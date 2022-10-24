@@ -44,8 +44,6 @@ using namespace std;
 #include "problem.hpp"
 #include <set>
 
-
-
 basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "qft", &typeid(const Fem2D::QuadratureFormular *)},
     { "qfe", &typeid(const Fem2D::QuadratureFormular1d *)},
@@ -784,7 +782,7 @@ template<class R>
     // --------- FH 120105
     template<class R>
     void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                              MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                              MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         /*FH:  case ..in 2D
@@ -814,6 +812,13 @@ template<class R>
 
         const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.neb/mpi_size);
+        int bei1 = min(Th.neb,(int)((mpi_rank+1)*ceil(1.*Th.neb/mpi_size)));
 
         //    const QuadratureFormular1d & FIE = di.FIE(stack);
         //    const QuadratureFormular & FIT = di.FIT(stack);
@@ -943,7 +948,7 @@ template<class R>
                 R2 Q[3];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -981,7 +986,7 @@ template<class R>
                     }
                 }
             }
-            else for( int e=0;e<Th.neb;e++)
+            else for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())
                 {
@@ -994,7 +999,7 @@ template<class R>
         }
         else if (di.kind == CDomainOfIntegration::intalledges)
         {
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -1016,7 +1021,7 @@ template<class R>
         {
             cerr << " a faire intallVFedges " << endl;
             ffassert(0);
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -1036,7 +1041,7 @@ template<class R>
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -1066,8 +1071,8 @@ template<class R>
             else
 
 
-            for (int i=0;i< Th.nt; i++)
-            {
+            for (int i=ti0;i< ti1; i++)
+            {            
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 A += mate(i,-1,Th[i].lab,stack);
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -1088,7 +1093,7 @@ template<class R>
     // --------- FH 120105
     template<class R>
     void AssembleBilinearForm(Stack stack,const FESpace3::Mesh & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                              MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                              MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         /*FH:  case ..in 3D
@@ -1102,6 +1107,13 @@ template<class R>
         typedef Mesh *pmesh ;
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
         Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
         bool sptrclean=true;
         const CDomainOfIntegration & di= *b->di;
@@ -1246,7 +1258,7 @@ template<class R>
                 R3 Q[4];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[4];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -1280,7 +1292,7 @@ template<class R>
 
             }
             else
-            for( int e=0;e<Th.nbe;e++)
+            for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
                 {
@@ -1293,7 +1305,7 @@ template<class R>
         }
         else if (di.kind == CDomainOfIntegration::intallfaces  )
         {
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<4;ie++)
@@ -1307,7 +1319,7 @@ template<class R>
         {
             cerr << " a faire intallVFedges " << endl;
             ffassert(0);
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -1330,7 +1342,7 @@ template<class R>
                 phi=uset;
                 double f[4];
 
-                for (int t=0;t< Th.nt; t++)
+                for (int t=ti0;t< ti1; t++)
                 {
 
                     const Mesh3::Element & K(Th[t]);
@@ -1361,7 +1373,7 @@ template<class R>
                 FIV=FIVo;
             }
             else
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 A += mate(i,-1,Th[i].lab,stack);
@@ -1409,7 +1421,7 @@ template<class R>
     // case 3D surface
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                              MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                              MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         /*FH:  case ..in 2D
@@ -1437,6 +1449,13 @@ template<class R>
 
         const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
         //    const QuadratureFormular1d & FIE = di.FIE(stack);
         //    const QuadratureFormular & FIT = di.FIT(stack);
@@ -1565,7 +1584,7 @@ template<class R>
                 R2 Q[3];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -1603,7 +1622,7 @@ template<class R>
                     }
                 }
             }
-            else for( int e=0;e<Th.nbe;e++)
+            else for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
                 {
@@ -1660,7 +1679,7 @@ template<class R>
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -1690,7 +1709,7 @@ template<class R>
             else
 
 
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 A += mate(i,-1,Th[i].lab,stack);
@@ -1712,7 +1731,7 @@ template<class R>
     // case 3D curve
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                              MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                              MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
 
@@ -1736,6 +1755,13 @@ template<class R>
 
         const MeshL & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
         const GQuadratureFormular<R1> & FITo = di.FIE(stack);
         GQuadratureFormular<R1>  FIT(FITo,3);
@@ -1834,7 +1860,7 @@ template<class R>
         if(verbosity>9) cout << "  -- CPU init assemble mat " <<  CPUtime()-CPU0 << " s\n";
 
         if (di.kind == CDomainOfIntegration::int1d ) {
-            for (int i=0;i< Th.nt; i++) {
+            for (int i=ti0;i< ti1; i++) {
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                         A += mate(i,-1,Th[i].lab,stack);
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -1842,7 +1868,7 @@ template<class R>
         }
 
         else if (di.kind == CDomainOfIntegration::int0d ) {
-            for( int e=0;e<Th.nbe;e++) {
+            for( int e=bei0;e<bei1;e++) {
                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end()) {
                     int ie,i =Th.BoundaryElement(e,ie);
                     A += mate(i,ie,Th.be(e).lab,stack);
@@ -1851,7 +1877,7 @@ template<class R>
             }
         }
         else if (di.kind == CDomainOfIntegration::intall0d ) {// add FH juin 2021 
-            for( int k=0;k<Th.nt;k++) {
+            for( int k=ti0;k<ti1;k++) {
                 if (all || setoflab.find(Th[k].lab) != setoflab.end()) {
                     for( int ie=0;ie<2;ie++)
                     A += mate(k,ie,Th[k].lab,&parammatElement_OpVF);
@@ -1872,7 +1898,7 @@ template<class R>
     // 3D curve / 2D on meshL
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                          MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                          MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
       ffassert(0);
@@ -1881,7 +1907,7 @@ template<class R>
     // 2D / 3D curve on meshL
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                         MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                         MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
     {
       ffassert(0);
     }
@@ -1889,28 +1915,28 @@ template<class R>
     // 3D Surf / 3D volume on meshS
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                         MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                         MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
     {
       ffassert(0);
     }
    // 3D volume / 3D Surf on meshS
    template<class R>
    void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                        MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
    {
      ffassert(0);
    }
    // 3D Surf / 3D curve on meshL
    template<class R>
    void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                        MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
    {
      ffassert(0);
    }
    // 3D curve / 3D Surf on meshL
    template<class R>
    void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+                        MatriceCreuse<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
    {
      ffassert(0);
    }
@@ -3727,7 +3753,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     // case 2d
     template<class R>
     void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                              MatriceMap<R>  & A, const  FormBilinear * b  )
+                              MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         /*FH:  case ..in 2D
@@ -3759,6 +3785,14 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         bool withmap =di.withmap();
         //   ExecError(" no map  in the case (4) ??");}
         ffassert(pThdi == & Th);
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.neb/mpi_size);
+        int bei1 = min(Th.neb,(int)((mpi_rank+1)*ceil(1.*Th.neb/mpi_size)));
+
         //const vector<Expression>  & what(di.what);
         CDomainOfIntegration::typeofkind  kind = di.kind;
         set<int> setoflab;
@@ -3857,7 +3891,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3], ll=0;
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -3900,7 +3934,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             else
             {
-                for( int e=0;e<Th.neb;e++)
+                for( int e=bei0;e<bei1;e++)
                 {
                     if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())
                     {
@@ -3919,7 +3953,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             ExecError("FH: no intalledges on diff mesh ???");
             ffassert(0); // a faire
             if(withmap)
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -3930,7 +3964,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             }
 
             else
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -3958,7 +3992,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -3994,7 +4028,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             {
                 if(withmap)
-                for (int i=0;i< Th.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 {
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                     AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
@@ -4002,7 +4036,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 }
 
                 else
-                for (int i=0;i< Th.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 {
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                     AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
@@ -4020,7 +4054,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     // case 3D volume
     template<class R>
     void AssembleBilinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                              MatriceMap<R>  & A, const  FormBilinear * b  )
+                              MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         /*FH:  case ..in 3D
@@ -4049,6 +4083,14 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             cout << "        suppose in mortar " << intmortar << endl;
         }
         assert(pThdi == & Th);
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
+
         //const vector<Expression>  & what(di.what);
         CDomainOfIntegration::typeofkind  kind = di.kind;
 
@@ -4142,7 +4184,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
         if (di.kind == CDomainOfIntegration::int2d )
         {
-            for( int e=0;e<Th.nbe;e++)
+            for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
                 {
@@ -4156,7 +4198,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         {
             ffassert(0); // a faire
 
-            for (int i=0;i< Th.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -4188,7 +4230,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 phi=uset;
                 double f[4];
 
-                for (int t=0;t< Th.nt; t++)
+                for (int t=ti0;t< ti1; t++)
                 {
 
                     const Mesh3::Element & K(Th[t]);
@@ -4224,7 +4266,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             {
                 // cerr << " a faire CDomainOfIntegration::int3d  " << endl;
-                for (int i=0;i< Th.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 {
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                     AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIV,FIT,p,stack);
@@ -4244,7 +4286,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     // case 3D surface
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                              MatriceMap<R>  & A, const  FormBilinear * b  )
+                              MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -4274,6 +4316,14 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         bool withmap =di.withmap();
         //   ExecError(" no map  in the case (4) ??");}
         assert(pThdi == & Th);
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
+
         //const vector<Expression>  & what(di.what);
         CDomainOfIntegration::typeofkind  kind = di.kind;
         set<int> setoflab;
@@ -4372,7 +4422,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3], ll=0;
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -4415,7 +4465,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             else
             {
-                for( int e=0;e<Th.nbe;e++)
+                for( int e=bei0;e<bei1;e++)
                 {
                     if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
                     {
@@ -4472,7 +4522,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                 double vol6[2];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
                     {
@@ -4516,7 +4566,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                    // }
 
                 //else
-                    for (int i=0;i< Th.nt; i++)
+                    for (int i=ti0;i< ti1; i++)
                     {
                         if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                             AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
@@ -4538,7 +4588,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     // case 3D curve
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                              MatriceMap<R>  & A, const  FormBilinear * b  )
+                              MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
     {
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -4564,6 +4614,14 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         Expression  const * const mapu=*di.mapu?di.mapu:0 ;
         bool withmap =di.withmap();
         assert(pThdi == & Th);
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
+
         CDomainOfIntegration::typeofkind  kind = di.kind;
         set<int> setoflab;
         bool all=true;
@@ -4634,7 +4692,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             if(di.islevelset())   ////// must be check
                 ffassert(0);
             else {
-                 for (int i=0;i< Th.nt; i++) {
+                 for (int i=ti0;i< ti1; i++) {   
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                         AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -4651,7 +4709,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
    // case 3D curve / 2D on meshL
    template<class R>
    void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                             MatriceMap<R>  & A, const  FormBilinear * b  )
+                             MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
    {
        StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -4659,6 +4717,13 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
        const CDomainOfIntegration & di= *b->di;
        pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
        SHOWVERB(cout << " FormBilinear () " << endl);
 
@@ -4744,7 +4809,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
            if(di.islevelset())
                ffassert(0);
            else {
-                for (int i=0;i< Th.nt; i++) {
+                for (int i=ti0;i< ti1; i++) {
                    if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                        AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -4760,7 +4825,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
    // case 2D / 3D curve on meshL
    template<class R>
    void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                          MatriceMap<R>  & A, const  FormBilinear * b  )
+                          MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
    {
        StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -4768,6 +4833,13 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
        const CDomainOfIntegration & di= *b->di;
        pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+        int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+        int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
        SHOWVERB(cout << " FormBilinear () " << endl);
 
@@ -4844,7 +4916,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
          if(di.islevelset())
            ffassert(0);
          else {
-           for (int i=0;i< Th.nt; i++) {
+           for (int i=ti0;i< ti1; i++) {
              if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -4860,7 +4932,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 // case 3D Surf / 3D volume on meshS
  template<class R>
  void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                           MatriceMap<R>  & A, const  FormBilinear * b  )
+                           MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
 {
  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -4871,6 +4943,13 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
  ///typedef typename Trait_MESHO<FESpaceS>::MeshO * pmeshO;
 // pmeshO  ThbfO = GetAny<pmeshO>((*b->di->Th)(stack)); // case 3D surface ThbfO =
  pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack)); //Trait_MESHO<FESpaceS>::topmesh(ThbfO);  //
+
+ int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+ int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+ int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+ int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+ int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+ int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
  SHOWVERB(cout << " FormBilinear () " << endl);
  //MatriceElementaireSymetrique<R> *mates =0;
@@ -4988,7 +5067,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
          double vol6[2];
          KN<double> phi(Th.nv);phi=uset;
          double f[3], ll=0;
-         for(int t=0; t< Th.nt;++t)
+         for(int t=ti0; t< ti1;++t)
          {
              if ( all || setoflab.find(Th[t].lab) != setoflab.end())
              {
@@ -5031,7 +5110,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
      else
      {
-         for( int e=0;e<Th.nbe;e++)
+         for( int e=bei0;e<bei1;e++)
          {
              if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
              {
@@ -5088,7 +5167,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
          double vol6[2];
          KN<double> phi(Th.nv);phi=uset;
          double f[3];
-         for(int t=0; t< Th.nt;++t)
+         for(int t=ti0; t< ti1;++t)
          {
              if ( all || setoflab.find(Th[t].lab) != setoflab.end())
              {
@@ -5132,7 +5211,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             // }
 
          //else
-             for (int i=0;i< Th.nt; i++)
+             for (int i=ti0;i< ti1; i++)
              {
                  if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                      AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
@@ -5155,7 +5234,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 // case 3D volume / 3D Surf on meshS
  template<class R>
  void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                           MatriceMap<R>  & A, const  FormBilinear * b  )
+                           MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
 {
  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -5164,6 +5243,13 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
  const CDomainOfIntegration & di= *b->di;
 pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
+
+ int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+ int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+ int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+ int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+ int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+ int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
  SHOWVERB(cout << " FormBilinear () " << endl);
  const int useopt=di.UseOpt(stack);
@@ -5279,7 +5365,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
          double vol6[2];
          KN<double> phi(Th.nv);phi=uset;
          double f[3], ll=0;
-         for(int t=0; t< Th.nt;++t)
+         for(int t=ti0; t< ti1;++t)
          {
              if ( all || setoflab.find(Th[t].lab) != setoflab.end())
              {
@@ -5322,7 +5408,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
      else
      {
-         for( int e=0;e<Th.nbe;e++)
+         for( int e=bei0;e<bei1;e++)
          {
              if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
              {
@@ -5379,7 +5465,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
          double vol6[2];
          KN<double> phi(Th.nv);phi=uset;
          double f[3];
-         for(int t=0; t< Th.nt;++t)
+         for(int t=ti0; t< ti1;++t)
          {
              if ( all || setoflab.find(Th[t].lab) != setoflab.end())
              {
@@ -5423,7 +5509,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             // }
 
          //else
-             for (int i=0;i< Th.nt; i++)
+             for (int i=ti0;i< ti1; i++)
              {
                  if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                      AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
@@ -5443,7 +5529,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 // 3D Surf / 3D curve on meshL
  template<class R>
  void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                           MatriceMap<R>  & A, const  FormBilinear * b  )
+                           MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
 {
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -5451,6 +5537,13 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
     const CDomainOfIntegration & di= *b->di;
     pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+    int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+    int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+    int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+    int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+    int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+    int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
     SHOWVERB(cout << " FormBilinear () " << endl);
 
@@ -5527,7 +5620,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
       if(di.islevelset())
         ffassert(0);
       else {
-        for (int i=0;i< Th.nt; i++) {
+        for (int i=ti0;i< ti1; i++) {
           if ( all || setoflab.find(Th[i].lab) != setoflab.end())
             AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
           if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -5547,7 +5640,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 // 3D curve / 3D Surf on meshL
   template<class R>
   void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                            MatriceMap<R>  & A, const  FormBilinear * b  )
+                            MatriceMap<R>  & A, const  FormBilinear * b, int * mpirankandsize = nullptr)
 
   {
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -5555,6 +5648,13 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
       const CDomainOfIntegration & di= *b->di;
       pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+    int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+    int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+    int ti0 = mpi_rank*ceil(1.*Th.nt/mpi_size);
+    int ti1 = min(Th.nt,(int)((mpi_rank+1)*ceil(1.*Th.nt/mpi_size)));
+    int bei0 = mpi_rank*ceil(1.*Th.nbe/mpi_size);
+    int bei1 = min(Th.nbe,(int)((mpi_rank+1)*ceil(1.*Th.nbe/mpi_size)));
 
       SHOWVERB(cout << " FormBilinear () " << endl);
 
@@ -5640,7 +5740,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
           if(di.islevelset())
               ffassert(0);
           else {
-               for (int i=0;i< Th.nt; i++) {
+               for (int i=ti0;i< ti1; i++) {
                   if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                       AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
                   if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -9331,7 +9431,7 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
 // generic template for AssembleVarForm
 template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
 bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
-                     MC  * A,KN_<R> * B,const list<C_F0> &largs)
+                     MC  * A,KN_<R> * B,const list<C_F0> &largs, int * mpirankandsize)
 { // return true if BC
     
     typedef MMesh * pmesh; // integration mesh type
@@ -9363,7 +9463,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 }
                 else {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
-                    if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
+                    if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf,mpirankandsize);
                 }
             }
         }
@@ -9399,7 +9499,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 else
                 {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
-                    if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
+                    if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf,mpirankandsize);
                 }}
         }
         else if (r==tvf->tTab)
@@ -10099,7 +10199,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
     // creating an instance of AssembleLinearForm
     // case 2d
     template<class R>
-    void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
+    void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
     {
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
         bool sptrclean=true;
@@ -10113,6 +10213,14 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
         const CDomainOfIntegration & di= *l->di;
         const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*ThI.nt/mpi_size);
+        int ti1 = min(ThI.nt,(int)((mpi_rank+1)*ceil(1.*ThI.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*ThI.neb/mpi_size);
+        int bei1 = min(ThI.neb,(int)((mpi_rank+1)*ceil(1.*ThI.neb/mpi_size)));
+
         const bool intmortar=di.intmortar(stack);
 
         SHOWVERB(cout << " FormLinear " << endl);
@@ -10213,7 +10321,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 R2 Q[3];
                 KN<double> phi(ThI.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< ThI.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     double umx=-HUGE_VAL,umn=HUGE_VAL;
                     for(int i=0;i<3;++i)
@@ -10256,7 +10364,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
 
             }
             else
-            for( int e=0;e<ThI.neb;e++)
+            for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(ThI.bedges[e].lab) != setoflab.end())
                 {
@@ -10282,7 +10390,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 //bstack.second= & binside;
 
                 //InternalError(" Today no jump or average in intalledges of RHS ");
-                for (int i=0;i< ThI.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
 
@@ -10307,7 +10415,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
 
             }
             else
-            for (int i=0;i< ThI.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             if (all || setoflab.find(ThI[i].lab) != setoflab.end())
             {
                 for (int ie=0;ie<3;ie++)
@@ -10325,7 +10433,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             InternalError(" intallVFedges a faire ");
 
             ffassert(0);
-            for (int i=0;i< ThI.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 for (int ie=0;ie<3;ie++)
@@ -10347,7 +10455,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 R2 Q[4];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(ThI[t].lab) != setoflab.end())
                     {
@@ -10390,7 +10498,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 }
             }
             else
-            for (int i=0;i< ThI.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             if (all || setoflab.find(ThI[i].lab) != setoflab.end())
             {
                 if ( sameMesh )
@@ -10411,7 +10519,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
     // creating an instance of AssembleLinearForm
     // case 3D volume
     template<class R>
-    void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
+    void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
     {
         typedef FESpace3 FESpace;
         typedef FESpace3::Mesh Mesh;
@@ -10432,6 +10540,13 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
 
         const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*ThI.nt/mpi_size);
+        int ti1 = min(ThI.nt,(int)((mpi_rank+1)*ceil(1.*ThI.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*ThI.nbe/mpi_size);
+        int bei1 = min(ThI.nbe,(int)((mpi_rank+1)*ceil(1.*ThI.nbe/mpi_size)));
 
         SHOWVERB(cout << " FormLinear " << endl);
         //const vector<Expression>  & what(di.what);
@@ -10546,7 +10661,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 R3 Q[4];
                 KN<double> phi(ThI.nv);phi=uset;
                 double f[4];
-                for(int t=0; t< ThI.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
 
                     double umx=-HUGE_VAL,umn=HUGE_VAL;
@@ -10602,7 +10717,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
 
             }
             else
-            for( int e=0;e<ThI.nbe;e++)
+            for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(ThI.be(e).lab) != setoflab.end())
                 {
@@ -10639,7 +10754,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 phi=uset;
                 double f[4];
 
-                for (int t=0;t< Th.nt; t++)
+                for (int t=ti0;t< ti1; t++)
                 {
 
                     const Mesh3::Element & K(ThI[t]);
@@ -10675,7 +10790,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             else
             {
 
-                for (int i=0;i< ThI.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
                     if ( sameMesh )
@@ -10693,7 +10808,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
              //   InternalError(" no jump or average in intallfaces for RHS");
                 pair_stack_double bstack(stack,& binside);
 
-                for (int i=0;i< ThI.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
 
@@ -10716,7 +10831,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             }
             else
             {
-            for(int i=0;i<ThI.nt; i++)
+            for(int i=ti0;i<ti1; i++)
               for(int ie=0;ie<Mesh3::nea; ie++)
                {
                 int lab=0;
@@ -10748,7 +10863,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
 // creating an instance of AssembleLinearForm
 // case surface 3d
 template<class R>
-void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * l )
+void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
     {
 
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
@@ -10765,6 +10880,13 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
 
         const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*ThI.nt/mpi_size);
+        int ti1 = min(ThI.nt,(int)((mpi_rank+1)*ceil(1.*ThI.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*ThI.nbe/mpi_size);
+        int bei1 = min(ThI.nbe,(int)((mpi_rank+1)*ceil(1.*ThI.nbe/mpi_size)));
 
         const bool intmortar=di.intmortar(stack);
 
@@ -10852,7 +10974,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                 R2 Q[3];
                 KN<double> phi(ThI.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< ThI.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     double umx=-HUGE_VAL,umn=HUGE_VAL;
                     for(int i=0;i<3;++i)
@@ -10895,7 +11017,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
 
             }
             else
-                for( int e=0;e<ThI.nbe;e++)
+                for( int e=bei0;e<bei1;e++)
                 {
                     if (all || setoflab.find(ThI.be(e).lab) != setoflab.end())
                     {
@@ -10968,7 +11090,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             InternalError(" intallVFedges a faire ");
 
             ffassert(0);
-            for (int i=0;i< ThI.nt; i++)
+            for (int i=ti0;i< ti1; i++)
             {
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                     for (int ie=0;ie<3;ie++)
@@ -10990,7 +11112,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                 R2 Q[4];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
-                for(int t=0; t< Th.nt;++t)
+                for(int t=ti0; t< ti1;++t)
                 {
                     if ( all || setoflab.find(ThI[t].lab) != setoflab.end())
                     {
@@ -11033,7 +11155,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                 }
             }
             else {
-                for (int i=0;i< ThI.nt; i++)
+                for (int i=ti0;i< ti1; i++)
                     if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                     {
                         if ( sameMesh )
@@ -11052,7 +11174,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
     // creating an instance of AssembleLinearForm
     // case 3d curve
     template<class R>
-    void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * l )
+    void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
     {
         typedef typename MeshL::Element Element;
         typedef typename MeshL::BorderElement BorderElement;
@@ -11069,6 +11191,13 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
 
         const MeshL & ThI = Th;
         bool sameMesh = &ThI == &Vh.Th;
+
+        int mpi_rank = mpirankandsize != nullptr ? *mpirankandsize : 0;
+        int mpi_size = mpirankandsize != nullptr ? *(mpirankandsize+1) : 1;
+        int ti0 = mpi_rank*ceil(1.*ThI.nt/mpi_size);
+        int ti1 = min(ThI.nt,(int)((mpi_rank+1)*ceil(1.*ThI.nt/mpi_size)));
+        int bei0 = mpi_rank*ceil(1.*ThI.nbe/mpi_size);
+        int bei1 = min(ThI.nbe,(int)((mpi_rank+1)*ceil(1.*ThI.nbe/mpi_size)));
 
         const bool intmortar=di.intmortar(stack);
 
@@ -11141,7 +11270,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             if(di.islevelset())
             {cout << " ok di.islevelset() " << di.islevelset() << endl;}
     
-            for (int i=0;i< ThI.nt; i++)
+            for (int i=ti0;i< ti1; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
                     if ( sameMesh )
@@ -11156,7 +11285,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         }
         else if(kind==CDomainOfIntegration::int0d){ // to
 
-            for( int e=0;e<ThI.nbe;e++)
+            for( int e=bei0;e<bei1;e++)
             {
                 if (all || setoflab.find(ThI.be(e).lab) != setoflab.end())
                 {
@@ -11180,7 +11309,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             { // Add juin 2021 ...
                 pair_stack_double bstack(stack,& binside);
 
-                 for (int i=0;i< ThI.nt; i++)
+                 for (int i=ti0;i< ti1; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
 
@@ -11203,7 +11332,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             }
             else
                 
-            for( int i=0;i<ThI.nt;i++)
+            for( int i=ti0;i<ti1;i++)
             {
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
@@ -11237,20 +11366,20 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
    // creating an instance of AssembleLinearForm
    // 3D curve / 2D on meshL
    template<class R>
-   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
+   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
    {
        ffassert(0);
    }
    // creating an instance of AssembleLinearForm
    // 3D Surf / 3D volume on meshS
    template<class R>
-   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
+   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
    {
        ffassert(0);
    }
    // 3D curve / 3D Surf on meshL
    template<class R>
-   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * l )
+   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * l, int * mpirankandsize)
    {
        ffassert(0);
    }
@@ -11951,7 +12080,6 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
     offsetUh[0] = 0; 
     for (int i=0; i<size_component; i++){
         offsetUh[i+1] = offsetUh[i] + sizeUh[i];
-        cout << "pfesUh=" << pfesUh[i] << endl;
     }
 }
 bool FieldOfForm( list<C_F0> & largs ,bool complextype);
@@ -12214,7 +12342,6 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     // On a besoin ici que des les FESpace de Uh
     long VhNbOfDF = offsetVh[NpVh];
     bool initx = true; // make x and b different in all case
-    // PAC(e) : 
     // more safe for the future ( 4 days lose with is optimization FH )
 
     KN<R> *B=new KN<R>(offsetUh[NpUh]); //  hypothese system carre
@@ -12358,7 +12485,6 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                
                 /*
                 varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, typeUh[i], typeVh[j], 
                                                         offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
@@ -12631,7 +12757,6 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
         LLVh[i] = nullptr;
         pfesVh[i] = nullptr;
     }
-
     // if (save) delete save; // clean memory
     *mps=mp;
     
@@ -13017,7 +13142,7 @@ void verified_E_FEcompo_ForProblem( const int &typeFEbase, const int &k, const s
             ffassert(0);
         }
         // check the size of nbitem in FESpace      
-        if( ((i-1) == Nbitem) ){    
+        if( ( (i-1)== Nbitem) ){    
             if( !( FEbase_comp->N == Nbitem) ){
                 cerr << "Error in the definition of "<< k <<"-th FESpace."<< endl;
                 cerr << "The size of t " << endl;
@@ -13065,7 +13190,7 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
 
     ffassert( nbarray >1 );
     ListOfId * array[nbarray]; // ??? 
-     
+    
     for (int i=0;i<nb;i++){
         if( l[i].compo_begin == true ) nbcompo_begin++;
         if(   l[i].compo_end == true )   nbcompo_end++;
@@ -13357,13 +13482,11 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
     if( verbosity > 999)  cout << "Problem : ----------------------------- " << top << " dim = " << dim<<" " << nargs <<  endl;
     
     if(dim==6){
-        top = offset + 4*sizeof( DataComposite );
+        top = offset + sizeof( DataComposite );
     }
     else{
         top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
     }
-    cout << "sizeof(DataComposite )=" << sizeof(DataComposite) << " === " <<  sizeof(Data<FESpace>) << endl;
-
     bool iscomplex=isSameDimAndComplexTypeProblem(l).second; // iscomplex of the type of argument u1,u2, ... of : problem myproblem([u1,u2],[v1,v2]), ...
 
     if(dim==2)
@@ -13446,7 +13569,8 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
             for(int j=0; j<NpVh; j++){
                 // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
                 bool iscmplx=FieldOfForm(block_largs(i,j),iscomplex)  ;
-                // cout<< "(i,j)=" << i << ',' << j <<"; FieldOfForm:iscmplx " << iscmplx << " iscomplex " << iscomplex << endl;
+                //cout<< "(i,j)=" << i << ',' << j <<"; FieldOfForm:iscmplx " << iscmplx << " iscomplex " << iscomplex << endl;
+
                 if( iscmplx ){ total_iscmplx =true;}
             }
         }
@@ -13872,21 +13996,21 @@ namespace Fem2D {
 
 
     // general template
-    template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<double> * B,const  FormLinear * const l);
+    template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<double> * B,const  FormLinear * const l, int * mpirankandsize);
 
     template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                 MatriceCreuse<double>  & A, const  FormBilinear * b  );
+                                                 MatriceCreuse<double>  & A, const  FormBilinear * b, int * mpirankandsize);
 
     template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                 MatriceMap<double> & A, const  FormBilinear * b  );
+                                                 MatriceMap<double> & A, const  FormBilinear * b, int * mpirankandsize);
 
-    template  void AssembleLinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<Complex> * B,const  FormLinear * const l);
-
-    template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                  MatriceCreuse<Complex>  & A, const  FormBilinear * b  );
+    template  void AssembleLinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<Complex> * B,const  FormLinear * const l, int * mpirankandsize);
 
     template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                  MatriceMap<Complex> & A, const  FormBilinear * b  );
+                                                  MatriceCreuse<Complex>  & A, const  FormBilinear * b, int * mpirankandsize);
+
+    template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                                                  MatriceMap<Complex> & A, const  FormBilinear * b, int * mpirankandsize);
 
 
 
@@ -13894,20 +14018,20 @@ namespace Fem2D {
     // instantation for type double
     template  bool AssembleVarForm<double,MatriceCreuse<double>,Mesh,FESpace,FESpace >(Stack stack,const Mesh & Th,
                                                                           const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                                          MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                          MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<double,MatriceMap<double>,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,
                                                                                 const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                                                MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                                MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<double,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
     // instantation for type complex
     template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,
                                                                             const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
 
     template  bool AssembleVarForm<Complex,MatriceMap<Complex>,Mesh,FESpace,FESpace >(Stack stack,const Mesh & Th,
                                                                                   const FESpace & Uh,const FESpace & Vh,bool sym,
-                                                                                  MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                                  MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
 
     template   void AssembleBC<Complex,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                                                 MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv  );
@@ -13917,20 +14041,20 @@ namespace Fem2D {
     // instantation for type double
     template  bool AssembleVarForm<double,MatriceCreuse<double>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                            const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<double,MatriceMap<double>,Mesh3,FESpace3,FESpace3 >(Stack stack,const Mesh3 & Th,
                                                                                  const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                                                                                 MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                                 MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<double,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
     template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                              const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<Complex,MatriceMap<Complex>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                                    const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                                                                                   MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                                   MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<Complex,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                  MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv  );
 
@@ -13944,20 +14068,20 @@ namespace Fem2D {
 
     template  bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                            const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                                  const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                                                                                 MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                                 MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<double,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
     template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                              const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                                    const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
-                                                                                   MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                                   MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<Complex,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                 MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
                                                 );
@@ -13968,20 +14092,20 @@ namespace Fem2D {
 
     template  bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                            const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceL,FESpaceL>(Stack stack,const  FESpaceL::Mesh & Th,
                                                                         const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                                                                        MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                        MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<double,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
     template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                              const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template  bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                           const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
-                                                                          MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                          MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template   void AssembleBC<Complex,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                  MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
                                                  );
@@ -13991,20 +14115,20 @@ namespace Fem2D {
 
     template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceL,FESpace>(Stack stack,const MeshL & Th,
                                                                            const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceL,FESpace>(Stack stack,const  FESpaceL::Mesh & Th,
                                                                         const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                                                                        MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                        MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template void AssembleBC<double,MeshL,FESpaceL,FESpace>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpace & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
     template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceL,FESpace>(Stack stack,const MeshL & Th,
                                                                              const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceL,FESpace>(Stack stack,const MeshL & Th,
                                                                           const FESpaceL & Uh,const FESpace & Vh,bool sym,
-                                                                          MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                          MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template void AssembleBC<Complex,MeshL,FESpaceL,FESpace>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpace & Vh,bool sym,
                                                  MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
                                                  );
@@ -14013,20 +14137,20 @@ namespace Fem2D {
 
     template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,
                                                                             const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                                                                            MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,
                                                                           const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                                                                          MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                          MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
     template void AssembleBC<double,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
                                                  MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
     template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,
                                                                              const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,
                                                                         const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                                                                        MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                        MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
     template void AssembleBC<Complex,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
                                                MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
    /////// 3D Surf / 3D volume on meshS
@@ -14034,20 +14158,20 @@ namespace Fem2D {
 
    template bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
                                                                            const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
                                                                          const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<double,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
    // instantation for type complex
    template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
                                                                             const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
                                                                        const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
-                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<Complex,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
                                               MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
    /////// 3D volume / 3D Surf on meshS
@@ -14055,20 +14179,20 @@ namespace Fem2D {
 
    template bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
                                                                            const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
                                                                          const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<double,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
    // instantation for type complex
    template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
                                                                             const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
                                                                        const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
-                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<Complex,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
                                               MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
 
@@ -14077,20 +14201,20 @@ namespace Fem2D {
 
    template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
                                                                           const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                                                                          MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                          MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
                                                                        const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                                                                       MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                       MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<double,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
    // instantation for type complex
    template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
                                                                             const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
                                                                          const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
-                                                                         MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                         MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<Complex,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
                                                 MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
                                                 );
@@ -14099,20 +14223,20 @@ namespace Fem2D {
 
    template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
                                                                            const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
                                                                          const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<double,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
    // instantation for type complex
    template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
                                                                             const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
                                                                        const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
-                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs , int * mpirankandsize);
    template void AssembleBC<Complex,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
                                               MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
   

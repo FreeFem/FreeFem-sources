@@ -1355,7 +1355,7 @@ namespace Fem2D {
 //general templates for 2d and 3d volume // for Surf version ...
 template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>  bool AssembleVarForm(Stack stack,const MMesh & Th,
                                                                    const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
-                                                                   MC  * A,KN_<R> * B,const list<C_F0> &largs );
+                                                                   MC  * A,KN_<R> * B,const list<C_F0> &largs, int * mpirankandsize = nullptr);
 
 template<class R,class MMesh,class FESpace1,class FESpace2>   void AssembleBC(Stack stack,const MMesh & Th,
                                                   const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
@@ -1367,7 +1367,7 @@ template<class R,class MMesh,class FESpace1,class FESpace2>  void AssembleBC(Sta
 
 
 // 2d case
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,
@@ -1379,7 +1379,7 @@ template<class R>   void AssembleBC(Stack stack,const Mesh & Th3,const FESpace &
 
 
 // 3d volume case
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,
@@ -1388,7 +1388,7 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & 
                                      void * stack,R3 *B);
 
 // 3d surface case
-template<class R>   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElementS & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElementS & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceS> & mat,const FElementS & Ku,const FElementS & Kv,double * p,
@@ -1397,7 +1397,7 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceS> & 
                                     void * stack,R3 *B);
 
 // 3d curve case
-template<class R>   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElementL & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElementL & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceL> & mat,const FElementL & Ku,const FElementL & Kv,double * p,
@@ -1774,7 +1774,7 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
 
 template<class R,class MMESH, class FESpace1, class FESpace2>
 void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 * PVh, const int &sym, const double &tgv, 
-                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A);
+                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A, int * mpirankandsize = nullptr);
 
 template<class R,class MMesh,class v_fes1,class v_fes2>
 AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
@@ -1884,7 +1884,7 @@ void changeComponentFormCompositeFESpace( const KN<int> &localIndexInTheBlockUh,
 */
 template<class R,class MMesh, class FESpace1, class FESpace2>
 void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 * PVh, const int &sym, const double &tgv, 
-                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A){
+                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A, int * mpirankandsize){
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace2::Mesh Mesh2;
 
@@ -1912,7 +1912,7 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
           // reset the solver ...
       }
      *A.A=R(); // reset value of the matrix
-     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym>0,A.A,0,largs) )
+     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym>0,A.A,0,largs,mpirankandsize) )
        AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
    }
   else 
@@ -1925,7 +1925,7 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
 #else
        MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,&AAA,0,largs);
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,&AAA,0,largs,mpirankandsize);
 
 #endif
        A.A.master(pMA ) ;

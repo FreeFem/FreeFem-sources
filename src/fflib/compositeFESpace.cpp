@@ -1546,13 +1546,23 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
   int i=i_Uh; // rename index 
   int j=j_Vh;
 
+  int mpirankandsize[2];
+  mpirankandsize[0] = 0;
+  mpirankandsize[1] = 1;
+  #ifndef FFLANG
+  #ifdef PARALLELE
+  mpirankandsize[0] = mpirank;
+  mpirankandsize[1] = mpisize;
+  #endif
+  #endif
+
   // cas ::  Mesh, v_fes, v_fes
   if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 2 ){
 
     // ==== FESpace 2d : inconnue et test  ===
     const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
     const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm< R, Mesh, FESpace,FESpace>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm< R, Mesh, FESpace,FESpace>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas ::  Mesh3, v_fes3, v_fes3 
   else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 3 ){
@@ -1560,7 +1570,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d : inconnue et test ===
     const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
     const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,Mesh3,FESpace3,FESpace3>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,Mesh3,FESpace3,FESpace3>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: MeshS, v_fesS, v_fesS 
   else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
@@ -1568,7 +1578,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d Surf: inconnue et test ===
     const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
     const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: MeshL, v_fesL, v_fesL
   else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
@@ -1576,7 +1586,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d Curve: inconnue et test ===
     const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
     const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: MeshL, v_fesL, v_fes
   else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
@@ -1584,7 +1594,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d Curve: inconnue et 2d : test ===
     const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
     const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpace>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpace>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: MeshL, v_fes, v_fesL
   else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
@@ -1592,7 +1602,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 2d: inconnue et 3d Curve: test ===
     const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
     const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpace,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpace,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
   else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 3 ){
@@ -1600,7 +1610,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d Surf: inconnue et 3d : test ===
     const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
     const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpace3>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpace3>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   } 
   // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
   else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 4 ){
@@ -1608,7 +1618,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ==== FESpace 3d : inconnue et 3d Surf : test ===
     const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
     const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpace3,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshS,FESpace3,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   } 
   // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
   else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 4 ){
@@ -1616,7 +1626,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ====  FESpace 3d Curve : inconnue et 3d Surf : test ===
     const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
     const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceS>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
   else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 5 ){
@@ -1624,7 +1634,7 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
     // ====  FESpace 3d Surf : inconnue et 3d Curve : test ===
     const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
     const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceS,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB);
+    creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceS,FESpaceL>( PUh, PVh, sym, tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
   }
   else{
     cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
@@ -1677,10 +1687,20 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
   const MMesh &Th= *pTh ;    // integration Th
   bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
 
+  int mpirankandsize[2];
+  mpirankandsize[0] = 0;
+  mpirankandsize[1] = 1;
+  #ifndef FFLANG
+  #ifdef PARALLELE
+  mpirankandsize[0] = mpirank;
+  mpirankandsize[1] = mpisize;
+  #endif
+  #endif
+
   // PAC(e) :  on retourne le type MatriceCreuse Ici et non Matrice_Creuse<R> dans creationBlockOfMatrixToBilinearForm.
   // Attention pour la generalisation
   if(same){
-    if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs))
+    if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs, &mpirankandsize[0]))
     {
       if( B ){
         *B = - *B;
@@ -1705,7 +1725,7 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
 #else
     MatriceMorse<R> *pMA =  dynamic_cast< HashMatrix<int,R>*>(&A);// new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,sym);
     MatriceMap<R>  &  AAA = *pMA;
-    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs);
+    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs, &mpirankandsize[0]);
 #endif
     //cout << "AAA == matrice map=" << AAA << endl;
     //(*pMA) = AAA;
