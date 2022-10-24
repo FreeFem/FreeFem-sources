@@ -5561,6 +5561,690 @@ namespace PETSc {
   }
 } // namespace PETSc
 
+template< class R, class FESpaceT1, class FESpaceT2 >
+Matrice_Creuse<R> *  buildMatrixInterpolationForCompositeFESpace(const FESpaceT1 * Uh ,const FESpaceT2 * Vh){
+  ffassert(Uh);
+  ffassert(Vh);
+  int NUh = Uh->N;
+  int NVh = Vh->N;
+
+  cout << "NUh=" << NUh << ", NVh=" << NVh << endl;
+  Matrice_Creuse<R> * sparse_mat= new Matrice_Creuse<R>();
+
+  // Remarque pas de U2Vc pour l'instant
+  int* data = new int[4 + NUh];
+  // default value for the interpolation matrix
+  data[0]=false;         // transpose not
+  data[1]=(long) op_id;  // get just value
+  data[2]=false;         // get just value
+  data[3]=0L;            // get just value
+
+  for(int i=0;i<NUh;++i) data[4+i]=i;//
+
+  if(verbosity>3){
+    for(int i=0;i<NUh;++i)
+    {
+      cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
+    }
+  }
+  for(int i=0;i<NUh;++i){
+    if(data[4+i]>=NVh)
+    {
+      cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
+      ExecError("Interpolation incompability between componante ");
+    }
+  }
+  const FESpaceT1 &rUh = *Uh;
+  const FESpaceT2 &rVh = *Vh;
+
+  MatriceMorse<R>* titi=buildInterpolationMatrixT<FESpaceT1,FESpaceT2>(rUh,rVh,data);
+
+  sparse_mat->init();
+  sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->A.master( titi );	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+  if(verbosity>3){
+    cout << "sparse_mat->typemat=" << sparse_mat->typemat << endl;
+    cout << "N=" << sparse_mat->A->n << endl;
+    cout << "M=" << sparse_mat->A->m << endl;
+  }
+  delete [] data;
+
+  return sparse_mat;
+}
+
+template<class HpddmType>  //  to make   A=linearform(x)
+struct OpMatrixtoBilinearFormVGPETSc
+  : public OneOperator
+{
+  typedef typename Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>::const_iterator const_iterator;
+  int init;
+  
+  class Op : public E_F0mps {
+    public:
+      Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *b;
+      Expression a;
+      int init;
+      //AnyType operator()(Stack s)  const;
+      
+      Op(Expression aa,Expression  bb,int initt)
+        : b(new Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>(* dynamic_cast<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *>(bb))),a(aa),init(initt)
+    { 
+      assert(b && b->nargs);
+      int NN = (int) b->euh->componentNbitem().size();
+      int MM = (int) b->evh->componentNbitem().size();
+
+      bool total_iscmplx=false;
+      // loop over block
+      for(int i=0; i<NN; i++){
+        for(int j=0; j<MM; j++){
+          // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
+          bool iscmplx=FieldOfForm(b->block_largs(i,j),IsComplexType<PetscScalar>::value)  ;
+          // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
+          ffassert( (iscmplx) == IsComplexType<PetscScalar>::value);
+          if( !total_iscmplx ) total_iscmplx=iscmplx;
+        }
+      }
+    }
+    operator aType () const { return atype<PETSc::DistributedCSR< HpddmType >*>();}
+
+    AnyType operator()(Stack s)  const;
+  };
+
+  E_F0 * code(const basicAC_F0 & args) const
+  { return  new Op(to<PETSc::DistributedCSR< HpddmType >*>(args[0]),args[1],init); }
+  OpMatrixtoBilinearFormVGPETSc(int initt=0) :
+    OneOperator(atype<PETSc::DistributedCSR< HpddmType >*>(),atype<PETSc::DistributedCSR< HpddmType >*>(),atype<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
+    init(initt){};
+
+};
+
+template<class HpddmType>
+AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) const
+{
+  typedef PetscScalar R;
+  assert(b && b->nargs);
+
+  pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*b->euh)(stack));
+  pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*b->evh)(stack));
+
+  ffassert( *pUh && *pVh ); 
+  // Update is necessary when we get "pvectgenericfes" to take account a new mesh.
+  (*pUh)->update();
+  (*pVh)->update();
+
+  if( verbosity > 5){
+    (*pUh)->printPointer();
+    (*pVh)->printPointer();
+  }
+  int NpUh = (*pUh)->N; // number of fespace in pUh
+  int NpVh = (*pVh)->N; // number of fespace in pVh
+
+  KN<int> UhNbOfDf = (*pUh)->vectOfNbOfDF(); // A changer en long
+  KN<int> VhNbOfDf = (*pVh)->vectOfNbOfDF();
+
+  KN<int> UhNbItem = (*pUh)->vectOfNbitem();
+  KN<int> VhNbItem = (*pVh)->vectOfNbitem();
+
+  //
+  const KNM<list<C_F0>> & block_largs=b->block_largs; 
+
+  // check if we have a square matrix
+  bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
+  cout << "A_is_square=" << A_is_square << endl;
+
+  // === simple check if A is symetrical === // 
+  // voir avec les autres.
+  bool A_is_maybe_sym = (void*)pUh == (void*)pVh; 
+
+  // VF == true => VF type of Matrix
+  //bool VF=isVF(b->block_largs);    //=== used to set the solver ??? block matrix ??? ===/
+  bool VF = 0;
+
+  // set parameteer of the matrix :: 
+  Data_Sparse_Solver ds;
+  ds.factorize=0;
+  ds.initmat=true;
+  int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
+  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
+
+  // set ds.sym = 0 
+  ds.sym = 0;
+  if(verbosity)
+    cout << " we consider the block matrix as a non symetric matrix " << endl; 
+
+  // J'ai repris ce qu'il y avait. 
+  // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
+  // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
+  // set ds.sym = 0 
+
+  ds.sym = 0;
+  if(verbosity)
+    cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl; 
+
+  if (! A_is_square )
+   {
+     if(verbosity>3) cout << " -- the solver  is un set  on rectangular matrix  " << endl;
+    }
+
+  // A quoi cela correspond?? Gestion du stack + autre
+  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
+  
+  PETSc::DistributedCSR< HpddmType > * Ares( GetAny<PETSc::DistributedCSR< HpddmType >*>((*a)(stack)));
+
+  // test function (Vh) are the line
+  // inconnu function (Uh) are the column
+
+  // Assemble the variationnal form
+  int maxJVh=NpVh;
+
+  Dmat** exchange = new Dmat*[NpUh * maxJVh]();
+  Mat* a = new Mat[NpUh * maxJVh]();
+
+  int offsetMatrixUh = 0;
+  // loop over the block
+  for( int i=0; i<NpUh; i++){
+    int offsetMatrixVh = 0;
+    if( ds.sym > 0 ){ maxJVh=(i+1); ffassert(maxJVh<NpVh);}
+    for( int j=0; j<maxJVh; j++){
+      cout << "offsetMatrixUh= " << offsetMatrixUh << ", offsetMatrixVh= " << offsetMatrixVh << endl;
+
+      // construction du block (i,j)
+      const list<C_F0> & b_largs=block_largs(i,j); 
+
+      //const void * PUh = (void *) (*pUh)->vect[i]->getpVh();
+      //const void * PVh = (void *) (*pVh)->vect[j]->getpVh();
+
+      // size of the block
+      int N_block = UhNbOfDf[i];
+      int M_block = VhNbOfDf[j];
+      /*
+      Matrice_Creuse<R> *CCC = new Matrice_Creuse<R>() ;
+      CCC->resize(M_block,N_block); // test function (Vh) are the line and inconnu function (Uh) are the column
+      cout << "block:  i=" << i << "j=" << j <<  " (N,M)=" << M_block << " " << N_block << endl;
+      */
+
+      Matrice_Creuse<R> A;
+      A.resize(M_block,N_block);
+      int nsparseblocks = 0;
+      Mat Abem = PETSC_NULL;
+
+      list<C_F0>::const_iterator b_largs_ii,b_ib=b_largs.begin(),b_ie=b_largs.end(); 
+      for (b_largs_ii=b_ib;b_largs_ii != b_ie;b_largs_ii++){
+        
+        Matrice_Creuse<R> *CCC = new Matrice_Creuse<R>() ;
+        CCC->resize(M_block,N_block); // test function (Vh) are the line and inconnu function (Uh) are the column
+        // cout << "block:  i=" << i << "j=" << j <<  " (N,M)=" << M_block << " " << N_block << endl;
+        
+        //list<C_F0>::const_iterator b_largs_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
+        //for (b_largs_ii=b_ib;b_largs_ii != b_ie;b_largs_ii++){
+        if (b_largs_ii->left() == atype<const BemFormBilinear *>() ){
+          list<C_F0> b_largs_tmp;
+          b_largs_tmp.push_back(*b_largs_ii);
+          const list<C_F0> & b_largs_zz = b_largs_tmp;
+          
+          int VFBEM = typeVFBEM(b_largs_zz,stack);
+          if(VFBEM == 2){ cerr << " not implemented with BEM POTENTIAL" << endl; ffassert(0);}
+          Data_Bem_Solver dsbem;
+          dsbem.factorize=0;
+          dsbem.initmat=true;
+          SetEnd_Data_Bem_Solver<R>(stack, dsbem, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT
+
+          HMatrixVirt<R> ** Hmat = new HMatrixVirt<R> *();
+         
+          //
+          // avoir dans le futur si la difference entre bloc diagonal et bloc non diagonal a un sens.
+          //
+          if( i==j ){
+
+            bool samemesh = (void*) (*pUh)->vect[i]->getppTh() == (void*) (*pVh)->vect[j]->getppTh();  // same Fem2D::Mesh     +++ pot or kernel
+            if (VFBEM==1)
+              ffassert (samemesh);
+
+            PETSc::DistributedCSR< HpddmType > * Abemblock = new PETSc::DistributedCSR< HpddmType >;
+
+            // block diagonal matrix
+            if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
+              ffassert( i==j ); // If not a block diagonal not coded yet
+              // MeshS --- MeshS
+              // ==== FESpace 3d Surf: inconnue et test ===
+              const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
+              const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
+
+              //creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS>(PUh, PVh, VFBEM, b_largs_zz, stack, dsbem, Hmat);
+              MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
+              MatSetSizes(Abemblock->_petsc, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF);
+              varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+
+
+            }
+            else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
+              ffassert( i==j ); // If not a block diagonal not coded yet
+              // MeshL --- MeshL
+              // ==== FESpace 3d Curve: inconnue et test ===
+              const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+              const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+
+              //creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PVh, VFBEM, b_largs_zz, stack, dsbem, Hmat );
+              MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
+              MatSetSizes(Abemblock->_petsc, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF);
+              varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+
+            }
+            else{
+              cerr << " BEM bilinear form " << endl;
+              cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
+              cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
+              cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
+              ffassert(0);
+            }
+            Abem = Abemblock->_petsc;
+          }
+          else{
+
+            bool samemesh = (void*) (*pUh)->vect[i]->getppTh() == (void*) (*pVh)->vect[j]->getppTh();  // same Fem2D::Mesh     +++ pot or kernel
+          
+            if(init)
+              *Hmat =0;
+            //*Hmat =0;
+            if( *Hmat)
+              delete *Hmat;
+            *Hmat =0;
+            
+            PETSc::DistributedCSR< HpddmType > * Abemblock = new PETSc::DistributedCSR< HpddmType >;
+
+            //MatSetType(Abemblock->_petsc, MATAIJ);
+            //MatSetUp(Abemblock->_petsc);
+
+            // block non diagonal matrix        
+            if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
+              // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
+              
+              cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+              //ffassert(0);
+              const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+              //creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PUh, VFBEM, b_largs_zz, stack, dsbem, Hmat );
+
+              MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
+              MatSetSizes(Abemblock->_petsc, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF);
+              varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+
+            }
+
+            else{
+              cerr << " BEM bilinear form " << endl;
+              cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
+              cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
+              cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
+              ffassert(0);
+            }
+            
+            // creation de la matrice dense 
+            
+            /*
+            KNM<R>* M = HMatrixVirtToDense< KNM<R>, R >(Hmat);
+            
+            HashMatrix<int,R> *phm= new HashMatrix<int,R>(*M);
+            MatriceCreuse<R> *pmc(phm);
+            
+            Matrice_Creuse<R> *BBB=new Matrice_Creuse<R>();
+            BBB->A=0;
+            BBB->A.master(pmc);
+            //BBB->resize(356,356);
+            */
+
+            // BEM matrix is constructed with different FESpace
+            ffassert( (*pUh)->vect[i]->getpVh() != (*pVh)->vect[j]->getpVh() ) ;
+            
+            
+            if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
+              // case Uh[i] == MeshL et Vh[j] = Mesh2 
+              const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+              const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
+              // construction of the matrix of interpolation
+              
+              //Matrice_Creuse<double> *  MI_BBB=new Matrice_Creuse<double>(); // = buildMatrixInterpolationForCompositeFESpace<double,FESpaceL,FESpace>( PUh, PVh  );
+              Matrice_Creuse<double> *  MI_BBB = buildMatrixInterpolationForCompositeFESpace<double,FESpaceL,FESpace>( PUh, PVh  );
+
+              MatriceMorse<double> * mr=MI_BBB->pHM();
+              Matrice_Creuse<R> * sparse_mat= new Matrice_Creuse<R>();
+              MatriceMorse<R> * mrr = new MatriceMorse<R>(mr->n,mr->m,0,0);
+              *mrr = *mr;
+              sparse_mat->init();
+              sparse_mat->typemat=MI_BBB->typemat; //  none square matrice (morse)
+              sparse_mat->A.master(mrr);
+
+              //MI_BBB->resize(356,2922);
+              // multiplication matrix*matrix
+            
+              MatriceMorse<R> *mA= sparse_mat->pHM();
+
+    PETSc::DistributedCSR< HpddmType > * mAA = new PETSc::DistributedCSR< HpddmType >;
+    mAA->_last = mA->n;
+    mAA->_clast = mA->m;
+    MatCreate(PETSC_COMM_WORLD, &mAA->_petsc);
+    MatSetSizes(mAA->_petsc, mAA->_last, mAA->_clast, PETSC_DECIDE, PETSC_DECIDE);
+    MatSetType(mAA->_petsc, MATAIJ);
+    MatSetUp(mAA->_petsc);
+    mAA->_num = new PetscInt[mAA->_last + mAA->_clast];
+    mAA->_cnum = mAA->_num + mAA->_last;
+    PetscInt rbegin, cbegin;
+    MatGetOwnershipRange(mAA->_petsc, &rbegin, NULL);
+    MatGetOwnershipRangeColumn(mAA->_petsc, &cbegin, NULL);
+    std::iota(mAA->_num, mAA->_cnum, rbegin);
+    std::iota(mAA->_cnum, mAA->_cnum + mAA->_clast, cbegin);
+    mAA->_first += rbegin;
+    mAA->_last += rbegin;
+    mAA->_cfirst += cbegin;
+    mAA->_clast += cbegin;
+    ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
+    if(cbegin)
+      for(int i = 0; i < dA._nnz; ++i)
+        dA._ja[i] += cbegin;
+    MatSeqAIJSetPreallocationCSR(mAA->_petsc, dA._ia, dA._ja, dA._a);
+    MatMPIAIJSetPreallocationCSR(mAA->_petsc, dA._ia, dA._ja, dA._a);
+    if(cbegin)
+      for(int i = 0; i < dA._nnz; ++i)
+        dA._ja[i] -= cbegin;
+
+/*
+    PETSc::DistributedCSR< HpddmType > * mBB = new PETSc::DistributedCSR< HpddmType >;
+    mBB->_last = mB->n;
+    mBB->_clast = mB->m;
+    MatCreate(PETSC_COMM_WORLD, &mBB->_petsc);
+    MatSetSizes(mBB->_petsc, mBB->_last, mBB->_clast, PETSC_DECIDE, PETSC_DECIDE);
+    MatSetType(mBB->_petsc, MATAIJ);
+    MatSetUp(mBB->_petsc);
+    mBB->_num = new PetscInt[mBB->_last + mBB->_clast];
+    mBB->_cnum = mBB->_num + mBB->_last;
+    //PetscInt rbegin, cbegin;
+    MatGetOwnershipRange(mBB->_petsc, &rbegin, NULL);
+    MatGetOwnershipRangeColumn(mBB->_petsc, &cbegin, NULL);
+    std::iota(mBB->_num, mBB->_cnum, rbegin);
+    std::iota(mBB->_cnum, mBB->_cnum + mBB->_clast, cbegin);
+    mBB->_first += rbegin;
+    mBB->_last += rbegin;
+    mBB->_cfirst += cbegin;
+    mBB->_clast += cbegin;
+    ff_HPDDM_MatrixCSR< PetscScalar > dB(mB);
+    if(cbegin)
+      for(int i = 0; i < dB._nnz; ++i)
+        dB._ja[i] += cbegin;
+    MatSeqAIJSetPreallocationCSR(mBB->_petsc, dB._ia, dB._ja, dB._a);
+    MatMPIAIJSetPreallocationCSR(mBB->_petsc, dB._ia, dB._ja, dB._a);
+    if(cbegin)
+      for(int i = 0; i < dB._nnz; ++i)
+        dB._ja[i] -= cbegin;
+*/
+
+    Mat mAAT;
+    if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(mAA->_petsc, &mAAT);
+    else MatCreateHermitianTranspose(mAA->_petsc, &mAAT);
+    MatDestroy(&mAA->_petsc);
+
+    Mat mats[2] = { Abemblock->_petsc , mAAT};
+    Mat C;
+    MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
+    MatCompositeSetType(C, MAT_COMPOSITE_MULTIPLICATIVE);
+    Abem = C;
+              
+            }
+            else{
+              cerr << "==== to do ==== " << endl;
+              ffassert(0);
+            }
+
+            
+          }
+
+        }
+        else{
+
+          // case BC_set or BilinearForm 
+          Matrice_Creuse<R> &BBB(*CCC);
+
+          int mpirankandsize[2];
+          mpirankandsize[0] = mpirank;
+          mpirankandsize[1] = mpisize;
+
+          list<C_F0> b_largs_tmp;
+          b_largs_tmp.push_back(*b_largs_ii);
+          const list<C_F0> & b_largs_zz = b_largs_tmp;
+          // cas ::  Mesh, v_fes, v_fes
+          if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 2 ){
+
+            // ==== FESpace 2d : inconnue et test  ===
+            const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
+            const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm< R, Mesh, FESpace,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas ::  Mesh3, v_fes3, v_fes3 
+          else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 3 ){
+
+            // ==== FESpace 3d : inconnue et test ===
+            const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
+            const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,Mesh3,FESpace3,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: MeshS, v_fesS, v_fesS 
+          else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
+
+            // ==== FESpace 3d Surf: inconnue et test ===
+            const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
+            const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: MeshL, v_fesL, v_fesL
+          else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
+
+            // ==== FESpace 3d Curve: inconnue et test ===
+            const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+            const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: MeshL, v_fesL, v_fes
+          else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
+
+            // ==== FESpace 3d Curve: inconnue et 2d : test ===
+            const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+            const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: MeshL, v_fes, v_fesL
+          else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
+
+            // ==== FESpace 2d: inconnue et 3d Curve: test ===
+            const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
+            const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshL,FESpace,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
+          else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 3 ){
+
+            // ==== FESpace 3d Surf: inconnue et 3d : test ===
+            const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
+            const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          } 
+          // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
+          else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 4 ){
+
+            // ==== FESpace 3d : inconnue et 3d Surf : test ===
+            const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
+            const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshS,FESpace3,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          } 
+          // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
+          else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 4 ){
+
+            // ====  FESpace 3d Curve : inconnue et 3d Surf : test ===
+            const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+            const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
+          else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 5 ){
+
+            // ====  FESpace 3d Surf : inconnue et 3d Curve : test ===
+            const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
+            const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+            creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceS,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs_zz, stack, BBB, &mpirankandsize[0]);
+          }
+          else{
+            cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
+            cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
+            ffassert(0);
+          }
+
+          A.pHM()->Add( BBB.pHM(), R(1), false, 0*offsetMatrixVh, 0*offsetMatrixUh ); // test function (Vh) are the line and inconnu function (Uh) are the column
+          nsparseblocks++;
+        }
+ 
+      delete CCC;
+
+      } // end loop bb_largs_ii
+    offsetMatrixVh += VhNbOfDf[j];
+
+    A.pHM()->half = ds.sym;
+    PETSc::DistributedCSR< HpddmType > * aij = new PETSc::DistributedCSR< HpddmType >;
+    ff_HPDDM_MatrixCSR< PetscScalar > dA(A.pHM());
+
+    std::set<PetscInt> irows;
+    A.pHM()->CSR();
+    std::vector<PetscInt> perm(A.pHM()->n,0);
+
+    for (int ii=0; ii < A.pHM()->n; ii++) {
+      for (int la = A.pHM()->p[ii]; la < A.pHM()->p[ii+1]; la++) {
+        perm[ii] = 1;
+        perm[A.pHM()->j[la]] = 1;
+      }
+    }
+
+    for (int ii=0; ii < A.pHM()->n; ii++) 
+    if (perm[ii] == 1) {
+      auto it = irows.insert(ii);
+      perm[ii] = std::distance(irows.begin(),it.first);
+    }
+
+    PetscInt *IA = new PetscInt[irows.size()+1];
+    PetscInt *JA = new PetscInt[A.pHM()->nnz];
+    PetscScalar* aa = new PetscScalar[A.pHM()->nnz];
+
+    int cpt = 0;
+    IA[0] = 0;
+    for (int ii=0; ii < A.pHM()->n; ii++)
+    if (A.pHM()->p[ii] != A.pHM()->p[ii+1])
+      IA[++cpt] = perm[ii];
+
+    for (int ii=0; ii < A.pHM()->nnz; ii++) {
+      JA[ii] = perm[A.pHM()->j[ii]];
+      cout << JA[ii] << endl;
+    }
+
+    std::copy_n(A.pHM()->aij, A.pHM()->nnz, aa);
+
+    std::vector<PetscInt> indices; indices.reserve(irows.size());
+    for(const auto& p : irows) indices.emplace_back(p);
+
+cout << irows.size() << " " << indices.size() << endl;
+    for (int ii=0; ii < indices.size();ii++)
+    cout << indices[ii] << endl;
+
+    ISLocalToGlobalMapping mapping;
+    ISLocalToGlobalMappingCreate(PETSC_COMM_WORLD, 1, indices.size(), indices.data(), PETSC_COPY_VALUES, &mapping);
+    Mat matIS, matISlocal, matIJ;
+    MatCreateIS(PETSC_COMM_WORLD, 1, PETSC_DECIDE, PETSC_DECIDE, irows.size(), irows.size(), mapping, mapping, &matIS);
+    MatAssemblyBegin(matIS, MAT_FINAL_ASSEMBLY);
+    MatISGetLocalMat(matIS, &matISlocal);
+    MatAssemblyBegin(matISlocal, MAT_FINAL_ASSEMBLY);
+    MatCreateSeqAIJ(PETSC_COMM_SELF, irows.size(), irows.size(), 0, nullptr, &matISlocal);
+    MatSetSizes(matISlocal, irows.size(), irows.size(), PETSC_DECIDE, PETSC_DECIDE);
+    MatSeqAIJSetPreallocationCSR(matISlocal, IA, JA, aa);
+    MatAssemblyEnd(matISlocal, MAT_FINAL_ASSEMBLY);
+    //MatISRestoreLocalMat(matIS, &matISlocal);
+    MatAssemblyEnd(matIS, MAT_FINAL_ASSEMBLY);
+    MatConvert(matIS, MATAIJ, MAT_INPLACE_MATRIX, &matIS);
+
+    aij->_last = A.pHM()->n;
+    aij->_clast = A.pHM()->m;
+    
+    MatCreate(PETSC_COMM_WORLD, &aij->_petsc);
+    MatSetSizes(aij->_petsc, aij->_last, aij->_clast, PETSC_DECIDE, PETSC_DECIDE);
+    MatSetType(aij->_petsc, MATAIJ);
+    MatSetUp(aij->_petsc);
+    
+    aij->_num = new PetscInt[aij->_last + aij->_clast];
+    aij->_cnum = aij->_num + aij->_last;
+    PetscInt rbegin, cbegin;
+    MatGetOwnershipRange(aij->_petsc, &rbegin, NULL);
+    MatGetOwnershipRangeColumn(aij->_petsc, &cbegin, NULL);
+    std::iota(aij->_num, aij->_cnum, rbegin);
+    std::iota(aij->_cnum, aij->_cnum + aij->_clast, cbegin);
+    aij->_first += rbegin;
+    aij->_last += rbegin;
+    aij->_cfirst += cbegin;
+    aij->_clast += cbegin;
+    if(cbegin)
+      for(int i = 0; i < dA._nnz; ++i)
+        dA._ja[i] += cbegin;
+    
+    MatSeqAIJSetPreallocationCSR(aij->_petsc, dA._ia, dA._ja, dA._a);
+    MatMPIAIJSetPreallocationCSR(aij->_petsc, dA._ia, dA._ja, dA._a);
+    
+    if(cbegin)
+      for(int i = 0; i < dA._nnz; ++i)
+        dA._ja[i] -= cbegin;
+
+    if (Abem != PETSC_NULL) {
+      if (!nsparseblocks) {
+        a[j * maxJVh + i] = Abem;
+      }
+      else {
+        Mat mats[2] = { aij->_petsc, Abem };
+        Mat C;
+        MatCreateComposite(PetscObjectComm((PetscObject)aij->_petsc), 2, mats, &C);
+        MatCompositeSetType(C, MAT_COMPOSITE_ADDITIVE);
+        a[j * maxJVh + i] = C;
+        /*
+          PetscInt m, n, M, N;
+          MatGetSize(aij->_petsc, &m, &n);
+          MatGetSize(Abem, &M, &N);
+        cout << " ALARME " << i << " " << j << " " << m << " " << n << " " << M << " " << N << endl;
+        */
+      }
+    }
+    else {
+      a[j * maxJVh + i] = aij->_petsc;
+    }
+
+    std::vector<int> o;
+    std::vector<std::vector<int>> r;
+    aij->_A = new HpddmType;
+    int comm = PETSC_COMM_WORLD;
+    aij->_A->HPDDM::template Subdomain< PetscScalar >::initialize(&dA, o, r, &comm, nullptr);
+
+    aij->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
+    aij->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*aij->_A);
+    aij->_exchange[0]->setBuffer();
+    aij->_exchange[1] = new HPDDM::template Subdomain< PetscScalar >(*aij->_A);
+    aij->_exchange[1]->setBuffer();
+    exchange[j * maxJVh + i] = aij;
+
+    } // end loop j
+    offsetMatrixUh += UhNbOfDf[i];
+  } // end loop i
+  
+  /*
+  if (A_is_square)
+    SetSolver(stack,VF,*A.A,ds);
+  */
+  //return SetAny<Matrice_Creuse<R>  *>(&A);
+
+  MatCreateNest(PETSC_COMM_WORLD, NpUh, NULL, maxJVh, NULL, a, &Ares->_petsc);
+  Ares->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
+
+  return SetAny<PETSc::DistributedCSR< HpddmType >*>(Ares);
+}
+
 static void Init_PETSc( ) {
   if (verbosity > 1 && mpirank == 0)
     cout << " PETSc (" << typeid(PetscScalar).name( ) << ")" << endl;
@@ -5622,6 +6306,7 @@ static void Init_PETSc( ) {
   Global.Add("constructor", "(", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1, 1));
   TheOperators->Add(
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
+  TheOperators->Add("<-", new OpMatrixtoBilinearFormVGPETSc< HpSchwarz< PetscScalar> >(1));
   TheOperators->Add(
     "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
          new PETSc::varfToMat< PetscScalar, Mesh, v_fes, v_fes >,

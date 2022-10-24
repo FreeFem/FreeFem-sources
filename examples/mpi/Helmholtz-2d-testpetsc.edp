@@ -1,0 +1,42 @@
+include "getARGV.idp"
+load "bem"
+load "MUMPS"
+load "PETSc-complex"
+
+real k = getARGV("-waven",20.);
+func f = 100*exp(-((x-.5)^2+(y-.5)^2)*k*10);
+
+real lambda = 2*pi/k;
+
+int Dirichlet = 1;
+int Robin = 2;
+
+int[int] chlab=[1, Robin, 2, Robin, 3, Robin, 4, Robin];
+//int[int] chlab=[1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet];
+
+real npplo = 15.;
+
+mesh Th = square(npplo*1./lambda,npplo*1./lambda);
+Th=change(Th,refe=chlab);
+
+fespace Vh(Th,P1);
+
+fespace Uh(<Vh>);
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+varf vA(u,v) = int2d(Th)(-k^2*u*v+Grad(u)'*Grad(v))
+				+ int1d(Th,Robin)(1i*k*u*v)
+        - int2d(Th)(f*v/mpisize)
+				+ on(Dirichlet,u=0);
+
+//matrix<complex> A = vA(Uh,Uh,solver=sparsesolver,master=-1);
+
+Mat<complex> A = vA(Uh,Uh);
+
+Vh<complex> u, rhs;
+
+rhs[] = vA(0,Uh);
+
+u[] = A^-1*rhs[];
+
+plot(u);
