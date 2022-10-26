@@ -68,7 +68,7 @@ index 5a46e581fd2..bc7535eb449 100644
 --- a/config/BuildSystem/config/packages/PTScotch.py
 +++ b/config/BuildSystem/config/packages/PTScotch.py
 @@ -32,12 +32,16 @@ class Configure(config.package.Package):
-     self.odeps          = [self.pthread,self.zlib]
+     self.odeps          = [self.pthread,self.zlib,self.bison]
      return
  
 +  def configureLibrary(self):
@@ -81,7 +81,7 @@ index 5a46e581fd2..bc7535eb449 100644
  
      self.programs.getExecutable('flex', getFullPath = 1)
      if not hasattr(self.programs, 'flex'): raise RuntimeError('PTScotch needs flex installed')
--    if not self.bison.haveBison3plus: raise RuntimeError('PTScotch needs Bison version 3.0 or above, use --download-bison')
+-    if not self.bison.found or not self.bison.haveBison3plus: raise RuntimeError('PTScotch needs Bison version 3.0 or above, use --download-bison')
  
      self.log.write('Creating PTScotch '+os.path.join(os.path.join(self.packageDir,'src'),'Makefile.inc')+'\n')
  
