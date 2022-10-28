@@ -2,8 +2,9 @@ include "getARGV.idp"
 load "bem"
 load "MUMPS"
 load "PETSc-complex"
+include "macro_ddm.idp"
 
-real k = getARGV("-waven",20.);
+real k = getARGV("-waven",5.);
 func f = 100*exp(-((x-.5)^2+(y-.5)^2)*k*10);
 
 real lambda = 2*pi/k;
@@ -26,12 +27,16 @@ fespace Uh(<Vh>);
 macro Grad(u) [dx(u),dy(u)] // EOM
 varf vA(u,v) = int2d(Th)(-k^2*u*v+Grad(u)'*Grad(v))
 				+ int1d(Th,Robin)(1i*k*u*v)
-        - int2d(Th)(f*v/mpisize)
-				+ on(Dirichlet,u=0);
+        - int2d(Th)(f*v/mpisize);
+				//+ on(Dirichlet,u=0);
 
-//matrix<complex> A = vA(Uh,Uh,solver=sparsesolver,master=-1);
+varf vFP(u,v) = - int2d(Th)(f*v);
+				//+ on(Dirichlet,u=0);
 
-Mat<complex> A = vA(Uh,Uh);
+matrix<complex> A = vA(Uh,Uh,solver=sparsesolver,master=-1);
+
+Mat<complex> APETSC=vA(Uh,Uh);
+cout << APETSC.n <<endl;
 
 Vh<complex> u, rhs;
 
@@ -39,4 +44,11 @@ rhs[] = vA(0,Uh);
 
 u[] = A^-1*rhs[];
 
-plot(u);
+complex[int] rhsG(APETSC.n);
+rhsG=1;
+complex[int] uG(APETSC.n);
+
+ObjectView(APETSC);
+cout << "KSPSolve" << endl;
+KSPSolve(APETSC, rhsG, uG ,sparams="-ksp_monitor");
+cout << "End KSPSolve" << endl;
