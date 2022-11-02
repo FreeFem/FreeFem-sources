@@ -332,11 +332,11 @@ bool in(Complex u[],R2 & P,double eps)
     double xmax = max(max(u[0].real(),u[1].real()),u[2].real());
     double ymin = min(min(u[0].imag(),u[1].imag()),u[2].imag());
     double ymax = max(max(u[0].imag(),u[1].imag()),u[2].imag());
-    bool b = (xmin < eps) && (xmax > eps) &&  (ymin < eps) && (ymax > eps);
+    bool b = (xmin < eps) && (xmax > -eps) &&  (ymin < eps) && (ymax > -eps);
     if( b )//Compute the vortex position and check if it is inside the triangle
     {
         P = zero(u);
-        b = in(P,eps);
+        b = in(P,eps);// check if the point are inside or on border of the triangle
     }
     else P=R2(-1.,-1.); // outside
     return b;
@@ -410,11 +410,12 @@ long uZero(pf3c const & fu, pf3r const & fuc, double const &eps)
                 Complex u2[3]={u[i0],u[i1],u[i2]};
                 R2 P2;
                 if(in(u2,P2,eps)){
-                    charge = (imag(log(u2[1]/u2[0])) + imag(log(u2[2]/u2[1])) + imag(log(u2[0]/u2[2])))/twopi;
-                    if(abs(charge)>.98){
-                        R3 P=K(K.PBord(i,P2));// Coors  ..
-                        ucn++;// compute for each tetraedra the number of face of abs(charge) == 1
+                    Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
+                    charge = imag(icharge);
+                    if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
+                        charge=1.;
                     }
+                    if(abs(charge)>.98) ucn++;// compute for each tetraedra the number of face of abs(charge) == 1
                 }
             }
             uc[k]=ucn;
@@ -448,9 +449,7 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
     const double twopi = 2.*Pi;
     Complex u0,u1,u2;// value of u over the vertex of the tetrahedron
     double charge;
-    double a0,a1,a2,a3,a4,a5;
     double l0,l1,l2;
-    double Xmin,Ymin;
     int nbc=0;
     for (int k=0; k<Th.nt; k++){
         const Element & K = Th[k];
@@ -460,7 +459,11 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
         Complex u2[3]={u[i0],u[i1],u[i2]};
         R2 P2;
         if(in(u2,P2,1.e-15)){
-            charge = (imag(log(u2[1]/u2[0])) + imag(log(u2[2]/u2[1])) + imag(log(u2[0]/u2[2])))/twopi;
+            Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
+            charge = imag(icharge);
+            if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
+                charge=1.;
+            }
             if(abs(charge)>.98){
                 l1=P2.x; l2=P2.y; l0 = 1-l1-l2;
                 points(nbc,0) = Th(i0).x * l0 + Th(i1).x * l1 +  Th(i2).x * l2;
@@ -469,6 +472,8 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
                 nbc++;
             }
         }
+        // remove duplicated points
+        for(int i=0;i<nbc-1;i++) if(points(i,0) == points(nbc-1,0) && points(i,1) == points(nbc-1,1)) nbc--;
     }
     points.resize(nbc,2);
     pts.resize(nbc,2);
@@ -546,7 +551,8 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
             R2 P2;
             if (in(u2,P2, eps))
             {nbp2++;}
-        }}
+        }
+    }
     int nbpx = nbp2;
     KN<Vertex> Pf(nbpx);
     int nbp=0;
@@ -566,20 +572,47 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
         const Element & K = Th[k];
         int fi[4],kf[4],ip[4],nfi=0;
         R3 PF[4];
+        /*
+         // IN TEST
+        int ku40 = 0, ku4[4];
+        int j0 =Th(K[0]);
+        int j1 =Th(K[1]);
+        int j2 =Th(K[2]);
+        int j3 =Th(K[3]);
+        Complex u4[]={u[j0],u[j1],u[j2],u[j3]};
+        
+        if(abs(u4[0])==0) ku4[ku40++] = 0;
+        if(abs(u4[1])==0) ku4[ku40++] = 1;
+        if(abs(u4[2])==0) ku4[ku40++] = 2;
+        if(abs(u4[3])==0) ku4[ku40++] = 3;
+        if(ku40>2) cout<<" we have 2 zero face on the tetraedre "<<k<<" "<<ku40<<endl;
+        */
         for(int i=0; i< 4;++i)
         {
             int i0 =Th(K[Element::nvface[i][0]]);
             int i1 =Th(K[Element::nvface[i][1]]);
             int i2 =Th(K[Element::nvface[i][2]]);
             Complex u2[]={u[i0],u[i1],u[i2]};
+            /*
+             // IN TEST
+            int ku0 = 0, ku[3];
+            if(abs(u2[0])==0) ku[ku0++] = 0;
+            if(abs(u2[1])==0) ku[ku0++] = 1;
+            if(abs(u2[2])==0) ku[ku0++] = 2;
+            if(ku0>1) cout<<" we have a zero face "<<k<<" "<<i<<" "<<ku0<<endl;
+            */
             R2 P2;
             if (in(u2,P2, eps))
             {
-                charge = (imag(log(u2[1]/u2[0])) + imag(log(u2[2]/u2[1])) + imag(log(u2[0]/u2[2])))/twopi;
+                Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
+                charge = imag(icharge);
+                if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
+                    charge=1.;
+                }
                 if(abs(charge)>.98){
                     R3 P=K(K.PBord(i,P2));//
                     Vertex * pvi=gtree->ToClose(P,hseuil,true);
-                    // verfi brute force
+                    // verif brute force
                     if(!pvi && nbp)
                     {
                         pvi=gtree->NearestVertex(P,true);
@@ -627,7 +660,6 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
                 Arc A={i0,i1};
                 arc.push_back(A);
             }
-            
         }
         // in ArcF(i0,i1) i \in [i0,i1], if i%5==4 => i/5 numéro thétraèdre else (i%5) numéro de face dans le tétraèdre i/5
     }

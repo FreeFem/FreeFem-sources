@@ -441,10 +441,10 @@ LIST_GENERATE_FILE_AM= \
     src/Algo/Makefile.am \
     src/lglib/Makefile.am \
     src/fflib/Makefile.am \
+    src/libMesh/Makefile.am \
     src/nw/Makefile.am \
     src/mpi/Makefile.am \
     src/bamg/Makefile.am \
-    src/libMesh/Makefile.am \
     src/medit/Makefile.am \
     src/bin-win32/Makefile.am \
     plugin/Makefile.am \
