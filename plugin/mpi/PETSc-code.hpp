@@ -4738,7 +4738,54 @@ namespace PETSc {
         MatGetType((*t)._petsc, &type);
         PetscStrcmp(type, MATNEST, &isType);
         PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
-        if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
+
+        if(1){
+          for(int i = 0; i < u->n; ++i)
+              p[i] = u->operator[](i);
+          MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PETSC_COMM_WORLD);
+          VecGetArray(x, &ptr);
+          if(isType) { // case nested matrix
+            Mat** mat;
+            PetscInt M, N;
+            PetscInt Mi = 0, Ni = 0;
+            MatNestGetSubMats((*t)._petsc, &M, &N, &mat);
+
+            PetscInt offset_cols=0;
+            PetscInt offset_local_cols=0;
+            for(PetscInt j = 0; j < N; ++j) { // cols
+              for(PetscInt i = 0; i < M; ++i) { // rows
+                Ni = 0, Mi = 0;
+                if(mat[i][j]) {
+                  MatGetSize(mat[i][j], &Mi, &Ni);
+
+                  PetscInt cbegin;
+                  PetscInt ni,mi;
+                  MatGetLocalSize( mat[i][j], &mi, &ni);
+                  MatGetOwnershipRangeColumn( mat[i][j], &cbegin, NULL);
+
+                  for(PetscInt i = 0; i < ni; ++i)
+                    ptr[i+offset_local_cols] = p[i+cbegin+offset_cols];
+
+                  offset_cols += Ni;
+                  offset_local_cols += ni;
+                  break;
+                } // if mat[i][j]
+
+              } // loop rows
+            } // loop cols
+          } // if nested matrix
+          else{
+            // case not nested matrix
+            PetscInt cbegin;
+            PetscInt n,m,N,M;
+            MatGetLocalSize( (*t)._petsc, &m, &n);
+            MatGetOwnershipRangeColumn( (*t)._petsc, &cbegin, NULL);
+            for(PetscInt i = 0; i < n; ++i)
+              ptr[i]  = p[i+cbegin];
+          }
+          VecRestoreArray(x, &ptr);
+        }
+        else if ( std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
                           HpSchwarz< PetscScalar > >::value) {
           VecGetArray(x, &ptr);
           for(int i = 0; i < u->n; ++i)
@@ -4809,7 +4856,55 @@ namespace PETSc {
         if (verbosity > 0 && mpirank == 0)
           cout << " --- system solved with PETSc (in " << MPI_Wtime( ) - timing << ")" << endl;
         p = reinterpret_cast<PetscScalar*>(out->operator upscaled_type<PetscScalar>*());
-        if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
+        if(1){
+          VecGetArray(y, &ptr);
+          if(isType) {
+              Mat** mat;
+              PetscInt M, N;
+              PetscInt Mi = 0, Ni = 0;
+              MatNestGetSubMats((*t)._petsc, &M, &N, &mat);
+
+              PetscInt offset_rows=0;
+              PetscInt offset_local_rows=0;
+              for(PetscInt i = 0; i < M; ++i) { // rows
+                for(PetscInt j = 0; j < N; ++j) { // cols
+
+                  Ni = 0, Mi = 0;
+                  if(mat[i][j]) {
+                    MatGetSize(mat[i][j], &Mi, &Ni);
+
+                    PetscInt rbegin;
+                    PetscInt ni,mi;
+                    MatGetLocalSize( mat[i][j], &mi, &ni);
+                    MatGetOwnershipRange( mat[i][j], &rbegin, NULL);
+
+                    for(PetscInt i = 0; i < mi; ++i)
+                      p[i+rbegin+offset_rows] = ptr[i+offset_local_rows];
+
+                    offset_rows += Mi;
+                    offset_local_rows += mi;
+                    break;
+                  } // if mat[i][j]
+
+                } // loop rows
+              } // loop cols
+          } // if nested matrix
+          else{
+            // case not nested matrix
+            PetscInt rbegin;
+            PetscInt n,m,N,M;
+            MatGetOwnershipRange( (*t)._petsc, &rbegin, NULL);
+            MatGetLocalSize( (*t)._petsc, &m, &n);
+            std::fill(p,p+u->n,0.);
+            
+            for(PetscInt i = 0; i < m; ++i)
+              p[i+rbegin] = ptr[i];
+          }
+
+          VecRestoreArray(y, &ptr);
+          MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PETSC_COMM_WORLD);
+        }
+        else if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
                           HpSchwarz< PetscScalar > >::value) {
           VecGetArray(y, &ptr);
           if(isType)
@@ -5660,6 +5755,125 @@ struct OpMatrixtoBilinearFormVGPETSc
 
 };
 
+void ff_createMatIS( MatriceMorse<PetscScalar> &ff_mat, Mat &matIS){
+    std::set<PetscInt> irows;
+    std::set<PetscInt> jcols;
+
+    ff_mat.CSR(); // transform the matrix to CSR format
+    
+    std::vector<PetscInt> perm_row(ff_mat.n,-1); 
+    std::vector<PetscInt> perm_col(ff_mat.m,-1);
+      
+    for (int ii=0; ii < ff_mat.n; ii++) {
+      for (int la = ff_mat.p[ii]; la < ff_mat.p[ii+1]; la++) {
+        perm_row[ii] = 1; 
+        perm_col[ff_mat.j[la]] = 1;
+        if( la > ff_mat.p[ii]){
+          //
+          if( !( ff_mat.j[la] > ff_mat.j[ff_mat.p[ii]]) ){
+            cerr << " The column index must be croissant :: Error " << ff_mat.j[la] << " " << ff_mat.j[ff_mat.p[ii]]  <<endl;
+          }
+          ffassert( ff_mat.j[la] > ff_mat.j[ff_mat.p[ii]] ); 
+        }
+      }
+    }
+  
+  if(verbosity> 2)
+    for(int ii=0; ii<10; ii++)
+      cout << "perm_row["<<ii<<"]=" << perm_row[ii] << endl;
+
+  // construction of irows
+  for (int ii=0; ii < ff_mat.n; ii++) 
+    if (perm_row[ii] == 1) {
+      auto it = irows.insert(ii);
+      perm_row[ii] = std::distance(irows.begin(),it.first);
+    }
+  // construction of jcols
+  for (int ii=0; ii < ff_mat.m; ii++) 
+    if (perm_col[ii] == 1) {
+      auto it = jcols.insert(ii);
+      perm_col[ii] = std::distance(jcols.begin(),it.first);
+    }
+
+  if(verbosity>2){
+    MPI_Barrier(PETSC_COMM_WORLD);
+    if(mpirank ==1){
+      cout << "nnz=" << ff_mat.nnz << endl;
+      cout << "n=" << ff_mat.n << endl;
+      //for (int ii=0; ii < ff_mat.n; ii++) 
+      //  cout << "ii=" << ii << " " << perm[ii] << endl;   
+    }
+    MPI_Barrier(PETSC_COMM_WORLD);
+  }
+  PetscInt *IA = new PetscInt[irows.size()+1];
+  PetscInt *JA = new PetscInt[ff_mat.nnz];
+  PetscScalar* aa = new PetscScalar[ff_mat.nnz];
+
+  int cpt = 0;
+  IA[0] = 0;
+  for (int ii=0; ii < ff_mat.n; ii++)
+    if (ff_mat.p[ii] != ff_mat.p[ii+1]){
+      IA[cpt] = ff_mat.p[ii];
+      ffassert( perm_row[ii] == cpt);
+      cpt++;
+    }
+  IA[ cpt ] = ff_mat.nnz; 
+  ffassert( IA[cpt] == ff_mat.nnz);
+  ffassert(cpt==irows.size());
+
+  for (int ii=0; ii < ff_mat.nnz; ii++) {
+    JA[ii] = perm_col[ff_mat.j[ii]];
+  }
+
+  std::copy_n(ff_mat.aij, ff_mat.nnz, aa);
+
+  std::vector<PetscInt> indices_row; indices_row.reserve(irows.size());
+  for(const auto& p : irows) indices_row.emplace_back(p);
+
+  std::vector<PetscInt> indices_col; indices_col.reserve(jcols.size());
+  for(const auto& p : jcols) indices_col.emplace_back(p);
+
+  ISLocalToGlobalMapping mapping_row;
+  ISLocalToGlobalMappingCreate(PETSC_COMM_WORLD, 1, indices_row.size(), indices_row.data(), PETSC_COPY_VALUES, &mapping_row);
+
+  ISLocalToGlobalMapping mapping_col;
+  ISLocalToGlobalMappingCreate(PETSC_COMM_WORLD, 1, indices_col.size(), indices_col.data(), PETSC_COPY_VALUES, &mapping_col);
+
+  Mat matISlocal, matIJ;
+
+  // Remark: If we put the true size of the global matrix ==> Error : Abort trap
+  MatCreateIS(PETSC_COMM_WORLD, 1, PETSC_DECIDE, PETSC_DECIDE, ff_mat.n, ff_mat.m, mapping_row, mapping_col, &matIS);
+
+  // This call supposed that local and global indices are the same
+  // MatCreateSeqAIJ(PETSC_COMM_SELF, irows.size(), irows.size(), 0, nullptr, &matISlocal);
+  // MatCreateSeqAIJ(PETSC_COMM_SELF, A.pHM()->n, A.pHM()->m, 0, nullptr, &matISlocal);
+
+  // This 4 lines are equivalent to MatCreateSeqAIJ
+  MatCreate(PETSC_COMM_SELF, &matISlocal);
+  MatSetType(matISlocal,MATSEQAIJ);
+  MatSetSizes(matISlocal, irows.size(), jcols.size(), irows.size(), jcols.size());
+  // nullptr can be replaced by the vector of nnz
+  MatSeqAIJSetPreallocation(matISlocal, 0, nullptr);
+
+  if(verbosity>2){
+    MPI_Barrier(PETSC_COMM_WORLD);
+    if(mpirank==0) cout << " matISlocal" <<  mpirank << endl;
+    if(mpirank==0) cout << " irows.size()=" << irows.size() << endl;
+    if(mpirank==0) cout << " jcols.size()=" << jcols.size() << endl;
+    MPI_Barrier(PETSC_COMM_WORLD);
+  }
+
+  MatSeqAIJSetPreallocationCSR(matISlocal, IA, JA, aa);
+  //MatMPIAIJSetPreallocationCSR(matISlocal, IA, JA, aa);
+
+  MatISSetLocalMat(matIS, matISlocal);
+
+  MatAssemblyBegin(matIS, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd(matIS, MAT_FINAL_ASSEMBLY);
+
+  MatConvert(matIS, MATAIJ, MAT_INPLACE_MATRIX, &matIS);
+}
+
 template<class HpddmType>
 AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) const
 {
@@ -5818,7 +6032,6 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
               const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
               const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
 
-              //creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS>(PUh, PVh, VFBEM, b_largs_zz, stack, dsbem, Hmat);
               MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
               MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
               varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
@@ -5832,9 +6045,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
               const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
               const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
-              //creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PVh, VFBEM, b_largs_zz, stack, dsbem, Hmat );
               MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
-              //MatSetSizes(Abemblock->_petsc, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF);
               MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
               varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
 
@@ -5866,12 +6077,10 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
               // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
               
               cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
-              //ffassert(0);
               const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-              //creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PUh, VFBEM, b_largs_zz, stack, dsbem, Hmat );
 
               MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
-              MatSetSizes(Abemblock->_petsc, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF, PUh->NbOfDF);
+              MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
               varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
             }
 
@@ -5902,53 +6111,29 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
               // Transform Real Matrix in Complex Matrix 
               MatriceMorse<R> * mA = new MatriceMorse<R>(mr->n,mr->m,0,0);
               *mA = *mr;
-              // transform ff_Matrix to HPDDM_Matrix
-              ff_HPDDM_MatrixCSR< PetscScalar > dA(mA); 
-              
-              // The matrix MI_BBB is sequential ==> transform to distributed matrix
-              // cela serait mieux d'avoir une fonction pour faire cela
-              PETSc::DistributedCSR< HpddmType > * mAA = new PETSc::DistributedCSR< HpddmType >;
-              mAA->_last = mA->n;
-              mAA->_clast = mA->m;
-              MatCreate(PETSC_COMM_WORLD, &mAA->_petsc);
-              MatSetSizes(mAA->_petsc, mAA->_last, mAA->_clast, PETSC_DECIDE, PETSC_DECIDE);
-              MatSetType(mAA->_petsc, MATAIJ);
-              MatSetUp(mAA->_petsc);
-              mAA->_num = new PetscInt[mAA->_last + mAA->_clast];
-              mAA->_cnum = mAA->_num + mAA->_last;
-              PetscInt rbegin, cbegin;
-              MatGetOwnershipRange(mAA->_petsc, &rbegin, NULL);
-              MatGetOwnershipRangeColumn(mAA->_petsc, &cbegin, NULL);
-              std::iota(mAA->_num, mAA->_cnum, rbegin);
-              std::iota(mAA->_cnum, mAA->_cnum + mAA->_clast, cbegin);
-              mAA->_first += rbegin;
-              mAA->_last += rbegin;
-              mAA->_cfirst += cbegin;
-              mAA->_clast += cbegin;
-            
-              if(cbegin)
-                for(int i = 0; i < dA._nnz; ++i)
-                  dA._ja[i] += cbegin;
-              MatSeqAIJSetPreallocationCSR(mAA->_petsc, dA._ia, dA._ja, dA._a);
-              MatMPIAIJSetPreallocationCSR(mAA->_petsc, dA._ia, dA._ja, dA._a);
-              if(cbegin)
-                for(int i = 0; i < dA._nnz; ++i)
-                  dA._ja[i] -= cbegin;
+
+              // transform intrerpolation matrix to matrix IS
+              Mat matIS_MI;
+              ff_createMatIS( *mA, matIS_MI);
+
+              if(verbosity>2){
+                MPI_Barrier(MPI_COMM_WORLD);
+                cout <<"compute the transpose matrix" << endl;
+                MPI_Barrier(MPI_COMM_WORLD);
+              }
 
               if( transpose_MI) ffassert(0); // transpose ==true doesn't work. Error Matrice Interpolation
               Mat mAAT;
-              if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(mAA->_petsc, &mAAT);
-              else MatCreateHermitianTranspose(mAA->_petsc, &mAAT);
-              MatDestroy(&mAA->_petsc);
+              if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(matIS_MI, &mAAT);
+              else MatCreateHermitianTranspose(matIS_MI, &mAAT);
+              MatDestroy(&matIS_MI);
               
-
               //  create composite 
               Mat mats[2] = { Abemblock->_petsc , mAAT};
               Mat C;
               MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
               MatCompositeSetType(C, MAT_COMPOSITE_MULTIPLICATIVE);
               Abem = C;
-              
             }
             else{
               cerr << "==== to do ==== " << endl;
@@ -5982,182 +6167,52 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
     //PETSc::DistributedCSR< HpddmType > * aij = new PETSc::DistributedCSR< HpddmType >;
     //ff_HPDDM_MatrixCSR< PetscScalar > dA(Afem.pHM());
     
-    std::set<PetscInt> irows;
-    Afem.pHM()->CSR();
-    std::vector<PetscInt> perm(Afem.pHM()->n,-1);
-
-    for (int ii=0; ii < Afem.pHM()->n; ii++) {
-      for (int la = Afem.pHM()->p[ii]; la < Afem.pHM()->p[ii+1]; la++) {
-        perm[ii] = 1;
-        perm[Afem.pHM()->j[la]] = 1;
-        if( la > Afem.pHM()->p[ii]){
-          ffassert( Afem.pHM()->j[la] > Afem.pHM()->j[Afem.pHM()->p[ii]] ); 
-        }
-      }
-    }
-
-    for (int ii=0; ii < Afem.pHM()->n; ii++) 
-      if (perm[ii] == 1) {
-        auto it = irows.insert(ii);
-        perm[ii] = std::distance(irows.begin(),it.first);
-      }
-    
-    MPI_Barrier(PETSC_COMM_WORLD);
-    if(mpirank ==1){
-      cout << "A.pHM()->nnz=" << Afem.pHM()->nnz << endl;
-      cout << "A.pHM()->n=" << Afem.pHM()->n << endl;
-      //for (int ii=0; ii < Afem.pHM()->n; ii++) 
-      //  cout << "ii=" << ii << " " << perm[ii] << endl;
-      
-    }
-    MPI_Barrier(PETSC_COMM_WORLD);
-
-    PetscInt *IA = new PetscInt[irows.size()+1];
-    PetscInt *JA = new PetscInt[Afem.pHM()->nnz];
-    PetscScalar* aa = new PetscScalar[Afem.pHM()->nnz];
-
-    int cpt = 0;
-    IA[0] = 0;
-    for (int ii=0; ii < Afem.pHM()->n; ii++)
-      if (Afem.pHM()->p[ii] != Afem.pHM()->p[ii+1]){
-        IA[cpt] = Afem.pHM()->p[ii];
-        ffassert( perm[ii] == cpt );
-        cpt++;
-        //cout << " cpt=" << cpt << " irows=" <<  irows.size()+1 << endl;
-      }
-    IA[ cpt ] = Afem.pHM()->nnz; 
-    ffassert( IA[cpt] == Afem.pHM()->nnz);
-    ffassert(cpt==irows.size());
-
-    for (int ii=0; ii < Afem.pHM()->nnz; ii++) {
-      JA[ii] = perm[Afem.pHM()->j[ii]];
-      //cout << JA[ii] << endl;
-    }
-
-    std::copy_n(Afem.pHM()->aij, Afem.pHM()->nnz, aa);
-
-    std::vector<PetscInt> indices; indices.reserve(irows.size());
-    for(const auto& p : irows) indices.emplace_back(p);
-
-    ISLocalToGlobalMapping mapping;
-    ISLocalToGlobalMappingCreate(PETSC_COMM_WORLD, 1, indices.size(), indices.data(), PETSC_COPY_VALUES, &mapping);
-
-    Mat matIS, matISlocal, matIJ;
-
-    // Remark: If we put the true size of the global matrix ==> Error : Abort trap
-    MatCreateIS(PETSC_COMM_WORLD, 1, PETSC_DECIDE, PETSC_DECIDE, Afem.pHM()->m, Afem.pHM()->n, mapping, mapping, &matIS);
-    
+    Mat matIS;
+    ff_createMatIS( *(Afem.pHM()), matIS);
   
-    // This call supposed that local and global indices are the same
-    // MatCreateSeqAIJ(PETSC_COMM_SELF, irows.size(), irows.size(), 0, nullptr, &matISlocal);
-    // MatCreateSeqAIJ(PETSC_COMM_SELF, A.pHM()->n, A.pHM()->m, 0, nullptr, &matISlocal);
-
-    // This 4 lines are equivalent to MatCreateSeqAIJ 
-    MatCreate(PETSC_COMM_SELF, &matISlocal);
-    MatSetType(matISlocal,MATSEQAIJ);
-    MatSetSizes(matISlocal, irows.size(), irows.size(), irows.size(), irows.size());
-    // nullptr can be replaced by the vector of nnz
-    MatSeqAIJSetPreallocation(matISlocal, 0, nullptr);
-
-    MatSeqAIJSetPreallocationCSR(matISlocal, IA, JA, aa);
-    //MatMPIAIJSetPreallocationCSR(matISlocal, IA, JA, aa);
-
-    MatISSetLocalMat(matIS, matISlocal);
-  
-    //MatISGetLocalMat(matIS, &matISlocal);
-    //MatISSetLocalMatType(matIS,MATSEQAIJ);
-    //MatSetType(matISlocal,MATAIJ);
-    //MatCreateSeqAIJ(PETSC_COMM_SELF, irows.size(), irows.size(), 0, nullptr, &matISlocal);
-    //MatAssemblyBegin(matISlocal, MAT_FINAL_ASSEMBLY);
-    //MatAssemblyEnd(matISlocal, MAT_FINAL_ASSEMBLY);
-    //MatISRestoreLocalMat(matIS, &matISlocal);
-
-    MatAssemblyBegin(matIS, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(matIS, MAT_FINAL_ASSEMBLY);
-
-    MatConvert(matIS, MATAIJ, MAT_INPLACE_MATRIX, &matIS);
-      
-
-
-
-      {
-    PetscInt mg;
-    PetscInt ng;
-    MatGetSize( matIS, &mg, &ng);
-
-    PetscInt ml;
-    PetscInt nl;
-    MatGetLocalSize( matIS, &ml, &nl);
-
-    MPI_Barrier(PETSC_COMM_WORLD);
-    if(mpirank==0) cout << " matIS_MATAIJ :: local size & global " <<  mpirank << endl;
-    if(mpirank==0) cout << " global mg= "<< mg << " ng="<< ng << endl;
-    if(mpirank==0) cout << " local  ml= "<< ml << " nl="<< nl << endl;
-    MPI_Barrier(PETSC_COMM_WORLD);
-
-    MPI_Barrier(PETSC_COMM_WORLD);
-    if(mpirank==1) cout << " matIS_MATAIJ :: local size & global " <<  mpirank << endl;
-    if(mpirank==1) cout << " global mg= "<< mg << " ng="<< ng << endl;
-    if(mpirank==1) cout << " local  ml= "<< ml << " nl="<< nl << endl;
-    MPI_Barrier(PETSC_COMM_WORLD);
-    }
-
+    // if( NpUh == 1 && NpVh==1){
+    // IS to, from;
+    // PetscInt nr;
+    // Vec rglobal;
+    // ISLocalToGlobalMappingGetSize(mapping_row, &nr);
+    // ISCreateStride(PETSC_COMM_SELF, nr, 0, 1, &to);
+    // ISLocalToGlobalMappingApplyIS(mapping_row, to, &from);
+    // MatCreateVecs(matIS, &rglobal, NULL);
+    // Vec isVec;
+    // VecCreate(PETSC_COMM_SELF, &isVec);
+    // VecSetType(isVec, VECSTANDARD);
+    // VecSetSizes(isVec, PETSC_DECIDE, nr);
+    // VecScatterCreate(rglobal, from, isVec, to, &Ares->_scatter);
+    // VecDestroy(&isVec);
+    // VecDestroy(&rglobal);
+    // ISDestroy(&from);
+    // ISDestroy(&to);
+    // // ISLocalToGlobalMappingView(rmap, PETSC_VIEWER_STDOUT_WORLD);
+    // ISLocalToGlobalMappingDestroy(&mapping_row);
+    // }
 
       PETSc::DistributedCSR< HpddmType > * aij = new PETSc::DistributedCSR< HpddmType >;
       ff_HPDDM_MatrixCSR< PetscScalar > dA(Afem.pHM());
 
       aij->_petsc = matIS;
-      
+    
       aij->_last = Afem.pHM()->n;  // n local normalement
       aij->_clast = Afem.pHM()->m; // m local normalement
       
-      /*
+    /*  
       MatCreate(PETSC_COMM_WORLD, &aij->_petsc);
       MatSetSizes(aij->_petsc, aij->_last, aij->_clast, PETSC_DECIDE, PETSC_DECIDE);
       MatSetType(aij->_petsc, MATAIJ);
       MatSetUp(aij->_petsc);
       */
-      {
-
-      PetscInt mg;
-      PetscInt ng;
-      MatGetSize( aij->_petsc , &mg, &ng);
-
-      PetscInt ml;
-      PetscInt nl;
-      MatGetLocalSize( aij->_petsc , &ml, &nl);
-
-      MPI_Barrier(PETSC_COMM_WORLD);
-      if(mpirank==0) cout << " aij->_petsc :: local size & global " <<  mpirank << endl;
-      if(mpirank==0) cout << " global mg= "<< mg << " ng="<< ng << endl;
-      if(mpirank==0) cout << " local  ml= "<< ml << " nl="<< nl << endl;
-      MPI_Barrier(PETSC_COMM_WORLD);
-
-      MPI_Barrier(PETSC_COMM_WORLD);
-      if(mpirank==1) cout << " aij->_petsc  :: local size & global " <<  mpirank << endl;
-      if(mpirank==1) cout << " global mg= "<< mg << " ng="<< ng << endl;
-      if(mpirank==1) cout << " local  ml= "<< ml << " nl="<< nl << endl;
-      MPI_Barrier(PETSC_COMM_WORLD);
-      }
-
+      
+      
       aij->_num = new PetscInt[aij->_last + aij->_clast];
       aij->_cnum = aij->_num + aij->_last;
       PetscInt rbegin, cbegin;
       MatGetOwnershipRange(aij->_petsc, &rbegin, NULL);
       MatGetOwnershipRangeColumn(aij->_petsc, &cbegin, NULL);
-
-      {
-      MPI_Barrier(PETSC_COMM_WORLD);
-      int iii=1;
-      if(mpirank==iii) cout << "                             "<< endl;
-      if(mpirank==iii) cout << " aij->_petsc :: local size & global " <<  mpirank << endl;
-      if(mpirank==iii) cout << " rbegin=" <<  rbegin << ", cbegin= "<< cbegin  << endl;
-      if(mpirank==iii) cout << " aij->num=" << aij->_num << ", aij->cnum=" << aij->_cnum << endl;
-      if(mpirank==iii) cout << " aij->first=" << aij->_first << ", aij->cfirst=" << aij->_cfirst << endl;
-      if(mpirank==iii) cout << " aij->last=" << aij->_last << ", aij->clast=" << aij->_clast << endl;
-      MPI_Barrier(PETSC_COMM_WORLD);
-      }
-
+      
       std::iota(aij->_num, aij->_cnum, rbegin);
       std::iota(aij->_cnum, aij->_cnum + aij->_clast, cbegin);
 
@@ -6165,25 +6220,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
       aij->_last += rbegin;
       aij->_cfirst += cbegin;
       aij->_clast += cbegin;
-      /*
-      {
-      
-      MPI_Barrier(PETSC_COMM_WORLD);
-      int iii=1;
-      if(mpirank==iii) cout << "                             "<< endl;
-      if(mpirank==iii) cout << " after iota " << endl;
-      if(mpirank==iii) cout << " aij->_petsc :: local size & global " <<  mpirank << endl;
-      if(mpirank==iii) cout << " rbegin=" <<  rbegin << ", cbegin= "<< cbegin  << endl;
-      if(mpirank==iii) cout << " aij->num=" << aij->_num << ", aij->cnum=" << aij->_cnum << endl;
-      if(mpirank==iii) cout << " aij->first=" << aij->_first << ", aij->cfirst=" << aij->_cfirst << endl;
-      if(mpirank==iii) cout << " aij->last=" << aij->_last << ", aij->clast=" << aij->_clast << endl;
-      if(mpirank==iii){
-        for(int ii=0; ii< (aij->_last/10)+1; ii++)
-          cout << " aij->num["<<ii<<"]=" << aij->_num[ii] << endl;
-      } 
-      MPI_Barrier(PETSC_COMM_WORLD);
-      }
-      */
+    
       /*
       if(cbegin)
         for(int i = 0; i < dA._nnz; ++i)
@@ -6197,36 +6234,21 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
           dA._ja[i] -= cbegin;
       */
       
-      PetscInt m, n, M, N;
 
       if (Abem != PETSC_NULL) {
         if (!nsparseblocks) {
           a[j * maxJVh + i] = Abem;
-          MatGetLocalSize(Abem, &m, &n);
-          MatGetSize(Abem, &M, &N);
-          cout << "npirank=" <<  mpirank <<" Abem :: ALARME " << i << " " << j << " " << m << " " << n << " " << M << " " << N << endl;
         }
         else {
           Mat mats[2] = { matIS, Abem };
-          //Mat mats[2] = { aij->_petsc, Abem };
           Mat C;
           MatCreateComposite(PetscObjectComm((PetscObject)aij->_petsc), 2, mats, &C);
           MatCompositeSetType(C, MAT_COMPOSITE_ADDITIVE);
           a[j * maxJVh + i] = C;
-          
-          //PetscInt m, n, M, N;
-          MatGetLocalSize(C, &m, &n);
-          MatGetSize(C, &M, &N);
-          cout << "npirank=" <<  mpirank << " Composite :: ALARME " << i << " " << j << " " << m << " " << n << " " << M << " " << N << endl;
-          
         }
       }
       else {
-        a[j * maxJVh + i] = matIS; //aij->_petsc;
-        //a[j * maxJVh + i] = aij->_petsc;
-        MatGetLocalSize(matIS, &m, &n);
-        MatGetSize(matIS, &M, &N);
-        cout << "npirank=" <<  mpirank << " matIS :: ALARME " << i << " " << j << " " << m << " " << n << " " << M << " " << N << endl;
+        a[j * maxJVh + i] = matIS; 
       }
 
 
@@ -6251,10 +6273,13 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
     offsetMatrixUh += UhNbOfDf[i];
   } // end loop i
   
-  MatCreateNest(PETSC_COMM_WORLD, NpUh, NULL, maxJVh, NULL, a, &Ares->_petsc);
-  //Ares->_petsc=a[0];
-  Ares->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
 
+  if( NpUh==1 && maxJVh==1 ){
+    Ares->_petsc = a[0];
+  }else{
+    MatCreateNest(PETSC_COMM_WORLD, NpUh, NULL, maxJVh, NULL, a, &Ares->_petsc);
+    Ares->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
+  }
   return SetAny<PETSc::DistributedCSR< HpddmType >*>(Ares);
 }
 
