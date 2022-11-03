@@ -508,7 +508,7 @@ long uZero2D1(const Mesh * const & pTh,KN<Complex>*const &pu, KN<double>*const &
 
 long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*const &pu, KN<double>*const &pucharge, double* const & pdmin)
 {
-    const double eps =1e-12,epscharge=0.5;
+    const double eps =1e-12,epscharge=0.1;
     typedef Mesh::Element Element;
     typedef Element::Vertex Vertex;
     KN<Complex> &u = *pu;
