@@ -938,7 +938,7 @@ double interpol(KN_<double> const &  so,KN_<double> const &  xo,KN_<double> cons
 
 static void inittt( ) {
     Global.Add("uZero2D", "(",new OneOperator5_<long,const Mesh *,KNM<double> *,KN<Complex> *,KN<double> *,double* >(uZero2D));
-    Global.Add("uZero2D1", "(",new OneOperator3_<long,const Mesh *,KN<Complex> *,KN<double> * >(uZero2D1));
+   // Global.Add("uZero2D1", "(",new OneOperator3_<long,const Mesh *,KN<Complex> *,KN<double> * >(uZero2D1));
     Global.Add("uZero", "(",new OneOperator3_<long,pf3c,pf3r,double>(uZero));
     Global.Add("ZeroLines", "(",new OneOperator5_<long,pf3c,double,KNM<double> *,KN<long>*,KN<long>*> (ZeroLines) );
     Global.Add("BSp", "(",new OneOperator2s_<KNM_<double>,KNM_<double>,long >(BSp));
