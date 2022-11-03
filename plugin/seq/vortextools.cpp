@@ -434,8 +434,81 @@ long uZero(pf3c const & fu, pf3r const & fuc, double const &eps)
 //    pdmin: minimum distance between the vortices
 // Returns:
 //    nbc: number of vortices
+double intdphase(bool bb,Complex  const & a,Complex  const & b,double  const & eps)
+{
+    const double twopi = 2.*Pi;
+    double zz = bb ? 1. : -1.;
+    zz=0; // in test !!!! FH.
+    // zero entra ua et ub => 0 phase ???
+    Complex ab(b-a);
+    if (abs(ab)<eps) return zz*100;
+    // 0=  a + l ab => l = -a/ab
+    Complex l= -a / ab;
+    
+    if( abs(l.imag())<eps) {
+       // cout << " intdphase "<< l << " " << arg(a/b) << " " << a/b << endl;
+        // l est real ???
+       // verif si l in [0,1]
+        double lr = l.imag();
+        if( lr> -eps && lr < 1+eps ) {
+            // zero sur a,b
+            return zz*10;
+        } else return zz*20;
+    }
+    static int count =0;
+    double dw =arg(b/a)/twopi;
+  // if(count++<100) cout << dw  << endl;
+    return dw;
+       
+}
+
+double ChargeF(int i1,int i2,int i3,Complex  u[3], double  const & eps)
+{
+    double ch =
+     intdphase(i1<i2,u[0],u[1],eps)
+    +intdphase(i2<i3,u[1],u[2],eps)
+    +intdphase(i3<i1,u[2],u[0],eps);
+    double chn = round(ch);
+    if(verbosity>99) cout << u[0]<< " " << u[1] << " " << u[2] << " ch = " << ch << endl;
+
+    return ch ;
+}
+
+
+long uZero2D1(const Mesh * const & pTh,KN<Complex>*const &pu, KN<double>*const &pucharge)
+{
+    typedef Mesh::Element Element;
+    typedef Element::Vertex Vertex;
+    KN<Complex> &u = *pu;
+    KN<double> &ucharge = *pucharge;
+    const Mesh &Th = *pTh;
+    ffassert(u.N()==Th.nv);
+    ffassert(ucharge.N()==Th.nt);
+    const double twopi = 2.*Pi;
+    Complex u0,u1,u2;// value of u over the vertex of the tetrahedron
+    double charge;
+    double l0,l1,l2;
+    int nbc=0;
+    for (int k=0; k<Th.nt; k++)
+    {
+        double ck=0;
+        for(int e =0; e<3;++e)
+        {
+            int i0 = Th(k,(e+1)%3);
+            int i1 = Th(k,(e+2)%3);
+            double ce = intdphase(i0<i1,u[i0],u[i1],1e-15);
+            ck += ce;
+        }
+        if(abs(ck)< 1e-16) nbc++;
+        ucharge[k]=ck;
+    }
+    return nbc;
+}
+
+
 long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*const &pu, KN<double>*const &pucharge, double* const & pdmin)
 {
+    const double eps =1e-12,epscharge=1e-3;
     typedef Mesh::Element Element;
     typedef Element::Vertex Vertex;
     KN<Complex> &u = *pu;
@@ -443,6 +516,12 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
     const Mesh &Th = *pTh;
     KNM<double> &pts=*ppoints;
     KNM<double> points(Th.nt,2);
+    KN<Vertex> Pf(Th.nt);
+    R2 Pmin,Pmax;
+    Th.BoundingBox(Pmin,Pmax);
+    FQuadTree *gtree=new FQuadTree(Pf,Pmin,Pmax,0);
+    double mindist=1e100;
+    
     double &dmin = *pdmin;
     ffassert(u.N()==Th.nv);
     ffassert(ucharge.N()==Th.nt);
@@ -451,49 +530,36 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
     double charge;
     double l0,l1,l2;
     int nbc=0;
+    double epsP = 10./gtree->coef;
     for (int k=0; k<Th.nt; k++){
         const Element & K = Th[k];
         int i0 = Th(k,0);
         int i1 = Th(k,1);
         int i2 = Th(k,2);
         Complex u2[3]={u[i0],u[i1],u[i2]};
+        charge=ChargeF(i0,i1,i2,u2,eps);
         R2 P2;
-        if(in(u2,P2,1.e-15)){
-            Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
-            charge = imag(icharge);
-            if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
-                charge=1.;
-            }
-            if(abs(charge)>.98){
-                l1=P2.x; l2=P2.y; l0 = 1-l1-l2;
-                points(nbc,0) = Th(i0).x * l0 + Th(i1).x * l1 +  Th(i2).x * l2;
-                points(nbc,1) = Th(i0).y * l0 + Th(i1).y * l1 +  Th(i2).y * l2;
+        if(in(u2,P2,eps) && (abs(charge)>epscharge ))
+        {
+            R2 Pk = K(P2);
+            //  verif ...
+            if(gtree->ToClose(Pk,epsP,true)==0 ) { // new points
+                const Vertex * pvi=gtree->TrueNearestVertex(Pk);
+                R2 d(Pk,*pvi);
+                mindist = min(mindist,d.norme2());
+                Pf[nbc]=Pk;
+                gtree->Add(Pf[nbc]);
+                points(nbc,0) = Pk.x;
+                points(nbc,1) = Pk.y;
                 ucharge[k] = 1.;
                 nbc++;
             }
         }
-        // remove duplicated points
-        for(int i=0;i<nbc-1;i++) if(points(i,0) == points(nbc-1,0) && points(i,1) == points(nbc-1,1)) nbc--;
-    }
+     }
     points.resize(nbc,2);
     pts.resize(nbc,2);
     pts=points;
-    KN<Vertex> Pf(nbc);
-    for (int i=0; i< nbc;++i)
-    {   Pf[i].x =points(i,0);
-        Pf[i].y =points(i,1);
-    }
-    R2 Pmin,Pmax;
-    Th.BoundingBox(Pmin,Pmax);
-    FQuadTree *gtree=new FQuadTree(Pf,Pmin,Pmax,0);
-    double mindist=1e100;
-    gtree->Add(Pf[0]);
-    for (int i=1; i<nbc; i++){
-        const Vertex * pvi=gtree->TrueNearestVertex(Pf[i]);
-        R2 d(Pf[i],*pvi);
-        mindist = min(mindist,d.norme2());
-        gtree->Add(Pf[i]);
-    }
+
     dmin = sqrt(mindist);
     delete gtree;
     return (long)nbc;
@@ -511,7 +577,7 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
 //    b: the number of vortex lines
 long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN<long>*const &pbe,KN<long>* const & ploop)
 {
-    
+    const double epscharge = 1e-3; //
     typedef   v_fes3::FESpace FESpace;
     typedef Complex K;
     pf3cbase bu=fu.first;
@@ -557,7 +623,7 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
     KN<Vertex> Pf(nbpx);
     int nbp=0;
     EF23::GTree<Vertex> *gtree=new EF23::GTree<Vertex>(Pf,Bmin,Bmax,0);
-    hseuil = 2./gtree->coef; //  seuil minimal dans gtree
+    hseuil = 5./gtree->coef; //  seuil minimal dans gtree
     if(verbosity>9) cout << " hseuil minimal "<< hseuil << endl;
     long ihseuil=gtree->coef*hseuil;
     ffassert(ihseuil);
@@ -572,48 +638,29 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
         const Element & K = Th[k];
         int fi[4],kf[4],ip[4],nfi=0;
         R3 PF[4];
-        /*
-         // IN TEST
-        int ku40 = 0, ku4[4];
-        int j0 =Th(K[0]);
-        int j1 =Th(K[1]);
-        int j2 =Th(K[2]);
-        int j3 =Th(K[3]);
-        Complex u4[]={u[j0],u[j1],u[j2],u[j3]};
-        
-        if(abs(u4[0])==0) ku4[ku40++] = 0;
-        if(abs(u4[1])==0) ku4[ku40++] = 1;
-        if(abs(u4[2])==0) ku4[ku40++] = 2;
-        if(abs(u4[3])==0) ku4[ku40++] = 3;
-        if(ku40>2) cout<<" we have 2 zero face on the tetraedre "<<k<<" "<<ku40<<endl;
-        */
+
         for(int i=0; i< 4;++i)
         {
             int i0 =Th(K[Element::nvface[i][0]]);
             int i1 =Th(K[Element::nvface[i][1]]);
             int i2 =Th(K[Element::nvface[i][2]]);
             Complex u2[]={u[i0],u[i1],u[i2]};
-            /*
-             // IN TEST
-            int ku0 = 0, ku[3];
-            if(abs(u2[0])==0) ku[ku0++] = 0;
-            if(abs(u2[1])==0) ku[ku0++] = 1;
-            if(abs(u2[2])==0) ku[ku0++] = 2;
-            if(ku0>1) cout<<" we have a zero face "<<k<<" "<<i<<" "<<ku0<<endl;
-            */
+            double charge = ChargeF(i0,i1,i2,u2,eps);
+
             R2 P2;
-            if (in(u2,P2, eps))
+             bool inz =in(u2,P2, eps) ;
+            
+            if( abs(round(charge)-charge)>1e-10 && verbosity>4)
+               cout << " change F not int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
+            else if(verbosity>99)
+                cout << " change F  int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
+
+            if (inz && (abs(charge)>epscharge))
             {
-                Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
-                charge = imag(icharge);
-                if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
-                    charge=1.;
-                }
-                if(abs(charge)>.98){
-                    R3 P=K(K.PBord(i,P2));//
-                    Vertex * pvi=gtree->ToClose(P,hseuil,true);
+                R3 P=K(K.PBord(i,P2));//
+                Vertex * pvi=gtree->ToClose(P,hseuil,true);
                     // verif brute force
-                    if(!pvi && nbp)
+                if(!pvi && nbp)
                     {
                         pvi=gtree->NearestVertex(P,true);
                         int j = pvi - Pf;
@@ -624,7 +671,7 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
                         }
                         
                     }
-                    if(0) //  force brute ???
+ /*                   if(0) //  force brute ???
                         for(int j=0; j< nbp; ++j)
                     {
                         double l2 = R3(P,Pf[j]).norme2();
@@ -632,7 +679,7 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
                             if(verbosity>9) cout << " bug " << k << " "<< i  << " == " << j << " :  " << P << " j " << Pf[j] << " / " << l2 <<endl;
                         }
                         
-                    }
+                    }*/
                     if(! pvi)
                     {
                         ffassert(nbp<nbpx);
@@ -647,7 +694,7 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
                     fi[nfi]=i;
                     ip[nfi]= pvi- (Vertex *) Pf;
                     nfi++;
-                }
+                
             }
             // compress ip
             sort(ip,ip+nfi);
@@ -888,6 +935,7 @@ double interpol(KN_<double> const &  so,KN_<double> const &  xo,KN_<double> cons
 
 static void inittt( ) {
     Global.Add("uZero2D", "(",new OneOperator5_<long,const Mesh *,KNM<double> *,KN<Complex> *,KN<double> *,double* >(uZero2D));
+    Global.Add("uZero2D1", "(",new OneOperator3_<long,const Mesh *,KN<Complex> *,KN<double> * >(uZero2D1));
     Global.Add("uZero", "(",new OneOperator3_<long,pf3c,pf3r,double>(uZero));
     Global.Add("ZeroLines", "(",new OneOperator5_<long,pf3c,double,KNM<double> *,KN<long>*,KN<long>*> (ZeroLines) );
     Global.Add("BSp", "(",new OneOperator2s_<KNM_<double>,KNM_<double>,long >(BSp));
