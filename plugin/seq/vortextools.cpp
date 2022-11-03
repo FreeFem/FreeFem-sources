@@ -508,7 +508,7 @@ long uZero2D1(const Mesh * const & pTh,KN<Complex>*const &pu, KN<double>*const &
 
 long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*const &pu, KN<double>*const &pucharge, double* const & pdmin)
 {
-    const double eps =1e-12,epscharge=1e-3;
+    const double eps =1e-12,epscharge=0.5;
     typedef Mesh::Element Element;
     typedef Element::Vertex Vertex;
     KN<Complex> &u = *pu;
@@ -539,6 +539,7 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
         Complex u2[3]={u[i0],u[i1],u[i2]};
         charge=ChargeF(i0,i1,i2,u2,eps);
         R2 P2;
+        ucharge[k] = 0; // p    s vortex
         if(in(u2,P2,eps) && (abs(charge)>epscharge ))
         {
             R2 Pk = K(P2);
@@ -554,7 +555,7 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
                 gtree->Add(Pf[nbc]);
                 points(nbc,0) = Pk.x;
                 points(nbc,1) = Pk.y;
-                ucharge[k] = 1.;
+                ucharge[k] = charge;
                 nbc++;
             }
         }
