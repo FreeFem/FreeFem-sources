@@ -6062,7 +6062,6 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
   // Assemble the variationnal form
   int maxJVh=NpVh;
 
-  Dmat** exchange = new Dmat*[NpUh * maxJVh]();
   Mat* a = new Mat[NpUh * maxJVh]();
 
   int offsetMatrixUh = 0;
@@ -6272,78 +6271,11 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
     offsetMatrixVh += VhNbOfDf[j];
 
     if(b_largs.size()> 0){
-    Afem.pHM()->half = ds.sym;
-    //PETSc::DistributedCSR< HpddmType > * aij = new PETSc::DistributedCSR< HpddmType >;
-    //ff_HPDDM_MatrixCSR< PetscScalar > dA(Afem.pHM());
-    
-    Mat matIS;
-    ff_createMatIS( *(Afem.pHM()), matIS);
+      Afem.pHM()->half = ds.sym;
   
-    // if( NpUh == 1 && NpVh==1){
-    // IS to, from;
-    // PetscInt nr;
-    // Vec rglobal;
-    // ISLocalToGlobalMappingGetSize(mapping_row, &nr);
-    // ISCreateStride(PETSC_COMM_SELF, nr, 0, 1, &to);
-    // ISLocalToGlobalMappingApplyIS(mapping_row, to, &from);
-    // MatCreateVecs(matIS, &rglobal, NULL);
-    // Vec isVec;
-    // VecCreate(PETSC_COMM_SELF, &isVec);
-    // VecSetType(isVec, VECSTANDARD);
-    // VecSetSizes(isVec, PETSC_DECIDE, nr);
-    // VecScatterCreate(rglobal, from, isVec, to, &Ares->_scatter);
-    // VecDestroy(&isVec);
-    // VecDestroy(&rglobal);
-    // ISDestroy(&from);
-    // ISDestroy(&to);
-    // // ISLocalToGlobalMappingView(rmap, PETSC_VIEWER_STDOUT_WORLD);
-    // ISLocalToGlobalMappingDestroy(&mapping_row);
-    // }
-
-      PETSc::DistributedCSR< HpddmType > * aij = new PETSc::DistributedCSR< HpddmType >;
-      ff_HPDDM_MatrixCSR< PetscScalar > dA(Afem.pHM());
-
-      aij->_petsc = matIS;
+      Mat matIS;
+      ff_createMatIS( *(Afem.pHM()), matIS);
     
-      aij->_last = Afem.pHM()->n;  // n local normalement
-      aij->_clast = Afem.pHM()->m; // m local normalement
-      
-    /*  
-      MatCreate(PETSC_COMM_WORLD, &aij->_petsc);
-      MatSetSizes(aij->_petsc, aij->_last, aij->_clast, PETSC_DECIDE, PETSC_DECIDE);
-      MatSetType(aij->_petsc, MATAIJ);
-      MatSetUp(aij->_petsc);
-      */
-      
-      
-      aij->_num = new PetscInt[aij->_last + aij->_clast];
-      aij->_cnum = aij->_num + aij->_last;
-      PetscInt rbegin, cbegin;
-      MatGetOwnershipRange(aij->_petsc, &rbegin, NULL);
-      MatGetOwnershipRangeColumn(aij->_petsc, &cbegin, NULL);
-      
-      std::iota(aij->_num, aij->_cnum, rbegin);
-      std::iota(aij->_cnum, aij->_cnum + aij->_clast, cbegin);
-
-      aij->_first += rbegin;
-      aij->_last += rbegin;
-      aij->_cfirst += cbegin;
-      aij->_clast += cbegin;
-    
-      /*
-      if(cbegin)
-        for(int i = 0; i < dA._nnz; ++i)
-          dA._ja[i] += cbegin;
-      
-      MatSeqAIJSetPreallocationCSR(aij->_petsc, dA._ia, dA._ja, dA._a);
-      MatMPIAIJSetPreallocationCSR(aij->_petsc, dA._ia, dA._ja, dA._a);
-    
-      if(cbegin)
-        for(int i = 0; i < dA._nnz; ++i)
-          dA._ja[i] -= cbegin;
-      */
-      
-
       if (Abem != PETSC_NULL) {
         if (!nsparseblocks) {
           a[j * maxJVh + i] = Abem;
@@ -6351,7 +6283,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
         else {
           Mat mats[2] = { matIS, Abem };
           Mat C;
-          MatCreateComposite(PetscObjectComm((PetscObject)aij->_petsc), 2, mats, &C);
+          MatCreateComposite(PetscObjectComm((PetscObject)matIS), 2, mats, &C);
           MatCompositeSetType(C, MAT_COMPOSITE_ADDITIVE);
           a[j * maxJVh + i] = C;
         }
@@ -6359,23 +6291,6 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
       else {
         a[j * maxJVh + i] = matIS; 
       }
-
-
-      
-      std::vector<int> o;
-      std::vector<std::vector<int>> r;
-      aij->_A = new HpddmType;
-      int comm = PETSC_COMM_WORLD;
-      aij->_A->HPDDM::template Subdomain< PetscScalar >::initialize(&dA, o, r, &comm, nullptr);
-
-      aij->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
-      aij->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*aij->_A);
-      aij->_exchange[0]->setBuffer();
-      aij->_exchange[1] = new HPDDM::template Subdomain< PetscScalar >(*aij->_A);
-      aij->_exchange[1]->setBuffer();
-  
-      exchange[j * maxJVh + i] = aij;
-
     }
       
     } // end loop j
@@ -6387,7 +6302,6 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
     Ares->_petsc = a[0];
   }else{
     MatCreateNest(PETSC_COMM_WORLD, NpUh, NULL, maxJVh, NULL, a, &Ares->_petsc);
-    Ares->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
   }
   return SetAny<PETSc::DistributedCSR< HpddmType >*>(Ares);
 }
