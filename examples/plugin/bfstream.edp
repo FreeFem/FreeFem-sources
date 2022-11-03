@@ -6,7 +6,7 @@ for (int i = 0; i < b.n; ++i)
 cout << " " << b << endl;
 int kk=100;
 {
-	ofstream f("bfstreamExample.dt");
+	ofstream f("bfstreamExample.dt",binary);
 	f.write(134);
 	f.write(1.346888);
 	f.write(b);
@@ -18,7 +18,7 @@ b = 0;
 {
 	real r;
 	int i,kk,i4;
-	ifstream f("bfstreamExample.dt");
+	ifstream f("bfstreamExample.dt",binary);
 	f.read(i);
 	f.read(r);
 	f.read(bb);
