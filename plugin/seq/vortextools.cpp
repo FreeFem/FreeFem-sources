@@ -545,8 +545,11 @@ long uZero2D(const Mesh * const & pTh,KNM<double>*const &ppoints,KN<Complex>*con
             //  verif ...
             if(gtree->ToClose(Pk,epsP,true)==0 ) { // new points
                 const Vertex * pvi=gtree->TrueNearestVertex(Pk);
-                R2 d(Pk,*pvi);
-                mindist = min(mindist,d.norme2());
+                if(pvi)
+                {
+                    R2 d(Pk,*pvi);
+                    mindist = min(mindist,d.norme2());
+                }
                 Pf[nbc]=Pk;
                 gtree->Add(Pf[nbc]);
                 points(nbc,0) = Pk.x;
