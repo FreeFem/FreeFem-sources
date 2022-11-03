@@ -4859,35 +4859,35 @@ namespace PETSc {
         if(1){
           VecGetArray(y, &ptr);
           if(isType) {
-              Mat** mat;
-              PetscInt M, N;
-              PetscInt Mi = 0, Ni = 0;
-              MatNestGetSubMats((*t)._petsc, &M, &N, &mat);
+            Mat** mat;
+            PetscInt M, N;
+            PetscInt Mi = 0, Ni = 0;
+            MatNestGetSubMats((*t)._petsc, &M, &N, &mat);
 
-              PetscInt offset_rows=0;
-              PetscInt offset_local_rows=0;
-              for(PetscInt i = 0; i < M; ++i) { // rows
-                for(PetscInt j = 0; j < N; ++j) { // cols
+            PetscInt offset_rows=0;
+            PetscInt offset_local_rows=0;
+            for(PetscInt i = 0; i < M; ++i) { // rows
+              for(PetscInt j = 0; j < N; ++j) { // cols
 
-                  Ni = 0, Mi = 0;
-                  if(mat[i][j]) {
-                    MatGetSize(mat[i][j], &Mi, &Ni);
+                Ni = 0, Mi = 0;
+                if(mat[i][j]) {
+                  MatGetSize(mat[i][j], &Mi, &Ni);
 
-                    PetscInt rbegin;
-                    PetscInt ni,mi;
-                    MatGetLocalSize( mat[i][j], &mi, &ni);
-                    MatGetOwnershipRange( mat[i][j], &rbegin, NULL);
+                  PetscInt rbegin;
+                  PetscInt ni,mi;
+                  MatGetLocalSize( mat[i][j], &mi, &ni);
+                  MatGetOwnershipRange( mat[i][j], &rbegin, NULL);
 
-                    for(PetscInt i = 0; i < mi; ++i)
-                      p[i+rbegin+offset_rows] = ptr[i+offset_local_rows];
+                  for(PetscInt i = 0; i < mi; ++i)
+                    p[i+rbegin+offset_rows] = ptr[i+offset_local_rows];
 
-                    offset_rows += Mi;
-                    offset_local_rows += mi;
-                    break;
-                  } // if mat[i][j]
+                  offset_rows += Mi;
+                  offset_local_rows += mi;
+                  break;
+                } // if mat[i][j]
 
-                } // loop rows
-              } // loop cols
+              } // loop rows
+            } // loop cols
           } // if nested matrix
           else{
             // case not nested matrix
@@ -4974,7 +4974,55 @@ namespace PETSc {
           PetscBool isType;
           PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
           PetscStrcmp(type, MATNEST, &isType);
-          if (isType) {
+          
+          if(1){
+            int nb_comm_size;
+            MPI_Comm_size(PETSC_COMM_WORLD,&nb_comm_size);
+            for(int i = 0; i < u->n; ++i)
+              p[i] = u->operator[](i)/nb_comm_size; // Is there I divided by mpisize
+            MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PETSC_COMM_WORLD);
+            // VecGetArray(x, &ptr) is defined before
+            if(isType) { // case nested matrix
+              Mat** mat;
+              PetscInt Mb, Nb;
+              PetscInt Mi = 0, Ni = 0;
+              MatNestGetSubMats((*t)._petsc, &Mb, &Nb, &mat);
+
+              PetscInt offset_cols=0;
+              PetscInt offset_local_cols=0;
+              for(PetscInt j = 0; j < Nb; ++j) { // cols
+                for(PetscInt i = 0; i < Mb; ++i) { // rows
+                  Ni = 0, Mi = 0;
+                  if(mat[i][j]) {
+                    MatGetSize(mat[i][j], &Mi, &Ni);
+
+                    PetscInt cbegin;
+                    PetscInt ni,mi;
+                    MatGetLocalSize( mat[i][j], &mi, &ni);
+                    MatGetOwnershipRangeColumn( mat[i][j], &cbegin, NULL);
+
+                    for(PetscInt i = 0; i < ni; ++i)
+                      ptr[i+offset_local_cols] = p[i+cbegin+offset_cols];
+
+                    offset_cols += Ni;
+                    offset_local_cols += ni;
+                    break;
+                  } // if mat[i][j]
+
+                } // loop rows
+              } // loop cols
+            } // if nested matrix
+            else{
+              // case not nested matrix
+              PetscInt cbegin;
+              PetscInt n,m;
+              MatGetLocalSize( (*t)._petsc, &m, &n);
+              MatGetOwnershipRangeColumn( (*t)._petsc, &cbegin, NULL);
+              for(PetscInt i = 0; i < n; ++i)
+                ptr[i]  = p[i+cbegin];
+            }
+          }
+          else if (isType) {
             ffassert((std::is_same<PetscReal, upscaled_type<PetscReal>>::value));
             loopDistributedVec<0, N>(t->_petsc, t->_exchange, u, ptr);
           } else {
@@ -4997,6 +5045,8 @@ namespace PETSc {
               HPDDM::Subdomain< K >::template distributedVec< 0 >(
                 t->_cnum, t->_cfirst, t->_clast, p, ptr, static_cast<PetscInt>(u->n), 1);
           }
+
+
           VecRestoreArray(x, &ptr);
           if (N == 'T')
             MatMultTranspose(t->_petsc, x, y);
@@ -5004,6 +5054,63 @@ namespace PETSc {
             MatMult(t->_petsc, x, y);
           VecDestroy(&x);
           VecGetArray(y, &ptr);
+
+          if(1){
+            p = reinterpret_cast<PetscScalar*>(out->operator upscaled_type<PetscScalar>*());
+            if(isType) {
+              Mat** mat;
+              PetscInt Mb, Nb;
+              PetscInt Mi = 0, Ni = 0;
+              MatNestGetSubMats((*t)._petsc, &Mb, &Nb, &mat);
+
+              PetscInt offset_rows=0;
+              PetscInt offset_local_rows=0;
+              for(PetscInt i = 0; i < Mb; ++i) { // rows
+                for(PetscInt j = 0; j < Nb; ++j) { // cols
+
+                  Ni = 0, Mi = 0;
+                  if(mat[i][j]) {
+                    MatGetSize(mat[i][j], &Mi, &Ni);
+
+                    PetscInt rbegin;
+                    PetscInt ni,mi;
+                    MatGetLocalSize( mat[i][j], &mi, &ni);
+                    MatGetOwnershipRange( mat[i][j], &rbegin, NULL);
+
+                    for(PetscInt i = 0; i < mi; ++i)
+                      p[i+rbegin+offset_rows] = ptr[i+offset_local_rows];
+
+                    offset_rows += Mi;
+                    offset_local_rows += mi;
+                    break;
+                  } // if mat[i][j]
+
+                } // loop rows
+              } // loop cols
+            } // if nested matrix
+            else{
+              // case not nested matrix
+              PetscInt rbegin;
+              PetscInt n,m;
+              MatGetOwnershipRange( (*t)._petsc, &rbegin, NULL);
+              MatGetLocalSize( (*t)._petsc, &m, &n);
+              std::fill(p,p+u->n,0.);
+              
+              for(PetscInt i = 0; i < m; ++i)
+                p[i+rbegin] = ptr[i];
+            }
+
+            VecRestoreArray(y, &ptr);
+            MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PETSC_COMM_WORLD);
+            for(int i = out->n - 1; i >= 0; --i)
+                out->operator[](i) = p[i];
+            if(!std::is_same<PetscReal, upscaled_type<PetscReal>>::value) {
+              p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
+              for(int i = u->n - 1; i >= 0; --i)
+                u->operator[](i) = p[i];
+            }
+          }
+          else{
           if (!t->_A) std::fill_n(out->operator upscaled_type<PetscScalar>*(), out->n, 0.0);
           if (isType) {
             loopDistributedVec<1, N>(t->_petsc, t->_exchange, out, ptr);
@@ -5032,6 +5139,8 @@ namespace PETSc {
                     u->operator[](i) = p[i];
             }
           }
+          } 
+
           VecRestoreArray(y, &ptr);
           VecDestroy(&y);
         }
