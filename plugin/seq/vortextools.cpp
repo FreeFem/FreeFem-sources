@@ -350,80 +350,7 @@ bool in(Complex u[],R2 & P,double eps)
 //    fuc: P0 function: =1 in tetrahedrons containing a vortex point, =0 otherwise
 // Returns:
 //    nkk: the number of tetrahedrons crossed by vortex lines
-long uZero(pf3c const & fu, pf3r const & fuc, double const &eps)
-{
-    typedef Mesh3::Element Element;
-    typedef   v_fes3::FESpace FESpace;
-    typedef Complex K;
-    pf3cbase bu=fu.first;
-    pf3rbase buc=fuc.first;
-    
-    ffassert(fu.second==0);
-    ffassert(fuc.second==0);
-    
-    KN<K> * pu=bu->x();
-    KN<double> * puc=buc->x();
-    
-    FESpace *pUh = fu.first->Vh ;
-    FESpace *pUch = fuc.first->newVh( );
-    ffassert(pUh && pUch);
-    ffassert(&pUh->Th ==  &pUch->Th );
-    if(pu ==0 || pu->N() != pUh->NbOfDF) {
-        ffassert(0); //  u undef ...
-    }
-    if(puc ==0 || puc->N() != pUch->NbOfDF) {
-        if(!mpirank && verbosity>0) cout << "  FE create or recreate " << puc <<  endl;
-        if(puc) delete [] puc;
-        *fuc.first = puc = new KN< double >(pUch->NbOfDF);
-        *puc = double( );
-    }
-    const Mesh3 & Th=pUh->Th;
-    KN<K> & u=*pu;
-    KN<double> & uc=*puc;
-    FESpace & Uh = *pUh;
-    int nkk=0;
-    const double twopi = 2.*Pi;
-    double charge;
-    uc=0.;
-    for(int k=0; k<Th.nt;++k)
-    {
-        const Element & K = Th[k];
-        int i0 = Uh(k,0);
-        int i1 = Uh(k,1);
-        int i2 = Uh(k,2);
-        int i3 = Uh(k,3);
-        
-        double xmn = min(min(min(u[i0].real(),u[i1].real()),u[i2].real()),u[i3].real());
-        double xmx = max(max(max(u[i0].real(),u[i1].real()),u[i2].real()),u[i3].real());
-        double ymn = min(min(min(u[i0].imag(),u[i1].imag()),u[i2].imag()),u[i3].imag());
-        double ymx = max(max(max(u[i0].imag(),u[i1].imag()),u[i2].imag()),u[i3].imag());
-        
-        bool b = (xmn < eps) && (xmx > -eps) &&  (ymn < eps) && (ymx > -eps);
-        if(b)
-        {
-            int ucn=0;// number of faces of charge = 1
-            for(int i=0; i<4;++i)
-            {
-                int i0 = Th(K[Element::nvface[i][0]]);
-                int i1 = Th(K[Element::nvface[i][1]]);
-                int i2 = Th(K[Element::nvface[i][2]]);
-                Complex u2[3]={u[i0],u[i1],u[i2]};
-                R2 P2;
-                if(in(u2,P2,eps)){
-                    Complex icharge = (log(u2[1]/u2[0]) + log(u2[2]/u2[1]) + log(u2[0]/u2[2]))/twopi;
-                    charge = imag(icharge);
-                    if(isnan(real(icharge)) || isnan(imag(icharge))){// We divide by zero
-                        charge=1.;
-                    }
-                    if(abs(charge)>.98) ucn++;// compute for each tetraedra the number of face of abs(charge) == 1
-                }
-            }
-            uc[k]=ucn;
-            nkk++;
-        }
-    }
-    return nkk;
-}
+
 
 // Search vortices in a 2D complex field:
 // Inputs: 
@@ -473,7 +400,85 @@ double ChargeF(int i1,int i2,int i3,Complex  u[3], double  const & eps)
 
     return ch ;
 }
+long uZero(pf3c const & fu, pf3r const & fuc, double const &eps)
+{
+    const double epscharge = 1e-3; //
 
+    typedef Mesh3::Element Element;
+    typedef   v_fes3::FESpace FESpace;
+    typedef Complex K;
+    pf3cbase bu=fu.first;
+    pf3rbase buc=fuc.first;
+    
+    ffassert(fu.second==0);
+    ffassert(fuc.second==0);
+    
+    KN<K> * pu=bu->x();
+    KN<double> * puc=buc->x();
+    
+    FESpace *pUh = fu.first->Vh ;
+    FESpace *pUch = fuc.first->newVh( );
+    ffassert(pUh && pUch);
+    ffassert(&pUh->Th ==  &pUch->Th );
+    if(pu ==0 || pu->N() != pUh->NbOfDF) {
+        ffassert(0); //  u undef ...
+    }
+    if(puc ==0 || puc->N() != pUch->NbOfDF) {
+        if(!mpirank && verbosity>0) cout << "  FE create or recreate " << puc <<  endl;
+        if(puc) delete [] puc;
+        *fuc.first = puc = new KN< double >(pUch->NbOfDF);
+        *puc = double( );
+    }
+    const Mesh3 & Th=pUh->Th;
+    KN<K> & u=*pu;
+    KN<double> & uc=*puc;
+    FESpace & Uh = *pUh;
+    int nkk=0;
+    const double twopi = 2.*Pi;
+    double charge;
+    uc=0.;
+    for(int k=0; k<Th.nt;++k)
+    {
+        const Element & K = Th[k];
+        int i0 = Uh(k,0);
+        int i1 = Uh(k,1);
+        int i2 = Uh(k,2);
+        int i3 = Uh(k,3);
+        
+        double xmn = min(min(min(u[i0].real(),u[i1].real()),u[i2].real()),u[i3].real());
+        double xmx = max(max(max(u[i0].real(),u[i1].real()),u[i2].real()),u[i3].real());
+        double ymn = min(min(min(u[i0].imag(),u[i1].imag()),u[i2].imag()),u[i3].imag());
+        double ymx = max(max(max(u[i0].imag(),u[i1].imag()),u[i2].imag()),u[i3].imag());
+        
+        bool b = (xmn < eps) && (xmx > -eps) &&  (ymn < eps) && (ymx > -eps);
+        int ucn=0;// number of faces of charge = 1
+
+        if(b)
+        {
+            for(int i=0; i<4;++i)
+            {
+                int i0 = Th(K[Element::nvface[i][0]]);
+                int i1 = Th(K[Element::nvface[i][1]]);
+                int i2 = Th(K[Element::nvface[i][2]]);
+                Complex u2[3]={u[i0],u[i1],u[i2]};
+                double charge = ChargeF(i0,i1,i2,u2,eps);
+                R2 P2;
+                bool inz =in(u2,P2, eps) ;
+               
+               if( abs(round(charge)-charge)>1e-10 && verbosity>4)
+                  cout << " uZero; charge F not int : "<< charge << " " << k << " / " << i  << " nkk: " << nkk << " in:" << inz  <<" "<< P2 << endl;
+               else if(verbosity>99)
+                   cout << " uZero charge F  int : "<< charge << " " << k << " / " << i  << " nkk: " << nkk << " in:" << inz  <<" "<< P2 << endl;
+
+               if (inz && (abs(charge)>epscharge))
+                   ucn ++;
+           }
+          uc[k]=ucn;
+          if(ucn) nkk++;
+        }
+    }
+    return nkk;
+}
 
 long uZero2D1(const Mesh * const & pTh,KN<Complex>*const &pu, KN<double>*const &pucharge)
 {
@@ -655,9 +660,9 @@ long ZeroLines(pf3c const & fu,double const & eps, KNM<double>*const &ppoints,KN
              bool inz =in(u2,P2, eps) ;
             
             if( abs(round(charge)-charge)>1e-10 && verbosity>4)
-               cout << " change F not int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
+               cout << " charge F not int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
             else if(verbosity>99)
-                cout << " change F  int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
+                cout << " charge F  int : "<< charge << " " << k << " / " << i  << " nbp: " << nbp << " in:" << inz  <<" "<< P2 << endl;
 
             if (inz && (abs(charge)>epscharge))
             {

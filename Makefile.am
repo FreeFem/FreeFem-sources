@@ -112,32 +112,34 @@ EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
 	readme/BUGS readme/HISTORY_BEFORE_2005 readme/README_MAC.md readme/TODO \
 	readme/COPYRIGHT readme/INNOVATION readme/README_COMPILATION.md	readme/README_WINDOWS.md \
 	readme/HISTORY readme/README readme/README_GIT.md readme/README_XCODE.md \
-	idp/ffddm_geneoCS.idp \
-	idp/func-max.idp \
-	idp/DDM-Schwarz-macro.idp \
-	idp/ExtractDofsonBorder.idp \
-	idp/Heat3d.idp \
-	idp/MPIGMRESmacro.idp \
-	idp/gsl.idp \
-	idp/ffddm_partitioning.idp \
-	idp/cube.idp \
-	idp/mortar-msh.idp \
-	idp/Makefile.am \
-	idp/movemeshsmooth.idp \
-	idp/DDM-funcs-v2.idp \
-	idp/cobrameshcavity.idp \
-	idp/MPIplot.idp \
-	idp/MeshSurface.idp \
-	idp/ffddm.idp \
-	idp/ffddm_coarsemeshCS.idp \
-	idp/ffddm_geneoCS_3rdlvl.idp \
-	idp/getARGV.idp \
-	idp/ffddm_functions.idp \
-	idp/macro_ddm_substructuring.idp \
-	idp/ffddm_parameters.idp \
-	idp/macro_ddm.idp \
-	idp/CC.idp \
-	idp/ElasticLaw2d.idp
+idp/CC.idp \
+idp/DDM-Schwarz-macro.idp \
+idp/DDM-funcs-v2.idp \
+idp/ElasticLaw2d.idp \
+idp/ExtractDofsonBorder.idp \
+idp/Heat3d.idp \
+idp/MPIGMRESmacro.idp \
+idp/MPIplot.idp \
+idp/MeshSurface.idp \
+idp/ball-buildlayer.idp \
+idp/cobrameshcavity.idp \
+idp/cube.idp \
+idp/ffddm.idp \
+idp/ffddm_coarsemeshCS.idp \
+idp/ffddm_functions.idp \
+idp/ffddm_geneoCS.idp \
+idp/ffddm_geneoCS_3rdlvl.idp \
+idp/ffddm_geneoCS_saddlepoint.idp \
+idp/ffddm_parameters.idp \
+idp/ffddm_partitioning.idp \
+idp/func-max.idp \
+idp/getARGV.idp \
+idp/gsl.idp \
+idp/macro_ddm.idp \
+idp/macro_ddm_substructuring.idp \
+idp/mortar-msh.idp \
+idp/movemeshsmooth.idp 
+
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 

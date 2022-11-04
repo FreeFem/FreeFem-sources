@@ -569,7 +569,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
             {
                 mp->set(Th,Th[i](PtHat),PtHat,Th[i],lab);
                 Th[i].lab =GetAny<long>( (* freg)(stack)) ;
-                 if(verbosity>0) cout << " freg "<<Th[i].lab  << endl;
+                 if(verbosity>5) cout << " freg "<<Th[i].lab  << endl;
             }
         }
 

@@ -1,0 +1,34 @@
+//  example to build a mesh a cone 
+load "msh3"
+func mesh3 BuildBall(real RR,real h,int lab)
+{
+border Taxe(t=-RR,RR){x=t;y=0;label=0;}
+border CC(t=0,pi){x=RR*cos(t);y=RR*sin(t);label=lab;}
+mesh Th2=buildmesh(  Taxe(2*RR/h)+ CC(pi*RR/h) ) ;
+
+int MaxLayersT=(int(2*pi*RR/h)/4)*4;
+func zminT = 0;
+func zmaxT = 2*pi;
+func fx= y*cos(z);// / max( abs(cos(z) ), abs(sin(z)));
+func fy= y*sin(z);// / max( abs(cos(z) ), abs(sin(z)));
+func fz= x;
+mesh3 Th=buildlayers(Th2,coef= min(max(.01,y/RR*1.3),1.) , MaxLayersT,zbound=[zminT,zmaxT],transfo=[fx,fy,fz],facemerge=1);
+return Th;
+}
+func mesh3 BuildAxiOx(mesh &Th2,real h)
+{
+load "msh3"
+real[int] bb(4);
+boundingbox(Th2,bb);
+if(verbosity>4) cout << bb << endl;
+real RR = bb[3]; 
+// cone using buildlayers with a triangle 
+int MaxLayersT=(int(2*pi*RR/h)/4)*4;
+func zminT = 0;
+func zmaxT = 2*pi;
+func fx= y*cos(z);// / max( abs(cos(z) ), abs(sin(z)));
+func fy= y*sin(z);// / max( abs(cos(z) ), abs(sin(z)));
+func fz= x;
+mesh3 Th=buildlayers(Th2,coef= min(max(.01,y/RR*1.3),1.) , MaxLayersT,zbound=[zminT,zmaxT],transfo=[fx,fy,fz],facemerge=1);
+return Th;
+}
