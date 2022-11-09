@@ -145,9 +145,9 @@ IFMACRO(!privateCreateMat)
             AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         }
     }
-    int[int] n2oGlobal, n2oNeighbor;
+    int[int] n2oGlobalPrivate, n2oNeighbor;
 IFMACRO(!privateDmesh#CartesianPartitioning)
-    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999, new2old = n2oGlobal);
+    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999, new2old = n2oGlobalPrivate);
 ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
@@ -191,7 +191,7 @@ ENDIFMACRO
 IFMACRO(!privateDmesh#CartesianPartitioning)
     {
         int[int] backup = privateDmesh#N2O;
-        int[int] new = n2oGlobal(privateDmesh#N2O);
+        int[int] new = n2oGlobalPrivate(privateDmesh#N2O);
         privateDmesh#N2O.resize(new.n);
         privateDmesh#N2O = new;
         n2oNeighbor.resize(backup.n);
@@ -248,15 +248,15 @@ ENDIFMACRO
     VhLocalPrivate sum;
     sum[] = khi[];
     VhGlobalPrivate phi;
-    if(n2oGlobal.n == globalName.nt && s == 1) {
-        real[int] restrictionPart(n2oGlobal.n);
-        restrictionPart = part[](n2oGlobal);
+    if(n2oGlobalPrivate.n == globalName.nt && s == 1) {
+        real[int] restrictionPart(n2oGlobalPrivate.n);
+        restrictionPart = part[](n2oGlobalPrivate);
         part = 0.0;
         part[] = restrictionPart;
     }
     else
         part = part;
-    n2oGlobal.resize(0);
+    n2oGlobalPrivate.resize(0);
     int numberIntersection = 0;
     {
         int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
