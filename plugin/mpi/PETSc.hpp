@@ -30,7 +30,8 @@ class DistributedCSR {
         PetscInt*                           _cnum;
         PetscInt                          _cfirst;
         PetscInt                           _clast;
-        DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { }
+        PetscBool                          _vector_global; // In case of the rhs and solution of freefem are not distributed
+        DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast(), _vector_global() { }
         ~DistributedCSR() {
             dtor();
         }
@@ -41,8 +42,10 @@ class DistributedCSR {
                 MatGetType(_petsc, &type);
                 PetscStrcmp(type, MATNEST, &isType);
                 if(isType) {
-                    delete [] reinterpret_cast<decltype(this)*>(_exchange);
-                    _exchange = nullptr;
+                    if(_exchange){
+                        delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                        _exchange = nullptr;
+                    }
                 }
                 PetscContainer ptr;
                 PetscObjectQuery((PetscObject)_petsc, "HtoolCtx", (PetscObject*)&ptr);
