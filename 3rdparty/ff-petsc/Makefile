@@ -69,7 +69,7 @@ FLAGS_MTUNE := -mtune=native
 endif
 unexport MAKEFLAGS
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 \
-		--download-slepc --download-hpddm
+		--download-slepc --download-hpddm --download-slepc-commit=d9df183c341775ffc91510ec6827e13db44a25cd
 
 ifneq ($(wildcard ~/.petsc_pkg),)
 COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
@@ -122,23 +122,11 @@ COMMON_FLAGS += --with-shared-libraries=0 \
 	CFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
 	FFLAGS='$(FCFLAGS)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
-PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
-	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
-	'--download-mmg-cmake-arguments=-G "MSYS Makefiles"' \
-	'--download-parmmg-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"' \
-	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
-	'--download-scalapack-cmake-arguments=-G "MSYS Makefiles"' \
-	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
-ifeq ($(FC),)
-PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
-else
-ifeq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
-PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
-endif
+ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
-PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles" --with-packages-download-dir=~/.petsc_pkg'
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --with-packages-download-dir=~/.petsc_pkg'
 else
-PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles"'
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack'
 endif
 endif
 endif
