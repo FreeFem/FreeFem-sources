@@ -11,11 +11,11 @@
 
 	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000
 
-	To launch:  ff-mpirun -np 8 chamonixgridheatgridpara.edp -ns -wg -Kmax 9
+	To launch:  ff-mpirun -np 8 chamonix.edp -ns -wg -Kmax 9
 
 	In order to run the test cases from the paper, you can download the original mesh at https://freefem.org/misc/chamonix_100K_surf.meshb , change the file in the readmesh command, and run with argument '-fullmesh':
 	wget https://freefem.org/misc/chamonix_100K_surf.meshb
-	ff-mpirun -np 8 chamonixgridheatgridpara.edp -ns -wg -Kmax 9 -fullmesh -n 15
+	ff-mpirun -np 8 chamonix.edp -ns -wg -Kmax 9 -fullmesh -n 15
 */
 
 load "msh3"
@@ -168,7 +168,7 @@ u2 = 1*z; u1 = 0; u3 = 0;
 
 /********************* Light is x cos(angle with normal)^-. Stored in seeface *********************/
 VhS Q0S = Q0*(beta+(1-beta)*(z<sal)); // snow
-varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(Ns.z^2+gamma^2*(0.04*Ns.y^2+Ns.x^2)));
+varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(1+0.04*gamma*gamma));
 real[int] seeface = vseeface(0,VhS);
 varf vlump(u,v) = int2d(ThS,qft=qf1pTlump)(v);
 real[int] blump = vlump(0,VhS);
