@@ -1,0 +1,23 @@
+// Mesh
+load "msh3"
+load "Element_P3"
+load "Element_P2pnc_3d"
+int[int] lc=[1,1,1,1,1,2];
+mesh3 Th=cube(5,5,5,label=lc);
+func Pu = P2pnc3d;
+func Pm = P1dc; 
+fespace VVh(Th,[Pu,Pu,Pu,Pm]);
+fespace Vh(Th,P23d);
+
+VVh [u1,u2,u3,p];
+VVh [v1,v2,v3,q];
+
+macro Grad(u) [dx(u),dy(u),dz(u)]// EOM
+macro div(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
+
+solve vStokes([u1,u2,u3,p],[v1,v2,v3,q]) = 
+  int3d(Th,qforder=3)( Grad(u1)'*Grad(v1) +  Grad(u2)'*Grad(v2) +  Grad(u3)'*Grad(v3) //)';
+		       - div(u1,u2,u3)*q - div(v1,v2,v3)*p + 1e-10*q*p ) 
+  + on(2,u1=1,u2=0,u3=0) + on(1,u1=0,u2=0,u3=0) ;
+plot(p,wait=1, nbiso=5); // a 3d plot of iso  pressure. 
+plot([u1,u2,u3] ,wait=1, nbiso=5); // a 3d plot of iso  pressure. 
