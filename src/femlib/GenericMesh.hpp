@@ -578,7 +578,8 @@ public:
   int CheckBE(int i) const { ASSERTION(i>=0 && i < nbe); return i;}
 
 
-  int Contening(const Vertex * vv) const{ return ElementConteningVertex[ vv  - vertices];}
+  int Contening(const Vertex * vv) const{ return ElementConteningVertex[ vv  - vertices]/(Element::nv);}
+  int kvContening(const Vertex * vv) const{ return ElementConteningVertex[ vv  - vertices];}
   void BuildAdj();
   void BuildBoundaryElementAdj();  // Add J. Morice function that give the TheAdjacencesSurfaceLink :: Version avec un manifold
   void BuildBoundaryElementAdj(const int &nbsurf, int* firstDefSurface, int* labelDefSurface, int* senslabelDefSurface); // version avec plusieurs vari�t�s
@@ -810,7 +811,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
 
     for (int k=0;k<nt;++k)
 	for (int i=0;i<nkv;++i)
-	    ElementConteningVertex[operator()(elements[k][i])]=k ;
+	    ElementConteningVertex[operator()(elements[k][i])]=nkv*k+i ;// modif FH nov 2022 add vertex number !!
     int kerr=0;
     for(int i=0;i<nv;++i)
 	if (ElementConteningVertex[i]<0)

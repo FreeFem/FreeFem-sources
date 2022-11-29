@@ -122,10 +122,19 @@ namespace Fem2D {
     if (verbosity > 9) {
         cout << " P2 3 bulle set: "<< odf << endl; ;
     }
-
+    // attention facePermutation a change !!!!! etait code faux
     for (int ff = 0; ff < Element::nf; ff++, k += 3) {
       // oriantation de la face  a endroit
       int fp = K.facePermutation(ff);
+      int i0= fp/2, sp = fp%2;
+      if(!i0) {
+            Exchange(p[k], p[k + i0]);// i0 en 0
+            if(!sp) Exchange(p[k+1], p[k +2]);}
+      else if(sp) Exchange(p[k+1], p[k + 2]);
+      
+    //  0 2 1  (sp =1)
+    //  0 1 2 ( sp ==0)
+/*
       if (fp & 1) {
         Exchange(p[k], p[k + 1]);
       }
@@ -137,6 +146,7 @@ namespace Fem2D {
       if (fp & 4) {
         Exchange(p[k], p[k + 1]);
       }
+ */
     }
   }
 
@@ -168,6 +178,13 @@ namespace Fem2D {
     for (int ff = 0; ff < Element::nf; ff++, k += 3) {
       // orientation de la face a envert
       int fp = K.facePermutation(ff);
+        int i0= fp/2, sp = fp%2;
+        if(!i0) {
+            if(!sp) Exchange(p[k+1], p[k +2]);
+            Exchange(p[k], p[k + i0]);// i0 en 0
+            }
+        else if(sp) Exchange(p[k+1], p[k + 2]);
+/*
       // fp=0; // No perm
       if (fp & 4) {
         Exchange(p[k], p[k + 1]);
@@ -180,6 +197,7 @@ namespace Fem2D {
       if (fp & 1) {
         Exchange(p[k], p[k + 1]);
       }
+ */
     }
 
     assert(val.N( ) >= E::nv + E::ne);

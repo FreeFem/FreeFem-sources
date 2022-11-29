@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
+  for detail )
 - add pdfPLOT form fujiwara@acs.i.kyoto-u.ac.jp [http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff++-programs/]
   usage: plot( ..., pdf="filename.pdf", svg="filename.svg" );
 - add missing code for Discontinous Galerkin in 3d for RHS 
@@ -46,7 +48,10 @@ All notable changes to this project will be documented in this file.
 - add test of functionnal interface of complex eigen value problem in 
     `examples/eigen/LapEigenValueFuncComplex.edp`
 ### Changed
--
+-  correct some old code with old version of K.facePermutation() function in 
+      plugin/seq/Element_Mixte3d.cpp and plugin/seq/Element_P2bulle3.cpp 
+      (not tested) 
+
 
 ### Deprecated
 -

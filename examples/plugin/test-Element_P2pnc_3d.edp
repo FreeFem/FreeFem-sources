@@ -1,0 +1,368 @@
+load "Element_P2pnc_3d"
+load "msh3"
+load "tetgen"
+load "medit"
+int err=0;
+int cas1=0;  //0 need Th1.mesh ... 
+macro DoFi(d,u,vf,p) ((d==12) ? int3d(Th)((u)/volume) : int2d(Th,d/3,qforder=6)((u)*l[vf(d/3,p[d]%3)]/area)) //
+macro DoFih(d,u) ((d==12) ? int3d(Th)((u)/volume) : int2d(Th,d/3,qforder=6)((u)*l[vf(d/3,d%3)]/area)) //
+macro ErrH1(Th,u,v) sqrt(int3d(Th)( square(dx(u)-dx(v))+square(dy(u)-dy(v))+square(dz(u)-dz(v)) )) //
+macro ErrL2(Th,u,v) sqrt(int3d(Th)( square((u)-(v)) )) //
+func real clean(real aa) {real a=aa; if(abs(a)<1e-10) a=0; return a;} 
+func real clean(real[int] &aa) {
+	for [i,ai:aa] ai=clean(ai);
+	return 0; }
+func real clean(real[int,int] &aa) {
+		for [i,j,ai:aa] ai=clean(ai);
+		return 0; }
+func bool PrintCC(string str,real[int,int] &A)
+		{
+			int n= A.n,m=A.m;
+			cout <<"\n\n   double "<<  str << "["<< n <<"][" << m <<"] = {\n";
+			for( int i=0; i< n;++i)
+			{ cout << "\t {";
+			  for( int j=0; j< m;++j)
+			  {
+			  cout << clean(A(i,j)) ;
+			  if( j != m-1) cout <<", ";
+		          }
+			  if( i != n-1) cout << "},\n ";
+			  else  cout << "}};\n\n ";
+			  if(i%3==2) cout << endl;
+		        }
+			return 1; 
+		}	
+// construction des coef fonction des bases
+// matrice 13x13 ... 
+// les monomes faire ...
+int[int,int] vf= [[3,2,1],[0,2,3],[ 3,1,0],[ 0,1,2]];  // FreeFem face Tet numbering ...
+//int[int,int] vf= [[1,2,3],[0,2,3],[ 0,1,3],[ 0,1,2]];
+int[int] p(13),p1(13) ;// p(î) = i , î dof dans ^K et i: dof dans K 
+int[int] q(12),Kq(12); 
+// p[i] : p[i]/3 == nF numero de la face p[i]%3 numero du sommet de face dans K et telle p[i] %3 croissante pour un nF. 
+// cf. construction de p,p1 
+int[int] id(13); 
+for(int i=0;i<13;++i) id[i] = i;
+func int  print(string cmm,int[int] & p)
+{
+	cout << cmm;
+	for [i,pi:p] {if(i%3==0) cout << " "; cout << " "<< pi ;}
+	cout<< endl;
+	return p.n;
+}
+
+func int buildp(mesh3 & Th,int k, int[int] & p,int[int,int]&  vf)
+{
+	int [int] I=[Th[k][0],Th[k][1],Th[k][2],Th[k][3]];// le 4 sommet du tet k.
+	int [int] II=[0,1,2,3];
+	// cout << I << " " << II << endl; 
+	int err =0;
+	for(int f=0; f<4;++f)
+	{ 
+		int k = 3*f;
+	  //  build the correct order
+	  // sort i_j j=0,1,2  I[i_j] croissnate
+	  int[int] F=vf(f,:); 
+	  int i0=0,i1=1,i2=2;
+	  if( I[vf(f,i0)] >I[vf(f,i2)] )  swap(i0,i2);
+	  if( I[vf(f,i1)] >I[vf(f,i2)] )  swap(i1,i2);
+	  if( I[vf(f,i0)] >I[vf(f,i1)] )  swap(i0,i1);
+	  p[k+0]=k+i0;
+	  p[k+1]=k+i1;
+	  p[k+2]=k+i2;
+	//  cout <<i0 << i1 << i2 << " " <<  I[F[i0]] << I[F[i1]] << I[F[i2]] << endl;
+	  assert(I[F[i0]] < I[F[i1]]);
+	  assert(I[F[i1]] < I[F[i2]]);
+       }
+        for(int i=0;i<12;++i)
+	 q[i] = vf(i/3,p[i]%3); // numero de sommet local des faces 
+	for(int i=0;i<12;++i)
+	  Kq[i]= I[q[i]]; // numero global de sommet local des faces
+	  p[12]=12; 
+	  for(int i=0;i<13;++i) p1[p[i]] = i;
+  print(" p = ",p);
+  print(" q = ",q );
+  print("Kq = ",Kq );
+  
+   return err;	
+}
+func int verifp(mesh3 & Th,int k, int[int] & p,int[int,int]&  vf)
+{
+	cout << p << " " << vf << endl;
+	int err =0;
+	for(int f=0; f<4;++f)
+	{
+	   err += ((vf(f,0)+vf(f,1)+vf(f,2))!= (0+1+2+3-f));		
+	for( int i=0; i<2; ++i)
+	{  int i1 = p[3*f+i]%3;// in [0,1,2]
+	   int i2 = p[3*f+i+1]%3;	   
+	   int n1 = Th[k][vf(f,i1)];
+	   int n2 = Th[k][vf(f,i2)];
+	   cout << err << " f "  << f << " " << i << " : " << i1 << " " << i2 << "::  " << n1 << " " << n2 << " " << (vf(f,0)+vf(f,1)+vf(f,2)) << " err = " ;	   
+	   err += (n2 <= n1);	
+	   cout << err << endl; 
+	}}
+	if(err) cout << err << "\n p = "<< p << "\n vf= " << vf << endl;
+   assert(err==0);
+   return err;	
+}
+load "Element_P3dc"
+load "Element_P4dc"
+load "Element_P2pnc"
+
+real[int] xx=[0,1,0,0], yy=[0,0,1,0], zz=[0,0,0,1]; 
+mesh3 Th=tetgconvexhull(xx,yy,zz,region=1,label=3);
+savemesh(Th,"/tmp/Th.mesh");
+
+assert(Th.nbe==4);
+int [int] plab=[0,2,3,1];
+for(int f=0; f<Th.nbe;++f)
+{
+  int k = 1+2+3-Th.be(f)[0]-Th.be(f)[1]-Th.be(f)[2];
+//  cout << f << " " << k << " ::: ";
+  plab[Th[0][f]]=k;
+  for(int l=0; l<3;++l)	
+      cout << " " <<  Th.be(f)[l] << " ";   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
+      cout << endl;
+	
+}
+Th=change(Th,flabel=plab[nuFace]);
+savemesh(Th,"/tmp/Th2.mesh");
+buildp(Th,0,p,vf);
+verifp(Th,0,p,vf);
+
+
+if(cas1) {
+	cout << " cas1 "<< "Th1.mesh"<<endl;
+mesh3 Th1("Th1.mesh");Th=Th1;
+buildp(Th,0,p,vf);
+verifp(Th,0,p,vf);
+
+}
+fespace Lh(Th,P1);
+Lh[int] l(4); // 4 fonctions de Base du P1 .. sur l'element 0
+{
+	int 	i0 = Lh(0,0); 
+	int 	i1 = Lh(0,1); 
+	int 	i2 = Lh(0,2); 
+	int 	i3 = Lh(0,3); 
+l[0][][i0]=1;
+l[1][][i1]=1;
+l[2][][i2]=1;
+l[3][][i3]=1;
+}
+// verif face
+for(int f=0; f<Th.nbe;++f)
+{
+ err += (abs(int2d(Th,f)(l[f]))>0 );
+ cout << f << " err " << err << endl;
+}
+ assert(err==0);
+
+fespace Wh(Th,P3dc3d); 
+
+Wh[int] mo(13),fb(13);
+// le 13 monome to build Base FE function. 
+{
+  int k=0;
+  for(int i=0;i<4;i++)
+    mo[k++]=l[i];
+   for(int i=0;i<4;i++)
+    for(int j=0;j<i;j++)
+     mo[k++] = l[i]*l[j];
+     cout << k << endl;
+    mo[k++] = l[1]*l[2]^2;
+    mo[k++] = l[0]*l[2]^2;
+    mo[k++] = l[0]*l[1]^2;
+    assert(k==13); 
+}
+// dof computation ...
+real[int,int] CC(13,13),C1(13,13),Cc(13,13);
+
+
+for(int i=0; i<13;++i)
+for(int d=0; d<13;++d)
+   CC(i,d) = clean(DoFih(d,mo[i]));
+   Cc =CC * (130 *6*3);
+if(verbosity>9)  cout << " CC = " << Cc << endl;
+
+load "lapack"
+verbosity=9;
+C1=CC^-1; 
+verbosity=1;
+clean(C1); 
+//cout << C1 << endl; 
+// Build Base Func  !!! 
+cout << " Test F b formel  p(^i)=i :: " << endl;
+ err=0; 
+for(int i=0; i<13;++i)
+{
+	real dij; 
+	fb[i][]=0;
+	for(int j=0; j<13;++j)
+	  fb[i][] += C1(p[i],j)*mo[j][];
+	cout << i << " : " ;
+	for(int j=0; j<13;++j)
+	{
+	  cout <<(dij=clean(DoFi(j,fb[i],vf,p))) << " , ";
+	  err +=  abs(dij- (i==j)) > 1e-10;
+        }
+	cout << endl; 	
+} 
+assert(err==0);
+
+cout << " cas: "<< cas1 <<endl; 
+print("p=",p);
+PrintCC("C1",C1);  // for C++
+
+
+// fonction de base 
+// CC(i,j) = dof(j)(mo(i)); // 
+//  les fonction de base
+//fb_k = sum_i c1(k,i)* mo(i)  
+// dof(j)fB_k = delta_jk  = sum_i c1(k,i) dof(j) mo(i)  = sum_i c1(k,i) CC(i,j) 
+// => Id = c1*CC => c1 = CC^-1 
+fespace Vh(Th,P2pnc3d);
+cout << " Vh" << Vh.ndof <<  " : "  ;
+for( int i=0; i< 13; ++i)
+cout << Vh(0,i) << " ";
+cout << endl;
+Vh f=l[0],g;
+cout << " f : " << f[] << endl; 
+real f000 = f(0,0,0);
+real f100 = f(1,0,0);
+real f010 = f(0,1,0);
+real f001 = f(0,0,1);
+cout << " f (0,0,0) = "<< f000  <<" " << f100 << " "<< f010 << " "<< f001 << " "<< dx(f)(0.25,0.25,0.25) << endl; 
+
+cout << " dof f  : ";
+for(int i=0; i<13;++i)
+	cout << DoFi(i,f,vf,p) << " ";
+cout << "\n\n Verif Interpolant : dof fb  : \n";
+	for(int ii=0; ii<13;++ii)
+	{
+		int i=Vh(0,ii);
+		f = fb[i]; 
+		cout << i << " :::: " ;
+		real dij;
+		for(int d=0; d<13;++d)
+		{
+	         cout << (dij=clean(f[][d]))  <<  ",";
+		 err += abs( dij - (d==i) ) > 1e-10; 
+	        }
+	 Wh ff =f;
+	 real dd = ErrH1(Th,f,ff);
+	 cout << " dd "<< dd << " "  << ErrL2(Th,dx(f),dx(ff)) << " " << ErrL2(Th,dy(f),dy(ff)) << " " << ErrL2(Th,dz(f),dz(ff)) <<  endl; ;
+
+	 err += (dd> 1e-10); 
+	 cout <<endl ;
+	}
+	
+cout <<endl <<  endl;
+verbosity=101;
+fespace VVh(Th,[P2pnc3d,P2pnc3d]);
+verbosity=1;
+VVh [u,v]=[1,2];
+
+//assert(err==0) ;
+int errinter=err; 
+if(errinter==0)
+cout << " Interpolant Ok !"<< endl; 
+
+err=0; 
+cout << " Test fb C++  with dofi:"<< endl; 
+for(int ii=0; ii<13;++ii)
+{ // Attention les fonction de base sont avec la permution !!!  non 
+	int i = Vh(0,ii);
+	cout << i << " i : " ;
+	f[]=0.;
+	f[][i]=1.;
+	real dij;
+	for(int d=0; d<13;++d)
+	{
+	  cout << (dij= clean(DoFi(d,f,vf,p))) <<  ",";
+	  err += abs( dij - (d==i) ) > 1e-10; 
+        }
+       cout << endl; 
+}
+cout << endl; cout << endl;
+if(err==0)
+cout << " Fonction de Base OK !!! nb err = " << err << endl;
+else 
+cout << " PB Fonction de Base!!! nb err = " << err << endl;
+
+if(errinter==0)
+cout << " Interpolant Ok !"<< endl; 
+else 
+cout << " PB Interpolant nb err = " << errinter << endl;
+
+assert(err==0); 
+
+cout << " verification  compatibility  interpolant and  basic function! "<< endl; 
+ err =0; 
+
+for(int i=0; i<13;++i)
+{
+	cout << i << " g i : ";
+	f[]=0.;
+	f[][i]=1.;
+	g = f;	
+	for[ j,gi:g[]] cout << clean(gi) << " ";
+	g[]-=f[];
+	err += g[].linfty > 1e-10; // if no zeo => bug ...
+	cout << endl; 
+
+}
+cout << " nb err = " << err << endl;
+// 
+assert(err==0 && errinter==0);  
+{
+Th= cube(3,2,1,[x*2,y*3+x,z*5]); //trunc(trunc(cube(1,1,1),x<0.5),nuTet<2);
+//Th= trunc(Th,nuTet<1);
+Vh u=0,v,w;
+
+for(int k=0;k<Th.nt;++k)
+{
+	for(int i=0;i<4;++i)
+	cout << k << ": " << Th[k][i] <<  " ";
+	cout << endl;
+	for(int i=0;i<13;++i)
+	cout << Vh(k,i) << " ";
+	cout << endl;
+}
+
+for(int i=0; i<Vh.ndof;++i)
+{
+	u[]=0;u[][i]=1;
+	v=u;
+	clean(v[]); 
+	w[]=u[];
+	w[]-=v[];
+	real lerr= w[].linfty;
+	if(lerr>1e-10 &&0) {
+ 		cout << " kkk err = "<< endl;
+		for(int d=0; d<Vh.ndof;++d)
+		if( abs(w[][d]) > 0.1 ) cout <<  d << " " << w[][d] << " , ";
+		cout << endl << endl; 
+		verbosity=9;
+		v=u;
+		verbosity=1;
+		clean(v[]); 
+		cout << i << " " << v[] << endl; 
+		
+		plot(u,cmm="u i "+i+" "+lerr,wait=1) ;
+		plot(v,cmm="v i "+i+" "+lerr,wait=1) ;
+	cout << i << " " << lerr << " " << err << endl;	
+	assert(lerr>1e-10);;
+	err++;
+	
+	
+}
+    
+	
+}
+assert(err==0);
+}
+
+
+

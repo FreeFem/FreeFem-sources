@@ -105,7 +105,9 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	ConnectedComponents.edp \
 	cavityNewtonP3pnc.edp \
 	MatrixMarket.edp \
-	plotPDF-sample.edp 
+	plotPDF-sample.edp \ 
+	Stokes-P2pnc3d.edp \
+	test-Element_P2pnc_3d.edp
 
 TESTS_FFTW3 = dfft.edp dfft-3d.edp
 

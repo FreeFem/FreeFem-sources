@@ -3942,6 +3942,9 @@ namespace Fem2D {
                                       &K.at(Element::nvface[ff][2])};
       int p[] = {0, 1, 2};
       int fp = K.facePermutation(ff);
+      SetNumPerm<3>(fp,p);
+  
+ /*
       if (fp & 1) {
         Exchange(p[0], p[1]);
       }
@@ -3953,7 +3956,7 @@ namespace Fem2D {
       if (fp & 4) {
         Exchange(p[0], p[1]);
       }
-
+*/
       R3 N = NK[ff];
       N *= coefK * K.faceOrient(ff);
 
@@ -4018,6 +4021,13 @@ namespace Fem2D {
     for (int ff = 0, k = 0; ff < Element::nf; ff++, k += 3) {
       // orientation de la face a envert
       int fp = K.facePermutation(ff);
+        int i0= fp/2, sp = fp%2;
+        if(!i0) {
+            if(!sp) Exchange(p[k+1], p[k +2]);
+            Exchange(p[k], p[k + i0]);// i0 en 0
+            }
+        else if(sp) Exchange(p[k+1], p[k + 2]);
+/*
       if (fp & 1) {
         Exchange(p[k], p[k + 1]);
       }
@@ -4029,6 +4039,7 @@ namespace Fem2D {
       if (fp & 4) {
         Exchange(p[k], p[k + 1]);
       }
+ */
     }
 
     double cf[][3] = {

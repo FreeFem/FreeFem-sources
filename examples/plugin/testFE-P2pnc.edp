@@ -5,7 +5,11 @@ func real cc(real aa) {real a=aa; if(abs(a)<1e-10) a=0; return a;}
 int[int] ne1=[1,2,0];
 int[int] ne2=[2,0,1];
 
-// the ref triangle 
+// the ref tet
+load "tetgen" 
+ 
+real[int] xx=[0,1,0,0],yy=[0,0,1,0],zz=[0,0,0,1];
+ 
 int[int] ll=[2,0,0,1];
 mesh Th=square(1,1,flags=2,label=ll);
 
