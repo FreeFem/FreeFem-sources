@@ -142,6 +142,8 @@ void TypeOfFE_P2pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
     int k = Th(K);
     int verb = verbosity>99 || (verbosity>9 && count < 4 ) ;//||  ocoef+odf || nump  ;
     int n = this->NbDoF;
+    int np=M.np;
+    int ncoef=M.ncoef;
     //int *p = M.p+odf;// correction FH mai 2020 ...
     //  update the coef to be ajdacent compatible
     //
@@ -163,30 +165,31 @@ void TypeOfFE_P2pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
         {
             
             int ipt = nump ? nump[ip] : ip;
+            ffassert(ipt<=np);
             //cout << ip << " -> "<< ipt << "  f= " << f <<" " << qq << " i "<< i << " " << this->pInterpolation[i]
             //<< "ipt: " << this->PtInterpolation[ipt] << " ::ip  "<< this->PtInterpolation[ip] <<endl;
             //ffassert( ipt == this->pInterpolation[i]) ; ce ne marche pas !!!!!! mais le point sont les  memem
             double ll[4]; // dans Khat
-            this->PtInterpolation[ipt].toBary(ll);//  point sur la face f ????
-            if(verb) cout << " P " << this->PtInterpolation[ipt] << " " << i  << endl;
+            M.P[ipt].toBary(ll);//  point sur la face f ????
+            if(verb) cout << " P " << M.P[ipt] << " " << i  << endl;
             for (int kf = 0; kf < 3; ++kf,i++)
             {
-                if(verb) cout << i <<  " " <<f<< kf  <<  " " <<  ipt << " " << ll[f] << " " << this->pInterpolation[i] << " // " << ocoef << " " << odf << " " << nump << endl;
+                if(verb) cout << i <<  " " <<f<< kf  <<  " " <<  ipt << " " << ll[f] << " " << M.p[i] << " // " << ocoef << " " << odf << " " << nump << endl;
                // ffassert(ipt == this->pInterpolation[i]);
                 ffassert(abs(ll[f])<1e-10);
 
                 int kfK = Element::nvface[f][p3[kf]];// vertex dans K ..
-                this->coefInterpolation[i] = QFf[qq].a*ll[kfK];
+                M.coef[i] = QFf[qq].a*ll[kfK];
              }
         }
     }
     
     for (int q = 0; q < QFt.n; ++q, ++i)
     {
-         this->coefInterpolation[i] = QFt[q].a;      // alfak: we will fill them with 'set' (below)
+        M.coef[i] = QFt[q].a;      // alfak: we will fill them with 'set' (below)
     }
-
-  
+   
+    ffassert(i<= ncoef);
 
 }
 void TypeOfFE_P2pnc_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K,
