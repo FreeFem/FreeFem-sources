@@ -12,7 +12,6 @@ while(1)
 
 cout << " login " << getenv("LOGIN") << endl;
 setenv("FF_TOTO","toto");
-setenv("FF_TOTO","toto");
 cout << " FF_TOTO  " << getenv("FF_TOTO") << endl;
 string pwd=getenv("PWD");
 verbosity=3;
