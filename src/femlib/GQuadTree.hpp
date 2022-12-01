@@ -177,8 +177,8 @@ namespace EF23 {
     QuadTreeBox * root;
     // Mesh *th;
     
-    int NbQuadTreeBoxSearch,NbVerticesSearch;
-    int NbQuadTreeBox,NbVertices;
+    long NbQuadTreeBoxSearch,NbVerticesSearch,NbSearch;
+    long NbQuadTreeBox,NbVertices;
     
     Rd cMin,cMax; //  box of QuadTree
     R coef; //	

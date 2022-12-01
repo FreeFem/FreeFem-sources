@@ -12,7 +12,8 @@ real[int] rhs = vP(0,Vh);
 
 load "SaveHB" 
 int ret = SaveHB("sample.hb", A, rhs, "sample of SaveHB");
-
+A.CSR; 
+cout << A << endl; 
 cout << " A = " << A << endl;
 cout << " rhs  = " << rhs << endl;
 

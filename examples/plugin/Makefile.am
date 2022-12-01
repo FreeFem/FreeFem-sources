@@ -93,6 +93,8 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testFE-P2pnc.edp \
 	testFE-P3.edp \
 	testFE-P3dc.edp \
+	testFE-P3nc.edp \
+	testFE-P3pnc.edp \
 	testFE-P4.edp \
 	testFE-P4dc.edp \
 	testFE-PkEdge.edp \
@@ -101,7 +103,10 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testp1dcnc.edp \
 	iovtk.edp \
 	ConnectedComponents.edp \
-	testFE-P3dc.edp cavityNewtowP3pnc.edp
+	cavityNewtonP3pnc.edp \
+	MatrixMarket.edp \
+	plotPDF-sample.edp \
+	Stokes-P2pnc3d.edp
 
 TESTS_FFTW3 = dfft.edp dfft-3d.edp
 
@@ -145,7 +150,8 @@ TESTS_TETGEN = buildlayermesh.edp \
 	checkglumeshcube.edp \
 	convexehull3d.edp \
 	tetgenholeregion_rugby.edp \
-	ttestio.edp
+	ttestio.edp \
+	test-Element_P2pnc_3d.edp
 
 TESTS_UMFPACK = LapLNewSolver.edp \
 	LapNewSolver.edp \

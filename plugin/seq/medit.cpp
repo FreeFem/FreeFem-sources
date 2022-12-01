@@ -92,7 +92,8 @@ class readsol_Op : public E_F0mps {
 basicAC_F0::name_and_type readsol_Op::name_param[] = {{"number", &typeid(long)}};
 AnyType readsol_Op::operator( )(Stack stack) const {
   string *ffname = GetAny< string * >((*filename)(stack));
-  int k, i, isol, type, inm, ver, dim, typtab[GmfMaxTyp], offset;
+  int k, i, isol, type,  ver, dim, typtab[GmfMaxTyp], offset;
+  int64_t inm;
   char *ptr, data[128];
   // rajout freefem++
   int nv = 0, ntet = 0, ntri = 0;
@@ -368,7 +369,8 @@ AnyType datasolMesh2_Op::operator( )(Stack stack) const {
   int TypTab[l.size( )];
   int resultorder = arg(0, stack, 1L);
   long longdefault;
-  int ver = GmfFloat, outm;
+    int ver = GmfFloat;
+  int64_t outm;
   // determination de TypTab
   solnbfloat = 0;
 
@@ -599,7 +601,8 @@ AnyType datasolMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
   int TypTab[l.size( )];
   int resultorder = arg(0, stack, 1);
   long longdefault;
-  int ver = GmfFloat, outm;
+    int ver = GmfFloat;
+  int64_t outm;
   // determination de TypTab
   solnbfloat = 0;
 
@@ -820,7 +823,8 @@ AnyType datasolMesh3_Op< v_fes >::operator( )(Stack stack) const {
   int TypTab[l.size( )];
   int resultorder = arg(0, stack, 1);
   long longdefault;
-  int ver = GmfFloat, outm;
+    int ver = GmfFloat;
+  int64_t outm;
   // determination de TypTab
   solnbfloat = 0;
 
@@ -1730,7 +1734,7 @@ AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
 
   // rajout pout la sauvegarde de la solution
   if (boolsave) {
-    int outm;
+      int64_t outm;
     int nbtype = nbsol;
     float *OutSolTab = new float[solnbfloat];
 
@@ -2508,7 +2512,7 @@ AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
   { pclose(popenstream); }
 
   if (boolsave) {
-    int outm;
+      int64_t outm;
     int nbtype = nbsol;
     float *OutSolTab = new float[solnbfloat];
 
@@ -3263,7 +3267,7 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
   { pclose(popenstream); }
 
   if (boolsave) {
-    int outm;
+      int64_t outm;
     int nbtype = nbsol;
     float *OutSolTab = new float[solnbfloat];
 

@@ -5,23 +5,20 @@ all-local: mshmet
 
 include ff-flags
 
-# Downloading and compiling mshmet
+# Now in distrib  and compiling mshmet
 # -------------------------------
 # 
 DIRPKG= ../pkg
-SRCDIR= ./mshmet$(mshmet_VERSION)
+SRCDIR= ./src
 #-$(mshmet_VERSION)
-PACKAGE=$(DIRPKG)/mshmet$(mshmet_VERSION).tgz
-SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
-mshmet_VERSION=.2012.04.25
+mshmet_VERSION=.FH
 FAIRE=$(SRCDIR)/FAIRE
 
 # ---------------------- 
 #     mshmetlib
 
-MSHMET_DIR = $(abs_top_builddir)/3rdparty/mshmet/mshmet$(mshmet_VERSION)
-MSHMET_SRCDIRNOLIB = $(MSHMET_DIR)/sources
+MSHMET_DIR = $(abs_top_builddir)/3rdparty/mshmet/src
 MSHMET_SRCDIR = $(MSHMET_DIR)/sourceslib
 MSHMET_OBJDIR = $(MSHMET_DIR)/objects
 
@@ -46,27 +43,9 @@ WHERE:install
 	echo mshmet INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet
 
 
-$(SRCDIR)/tag-tar: $(PACKAGE) mshmetlib-internal.h mshmetlib.c mshmetlib.h 
-	-mkdir mshmet$(mshmet_VERSION)
-	cd mshmet$(mshmet_VERSION); tar xzf ../$(PACKAGE)
-	-mkdir $(MSHMET_SRCDIR)
-	cp $(MSHMET_SRCDIRNOLIB)/*.c $(MSHMET_SRCDIRNOLIB)/*.h $(MSHMET_SRCDIR)
-	cp $(MSHMET_SRCDIRNOLIB)/compil.date $(MSHMET_SRCDIR)
-	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
-	cp ../../src/libMesh/chrono.h $(MSHMET_SRCDIR)
-	rm $(MSHMET_SRCDIR)/mshmet.c
-	rm $(MSHMET_SRCDIR)/chrono.c
-	cp ../../src/libMesh/eigenv.c $(MSHMET_SRCDIR)
-	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
-	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
-#
-#	Patch for i586 developed by John Hunt (14/2/13)
-#
-	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2012.04.25_i586.patch
+$(SRCDIR)/tag-tar:
 	touch $(SRCDIR)/tag-tar
 
-$(PACKAGE):
-	../getall -o mshmet -a
 
 clean:
 	-rm ff-flags
@@ -85,7 +64,6 @@ ff-flags: ../Makefile
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
 	grep 'WGET *=' ../Makefile >> ff-flags
-	grep 'mshmet_VERSION *=' ./Makefile >> ff-flags
 
 
 .PHONY: $(SRCDIR)/$(INSTALL)

@@ -2794,7 +2794,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
   /// <<number_of_distinct_named_parameters_for_plot>> FFCS: added new parameters for VTK graphics.
   /// See
   /// [[Plot_name_param]] for new parameter names
-  static const int n_name_param = 44;
+  static const int n_name_param = 46; // modified by fujiwara
 
   Expression bb[4];
 
@@ -3049,6 +3049,8 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"add", &typeid(bool)},         // add to previous plot
   {"prev", &typeid(bool)},        // keep previou  view point
   {"ech", &typeid(double)},       // keep previou  view point
+  {"pdf", &typeid(string*)}, // 21, add by fujiwara
+  {"svg", &typeid(string*)}, // 22, add by fujiwara
 
   // FFCS: more options for VTK graphics (numbers are required for processing)
 
@@ -4317,7 +4319,7 @@ AnyType Plot::operator( )(Stack s) const {
       // [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the parameter value from the
       // pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
 
-#define VTK_START 20
+#define VTK_START 22 // modified by fujiwara
 #define SEND_VTK_PARAM(index, type) \
   if (nargs[VTK_START + index])     \
     (theplot << (long)(VTK_START + index)) <= GetAny< type >((*nargs[VTK_START + index])(s));
@@ -4561,6 +4563,8 @@ AnyType Plot::operator( )(Stack s) const {
 
   bool bw = false;
   string *psfile = 0;
+  string * pdffile=0; // add by fujiwara
+  string * svgfile=0; // add by fujiwara
   string *cm = 0;
   pferbase fe = 0, fe1 = 0;
   int cmp0, cmp1;
@@ -4570,6 +4574,8 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[0]) coeff = GetAny< double >((*nargs[0])(s));
   if (nargs[1]) cm = GetAny< string * >((*nargs[1])(s));
   if (nargs[2]) psfile = GetAny< string * >((*nargs[2])(s));
+  if (nargs[21]) pdffile= GetAny<string*>((*nargs[21])(s)); // add by fujiwara
+  if (nargs[22]) svgfile= GetAny<string*>((*nargs[22])(s)); // add by fujiwara
   if (nargs[3]) wait = GetAny< bool >((*nargs[3])(s));
   if (nargs[4]) fill = GetAny< bool >((*nargs[4])(s));
   if (nargs[5]) value = GetAny< bool >((*nargs[5])(s));
@@ -4624,6 +4630,8 @@ AnyType Plot::operator( )(Stack s) const {
   const Mesh *cTh = 0;
   bool vecvalue = false, isovalue = false;
   bool ops = psfile;
+  bool opdf=pdffile; // add by fujiwara
+  bool osvg=svgfile; // add by fujiwara
   bool drawmeshes = false;
   if (clean) {
     // ALH - 28/3/15 - Open PS file before blanking the current picture because Javascript needs to
@@ -4634,6 +4642,14 @@ AnyType Plot::operator( )(Stack s) const {
       openPS(psfile->c_str( ));
     }
 
+    // add by fujiwara
+    if( pdffile ) {
+      openPDF(pdffile->c_str());
+    }
+    // add by fujiwara
+    if( svgfile ) {
+      openSVG(svgfile->c_str());
+    }
     reffecran( );
 
     if (bw) NoirEtBlanc(1);
@@ -4845,6 +4861,16 @@ AnyType Plot::operator( )(Stack s) const {
     if (ops) {
       ops = false;
       closePS( );
+    }
+    // add by fujiwara
+    if ( opdf ) {
+        opdf = false;
+        closePDF();
+    }
+    // add by fujiwara
+    if ( osvg ) {
+        osvg = false;
+        closeSVG();
     }
     if (wait && !NoWait) {
     next:

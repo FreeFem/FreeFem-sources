@@ -458,11 +458,16 @@ parameters_list:
 	| FESPACE  ID                            { $$=Find($1);}
 	| FESPACE1  ID                           { $$=Find($1);}
 	| FESPACE3  ID                           { $$=Find($1);}
-    | FESPACES  ID                           { $$=Find($1);}
-    | FESPACEL  ID                           { $$=Find($1);}
-	| ID '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
-	| parameters_list ',' no_set_expr        { $$ = ($1 += $3);}
-	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>((const char *) $3,(C_F0) $5));}
+        | FESPACES  ID                           { $$=Find($1);}
+        | FESPACEL  ID                           { $$=Find($1);}
+	| FESPACE                              { $$=Find($1);}
+	| FESPACE1                            { $$=Find($1);}
+	| FESPACE3                            { $$=Find($1);}
+        | FESPACES                            { $$=Find($1);}
+        | FESPACEL                             { $$=Find($1);}
+	| id '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
+	| parameters_list ',' parameters_list        { $$ = ($1 += $3);}
+/*	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>((const char *) $3,(C_F0) $5));}*/
     ;
 
 type_of_dcl:   TYPE

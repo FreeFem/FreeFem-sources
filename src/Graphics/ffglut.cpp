@@ -1241,7 +1241,7 @@ void OnePlotFEL::Draw(OneWindow *win)
 
 template<class Mesh>
 OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
-:OnePlot(w,2,5),Th(T)
+:OnePlot(w,2,5),Th(T),cas(2)
 {
     R2 P0,P1;
     Th->BoundingBox(P0,P1);
@@ -1283,7 +1283,7 @@ OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
     }
     cas =2;
     vc2v();
-    if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << Psub.N() << " " << Ksub.N()/3 <<" " << v.N() << endl;
+    if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << Psub.N() << " " << Ksub.N()/3 <<" " << v.N() << " cas " << cas << endl;
     ffassert(f.good());
 
 }

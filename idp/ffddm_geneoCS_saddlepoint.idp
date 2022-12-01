@@ -121,14 +121,17 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     pr#prfe#snd[j][0] = 1e+30;
   for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
     Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rqd[j]),pr#prfe#snd[j]);
-  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
-    int k = mpiWaitAny(rqd);
 
+  int wit = 0;
   while (done.min == 0) {
     mpiRequest[int] rq(pr#prfe#prmesh#numberIntersection);  
     for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
     if (!done[j])
       Irecv(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j]),pr#prfe#rcv[j]);
+
+    if (wit++ == 0)
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      int k = mpiWaitAny(rqd);
     for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
       int k = mpiWaitAny(rq);
 

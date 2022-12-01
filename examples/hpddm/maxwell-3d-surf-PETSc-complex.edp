@@ -1,0 +1,142 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+// PARAM -freq 2e+8
+
+load "bem"
+load "Element_Mixte3d"
+load "PETSc-complex"
+macro dimension()3S// EOM
+include "macro_ddm.idp"
+include "cobrameshcavity.idp"
+
+if(!HasType("Mat", "Htool")) exit(0);
+
+func Pk = RT0S;
+func Qk = [P1,P1,P1];
+real c0     = 299792458;
+real f      = getARGV("-freq",5.e+8);
+real k      = 2*pi*f/c0;
+real lambda = c0/f;
+
+// incident wave
+real thetaI   = 2*pi*0./360.;
+real[int] dir = [cos(thetaI),0,sin(thetaI)];
+func fincx    = 0;
+func fincy    = exp(1i*k*(dir[0]*x + dir[1]*y + dir[2]*z));
+func fincz    = 0;
+int nloc      = 4.0/lambda;
+
+mesh3 Th3 = cube(nloc, nloc, nloc, [x-0.5, y-0.5, z-0.5]);
+
+meshS ThG, ThS = extract(Th3);
+
+Mat<complex> A;
+int[int] n2o;
+macro ThSN2O()n2o//
+ThG = ThS;
+buildDmesh(ThS);
+{
+    Mat<complex> H, T;
+    createMat(ThS, H, P1);
+    createMat(ThS, T, P0);
+    CoherentGlobalMesh(T, H, ThS, ThG);
+}
+{
+    macro def(u)[u, u#2, u#3]//
+    macro init(u)[u, u, u]//
+    macro ThSPkPart()Edge0S//
+    macro defPart(u)def(u)//
+    macro initPart(u)init(u)//
+    createMat(ThS, A, Pk);
+}
+fespace UhG(ThG, Pk);
+fespace UhS(ThS, Pk);
+varf vk(u, v) = int2dx2d(ThG)(ThG)(BEM(BemKernel("SL", k=k), u, v));
+A = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
+varf vRHS([ux, uy, uz], [vx, vy, vz]) = int2d(ThG)([vx, vy, vz]' * [-fincx, -fincy, -fincz]);
+UhG<complex> [bx, by, bz], [ux, uy, uz];
+bx[] = vRHS(0, UhG);
+Mat<complex> C;
+string type = HasType("Mat", "ScaLAPACK") ? "scalapack" : "aij";
+MatConvert(A, C, type = type);
+set(C, sparams = "-pc_type lu");
+int[int] range = C.range;
+complex[int] rhs(C.n);
+rhs = bx[](range(0):range(1)-1);
+KSPSolve(C, rhs, rhs);
+if(!NoGraphicWindow) {
+    if (type == "scalapack") {
+        complex[int] before(UhG.ndof), after(UhG.ndof);
+        before(range(0):range(1)-1) = rhs;
+        mpiAllReduce(before, after, mpiCommWorld, mpiSUM);
+        rhs.resize(A.n);
+        range = A.range;
+        rhs = after(range(0):range(1)-1);
+    }
+    UhS<complex> [solx, soly, solz];
+    bool flg = true;
+    if(!flg)
+        ChangeNumbering(A, solx[], rhs, inverse = 1, exchange = 1);
+    nloc *= 15;
+    nloc -= nloc%8;
+    meshS ThOutG = square3(nloc, nloc, [4*(x-0.5), 4*(y-0.5), 0]);
+    ThOutG = trunc(ThOutG, max(abs(x), abs(y)) > 0.5 + 4.0/nloc);
+    meshS ThOutS = ThOutG;
+    int[int] n2o;//
+    macro ThOutSN2O()n2o//
+    buildDmesh(ThOutS);
+    {
+        Mat<complex> B, T;
+        createMat(ThOutS, B, P1)
+        createMat(ThOutS, T, P0);
+        CoherentGlobalMesh(T, B, ThOutS, ThOutG);
+    }
+    Mat<complex> B;
+    {
+        macro def(u)[u, u#2, u#3]//
+        macro init(u)[u, u, u]//
+        createMat(ThOutS, B, Qk);
+    }
+    fespace UhOutG(ThOutG, Qk);
+    fespace UhOutS(ThOutS, Qk);
+    varf vP(u, v) = int2d(ThG)(POT(BemPotential("SL", k=k), u, v)) ;
+    Mat<complex> P(B, A);
+    P = vP(UhG, UhOutG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
+    ObjectView(P, format = "info");
+
+    UhOutS<complex> [Ex, Ey, Ez];
+    if(flg) {
+        complex[int] E(B.n);
+        MatMult(P, rhs, E);
+        ChangeNumbering(B, Ex[], E, inverse = 1, exchange = 1);
+    } else {
+        Ex[] = P * solx[];
+    }
+
+    fespace Uh(ThOutS, P1);
+    Uh Er = sqrt(real(Ex+fincx)^2 + real(Ey+fincy)^2 + real(Ez+fincz)^2);
+    macro def1(u)u//
+    plotMPI(ThOutS, Er, P1, def1, real, cmm = "Global solution")
+}
+if(0) {
+    UhS<complex> [blx, bly, blz];
+    varf vRHSl([ux, uy, uz], [vx, vy, vz]) = int2d(ThS)([vx, vy, vz]' * [-fincx, -fincy, -fincz]);
+    blx[] = vRHSl(0, UhS);
+    exchange(A, blx[], scaled = 1);
+    complex[int] wrhs;
+    ChangeNumbering(A, blx[], wrhs);
+    wrhs -= rhs;
+    cout << wrhs.l2 << endl;
+    [blx, bly, blz] = [bx, by, bz];
+    exchange(A, blx[], scaled = 1);
+    ChangeNumbering(A, blx[], wrhs);
+    wrhs -= rhs;
+    cout << wrhs.l2 << endl;
+    blx[] = vRHSl(0, UhS);
+    complex[int] exchge;
+    ChangeNumbering(A, blx[], exchge);
+    ChangeNumbering(A, blx[], exchge, inverse = 1, exchange = 1);
+    ChangeNumbering(A, blx[], wrhs);
+    wrhs -= rhs;
+    cout << wrhs.l2 << endl;
+}

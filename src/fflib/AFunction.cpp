@@ -132,8 +132,8 @@ extern double  genrand_res53(void) ;
 
 // FH  for g++ 3.4  the prototypage  have change
 double  VersionNumber();
-double Imag(const  complex<double> & z){ return imag(z);}
-double Real(const  complex<double> & z){ return real(z);}
+double Imag(const  complex<double>  z){ return imag(z);}
+double Real(const  complex<double>  z){ return real(z);}
 const  basicForEachType * basicForEachType::type_C_F0 =0; //  for any type un formal operation .... FH add 09/2012
 
 // FH
@@ -1621,9 +1621,9 @@ void Init_map_type()
      TheOperators->Add("\'",new OneOperator1_<double>(RNM::conj,1));       //  add F.  Feb 2010  of conj of varf..
 
 
-     Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
+     Global.Add("imag","(",new OneOperator1<double,Complex>(Imag));
      //  Big probleme  real is a type
-     Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
+     Add<double>("<--","(",new OneOperator1<double,Complex>(Real));
 
      Global.Add("abs","(",new OneOperator1_<double,Complex>(abs));
 
@@ -1694,7 +1694,12 @@ void Init_map_type()
   // add setw feb 2015 FH
   Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
   TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
-
+// Add FH oct 2022 and remove form plugin pipe 
+#ifdef _WIN32
+  Global.New("onWIN32", CConstant< bool >(true));
+#else
+  Global.New("onWIN32", CConstant< bool >(false));
+#endif
 }
 
 

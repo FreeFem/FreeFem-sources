@@ -9,10 +9,6 @@
 
 #ifdef WITH_SLEPC
 
-#if PETSC_VERSION_LT(3, 15, 0)
-#define SVDSetOperators(a, b, c) SVDSetOperator(a, b)
-#endif
-
 #include "slepc.h"
 
 namespace SLEPc {
@@ -155,7 +151,7 @@ basicAC_F0::name_and_type eigensolver<Type, K, SType>::E_eigensolver::name_param
     {!std::is_same<SType, SVD>::value ? "array" : "larray", &typeid(KNM<K>*)},
     {"fields", &typeid(KN<double>*)},
     {"names", &typeid(KN<String>*)},
-    {!std::is_same<SType, SVD>::value ? "schurPreconditioner" : "rvectors", !std::is_same<SType, SVD>::value ? &typeid(KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*) : &typeid(FEbaseArrayKn<K>*)},
+    {!std::is_same<SType, SVD>::value ? "schurPreconditioner" : "rvectors", !std::is_same<SType, SVD>::value ? &typeid(KN<Matrice_Creuse<upscaled_type<PetscScalar>>>*) : &typeid(FEbaseArrayKn<K>*)},
     {!std::is_same<SType, SVD>::value ? "schurList" : "rarray", !std::is_same<SType, SVD>::value ? &typeid(KN<double>*) : &typeid(KNM<K>*)},
     {"deflation", &typeid(KNM<PetscScalar>*)},
     {"errorestimate", &typeid(KN<PetscReal>*)},
@@ -298,7 +294,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     if(isFieldSplit) {
                         KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
                         KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
-                        KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*>((*nargs[7])(stack)) : 0;
+                        KN<Matrice_Creuse<upscaled_type<PetscScalar>>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<upscaled_type<PetscScalar>>>*>((*nargs[7])(stack)) : 0;
                         KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
                         if(fields && names) {
                             KSP ksp;
@@ -455,6 +451,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         else {
                             pt = reinterpret_cast<K*>(tmpr);
                             VecGetArray(xi, reinterpret_cast<PetscScalar**>(&pti));
+                            tmpi = reinterpret_cast<PetscScalar*>(pti);
                         }
                         if(!isType && (ptA->_A || ptA->_exchange)) {
                             KN<K> cpy(ptA->_A ? ptA->_A->getDof() : ptA->_exchange[0]->getDof());
@@ -503,7 +500,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
                             delete [] pt;
-                        else
+                        if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
                             VecRestoreArray(xi, &tmpi);
                         VecRestoreArray(xr, &tmpr);
                     }

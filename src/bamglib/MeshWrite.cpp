@@ -64,6 +64,7 @@ namespace bamg {
     const char *gsuffix = ".gmsh";
     int ls = 0;
     int lll = strlen(filename);
+    int bin=0;
     if (type == AutoMesh) {
       type = BDMesh;
       if (!strcmp(filename + lll - (ls = 7), ".am_fmt"))
@@ -71,14 +72,14 @@ namespace bamg {
       else if (!strcmp(filename + lll - (ls = 6), ".amdba"))
         type = amdbaMesh;
       else if (!strcmp(filename + lll - (ls = 3), ".am"))
-        type = amMesh;
+          bin=1,type = amMesh;
       else if (!strcmp(filename + lll - (ls = 5), ".nopo"))
-        type = NOPOMesh;
+          bin=1,type = NOPOMesh;
       else if (!strcmp(filename + lll - (ls = 4), ".msh"))
         type = mshMesh;
       //-----------------------------ajout format hdf5-----------------------------//
       else if (!strcmp(filename + lll - (ls = 3), ".h5"))
-        type = hdf5Mesh;
+          bin=1,type = hdf5Mesh;
       //-----------------------------ajout format hdf5-----------------------------//
       else if (!strcmp(filename + lll - (ls = 4), ".ftq"))
         type = ftqMesh;
@@ -87,7 +88,7 @@ namespace bamg {
       else if (!strcmp(filename + lll - (ls = 6), ".AMDBA"))
         type = amdbaMesh;
       else if (!strcmp(filename + lll - (ls = 3), ".AM"))
-        type = amMesh;
+          bin=1,type = amMesh;
       else if (!strcmp(filename + lll - (ls = 5), ".NOPO"))
         type = NOPOMesh;
       else if (!strcmp(filename + lll - (ls = 4), ".MSH"))
@@ -98,7 +99,7 @@ namespace bamg {
         ls = 0;
     }
     if (verbosity > 1) {
-      cout << "  -- Writing the file " << filename << " of type ";
+      cout << "  -- Writing the file " << filename << " binary:" << bin <<"  of type " ;
       switch (type) {
         case BDMesh:
           cout << " BD Mesh ";
@@ -137,7 +138,10 @@ namespace bamg {
       if (nbe) cout << " NbOfRefEdge = " << nbe;
       cout << endl;
     }
-    ofstream f(filename /*,ios::trunc*/);
+      ios_base::openmode mode = ios_base::out;
+      if(bin) mode |=ios_base::binary;
+      if(verbosity>9) cout << "     mode = " << mode << " bin: " << ios_base::binary << " out: s" << ios_base::out << endl;
+      ofstream f(filename,mode  /*,ios::trunc*/);
     f.precision(12);
 
     if (f) switch (type) {

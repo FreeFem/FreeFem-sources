@@ -1,40 +1,40 @@
 #!/usr/bin/env bash
 
-## This job must be executed on VM2-2 machines
-## See ./README.md
-
 echo "Job 4 (mpich)"
-set -e
 
 casejob=4_mpich
 
-# change default  compiler
-if [ "$(uname)" == "Darwin" ]; then
-  # in case where the OS type is Darwin
+# change default compiler
+if [ "$(uname)" = "Darwin" ]
+then
+  # MacOS
   PETSC_DIR='/Users/Shared/mpich/ff-petsc'
-  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
-  installedVersionffpetsc=$(grep "VERSION_GIT" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
-elif [ "$(uname)" == "Linux" ]; then
-  # in case where the OS type is Linux
-PETSC_DIR='/builds/Shared/mpich/ff-petsc'
-change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
-installedVersionffpetsc=$(grep "VERSION_GIT" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
+  change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$(uname -r)-$casejob.sh
+elif [ "$(uname)" = "Linux" ]
+then
+  # Linux
+  PETSC_DIR='/media/builds/shared/mpich/ff-petsc'
+
+  export MPIRUN=/usr/bin/mpirun.mpich
+  export MPICXX=/usr/bin/mpicxx.mpich
+  export MPIFC=/usr/bin/mpif90.mpich
+  export MPICC=/usr/bin/mpicc.mpich
 fi
-echo installed Versionff petsc "$installedVersionffpetsc"
-echo try to source file  "$change_compiler"
-test -f "$change_compiler" && echo  source file "$change_compiler"
-test -f "$change_compiler" && cat  "$change_compiler"
+
+petscVersion=$(grep "VERSION_GIT" "$PETSC_DIR/c/include/petscversion.h" | cut -c36-42 | cut -f1 -d "\"" )
+echo "Installed PETSc version: $petscVersion"
+echo "Try to source file $change_compiler"
+test -f "$change_compiler" && echo "Source file $change_compiler"
+test -f "$change_compiler" && cat "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
 
-
-
 # configuration & build
-autoreconf -i \
-  && ./configure --enable-download --prefix=/builds/workspace/freefem \
+autoreconf -i
+./configure --enable-download --prefix="$WORKSPACE/install" \
   --with-petsc=$PETSC_DIR/r/lib \
-  --with-petsc_complex=$PETSC_DIR/c/lib \
-  && ./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS \
-  && ./etc/jenkins/blob/build.sh
+  --with-petsc_complex=$PETSC_DIR/c/lib
+./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
+./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
 then
@@ -52,7 +52,6 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
-  exit 1
 fi
 
 # install
@@ -71,11 +70,18 @@ fi
 
 if [ $? -eq 0 ]
 then
-echo "Uninstall process complete"
+  echo "Uninstall process complete"
 else
-echo "Uninstall process failed"
-exit 1
+  echo "Uninstall process failed"
+  exit 1
 fi
 
-# visu for jenkins tests results analyser
+# Jenkins tests results analyser
 ./etc/jenkins/resultForJenkins/resultForJenkins.sh
+
+if [ $? -eq 0 ]
+then
+  echo "Jenkins process complete"
+else
+  echo "Jenkins process failed"
+fi

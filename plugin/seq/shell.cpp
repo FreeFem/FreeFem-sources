@@ -151,12 +151,12 @@ string *ffgetenv(Stack s, string *const &k) {
 }
 
 long ffsetenv(string *const &k, string *const &v) {
-  char *vv = strcpy((char *)malloc(v->size( ) + 2), v->c_str( ));
   char *kk = strcpy((char *)malloc(k->size( ) + 2), k->c_str( ));
+  char *vv = strcpy((char *)malloc(v->size( ) + 2), v->c_str( ));
 
-  SetEnvironmentVariable(vv, kk);
-  free(vv);
+  SetEnvironmentVariable(kk, vv);
   free(kk);
+  free(vv);
   return 0;
 }
 
@@ -177,12 +177,12 @@ string *ffgetenv(Stack s, string *const &k) {
 }
 
 long ffsetenv(string *const &k, string *const &v) {
-  char *vv = strcpy((char *)malloc(v->size( ) + 2), v->c_str( ));
   char *kk = strcpy((char *)malloc(k->size( ) + 2), k->c_str( ));
-  long r = setenv(vv, kk, 1);
+  char *vv = strcpy((char *)malloc(v->size( ) + 2), v->c_str( ));
+  long r = setenv(kk, vv, 1);
 
-  free(vv);
   free(kk);
+  free(vv);
   return r;
 }
 

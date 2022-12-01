@@ -42,7 +42,7 @@ TESTS_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
 TESTS_MPI_METIS_PARMETIS = parmetis-3d.edp \
 	parmetis.edp
 
-TESTS_MPI_MUMPS = cavityNewtow-MUMPS.edp \
+TESTS_MPI_MUMPS = cavityNewton-MUMPS.edp \
 	LaplaceRT-3d-matrix-mumps.edp \
 	MUMPS.edp \
 	NSI3d-carac-mumps.edp \
@@ -57,7 +57,8 @@ TESTS_MPI_METIS_PARMMG = parmmg.edp
 
 TESTS_MPI_BEMTOOL = Helmholtz_Cobracavity.edp \
 	Helmholtz_circle_Dirichlet.edp\
-	Helmholtz_circle_Neumann.edp
+	Helmholtz_circle_Neumann.edp\
+	Maxwell_cube_EFIE.edp
 
 if MPI
 CONDITIONAL_MPI =  $(TESTS_MPI)

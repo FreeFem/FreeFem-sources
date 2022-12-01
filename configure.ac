@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT([FreeFEM],[4.11],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
+AC_INIT([FreeFEM],[4.12],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -23,7 +23,7 @@ ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
 ff_uncompile_plugin=""
 ff_unlib_plugin=""
 ff_download_lib=""
-AC_PREREQ([2.69]) dnl for AC_LANG_CASE and check stuff
+AC_PREREQ([2.69]) dnl for AC_LANG_CASE and check stuff (bug avec 2.71)
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
@@ -467,10 +467,22 @@ AC_LANG(C++)
 
 
 # Some useful libraries
+AC_CHECK_LIB(z,deflate,ff_zlib="-lz",ff_zlib="")   
+AC_ARG_WITH(zlib,[--with-zlib= the z library ])
+if test "$with_zlib" != no -a  -n "$with_glut" ; then
+    ff_zlib="$with_zlib";
+elif test "$with_zlib" = no ; then
+    ff_zlib=""
+fi
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
 AC_CHECK_LIB(iomp5,omp_get_wtime,ff_iomp5="-liomp5",ff_iomp5="")
 AC_CHECK_LIB([rt],[clock_gettime])
+AC_CHECK_HEADERS(zlib.h, 
+        ff_zlib_ok=yes
+        ,
+        ff_zlib_ok=no
+) 
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
@@ -864,7 +876,7 @@ then
 fi
 fi
 AC_SUBST(LIBSPTHREAD,$ff_pthread)
-
+AC_SUBST(FF_ZLIB,$ff_zlib)
 # ALH - 16/9/13 - at the moment the requirements for medit (glut) are not compatible with FFCS so medit is
 # only compiled with FF.
 
@@ -1263,7 +1275,7 @@ if test "$with_cadna" != no
     LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
     AC_CHECK_LIB(cadnafree,arit_zero,
 	ff_cadna_ok=yes)
-    AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
+    AC_CHECK_HEADERS([${ff_cadna_dir}/cadnafree.h],
 	ff_cadna_h=yes, ff_cadna_h=no)
 
     LIBS="$ff_libs_old"
@@ -1949,6 +1961,7 @@ then
 fi
 
 # Checking for some functions that may not appear everywhere
+#  for libff-mmap-semaphore.c plugin and test ... 
 # ----------------------------------------------------------
 AC_CHECK_HEADERS(cstddef)
 AC_CHECK_HEADERS(stddef.h)
@@ -1969,7 +1982,20 @@ AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)
 AC_CHECK_HEADERS([unistd.h])
 # asinh acosh atanh are not in Mingw yet gettimeofday
 ff_malloc_h=""
-AC_HEADER_TIME
+m4_warn([obsolete],
+[Update your code to rely only on HAVE_SYS_TIME_H,
+then remove this warning and the obsolete code below it.
+All current systems provide time.h; it need not be checked for.
+Not all systems provide sys/time.h, but those that do, all allow
+you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
 
@@ -2190,6 +2216,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
         [[mmg],[-lmmg],[libmmg.h],[]],
+        [[zlib],[-lz],[zlib.h],[]],
         [[parmmg],[-lparmmg],[libparmmg.h],[]],
 	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
@@ -2403,7 +2430,7 @@ fi
 
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
-TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
+TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX RadiativeTransfer_htool.$DYLIB_SUFFIX"])
 if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
 fi

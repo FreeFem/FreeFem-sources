@@ -53,6 +53,27 @@ typedef void VOID;
 #undef real
 #undef complex
 
+// warning code duplicated from lgmat.cpp
+template<class R>
+MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
+{
+
+    // half < 0 => keep U
+    // half > 0 => keep L
+    // half = 0 => L and the result will be sym
+    int nnz =0;
+
+    if( A.half )
+        return new MatriceMorse<R>(A);//  copy
+    // do alloc
+    MatriceMorse<R> *r=new MatriceMorse<R>(A);
+    r->RemoveHalf(half,tol);
+    if(verbosity )
+        cout << "  removeHalf: new nnz = "<< r->nnz << " "<< r->half << endl;
+
+    return r;
+}
+template<typename R>
 long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
   // cf https://en.wikipedia.org/wiki/Incomplete_Cholesky_factorization
   cout << " tgv " << tgv << endl;
@@ -65,14 +86,16 @@ long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
   for (int k = 0; k < L.nnz; ++k) L.aij[k] = nan;
   int BC = 0;
   long err = 0;
+  if(verbosity>9)   cout << "    ichol: &L, &A "  << &L << " " << &A << endl
+      << "      ||L|| " << L.norminfty() << " ||A|| " <<  A.norminfty() << endl;
   A.CSR( );
   L.CSR( );
   for (int i = 0; i < n; ++i) {
     int ai1 = A.p[i + 1] - 1;
     int li1 = L.p[i + 1] - 1;
     int li0 = L.p[i];
-    double Aii = A.aij[ai1];
-    if (Aii > tgve) {                                  // B.C
+    R Aii = A.aij[ai1];
+    if (abs(Aii) > tgve) {                                  // B.C
       for (kk = li0; kk < li1; kk++) L.aij[kk] = 0;    //  remove row and col
       L.aij[li1] = 1;
       BC++;
@@ -84,33 +107,34 @@ long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
         int lj1 = L.p[j + 1] - 1;
         int lj0 = L.p[j];
 
-        double *pAij = A.pij(i, j);
-        double Lij = pAij ? *pAij : 0., Aij = Lij;
+        R *pAij = A.pij(i, j);
+        R Lij = pAij ? *pAij : R(), Aij = Lij;
         for (int kkk = lj0; kkk < lj1; ++kkk)    // loop  row j
         {
           int k = L.j[kkk];
           ffassert(k >= 0 && k < j);
-          double Ljk = L.aij[kkk], *pLik = L.pij(i, k), Lik = pLik ? *pLik : 0.;
+          R Ljk = L.aij[kkk], *pLik = L.pij(i, k), Lik = pLik ? *pLik : R();
           Lij -= Lik * Ljk;
         }
         Lij /= L(j, j);
         L.aij[kk] = Lij;
       }
       for (int k = li0; k < li1; ++k) Aii -= L.aij[k] * L.aij[k];
-      if (Aii <= 1e-30) {
+      if (abs(Aii) <= 1e-30) {
         if (err < 10 && verbosity)
           cout << "   ichol neg pivot:" << i << " " << Aii << " " << A.aij[ai1] << endl;
         Aii = 1;    // Bof Bof !!!
         err++;
       }
-      double Lii = sqrt(Aii);
+      R Lii = sqrt(Aii);
       L.aij[li1] = Lii;
     }
   }
-  if (verbosity > 2) cout << "  -- ichol:  N BC = " << BC << " nberr " << err << endl;
+  if (verbosity > 2) cout << "  -- ichol:  N BC = " << BC << " nberr " << err << " A.half " << A.half << " ||L|| " << L.norminfty() << " ||A|| " <<  A.norminfty() << endl;
   return err;
 }
 
+template<typename R>
 inline R pscal(R *L, int *cl, int kl, int kl1, int i, MatriceMorse< R > &Ut, int j) {
   int k = min(i, j);    //  common  part
   R r = 0;
@@ -127,10 +151,17 @@ inline R pscal(R *L, int *cl, int kl, int kl1, int i, MatriceMorse< R > &Ut, int
   ffassert(r == r);
   return r;
 }
+
+template<typename R>
+double Real(R a){return a;}
+template<>
+double Real(complex< double >  a){return a.real();}
+
+template<typename R>
 long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, double tgv) {
   A.CSR( );
   L.CSR( );
-  Ut.dotranspose( );
+  Ut.dotranspose( 0 );
   Ut.CSR( );
   if (verbosity > 4) cout << "   - ILU fact:   tgv " << tgv << endl;
   ffassert(A.n == L.n);
@@ -154,10 +185,10 @@ long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, doub
     err += Ut.j[ui1] != i;
     err += L.j[li1] != i;
     ffassert(L.j[li1] == i && Ut.j[ui1] == i);
-    double Aii = A(i, i), Uii;
+    R Aii = A(i, i), Uii;
 
     int BCi;
-    wbc[i] = BCi = (Aii > tgve);
+    wbc[i] = BCi = (Real(Aii) > tgve);
     if (BCi) {    // B.C
       fill(L.aij + li0, L.aij + li1, 0.);
       fill(Ut.aij + ui0, Ut.aij + ui1, 0.);
@@ -189,7 +220,7 @@ long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, doub
 
       if (abs(Uii) < 1e-30) {
         if (verbosity && err < 10) cerr << "    error: ILU nul pivot " << i << " " << Uii << endl;
-        Uii = 1;
+        Uii = 1.;
         err++;
       }
       Ut(i, i) = Uii;
@@ -197,7 +228,7 @@ long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, doub
   }
   if (verbosity > 2 || err)
     cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
-  Ut.dotranspose( );
+  Ut.dotranspose( 0);// warning do conj by default (0=> no conj)
   Ut.CSC( );
   L.CSR( );
   return err;
@@ -210,6 +241,16 @@ double *inv(int n, double *a, double *a1) {
 
   KN< integer > p(n);
   dgesv_(&n0, &n0, a1, &n0, p, a, &n0, &info);
+  return a1;
+}
+Complex *inv(int n, Complex *a, Complex *a1) {
+  integer info;
+  integer n0 = n, n2 = n * n, n1 = n + 1.;
+  fill(a1, a1 + n * n, 0.);
+  for (int i = 0; i < n2; i += n1) a1[i] = 1;
+
+  KN< integer > p(n);
+  zgesv_(&n0, &n0, a1, &n0, p, a, &n0, &info);
   return a1;
 }
 
@@ -240,7 +281,8 @@ long iLUB(int nb, int *b, MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMor
 
   A.CSR( );
   L.CSR( );
-  Ut.dotranspose( );
+  Ut.dotranspose( 0);// no conj ..
+ 
   Ut.CSR( );
   if (verbosity > 4) cout << "   - ILU fact:   tgv " << tgv << endl;
   ffassert(A.n == L.n);
@@ -364,18 +406,35 @@ long iLUB(int nb, int *b, MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMor
 
   if (verbosity > 2 || err)
     cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
-  Ut.dotranspose( );
+  Ut.dotranspose(0 );// no conj
   Ut.CSC( );
   L.CSR( );
   return err;
 }
 #endif
-
+template<typename R>
 long ff_ilu(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL,
             Matrice_Creuse< R > *const &pcU, double const &tgv) {
   MatriceCreuse< R > *pa = pcA->A;
   MatriceCreuse< R > *pl = pcL->A;
   MatriceCreuse< R > *pu = pcU->A;
+  if(pl==0)
+    {
+        MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+        MatriceCreuse<R> * pr= removeHalf(*pma,1,-1.);// L
+        pcL->A.master(pr);
+        pl = pcL->A;
+
+    }
+    if(pu==0)
+      {
+          MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+          MatriceCreuse<R> * pr= removeHalf(*pma,-1,-1.);// L
+          pcU->A.master(pr);
+          pu = pcU->A;
+
+      }
+
   ffassert(pa && pl && pu);
   MatriceMorse< R > *pA = dynamic_cast< MatriceMorse< R > * >(pa);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
@@ -384,25 +443,38 @@ long ff_ilu(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL,
 
   return iLU(*pA, *pL, *pU, tgv);
 }
-
+template<typename R>
 long ff_ichol(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL, double const &tgv) {
   MatriceCreuse< R > *pa = pcA->A;
   MatriceCreuse< R > *pl = pcL->A;
+  if(verbosity>9 )  cout << "ff_ichol " << pa << " " << pl << endl;
+
+  if(pl==0)
+  {
+      MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+      MatriceCreuse<R> * pr= removeHalf(*pma,1,-1.);// L
+      pcL->A.master(pr);
+      pl = pcL->A;
+
+  }
   ffassert(pa && pl);
   MatriceMorse< R > *pA = dynamic_cast< MatriceMorse< R > * >(pa);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
   ffassert(pL && pA);
-
+  if(verbosity>9 )  cout << "ff_ichol " << pA << " " << pL << endl;
   return ichol(*pA, *pL, tgv);
 }
+template<typename R>
 long ff_ilu(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL,
             Matrice_Creuse< R > *const &pcU) {
   return ff_ilu(pcA, pcL, pcU, ff_tgv);
 }
+template<typename R>
 long ff_ichol(Matrice_Creuse< R > *pcA, Matrice_Creuse< R > *pcL) {
   return ff_ichol(pcA, pcL, ff_tgv);
 }
-void LU_solve(MatriceMorse< R > &T, int cas, KN< double > &b, bool trans) {
+template<typename R>
+void LU_solve(MatriceMorse< R > &T, int cas, KN< R > &b, bool trans) {
   int n = T.n, i, j, k, k1, k0;
   if (cas < 0)
     T.CSR( );
@@ -440,7 +512,8 @@ void LU_solve(MatriceMorse< R > &T, int cas, KN< double > &b, bool trans) {
     }
   }
 }
-bool ff_ichol_solve(Matrice_Creuse< R > *pcL, KN< double > *b) {
+template<typename R>
+bool ff_ichol_solve(Matrice_Creuse< R > *pcL, KN< R > *b) {
   MatriceCreuse< R > *pl = pcL->A;
   ffassert(pl);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
@@ -450,8 +523,9 @@ bool ff_ichol_solve(Matrice_Creuse< R > *pcL, KN< double > *b) {
 
   return true;
 }
+template<typename R>
 bool ff_ilu_solve(Matrice_Creuse< R > *const &pcL, Matrice_Creuse< R > *const &pcU,
-                  KN< double > *const &b) {
+                  KN< R > *const &b) {
   MatriceCreuse< R > *pl = pcL->A;
   ffassert(pl);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
@@ -485,6 +559,26 @@ static void Load_Init( ) {
                ff_ilu_solve));
   Global.Add("icholSolve", "(",
              new OneOperator2< bool, Matrice_Creuse< R > *, KN< R > * >(ff_ichol_solve));
+    typedef Complex C;
+    Global.Add("ichol", "(",
+               new OneOperator2< long, Matrice_Creuse< C > *, Matrice_Creuse< C > * >(ff_ichol));
+    Global.Add(
+      "ichol", "(",
+      new OneOperator3_< long, Matrice_Creuse< C > *, Matrice_Creuse< C > *, double >(ff_ichol));
+    Global.Add("iLU", "(",
+               new OneOperator4_< long, Matrice_Creuse< C > *, Matrice_Creuse< C > *,
+                                  Matrice_Creuse< C > *, double >(ff_ilu));
+    Global.Add(
+      "iLU", "(",
+      new OneOperator3_< long, Matrice_Creuse< C > *, Matrice_Creuse< C > *, Matrice_Creuse< C > * >(
+        ff_ilu));
+    Global.Add("iluSolve", "(",
+               new OneOperator3_< bool, Matrice_Creuse< C > *, Matrice_Creuse< C > *, KN< C > * >(
+                 ff_ilu_solve));
+    Global.Add("icholSolve", "(",
+               new OneOperator2< bool, Matrice_Creuse< C > *, KN< C > * >(ff_ichol_solve));
+
+
 }
 
 LOADFUNC(Load_Init)

@@ -33,7 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
@@ -760,7 +760,10 @@ namespace Fem2D
     int Mesh3::load(const string & filename)
     {
         int bin;
-        int ver,inm,dim,err=0;
+        int ver;
+        int64_t inm;
+        int dim;
+        int err=0;
         int lf=filename.size()+20;
         KN<char>  fileb(lf),filef(lf);
         char *data = new char[filename.size()+1];
@@ -1147,7 +1150,8 @@ namespace Fem2D
     
     int Mesh3::Save(const string & filename) const
     {
-        int ver = GmfDouble, outm;
+        int ver = GmfDouble;
+        int64_t outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
             cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);
@@ -1205,7 +1209,8 @@ namespace Fem2D
     
     int Mesh3::SaveSurface(const string & filename) const
     {
-        int ver = GmfDouble, outm;
+        int ver = GmfDouble;
+        int64_t outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) )
         {
             cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;

@@ -94,6 +94,7 @@ namespace EF23 {
 template<class Vertex>
     int  GTree<Vertex>::ListNearestVertex(Vertex **lnv,int nlvnx,int dh,Zd xyi)
     {
+        NbSearch++;
         // warning this function return the NearestVertex in the first
         // none empty box contening the point xyi.
         //   They do not return the true nearest point in classical norm.
@@ -118,8 +119,8 @@ template<class Vertex>
         if (!root->n)
             return 0; // empty tree
       
-        if(verbosity>2000)
-            cout << "        general case : NearVertex" << endl;
+        if(verbosity>4999)
+            cout << "        general case : ListNearestVertex" << endl;
         // general case -----
         pb[0]= b;
         pi[0]=b->n>0 ?(int)  b->n : N  ;
@@ -177,7 +178,7 @@ template<class Vertex>
     // warning this function return the NearestVertex in the first
     // none empty box contening the point xyi.
     //   They do not return the true nearest point in classical norm.
-      
+    NbSearch++;
     QuadTreeBox * pb[ MaxDeep ];
     int  pi[ MaxDeep  ];
     Zd pp[  MaxDeep ];
@@ -218,7 +219,7 @@ template<class Vertex>
       }
       // n0 number of boxes of in b ("b0")
     if(verbosity>2000)
-    cout << "        n0=" << n0 << " " << trueNearest <<endl;
+    cout << "        NV: n0=" << n0 << " " << trueNearest <<endl;
     
     if ( n0 > 0) 
     {  
@@ -263,7 +264,7 @@ if(verbosity>2000)
                 h =Zd(i2,plus).norm()*c2infty;// norm infty -> norm 2 big enought
 		vn = b->v[k];
                   if(verbosity>2000)
-                      cout << "        find   " << vn << " " << h0 << " " << h2 << " " << h << endl;
+                      cout << "        NV: find   " << vn << " " << h0 << " " << h2 << " " << h << endl;
 
 	      }
 	  }
@@ -448,6 +449,7 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
  // th(t),
  NbQuadTreeBoxSearch(0),
  NbVerticesSearch(0),
+ NbSearch(0),
  NbQuadTreeBox(0),
  NbVertices(0),
  cMin(Pmin-(Pmax-Pmin)/2),
@@ -475,6 +477,7 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
   // th(0),
   NbQuadTreeBoxSearch(0),
   NbVerticesSearch(0),
+  NbSearch(0),
   NbQuadTreeBox(0),
   NbVertices(0),
   cMin(),cMax(),coef(0)
@@ -508,6 +511,8 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
   
   template<class Vertex> GTree<Vertex>::~GTree()
   {
+      if(verbosity>4) cout << "~GTree " << *this << endl;
+      
     delete sb; 
   }
   
@@ -517,7 +522,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   f << " NbTreeBox = " << qt.NbQuadTreeBox 
     << " Nb Vertices = " <<  qt.NbVertices << endl;
   f << " NbTreeBoxSearch " << qt.NbQuadTreeBoxSearch  
-    << " NbVerticesSearch " << qt.NbVerticesSearch << endl;
+    << " NbVerticesSearch " << qt.NbVerticesSearch << " NbSearch " << qt.NbSearch << " ratio: "
+    <<  qt.NbVerticesSearch/max(1L,qt.NbSearch) << endl;
   f << " SizeOf QuadTree" << qt.SizeOf() << endl;
   //     return  dump(f,*qt.root);
   return  f;
@@ -525,6 +531,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   
   template<class Vertex> Vertex *  GTree<Vertex>::NearestVertexWithNormal(const Rd &P)//(long xi,long yj)
   {
+    NbSearch++;
     QuadTreeBox * pb[ MaxDeep ];
     int  pi[ MaxDeep  ];
     Zd pp[ MaxDeep];
@@ -1316,7 +1323,8 @@ inline double dist2(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l,double *d
     return d2;
 }
 template<typename Mesh>
-int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside) const
+int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside,long old) const
+//  old :add FH et PHT mai 2022
 {  // FH: outside : 0 inside, 1 out close, 2, out fare, , -1 inside
     // warning l
     nbfind++;
@@ -1330,6 +1338,30 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
     int ip = p-P;
     Rd Q[dHat+1];
     R ll[dHat+1],lpj[dHat+1];
+    if( old >=0 &&   !bborder)
+    { // check if old is correct element
+        int k =old;
+        const Element & K=(*pTh)[k];
+        int nI =dHat+1;
+        for(int i=0; i< nI;++i)
+            Q[i]=K[i];
+        double ddeps=Plambla(nI-1,Q,PP,ll);//  return une taille ^2, ^4, ^3 suivant la dim  nI-1
+        R d2 = dist2(nI-1,Q,PP,ll,lpj);
+        if( nI==2)
+                ddeps =ddeps/10000.;
+        else if (nI==3)
+                ddeps = sqrt(ddeps)/10000.; // epaisseur de l'objet au carre 1.100 de
+        else ffassert(0);
+        if( d2 < ddeps/1000.) // pour etre sur
+        {
+
+            for(int i=0;i<=dHat;++i)
+                l[i]=lpj[i];
+            outside=0;
+            return k;
+        }
+    }
+
 //#define DEBUGGING
 #ifdef DEBUGGING
     int err=0;
@@ -1487,10 +1519,12 @@ int  TrueBorder(const Mesh &Th,typename Mesh::Vertex *P,double *delta)
     return nv;
 }
 
+inline double CPUtime(){      return ((double) std::clock())/CLOCKS_PER_SEC;}
 template<typename Mesh>
 GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int ddebug)
 : pTh(_pTh),tree(0),nbfind(0), nbelement(0), P(bborder ? pTh->nbe: pTh->nt),delta(P.N()),lp(0),debug(ddebug)
 {
+    double t0=  CPUtime(); 
     //cout << " enter in GenericDataFindBoundary"<< endl;
     const int nvE= Element::nv;
     const int nvB = BorderElement::nv;
@@ -1570,7 +1604,7 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
     cout << "    count  "<< mcount << " / " <<ncount<< " ratio "
     << (double) mcount / max(ncount,1L) << " max lvp " << lvpx
     << " gtree search box " << tree->NbQuadTreeBoxSearch - NbQuadTreeBoxSearch
-    << " v " << tree->NbVerticesSearch-NbVerticesSearch << endl;
+    << " v " << tree->NbVerticesSearch-NbVerticesSearch << " CPU =" << CPUtime()-t0 <<  endl;
     }
 }
 // Bof Bof pas sur du tout.

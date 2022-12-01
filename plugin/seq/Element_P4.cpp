@@ -229,12 +229,21 @@ namespace Fem2D {
     }
   }
 
+
 #include "Element_P4.hpp"
+#include "Element_PkL.hpp" // for Pk_L
+static TypeOfFE_Pk_L P4_L(4);
+GTypeOfFE< MeshL > &Elm_P4_L(P4_L);
 
   // link with FreeFem++
   static TypeOfFE_P4Lagrange P4LagrangeP4;
   // a static variable to add the finite element to freefem++
-  static AddNewFE P4Lagrange("P4", &P4LagrangeP4);
+//  static AddNewFE P4Lagrange("P4", &P4LagrangeP4);
+static void init( ) {
+    AddNewFE("P4", &P4LagrangeP4);
+    static ListOfTFE FE_P4("P4", &P4LagrangeP4); // to add P4 in list of Common FE
+    AddNewFEL("P4L", &Elm_P4_L,"P4");
+}
 }    // namespace Fem2D
-
+LOADFUNC(Fem2D::init);
 // --- fin --

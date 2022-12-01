@@ -6,16 +6,19 @@
 */
 load "IncompleteCholesky"
 
-int nn=50	;
+int nn=50;
 mesh Th=square(nn,nn);
 fespace Vh(Th,P1); 
 macro grad(u) [dx(u),dy(u)]//
 real kconv =0;
+complex cc= 1+2i; 
 func f = sin(2*pi*x)*sin(2*pi*y);
 varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+varf vac(u,v) = int2d(Th) (cc*grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
 real teps =1e-8;
 if(1)
 {
+	verbosity=3;
 	matrix L ;// to store in incomplet factorizatin. 
 	func real[int] PreconIcho(real[int] & b) {// the precondtionner
 		icholSolve(L,b);
@@ -23,15 +26,14 @@ if(1)
 	
 	matrix AI = va(Vh,Vh,solver=CG,precon=PreconIcho);
 	matrix A = va(Vh,Vh,solver=CG,sym=1);
-	L=A; // sym ok 
-	ichol(A,L);
-
+	ichol(A,L);//  take the stucture OF a FOR l; 
 	real[int] b = va(0,Vh);
 	Vh u,ui;
 	verbosity = 4;
 	real t0=clock();
 	u[]= A^-1*b;
 	real t1=clock();
+	
 	ui[]= AI^-1*b;
 	real t2=clock();
 	cout << " ** GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1+teps) << endl;
@@ -48,11 +50,41 @@ if(1)
 		 iluSolve(L,U,b); 
 		 return b;}
 		 
-	matrix AI = va(Vh,Vh,solver=GMRES,precon=PreconILU);
+	matrix AI =	 va(Vh,Vh,solver=GMRES,precon=PreconILU);
 	matrix A = va(Vh,Vh,solver=GMRES);
 	
 	real[int] b = va(0,Vh);
+	iLU(AI,L,U);// do the incomplet LU  with sturct of A.
 	
+    if(nn<10)	
+	  cout << "\n\n **L=" << L <<"\n\n  **U " <<  U << endl; 
+	Vh u,ui;
+	verbosity = 3;
+	real t0=clock();
+	u[]= A^-1*b;
+	real t1=clock();
+	ui[]= AI^-1*b;
+	real t2=clock();
+	cout << " ** GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1+teps) << endl;
+	//plot(u,wait=1);
+}
+
+{ // test ILU complex ...
+	cout << " Complex \n\n" <<endl;
+    kconv =50;
+    
+	int n = Vh.ndof;
+	verbosity=3;
+	matrix<complex> L,U;// to store in incomplet factorizatin. 
+	
+	func complex[int] PreconILU(complex[int] & b) {
+		 iluSolve(L,U,b); 
+		 return b;}
+		 
+	matrix<complex> AI = vac(Vh,Vh,solver=GMRES,precon=PreconILU);
+	matrix<complex> A = vac(Vh,Vh,solver=GMRES);
+	
+	complex[int] b = vac(0,Vh);
 	L=removeHalf(AI,1);  // build the structure of L
 		if(nn<10)
     	  cout << " L " <<  L << endl; 
@@ -64,7 +96,7 @@ if(1)
 	
     if(nn<10)	
 	  cout << "\n\n **L=" << L <<"\n\n  **U " <<  U << endl; 
-	Vh u,ui;
+	Vh<complex> u,ui;
 	verbosity = 3;
 	real t0=clock();
 	u[]= A^-1*b;

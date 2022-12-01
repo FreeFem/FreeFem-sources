@@ -7391,6 +7391,7 @@ Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete, bool const 
         }
       }
     }
+    delete gtree;
     nbe = bb - b;
     delete[] *idx;
     delete[] idx;
@@ -8889,6 +8890,225 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
   return T_Th;
 }
 
+const Mesh * MoveTheMesh(const MeshS &Th,const KN_<double> & U,const KN_<double> &V,bool orientation)
+{
+  using  Fem2D::Triangle;
+  using  Fem2D::Vertex;
+  using  Fem2D::R2;
+  using  Fem2D::BoundaryEdge;
+  using  Fem2D::Mesh;
+ // using  Fem2D::R;
+  using  Fem2D::MeshPointStack;
+  int nbv=Th.nv;
+  int nbt=Th.nt;
+  int neb=Th.nbe;
+  Vertex * v= new Vertex[nbv];
+  Triangle *t= new Triangle[nbt];
+  BoundaryEdge *b= new BoundaryEdge[neb];
+  Vertex *vv=v;
+  for (int i=0;i<nbv;i++)
+   {
+     R2 P(U[i],V[i]);
+     vv->x=P.x;
+     vv->y=P.y;
+     vv->lab = Th(i).lab;
+     vv++;
+    }
+  Triangle *tt= t;
+  int nberr=0;
+  double atotal=0,atotal0=0;
+  double amax=-1e100,amin=1e100;
+    int ineg=0, ipos =0;
+  for (int i=0;i<nbt;i++)
+    {
+       atotal0 += Th[i].mesure();
+      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+      double a= Area2(v[i0],v[i1],v[i2])/2;
+        if( a<0 ) ineg++;
+        else if (a>0) ipos++;
+      atotal +=  a;
+      amax=max(a,amax);
+      amin=min(a,amin);
+    }
+  double  eps = 1e-6 * max(abs(atotal),1e-100)/atotal0;
+  bool rev=(atotal<0);
+  if(ipos + ineg != nbt || (ipos >0 && ineg >0))
+  {
+      cout << " Error " << ipos << " triangle positif " << endl;
+      cout << " Error " << ineg << " triangle negatif " << endl;
+      cout << " Error " << nbt-ineg-ipos << " triangle nulle " << endl;
+      nberr++;
+  }
+  if(verbosity>2 && rev) cout <<  "  -- movemesh negatif tranfomation => reverse all triangle (old area " << atotal0 << ") ( new area  " << atotal << ") "<< endl;
+  for (int i=0;i<nbt;i++)
+    {
+      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+      if(rev) swap(i1,i2);
+      R a= Area2(v[i0],v[i1],v[i2])/2;
+      if ( a < Th[i].mesure()*eps)
+       { nberr++;
+        if (verbosity>1)
+         {
+          if (nberr==1) { cerr << "Erreur: MoveMesh "; }
+      cerr << " T = " << Th[i] <<  endl;
+          }
+          if (nberr < verbosity*5) {
+            cerr << " " <<i;
+            if ( nberr % 5 )  cerr << "\n\t";}
+         }
+       else
+        (*tt++).set(v,i0,i1,i2,Th[i].lab,a);
+
+   }
+    if (nberr)
+      { if (verbosity)
+      cerr << "Error movemesh: " << nberr << " triangles was reverse  (=> no move)" <<  endl;
+      cout << " u min " << U.min() << " max " << U.max() << endl;
+      cout << " v min " << V.min() << " max " << V.max() << endl;
+
+      delete []v;
+      delete []t;
+      delete []b;
+      throw(ErrorExec("Error move mesh triangles was reverse",1));
+      return 0;
+      }
+
+    BoundaryEdge * bb=b;
+  for (int i=0;i<neb;i++)
+    {
+     int i1=Th(Th.be(i)[0]);
+     int i2=Th(Th.be(i)[1]);
+     int lab=Th.be(i).lab;
+     if(rev) swap(i1,i2);
+     *bb++ = BoundaryEdge(v,i1,i2,lab);
+    }
+ {
+  Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
+  R2 Pn,Px;
+  m->BoundingBox(Pn,Px);
+  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
+  return m;
+
+}
+}
+// movemesh
+
+class Movemesh_OpS2 : public E_F0mps {
+ public:
+  Expression eTh;
+  Expression X, Y , Z;
+  // Expression  lab,reg;
+  static const int n_name_param = 3;
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+  KN< double >* arg(int i, Stack stack, KN< double > *a) const {
+    return nargs[i] ? GetAny< KN< double >* >((*nargs[i])(stack)) : a;
+  }
+  bool arg(int i, Stack stack, bool a) const {
+      return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+    }
+
+ public:
+    Movemesh_OpS2(const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
+    : eTh(tth), X(xxx), Y(yyy),Z(zzz) {
+    
+  //      int size;
+         
+    args.SetNameParam(n_name_param, name_param, nargs);
+     if( nargs[0]){
+        
+        const E_Array *a = dynamic_cast< const E_Array * >(nargs[0]);
+        ffassert(a);
+        //cout << " a size "<< a->size() << endl;
+        if ( a->size( ) != 2 && a->size( ) != 3  ) {
+          CompileError("movemesh(Th,transfo=[X,Y],...) need 2 or 3 componates in array ", atype< pmeshS >( ));
+        }
+        ffassert(!X && !Y && !Z);//  verif X,Y,Z == 0
+         X = to< double >((*a)[0]);
+         Y = to< double >((*a)[1]);
+         if (a->size( ) == 3 )
+          Z=to< double >((*a)[2]);
+    }
+  }
+
+  AnyType operator( )(Stack stack) const;
+};
+class MovemeshS2 : public OneOperator {
+ public:
+  int cas;
+  typedef const Mesh *pmesh;
+  typedef const MeshS *pmeshS;
+  MovemeshS2( ) : OneOperator(atype< pmesh >( ), atype< pmeshS >( )), cas(0) {}
+
+ // MovemeshS2(int) : OneOperator(atype< pmesh >( ), atype< pmeshS >( ), atype< E_Array >( )), cas(1) {}
+
+  E_F0 *code(const basicAC_F0 &args) const {
+      return new Movemesh_OpS2(args, t[0]->CastTo(args[0]));
+  }
+};
+
+AnyType Movemesh_OpS2::operator( )(Stack stack) const {
+    typedef const Mesh *pmesh;
+    typedef const MeshS *pmeshS;
+
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  MeshS *pTh = GetAny< MeshS * >((*eTh)(stack));
+  bool orientation= arg(2,stack,true);
+
+  ffassert(pTh);
+  MeshPoint *mpp(MeshPointStack(stack));
+
+   MeshS &Th = *pTh;
+    int nv = Th.nv;
+    int nt = Th.nt;
+    KN<double> U(nv),V(nv);
+    KN<double> *gz=0;
+    gz = arg(1,stack,gz);
+    cout << " gz " << gz  << endl;
+    double infini=DBL_MAX;
+    U=infini;
+    V=infini;
+    if(gz) gz->resize(nv);
+    for (int it=0;it<nt;it++)
+        for (int iv=0;iv<3;iv++)
+        {
+            int i=(Th)(it,iv);
+            if ( U[i]==infini) { // if nuset the set
+                
+                mp->setP(&Th,it,iv);
+                if(X)
+                    U[i]=GetAny<double>((*X)(stack));
+                else
+                    U[i] = Th[it][iv].x;
+                if(Y)
+                    V[i]=GetAny<double>((*Y)(stack));
+                else
+                    V[i] = Th[it][iv].y;
+                if(gz )
+                {
+                    if(Z)
+                        (*gz)[i]=GetAny<double>((*Z)(stack));
+                    else
+                        (*gz)[i] = Th[it][iv].z;
+
+                }
+            }
+        }
+
+  const Mesh *pThr= MoveTheMesh(Th,U,V,orientation);
+  *mp=mps;
+  Add2StackOfPtr2FreeRC(stack,pThr);
+  return SetAny<pmesh>(pThr);
+}
+
+// instance arguments for meshS
+
+basicAC_F0::name_and_type Movemesh_OpS2::name_param[] = {
+  {"transfo", &typeid(E_Array)},       // 0
+  {"getZ", &typeid(KN< double >*)},     // 1
+  {"orientation", &typeid(bool)}    // 2
+};
+
 template<>
 class Movemesh< Mesh > : public OneOperator {
  public:
@@ -9598,6 +9818,8 @@ static void Load_Init( ) {
 
   Global.Add("movemesh23", "(", new Movemesh< Mesh >);
   // Global.Add("movemesh", "(", new Movemesh<Mesh>(1));
+  //  Global.Add("movemesh", "(", new MovemeshS2(1)); genere un ambiguete on vide ...
+    Global.Add("movemesh", "(", new MovemeshS2);
 
       
   Global.Add("change", "(", new SetMesh< MeshL >);

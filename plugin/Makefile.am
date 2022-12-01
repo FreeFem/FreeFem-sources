@@ -14,6 +14,7 @@ mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
 mpi/bem.cpp \
+mpi/RadiativeTransfer_htool.cpp \
 mpi/mpi-cmaes.cpp \
 mpi/parmetis.cpp \
 seq/BEC.cpp \
@@ -41,6 +42,7 @@ seq/Element_P4.hpp \
 seq/Element_P4dc.cpp \
 seq/Element_P4dc.hpp \
 seq/Element_PkEdge.cpp \
+seq/Element_PkL.hpp \
 seq/Element_QF.cpp \
 seq/ExampleMetrics.h \
 seq/FreeFemQA.cpp \
@@ -65,6 +67,7 @@ seq/TensorK.hpp \
 seq/TransfoMesh_v2.cpp \
 seq/TransfoMesh_v2.hpp \
 seq/UMFPACK64.cpp \
+seq/vortextools.cpp \
 seq/VTK_writer.cpp \
 seq/VTK_writer_3d.cpp \
 seq/addNewType.cpp \

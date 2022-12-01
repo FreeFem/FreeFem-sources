@@ -35,7 +35,7 @@
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
-#include "libmesh5.h"
+#include "libmeshb7.h"
 
 
 #include "Mesh2dn.hpp"
@@ -131,7 +131,9 @@ int Mesh2::load(const string & filename)
 {
 
   int bin;
-  int ver,inm,dim;
+  int ver;
+  int64_t inm;
+  int dim;
   int lf=filename.size()+20;
   KN<char>  fileb(lf),filef(lf);
   char * pfile;
@@ -220,7 +222,8 @@ int Mesh2::load(const string & filename)
 
 int Mesh2::Save(const string & filename)
 {
-  int ver = GmfDouble, outm;
+    int ver = GmfDouble;
+    int64_t outm;
   if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,2)) ) {
     cerr <<"  -- Mesh2::Save  UNABLE TO OPEN  :"<< filename << endl;
     return(1);

@@ -8,8 +8,6 @@ macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"
 include "cube.idp"
 
-macro defPart(u)u// EOM             // partition of unity definition
-macro initPart(u)u// EOM            // partition of unity initialization
 macro Curl(ux, uy, uz)[dy(uz)-dz(uy), dz(ux)-dx(uz), dx(uy)-dy(ux)]// EOM
 macro CrossN(ux, uy, uz)[uy*N.z-uz*N.y, uz*N.x-ux*N.z, ux*N.y-uy*N.x]// EOM
 func Pk = Edge03d;
@@ -28,8 +26,6 @@ int[int] n2o;
 macro ThN2O()n2o// EOM
 buildDmesh(Th)
 {
-    macro def(i)i// EOM
-    macro init(i)i// EOM
     macro ThPkPart()Edge03ds0// EOM special FE for the domain partitioning
     createMat(Th, A, Pk)
 }

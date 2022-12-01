@@ -145,9 +145,9 @@ IFMACRO(!privateCreateMat)
             AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         }
     }
-    int[int] n2oGlobal, n2oNeighbor;
+    int[int] n2oGlobalPrivate, n2oNeighbor;
 IFMACRO(!privateDmesh#CartesianPartitioning)
-    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999, new2old = n2oGlobal);
+    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999, new2old = n2oGlobalPrivate);
 ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
@@ -191,7 +191,7 @@ ENDIFMACRO
 IFMACRO(!privateDmesh#CartesianPartitioning)
     {
         int[int] backup = privateDmesh#N2O;
-        int[int] new = n2oGlobal(privateDmesh#N2O);
+        int[int] new = n2oGlobalPrivate(privateDmesh#N2O);
         privateDmesh#N2O.resize(new.n);
         privateDmesh#N2O = new;
         n2oNeighbor.resize(backup.n);
@@ -248,15 +248,15 @@ ENDIFMACRO
     VhLocalPrivate sum;
     sum[] = khi[];
     VhGlobalPrivate phi;
-    if(n2oGlobal.n == globalName.nt) {
-        real[int] restrictionPart(n2oGlobal.n);
-        restrictionPart = part[](n2oGlobal);
+    if(n2oGlobalPrivate.n == globalName.nt && s == 1) {
+        real[int] restrictionPart(n2oGlobalPrivate.n);
+        restrictionPart = part[](n2oGlobalPrivate);
         part = 0.0;
         part[] = restrictionPart;
     }
     else
         part = part;
-    n2oGlobal.resize(0);
+    n2oGlobalPrivate.resize(0);
     int numberIntersection = 0;
     {
         int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
@@ -569,6 +569,10 @@ ENDIFMACRO
 else {
     privateDmesh#ThName#khi[0] = 1.0;
     privateDmesh#ThName#khi[1] = 1.0;
+IFMACRO(ThName#N2O)
+    ThName#N2O.resize(ThName.nt);
+    ThName#N2O = 0:ThName.nt - 1;
+ENDIFMACRO
 }
 }
 EndMacro
@@ -770,7 +774,7 @@ ENDIFMACRO
     buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm)
 }
 EndMacro
-macro copyDmesh(OldName, NewName)
+macro initializeDmesh(NewName)
 IFMACRO(!privateDmesh#NewName)
 NewMacro privateDmesh#NewName()privateDmesh#NewName EndMacro
 NewMacro privateDmesh#NewName#khi()privateDmesh#NewName#khiDef EndMacro
@@ -778,6 +782,9 @@ NewMacro privateDmesh#NewName#intersection()privateDmesh#NewName#intersectionDef
 real[int][int] privateDmesh#NewName#khi(2);
 real[int][int] privateDmesh#NewName#intersection;
 ENDIFMACRO
+EndMacro
+macro copyDmesh(OldName, NewName)
+initializeDmesh(NewName)
 IFMACRO(privateDmesh#OldName)
 NewName = OldName;
 privateDmesh#NewName#khi[0].resize(privateDmesh#OldName#khi[0].n);
@@ -1192,6 +1199,15 @@ macro buildMatEdgeRecursive(Th, s, nlevel, prolongation, A, P, comm, PkPart, def
     for(int i = 0; i < nlevel; ++i)
         constructor(A[i], DTab[i].n, intersectionMat, DTab[i], bs = bsMat, communicator = comm, level = i);
 }// EOM
+macro buildMatEdgeRecursiveWithPartitioning(Th, part, s, nlevel, prolongation, A, P, comm, PkPart, defPart, initPart, bsMat) {
+    int[int] emptyArray(0);
+    meshN[int] ThBorderTab(nlevel);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(nlevel);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, nlevel, prolongation, intersectionMat, DTab, P, comm, false, PkPart, defPart, initPart, emptyArray, part, bsMat)
+    for(int i = 0; i < nlevel; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], bs = bsMat, communicator = comm, level = i);
+}// EOM
 macro buildMatEdgeWithPartitioning(Th, part, s, A, P, comm, PkPart, defPart, initPart, bsMat) {
     real[int] DMat;
     int[int][int] intersectionMat;
@@ -1321,6 +1337,15 @@ macro buildMatEdgeRecursive(Th, s, nlevel, prolongation, A, P, comm, PkPart, def
     for(int i = 0; i < nlevel; ++i)
         constructor(A[i], DTab[i].n, intersectionMat, DTab[i], communicator = comm, level = i);
 }// EOM
+macro buildMatEdgeRecursiveWithPartitioning(Th, part, s, nlevel, prolongation, A, P, comm, PkPart, defPart, initPart) {
+    int[int] emptyArray(0);
+    meshN[int] ThBorderTab(nlevel);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(nlevel);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, nlevel, prolongation, intersectionMat, DTab, P, comm, false, PkPart, defPart, initPart, emptyArray, part, 1)
+    for(int i = 0; i < nlevel; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], communicator = comm, level = i);
+}// EOM
 macro buildMatEdgeWithPartitioning(Th, part, s, A, P, comm, PkPart, defPart, initPart) {
     real[int] DMat;
     int[int][int] intersectionMat;
@@ -1353,17 +1378,23 @@ macro buildMatMinimalist(Th, A, P) {
 }// EOM
 ENDIFMACRO
 
-macro convectParallel(ThName, uVel, dt, uChi, safety)
+macro convectParallel(ThName, uVel, dt, uKhi, safety)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
-if(verbosity > 0)
+IFMACRO(!ThName#VelocityPk)
+func ThSinglePk = P1;
+ENDIFMACRO
+IFMACRO(ThName#VelocityPk)
+func ThSinglePk = ThName#VelocityPk;
+ENDIFMACRO
+if(verbosity >= 0)
     mpiBarrier(ThName#Comm);
 real timerConvect = mpiWtime();
 if(mpiSize(ThName#Comm) == 1) {
-    uChi = convect(uVel, dt, uChi);
+    uKhi = convect(uVel, dt, uKhi);
 }
 else {
     int backupSM = searchMethod;
@@ -1403,22 +1434,35 @@ ENDIFMACRO
         }
     }
     real[int] D, backupRegion(ThName.nt);
-    real[int] buffer(ThName.nt * (dimension + 1));
 IFMACRO(dimension,2)
-    func PkVel = [P1, P1];
+    func PkVel = [ThSinglePk, ThSinglePk];
 ENDIFMACRO
 IFMACRO(dimension,3)
-    func PkVel = [P1, P1, P1];
+    func PkVel = [ThSinglePk, ThSinglePk, ThSinglePk];
 ENDIFMACRO
     fespace VhVelPrivate(ThName, PkVel);
-    fespace VhChiPrivate(ThName, P1);
+    fespace VhKhiPrivate(ThName, ThSinglePk);
+    real[int] buffer(VhVelPrivate.ndof + VhKhiPrivate.ndof);
     {
         VhVelPrivate defVel(uVelLocal) = uVel;
-        for[i, v : uVelLocal[]] v *= privateDmesh#ThName#khiDef[0][i / dimension];
-        buffer(0:ThName.nv * dimension - 1) = uVelLocal[];
+        fespace VhKhiP1(ThName, P1);
+        VhKhiP1 khiP1;
+        khiP1[] = privateDmesh#ThName#khiDef[0];
+        VhKhiPrivate khi;
+        if(khi[].n != khiP1[].n)
+            khi = khiP1;
+        else
+            khi[] = khiP1[];
+        for[i, v : uVelLocal[]] v *= khi[][i / dimension];
+        buffer(0:VhVelPrivate.ndof - 1) = uVelLocal[];
+        buffer(VhVelPrivate.ndof:VhVelPrivate.ndof + VhKhiPrivate.ndof - 1) = khi[];
+        if(khi[].n != uKhi[].n) {
+            khi = uKhi;
+            buffer(VhVelPrivate.ndof:VhVelPrivate.ndof + VhKhiPrivate.ndof - 1) .*= khi[];
+        }
+        else
+            buffer(VhVelPrivate.ndof:VhVelPrivate.ndof + VhKhiPrivate.ndof - 1) .*= uKhi[];
     }
-    buffer(ThName.nv * dimension:ThName.nv * (dimension + 1) - 1) = uChi[];
-    buffer(ThName.nv * dimension:ThName.nv * (dimension + 1) - 1) .*= privateDmesh#ThName#khiDef[0];
     fespace PhPartPrivate(ThName, P0);
     {
         PhPartPrivate backup = region;
@@ -1453,9 +1497,9 @@ ENDIFMACRO
         if(part[].linfty > 1.0e-2) {
             int[int] n2o;
             sendTh[i] = trunc(ThName, part > 1.0e-2, new2old = n2o);
-            fespace VhRestrictionPrivate(sendTh[i], P1);
+            fespace VhRestrictionPrivate(sendTh[i], ThSinglePk);
             int[int] map;
-            map = restrict(VhRestrictionPrivate, VhChiPrivate, n2o);
+            map = restrict(VhRestrictionPrivate, VhKhiPrivate, n2o);
             exchangeU[rankExchange.n + i].resize(VhRestrictionPrivate.ndof * (dimension + 1));
             for[j, w : map] {
                 exchangeU[rankExchange.n + i][dimension * j] = buffer[dimension * w];
@@ -1463,7 +1507,7 @@ ENDIFMACRO
 IFMACRO(dimension,3)
                 exchangeU[rankExchange.n + i][dimension * j + 2] = buffer[dimension * w + 2];
 ENDIFMACRO
-                exchangeU[rankExchange.n + i][VhRestrictionPrivate.ndof * dimension + j] = buffer[VhChiPrivate.ndof * dimension + w];
+                exchangeU[rankExchange.n + i][VhRestrictionPrivate.ndof * dimension + j] = buffer[VhKhiPrivate.ndof * dimension + w];
             }
             Isend(processor(v, rqSendTh[i]), sendTh[i]);
             Isend(processor(v, rqSendU[i]), exchangeU[rankExchange.n + i]);
@@ -1478,7 +1522,7 @@ ENDIFMACRO
         for[i, v : rankExchange] {
             int index = mpiWaitAny(rqRecvTh);
             if(recvTh[index].nt) {
-                fespace VhRestrictionPrivate(recvTh[index], P1);
+                fespace VhRestrictionPrivate(recvTh[index], ThSinglePk);
                 exchangeU[index].resize(VhRestrictionPrivate.ndof * (dimension + 1));
                 Irecv(processor(rankExchange[index], rqRecvU[index]), exchangeU[index]);
                 fespace PhRestrictionPrivate(recvTh[index], P0);
@@ -1494,15 +1538,15 @@ ENDIFMACRO
     }
     meshN interpolateExchange;
     fespace VhVelExchangePrivate(gluedExchange, PkVel);
-    fespace VhChiExchangePrivate(gluedExchange, P1);
+    fespace VhKhiExchangePrivate(gluedExchange, ThSinglePk);
     VhVelExchangePrivate defVel(uVelExchange);
-    VhChiExchangePrivate uChiExchange;
+    VhKhiExchangePrivate uKhiExchange;
     for[i, v : rankExchange] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
             if(recvTh[index].nt) {
-                fespace VhRestrictionPrivate(recvTh[index], P1);
-                matrix R = interpolate(VhRestrictionPrivate, VhChiExchangePrivate);
+                fespace VhRestrictionPrivate(recvTh[index], ThSinglePk);
+                matrix R = interpolate(VhRestrictionPrivate, VhKhiExchangePrivate);
                 if(R.nnz != R.n) {
                     R.thresholding(1.0e-2);
                     assert(R.nnz == R.n);
@@ -1513,25 +1557,26 @@ ENDIFMACRO
 IFMACRO(dimension,3)
                     uVelExchange[][dimension * j + 2] += exchangeU[index][dimension * i + 2];
 ENDIFMACRO
-                    uChiExchange[][j] += exchangeU[index][dimension * VhRestrictionPrivate.ndof + i];
+                    uKhiExchange[][j] += exchangeU[index][dimension * VhRestrictionPrivate.ndof + i];
                 }
             }
         }
     }
     searchMethod = backupSM;
     fespace VhPhiExchangePrivate(gluedExchange, P0);
+    fespace VhKhiExchangeP1(gluedExchange, P1);
     int rank = mpiRank(ThName#Comm);
     VhPhiExchangePrivate phi = abs(region - rank) < 1.0e-2 ? 1.0 : 0.0;
-    VhChiExchangePrivate chi;
-    AddLayers(gluedExchange, phi[], safety, chi[]);
+    VhKhiExchangeP1 khi;
+    AddLayers(gluedExchange, phi[], safety, khi[]);
     int[int] n2o;
-    meshN gluedExchangeSafety = trunc(gluedExchange, abs(chi) > 0.1, new2old = n2o);
+    meshN gluedExchangeSafety = trunc(gluedExchange, abs(khi) > 0.1, new2old = n2o);
     fespace VhVelExchangeSafetyPrivate(gluedExchangeSafety, PkVel);
-    fespace VhChiExchangeSafetyPrivate(gluedExchangeSafety, P1);
-    int[int] map = restrict(VhChiExchangeSafetyPrivate, VhChiExchangePrivate, n2o);
+    fespace VhKhiExchangeSafetyPrivate(gluedExchangeSafety, ThSinglePk);
+    int[int] map = restrict(VhKhiExchangeSafetyPrivate, VhKhiExchangePrivate, n2o);
     VhVelExchangeSafetyPrivate defVel(uVelExchangeSafety);
-    VhChiExchangeSafetyPrivate uChiExchangeSafety;
-    uChiExchangeSafety[] = uChiExchange[](map);
+    VhKhiExchangeSafetyPrivate uKhiExchangeSafety;
+    uKhiExchangeSafety[] = uKhiExchange[](map);
     for[j, w : map] {
         uVelExchangeSafety[][dimension * j] = uVelExchange[][dimension * w];
         uVelExchangeSafety[][dimension * j + 1] = uVelExchange[][dimension * w + 1];
@@ -1539,8 +1584,8 @@ IFMACRO(dimension,3)
         uVelExchangeSafety[][dimension * j + 2] = uVelExchange[][dimension * w + 2];
 ENDIFMACRO
     }
-    uChiExchangeSafety = convect(defVel(uVelExchangeSafety), dt, uChiExchangeSafety);
-    uChi = uChiExchangeSafety;
+    uKhiExchangeSafety = convect(defVel(uVelExchangeSafety), dt, uKhiExchangeSafety);
+    uKhi = uKhiExchangeSafety;
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
@@ -1914,7 +1959,7 @@ ENDIFMACRO
     assert(reduce == mpiSize(ThScatterName#Comm));
     if(ThName#Comm) {
         meshN ThNoOverlap;
-        if(mpiSize(ThName#Comm) == 1)
+        if(mpiSize(ThName#Comm) == 1 || (privateDmesh#ThName#intersectionDef.n == 0 && privateDmesh#ThName#khiDef[0].n == 0 && privateDmesh#ThName#khiDef[1].n == 0))
             ThNoOverlap = ThName;
         else
             ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);

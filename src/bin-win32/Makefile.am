@@ -21,7 +21,7 @@
 # E-MAIL  : ...
 
 EXTRA_DIST = launchff++.cpp
-LDADD2 = $(ARPACKLIBS) $(UMFPACKLIBS) $(BLASLIBS) $(G2CLIB)
+LDADD2 = $(ARPACKLIBS) $(UMFPACKLIBS) $(BLASLIBS) $(G2CLIB)  $(FF_ZLIB)
 # remark the libff.dll was splited in 6 because ld trap
 # to much routine => memory fault in ld
 # but now I see thant the couple allocation/delete
@@ -73,6 +73,7 @@ win32-dll-target: FreeFem++.exe ff-c++
 	echo "on a fini"
 else
 win32-dll-target: FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe launchff++.exe ff-c++ $(MPIPROG)
+	-cp ../nw/ffglut.exe . 2> /dev/null
 	-for i in $(LDADD2) ; do case $$i in *.dll) echo cp -p $$i .; cp -p $$i . ;; esac ; done
 	./copy-dll.sh
 	echo "on a fini"
@@ -113,8 +114,8 @@ ff-c++:../../plugin/seq/load.link.in
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) $(DESTDIR)${bindir}
-	$(INSTALL_SCRIPT) *.dll $(DESTDIR)${bindir}
+	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) *.dll "$(DESTDIR)${bindir}"
 install-exec-local--::
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.

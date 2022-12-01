@@ -20,12 +20,38 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.12]
 ### Added
--
+- add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
+  for detail )
+- add pdfPLOT form fujiwara@acs.i.kyoto-u.ac.jp [http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff++-programs/]
+  usage: plot( ..., pdf="filename.pdf", svg="filename.svg" );
+- add missing code for Discontinous Galerkin in 3d for RHS 
+   ( see [problem-in-3d-discontinuous-galerkin-computation][https://community.freefem.org/t/problem-in-3d-discontinuous-galerkin-computation/2015/6] )
+- add in examples/mpi/chamonix.edp : radiative transfer (use new plugin 
+     plugin/mpi/RadiativeTransfer_htool.cpp, illustrates the use of htool for compression
+     of user defined matrix operator)
+- transform a surface meshS in 2d mesh (warning with overloaping, no test) with movemesh:
+ 
+    meshS Ths = square3(10,10,[x,y,square(2*x-1)+square(2*y-1)]); 
+    real[int] gzz;
+    mesh Th2 = movemesh(Ths,transfo=[x,y,z],getZ=gzz);//  get flat 2d mesh form meshS 
 
+- New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3` 
+	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
+	see exemple end of exemple plugin/testFE-P3
+- missing new 1d finite element P4 in plugin `Elemnt_P4`
+- plugin `plugin/seq/MatrixMarket.cpp`  to read and save matrix in MatrixMarket and add also a binary form 
+     (see examples/plugin/MatrixMarket.edp test)
+- add ILU on complex matrix in plugin IncompleteCholesky 
+    remark:the IncompleteCholesky is writen but not tested
+- add test of functionnal interface of complex eigen value problem in 
+    `examples/eigen/LapEigenValueFuncComplex.edp`
 ### Changed
--
+-  correct some old code with old version of K.facePermutation() function in 
+      plugin/seq/Element_Mixte3d.cpp and plugin/seq/Element_P2bulle3.cpp 
+      (not tested) 
+
 
 ### Deprecated
 -
@@ -34,7 +60,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+-  fixe in A.RemoveHalf (alway return a new matrix)
 
 ## [4.11]
 ### Added
@@ -71,9 +97,12 @@ All notable changes to this project will be documented in this file.
 - new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
    Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
    current on  Edge in orientate edge by number of vertices.  
--  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  noncoforming  (continuite of P2 mod)   
+-  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  nonconforming  (continuite of P2 mod)   
    and add 2 examples with this new finite element 
       examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+-  plugin Element_P3nc for new 2d finite element P3pnc (P3 )  nonconforming  (continuite of P2 mod)   
+   and add  examples with this new finite element 
+      examples/plugin/testFE-P3pnc.edp
 - function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
     (if none zero => set BC ) 
   setBC(A,au1[],-2); and the example 
@@ -87,7 +116,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Removed
--map function  in plugin dfft 
+- map function  in plugin dfft 
 
 ### Fixed
 - pow(int,int) now call int version not complex version..
@@ -106,7 +135,7 @@ All notable changes to this project will be documented in this file.
   `nuVertex` of now the vertex number of element in intallBE0d integral
   `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
   update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
-  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS.
+  add code to use jump, mean, otherside of test function on MeshL case. ( not in mesh3 ) to compute RHS.
 - add getcwd() function in shell plugin to get the current working dir
 - add nuVertex to get the vextex on element in some int?
 
@@ -511,7 +540,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..develop
+[4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12
 [4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9

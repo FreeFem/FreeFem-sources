@@ -3343,7 +3343,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,
             R2 Pt(pi),Ptu;
             R3 Ptv;
             R3 P(T(Pt));
-            R2 PP(P.p2());
+            R3 PP(P); // correction FH. Sep 2022.. 
             bool outsideu,outsidev;
             // ici trouve le T
             int iut=0,ivt=0;
@@ -8766,102 +8766,316 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
 
     }
 
-    // creating an instance of Element_rhs
-    // case 3D volume
-    template<class R>
-    void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
-                      int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                      const QuadratureFormular & FI,bool alledges=false,int optim=1)
+// creating an instance of Element_rhs
+// case 3D volume
+
+
+//  VFVF
+template<class R>
+void  Element_rhsVF(const FElement3 & Kv,const FElement3 & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
+                    const QuadratureFormular & FIb,
+                    int optim=1)
+{
+   
+      int intmortar=0;
+  //     AFAIRE("Element_rhsVF 3d  "); A FAit 23 sep 2022 FH
+    typedef typename FElement3::Element Element;
+    ffassert(B!=0);
+    pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
+    Stack stack= bs->first;
+    double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
+    ffassert(ie>=0 && ie < 4); //  int on Face
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+
+    const Element & T  = Kv.T;
+    const Element & TT  = KKv.T;
+    bool sameT = &T == & TT;
+    int nTonEdge =  &T == &TT ? 1 : 2;
+    double cmean = 1./nTonEdge;
+    bool onborder= &T == &TT;
+    const FElement3 *pKKv= !onborder ?  & KKv : 0;
+
+    long npi;
+    long i;
+    long N= Kv.N;
+    long nv=Kv.NbDoF();
+    long nnv=Kv.NbDoF();
+    assert(nv == nnv) ;
+    int lp =nv*2;
+    KN_<int> pp(ip,lp),pk(ip+lp,lp),pkk(ip+2*lp,lp);
+    int n = BuildMEK_KK(lp,pp,pk,pkk,&Kv,pKKv);
+
+    bool classoptm = copt && Op.optiexpK;// a voir !!!!
+    if (Kv.number<1 && ( verbosity > 1 ) )
+    cout << "Element_rhsVF 3d P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside << " opt: " << optim << endl;
+
+     bool oldopt=1;
+    int  iloop=0;
+    KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
+    if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2)
+    cout << "Element_rhsVF 3d P: copt = " << copt << " " << classoptm << " opt: " << optim << endl;
+     //
+    int lastop=0;
+    lastop = 0;
+    What_d Dop = Op.DiffOp(lastop);
+
+    long lffv = sameT ? 0  : nv*N*lastop;
+
+    RNMK_ fv(p,nv,N,lastop); //  the value for basic fonction in K
+    RNMK_ ffv(p + lffv ,nnv,N,lastop); //  the value for basic fonction in KK
+     
+    
+
+
+    R3 NN= T.N(ie);
+    double mes=NN.norme();
+    NN/=mes;
+//  PB for find common dof
+    // compute the permutaion face ie to iie ...
+    // a little tricky
+    int fpe= T.facePermutation(ie);
+    int fpee= TT.facePermutation(iie);
+    int pr[3],ppr[3];
+    SetNumPerm<3>(fpe,pr);
+    SetNumPerm1<3>(fpee,ppr);
+
+    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
     {
-        Stack stack=pvoid2Stack(vstack);
-        int intmortar=0;
-        //  AFAIRE("Element_rhs 3d on surface  2 diff mesh ");
-        static int count =0;
-        if(count++<1)
+  
+        GQuadraturePoint<R2> pi( FIb[npi]);
+        double lpi[3];
+        pi.toBary(lpi);
+        double llpi[]={lpi[pr[ppr[0]]], lpi[pr[ppr[1]]], lpi[pr[ppr[2]]]};
+        double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
+        R3 Pt(T.PBord(ie,pi));
+        R2 pii(llpi+1);
+        R3 PP_t(TT.PBord(iie,pii));
         {
-            cout << " Element_rhs 3d on surface  2 diff mesh int test (FH)" << endl;
-            cout << " -----------------------------------------------------" << endl;
+            static int err=0;
+            R3 P(T(Pt)),PP(TT(PP_t)),D(P,PP);
+           if(  D.norme2() > 1e-5)
+           {
+               const Mesh3 & Th=Kv.Vh.Th;
+               cout << " pr "<< pr[0] << pr[1]<< pr[2] << " prr " << ppr[0] << ppr[1]<< ppr[2]<<" "
+               << ppr[pr[0]] <<  ppr[pr[1]] << ppr[pr[2]]  << "   " <<  pr[ppr[0]] <<  pr[ppr[1]] << pr[ppr[2]]<< endl;
+               cout << ie << " " << iie << endl;
+               cout << " T = " << Th(T[0]) << " " <<Th(T[1]) << " " << Th(T[2]) << " " << Th(T[3]) << endl;
+               cout << " TT = " << Th(TT[0]) << " " <<Th(TT[1]) << " " << Th(TT[2]) << " " << Th(TT[3]) << endl;
+               cout << fpe << " " << fpee << endl;
+               cout << P << " " << PP << " diff=D.norme2() " << D.norme2()  << endl;
+               err++;
+               ffassert(err<10);
+           }
+            
         }
-        // integration 1d on 2 diff mesh
+        Kv.BF(Dop,Pt,fv);
+        if(!sameT) KKv.BF(Dop,PP_t,ffv);
+        if(verbosity==99999 &&( Kv.number == 3 || KKv.number == 2)) {
+            cout << "intallfaces " << Kv.number << " " << fv << endl;
+            cout << "intallfaces " << KKv.number << " " << ffv << endl;
+        }
+        MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,ie);
+        if (classoptm) (*Op.optiexpK)(stack); // call optim version
 
 
-        MeshPoint mp=*MeshPointStack(stack) ;
-        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+        
 
 
-        bool classoptm = copt && Op.optiexpK;
-        //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
-        if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
-        cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt "<< optim <<endl;
-        assert(Op.MaxOp() <last_operatortype);
-        //
-        int lastop=0;
-        lastop = 0;
-        What_d Dop = Op.DiffOp(lastop);
-        // assert(lastop<=3);
-        const Tet & T  = KI;
-        long npi;
 
-        const Tet * Kp=0;
-
-        for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        for ( i=0;  i<n;   i++ )
         {
+            int ik= pk[i];
+            int ikk=pkk[i];
+            int dofik=ik>=0? Kv(ik):-1;
+            int dofikk=ikk>=0? KKv(ikk):-1;
 
-            GQuadraturePoint<R2> pi(FI[npi]);
-            R3 NN= T.N(ie);
-            double mes=NN.norme();
-            NN/=mes;
-            double coef = 0.5*mes*pi.a; //
-            R3 Pt(T.PBord(ie,pi)),PI(T(Pt));
+            RNM_ wi(fv(Max(ik,0),'.','.'));
+            RNM_ wwi(ffv(Max(ikk,0),'.','.'));
 
 
-
-            MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,NN,ie);
-            if (classoptm) (*Op.optiexpK)(stack); // call optim version
-            bool outside;
-            R3 PIt;
-            const Tet & K  = *Vh.Th.Find(PI,PIt,outside,Kp);
-            if ( ! outside || intmortar) //  FH march 2009 ???
-            {
-                const  FElement3  Kv= Vh[K];
-                long i,n=Kv.NbDoF(),N=Kv.N;
-                RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
-                Kv.BF(Dop,PIt,fu);
-
-                for ( i=0;  i<n;   i++ )
-                //   if (alledges || onWhatIsFace[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
+                int il=0;
+                for (auto l=Op.v.begin();l!=Op.v.end();l++,il++)
                 {
-                    RNM_ wi(fu(i,'.','.'));
-                    int il=0;
-                    for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                    auto ll(*l);
+                    pair<int,int> ii(ll.first);
+                    int iis = ii.second;
+
+                    int iicase  = iis / last_operatortype;
+
+                    iis %= last_operatortype;
+              /*
+                    double w_i=0,w_j=0,ww_i=0;
+
+                    if(ik>=0) w_i =   wi(ii.first,iis );
+                
+
+                    if( iicase>0 && ikk>=0) ww_i =  wwi(ii.first,iis );
+                    
+
+
+                    if       (iicase==Code_Jump) ww_i=-(w_i = ww_i-w_i); // jump
+                    else  if (iicase==Code_Mean) {
+
+                        ww_i=w_i = cmean*  (w_i + ww_i );} // average
+                    else  if (iicase==Code_OtherSide) swap(w_i,ww_i);  // valeur de autre cote
+
+ 
+                    // R ccc = GetAny<R>(ll.second.eval(stack));
+
+                    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                    if ( copt && ( optim==1) && Kv.number <1)
                     {
-                        LOperaD::K ll(*l);
-                        pair<int,int> ii(ll.first);
-                        double w_i =  wi(ii.first,ii.second);
-                        R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                        // FFCS - removing what is probably a small glitch
-                        if ( copt && ( optim==1) && Kv.number<1)
-                        {
-                            R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( c != cc) {
-                                cerr << c << " =! " << cc << endl;
-                                cerr << "Sorry error in Optimization (y) add:  int1d(Th,optimize=0)(...)" << endl;
-                                ExecError("In Optimized version "); }
-                        }
-
-
-                        //= GetAny<double>(ll.second.eval(stack));
-
-                        B[Kv(i)] += coef * c * w_i;
+                        R cc  =  GetAny<R>(ll.second.eval(stack));
+                        CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_OpVF3d  (face) add:   intallface(Th,optimize=0)(...)");
+                     }
+                    if(verbosity==99999)
+                        cout << ie << " / " << i <<  "/  "<<"  pi " << npi << " : " << coef << " c= " << ccc << " " << w_i  << " = " << coef * ccc * w_i
+                        << " k/kk  " << Kv.number << " "<< KKv.number << " :: " << ik << " " << ikk  << ",  " << " ii" << ii.second << " w= "   // << " // " << bbnElementonB(stack)
+                        << w_i << " " << ww_i << endl;
+                    if(dofik>=0) B[dofik] += coef * ccc * w_i;
+                    if(dofikk>=0) B[dofikk] += coef * ccc * ww_i;
+                    */
+                    
+                    double w_i=0,ww_i=0;
+                    if(ik>=0) w_i =   wi(ii.first,iis );
+                    if( iicase>0 )
+                    {
+                        if( ikk>=0) ww_i =  wwi(ii.first,iis );
+                        if       (iicase==  Code_Jump)      w_i = -w_i; ///(w_i = ww_i-w_i); // jump
+                        else  if (iicase==Code_Mean)      ww_i=w_i = cmean*  (w_i + ww_i ); // average
+                        else  if (iicase==Code_OtherSide) std::swap(w_i,ww_i);  // valeur de autre cote
+                        else ffassert(0);
                     }
-                }
+                    R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                    // FFCS - removing what is probably a small glitch
+                    if ( copt && ( optim==1) && Kv.number<1)
+                    {
+                        R cc  =  GetAny<R>(ll.second.eval(stack));
+                        if ( c != cc) {
+                            cerr << c << " =! " << cc << endl;
+                            cerr << "Sorry error in Optimization (x) add:  int2d(Th,optimize=0)(...)" << endl;
+                            ExecError("In Optimized version "); }
+                    }
 
+                    if(verbosity>999)
+                    cout<< iicase << " : " << dofik << " " << dofikk << " :: " << coef << " "<< c << " " << w_i << " " << ww_i << " K  = "<< Kv.number<< " " << KKv.number << " ?? ";
+ 
+                    //= GetAny<double>(ll.second.eval(stack));
+
+                    if(dofik>=0) B[dofik] += coef * c * w_i;
+                    if(dofikk>=0) B[dofikk] += coef * c * ww_i;
+                    if(verbosity>999)
+                    {
+                        if(dofik>=0)   cout << " + "<< dofik << " " << coef * c * w_i << " b " << B[dofik]   << " , cm  " << cmean;
+                        if(dofikk>=0)  cout << " + "<< dofikk <<" " <<  coef * c * ww_i << " b " << B[dofikk] << " , cm  " << cmean;
+                        cout << endl;
+                    }
+
+               }
             }
         }
-        *MeshPointStack(stack) = mp;
+    
+
+
+    *MeshPointStack(stack) = mp;
 
     }
+// creating an instance of Element_rhs
+// case 3D volume
+template<class R>
+void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
+                  int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
+                  const QuadratureFormular & FI,bool alledges=false,int optim=1)
+{
+    Stack stack=pvoid2Stack(vstack);
+    int intmortar=0;
+    //  AFAIRE("Element_rhs 3d on surface  2 diff mesh ");
+    static int count =0;
+    if(count++<1)
+    {
+        cout << " Element_rhs 3d on surface  2 diff mesh int test (FH)" << endl;
+        cout << " -----------------------------------------------------" << endl;
+    }
+    // integration 1d on 2 diff mesh
 
+
+    MeshPoint mp=*MeshPointStack(stack) ;
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+
+
+    bool classoptm = copt && Op.optiexpK;
+    //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+    if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
+    cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt "<< optim <<endl;
+    assert(Op.MaxOp() <last_operatortype);
+    //
+    int lastop=0;
+    lastop = 0;
+    What_d Dop = Op.DiffOp(lastop);
+    // assert(lastop<=3);
+    const Tet & T  = KI;
+    long npi;
+
+    const Tet * Kp=0;
+
+    for (npi=0;npi<FI.n;npi++) // loop on the integration point
+    {
+
+        GQuadraturePoint<R2> pi(FI[npi]);
+        R3 NN= T.N(ie);
+        double mes=NN.norme();
+        NN/=mes;
+        double coef = 0.5*mes*pi.a; //
+        R3 Pt(T.PBord(ie,pi)),PI(T(Pt));
+
+
+
+        MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,NN,ie);
+        if (classoptm) (*Op.optiexpK)(stack); // call optim version
+        bool outside;
+        R3 PIt;
+        const Tet & K  = *Vh.Th.Find(PI,PIt,outside,Kp);
+        if ( ! outside || intmortar) //  FH march 2009 ???
+        {
+            const  FElement3  Kv= Vh[K];
+            long i,n=Kv.NbDoF(),N=Kv.N;
+            RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+            Kv.BF(Dop,PIt,fu);
+
+            for ( i=0;  i<n;   i++ )
+            //   if (alledges || onWhatIsFace[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
+            {
+                RNM_ wi(fu(i,'.','.'));
+                int il=0;
+                for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                {
+                    LOperaD::K ll(*l);
+                    pair<int,int> ii(ll.first);
+                    double w_i =  wi(ii.first,ii.second);
+                    R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                    // FFCS - removing what is probably a small glitch
+                    if ( copt && ( optim==1) && Kv.number<1)
+                    {
+                        R cc  =  GetAny<R>(ll.second.eval(stack));
+                        if ( c != cc) {
+                            cerr << c << " =! " << cc << endl;
+                            cerr << "Sorry error in Optimization (y) add:  int1d(Th,optimize=0)(...)" << endl;
+                            ExecError("In Optimized version "); }
+                    }
+
+
+                    //= GetAny<double>(ll.second.eval(stack));
+
+                    B[Kv(i)] += coef * c * w_i;
+                }
+            }
+
+        }
+    }
+    *MeshPointStack(stack) = mp;
+
+}
     // creating an instance of Element_rhs
     // case 3D surface
     template<class R>
@@ -9109,68 +9323,58 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
         ffassert(0);
     }
 
-    // generic template for AssembleVarForm
-    template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
-    bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
-                         MC  * A,KN_<R> * B,const list<C_F0> &largs)
-    { // return true if BC
-        
-        typedef MMesh * pmesh; // integration mesh type
-        bool ret=false;
-        typedef DotStar_KN_<R> DotStar;
-        typedef DotSlash_KN_<R> DotSlash;
-        list<C_F0>::const_iterator ii,ib=largs.begin(),
-        ie=largs.end();
-        using namespace FreeFempp;
-        TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
-        assert( tvf);
-        for (ii=ib;ii != ie;ii++)
-        {
-            Expression e=ii->LeftValue();
-            aType r = ii->left();
+// generic template for AssembleVarForm
+template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
+bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
+                     MC  * A,KN_<R> * B,const list<C_F0> &largs)
+{ // return true if BC
+    
+    typedef MMesh * pmesh; // integration mesh type
+    bool ret=false;
+    typedef DotStar_KN_<R> DotStar;
+    typedef DotSlash_KN_<R> DotSlash;
+    list<C_F0>::const_iterator ii,ib=largs.begin(),
+    ie=largs.end();
+    using namespace FreeFempp;
+    TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
+    assert( tvf);
+    for (ii=ib;ii != ie;ii++)
+    {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
         //    if(verbosity > 99)   cout <<  << "AssembleVarForm " <<  << " " <<  (*A)(0,3) << endl;
-            if (r==  tvf->tFB)
-            { if (A)
+        if (r==  tvf->tFB)
+        {
+            if (A)
+            {
+                const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
+                if((bf->di->d != MMesh::Rd::d) || (bf->di->dHat != MMesh::RdHat::d) )
                 {
-                    const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
-                    if(bf->di->d != MMesh::Rd::d )
-                    {
-                      
-                      if( bf->di->dHat==2)
-                    {
-                        cout << " int on MeshS ( Bilinear Form ) toDo  " << endl;
-                        ffassert(0);
-                        
-                    }
-                    else  if( bf->di->dHat==1)
-                    {
-                        cout << " int on MeshL ( Bilinear Form ) toDo  " << endl;
-                        ffassert(0);
-                            
-                    }
-                    else if(bf->di->d != MMesh::Rd::d ){
-                        cout << " int 2d case ( Bilinear Form ) on Mesh"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
-                        ffassert(0);}
-                    }
-                    else {
+                    cout << " Errer: int "<< bf->di->dHat << "d case ( Bilinear Form ) on Mesh"<< MMesh::RdHat::d <<" Bizarre  !!!!! "<< endl;
+                    cout << "    dim coord (template) "<<MMesh::Rd::d << " mesh : " << bf->di->d << endl;
+
+                  ffassert(0);        
+          
+                }
+                else {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
-                    }
                 }
             }
-            else if (r==tvf->tMat)
-            {
-                if (A)
+        }
+        else if (r==tvf->tMat)
+        {
+            if (A)
                 InternalError(" Add sparse matrice; to do, sorry");
-            }
-            else if (r==tvf->tFL)
-            {
-                if (B) {
-                    const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
-                    if(bf->di->d != MMesh::Rd::d )
-                    {
-                      
-                      if( bf->di->dHat==2)
+        }
+        else if (r==tvf->tFL)
+        {
+            if (B) {
+                const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
+                if(bf->di->d != MMesh::Rd::d )
+                {
+                    
+                    if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS toDo  ( Linear Form )" << endl;
                         ffassert(0);
@@ -9180,56 +9384,56 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
                     {
                         cout << " int on MeshL toDo  ( Linear Form )" << endl;
                         ffassert(0);
-                            
+                        
                     }
                     else if(bf->di->d != MMesh::Rd::d ){
                         cout << " int 2d case  on Mesh ( Linear Form )"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
                         ffassert(0);}
-                    }
-
-                    else
+                }
+                
+                else
                 {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
                 }}
-            }
-            else if (r==tvf->tTab)
-            {
-                if ( B)
+        }
+        else if (r==tvf->tTab)
+        {
+            if ( B)
                 *B += *GetAny<KN<R> *>( (*e)(stack) );
-            }
-            else if (r==tvf->tDotStar)
+        }
+        else if (r==tvf->tDotStar)
+        {
+            if ( B)
             {
-                if ( B)
-                {
-                    DotStar ab=GetAny<DotStar>( (*e)(stack) );
-                    *B += ab;
-                }
-            }
-            else if (r==tvf->tMatX)
-            {
-                if ( B)
-                {
-                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
-                }
-            }
-            else if (r==tvf->tMatTX)
-            {
-                if ( B)
-                {
-                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
-                }
-            }
-            else if (r== tvf->tBC)
-            ret=true;
-            else
-            {
-                cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
-                throw(ErrorExec("AssembleVarForm invalid type in varf",1));
+                DotStar ab=GetAny<DotStar>( (*e)(stack) );
+                *B += ab;
             }
         }
-        return ret;
+        else if (r==tvf->tMatX)
+        {
+            if ( B)
+            {
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
+            }
+        }
+        else if (r==tvf->tMatTX)
+        {
+            if ( B)
+            {
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
+            }
+        }
+        else if (r== tvf->tBC)
+            ret=true;
+        else
+        {
+            cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
+            throw(ErrorExec("AssembleVarForm invalid type in varf",1));
+        }
     }
+    return ret;
+}
 
     template<class R,class MMesh,class FESpace1,class FESpace2>
     void AssembleBC(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
@@ -10482,13 +10686,9 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
             if(VF)
             {
                 if ( !sameMesh) InternalError(" no jump or average in intallfaces for RHS in not samemesh");
-                InternalError(" no jump or average in intallfaces for RHS");
+             //   InternalError(" no jump or average in intallfaces for RHS");
                 pair_stack_double bstack(stack,& binside);
 
-                //bstack.first = stack;
-                //bstack.second= & binside;
-
-                //InternalError(" Today no jump or average in intalledges of RHS ");
                 for (int i=0;i< ThI.nt; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
@@ -10497,12 +10697,12 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
                    
                     {
                         int iie=ie,ii=Th.ElementAdj(i,iie);
+                        BorderElement * be = 0; // FIND BOUNDARY ELEMENT !!!
                         if(ii<0) ii=i;//  sur le bord
                         const Tet & K(ThI[i]);
-                        BorderElement * be = 0; // FIND BOUNDARY ELEMENT !!!
+                        
                         int lab = be ? be->lab :  notalabel;
-                        ffassert(0); //
-                      //  Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,lab,*l->l,buf,ip,&bstack,*B,FIE,useopt);
+                        Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,lab,*l->l,buf,ip,&bstack,*B,FIT,useopt);
                     }
                     
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -11773,12 +11973,13 @@ bool CheckSizeOfForm( list<C_F0> & largs ,int N,int M)
             const Ftest * l= const_cast<Ftest *>(ll->l);
         }
         else if (r==atype<const  BC_set *>())
-        {// modif FH  mai 2007  A FAIRE il y a un bug ici XXXXXXXXXXXXX
+        {
 
             const BC_set * bc= dynamic_cast<const  BC_set *>(e);
          }
 
     }
+    return true;
 }
 
 bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem

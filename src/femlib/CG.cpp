@@ -408,7 +408,7 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
         pCl->matmul(ri,zi);
         // g[0] = sqrt(real(pr#scalprod(zi[],zi[])));
         g[0]=mysnrm2(n,(K*)zi);
-        if(verbo>2)
+        if(verbo>3)
             cout << "  ** fgmres: " << iter << " residus 0 " << abs(g[0]) << " Cl: " << normb << endl ;
         if (normb < 1.e-20 || eps < 0) normb = 1.;
         Vi[0]=(1./g[0])*zi;
@@ -465,8 +465,8 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
             if(relres/normb < abs(eps)) {
                 noconv= false;
                 if (verbo ) {
-                    cout << "     fgmres has converged in " << (iter) << " iterations "
-                    << "The relative residual is " <<  relres/normb << endl;
+                    cout << "  **  fgmres has converged in " << (iter) << " iterations "
+                    << "The relative residual is " <<  relres/normb << " Cl: " << normb << endl;
                 }
                 break;
             }
@@ -506,7 +506,7 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
     if(noconv && verbo  )
     {
         cout << " !!!!!!!! fgmres has not  converged in " << iter << " iterations "
-        << "The relative residual is " <<  relres/normb << endl;
+        << "The relative residual is " <<  relres/normb << " Cl: " << normb << endl;
     }
     nbitermx=iter; //  to
     delete [] g1;

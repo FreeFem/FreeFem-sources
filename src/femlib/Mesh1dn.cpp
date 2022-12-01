@@ -34,7 +34,7 @@
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
-#include "libmesh5.h"
+#include "libmeshb7.h"
 
 #include "Mesh1dn.hpp"
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ## Jenkins variables
-workspace=$WORKSPACE
-job=$JOB_NAME
+workspace="$WORKSPACE"
+job="$JOB_NAME"
 
 ## Tests directories
 logDirectory="${workspace}/log/${job}"
@@ -16,11 +16,11 @@ echo "Log will be put in ${logDirectory}"
 for directory in "${directories[@]}"
 do
     ## Create directory
-    mkdir -p ${logDirectory}/${directory}
+    mkdir -p "${logDirectory}/${directory}"
     ## Remove files, if any
-    rm -f ${logDirectory}/${directory}/*
+    rm -f "${logDirectory}/${directory}/*"
     ## Copy log
-    cp -f ${baseDirectory}/${directory}/*.err ${logDirectory}/${directory}/ 2>/dev/null
+    cp -f "${baseDirectory}/${directory}/*.err" "${logDirectory}/${directory}/" 2>/dev/null
 done
 
 ## Exit with 0 if the last cp failed (just no error log)

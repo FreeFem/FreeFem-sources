@@ -33,7 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
@@ -271,7 +271,9 @@ namespace Fem2D
     int MeshS::load(const string & filename)
     {
         int bin;
-        int ver,inm,dim;
+        int ver;
+        int64_t inm;
+        int dim;
         int lf=filename.size()+20;
         KN<char>  fileb(lf),filef(lf);
         char *data = new char[filename.size()+1];
@@ -658,7 +660,8 @@ namespace Fem2D
         {
             double l[3];
             int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
-            int itt =gdfb->Find(P,l,loutside);
+            long old = tstart ? tstart-elements  : -1;
+            int itt =gdfb->Find(P,l,loutside,old);
             outside=loutside;
             Phat=R2(l+1);
             Element &K=(this->elements)[itt];
@@ -828,7 +831,8 @@ namespace Fem2D
     
     int MeshS::Save(const string & filename) const
     {
-        int ver = GmfDouble, outm;
+        int ver = GmfDouble;
+        int64_t outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
             cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);

@@ -138,6 +138,8 @@ for (int j=0;j<Vh.ndofK;++j)
 	cout << endl;
 
 }
+
+
  Th=square(5,5);
  u=x*x*y;
  v = u;

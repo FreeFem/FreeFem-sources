@@ -32,7 +32,7 @@ fespace Vh(Th,P1);
 macro Grad3(uSVar) [dx(uSVar),dy(uSVar),dz(uSVar)]  // EOM
 
 //with variational form
-real sigma = 1; 
+real sigma = -1; 
 varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v)- sigma* u*v);
 varf mS(u,v) = int2d(Th)( u*v);
 Vh Nx,Ny,Nz;

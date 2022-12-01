@@ -1672,7 +1672,8 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 template<class R, class v_fes>
 AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
-{ 
+{
+    // interpolation operator generic meshes !!!
   typedef typename  v_fes::pfes pfes;
   typedef typename  v_fes::FESpace FESpace;
   typedef typename  FESpace::Mesh Mesh;
@@ -1714,12 +1715,14 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
       for (int iv=0;iv<Th.nv;iv++)
 	{
 	  const Vertex & v(Th(iv));
-	  int ik=Th.Contening(&v);
+	  int kv=Th.kvContening(&v);
+            int ik = kv/Element::nv;
+            int il = kv%Element::nv;
 	  const Element & K(Th[ik]);
-	  int il=-1;
+/*	  int il=-1;
 	  for(int k=0;k<Element::nv;++k)
 	    if  ( &K[k] == &v) il=k;
-	  assert(il>=0);
+	  assert(il>=0);*/
 	  mps->setP(&Th,ik,il);
 	  yy[iv] = GetAny<R>( ff(s) );
 	  sptr->clean(); // modif FH mars 2006  clean Ptr

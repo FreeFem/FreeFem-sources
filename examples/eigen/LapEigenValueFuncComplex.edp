@@ -1,0 +1,65 @@
+//  Computation of the eigen value and eigen vector of the 
+// Dirichlet problem  on square $]0,\pi[^2$
+// Functionnal interface in complex ..
+// ----------------------------------------
+// we use the inverse shift mode 
+// the shift is given with sigma real
+// -------------------------------------
+//  find $\lamda$ such that:
+// $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
+verbosity=1;
+mesh Th=square(20,20,[pi*y,pi*x]);
+fespace Vh(Th,P2);
+Vh<complex> u1,u2;
+int n=Vh.ndof; 
+
+complex sigma = 00;  // value of the shift 
+
+varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
+                    + int1d(Th)(u1*u2) ;  // Boundary condition
+                   
+varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
+
+matrix<complex> A= a(Vh,Vh,solver=sparsesolver); 
+matrix<complex> B= b(Vh,Vh,solver=sparsesolver); 
+
+func complex[int] FA1(complex[int] & u) { complex[int] Au=A^-1*u;return Au;}
+func complex[int] FB(complex[int] & u) { complex[int] Au=B*u;return Au;}
+func complex[int] FA(complex[int] & u) { complex[int] Au=A*u;return Au;}
+func complex[int] FB1(complex[int] & u) { complex[int] Au=B^-1*u;return Au;}
+// important remark:
+// the boundary condition is make with exact penalisation:
+//     we put 1e30=tgv  on the diagonal term of the lock degre of freedom.
+//  So take dirichlet boundary condition just on $a$ variationnal form
+// and not on  $b$ variationnanl form.
+// because we solve
+//  $$ w=A^-1*B*v $$
+
+int nev=20;  // number of computed eigen valeu close to sigma
+
+complex[int] ev(nev); // to store nev eigein value
+Vh<complex>[int] eV(nev);   // to store nev eigen vector
+
+
+int k=complexEigenValue(n,A1=FA1,B=FB,A=FA,B1=FB1,sigma=sigma,tol=1e-10,maxit=1000,ncv=200,nev=nev,value=ev,vector=eV);
+	//,mode=3,which="LM");
+//   tol= the tolerace
+//   maxit= the maximal iteration see arpack doc.
+//   ncv   see arpack doc.
+//  the return value is number of converged eigen value.
+k=min(k,nev); //  some time the number of converged eigen value 
+              // can be greater than nev;
+int nerr=0; 
+for (int i=0;i<k;i++)
+{
+  u1=eV[i];
+  complex gg = int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1)) + int1d(Th)(u1*u1);
+  complex mm= int2d(Th)(u1*u1) ;
+  complex err = int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1) - (ev[i])*u1*u1) +  int1d(Th)(u1*u1) ;
+  if(abs(err) > 1e-6) nerr++;
+  cout << " ---- " <<  i<< " " << ev[i]  << " err= " << err << " --- "<<endl;
+
+  // FFCS: add 3D view capabilities
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=0,value=1,dim=3,fill=1,CutPlane=0,ShowAxes=0);
+}
+
