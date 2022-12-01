@@ -20,7 +20,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.12]
 ### Added
 - add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
   for detail )
@@ -116,7 +116,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Removed
--map function  in plugin dfft 
+- map function  in plugin dfft 
 
 ### Fixed
 - pow(int,int) now call int version not complex version..
@@ -540,7 +540,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..develop
+[4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12
 [4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
