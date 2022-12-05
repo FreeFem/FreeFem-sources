@@ -225,22 +225,21 @@ class BC_set : public E_F0mps { public:
         ffassert(uu);
         const MGauche *ui=uu->simple();
         ffassert(ui && ui->second == op_id);
-        //if(verbosity>9)
-         cout <<"bc=" << kk << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
+        if(verbosity>9)
+          cout <<"bc=" << kk << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
         else
         bc[kk]= make_pair(ui->first,CastTo<double>(ii->second));
-        //ii->second;
-        cout << " ii->second type=" << ii->second.left() << endl;
+        
       }
-      cout<< "args.size()=" << args.size() << endl;
-    //  sort bc / num de composante
-      cout << "atype< double *>" << atype<double *>() << " %%%% " << endl;
-        std::sort(bc.begin(),bc.end());
-        //if(verbosity>9)
+      
+      //  sort bc / num de composante
+      
+      std::sort(bc.begin(),bc.end());
+      if(verbosity>9)
         for (vector<pair<int,Expression> >::iterator i=bc.begin(); i !=bc.end();++i)
-            cout <<"bc:  on " <<  i->first << " " << i->second << endl;
+          cout <<"bc:  on " <<  i->first << " " << i->second << endl;
 
     for (int i=0;i<n;i++)
       if( ! BCastTo<KN_<long> >(args[i]))
@@ -1474,6 +1473,7 @@ inline KN< list<C_F0> >  creationLinearFormCompositeFESpace( const list<C_F0> & 
   changeComponentFormCompositeFESpace( localIndexInTheBlockVh, localIndexInTheBlockVh, block_largs );
 
   // verifies that we don't have non diagonal block
+  /*
   for( int i=0; i<NpVh; i++){
     for(int j=0; j<NpVh; j++){
       if( i!=j && block_largs(i,j).size() > 0 ){
@@ -1482,13 +1482,18 @@ inline KN< list<C_F0> >  creationLinearFormCompositeFESpace( const list<C_F0> & 
       }
     }
   }
+  */
 
   KN< list<C_F0> > block_diag_largs( (long) NpVh);
   for( int i=0; i<NpVh; i++){
     const list<C_F0> & tp_largs = block_largs(i,i);
     list<C_F0>::const_iterator ii,ib=tp_largs.begin(),ie=tp_largs.end(); 
     for (ii=ib;ii != ie;ii++) {
-      block_diag_largs(i).push_back(*ii);
+      aType r = ii->left(); 
+      if(r == atype<const  BC_set  *>() || r==atype<const  FormLinear *>() ){
+        // only add BC_set in  FormLinear in the varf that we want to evaluate
+        block_diag_largs(i).push_back(*ii);
+      }
     }
   }
 
@@ -1673,6 +1678,7 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
   // creation of the LinearForm corresponding to each block
   //KN< list<C_F0> > block_largs = creationLinearFormCompositeFESpace( l->largs, NpVh, indexBlockVh, localIndexInTheBlockVh);
   
+  bool parallel_assemble=true;
   // ===  loop over the block ===//
   int offsetVh = 0;
   for( int j=0; j<NpVh; j++){
@@ -1681,55 +1687,69 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
     int M_block = VhNbOfDf[j];
 
     if( b_largs.size() > 0 ){
-      // cout << "construction of the block "<< j <<" of the varf" << endl;
-      KN<R> xxblock2(M_block);
-      xxblock2=R();   // initiallise the block to zero ??? (get previous value of xxblock2).
+      
+      if(!parallel_assemble){
+        // cout << "construction of the block "<< j <<" of the varf" << endl;
+        KN<R> xxblock2(M_block);
+        xxblock2=R();   // initiallise the block to zero ??? (get previous value of xxblock2).
 
-      if( (*pCompoVh)->typeFE[j] == 2 ){
-        // 2d Mesh 
-        FESpace * pVh = (FESpace*) (*pCompoVh)->vect[j]->getpVh();;
-        FESpace & Vh = *pVh;
+        if( (*pCompoVh)->typeFE[j] == 2 ){
+          // 2d Mesh 
+          FESpace * pVh = (FESpace*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpace & Vh = *pVh;
 
-        if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
-          AssembleBC<R,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
 
-      }else if( (*pCompoVh)->typeFE[j] == 3 ){
-        // 3d Mesh
-        FESpace3 * pVh = (FESpace3*) (*pCompoVh)->vect[j]->getpVh();;
-        FESpace3 & Vh = *pVh;
+        }else if( (*pCompoVh)->typeFE[j] == 3 ){
+          // 3d Mesh
+          FESpace3 * pVh = (FESpace3*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpace3 & Vh = *pVh;
 
-        if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
-          AssembleBC<R,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
 
-      }else if( (*pCompoVh)->typeFE[j] == 4 ){
-        // 3d Surface Mesh 
-        FESpaceS * pVh = (FESpaceS*) (*pCompoVh)->vect[j]->getpVh();;
-        FESpaceS & Vh = *pVh;
+        }else if( (*pCompoVh)->typeFE[j] == 4 ){
+          // 3d Surface Mesh 
+          FESpaceS * pVh = (FESpaceS*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpaceS & Vh = *pVh;
 
-        if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
-          AssembleBC<R,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
 
-      }else if( (*pCompoVh)->typeFE[j] == 5 ){
-        // 3d Curve Mesh
-        FESpaceL * pVh = (FESpaceL*) (*pCompoVh)->vect[j]->getpVh();;
-        FESpaceL & Vh = *pVh;
+        }else if( (*pCompoVh)->typeFE[j] == 5 ){
+          // 3d Curve Mesh
+          FESpaceL * pVh = (FESpaceL*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpaceL & Vh = *pVh;
 
-        if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
-          AssembleBC<R,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
 
+        }
+        else{
+          cerr << "Error in the definition in the type of FESpace."  << endl;
+          ffassert(0);
+        }
+        for(int indexJ=0; indexJ<M_block; indexJ++){
+          xx[indexJ+offsetVh] += xxblock2[indexJ]; 
+        }
+        // delete [] xxblock2; 
       }
       else{
-        cerr << "Error in the definition in the type of FESpace."  << endl;
-        ffassert(0);
+        KN<R> bidon(totalNbOfDF);
+        bool rhs_from_varf=true;
+        //KN<R> bidon(1); ???
+        varfToCompositeBlockLinearSystemALLCASE_pfes<R>( j, j, 
+                (*pCompoVh)->typeFE[j], (*pCompoVh)->typeFE[j],
+                offsetVh, offsetVh,
+                 (*pCompoVh)->vect[j], (*pCompoVh)->vect[j],
+                false, false, false, tgv, 
+                b_largs, stack, 
+                &xx , &bidon, nullptr,rhs_from_varf);
       }
-      for(int indexJ=0; indexJ<M_block; indexJ++){
-        xx[indexJ+offsetVh] += xxblock2[indexJ]; 
-      }
-      //delete xxblock;
     }
     offsetVh += M_block;
   }
-
   return SetAny<KN_<R> >(xx);
 }
 

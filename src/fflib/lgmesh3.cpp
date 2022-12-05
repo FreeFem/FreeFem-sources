@@ -2058,8 +2058,7 @@ public:
   E_F0 * code(const basicAC_F0 & args) const 
   { return  new CODE(args);}
   OneOperatorMakePtrFE3(aType tt):  // tt= aType<double>() or aType<E_Array>()  
-    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt)
-  { cout << "==== OneOperatorMakePtrFE3 ====" <<endl;}
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt){}
 };
 
 

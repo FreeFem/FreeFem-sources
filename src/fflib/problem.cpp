@@ -91,6 +91,8 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      {   "filepermrow",&typeid(string*)},
      {   "filepermcol",&typeid(string*)} //22
      */
+    ,// param for bem solver
+    LIST_NAME_PARM_HMAT
 };
 
 struct pair_stack_double
@@ -9537,6 +9539,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             throw(ErrorExec("AssembleVarForm invalid type in varf",1));
         }
     }
+    if(mpirank==0){ cout << "return AssembleVarForm= " << ret << endl; }
     return ret;
 }
 
@@ -9552,7 +9555,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             Expression e=ii->LeftValue();
             aType r = ii->left();
             if (r==tBC)
-            AssembleBC(stack,Th,Uh,Vh,sym,A,B,X, dynamic_cast<const  BC_set *>(e),tgv);
+                AssembleBC(stack,Th,Uh,Vh,sym,A,B,X, dynamic_cast<const  BC_set *>(e),tgv);
         }
 
     }
@@ -9612,6 +9615,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
         KN<double>   Aipj(ipj.N());
         KNM<R>  Vp(dim,PtHat.N());
         double tgv1=tgv <0? 1: tgv; // change 21 dec 2010 FH (Hack of ILU)
+
+        if(mpirank==0) cout << "Th.neb=" << Th.neb << ",tgv = " << tgv << ", kk="<< kk  << endl;
         for (int ib=0;ib<Th.neb;ib++)
         {
             int ie;
@@ -9619,6 +9624,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             int r =Th.bedges[ib].lab;
             if (on.find(r) != on.end() )
             {
+                
                 const FElement K(Uh[it]);
                 R2 E=K.T.Edge(ie);
                 double le = sqrt((E,E));
@@ -10237,6 +10243,9 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
         bool VF=l->VF();  // finite Volume or discontinuous Galerkin
         if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinuous Galerkin  =" << VF << " binside = "<< binside
         << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
+
+        if(verbosity>2) cout << mpirank <<" ti0= " << ti0 << ", ti1 =" << ti1 << endl;
+        if(verbosity>2) cout << mpirank <<" bei0=" << bei0 <<", bei1=" << bei1 << endl;
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
         sameMesh = sameMesh && !mapt; //
@@ -12109,13 +12118,15 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
 
     int np_bem = n_name_param;
     int np = np_bem - NB_NAME_PARM_HMAT;
-    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,np);
     cout << " Apres lecture :: ds.initmat=" << ds.initmat << endl;
+    cout << " Apres lecture :: ds.initmat=" << ds.master << endl;
 
     //  for the gestion of the PTR.
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
 
     bool sym = ds.sym;
+    if(mpirank==0) cout << "sym=" << ds.sym << endl;
 
     //list<C_F0>::const_iterator ii,ib=op->largs.begin(), ie=op->largs.end(); // delete unused variable
     int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
@@ -12480,30 +12491,25 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                 // computation of the matrix
                 const list<C_F0> & b_largs_zz = largs_FEM;
                 
-                varfToCompositeBlockLinearSystemALLCASE( i, j, typeUh, typeVh, sizeUh, sizeVh, 
-                                                        offsetUh, offsetVh, LLUh, LLVh,
-                                                        ds.initmat, initx, sym, ds.tgv, 
-                                                        b_largs_zz, stack, 
-                                                        B, X, hm_A);
-                /*
+                // Assemblage // inside
                 varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, typeUh[i], typeVh[j], 
                                                         offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                */
                 //deleteNewLargs(largs_FEM);
             }
 
             if( largs_BEM.size() >0 ){
                 // computation of the matrix
-                // ffassert( largs_BEM.size() <3 ); 
+                // Assemblage //
                 varfBemToCompositeBlockLinearSystem( i, j, typeUh[i], typeVh[j], sizeUh[i], sizeVh[j],
                                         offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
                                         largs_BEM, stack, nargs, hm_A,np_bem);
                 //deleteNewLargs(largs_BEM);
             }
 
+            if(mpirank ==0 && verbosity >2) cout << "Add block (" << i << "," << j <<")=> size nnz=" << hm_A->nnz << endl;
             //largs_FEM.clear();
             //largs_BEM.clear();
             }
@@ -12537,7 +12543,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
 
         if (ds.initmat)
         {
-        cout << " DefSolver(stack,  A, ds):::::::::   ds.initmat=" << ds.initmat << endl;
+        if(verbosity >3) cout << " DefSolver(stack,  A, ds):::::::::   ds.initmat=" << ds.initmat << endl;
          //   if(cadna)
          //   ACadna = DefSolverCadna( stack,A, ds);
          //   else
@@ -12564,33 +12570,13 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
             cout << " X= " << *X << endl;
             cout << " B= " << *B << endl;
         }
-
-//         if(ACadna)
-//         {
-//             KN<R_st> XX(*X);
-//             KN<R_st> BB(*B);
-//             ACadna->Solve(XX,BB);
-//             *X=XX;
-//             *cadna =-1.;
-
-// #ifdef HAVE_CADNA
-//             R_st xxmin = XX.min();
-//             R_st xxmax = XX.max();
-//             cout  << "    cadna:      min " <<  xxmin << "/ nd " << cestac(xxmin)
-//             << " ,   max " << xxmax << " / nd " << cestac(xxmax)   << endl ;
-//             int nn= XX.N();
-//             if ( cadna->N() == nn )
-//             for (int i=0;i<nn;++i)
-//             (*cadna)[i] = cestac(XX[i]);
-//             else
-//             cerr << "Warning: Sorry array is incorrect size to store cestac "
-//             << nn << " != " << cadna->N() << endl;
-// #endif
-//         }
-//         else{
-//             A.Solve(*X,*B);
-//         }
-
+        if(verbosity>3){
+            if(mpirank==0){
+                for(int ii=0; ii<10; ii++){
+                    cout << "before solve :: pb (*B)["<< ii <<"]=" << (*B)[ii] << endl;
+                }
+            }
+        }
         A.Solve(*X,*B); // version sans CADNA
         if (verbosity>99)
         {
@@ -13205,12 +13191,12 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
     {
         bool ok=false;
         for (int j=0;j<n_name_param;j++)
-        if (!strcmp(l[i].id,name_param[j].name))
-        {
-            ok = !nargs[j];
-            nargs[j]= map_type[name_param[j].type->name()]->CastTo(C_F0(l[i].e,l[i].re));
-            break;
-        }
+            if (!strcmp(l[i].id,name_param[j].name))
+            {
+                ok = !nargs[j];
+                nargs[j]= map_type[name_param[j].type->name()]->CastTo(C_F0(l[i].e,l[i].re));
+                break;
+            }
         if (!ok)
         {
             cerr << " Error name argument " << l[i].id << " the kown arg : ";

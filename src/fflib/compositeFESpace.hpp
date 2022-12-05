@@ -147,7 +147,7 @@ void computationGlobalMatrix( const KNM<list<C_F0>> &block_largs, Expression *na
 template<class R,class MMesh, class FESpace1, class FESpace2>
 void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A);
+                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A,int *mpirankandsize, bool B_from_varf);
 
 
 template< class R>
@@ -166,7 +166,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
                 const generic_v_fes *pfesUh, const generic_v_fes *pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A);
+                KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A, bool B_from_varf=false);
 
 
 template<class R> 
@@ -177,6 +177,6 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
                 const vector< void *> &LLUh, const vector< void *> &LLVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A);
+                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A,int *mpirankandsize, bool B_from_varf=false);
 
 #endif

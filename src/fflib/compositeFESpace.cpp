@@ -101,7 +101,7 @@ list<C_F0>  creationLargsForCompositeFESpace( const list<C_F0> & largs, const in
   // const_iterator
   list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
   // loop over largs information 
-  cout << "loop over the integral" << endl;
+  if(verbosity>3) cout << "loop over the integral" << endl;
 
   int count_integral = 0;
   for (ii=ib;ii != ie;ii++) {
@@ -593,7 +593,7 @@ KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, 
       block_largs(indexOfBlockVh,indexOfBlockVh).push_back(*ii); 
     }
     else if(r == atype<const  BC_set  *>()){
-      cout << " BC in variational form " << endl;
+      if(verbosity >3) cout << " BC in variational form " << endl;
       
       const BC_set * bc=dynamic_cast<const  BC_set *>(e);
       
@@ -990,7 +990,7 @@ Matrice_Creuse<R> *  buildMatrixInterpolationForCompositeFESpace(const FESpaceT1
   return sparse_mat;
 }
 
-// A enlever ??
+// print the information of the list of arguments of the varf 
 void listOfComponentBilinearForm(const list<C_F0> & largs){
 
   list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
@@ -1001,50 +1001,29 @@ void listOfComponentBilinearForm(const list<C_F0> & largs){
   int count_integral = 0;
   for (ii=ib;ii != ie;ii++) {
     count_integral++;
+    Expression e=ii->LeftValue();
+    aType r = ii->left();
+    
     cout <<"========================================================" << endl;
     cout <<"=                                                      =" << endl;
     cout << "reading the " << count_integral << "-th integral" << endl;
-    Expression e=ii->LeftValue();
-    aType r = ii->left();
     cout << "e=" << e << ", " << "r=" << r << endl;
     cout <<"=                                                      =" << endl;
-
+    
     // ***************************************
     // Case FormBillinear
     // ***************************************
     if (r==atype<const  FormBilinear *>() ){
       const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
       const CDomainOfIntegration & di= *bb->di;
-
+      
       cout << "di.kind=" << di.kind << endl;
       cout << "di.dHat=" << di.dHat << endl;
       cout << "di.d=" << di.d << endl;
       cout << "di.Th=" << di.Th << endl;
-
+      
       int    d = di.d;
       int dHat = di.dHat;
-
-
-      // Sert a verifier que "*bb->di->Th" est du bon type ==> A enlever
-      
-      // Recuperation du pointeur sur le maillage de l'integrale
-      //if(d==2){ // 3d
-      //  pmesh Thtest=GetAny<pmesh >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==3){
-      //  pmesh3 Thtest=GetAny<pmesh3 >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==2){
-      //  pmeshS Thtest=GetAny<pmeshS >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==1){
-      //  pmeshL Thtest=GetAny<pmeshL >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else{ ffassert(0); }// a faire
       
       BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
       if (Op == NULL) {
@@ -1054,8 +1033,8 @@ void listOfComponentBilinearForm(const list<C_F0> & largs){
       
       size_t Opsize= Op->v.size();
       
-      cout << " loop over the term inside the integral" << endl;
-      cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
+        cout << " loop over the term inside the integral" << endl;
+        cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
       
       // index to check if a integral is defined on multi block
 
@@ -1087,16 +1066,12 @@ void listOfComponentBilinearForm(const list<C_F0> & largs){
       cout << " BC in variational form " << endl;
       const BC_set * bc=dynamic_cast<const  BC_set *>(e);
   
-      //KN<int>  new_index_funct_finc( bc.size() );
       int kk=bc->bc.size();
-      //cout << "bc.size=" << bc->bc.size() << endl;
+      cout << "bc.size=" << bc->bc.size() << endl;
       for (int k=0;k<kk;k++)
       {
-        //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
-        // change the index of the component to correspond to the index in the block
         cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
       }
-      //ffassert(0);
     }
     #ifndef FFLANG
     #ifdef PARALLELE
@@ -1657,7 +1632,7 @@ void varfToCompositeBlockLinearSystem_fes(bool initmat, bool initx,
         /*const typename v_fes1::pfes &pUh, const typename v_fes2::pfes &pVh,*/
         const typename v_fes1::FESpace*& PUh, const typename v_fes2::FESpace*& PVh,
         const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-        KN_<K> *B, KN_<K> *X, MatriceCreuse<K> &A){
+        KN_<K> *B, KN_<K> *X, MatriceCreuse<K> &A,int *mpirankandsize, bool B_from_varf=false){
 
   typedef typename  v_fes1::pfes pfes1;
   typedef typename  v_fes2::pfes pfes2;
@@ -1666,15 +1641,14 @@ void varfToCompositeBlockLinearSystem_fes(bool initmat, bool initx,
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace2::Mesh Mesh2;
 
-  varfToCompositeBlockLinearSystem<K,MMesh, FESpace1, FESpace2>( initmat, initx, PUh, PVh, sym, tgv, largs, stack, B, X, A);
+  varfToCompositeBlockLinearSystem<K,MMesh, FESpace1, FESpace2>( initmat, initx, PUh, PVh, sym, tgv, largs, stack, B, X, A,mpirankandsize,B_from_varf);
 
 }
-
 
 template<class R,class MMesh, class FESpace1, class FESpace2>
 void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A)
+                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A,int *mpirankandsize, bool B_from_varf)
                               {
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace2::Mesh Mesh2;
@@ -1687,32 +1661,51 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
   const MMesh &Th= *pTh ;    // integration Th
   bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
 
-  int mpirankandsize[2];
-  mpirankandsize[0] = 0;
-  mpirankandsize[1] = 1;
-  #ifndef FFLANG
-  #ifdef PARALLELE
-  mpirankandsize[0] = mpirank;
-  mpirankandsize[1] = mpisize;
-  #endif
-  #endif
 
   // PAC(e) :  on retourne le type MatriceCreuse Ici et non Matrice_Creuse<R> dans creationBlockOfMatrixToBilinearForm.
   // Attention pour la generalisation
   if(same){
     if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs, &mpirankandsize[0]))
     {
-      if( B ){
-        *B = - *B;
+      if( B && !B_from_varf ){
+        // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
+        *B = - *B; 
         // hach FH
         for (int i=0, n= B->N(); i< n; i++)
         if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
+        // #ifndef FFLANG
+        // #ifdef PARALLELE
+        // for(int jjj=0; jjj<mpisize; jjj++){
+        //   MPI_Barrier(MPI_COMM_WORLD);
+        //   if(mpirank==jjj){
+        //     cout<< "B after VarForm:mpirank=" << mpirank << " "<< same << endl;
+        //     for(int ii=0; ii<10; ii++){
+        //       cout << "(*B)["<< ii <<"]=" << (*B)[ii] << endl;
+        //     }
+        //   }
+        //   MPI_Barrier(MPI_COMM_WORLD);
+        // }
+        // #endif
+        // #endif
       }
-      // AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
+// #ifndef FFLANG
+// #ifdef PARALLELE
+//       for(int jjj=0; jjj<mpisize; jjj++){
+//         MPI_Barrier(MPI_COMM_WORLD);
+//         if(mpirank==jjj){
+//           cout<< "B inside::mpirank=" << mpirank << " je vais calculer BC" << endl;
+//           cout<< "&Uh.Th=" << &Uh.Th<< ", &Vh.Th=" << &Vh.Th << endl;
+//           cout<< "&Th=" << &Th<< endl;
+//         }
+//         MPI_Barrier(MPI_COMM_WORLD);
+//       }
+// #endif
+// #endif
+      AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
+      //AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0, B, initx ? X:0,  largs, tgv );   // TODO with problem
     }
     else{
-      if( B ) *B = - *B;
+      if( B && !B_from_varf ) *B = - *B; // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
     }
   }else{
 #ifdef V3__CODE
@@ -1732,7 +1725,8 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
     //cout << "  *pMA == matrice map=" <<  *pMA << endl;
     //cout << "     A == matrice map=" <<  *dynamic_cast< HashMatrix<int,R>*>(&A) << endl;
     if (bc){
-      if( B ){
+      if( B && !B_from_varf ){
+        // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
         *B = - *B;
         // hach FH
         for (int i=0, n= B->N(); i< n; i++)
@@ -1741,9 +1735,25 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
       AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
     }
     else{
-      if( B ) *B = - *B;
+      if( B && !B_from_varf ) *B = - *B; // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
     }
   }
+  // if(B){
+  //   #ifndef FFLANG
+  //   #ifdef PARALLELE
+  //   for(int jjj=0; jjj<mpisize; jjj++){
+  //     MPI_Barrier(MPI_COMM_WORLD);
+  //     if(mpirank==jjj){
+  //       cout<< "B inside::mpirank=" << mpirank << " "<< same << endl;
+  //       for(int ii=0; ii<10; ii++){
+  //         cout << "(*B)["<< ii <<"]=" << (*B)[ii] << endl;
+  //       }
+  //     }
+  //     MPI_Barrier(MPI_COMM_WORLD);
+  //   }
+  //   #endif
+  //   #endif
+  // }
 }
 
 #ifndef FFLANG
@@ -1762,8 +1772,8 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
                 const list<C_F0> & b_largs_zz, Stack stack, Data_Bem_Solver &dsbem,
                 HMatrixVirt<R>** Hmat){
 
-    cout << "iUh=" << iUh << " , " << "jVh=" << jVh << endl;
-    cout << LLUh << " " <<  LLVh << endl;
+    //cout << "iUh=" << iUh << " , " << "jVh=" << jVh << endl;
+    //cout << LLUh << " " <<  LLVh << endl;
 
     // reinitialise Hmat
     if( *Hmat)
@@ -1833,8 +1843,8 @@ HashMatrix<int,R> * varfBemToBlockDenseMatrix(const int& iUh, const int &jVh, co
   // IF LLVh is FESpace(Mesh2) ==> LLVh == LLUh (by hypothesis) 
   // Remove this comment in the future.
 
-  cout << "iUh=" << iUh << " , " << "jVh=" << jVh << endl;
-  cout << LLUh << " " <<  LLVh << endl;
+  //cout << "iUh=" << iUh << " , " << "jVh=" << jVh << endl;
+  //cout << LLUh << " " <<  LLVh << endl;
 
   varfBemToCompositeBlockLinearSystem_hmat( iUh, jVh, typeUh, typeVh,
                 LLUh, LLVh, b_largs_zz, stack, dsbem,Hmat);
@@ -1999,7 +2009,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j,
                 const typename  v_fes1::FESpace * &PUh, const typename v_fes2::FESpace * &PVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A){
+                KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A,int *mpirankandsize, bool B_from_varf=false){
      
 
     typedef typename  v_fes1::pfes pfes1;
@@ -2015,8 +2025,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j,
 
     long N = PVh->NbOfDF;
     long M = PUh->NbOfDF;
-
-
+    
     ffassert( B && X || (!B && !X) );
     
     if(B && X){
@@ -2038,12 +2047,12 @@ void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j,
                   x_block[ii] = (*X)[ii+offsetUh];
           }
           
-          // give initial vallue to B: if necessary
+          // give initial value to B: if necessary
           for(int ii=0; ii<PVh->NbOfDF; ii++)
             b_block[ii] = (*B)[ii+offsetVh];
 
           varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, initx, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                          &b_block, &x_block, BBB);
+                          &b_block, &x_block, BBB, mpirankandsize, B_from_varf);
 
           // update X: if necessary
           if(initx){
@@ -2057,20 +2066,28 @@ void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j,
       }
       else{
           // non diagonal block
+          // no B : so B_from_varf can be default value
           varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                          0, 0, BBB);
+                          0, 0, BBB,mpirankandsize); 
       }
     }
     else{
-       varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                        0, 0, BBB);
+      // no B : so B_from_varf can be default value
+      varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
+                        0, 0, BBB,mpirankandsize);
     }
 
-    const HashMatrix<int,K> * hm_block = dynamic_cast<HashMatrix<int,K> *>( &BBB );
-    //cout << "---- Add block --- offset I=" << (int) offsetVh[j] << ", J="<< (int) offsetUh[i] << endl;
-    //cout << " hm_block=" << *hm_block << endl;
-    hm_A->Add(hm_block, K(1.0), false, (int) offsetVh,(int) offsetUh); // test function (Vh) are the line and inconnu function (Uh) are the column
-   
+    if( hm_A ){
+      const HashMatrix<int,K> * hm_block = dynamic_cast<HashMatrix<int,K> *>( &BBB );
+      //cout << "---- Add block --- offset I=" << (int) offsetVh[j] << ", J="<< (int) offsetUh[i] << endl;
+      //cout << " hm_block=" << *hm_block << endl;
+      if(mpirank ==0) cout << "varfToCompositeBlockLinearSystem_fes::Add local block (" << i << "," << j <<")=> size nnz=" << hm_block->nnz << endl;
+      hm_A->Add(hm_block, K(1.0), false, (int) offsetVh,(int) offsetUh); // test function (Vh) are the line and inconnu function (Uh) are the column
+    }
+    else{
+      // only LinearForm and BC
+      ffassert( initmat == false );
+    }
     //A_block->destroy();
     delete A_block;
 }
@@ -2082,21 +2099,31 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
                 const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A){
+                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A, bool B_from_varf){
 
+  int mpirankandsize[2];
+  mpirankandsize[0] = 0;
+  mpirankandsize[1] = 1;
+  #ifndef FFLANG
+  #ifdef PARALLELE
+  mpirankandsize[0] = mpirank;
+  mpirankandsize[1] = mpisize;
+  cout << "PARALLEL :: mpisize=" << mpirankandsize[1] << endl;
+  #endif
+  #endif
   if(typeUh == 2 && typeVh == 2){
     const FESpace * PUh = (FESpace*) pfesUh->getpVh(); // update the FESpace1
     const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
 
     varfToCompositeBlockLinearSystemALLCASE_pfesT<R,Mesh,v_fes,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }else if(typeUh == 5 && typeVh == 2){
     const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
     const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
 
     varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
   else if(typeUh == 2 && typeVh == 5){
@@ -2104,7 +2131,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
     const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
 
     varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fes,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
   else if(typeUh == 5 && typeVh == 5){
@@ -2112,7 +2139,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
     const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
 
     varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
   else{
@@ -2129,7 +2156,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
                 const vector< void *> &LLUh, const vector< void *> &LLVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A){
+                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A,int *mpirankandsize, bool B_from_varf){
    
     MatriceCreuse<R> * A_block = new MatriceMorse<R>( sizeVh[j], sizeUh[i], 0, sym );
     MatriceCreuse<R>  & BBB(*A_block);
@@ -2161,7 +2188,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
                 b_block[ii] = (*B)[ii+offsetVh[j]];
 
             varfToCompositeBlockLinearSystem<R, Mesh, FESpace,FESpace>( initmat, initx, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                            &b_block, &x_block, BBB);
+                            &b_block, &x_block, BBB, mpirankandsize, B_from_varf);
             // update X: if necessary
             if(initx){
                 for(int ii=0; ii<PUh->NbOfDF; ii++)
@@ -2176,7 +2203,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
         else{
             // non diagonal block
             varfToCompositeBlockLinearSystem<R, Mesh, FESpace,FESpace>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                            0, 0, BBB);
+                            0, 0, BBB,mpirankandsize, B_from_varf);
         }
     }else if( typeUh[i] == 5 && typeVh[j] == 5 ){
         const FESpaceL * PUh = (FESpaceL *) LLUh[i];
@@ -2197,7 +2224,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
                 b_block[ii] = (*B)[ii+offsetVh[j]];
             
             varfToCompositeBlockLinearSystem<R, MeshL, FESpaceL,FESpaceL>( initmat, initx, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                            &b_block, &x_block, BBB);
+                            &b_block, &x_block, BBB,mpirankandsize, B_from_varf);
 
         
             // update X: if necessary
@@ -2212,7 +2239,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
         }
         else{
             varfToCompositeBlockLinearSystem<R, MeshL, FESpaceL,FESpaceL>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                            0, 0, BBB);
+                            0, 0, BBB,mpirankandsize, B_from_varf);
         }
 
     }
@@ -2226,7 +2253,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
         ffassert( !(i == j) ); // non diagonal block
 
         varfToCompositeBlockLinearSystem<R, MeshL, FESpace,FESpaceL>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                        0, 0, BBB);
+                        0, 0, BBB,mpirankandsize, B_from_varf);
 
     }
     else if( typeUh[i] == 5 && typeVh[j] == 2 ){
@@ -2239,7 +2266,7 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
         ffassert( !(i == j) ); // non diagonal block
 
         varfToCompositeBlockLinearSystem<R, MeshL, FESpaceL,FESpace>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
-                                        0, 0, BBB);
+                                        0, 0, BBB,mpirankandsize, B_from_varf);
 
     }
     else{
@@ -2310,7 +2337,6 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
 
   // set ds.sym = 0 
-  ds.sym = 0;
   if(verbosity>3)
     cout << " we consider the block matrix as a non symetric matrix " << endl; 
 
@@ -2570,6 +2596,7 @@ if(method == 1){
           
           A.pHM()->Add( BBB.pHM(), R(1), false, offsetMatrixVh, offsetMatrixUh ); // test function (Vh) are the line and inconnu function (Uh) are the column
           */
+          // if(mpirank==0) cout << "ds.sym=" << ds.sym << endl;
           varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, (*pUh)->typeFE[i], (*pVh)->typeFE[j], 
                                                         offsetMatrixUh, offsetMatrixVh, (*pUh)->vect[i], (*pVh)->vect[j],
                                                         true, false, ds.sym, ds.tgv, 
@@ -2577,6 +2604,7 @@ if(method == 1){
                                                         0, 0, A.pHM());
         }
 
+        if(mpirank ==0) cout << "Add block (" << i << "," << j <<")=> size nnz=" << A.pHM()->nnz << endl;
       //delete CCC;
       } // end loop bb_largs_ii
     offsetMatrixVh += VhNbOfDf[j];
@@ -2600,44 +2628,44 @@ if(method == 1){
 template void varfToCompositeBlockLinearSystem< double, Mesh, FESpace, FESpace>
                               (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
+                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A,int *mpirankandsize, bool B_from_varf);
 
 template void varfToCompositeBlockLinearSystem< Complex, Mesh, FESpace, FESpace>
                               (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
+                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A,int *mpirankandsize, bool B_from_varf);
 // MeshL - MeshL
 template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpaceL>
                               (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
+                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A,int *mpirankandsize, bool B_from_varf);
 
 template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpaceL>
                               (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
+                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A,int *mpirankandsize, bool B_from_varf);
 
 // Mesh - MeshL
 template void varfToCompositeBlockLinearSystem< double, MeshL, FESpace, FESpaceL>
                               (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
+                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A,int *mpirankandsize, bool B_from_varf);
 
 template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpace, FESpaceL>
                               (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
+                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A,int *mpirankandsize, bool B_from_varf);
 
 // MeshL - Mesh
 template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpace>
                               (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
+                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A,int *mpirankandsize, bool B_from_varf);
 
 template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpace>
                               (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
+                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A,int *mpirankandsize, bool B_from_varf);
 
 template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
                 const int &typeUh, const int &typeVh, 
@@ -2645,7 +2673,7 @@ template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const 
                 const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<double> *B, KN_<double> *X, HashMatrix<int,double> *hm_A);
+                KN_<double> *B, KN_<double> *X, HashMatrix<int,double> *hm_A, bool B_from_varf=false);
 
 template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
                 const int &typeUh, const int &typeVh, 
@@ -2653,7 +2681,7 @@ template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const 
                 const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<Complex> *B, KN_<Complex> *X, HashMatrix<int,Complex> *hm_A);
+                KN_<Complex> *B, KN_<Complex> *X, HashMatrix<int,Complex> *hm_A, bool B_from_varf=false);
 
 
 template void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 
@@ -2663,7 +2691,7 @@ template void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &
                 const vector< void *> &LLUh, const vector< void *> &LLVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<double> *B, KN_<double> *X, HashMatrix<int,double> *hm_A);
+                KN_<double> *B, KN_<double> *X, HashMatrix<int,double> *hm_A,int *mpirankandsize, bool B_from_varf=false);
 
 template void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 
                 const vector< int> &typeUh, const vector< int> &typeVh,
@@ -2672,7 +2700,7 @@ template void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &
                 const vector< void *> &LLUh, const vector< void *> &LLVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<Complex> *B, KN_<Complex> *X, HashMatrix<int,Complex> *hm_A);
+                KN_<Complex> *B, KN_<Complex> *X, HashMatrix<int,Complex> *hm_A,int *mpirankandsize, bool B_from_varf=false);
                 
 template<> void varfBemToCompositeBlockLinearSystem<double>(const int& i, const int &j, 
                 const int &typeUh, const  int &typeVh,

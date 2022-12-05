@@ -129,7 +129,7 @@ struct UnId {
   UnId() :id(0),r(0),e(0),array(0),re(0),ref(false),compo_begin(false),compo_end(false) {}
   UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false), compo_begin(false), compo_end(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  
-  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false),compo_begin(cc_b),compo_end(cc_e) { cout << "call UnId(deque<UnId>  * d) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false)" << endl;}
+  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false),compo_begin(cc_b),compo_end(cc_e) { }
   UnId(const UnId & u) : 
     id(u.id),r(u.r),e(u.e),
     array(u.array?new deque<UnId>(*u.array):0),

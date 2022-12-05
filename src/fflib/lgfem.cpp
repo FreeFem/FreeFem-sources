@@ -1583,7 +1583,7 @@ class OP_MakePtrL {
   };    // end Op class
 
   typedef Op::R Result;
-  static E_F0 *f(const basicAC_F0 &args) { cout << "call static E_F0 *f(const basicAC_F0 &args) " << endl; return new Op(args); }
+  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
   static ArrayOfaType typeargs( ) {
     return ArrayOfaType(atype< Op::A >( ), atype< Op::B >( ), atype< Op::C >( ), false);
   }
@@ -2027,7 +2027,7 @@ template< class K >
 E_set_fev< K >::E_set_fev(const E_Array *a, Expression pp, int ddim)
   : dim(ddim), aa(*a), ppfe(pp), optimize(true), where_in_stack_opt( ), optiexp0( ), optiexpK( ) {
   aa.map(to< K >);
-  bool kdump = true; // false; // Morice
+  bool kdump = false;
   if (optimize) {    // new code Optimized  -------
     int n = aa.size( );
     deque< pair< Expression, int > > ll;
@@ -7426,8 +7426,7 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
     if (   args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS || args[i].left( ) == t_tfeL
         || args[i].left( ) == pt_tfe || args[i].left( ) == pt_tfe3 || args[i].left( ) == pt_tfeS || args[i].left( ) == pt_tfeL)// A febr 2023 FH et PH-T
       dim23+= args[i].LeftValue( )->nbitem( ) ; 
-      cout << " args[i].LeftValue( )->nbitem( ) ="<< args[i].LeftValue( )->nbitem( ) << " "<< dim23 << endl;
-    }
+      // if(verbosity >99) cout << " args[i].LeftValue( )->nbitem( ) ="<< args[i].LeftValue( )->nbitem( ) << " "<< dim23 << endl;
     // case E_array of TypeOfFE
     else if (args[i].left( ) == t_a) {
       const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
@@ -7436,10 +7435,11 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
         if   ( ea[i].left( ) == t_tfe || ea[i].left( ) == t_tfe3 || ea[i].left( ) == t_tfeS || ea[i].left( ) == t_tfeL
             || ea[i].left( ) == pt_tfe || ea[i].left( ) == pt_tfe3 || ea[i].left( ) == pt_tfeS || ea[i].left( ) == pt_tfeL)
           dim23 += ea[i].nbitem( );
-          cout << " ea[ii]->nbitem( ) =" << ea[ii].nbitem( ) <<  " " << dim23 << endl; ;
-        }
         else
-          ffassert(0);    // bug
+        {
+            cout<< " tpye .. " << *ea[i].left() << " " << *ea[i].right() <<endl;
+            ffassert(0);    // bug
+        }
     }
     // case E_FEarray of FEspace
     else if(args[i].left( ) == t_fea){
@@ -7454,7 +7454,7 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
           ffassert(0);    // bug
       }
     }
-  }
+
   if(compositeFESpace){
     KN<size_t> result(dimComposite.size()); 
     result[0] = dim23;
@@ -7465,16 +7465,14 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
         ffassert(0);
       }
 
-      //if(verbosity >99) 
-      cout << "nbitem in the "<< ii << "-th FEspace =" << dimComposite[ii] << endl;
+      // if(verbosity >99) cout << "nbitem in the "<< ii << "-th FEspace =" << dimComposite[ii] << endl;
       result[ii] = dimComposite[ii];
     }
     return result;
   }
   else{
     dim23 = dim23 ? dim23 : 1;
-    //if(verbosity >99) 
-    cout << "nbitem in the FEspace =" << dim23 << endl;
+    // if(verbosity >99) cout << "nbitem in the FEspace =" << dim23 << endl;
 
     KN<size_t> result(1); result[0] = dim23;
     return result;
