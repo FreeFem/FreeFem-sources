@@ -51,49 +51,50 @@ KN< R > *partmetis(Stack s, KN< R > *const &part, Mesh *const &pTh, long const &
   idx_t nve = Mesh::RdHat::d + 1;
 
   KN< idx_t > eptr(nt + 1), elmnts(nve * nt), epart(nt), npart(nv);
+  if(lparts > 1) {
+      for (idx_t k = 0, i = 0; k < nt; ++k) {
+          eptr[k] = i;
 
-  for (idx_t k = 0, i = 0; k < nt; ++k) {
-    eptr[k] = i;
+          for (idx_t j = 0; j < nve; j++) {
+              elmnts[i++] = Th(k, j);
+          }
 
-    for (idx_t j = 0; j < nve; j++) {
-      elmnts[i++] = Th(k, j);
-    }
+          eptr[k + 1] = i;
+      }
 
-    eptr[k + 1] = i;
-  }
-
-  idx_t numflag = 0;
-  idx_t nparts = lparts;
-  idx_t edgecut;
-  idx_t etype = nve - 2;    // triangle or tet .  change FH fevr 2010
-  idx_t ncommon = 1;
+      idx_t numflag = 0;
+      idx_t nparts = lparts;
+      idx_t edgecut;
+      idx_t etype = nve - 2;    // triangle or tet .  change FH fevr 2010
+      idx_t ncommon = 1;
 #ifdef METIS_VER_MAJOR
-  if (NO == 0) {
-    METIS_PartMeshNodal(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &nparts, 0, 0, &edgecut,
-                        (idx_t *)epart, (idx_t *)npart);
-  } else {
-    METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
-                       (idx_t *)epart, (idx_t *)npart);
-  }
+      if (NO == 0) {
+          METIS_PartMeshNodal(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &nparts, 0, 0, &edgecut,
+                  (idx_t *)epart, (idx_t *)npart);
+      } else {
+          METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
+                  (idx_t *)epart, (idx_t *)npart);
+      }
 
-  if (verbosity) {
-    printf("  --metisOA: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
-           libmetis__ComputeElementBalance(nt, nparts, epart), NO);
-  }
+      if (verbosity) {
+          printf("  --metisOA: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
+                  libmetis__ComputeElementBalance(nt, nparts, epart), NO);
+      }
 
 #else
-  if (NO == 0) {
-    METIS_PartMeshNodal(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
-  } else {
-    METIS_PartMeshDual(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
-  }
+      if (NO == 0) {
+          METIS_PartMeshNodal(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+      } else {
+          METIS_PartMeshDual(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+      }
 
-  if (verbosity) {
-    printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
-           ComputeElementBalance(nt, nparts, epart), NO);
-  }
+      if (verbosity) {
+          printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
+                  ComputeElementBalance(nt, nparts, epart), NO);
+      }
 
 #endif
+  } else epart = 0;
   part->resize(nt);
   *part = epart;
   return part;
@@ -106,23 +107,24 @@ KN< long > *partmetisd(Stack s, KN< long > *const &part, Mesh *const &pTh, long 
   idx_t nve = Mesh::Element::NbV;
 
   KN< idx_t > elmnts(nve * nt), epart(nt), npart(nv);
+  if(lparts > 1) {
+      for (idx_t k = 0, i = 0; k < nt; ++k) {
+          for (idx_t j = 0; j < nve; j++) {
+              elmnts[i++] = Th(k, j);
+          }
+      }
 
-  for (idx_t k = 0, i = 0; k < nt; ++k) {
-    for (idx_t j = 0; j < nve; j++) {
-      elmnts[i++] = Th(k, j);
-    }
-  }
-
-  idx_t numflag = 0;
-  idx_t nparts = lparts;
-  idx_t edgecut;
+      idx_t numflag = 0;
+      idx_t nparts = lparts;
+      idx_t edgecut;
 #ifdef METIS_VER_MAJOR
-  printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve,
-         libmetis__ComputeElementBalance(nt, nparts, epart));
+      printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve,
+              libmetis__ComputeElementBalance(nt, nparts, epart));
 #else
-  printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve,
-         ComputeElementBalance(nt, nparts, epart));
+      printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve,
+              ComputeElementBalance(nt, nparts, epart));
 #endif
+  } else epart = 0;
   part->resize(nt);
   *part = epart;
   return part;
