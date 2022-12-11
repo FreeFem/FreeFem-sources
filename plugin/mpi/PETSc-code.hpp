@@ -5073,7 +5073,15 @@ namespace PETSc {
               DMCreateLabel(pdm, "Face Sets");
               DMGetLabel(pdm, "Face Sets", &label);
           }
+#if PETSC_VERSION_GE(3,19,0)
+          PetscSF sf;
+          DMGetPointSF(pdm, &sf);
+          DMSetPointSF(pdm, NULL);
+#endif
           DMPlexMarkBoundaryFaces(pdm, 111111, label);
+#if PETSC_VERSION_GE(3,19,0)
+          DMSetPointSF(pdm, sf);
+#endif
           DMDestroy(&pA->_dm);
           pA->_dm = pdm;
           if(neighbors) {
@@ -5282,7 +5290,12 @@ namespace PETSc {
               DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
               int iv[4];
               PetscInt lab;
-              DMGetLabelValue(p->_dm, "Cell Sets", c, &lab);
+              DMGetLabel(p->_dm, "Cell Sets", &label);
+              if (label) DMGetLabelValue(p->_dm, "Cell Sets", c, &lab);
+              else {
+                DMGetLabel(p->_dm, "celltype", &label);
+                if (label) DMGetLabelValue(p->_dm, "celltype", c, &lab);
+              }
               if (lab == -1) lab = 0;
               int* ivv = iv;
               for (cl = 0; cl < 2 * closureSize; cl += 2) {
@@ -5388,6 +5401,10 @@ namespace PETSc {
           ISDestroy(&valueIS);
           DMGetLabel(p->_dm, "Cell Sets", &label);
           if (label) DMLabelSetDefaultValue(label, 0);
+          else {
+            DMGetLabel(p->_dm, "celltype", &label);
+            if (label) DMLabelSetDefaultValue(label, 0);
+          }
           for (PetscInt c = cStart; c < cEnd; ++c) {
               PetscInt *closure = NULL;
               PetscInt  closureSize, cl;
