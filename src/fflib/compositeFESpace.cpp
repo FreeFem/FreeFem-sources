@@ -1786,7 +1786,7 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
 
     // block diagonal matrix
     if( typeUh == 4 && typeVh == 4 ){
-      ffassert( iUh==jVh ); // If not a block diagonal not coded yet
+      ffassert( iUh==jVh ); // If not a block diagonal not coded yet :: Same mesh for the different FESpace
       // MeshS --- MeshS
       // ==== FESpace 3d Surf: inconnue et test ===
       const FESpaceS * PUh = (FESpaceS *) LLUh->getpVh();
@@ -1797,7 +1797,7 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
 
     }
     else if( typeUh == 5 && typeVh == 5  ){
-      ffassert( iUh==jVh ); // If not a block diagonal not coded yet
+      ffassert( iUh==jVh ); // If not a block diagonal not coded yet :: Same mesh for the different FESpace
       // MeshL --- MeshL
       // ==== FESpace 3d Curve: inconnue et test ===
       const FESpaceL * PUh = (FESpaceL *) LLUh->getpVh();
@@ -1815,6 +1815,16 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
       
       const FESpaceL * PUh = (FESpaceL *) LLUh->getpVh();
       creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PUh, VFBEM, 
+                        b_largs_zz, stack, dsbem, Hmat );
+    }
+    else if( typeUh == 4 && typeVh == 3 ){
+      //ffassert( !(iUh==jVh) );
+      // case Uh[i] == MeshS et Vh[j] = Mesh3  // Est ce que cela a un sens?
+   
+      if(verbosity) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+      if(verbosity) cout << " ===      hypothesis:: FESpace3 become FESpaceS for Vh      === " << endl;
+      const FESpaceS * PUh = (FESpaceS *) LLUh->getpVh();
+      creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS> ( PUh, PUh, VFBEM, 
                         b_largs_zz, stack, dsbem, Hmat );
     }
     else{
@@ -2111,35 +2121,59 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
   cout << "PARALLEL :: mpisize=" << mpirankandsize[1] << endl;
   #endif
   #endif
-  if(typeUh == 2 && typeVh == 2){
+  if(typeUh == 2 && typeVh == 2){        // Mesh2 -- Mesh2
     const FESpace * PUh = (FESpace*) pfesUh->getpVh(); // update the FESpace1
     const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
 
     varfToCompositeBlockLinearSystemALLCASE_pfesT<R,Mesh,v_fes,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
                 initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
-  }else if(typeUh == 5 && typeVh == 2){
+  }else if(typeUh == 3 && typeVh == 3){   // Mesh3 -- Mesh3
+    const FESpace3 * PUh = (FESpace3*) pfesUh->getpVh(); // update the FESpace1
+    const FESpace3 * PVh = (FESpace3*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,Mesh3,v_fes3,v_fes3>( i, j, offsetUh, offsetVh, PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+      
+  }else if(typeUh == 4 && typeVh == 4){   // MeshS -- MeshS
+    const FESpaceS * PUh = (FESpaceS*) pfesUh->getpVh(); // update the FESpace1
+    const FESpaceS * PVh = (FESpaceS*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshS,v_fesS,v_fesS>( i, j, offsetUh, offsetVh,
+                PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+      
+  }
+  else if(typeUh == 5 && typeVh == 5){    // MeshL -- MeshL
+    const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
+    const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fesL>( i, j, offsetUh, offsetVh,   PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+      
+  }
+  else if(typeUh == 5 && typeVh == 2){    // MeshL -- Mesh
     const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
     const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
 
-    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
-  else if(typeUh == 2 && typeVh == 5){
+  else if(typeUh == 2 && typeVh == 5){    // Mesh -- MeshL
     const FESpace * PUh = (FESpace*) pfesUh->getpVh(); // update the FESpace1
     const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
 
-    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fes,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fes,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+  }
+  else if(typeUh == 4 && typeVh == 3){    // MeshS -- Mesh3
+    const FESpaceS * PUh = (FESpaceS*) pfesUh->getpVh(); // update the FESpace1
+    const FESpace3 * PVh = (FESpace3*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshS,v_fesS,v_fes3>( i, j, offsetUh, offsetVh, PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
-  else if(typeUh == 5 && typeVh == 5){
-    const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
-    const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
+  else if(typeUh == 3 && typeVh == 4){    // Mesh3 -- MeshS
+    const FESpace3 * PUh = (FESpace3*) pfesUh->getpVh(); // update the FESpace1
+    const FESpaceS * PVh = (FESpaceS*) pfesVh->getpVh(); // update the FESpace2
 
-    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
-                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshS,v_fes3,v_fesS>( i, j, offsetUh, offsetVh, PUh, PVh, initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A,&mpirankandsize[0],B_from_varf);
       
   }
   else{
