@@ -683,6 +683,7 @@ FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFEM build date)
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
 AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
+AC_SUBST(ff_prefix,${prefix})
 
 ff_prefix_dir_lib="$ff_prefix_dir/lib"
 ff_prefix_dir_data="$datadir/$PACKAGE_NAME"

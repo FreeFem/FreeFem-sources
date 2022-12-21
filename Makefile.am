@@ -259,6 +259,10 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
+bin/movefortranlib:etc/config/movefortranlib.in ./config.status
+	./config.status --file=$@:etc/config/movefortranlib.in
+	chmod a+x $@
+	
 install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
@@ -272,6 +276,7 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
 	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
+	test `uname` != Darwin || ( $(MAKE) bin/movefortranlib )
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
 	cd idp; for i in *.idp; do \
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
