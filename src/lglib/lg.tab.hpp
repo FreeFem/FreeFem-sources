@@ -155,7 +155,7 @@ typedef union YYSTYPE
  double dnum;
 
  /* <<YYSTYPE_lnum>> */
- long lnum;
+ long   lnum;// to read long long number !!!! FH dec 2022
 
  /* <<YYSTYPE_str>> */
  char * str;

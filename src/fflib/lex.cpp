@@ -303,7 +303,7 @@ debut:
         else if (real)
             plglval->dnum = atof(buf),ret=DNUM;
         else
-            plglval->lnum = atoi(buf),ret=LNUM;
+            plglval->lnum = atol(buf),ret=LNUM;//  FH 12/2022 
 
         if(lexdebug) cout << " NUM : " << buf  << " "<<endl;
     }
