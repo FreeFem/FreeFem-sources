@@ -1041,7 +1041,13 @@ esac
                           AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
                           AC_SUBST([TOOL_COMPILE_scotch],"")
                         fi
-		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+                        if test -n "$ff_MUMPS_LIB"; then
+                            sed -E 's/mumps LD(.*)-lzmumps /mumps LD\1/g;s/mumps LD(.*)ldmumps/mumps LD\1ldmumps -lzmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                            mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                            sed -E 's/mumps LD(.*)-lcmumps /mumps LD\1/g;s/mumps LD(.*)lsmumps/mumps LD\1lsmumps -lcmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                            mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                        fi
                         AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
@@ -1140,6 +1146,12 @@ esac
                 AC_SUBST([TOOL_COMPILE_scotch],"")
             fi
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
+            if test -n "$ff_MUMPS_LIB"; then
+                sed -E 's/mumps LD(.*)-lzmumps /mumps LD\1/g;s/mumps LD(.*)ldmumps/mumps LD\1ldmumps -lzmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                sed -E 's/mumps LD(.*)-lcmumps /mumps LD\1/g;s/mumps LD(.*)lsmumps/mumps LD\1lsmumps -lcmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+            fi
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(htool,HTOOL_LIB,HTOOL_INCLUDE,$ffconfpetscc)
