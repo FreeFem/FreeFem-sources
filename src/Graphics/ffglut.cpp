@@ -2630,7 +2630,7 @@ plotdim(2),changePlotdim(false),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1)
 datadim(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
-
+    string * pdffile=0,*svgfile=0;// add for  fujiwara used today !!!
     hsv=true; // hsv  type
     coeff=1;
     wait=0;
@@ -2757,6 +2757,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
       
                 //case 43: fin >= winnum; break;
                 case 43: fin >= pNormalT;break;
+                case 44: fin >= pdffile;break;
+                case 45: fin >= svgfile;break;
 
                 default:
                     static int nccc=0;

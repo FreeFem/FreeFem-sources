@@ -8175,7 +8175,8 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
 
 
                     //= GetAny<double>(ll.second.eval(stack));
-
+                    if(verbosity>100000)
+                        cout << "Element_rhs 3d S: " <<coef << " " << c << " "<< w_i << " = "<< coef * c * w_i << " += " << Kv(i) <<endl;
                     B[Kv(i)] += coef * c * w_i;
                 }
             }

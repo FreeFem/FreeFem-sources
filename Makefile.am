@@ -262,6 +262,18 @@ clean-local::
 bin/movefortranlib:etc/config/movefortranlib.in ./config.status
 	./config.status --file=$@:etc/config/movefortranlib.in
 	chmod a+x $@
+bin/init-var.sh:Makefile
+	echo "# buid form Makefile" >$@
+	echo "bindir=$(bindir)" >>$@
+	echo "ff_prefix=$(ff_prefix)" >>$@
+	echo "version=$(VERSION)" >>$@
+	echo "ffsrc=$(abs_top_srcdir)" >>$@
+	echo "ff_prefix_dir_lib=$(ff_prefix_dir_lib)" >>$@
+	echo "ff_prefix_dir_lib_mpi=$(ff_prefix_dir_lib_mpi)" >>$@
+	echo "ff_data=$(pkgdatadir)/$(VERSION)" >>$@
+	chmod a+x $@
+	
+	
 	
 install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh

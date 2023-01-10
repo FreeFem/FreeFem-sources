@@ -3049,8 +3049,6 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"add", &typeid(bool)},         // add to previous plot
   {"prev", &typeid(bool)},        // keep previou  view point
   {"ech", &typeid(double)},       // keep previou  view point
-  {"pdf", &typeid(string*)}, // 21, add by fujiwara
-  {"svg", &typeid(string*)}, // 22, add by fujiwara
 
   // FFCS: more options for VTK graphics (numbers are required for processing)
 
@@ -3076,7 +3074,11 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"WindowIndex", &typeid(long)},                     // #20
   {"NbColorTicks", &typeid(long)},                    // #21
   {"NbColors", &typeid(long)},                        // #22
-  {"pNormalT", &typeid(bool)}                         //43
+// after FFCS !!!!
+  {"pNormalT", &typeid(bool)} ,                        //43
+  {"pdf", &typeid(string*)}, // 44, add by fujiwara modif FH 09/01/23
+  {"svg", &typeid(string*)} // 45, add by fujiwara
+
 };
 
 template< class K >
@@ -4319,7 +4321,7 @@ AnyType Plot::operator( )(Stack s) const {
       // [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the parameter value from the
       // pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
 
-#define VTK_START 22 // modified by fujiwara
+#define VTK_START 20 // modified by fujiwara
 #define SEND_VTK_PARAM(index, type) \
   if (nargs[VTK_START + index])     \
     (theplot << (long)(VTK_START + index)) <= GetAny< type >((*nargs[VTK_START + index])(s));
@@ -4347,6 +4349,10 @@ AnyType Plot::operator( )(Stack s) const {
     SEND_VTK_PARAM(21, long);             // NbColorTicks
     SEND_VTK_PARAM(22, long);             // NbColors
     SEND_VTK_PARAM(23, bool);             // pNormalT
+      //  pdffile and svgfile !!!!
+    if (nargs[44]) (theplot << 44L) <= GetAny< string * >((*nargs[44])(s));
+    if (nargs[45]) (theplot << 45L) <= GetAny< string * >((*nargs[45])(s));
+
     theplot.SendEndArgPlot( );
     map< const Mesh *, long > mapth;
     map< const Mesh3 *, long > mapth3;
@@ -4574,8 +4580,6 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[0]) coeff = GetAny< double >((*nargs[0])(s));
   if (nargs[1]) cm = GetAny< string * >((*nargs[1])(s));
   if (nargs[2]) psfile = GetAny< string * >((*nargs[2])(s));
-  if (nargs[21]) pdffile= GetAny<string*>((*nargs[21])(s)); // add by fujiwara
-  if (nargs[22]) svgfile= GetAny<string*>((*nargs[22])(s)); // add by fujiwara
   if (nargs[3]) wait = GetAny< bool >((*nargs[3])(s));
   if (nargs[4]) fill = GetAny< bool >((*nargs[4])(s));
   if (nargs[5]) value = GetAny< bool >((*nargs[5])(s));
@@ -4620,6 +4624,9 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[19]) keepPV = GetAny< bool >((*nargs[19])(s));
   if (nargs[VTK_START + 23]) pNormalT = GetAny< bool >((*nargs[VTK_START + 23])(s));
   if (nargs[VTK_START + 8]) ArrowSize = GetAny< double >((*nargs[VTK_START + 8])(s));
+  if (nargs[44]) pdffile= GetAny<string*>((*nargs[21])(s)); // add by fujiwara move by FH
+  if (nargs[45]) svgfile= GetAny<string*>((*nargs[22])(s)); // add by fujiwara move by FH
+
   //  for the gestion of the PTR.
   WhereStackOfPtr2Free(s) = new StackOfPtr2Free(s);    // FH aout 2007
 
