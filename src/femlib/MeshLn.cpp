@@ -299,6 +299,8 @@ namespace Fem2D
     size_t ssize = filename.size()+1;
     char *ptr;
     char *pfile=data;
+    int err=0;
+
     strncpy( data, filename.c_str(),ssize);
     ptr = strstr(data,".mesh");
     if( !ptr ){
@@ -329,14 +331,13 @@ namespace Fem2D
     nEdge=GmfStatKwd(inm,GmfEdges); // segment elements
     nPts=0; // GmfStatKwd(inm,GmfVertices);  // points border element
     this->set(nv,nEdge,nPts);
-       
     if(nEdge == 0) {
       cerr << "  A meshL type must have elements  " << endl;
       ffassert(0);exit(1);}
         
     if(verbosity>1)
       cout << "  -- MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
-	   << ", num Edge elts:= " << nEdge << ", num vertice:= " << nv << " num Points boundaries:= " << nPts << endl;
+	   << ", num Edge elts:= " << nEdge << ", num vertice:= " << nv << " num Points boundaries:= " << nPts << " nerr= " << err << endl;
         
     if(dim  != 3) {
       cerr << "Err dim == " << dim << " !=3 " <<endl;
@@ -368,7 +369,7 @@ namespace Fem2D
         GmfGotoKwd(inm,GmfEdges);
         for(int i=0;i<nEdge;++i) {
             GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-            assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
+            ffassert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
             for(int j=0;j<2;++j)
                 if(!vertices[iv[j]-1].lab) {
                     vertices[iv[j]-1].lab=1;
@@ -376,6 +377,11 @@ namespace Fem2D
                 }
             for (int j=0;j<2;++j) iv[j]--;
                 elements[i].set(vertices,iv,lab);
+            if( abs(elements[i].mesure())<1e-30) {
+                if(verbosity && err < 10)
+                cout << " Err load meshL zero element "<< i << " vertices:  " << iv[0] << " " << iv[1] << endl;
+                err++;
+            }
           mes += elements[i].mesure();
         }
         if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
@@ -385,9 +391,14 @@ namespace Fem2D
         GmfGotoKwd(inm,GmfEdges);
         for(int i=0;i<nEdge;++i) {
             GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-            assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
+            ffassert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
             for (int j=0;j<2;++j) iv[j]--;
                 elements[i].set(this->vertices,iv,lab);
+            if( abs(elements[i].mesure())<1e-30) {
+                if(verbosity && err < 10)
+                cout << " Err load meshL zero element "<< i << " vertices:  " << iv[0] << " " << iv[1] << endl;
+                err++;
+            }
             mes += elements[i].mesure();
         }
     }
@@ -396,7 +407,7 @@ namespace Fem2D
     GmfGotoKwd(inm,GmfVertices);
     for(int i=0;i<nPts;++i) {
         GmfGetLin(inm,GmfVertices,&iv[0],&lab);
-        assert( iv[0]>0 && iv[0]<=nv);
+        ffassert( iv[0]>0 && iv[0]<=nv);
         borderelements[i].set(this->vertices,iv,lab);
         mesb += this->borderelements[i].mesure();
     }
@@ -404,10 +415,15 @@ namespace Fem2D
         
     if(verbosity>1)
         cout << "  -- MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
-	    << ", Edges elts:= " << nt << ", num vertice:= " << nv << ", num Points boundaries:= " << nbe << endl;
-        
+	    << ", Edges elts:= " << nt << ", num vertice:= " << nv << ", num Points boundaries:= " << nbe << endl; 
     GmfCloseMesh(inm);
     delete[] data;
+    if(err) {
+           cerr << " readmeshL: wrong mesh : number of zero seg : "<< err << endl;
+            ErrorExec("readmeshL mesh with zero element ",1);
+          return -1;
+        }
+
     return 0; // OK
   }
     
