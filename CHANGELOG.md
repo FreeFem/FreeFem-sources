@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 -  try to  and build dmg install mac version 
-- add  file script to build meshS form boundary meshL TL if the boundary is
+-  add  file script to build meshS form boundary meshL TL if the boundary is
     the graph of function form a mean plan. see example in examples/3dSurf/buildmeshS.edp
     meshS Ts=buildmeshSminsurf(TL,1);// minamal surface
     meshS Tsl=buildmeshSLap(TL,1);//  Laplace Surface ..
@@ -42,6 +42,7 @@ All notable changes to this project will be documented in this file.
 - bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL  and also discontinous  version (missing  initialisation)
 - bug in  plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
 - genere a bug if zero size element in read MeshL from file. 
+- remove  mistake when the border is badly defined , remove empty element in buildmeshL function. 
 ## [4.12]
 ### Added
 - add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr

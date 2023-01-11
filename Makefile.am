@@ -122,6 +122,7 @@ idp/MPIGMRESmacro.idp \
 idp/MPIplot.idp \
 idp/MeshSurface.idp \
 idp/ball-buildlayer.idp \
+idp/buildmeshS.idp \
 idp/cobrameshcavity.idp \
 idp/cube.idp \
 idp/ffddm.idp \
