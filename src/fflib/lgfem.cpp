@@ -4624,8 +4624,8 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[19]) keepPV = GetAny< bool >((*nargs[19])(s));
   if (nargs[VTK_START + 23]) pNormalT = GetAny< bool >((*nargs[VTK_START + 23])(s));
   if (nargs[VTK_START + 8]) ArrowSize = GetAny< double >((*nargs[VTK_START + 8])(s));
-  if (nargs[44]) pdffile= GetAny<string*>((*nargs[21])(s)); // add by fujiwara move by FH
-  if (nargs[45]) svgfile= GetAny<string*>((*nargs[22])(s)); // add by fujiwara move by FH
+  if (nargs[44]) pdffile= GetAny<string*>((*nargs[44])(s)); // add by fujiwara move by FH
+  if (nargs[45]) svgfile= GetAny<string*>((*nargs[45])(s)); // add by fujiwara move by FH
 
   //  for the gestion of the PTR.
   WhereStackOfPtr2Free(s) = new StackOfPtr2Free(s);    // FH aout 2007
