@@ -57,7 +57,7 @@ int ffmesh_to_MMG5_pMesh<MeshS>(const MeshS &Th, MMG5_pMesh& mesh) {
   int nPrisms         = 0;
   int nTriangles      = Th.nt;
   int nQuadrilaterals = 0;
-  int nEdges          = 0;
+  int nEdges          = Th.nbe;
 
     if ( MMGS_Set_meshSize(mesh,nVertices,nTriangles,nEdges) != 1 ) {
       exit(EXIT_FAILURE);
@@ -73,6 +73,14 @@ int ffmesh_to_MMG5_pMesh<MeshS>(const MeshS &Th, MMG5_pMesh& mesh) {
     for (int k = 0; k < Th.nt; k++) {
       const TriangleS &K(Th.elements[k]);
       if ( MMGS_Set_triangle(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,Th.operator()(K[2])+1,
+                             K.lab,k+1) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    for (int k = 0; k < Th.nbe; k++) {
+      const BoundaryEdgeS &K(Th.be(k));
+      if ( MMG3D_Set_edge(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,
                              K.lab,k+1) != 1 ) {
         exit(EXIT_FAILURE);
       }
@@ -226,7 +234,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 27 : 19;
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 27 : 20;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -313,7 +321,8 @@ basicAC_F0::name_and_type mmg_Op<MeshS>::name_param[] = {
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
-{"ls"                , &typeid(double)} /*!< [val], Value of level-set */
+{"ls"                , &typeid(double)},/*!< [val], Value of level-set */
+{"requiredEdge"      , &typeid(KN<long>*)}/*!< [val], References of boundaries with required edges */
 };
 
 template<class ffmesh>
@@ -488,9 +497,13 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
   int nbe = Th.nbe;
 
   KN< double > *pmetric = 0;
+  KN< long > *prequiredEdge = 0;
 
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
+  }
+  if (nargs[19]) {
+    prequiredEdge = GetAny< KN< long > * >((*nargs[19])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -527,6 +540,26 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
           if ( MMGS_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]], 
                                   metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) { 
             printf("Unable to set metric.\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+    }
+    if (prequiredEdge && prequiredEdge->N( ) > 0) {
+      const KN< long > &requiredEdge = *prequiredEdge;
+      std::sort(requiredEdge + 0, requiredEdge + requiredEdge.N());
+      int na;
+      if ( MMGS_Get_meshSize(mesh,NULL,NULL,&na) !=1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for (int k=1; k<=na; k++) {
+        int ref, dummy;
+        if ( MMGS_Get_edge(mesh, &dummy, &dummy, &ref,
+                                  &dummy, &dummy) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+        if (std::binary_search(requiredEdge + 0, requiredEdge + requiredEdge.N(), ref)) {
+          if ( MMG3D_Set_requiredEdge(mesh,k) != 1 ) {
             exit(EXIT_FAILURE);
           }
         }
