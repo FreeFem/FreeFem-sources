@@ -10,10 +10,11 @@ load "msh3"
 include "getARGV.idp"
 
 real c0= 299792458;
-real f = getARGV("-frequency",5.e+8);
+real f = getARGV("-frequency",1.5e+9);
 real k = 2*pi*f/c0;
 real lambda = c0/f;
 
+cout << "lambda=" << lambda << endl;
 // incident wave
 real thetaI =  2*pi*0./360.;
 real[int] dir=[cos(thetaI),0,sin(thetaI)];
@@ -35,7 +36,7 @@ macro def(u)[u,u#2,u#3]//
 fespace Uh(ThS,RT0S);
 Uh<complex> def(u), def(b);
 
-varf vM(u,v) = int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v));  
+varf vM([u1,u2,u3],[v1,v2,v3]) = int2dx2d(ThS)(ThS)(BEM(BemKernel("MA_SL",k=k),[u1,u2,u3],[v1,v2,v3]));  
 HMatrix<complex> H = vM(Uh,Uh,eta=10,eps=1e-3);
 
 if (mpirank == 0) cout << H.infos << endl;
@@ -56,7 +57,7 @@ ThOut = trunc(ThOut, max(abs(x),abs(y)) > 0.5 + 4./nloc);
 
 fespace UhOut(ThOut,[P1,P1,P1]);
  
-varf vP(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k),u,v)) ;
+varf vP([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(BemPotential("SL",k=k),[u1,u2,u3],[v1,v2,v3])) ;
 HMatrix<complex> B = vP(Uh,UhOut,eta=10,eps=1e-3);
 
 if (mpirank == 0) cout << B.infos << endl;

@@ -639,7 +639,11 @@ struct OpHMatrixtoBEMForm
         
         Op(Expression aa,Expression  bb,int initt)
         : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
-        { assert(b && b->nargs);
+        { 
+            assert(b && b->nargs);
+
+            // Check the nbitem of inconnu and test in BemFormBilinear
+            checkNbItemFEspacesInconnuAndTest(b->largs,b->N,b->M);
         }
         operator aType () const { return atype<HMatrixVirt<R> **>();}
         
@@ -1778,7 +1782,9 @@ static void Init_Bem() {
     Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
         
     Global.Add("BEM","(",new FormalKBEMcode);
+    Global.Add("BEM","(",new FormalKBEMcodeArray);
     Global.Add("POT","(",new FormalPBEMcode);
+    Global.Add("POT","(",new FormalPBEMcodeArray);
  //   Global.Add("Kernel","(",new FormalBemKernel);
     Add< pBemKernel >("<--","(",new FormalBemKernel);
 //    Global.Add("Potential","(",new FormalBemPotential);

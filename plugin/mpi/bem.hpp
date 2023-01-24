@@ -25,6 +25,8 @@ public:
             typeKernel[0] = 4;
         else if(!tkernel->compare("CST"))
             typeKernel[0] = 5;
+        else if(!tkernel->compare("MA_SL"))
+            typeKernel[0] = 6;
         else
             ExecError("unknown BEM kernel type ");
         
@@ -481,6 +483,8 @@ public:
             typePotential = 2;
         else if(!tpotential->compare("CST"))
             typePotential = 3;
+        else if(!tpotential->compare("MA_SL"))
+            typePotential = 4;
         else
             ExecError("unknown BEM Potential type ");
         
@@ -631,11 +635,38 @@ class FoperatorKBEM : public E_F0mps { public:
     Expression kbem;
     
     FoperatorKBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
+        aType t_a = atype< E_Array >( );
         ffassert(args.size()==3);
  
         kbem= CastTo<KBem>(args[0]);
-        fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
-        ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
+        // only BEM(bemkernel,u0,v0);
+        //      BEM(bemkernel,[u0,..,un],[v0,..,vm]); 
+        // are valid
+        if( args[1].left( ) == t_a && args[2].left( ) == t_a ){
+            // case BEM(bemkernel,[u0,..,un],[v0,..,vm])
+            // Here, we are in the compilation step
+            // so we can't check if the size of ea.size is correct
+            const E_Array &ea = *dynamic_cast< const E_Array * >(args[1].LeftValue( ));
+            ffassert(&ea);
+            ffassert(ea.size() == 3); // hack for "MA_SL"
+            fi = dynamic_cast<Fi>(CastTo<Fi>(ea[ea.size()-1]));      
+
+            const E_Array &et = *dynamic_cast< const E_Array * >(args[2].LeftValue( ));
+            ffassert(&et);
+            ffassert(et.size() == 3); // hack for "MA_SL"
+            ft = dynamic_cast<Ft>(CastTo<Ft>(et[et.size()-1]));
+
+            // Remark: n = fi->v[0].first.first;
+            // Remark: m = ft->v[0].first.first;
+        }
+        else if( args[1].left( ) != t_a && args[2].left( ) != t_a ){
+            // case BEM(bemkernel,u0,v0);
+            fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
+            ft = dynamic_cast<Ft>(CastTo<Ft>(args[2]));
+        }
+        else{
+            CompileError("The BEM keyword inside an integral must be : BEM(bemkernel,u0,v0); or BEM(bemkernel,[u0,..,un],[v0,..,vm]); ");
+        }
         ffassert(kbem && fi && ft);
     }
     
@@ -671,10 +702,27 @@ class BemKFormBilinear : public BemFormBilinear { public:
         b= new FoperatorKBEM(*Kb);
         ffassert(di && Kb);
         type=1;
-        
-        
     };
     
+    void checkNbItemFEspaceInconnuAndTest(const int & nbitem_inconnu, const int & nbitem_test ){
+        // check the size of the FEspace 
+        if(  (b->fi->v[0].first.first +1) != nbitem_inconnu ){
+            cerr << " " << endl;
+            cerr << "\nThe size of unknown FEspace is " << nbitem_inconnu  << endl;
+            cerr << "The nbitem of unknown Function in BEM (defined in varf) is " << b->fi->v[0].first.first +1 << endl;
+            cerr << "These two quantities must be the same." << endl; 
+            ffassert(0);
+        }
+        if( (b->ft->v[0].first.first +1) != nbitem_test ){
+            cerr << " " << endl;
+            cerr << "\nThe size of test FEspace is " << nbitem_test  << endl;
+            cerr << "The nbitem of test Function in BEM (defined in varf) is " << b->ft->v[0].first.first +1 << endl;
+            cerr << "These two quantities must be the same." << endl; 
+            ffassert(0);
+        }
+    }
+
+
     static  E_F0 * f(const basicAC_F0 & args) { return new BemKFormBilinear(args);}
     static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}
     AnyType operator()(Stack ) const { return SetAny<Result>(this);}
@@ -727,6 +775,23 @@ public:
     
 };
 
+// define the function BEM(k,[u1,u2,u3],[v1,v2,v3])
+class FormalKBEMcodeArray : public OneOperator{
+public:
+    
+    FormalKBEMcodeArray( ): OneOperator(atype<C_F0>(),atype<pBemKernel>(), atype<E_Array>(), atype<E_Array>()) {}
+    FormalKBEMcodeArray(int  ): OneOperator(atype<C_F0>(),atype<pBemKernel>()) {}
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const {
+        Expression e=new FoperatorKBEM(args);
+        aType r=atype<const FoperatorKBEM *>();
+        return C_F0(e,r) ;}
+    
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    
+};
+
+
 
 
 // define the function POT(k,u,v)
@@ -741,11 +806,37 @@ class FoperatorPBEM : public E_F0mps { public:
     Expression pot;
     
     FoperatorPBEM(const basicAC_F0 & args) :fi(0),ft(0),pot(0) {
+        aType t_a = atype< E_Array >( );
         ffassert(args.size()==3);
         
         pot= CastTo<Pot>(args[0]);
-        fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
-        ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
+        // only POT(bemkernel,u0,v0);
+        //      POT(bemkernel,[u0,..,un],[v0,..,vm]); 
+        // are valid
+        if( args[1].left( ) == t_a && args[2].left( ) == t_a ){
+            // case POT(bemkernel,[u0,..,un],[v0,..,vm])
+            // Here, we are in the compilation step
+            // so we can't check if the size of ea.size is correct
+            const E_Array &ea = *dynamic_cast< const E_Array * >(args[1].LeftValue( ));
+            ffassert(&ea);
+            ffassert(ea.size() == 3); // hack for "MA_SL"
+            fi = dynamic_cast<Fi>(CastTo<Fi>(ea[ea.size()-1]));      
+
+            const E_Array &et = *dynamic_cast< const E_Array * >(args[2].LeftValue( ));
+            ffassert(&et);
+            ffassert(et.size() == 3); // hack for "MA_SL"
+            ft = dynamic_cast<Ft>(CastTo<Ft>(et[et.size()-1]));
+
+            // Remark: n = fi->v[0].first.first;
+            // Remark: m = ft->v[0].first.first;
+        }
+        else if( args[1].left( ) != t_a && args[2].left( ) != t_a ){
+            fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
+            ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
+        }
+        else{
+            CompileError("The POT keyword inside an integral must be : POT(bemkernel,u0,v0); or POT(bemkernel,[u0,..,un],[v0,..,vm]); ");
+        }
         
         ffassert(pot && fi && ft);
     }
@@ -771,6 +862,23 @@ class BemPFormBilinear : public BemFormBilinear { public:
         ffassert(di && Kb);
         type=2;
     }
+
+    void checkNbItemFEspaceInconnuAndTest(const int & nbitem_inconnu, const int & nbitem_test ){
+        // check the size of the FEspace 
+        
+        if(  (b->fi->v[0].first.first +1) != nbitem_inconnu ){
+            cerr << "\nThe size of unknown FEspace is " << nbitem_inconnu  << endl;
+            cerr << "The nbitem of unknown Function in POT(defined in varf) is " << b->fi->v[0].first.first +1 << endl;
+            cerr << "These two quantities must be the same." << endl; 
+            ffassert(0);
+        }
+        if( (b->ft->v[0].first.first +1) != nbitem_test ){
+            cerr << "\nThe size of test FEspace is " << nbitem_test  << endl;
+            cerr << "The nbitem of test in POT(defined in varf) is " << b->ft->v[0].first.first +1 << endl;
+            cerr << "These two quantities must be the same." << endl; 
+            ffassert(0);
+        }
+    }
     
     static  E_F0 * f(const basicAC_F0 & args) { return new BemPFormBilinear(args);}
     static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
@@ -785,7 +893,7 @@ class BemPFormBilinear : public BemFormBilinear { public:
     BemPFormBilinear(const BemPFormBilinear & fb) : di(fb.di),b(new FoperatorPBEM(*fb.b) ) {type=2;}
     
 };
-
+// define the function POT(k,u1,v1)
 class FormalPBEMcode : public OneOperator{
 public:
     
@@ -800,6 +908,23 @@ public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     
 };
+
+// define the function POT(k,[u1,u2,u3],[v1,v2,v3])
+class FormalPBEMcodeArray : public OneOperator{
+public:
+    
+    FormalPBEMcodeArray( ): OneOperator(atype<C_F0>(),atype<pBemPotential>(), atype<E_Array>(), atype<E_Array>()){}
+    FormalPBEMcodeArray(int  ): OneOperator(atype<C_F0>(),atype<pBemPotential>()) {}
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const {
+        Expression e=new FoperatorPBEM(args);
+        aType r=atype<const FoperatorPBEM *>();
+        return C_F0(e,r) ;}
+    
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    
+};
+
 
 
 //// end type BEM kernel / potential
@@ -821,6 +946,33 @@ int typeVFBEM(const list<C_F0> & largs, Stack stack)
     }
     return VVFBEM;
 }
+
+void checkNbItemFEspacesInconnuAndTest(const list<C_F0> & largs,const int & nbitem_inconnu, const int & nbitem_test){
+
+    // Loop to check the nbitem of inconnu and test in BemFormBilinear
+    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
+    for (ii=ib;ii != ie;ii++) {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
+        if (r==atype<const BemFormBilinear *>() ){
+            BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
+            ffassert(bbtmp);
+            int VVFBEM = bbtmp->type;
+
+            if(VVFBEM ==1){
+                BemKFormBilinear * bk = dynamic_cast< BemKFormBilinear *>(e);
+                ffassert(bk);
+                bk->checkNbItemFEspaceInconnuAndTest( nbitem_inconnu, nbitem_test );
+                
+            }else if(VVFBEM ==2){
+                BemPFormBilinear *bp = dynamic_cast< BemPFormBilinear *>(e);
+                ffassert(bp);
+                bp->checkNbItemFEspaceInconnuAndTest( nbitem_inconnu, nbitem_test);
+            }
+        }
+    }
+}
+
 bool iscombinedKernel(BemKernel *K ) {
     bool iscombined=false;
     for (int i=0;i<2;i++)
@@ -834,6 +986,7 @@ bemtool::BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) {
         case 2: pKernel=bemtool::DL_OP ; break;
         case 3: pKernel=bemtool::HS_OP ; break;
         case 4: pKernel=bemtool::TDL_OP ; break;
+        case 6: pKernel=bemtool::SL_OP ; break; // MA_SL
     }
     const bemtool::BIOpKernelEnum cpKernel=pKernel;
     return cpKernel;
@@ -925,6 +1078,7 @@ bemtool::PotKernelEnum whatTypeEnum(BemPotential *P) {
         case 2: pPotential=bemtool::DL_POT ; break;
         case 3: pPotential=bemtool::CST_POT ; break;
             //case 4: pPotential=TDL_POT ; break;
+        case 4: pPotential=bemtool::SL_POT ; break; // MA_SL
     }
     const bemtool::PotKernelEnum cpPotential=pPotential;
     return cpPotential;
@@ -1271,7 +1425,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
     if ( (kappaRe1 && !kappaIm1) && !iscombined && (!kappaRe2 && !kappaIm2) && alpha == 0. ) {
         switch (ker1) {
             case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA,bemtool::SL_OP,3,bemtool::RT0_2D,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,kappaRe1);
-                if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<HE,SL_OP ..." << endl; break;
+                if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<MA,SL_OP ..." << endl; break;
             default: ffassert(0);
         }
     }
