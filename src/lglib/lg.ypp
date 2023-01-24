@@ -518,7 +518,7 @@ fespace123:
     | FESPACES { fespacedim=4;}
     | FESPACEL { fespacedim=5;}
     | VGFESPACE { fespacedim=6;}
-    | GFESPACE { fespacedim=7;}
+    | GFESPACE { fespacedim=7;} /* A enlever */
     ;
 
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -538,6 +538,9 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2;}
 
 fespace_def:
    ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,KN<size_t>>($1,typeFESpace($3),$3,dimFESpaceImage($3));
+     $3.destroy(); }
+    ;
+  | ID '=' parameters_list  {$$=currentblock->NewVar<LocalVariableFES,KN<size_t>>($1,typeFESpace($3),$3,dimFESpaceImage($3));
      $3.destroy(); }
     ;
 
@@ -768,6 +771,11 @@ FEarray: FESPACE                   { $$=Find($1)}
       | FEarray ',' FESPACE3       { $$ = ($1 += Find($3));}
       | FEarray ',' FESPACES       { $$ = ($1 += Find($3));}
       | FEarray ',' FESPACEL       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE        { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE1       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE3       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACES       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACEL       { $$ = ($1 += Find($3));}
   ;
 
 unary_expr:                                                 /* returns a [[YYSTYPE_cexp]] */
@@ -841,6 +849,7 @@ primary: /* returns a [[YYSTYPE_cexp]] */
   |        '(' Expr ')' {$$=$2;}
   |        '[' array  ']' { $$=C_F0(TheOperators,"[]",$2);}
   |        '<' FEarray '>' { $$=C_F0(TheOperators,"<>",$2);}
+  |        FEarray { $$=C_F0(TheOperators,"<>",$1);}
 ;
 
 
