@@ -144,6 +144,10 @@ class parmmg_Op : public E_F0mps {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
 
+  long arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+
  public:
   parmmg_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
     if (verbosity > 1) {
@@ -322,36 +326,36 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       -1);
     PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    -1);
   }
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity of Mmg */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mem,           arg(i,stack,0L)); i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_debug,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off debug mode */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgDebug,      arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off debug mode */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_angle,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off angle detection */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_iso,           arg(i,stack,0L)); i++;   /*!< [1/0], Level-set meshing */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_lag,           arg(i,stack,0L)); i++;   /*!< [-1/0/1/2], Lagrangian option */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_opnbdy,        arg(i,stack,0L)); i++;   /*!< [0/1], Enable preservation of open boundaries */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optim,         arg(i,stack,0L)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optimLES,      arg(i,stack,0L)); i++;   /*!< [1/0], Strong mesh optimization for Les computations */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_noinsert,      arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point insertion */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_noswap,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_nomove,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point relocation */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_nosurf,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow surface modifications */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_anisosize,     arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_octree,        arg(i,stack,0L)); i++;   /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_meshSize,      arg(i,stack,0L)); i++;   /*!< [n], Target mesh size of Mmg (advanced use) */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_metisRatio,    arg(i,stack,0L)); i++;   /*!< [n], wanted ratio # mesh / # metis super nodes (advanced use) */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_ifcLayers,     arg(i,stack,0L)); i++;   /*!< [n], Number of layers of interface displacement */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_groupsRatio,   arg(i,stack,0.)); i++;   /*!< [val], Allowed imbalance between current and desired groups size */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_niter,         arg(i,stack,0L)); i++;   /*!< [n], Set the number of remeshing iterations */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_angleDetection,arg(i,stack,0.)); i++;   /*!< [val], Value for angle detection */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hmin,          arg(i,stack,0.)); i++;   /*!< [val], Minimal mesh size */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hmax,          arg(i,stack,0.)); i++;   /*!< [val], Maximal mesh size */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hsiz,          arg(i,stack,0.)); i++;   /*!< [val], Constant mesh size */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hausd,         arg(i,stack,0.)); i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgrad,         arg(i,stack,0.)); i++;   /*!< [val], Control gradation */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgradreq,      arg(i,stack,0.)); i++;   /*!< [val], Control gradation from required entities */
-  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       arg(i,stack,0L));    i++;   /*!< [-10..10], Tune level of verbosity */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    arg(i,stack,0L));    i++;   /*!< [-10..10], Tune level of verbosity of Mmg */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mem,           arg(i,stack,0L));    i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_debug,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgDebug,      arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_iso,           arg(i,stack,false)); i++;   /*!< [1/0], Level-set meshing */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_lag,           arg(i,stack,0L));    i++;   /*!< [-1/0/1/2], Lagrangian option */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_opnbdy,        arg(i,stack,false)); i++;   /*!< [0/1], Enable preservation of open boundaries */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optim,         arg(i,stack,false)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optimLES,      arg(i,stack,false)); i++;   /*!< [1/0], Strong mesh optimization for Les computations */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_nosurf,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow surface modifications */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_anisosize,     arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_octree,        arg(i,stack,0L));    i++;   /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_meshSize,      arg(i,stack,0L));    i++;   /*!< [n], Target mesh size of Mmg (advanced use) */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_metisRatio,    arg(i,stack,0L));    i++;   /*!< [n], wanted ratio # mesh / # metis super nodes (advanced use) */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_ifcLayers,     arg(i,stack,0L));    i++;   /*!< [n], Number of layers of interface displacement */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_groupsRatio,   arg(i,stack,0.));    i++;   /*!< [val], Allowed imbalance between current and desired groups size */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_niter,         arg(i,stack,0L));    i++;   /*!< [n], Set the number of remeshing iterations */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgradreq,      arg(i,stack,0.));    i++;   /*!< [val], Control gradation from required entities */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
 
   if(communicators != NULL) {
     /* Set API mode */
