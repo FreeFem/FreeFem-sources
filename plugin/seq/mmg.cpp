@@ -254,6 +254,10 @@ class mmg_Op : public E_F0mps {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
 
+  long arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+
  public:
   mmg_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
     if (verbosity > 1) {
@@ -435,32 +439,32 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
     }
 
   int i=1;
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_verbose,       arg(i,stack,0L)); i++;   /*!< [-1..10], Tune level of verbosity */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_mem,           arg(i,stack,0L)); i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_debug,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off debug mode */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_angle,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off angle detection */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_iso,           arg(i,stack,0L)); i++;   /*!< [1/0], Level-set meshing */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nofem,         arg(i,stack,0L)); i++;   /*!< [1/0], Generate a non finite element mesh */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_opnbdy,        arg(i,stack,0L)); i++;   /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_lag,           arg(i,stack,0L)); i++;   /*!< [-1/0/1/2], Lagrangian option */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_optim,         arg(i,stack,0L)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_optimLES,      arg(i,stack,0L)); i++;   /*!< [1/0], Strong mesh optimization for Les computations */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_noinsert,      arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point insertion */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_noswap,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nomove,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point relocation */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nosurf,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow surface modifications */
-  //if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nreg,          arg(i,stack,0L)); i++;   /*!< [0/1], Enable normal regularization */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_renum,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_anisosize,     arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_octree,        arg(i,stack,0L)); i++;   /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_angleDetection,arg(i,stack,0.)); i++;   /*!< [val], Value for angle detection */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hmin,          arg(i,stack,0.)); i++;   /*!< [val], Minimal mesh size */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hmax,          arg(i,stack,0.)); i++;   /*!< [val], Maximal mesh size */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hsiz,          arg(i,stack,0.)); i++;   /*!< [val], Constant mesh size */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hausd,         arg(i,stack,0.)); i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hgrad,         arg(i,stack,0.)); i++;   /*!< [val], Control gradation */
-  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
-  //if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_rmc,           arg(i,stack,0.)); i++;   /*!< [-1/val], Remove small connex componants in level-set mode */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_verbose,       arg(i,stack,0L));    i++;   /*!< [-1..10], Tune level of verbosity */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_mem,           arg(i,stack,0L));    i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_debug,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_iso,           arg(i,stack,false)); i++;   /*!< [1/0], Level-set meshing */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nofem,         arg(i,stack,false)); i++;   /*!< [1/0], Generate a non finite element mesh */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_opnbdy,        arg(i,stack,false)); i++;   /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_lag,           arg(i,stack,0L));    i++;   /*!< [-1/0/1/2], Lagrangian option */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_optim,         arg(i,stack,false)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_optimLES,      arg(i,stack,false)); i++;   /*!< [1/0], Strong mesh optimization for Les computations */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nosurf,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow surface modifications */
+  //if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Enable normal regularization */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_renum,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_anisosize,     arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_octree,        arg(i,stack,0L));    i++;   /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
+  //if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_rmc,           arg(i,stack,0.));    i++;   /*!< [-1/val], Remove small connex componants in level-set mode */
 
   bool bls = MMG3D_Get_iparameter(mesh,MMG3D_IPARAM_iso);
 
@@ -566,29 +570,35 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
       }
     }
 
-  int i=1;
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_verbose,       arg(i,stack,0L)); i++;   /*!< [-1..10], Tune level of verbosity */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_mem,           arg(i,stack,0L)); i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_debug,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off debug mode */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_angle,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off angle detection */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_iso,           arg(i,stack,0L)); i++;   /*!< [1/0], Level-set meshing */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_keepRef,       arg(i,stack,0L)); i++;   /*!< [1/0], Preserve the initial domain references in level-set mode */
-  //if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_optim,         arg(i,stack,0L)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noinsert,      arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point insertion */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noswap,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nomove,        arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point relocation */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nreg,          arg(i,stack,0L)); i++;   /*!< [0/1], Disabled/enabled normal regularization */
-  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_renum,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_angleDetection,arg(i,stack,0.)); i++;   /*!< [val], Value for angle detection */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmin,          arg(i,stack,0.)); i++;   /*!< [val], Minimal mesh size */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmax,          arg(i,stack,0.)); i++;   /*!< [val], Maximal mesh size */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hsiz,          arg(i,stack,0.)); i++;   /*!< [val], Constant mesh size */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hausd,         arg(i,stack,0.)); i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hgrad,         arg(i,stack,0.)); i++;   /*!< [val], Control gradation */
-  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
+  long iso=0L;
 
-  int ier = MMGS_mmgslib(mesh,sol);
-  
+  int i=1;
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_verbose,       arg(i,stack,0L));    i++;   /*!< [-1..10], Tune level of verbosity */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_mem,           arg(i,stack,0L));    i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_debug,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
+  if (nargs[i]) {iso = arg(i,stack,false); MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_iso,iso);} i++; /*!< [1/0], Level-set meshing */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_keepRef,       arg(i,stack,false)); i++;   /*!< [1/0], Preserve the initial domain references in level-set mode */
+  //if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_optim,       arg(i,stack,false));   i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Disabled/enabled normal regularization */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_renum,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
+
+  int ier;
+  if (!iso)
+    ier = MMGS_mmgslib(mesh,sol);
+  else
+    ier = MMGS_mmgsls(mesh,sol,NULL);
+
   MeshS *Th_T = nullptr;
   
   MMG5_pMesh_to_ffmesh(mesh,Th_T);
