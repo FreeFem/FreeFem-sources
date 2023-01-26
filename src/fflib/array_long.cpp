@@ -59,7 +59,7 @@ class OneBinaryOperatorInv_KN_long : public OneOperator {
       long pv = GetAny<long>((*p)(NullStack));
       if (pv !=-1) {
         char buf[100];
-        sprintf(buf, "Inverse: int[int] I, array, I^%ld, The pow must be == -1, sorry", pv);
+        snprintf(buf,100, "Inverse: int[int] I, array, I^%ld, The pow must be == -1, sorry", pv);
         CompileError(buf);
       }
       return new E_F_F0<Inv_KN_long, KN_<long> >(Build<Inv_KN_long, KN_<long> >, to< KN_<long> >(args[0]));

@@ -1378,7 +1378,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     aType t_tfe2 = atype< TypeOfFE2 * >( );
     ffassert(d>0 && d < 4);
     char  cdim[10];
-      sprintf(cdim,"%dd",d);
+      snprintf(cdim,10,"%dd",d);
     string sdim = cdim ;
     const E_Array *a2(dynamic_cast< const E_Array * >(args[2].LeftValue( )));
     ffassert(a2);

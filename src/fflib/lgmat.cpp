@@ -1958,7 +1958,7 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)
          { char buf[100];
-           sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
+           snprintf(buf,100," A^%ld, The pow must be  == -1, sorry",pv);
            CompileError(buf);}
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0]));
     }
@@ -1976,7 +1976,7 @@ class OneBinaryOperatorAt_inv : public OneOperator { public:
         long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)
         { char buf[100];
-            sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
+            snprintf(buf,100," A^%ld, The pow must be  == -1, sorry",pv);
             CompileError(buf);}
         return  new E_F_F0<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >(Build<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >,t[0]->CastTo(args[0]));
     }

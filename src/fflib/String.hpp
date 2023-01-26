@@ -51,13 +51,13 @@ string * toString(const T& a)
 inline string * toString(const double& a)
 {
   char buf[30];
-  sprintf(buf,"%g",a);
+  snprintf(buf,30,"%g",a);
  return newstring(buf);
 }
 inline string * toString(const long& a)
 {
   char buf[30];
-  sprintf(buf,"%ld",a);
+  snprintf(buf,30,"%ld",a);
   return newstring(buf);
 }
 inline string * toString(const bool& a)
@@ -67,7 +67,7 @@ inline string * toString(const bool& a)
 inline string * toString(const complex<double> & a)
 {
   char buf[60];
-  sprintf(buf,"%g%+gi",a.real(),a.imag());
+  snprintf(buf,30,"%g%+gi",a.real(),a.imag());
   return newstring(buf);
 }
 

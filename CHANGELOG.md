@@ -28,9 +28,9 @@ All notable changes to this project will be documented in this file.
     meshS Ts=buildmeshSminsurf(TL,1);// minamal surface
     meshS Tsl=buildmeshSLap(TL,1);//  Laplace Surface ..
     meshS Tsl=buildmesh(TL,1,op);// op = 0 Lap and op =1 => minsurf. 
-
 ### Changed
--
+-  change  isoline of do the job  meshS, see exemple plugin/isoline.edp
+-  change  Curve function to be with 3 componates to use the isoline data.
 
 ### Deprecated
 -
