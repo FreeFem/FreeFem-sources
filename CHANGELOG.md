@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 -  change  isoline of do the job  meshS, see exemple plugin/isoline.edp
 -  change  Curve function to be with 3 componates to use the isoline data.
-
+-  change  Curvature plugin to compatible with new isoline data for 3 d case.
 ### Deprecated
 -
 

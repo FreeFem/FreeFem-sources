@@ -559,7 +559,7 @@ AnyType ISOLINE_P1_Op<Mesh>::operator( )(Stack stack) const {
   }
   const int d = Rd::d;
   ffassert((pxx || pyy) == !pxy);
-  if(pxy)  cout << " PXY ???? " << pxy->N() << " "<< pxy->M() << " " << pxy << "  "<< pxx << " " << pyy <<endl;
+  //if(pxy)  cout << " PXY ???? " << pxy->N() << " "<< pxy->M() << " " << pxy << "  "<< pxx << " " << pyy <<endl;
   const Mesh *pTh = GetAny< const Mesh * >((*eTh)(stack));
   ffassert(pTh);
   SMesh<Mesh> Th(pTh);
@@ -940,7 +940,7 @@ AnyType ISOLINE_P1_Op<Mesh>::operator( )(Stack stack) const {
       (*pbeginend)[i] = iQ[i];
     }
   }
-    cout << " !!!!"<< pxy << endl;
+  //  cout << " !!!!"<< pxy << endl;
   if (pxx && pyy) {
     pxx->resize(QQ.size( ));
     pyy->resize(QQ.size( ));
@@ -954,7 +954,7 @@ AnyType ISOLINE_P1_Op<Mesh>::operator( )(Stack stack) const {
   } else if (pxy) {
       
     pxy->resize(d+1, QQ.size( ));
-      cout << " resize " << " xy " << d+1 << " " << QQ.size() << endl;
+    if(verbosity>9)   cout << " resize " << " xy " << d+1 << " " << QQ.size() << endl;
     for (int k = 0; k < iQ.size( ); k += 2) {
       int i0 = iQ[k], i1 = iQ[k + 1];
       double lg = 0;
@@ -1013,7 +1013,6 @@ AnyType ISOLINE_P1_Op<Mesh>::operator( )(Stack stack) const {
    * }
    */
   // construction des courble
-      cout << " PXY !!!! "  << pxy << "  "<< pxx << " " << pyy <<endl;
 
   return nbc;
 }
