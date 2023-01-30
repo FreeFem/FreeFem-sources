@@ -2025,7 +2025,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
 
         // check for Maxwell case
         if (SRT0 && SRdHat::d == 2) {
-            if( Ker->typeKernel[0] >0 ){
+            if( Ker->typeKernel[1] >0 ){
                 cerr << "vector BEM Maxwell is not valid for combined field formulation."<< endl;
                 ffassert(0);
             }

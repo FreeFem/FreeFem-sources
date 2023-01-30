@@ -51,7 +51,8 @@ buildDmesh(ThS);
 }
 fespace UhG(ThG, Pk);
 fespace UhS(ThS, Pk);
-varf vk(u, v) = int2dx2d(ThG)(ThG)(BEM(BemKernel("SL", k=k), u, v));
+// Maxwell is defined on a vector of size three
+varf vk( [u1,u2,u3], [v1,v2,v3] ) = int2dx2d(ThG)(ThG)(BEM(BemKernel("MA_SL", k=k), [u1,u2,u3], [v1,v2,v3]));
 A = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
 varf vRHS([ux, uy, uz], [vx, vy, vz]) = int2d(ThG)([vx, vy, vz]' * [-fincx, -fincy, -fincz]);
 UhG<complex> [bx, by, bz], [ux, uy, uz];
@@ -99,7 +100,8 @@ if(!NoGraphicWindow) {
     }
     fespace UhOutG(ThOutG, Qk);
     fespace UhOutS(ThOutS, Qk);
-    varf vP(u, v) = int2d(ThG)(POT(BemPotential("SL", k=k), u, v)) ;
+    // Maxwell is defined on a vector of size three
+    varf vP([u1,u2,u3], [v1,v2,v3] ) = int2d(ThG)(POT(BemPotential("MA_SL", k=k), [u1,u2,u3], [v1,v2,v3] )) ;
     Mat<complex> P(B, A);
     P = vP(UhG, UhOutG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
     ObjectView(P, format = "info");

@@ -10,7 +10,7 @@ load "msh3"
 include "getARGV.idp"
 
 real c0= 299792458;
-real f = getARGV("-frequency",1.5e+9);
+real f = getARGV("-frequency",6e+8);
 real k = 2*pi*f/c0;
 real lambda = c0/f;
 
@@ -57,7 +57,7 @@ ThOut = trunc(ThOut, max(abs(x),abs(y)) > 0.5 + 4./nloc);
 
 fespace UhOut(ThOut,[P1,P1,P1]);
  
-varf vP([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(BemPotential("SL",k=k),[u1,u2,u3],[v1,v2,v3])) ;
+varf vP([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(BemPotential("MA_SL",k=k),[u1,u2,u3],[v1,v2,v3])) ;
 HMatrix<complex> B = vP(Uh,UhOut,eta=10,eps=1e-3);
 
 if (mpirank == 0) cout << B.infos << endl;
