@@ -350,6 +350,9 @@ namespace PETSc {
       Op(Expression x, Expression y) : b(new Call_FormBilinear<fes1, fes2>(*dynamic_cast<const Call_FormBilinear<fes1, fes2>*>(y))), a(x) {
           assert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<upscaled_type<K>>::value) == IsComplexType<upscaled_type<K>>::value);
+          
+          // Check the nbitem of inconnu and test in BemFormBilinear
+          checkNbItemFEspacesInconnuAndTest(b->largs,b->N,b->M);
       }
       operator aType () const { return atype<Dmat*>(); }
     };

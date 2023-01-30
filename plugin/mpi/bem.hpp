@@ -633,6 +633,10 @@ class FoperatorKBEM : public E_F0mps { public:
     Fi fi;
     Ft ft;
     Expression kbem;
+    // Morice : Ils ne sont pas utiliser dans cette version.
+    //          Mais sont rajouter pour clarrifier la valeur "fi->v[0].first.first;"
+    //int nb_component_FEspace_inc; 
+    //int nb_component_FEspace_test;
     
     FoperatorKBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
         aType t_a = atype< E_Array >( );
@@ -667,6 +671,8 @@ class FoperatorKBEM : public E_F0mps { public:
         else{
             CompileError("The BEM keyword inside an integral must be : BEM(bemkernel,u0,v0); or BEM(bemkernel,[u0,..,un],[v0,..,vm]); ");
         }
+        // nb_component_FEspace_inc  = fi->v[0].first.first+1;
+        // nb_component_FEspace_test = ft->v[0].first.first+1;
         ffassert(kbem && fi && ft);
     }
     
@@ -804,6 +810,9 @@ class FoperatorPBEM : public E_F0mps { public:
     Fi fi;
     Ft ft;
     Expression pot;
+
+    //int nb_component_FEspace_inc;
+    //int nb_component_FEspace_test;
     
     FoperatorPBEM(const basicAC_F0 & args) :fi(0),ft(0),pot(0) {
         aType t_a = atype< E_Array >( );
@@ -831,12 +840,16 @@ class FoperatorPBEM : public E_F0mps { public:
             // Remark: m = ft->v[0].first.first;
         }
         else if( args[1].left( ) != t_a && args[2].left( ) != t_a ){
+            // case POT(bemkernel,u0,v0)])
             fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
             ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
         }
         else{
             CompileError("The POT keyword inside an integral must be : POT(bemkernel,u0,v0); or POT(bemkernel,[u0,..,un],[v0,..,vm]); ");
         }
+
+        // nb_component_FEspace_inc  = fi->v[0].first.first+1;
+        // nb_component_FEspace_test = ft->v[0].first.first+1;
         
         ffassert(pot && fi && ft);
     }
@@ -992,7 +1005,50 @@ bemtool::BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) {
     return cpKernel;
 }
 
+bool checkVectorBemKernel(Stack stack, const list<C_F0> & largs){
+    // return true if the bem kernel
+    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
+    for (ii=ib;ii != ie;ii++) {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
+        
+        if ( r==atype<const  BemFormBilinear *>() ){
+            BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
+            FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
+            if (b == NULL) {
+                if(mpirank == 0) cout << "dynamic_cast error" << endl; 
+                ffassert(0);
+            }
+            else{
+                BemKernel* K=GetAny<BemKernel*>((*b->kbem)(stack));
+                // verification vector BEM
+                if( b->fi->v[0].first.first > 0 || b->ft->v[0].first.first > 0 ){
+                    if( b->fi->v[0].first.first+1 == 3 && b->ft->v[0].first.first+1 == 3 ){
+                        ffassert( K->typeKernel[0] == 6 ); // case MA_SL 
+                        // vector BEM Maxwell in 3d
+                        ffassert( K->typeKernel[1] == 0); // not combined kernel available
+                    }
+                    else{
+                        cerr << "Error in the definition of the varf for vector BEM equation" << endl;
+                        ffassert(0);
+                    }
+                }
+                // verification reciproque de vector BEM
+                if( K->typeKernel[0] == 6 ){
+                    // :: case MA_SL ::
+                    ffassert( b->fi->v[0].first.first+1 == 3 && b->ft->v[0].first.first+1 == 3 );
+                    ffassert( K->typeKernel[1] == 0); // not combined kernel available
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
+    bool IsVectorBem =checkVectorBemKernel(stack, largs);
+    // need to do that before to allow to add mass matrix in the scalar case
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
     
     BemKernel* K;
@@ -1012,13 +1068,10 @@ pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             else
                 K=GetAny<BemKernel*>((*b->kbem)(stack));
             haveBemBilinearOperator=true;
-            //if(verbosity >5){
-            cout << "KKKK combi=" << K->coeffcombi[0] << " " << K->coeffcombi[1] << endl;
-            //}
         }
-        
-        else if (r==atype<const  FormBilinear *>() && !haveBilinearOperator) {
-            
+        else if (r==atype<const  FormBilinear *>() && !haveBilinearOperator && !IsVectorBem) {
+            // These line are not valid for vectorial BEM
+
             const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
             const CDomainOfIntegration & di= *bb->di;
             // check the integration (keyword)
@@ -1042,9 +1095,12 @@ pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
                 cout << "FormBilinear: number of unknown finc=" << finc.first << " ,ftest= " << ftest.first << endl;
                 cout << "FormBilinear: operator order finc=" << finc.second << " ,ftest= " << ftest.second << endl;      // ordre   only op_id=0
             }
-            ffassert(finc.first==0 && ftest.first==0);
+            ffassert(finc.first==0 && ftest.first==0); // only valid for scalar BEM
             ffassert(finc.second==0 && ftest.second==0);
             haveBilinearOperator=true; // or ffassert(Op->v.size()==1); // check size 1
+        }
+        else if (r==atype<const FormLinear *>()){
+            if(verbosity>3) cout << "getBemKernel: FormLinear in variationnal form" << endl;
         }
         else
             ffassert(0);
@@ -1065,8 +1121,19 @@ BemPotential* getBemPotential(Stack stack, const list<C_F0> & largs)  {
         FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
         if (b == NULL) {
             if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-        else
+        else{
             P=GetAny<BemPotential*>((*b->pot)(stack));
+            if( b->fi->v[0].first.first > 0 || b->ft->v[0].first.first > 0 ){
+                if( b->fi->v[0].first.first+1 == 3 && b->ft->v[0].first.first+1 == 3 ){
+                    ffassert( P->typePotential == 4 ); // case MA_SL 
+                    // vector BEM Maxwell in 3d
+                }
+                else{
+                    cerr << "Error in the definition of the varf with BEM kernel for Potential" << endl;
+                    ffassert(0);
+                }
+            }
+        }
     }
     return P;
 }
@@ -1952,11 +2019,20 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
 
     if (VFBEM==1) {
         // info kernel
-        cout << "call getBemKernel(stack,largs);" << endl;
         pair<BemKernel*,Complex> kernel = getBemKernel(stack,largs);
         BemKernel *Ker = kernel.first;
         Complex alpha = kernel.second;
-        
+
+        // check for Maxwell case
+        if (SRT0 && SRdHat::d == 2) {
+            if( Ker->typeKernel[0] >0 ){
+                cerr << "vector BEM Maxwell is not valid for combined field formulation."<< endl;
+                ffassert(0);
+            }
+            // BemKernel->typeKernel[0] == 6 :: MA_SL
+            ffassert( Ker->typeKernel[0] == 6 ); // check MA_SL
+        }
+
         if(mpirank == 0 && verbosity >5) {
             int nk=-1;
             iscombinedKernel(Ker) ? nk=2 : nk=1;
@@ -1981,6 +2057,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             ff_BIO_Generator<R,P2,SMesh>(generator,Ker,dof,alpha);
         }
         else if (SRT0 && SRdHat::d == 2) {
+            // BemKernel->typeKernel[0] == 6 :: MA_SL
             bemtool::Dof<bemtool::RT0_2D> dof(mesh);
             ff_BIO_Generator_Maxwell<R>(generator,Ker,dof,alpha);
         }
@@ -2011,9 +2088,14 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         delete generator;
     }
     else if (VFBEM==2) {
-        cout << "VFBEM==2"<< endl;
         BemPotential *Pot = getBemPotential(stack,largs);
         bemtool::Geometry node_output;
+
+        if (SRT0 && SRdHat::d == 2) {
+            // check if we have the good FE space for vector BEM
+            ffassert( Pot->typePotential == 4 ); // check MA_SL
+        }
+
         if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
             Mesh2Bemtool(ThV,node_output);
         else if (Vh->MaxNbNodePerElement == 1) {
