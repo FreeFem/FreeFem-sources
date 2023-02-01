@@ -351,8 +351,10 @@ namespace PETSc {
           assert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<upscaled_type<K>>::value) == IsComplexType<upscaled_type<K>>::value);
           
+          #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
           // Check the nbitem of inconnu and test in BemFormBilinear
           checkNbItemFEspacesInconnuAndTest(b->largs,b->N,b->M);
+          #endif
       }
       operator aType () const { return atype<Dmat*>(); }
     };
