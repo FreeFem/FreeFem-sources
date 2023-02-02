@@ -42,7 +42,6 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../lglib/mymain.cpp \
 	../lglib/lg.tab.cpp \
 	/compositeFESpace.cpp \
-	/lgfem.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
 LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@
@@ -60,9 +59,6 @@ ff-mpirun: ff-mpirun.in Makefile
 ## TODO: same compilation process for *Nix and Windows ?
 # copy this file because we use different FLAGS (-DPARALLELE)
 ffapi.cpp: ../fflib/ffapi.cpp
-	cp $^ .
-
-lgfem.cpp: ../fflib/lgfem.cpp
 	cp $^ .
 
 compositeFESpace.cpp: ../fflib/compositeFESpace.cpp
