@@ -31,7 +31,7 @@ template<typename P, typename MeshBemtool>
 static PetscErrorCode GenEntriesFromCtx(PetscInt sdim,PetscInt M,PetscInt N, const PetscInt *const J, const PetscInt *const K, PetscScalar* ptr,void *ctx) {
     HtoolCtx<P,MeshBemtool>* user = reinterpret_cast<HtoolCtx<P,MeshBemtool>*>(ctx);
     user->generator->copy_submatrix(M,N,J,K,ptr);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 template<typename P, typename MeshBemtool>
@@ -40,7 +40,7 @@ static PetscErrorCode DestroyHtoolCtx(void *ctx) {
 
     PetscFunctionBeginUser;
     delete user;
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 template<template<typename P, typename MeshBemtool> class Gen, typename P, typename MeshBemtool, typename std::enable_if< std::is_same< HtoolCtx<P, MeshBemtool>, Gen<P, MeshBemtool> >::value >::type* = nullptr>
@@ -2065,7 +2065,7 @@ namespace PETSc {
       ierr = PetscCalloc1(1,submat);CHKERRQ(ierr);
     }
     (*submat)[0] = *O;
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value || std::is_same< T, KN< long > >::value >::type* =
                        nullptr >
@@ -2188,7 +2188,7 @@ namespace PETSc {
       ierr = VecRestoreArray(y, &out);CHKERRQ(ierr);
       ierr = VecRestoreArrayRead(x, &in);CHKERRQ(ierr);
     } else VecCopy(x, y);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type, typename std::enable_if<!std::is_same<Type, ShellInjection>::value>::type* = nullptr  >
   static PetscErrorCode ShellDestroy(Mat A) {
@@ -2199,7 +2199,7 @@ namespace PETSc {
     ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
     delete user->op;
     ierr = PetscFree(user);CHKERRQ(ierr);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type, typename std::enable_if<std::is_same<Type, ShellInjection>::value>::type* = nullptr  >
   static PetscErrorCode ShellDestroy(Mat A) {
@@ -2209,7 +2209,7 @@ namespace PETSc {
     PetscFunctionBeginUser;
     ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
     ierr = PetscFree(user);CHKERRQ(ierr);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   static PetscErrorCode PCShellDestroy(PC pc) {
@@ -2220,13 +2220,13 @@ namespace PETSc {
     ierr = PCShellGetContext(pc, (void**)&user);CHKERRQ(ierr);
     delete user->op;
     ierr = PetscFree(user);CHKERRQ(ierr);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   static PetscErrorCode MonitorDestroy(void** ctx) {
     PetscFunctionBeginUser;
     delete reinterpret_cast< typename LinearSolver< Type >::MonF_O* >(*ctx);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   struct WrapperSubKSP {
     IS  is;
@@ -2240,7 +2240,7 @@ namespace PETSc {
     VecPermute(out, ctx->is, PETSC_FALSE);
     KSPSolve(*ctx->ksp, out, out);
     VecPermute(out, ctx->is, PETSC_TRUE);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   static PetscErrorCode WrapperDestroy(PC pc) {
     WrapperSubKSP *ctx;
@@ -2248,14 +2248,14 @@ namespace PETSc {
     PCShellGetContext(pc, (void**)&ctx);
     ISDestroy(&ctx->is);
     PetscFree(ctx);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   static PetscErrorCode WrapperView(PC pc, PetscViewer viewer) {
     WrapperSubKSP *ctx;
     PetscFunctionBeginUser;
     PCShellGetContext(pc, (void**)&ctx);
     KSPView(*ctx->ksp, viewer);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class, class Container, char N = 'N' >
   static PetscErrorCode Op_User(Container, Vec, Vec);
@@ -2265,7 +2265,7 @@ namespace PETSc {
     typename LinearSolver< Type >::MonF_O* mat =
       reinterpret_cast< typename LinearSolver< Type >::MonF_O* >(ctx);
     mat->apply(it, rnorm);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
@@ -4124,7 +4124,7 @@ namespace PETSc {
     KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->x.n);
     long ret = mat->apply(xx);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(ret);
+    PetscFunctionReturn(PetscErrorCode(ret));
   }
   template< class Type >
   PetscErrorCode Convergence(SNES snes, PetscInt it, PetscReal xnorm, PetscReal gnorm, PetscReal f,
@@ -4149,7 +4149,7 @@ namespace PETSc {
       *reason = SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww));
     VecRestoreArrayRead(du, &din);
     VecRestoreArrayRead(u, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type, int I >
   PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
@@ -4189,7 +4189,7 @@ namespace PETSc {
       if (DE) VecRestoreArrayRead(DE, &in_e);
     }
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(ret);
+    PetscFunctionReturn(PetscErrorCode(ret));
   }
   template< class Type, int I >
   PetscErrorCode FormConstraintsTao(Tao obj, Vec x, Vec c, void* ctx) {
@@ -4209,7 +4209,7 @@ namespace PETSc {
     yy = *mat * xx;
     VecRestoreArray(c, &out);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class PType, class Type >
   PetscErrorCode FormFunction(PType obj, Vec x, Vec f, void* ctx) {
@@ -4228,7 +4228,7 @@ namespace PETSc {
     yy = *mat * xx;
     VecRestoreArray(f, &out);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   PetscErrorCode FormObjectiveRoutine(Tao tao, Vec x, PetscReal* f, void* ctx) {
@@ -4243,7 +4243,7 @@ namespace PETSc {
     KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), J->x.n);
     J->apply(xx, f);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   PetscErrorCode FormIJacobian(TS ts, PetscReal t, Vec u, Vec u_t, PetscReal a, Mat J, Mat B,
@@ -4262,7 +4262,7 @@ namespace PETSc {
     long ret = mat->apply(t, xx, xx_t, a);
     VecRestoreArrayRead(u_t, &in);
     VecRestoreArrayRead(u, &in);
-    PetscFunctionReturn(ret);
+    PetscFunctionReturn(PetscErrorCode(ret));
   }
   template< class Type >
   PetscErrorCode FormIFunction(TS ts, PetscReal t, Vec u, Vec u_t, Vec F, void* ctx) {
@@ -4284,7 +4284,7 @@ namespace PETSc {
     VecRestoreArray(F, &out);
     VecRestoreArrayRead(u_t, &in);
     VecRestoreArrayRead(u, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   PetscErrorCode FormRHSFunction(TS ts, PetscReal t, Vec u, Vec F, void* ctx) {
@@ -4303,7 +4303,7 @@ namespace PETSc {
     mat->apply(t, xx, yy);
     VecRestoreArray(F, &out);
     VecRestoreArrayRead(u, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   PetscErrorCode Monitor(TS ts, PetscInt step, PetscReal time, Vec u, void* ctx) {
@@ -4318,7 +4318,7 @@ namespace PETSc {
     KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->x.n);
     mat->apply(step, time, xx);
     VecRestoreArrayRead(u, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   AnyType NonlinearSolver< Type >::E_NonlinearSolver::operator( )(Stack stack) const {
@@ -4603,7 +4603,7 @@ namespace PETSc {
     }
     VecRestoreArray(y, &out);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   template< bool U, char T, class K >
