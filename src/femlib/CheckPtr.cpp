@@ -590,7 +590,7 @@ void * operator new[](std::size_t size,const std::nothrow_t& nothrow_constant) t
     return p;
 }
 
-void *operator new(std::size_t size) throw(std::bad_alloc)
+void *operator new(std::size_t size) //throw(std::bad_alloc)
 {
     CheckPtr___nbptr++;
     void *p = malloc( size );
@@ -601,7 +601,7 @@ void *operator new(std::size_t size) throw(std::bad_alloc)
     return p;
 }
 
-void *operator new[](std::size_t size) throw(std::bad_alloc)
+void *operator new[](std::size_t size) //throw(std::bad_alloc)
 {
     void *p = malloc(size);
     CheckPtr___nbptr++;

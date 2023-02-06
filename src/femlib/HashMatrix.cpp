@@ -128,7 +128,7 @@ head(0), next(0),
 // trans(false),
 half(halff), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 {
     Increaze(nnnz);
 }
@@ -140,7 +140,7 @@ head(0), next(0),
 // trans(false),
 half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 {
     if(cas ==-1) cas=  WhichMatrix(f)  ;
     // eat lines with #
@@ -219,7 +219,7 @@ HashMatrix<I,R>::HashMatrix(KNM_<R> F,double  threshold)
 head(0), next(0),
 half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 
 {
     Increaze();
@@ -238,7 +238,7 @@ HashMatrix<I,R>::HashMatrix(I nn,I mm,bool Half)
 head(0), next(0),
 half(Half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 
 {
     Increaze(max(nn,mm)*4);
@@ -250,7 +250,7 @@ HashMatrix<I,R>::HashMatrix(const HashMatrix& A)
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 {
     Increaze(A.nnz);
     operator=(A);
@@ -262,7 +262,7 @@ HashMatrix<I,R>::HashMatrix(const HashMatrix<II,R>& A)
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),mindiffij(1),maxdiffij(-1),tgv(0), ntgv(0)
 {
     HashMatrix<I,R>::set<II>(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij,fortran);
 }
@@ -273,7 +273,7 @@ HashMatrix<I,R>::HashMatrix(const HashMatrix<II,RR>& A, R (*ff)(RR) )
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 {
      HashMatrix<I,R>::set<II,RR>(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij,fortran,ff);
 }
@@ -284,7 +284,7 @@ HashMatrix<I,R>::HashMatrix(I nn,const R *diag)
 head(0), next(0),
 half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0)
+re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 {
     Increaze(nn);
     for(int k=0;k<nn;++k)
@@ -412,6 +412,10 @@ void HashMatrix<I,R>::clear()
     fortran = 0;
     state=unsorted;
     type_state = type_HM;
+    mindiffij=1;
+    maxdiffij=-1;
+    tgv=0;
+    ntgv=0;
     setp(0); // unset
     if(nnz)
     {

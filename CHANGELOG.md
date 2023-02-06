@@ -28,15 +28,20 @@ All notable changes to this project will be documented in this file.
     meshS Ts=buildmeshSminsurf(TL,1);// minamal surface
     meshS Tsl=buildmeshSLap(TL,1);//  Laplace Surface ..
     meshS Tsl=buildmesh(TL,1,op);// op = 0 Lap and op =1 => minsurf. 
+- add sparse block to sparse  matrix 
+  matrix A = va(Vh,Vh);
+  matrix B(A.n*5,A.n*5);
+  int i=2;
+  B.add(1.+10*i,A,i*ndof,i*ndof); 
 ### Changed
 -  change  isoline of do the job  meshS, see exemple plugin/isoline.edp
 -  change  Curve function to be with 3 componates to use the isoline data.
 -  change  Curvature plugin to compatible with new isoline data for 3 d case.
+-  change some sprintf in snprint to remove warning 
+
 ### Deprecated
--
 
 ### Removed
--
 
 ### Fixed
 - bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL  and also discontinous  version (missing  initialisation)

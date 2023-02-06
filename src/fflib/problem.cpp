@@ -3119,7 +3119,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     What_d Dop = Op.DiffOp(lastop);
     KN<bool> Dop2(last_operatortype);
     Op.DiffOp(Dop2);
-    int lastop2=1+Dop2.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+    int lastop2=lastop;//1+Dop2.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
     double epsP=1e-6; // must be choose
     
     if (ie<0)
@@ -3226,7 +3226,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     What_d Dop = Op.DiffOp(lastop);
     KN<bool> Dop2(last_operatortype);
     Op.DiffOp(Dop2);
-    int lastop2=1+Dop2.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+    int lastop2=lastop;//1+Dop2.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
     double epsP=1e-6; // must be choose
     
     if (ie<0) {

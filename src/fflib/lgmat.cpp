@@ -3114,6 +3114,54 @@ template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const
 template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const & bc)
 { return Set_BC(pA,bc,ff_tgv);
 }
+
+template <class K>
+class SparseMat_Add { public:
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm;
+    SparseMat_Add(Matrice_Creuse<K> * ff) :phm(ff?ff->pHM():0) {ffassert(phm);}
+// void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
+    SparseMat_Add(const SparseMat_Add<K> & s): phm(s.phm) {}
+};
+/*
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,Matrice_Creuse<K>* const &pA)
+{
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm= sm.phm;
+    HMat *phA= pA->pHM();
+    ffassert(phm && phA);
+    phm->Add(phA);
+    return sm;
+}*/
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,K const & coef,Matrice_Creuse<K>*const  & pA,const long & i0,const long & j0)
+{
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm= sm.phm;
+    HMat *phA= pA->pHM();
+    ffassert(phm && phA);
+    phm->Add(phA,coef,false,i0,j0);
+    return sm;
+}
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,K const & coef,Matrice_Creuse<K>*const  & pA)
+{ return addMat(sm,coef,pA,0,0);}
+
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,Matrice_Creuse<K>*const  & pA)
+{ return addMat(sm,K(1.),pA,0,0);}
+
+template <class R>
+SparseMat_Add<R> to_add(Matrice_Creuse<R> * ff){return SparseMat_Add<R>(ff);}
+template <class R>
+R ffpscal(Matrice_Creuse<R> * const & pM,  KN_<R>  const & a,  KN_<R>  const & b)
+{     typedef  typename Matrice_Creuse<R>::HMat HMat;
+    HMat *phm= pM->pHM();
+    R s=0;
+    if( phm) s = phm->pscal(a,b);
+    return s;
+}
 template <class R>
 void AddSparseMat()
 {
@@ -3122,7 +3170,7 @@ void AddSparseMat()
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
  Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005
  Dcl_Type<  minusMat<R>  >(); // Add FJH mars 2007
-
+ Dcl_Type<  SparseMat_Add<R>  >(); // FH jan 2023
  basicForEachType * t_MC=atype<  Matrice_Creuse<R>* >();
 
  t_MC->SetTypeLoop(atype<  R* >(),atype<  long* >(),atype<  long* >());
@@ -3287,7 +3335,14 @@ TheOperators->Add("+",
     Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
     Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
     Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<R> *>(symmetrizeCSR<R> ));
-//  --- end
+    Global.Add("pscal","(",new OneOperator3_<R,Matrice_Creuse<R> *,KN_<R> ,KN_<R>> (ffpscal));
+     Add<MR *>("add", ".", new OneOperator1<SparseMat_Add<R>, MR *>(to_add));
+    Add<SparseMat_Add<R>>("(","", new OneOperator2_<SparseMat_Add<R>,SparseMat_Add<R>,MR*>(addMat<R>)
+                                , new OneOperator3_<SparseMat_Add<R>,SparseMat_Add<R>,R,MR*>(addMat)
+                                , new OneOperator5_<SparseMat_Add<R>,SparseMat_Add<R>,R,MR*,long,long>(addMat));
+
+//  --- end ADD
+    
 }
 
 extern int lineno();
