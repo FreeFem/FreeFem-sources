@@ -1622,7 +1622,6 @@ void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&p
 
 OP_MakePtr2::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
-  //cout << "call du constructeur OP_MakePtr2::Op::Op" << endl; // Morice
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
@@ -2199,7 +2198,6 @@ inline FEbase< K, v_fes > *MakePtrFE(pfes *const &a) {
 
 template< class K >
 inline FEbase< K, v_fes > **MakePtrFE2(FEbase< K, v_fes > **const &p, pfes *const &a) {
-  cout << "=== :: execution :: call MakePtrFE2( :: ===" << endl;
   *p = new FEbase< K, v_fes >(a);
   return p;
 }
@@ -2207,7 +2205,6 @@ inline FEbase< K, v_fes > **MakePtrFE2(FEbase< K, v_fes > **const &p, pfes *cons
 template< class K >
 inline FEbaseArray< K, v_fes > **MakePtrFE3(FEbaseArray< K, v_fes > **const &p, pfes *const &a,
                                             const long &N) {
-  cout << "=== :: execution :: call MakePtrFE3( :: ===" << endl;
   *p = new FEbaseArray< K, v_fes >(a, N);
   return p;
 }
@@ -2223,9 +2220,6 @@ class OneOperatorMakePtrFE : public OneOperator {
     E_set_fev< K > *e_set_fev;
     const E_Array *v;
     CODE(const basicAC_F0 &args) : fer(to< R >(args[0])), fes(to< B >(args[1])), e_set_fev(0) {
-      //cout << "call CODE(const basicAC_F0 &args) in OneOperatorMakePtrFE::CODE" << endl; // Morice
-      //cout << "*args[2].left=" << *args[2].left() << endl;  // Morice
-      //cout << "*args[2].LeftValue( )=" << *args[2].LeftValue( ) << endl;  // Morice
       if (BCastTo< K >(args[2]))
         v = new E_Array(basicAC_F0_wa(to< K >(args[2])));
       else
@@ -2249,8 +2243,7 @@ class OneOperatorMakePtrFE : public OneOperator {
     operator aType( ) const { return atype< R >( ); }
   };
 
-  E_F0 *code(const basicAC_F0 &args) const { /* cout << "E_F0 *code(const basicAC_F0 &args) in E_F0 *code(const basicAC_F0 &args)" << endl; // Morice */
-  return new CODE(args); }
+  E_F0 *code(const basicAC_F0 &args) const { return new CODE(args); }
   OneOperatorMakePtrFE(aType tt)
     :    // tt= aType<double>() or aType<E_Array>()
       OneOperator(map_type[typeid(R).name( )], map_type[typeid(R).name( )],
@@ -6701,7 +6694,7 @@ void init_lgfem( ) {
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesL, v_fesS >); // 3D curve / 3D Surf on meshL
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesS, v_fesL >); // 3D Surf / 3D curve on meshL
 
-  // Morice: composite FESpace / composite FESpace ( A quoi cela sert ?????) 
+  // Morice: composite FESpace / composite FESpace 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, vect_generic_v_fes >);    
   Add< const FormBilinear * >("(", "", new OpCall_CompositeFormBilinear< FormBilinear, vect_generic_v_fes , vect_generic_v_fes >);    
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, vect_generic_v_fes  >);    
@@ -7219,11 +7212,8 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   Expression fes = fespacetype;
   
   aType dcltype = atype< FE ** >( );
-  //cout << "dcltype=" << dcltype << endl; // Morice
   aType cf0type = atype< C_F0 >( );
-  //cout << "cf0type=" << cf0type << endl; // Morice 
   aType rtype = atype< FEiR >( );
-  //cout << "rtype=" << rtype << endl; // Morice
 
   if (cplx) {
     dcltype = atype< CFE ** >( );
@@ -7235,7 +7225,6 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   string str("[");
 
   const int n = ids.size( );
-  //cout << "ids.size( )" << n  << " " << fes->nbitem() << endl; // Morice
   ffassert(n > 0);
   if (fes->nbitem( ) != (size_t)n) {
     cerr << " the array size must be " << fes->nbitem( ) << " not " << n << endl;
@@ -7256,7 +7245,6 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
                                                          basicAC_F0_wa(fespacetype, init))
           : currentblock->Block::NewVar< LocalVariable >(name, dcltype, basicAC_F0_wa(fespacetype));
   C_F0 base = currentblock->Find(name);
-  //cout << "block NewVar Okay" << endl; // morice
 
   // Morice : Ajout dans la table du block un NewId 
   //          NewId = "une nouvelle variable", PAC: [u,v,w] ajout de 3 variables et non 1 variable. 
@@ -7268,7 +7256,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
     for (int i = 0; i < n; i++)
       currentblock->NewID(cf0type, ids[i].id, C_F0(new FEi(base, i, n), rtype)); 
   delete pids;    // add FH 25032005
-  // cout << "block NewID Okay" << endl; // morice
+
   return ret;
 }
 /*
@@ -7288,12 +7276,9 @@ C_F0 NewVecFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, C
   Expression fes = fespacetype;
   
   aType dcltype = atype< FE ** >( );
-  cout << "dcltype=" << dcltype << endl;
   aType cf0type = atype< C_F0 >( );
-  cout << "cf0type=" << cf0type << endl;
   aType rtype = atype< FEiR >( );
-  cout << "rtype=" << rtype << endl;
-
+  
   if (cplx) {
     dcltype = atype< CFE ** >( );
     rtype = atype< CFEiR >( );
@@ -7371,8 +7356,6 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
 
 C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
                    int dim) {
-
-  // cout << "version :: NewFEvariable :: const char *id " << endl; // morice
   ListOfId *lid = new ListOfId;
   lid->push_back(UnId(id));
   return NewFEvariable(lid, currentblock, fespacetype, init, cplx, dim);
@@ -7620,7 +7603,6 @@ C_F0 NewFEarrayT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 s
   string str("[");
 
   const int n = ids.size( );
-   //cout << "NewFEarrayT=" << n << endl;    // Morice 
   ffassert(n > 0);
   if (fes->nbitem( ) != (size_t)n) {
     cerr << " the array size must be " << fes->nbitem( ) << " not " << n << endl;

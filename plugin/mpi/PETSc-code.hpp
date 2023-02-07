@@ -6039,7 +6039,6 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
 
   // check if we have a square matrix
   bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
-  cout << "A_is_square=" << A_is_square << endl;
 
   // === simple check if A is symetrical === // 
   // voir avec les autres.
@@ -6056,18 +6055,13 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
   int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
 
-  // set ds.sym = 0 
-  ds.sym = 0;
-  if(verbosity)
-    cout << " we consider the block matrix as a non symetric matrix " << endl; 
-
   // J'ai repris ce qu'il y avait. 
   // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
   // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
   // set ds.sym = 0 
 
   ds.sym = 0;
-  if(verbosity)
+  if(verbosity>3)
     cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl; 
 
   if (! A_is_square )
@@ -6096,7 +6090,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
     int offsetMatrixVh = 0;
     if( ds.sym > 0 ){ maxJVh=(i+1); ffassert(maxJVh<NpVh);}
     for( int j=0; j<maxJVh; j++){
-      if(mpirank ==0){
+      if(mpirank ==0 && verbosity>3){
       cout << "offsetMatrixUh= " << offsetMatrixUh << ", offsetMatrixVh= " << offsetMatrixVh << endl;
       cout << "construction of block i,j=" << i << ","<< j << endl;
       cout << "                          " << endl;
@@ -6209,7 +6203,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
             if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
               // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
               
-              cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+              if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
               const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
 
               MatCreate(PETSC_COMM_WORLD, &Abemblock->_petsc);
@@ -6272,7 +6266,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
 
               // Abemblock->dtor();  // ???
               MatDestroy(&mAAT);  // ???
-              // we need to that because R=Complex with BEM
+              // we need to do that because R=Complex with BEM
               MI_BBB->destroy();
               delete MI_BBB;
             }
@@ -6331,7 +6325,7 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
   } // end loop i
   
   // 
-  cout << "Ares->_vector_global=" << Ares->_vector_global << endl; 
+  if(verbosity>3) cout << "Ares->_vector_global=" << Ares->_vector_global << endl; 
 
   if( NpUh==1 && maxJVh==1 ){
     Ares->_petsc = a[0];

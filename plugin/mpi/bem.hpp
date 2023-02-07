@@ -1156,8 +1156,6 @@ bemtool::PotKernelEnum whatTypeEnum(BemPotential *P) {
 template <class K, typename P, class MMesh>
 void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<P>& dof, Complex alpha) {
     
-    if(mpirank == 0) cout << "ff_BIO::LaplaceHelmoltz:: " << endl;
-
     bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
     double kappaIm1 = typeKernel->wavenum[0].imag(), kappaIm2 = typeKernel->wavenum[1].imag();
@@ -1166,7 +1164,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     if(iscombined) ffassert( (kappaRe1==kappaRe2) && (kappaIm1==kappaIm2) );
     std::complex<double> coeff1=typeKernel->coeffcombi[0], coeff2=typeKernel->coeffcombi[1];
     
-    if(mpirank == 0) cout << "ff_BIO::LaplaceHelmoltz:: alpha=" << alpha << ", coeff1=" << coeff1 << endl;
+    if(mpirank == 0 && verbosity>3) cout << "ff_BIO::LaplaceHelmoltz:: alpha=" << alpha << ", coeff1=" << coeff1 << endl;
     
     // BIO_Generator -> single kernel
     // Equ Helmholtz kappa1.real() > 0 et kappa1.imag() == 0
@@ -1450,23 +1448,6 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     
 }
 
-/*
-template<int d>
-struct is_dim_2{static constexpr bool value = false;};
-template<>
-struct is_dim_2<2>{static constexpr bool value = true;};
-
-template<int d>
-struct is_dim_1{static constexpr bool value = false;};
-template<>
-struct is_dim_1<1>{static constexpr bool value = true;};
-
-template <class K, class mesh, typename std::enable_if_t<is_dim_1<mesh::dim>::value>* = nullptr>
-void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, mesh& m, double alpha) {
-    return;
-}
-*/
-
 template <class K, class mesh>
 void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
@@ -1476,8 +1457,6 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
 template <class K>
 void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
 
-    if(mpirank == 0) cout << "ff_BIO::Maxwell:: " << endl;
-
     bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
     double kappaIm1 = typeKernel->wavenum[0].imag(), kappaIm2 = typeKernel->wavenum[1].imag();
@@ -1486,6 +1465,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
     if(iscombined) ffassert( (kappaRe1==kappaRe2) && (kappaIm1==kappaIm2) );
     std::complex<double> coeff1=typeKernel->coeffcombi[0], coeff2=typeKernel->coeffcombi[1];
 
+    if(mpirank == 0 && verbosity >3) cout << "ff_BIO::Maxwell:: k=" << kappaRe1 << " + i " << kappaRe2 << endl;
 
     // BIO_Generator -> single kernel
     // Equ Helmholtz kappa1.real() > 0 et kappa1.imag() == 0

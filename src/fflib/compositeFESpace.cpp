@@ -291,32 +291,10 @@ list<C_F0>  creationLargsForCompositeFESpace( const list<C_F0> & largs, const in
       if(VVFBEM ==1){
         BemKFormBilinear * bb= dynamic_cast< BemKFormBilinear *>(e);
         ffassert(bb);
-        
-        // // for construction of block largs
-        // FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        // if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-        
-        // int indexOfBlockUh =-1; // A changer de nom
-        // int indexOfBlockVh = -1; // A changer de nom
-
-        // // loop over the index of finconnue
-        // LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-        // ffassert( OpG->v.size() == 1);
-        // indexOfBlockUh = indexBlockUh[OpG->v[0].first.first];
       
-        // // Loop over the index of ftest
-        // LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-        // ffassert( OpD->v.size() == 1);
-        // indexOfBlockVh = indexBlockVh[OpD->v[0].first.first];
- 
         // creation of the new operator
         BemKFormBilinear * bbnew = new BemKFormBilinear( bb->di, FoperatorKBEM(bb->b->kbem, *(bb->b->fi), *(bb->b->ft) ) ); 
         newlargs.push_back( C_F0( bbnew, r ) );
-
-        // // for construction of block_largs
-        // bbnew->b->fi->Op->v[0].first.first = localIndexInTheBlockUh( bbnew->b->fi->Op->v[0].first.first ); // not tested
-        // bbnew->b->ft->Op->v[0].first.first = localIndexInTheBlockVh( bbnew->b->ft->Op->v[0].first.first ); // not tested
-        // block_largs(indexBlockUh,indexBlockVh).push_back( C_F0( bbnew, r) );
       }
       else if(VVFBEM == 2){
         cerr << " BEM Potential in composite FESpace in construction " << endl;
@@ -475,7 +453,7 @@ KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, 
         //BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
         const BemKFormBilinear * bb= dynamic_cast<const BemKFormBilinear *>(e);
         FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
+        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; ffassert(0);}
 
         int indexOfBlockUh = -1; // A changer de nom
         int indexOfBlockVh = -1; // A changer de nom
@@ -866,7 +844,7 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
               // BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
               const BemKFormBilinear * bb= dynamic_cast<const BemKFormBilinear *>(e);
               FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
+              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; ffassert(0);}
 
               // loop over the index of finconnue
               LOperaG * OpG = const_cast<LOperaG *>(b->fi);
@@ -876,11 +854,6 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
               for(size_t jjj=0; jjj<Opsize; jjj++){
                 LOperaG::K *lf=&(OpG->v[jjj]);
                 OpG->v[jjj].first.first += beginBlockUh[i];
-                
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown finc = " << finc.first << endl;
-                //cout << " BemFormBilinear: operator order   finc = " << finc.second << endl; 
                 
               }
 
@@ -892,17 +865,12 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
                 LOperaD::K *lf=&(OpD->v[jjj]);
                 OpD->v[jjj].first.first += beginBlockVh[j]; 
                 
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown ftest = " << ftest.first << endl;
-                //cout << " BemFormBilinear: operator order   ftest = " << ftest.second << endl;
-                
               }
             }
             else if(VVFBEM == 2){
               BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
               FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
+              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; ffassert(0);}
 
               cerr << " BEM Potential in composite FESpace in construction " << endl;
               ffassert(0);
@@ -945,8 +913,7 @@ Matrice_Creuse<R> *  buildMatrixInterpolationForCompositeFESpace(const FESpaceT1
   ffassert(Vh);
   int NUh = Uh->N;
   int NVh = Vh->N;
-
-  cout << "NUh=" << NUh << ", NVh=" << NVh << endl;
+  
   Matrice_Creuse<R> * sparse_mat= new Matrice_Creuse<R>();
 
   // Remarque pas de U2Vc pour l'instant
@@ -1377,7 +1344,7 @@ void separateFEMpartBemPart(const list<C_F0> & largs, list<C_F0> &largs_FEM, lis
           partFEM[indexBEMmass] = false;
 
           // check 
-          if(verbosity) cout << "partFEM=" << partFEM << endl;
+          if(verbosity>3) cout << "partFEM=" << partFEM << endl;
           
           if(newC_F0){
             BilinearOperator * OpFEM = new BilinearOperator( *Op, partFEM );
@@ -1810,8 +1777,8 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
       //ffassert( !(iUh==jVh) );
       // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
                     
-      if(verbosity) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
-      if(verbosity) cout << " ===      hypothesis:: FESpace become FESpaceL for Vh      === " << endl;
+      if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+      if(verbosity>3) cout << " ===      hypothesis:: FESpace become FESpaceL for Vh      === " << endl;
       
       const FESpaceL * PUh = (FESpaceL *) LLUh->getpVh();
       creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PUh, PUh, VFBEM, 
@@ -1821,8 +1788,8 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
       //ffassert( !(iUh==jVh) );
       // case Uh[i] == MeshS et Vh[j] = Mesh3  // Est ce que cela a un sens?
    
-      if(verbosity) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
-      if(verbosity) cout << " ===      hypothesis:: FESpace3 become FESpaceS for Vh      === " << endl;
+      if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+      if(verbosity>3) cout << " ===      hypothesis:: FESpace3 become FESpaceS for Vh      === " << endl;
       const FESpaceS * PUh = (FESpaceS *) LLUh->getpVh();
       creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS> ( PUh, PUh, VFBEM, 
                         b_largs_zz, stack, dsbem, Hmat );
@@ -1942,9 +1909,6 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
   dsbem.initmat=true;
   SetEnd_Data_Bem_Solver<R>(stack, dsbem, nargs,n_name_param);  // LIST_NAME_PARM_HMAT
 
-  cout << "i=" << i <<  ", j= " << j << endl;
-  cout << "type=" << typeUh << " " << typeVh << endl;
-  cout << LLUh << " " << LLVh << endl;
   // hm_A_block : is a dense block
   HashMatrix<int,R> * hm_A_block = varfBemToBlockDenseMatrix<R>(i, j, typeUh, typeVh, LLUh, LLVh, b_largs_zz, stack, dsbem );
 
@@ -1959,7 +1923,7 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
     isNeedInterpolationMatrixLeft = true;
   }
   if( isNeedInterpolationMatrix ){
-    cout << " creation of interpolation matrix " << endl;
+    if(verbosity>3) cout << " creation of interpolation matrix " << endl;
     // Creation of the Interpolation Matrix
     Matrice_Creuse<double> * MI = buildBlockMatrixInterpolation( i, j, typeUh, typeVh, LLUh, LLVh );
     MatriceMorse<double> *mMI = MI->pHM(); 
@@ -2089,16 +2053,15 @@ void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j,
 
     if( hm_A ){
       const HashMatrix<int,K> * hm_block = dynamic_cast<HashMatrix<int,K> *>( &BBB );
-      //cout << "---- Add block --- offset I=" << (int) offsetVh[j] << ", J="<< (int) offsetUh[i] << endl;
-      //cout << " hm_block=" << *hm_block << endl;
-      if(mpirank ==0) cout << "varfToCompositeBlockLinearSystem_fes::Add local block (" << i << "," << j <<")=> size nnz=" << hm_block->nnz << endl;
+      
+      if(mpirank ==0 && verbosity > 3) cout << "varfToCompositeBlockLinearSystem_fes::Add local block (" << i << "," << j <<")=> size nnz=" << hm_block->nnz << endl;
+
       hm_A->Add(hm_block, K(1.0), false, (int) offsetVh,(int) offsetUh); // test function (Vh) are the line and inconnu function (Uh) are the column
     }
     else{
       // only LinearForm and BC
       ffassert( initmat == false );
     }
-    //A_block->destroy();
     delete A_block;
 }
 
@@ -2118,7 +2081,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
   #ifdef PARALLELE
   mpirankandsize[0] = mpirank;
   mpirankandsize[1] = mpisize;
-  cout << "PARALLEL :: mpisize=" << mpirankandsize[1] << endl;
+  if( verbosity >3 && mpirank ==0) cout << "PARALLEL :: mpisize=" << mpirankandsize[1] << endl;
   #endif
   #endif
   if(typeUh == 2 && typeVh == 2){        // Mesh2 -- Mesh2
@@ -2308,8 +2271,6 @@ void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j,
         ffassert(0);
     }
     const HashMatrix<int,R> * hm_block = dynamic_cast<HashMatrix<int,R> *>( &BBB );
-    //cout << "---- Add block --- offset I=" << (int) offsetVh[j] << ", J="<< (int) offsetUh[i] << endl;
-    //cout << " hm_block=" << *hm_block << endl;
     hm_A->Add(hm_block, R(1.0), false, (int) offsetVh[j],(int) offsetUh[i]); // test function (Vh) are the line and inconnu function (Uh) are the column
    
     //A_block->destroy();
@@ -2346,7 +2307,7 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
   
   // check if we have a square matrix
   bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
-  //if(verbosity >3) cout << "A_is_square=" << A_is_square << endl;
+
 
   // === simple check if A is symetrical === // 
   // voir avec les autres.
@@ -2366,13 +2327,10 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
   Data_Sparse_Solver ds;
   ds.factorize=0;
   ds.initmat=true;
-  int np_bem = OpCall_FormBilinear_np::n_name_param;
+  int np_bem = OpCall_FormBilinear_np::n_name_param; // number of parameter with BEM
   int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
 
-  // set ds.sym = 0 
-  if(verbosity>3)
-    cout << " we consider the block matrix as a non symetric matrix " << endl; 
 
   // J'ai repris ce qu'il y avait. 
   // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
@@ -2385,7 +2343,7 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
 
   if (! A_is_square )
    {
-     if(verbosity>3) cout << " -- the solver  is un set  on rectangular matrix  " << endl;
+     if(verbosity>3) cout << " -- the solver  is un set on rectangular matrix  " << endl;
     }
 
   // A quoi cela correspond?? Gestion du stack + autre
@@ -2585,8 +2543,8 @@ if(method == 1){
               MatriceMorse<double> *mA= MI_BBB->pHM();
               MatriceMorse<R> *mB= BBB->pHM();            
 
-              cout << "A=MI " << MI_BBB->N() << " " << MI_BBB->M() << endl;
-              cout << "B=BBB " << BBB->N() << " " << BBB->M() << endl;
+              //cout << "A=MI " << MI_BBB->N() << " " << MI_BBB->M() << endl;
+              //cout << "B=BBB " << BBB->N() << " " << BBB->M() << endl;
 
               ffassert( MI_BBB->M() >= BBB->M() ); 
               
@@ -2638,7 +2596,7 @@ if(method == 1){
                                                         0, 0, A.pHM());
         }
 
-        if(mpirank ==0) cout << "Add block (" << i << "," << j <<")=> size nnz=" << A.pHM()->nnz << endl;
+        if(mpirank ==0 && verbosity >3) cout << "Add block (" << i << "," << j <<")=> size nnz=" << A.pHM()->nnz << endl;
       //delete CCC;
       } // end loop bb_largs_ii
     offsetMatrixVh += VhNbOfDf[j];

@@ -9539,7 +9539,6 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             throw(ErrorExec("AssembleVarForm invalid type in varf",1));
         }
     }
-    if(mpirank==0){ cout << "return AssembleVarForm= " << ret << endl; }
     return ret;
 }
 
@@ -9616,7 +9615,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
         KNM<R>  Vp(dim,PtHat.N());
         double tgv1=tgv <0? 1: tgv; // change 21 dec 2010 FH (Hack of ILU)
 
-        if(mpirank==0) cout << "Th.neb=" << Th.neb << ",tgv = " << tgv << ", kk="<< kk  << endl;
+        // if(mpirank==0) cout << "Th.neb=" << Th.neb << ",tgv = " << tgv << ", kk="<< kk  << endl;
         for (int ib=0;ib<Th.neb;ib++)
         {
             int ie;
@@ -12081,7 +12080,6 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             cerr << "error in the type of FESpace" <<endl;
             ffassert(0);
         } 
-        cout <<"UhNbItem[kkk] =" << UhNbItem[kkk] << endl;
         kkk++;
     }
     
@@ -12119,14 +12117,14 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     int np_bem = n_name_param;
     int np = np_bem - NB_NAME_PARM_HMAT;
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,np);
-    cout << " Apres lecture :: ds.initmat=" << ds.initmat << endl;
-    cout << " Apres lecture :: ds.initmat=" << ds.master << endl;
+    if(verbosity>3 && mpirank==0) cout << " After reads :: ds.initmat=" << ds.initmat << endl;
+    if(verbosity>3 && mpirank==0) cout << " After reads :: ds.master=" << ds.master << endl;
 
     //  for the gestion of the PTR.
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
 
     bool sym = ds.sym;
-    if(mpirank==0) cout << "sym=" << ds.sym << endl;
+    if( verbosity>3 && mpirank==0) cout << "sym=" << ds.sym << endl;
 
     //list<C_F0>::const_iterator ii,ib=op->largs.begin(), ie=op->largs.end(); // delete unused variable
     int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
@@ -12156,25 +12154,18 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                     if( type_var[i-1]== 2){
                         FEbase<R, v_fes> * tyty = (FEbase<R, v_fes> *) u_hh[i-1].first;
                         ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
-                        //tyty->newVh(); // get pfes, pfes3,...
                     }
                     else if( type_var[i-1]== 3){
                         FEbase<R, v_fes3> * tyty = (FEbase<R, v_fes3> *) u_hh[i-1].first;
                         ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
-                        //tyty->newVh(); // get pfes, pfes3,.
-                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
                     }
                     else if( type_var[i-1]== 4){
                         FEbase<R, v_fesS> * tyty = (FEbase<R, v_fesS> *) u_hh[i-1].first;
                         ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
-                        //tyty->newVh(); // get pfes, pfes3,.
-                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
                     }
                     else if( type_var[i-1]== 5){
                         FEbase<R, v_fesL> * tyty = (FEbase<R, v_fesL> *) u_hh[i-1].first;
                         ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
-                        //tyty->newVh(); // get pfes, pfes3,.
-                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
                     }
                     else{
                         //cerr << "type_var["<<i<<"]=" << type_var[i] << endl;
@@ -12271,10 +12262,8 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
 
     for(int i=0; i<NpUh; i++){
         // if one mesh have changed, we recompute all the matrix
-        //cout << "NpUh :: i=" << i << " == " << data->pThU->size() <<  endl;
         if( typeUh[i]== 2){ 
             FESpace * fes = (FESpace *) LLUh[i];
-            //cout << "fes->Th" << &(fes->Th) << " " << (*data->pThU)[i] << endl;
             if ( &(fes->Th) != (Mesh*) (*data->pThU)[i] ){ ds.initmat=true; (*data->pThU)[i]=(void*) &fes->Th; }
         }
         else if(typeUh[i]== 3){
@@ -12295,7 +12284,6 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
             ffassert(0);
 
         }
-        //cout << "value of the Mesh" << (*data->pThU)[i] << endl;
     }
     //cout << "ds.initmat=" << ds.initmat << endl;
     
@@ -12464,7 +12452,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     MatriceCreuse<R>  & A(dataA); // A is the global matrix
     HashMatrix<int,R> * hm_A = dynamic_cast<HashMatrix<int,R> *>( &A );
 
-    cout << "===  hm_A.nnz ==============:::" << hm_A->nnz << endl;
+    if(verbosity>2) cout << "===  hm_A.nnz ==============:::" << hm_A->nnz << endl;
 
     int maxJVh=NpVh;
     int offsetMatrixUh = 0;   
@@ -12977,8 +12965,6 @@ int dimProblem(const ListOfId &l)
 
 AnyType Problem::operator()(Stack stack) const
 {
-
-    if(verbosity) cout << "=== Problem::operator()(Stack stack) ===" << endl;
     if(dim==2) {
         Data<FESpace> *data= dataptr(stack);
         if (complextype)
