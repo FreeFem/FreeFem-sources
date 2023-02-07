@@ -12744,6 +12744,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
 
 
 bool isCompositeProblem(const ListOfId &l){
+    // function to check a composite problem with chevron < >
     int nb=l.size();
 
     int nbcompo_begin = 0;
@@ -13157,8 +13158,8 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
         if (l[i].r == 0 && l[i].re  == 0 && l[i].array == 0) n++;
         else if (l[i].array) nbarray++;
 
-    int nbcompo_begin=0;
-    int nbcompo_end=0;
+    int nbcompo_begin=0; // variable for composite with chevron <>
+    int nbcompo_end=0;   // variable for composite with chevron <>
 
     ffassert( nbarray >1 );
     ListOfId * array[nbarray]; // ??? 
@@ -13761,8 +13762,8 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
     int n=0;
     C_F0 type,init;
     int nbarray=0;
-    int nbcompo_begin=0;
-    int nbcompo_end=0;
+    int nbcompo_begin=0; // variable for chevron <> for problem/solve
+    int nbcompo_end=0;   // variable for chevron <> for problem/solve
     aType uh=atype<const finconnue*>(),vh=atype<const ftest*>();
     
     for (int i=0;i<nb;i++){

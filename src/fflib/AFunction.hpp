@@ -124,8 +124,8 @@ struct UnId {
   deque<UnId> * array; //  to store a array 
   aType re; 
   bool ref; // a ref or non
-  bool compo_begin; // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice
-  bool compo_end;  // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice
+  bool compo_begin; // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
+  bool compo_end;  // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
   UnId() :id(0),r(0),e(0),array(0),re(0),ref(false),compo_begin(false),compo_end(false) {}
   UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false), compo_begin(false), compo_end(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  

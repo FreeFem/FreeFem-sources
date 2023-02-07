@@ -7260,6 +7260,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   return ret;
 }
 /*
+// Morice :: A supprimer
 // classe pour la creation d'une NewVecVariable
 // << v_generic_fes >> correspond à : v_vect_generic_fes  
 C_F0 NewVecFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
