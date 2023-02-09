@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<VTKFile type="PUnstructuredGrid" version="0.1" byte_order="LittleEndian">
+  <PUnstructuredGrid GhostLevel="0">
+    <PPointData>
+      <PDataArray type="Float64" NumberOfComponents="1" Name="scalar1"/>
+    </PPointData>
+    <PCellData>
+      <PDataArray type="Int32" Name="Label"/>
+    </PCellData>
+    <PPoints>
+      <PDataArray type="Float32" NumberOfComponents="3" Name="Points"/>
+    </PPoints>
+    <Piece Source="laplace-adapt-3d_4_0003_0.vtu"/>
+    <Piece Source="laplace-adapt-3d_4_0003_1.vtu"/>
+    <Piece Source="laplace-adapt-3d_4_0003_2.vtu"/>
+    <Piece Source="laplace-adapt-3d_4_0003_3.vtu"/>
+  </PUnstructuredGrid>
+</VTKFile>

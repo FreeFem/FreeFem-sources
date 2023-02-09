@@ -1,0 +1,191 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc-complex"
+load "lapack"
+macro dimension()2//
+include "macro_ddm.idp"
+load "bem"
+load "msh3"
+
+complex k = 10; // wavenumber
+
+real lambda = 2*pi/real(k);
+
+real nloc = 10./lambda;
+real n = nloc*2*pi;
+
+int[int] nsl(10); // number of lenses
+nsl = n;
+
+real theta = 10*2*pi/360; // angular shift between lenses
+
+real[int] nsx(nsl.n), nsy(nsl.n);
+nsx[0] = 3.2;
+nsy[0] = 0;
+
+for (int i=1; i< nsl.n; i++) {
+  nsx[i] = nsx[i-1] + 2.01*cos(i*theta);
+  nsy[i] = nsy[i-1] + 2.01*sin(i*theta);
+}
+
+int interface = 1;
+int waveguide = 2;
+
+border circle(t=0, 2*pi; i){x=cos(t)+nsx[i]; y=sin(t)+nsy[i]; z=0; label=interface;}
+
+real L = 2;
+real l = 0.3;
+real dd = 0.1;
+
+func finc = exp(-100*((x+L-0.1)^2+y^2+z^2)); // source for waveguide excitation
+
+// interface around the waveguide :
+border a(t=-L-dd, L+dd){x=t; y=-l-dd; z=0; label=interface;}
+border b(t=-l-dd, l+dd){x=L+dd; y=t; z=0; label=interface;}
+border c(t=L+dd, -L-dd){x=t; y=l+dd; z=0; label=interface;}
+border d(t=l+dd, -l-dd){x=-L-dd; y=t; z=0; label=interface;}
+
+// waveguide :
+border ga(t=-L, L){x=t; y=-l; z=0; label=waveguide;}
+border gc(t=L, -L){x=t; y=l; z=0; label=waveguide;}
+border gd(t=l, -l){x=-L; y=t; z=0; label=waveguide;}
+
+mesh Thwaveguide = buildmesh(a(nloc*(2*L+2*dd))+b(nloc*(2*l+2*dd))+c(nloc*(2*L+2*dd))+d(nloc*(2*l+2*dd))
+                         +ga(nloc*2*L)+gc(nloc*2*L)+gd(nloc*2*l));
+
+mesh Thlenses = buildmesh(circle(nsl));
+
+mesh Th = Thwaveguide + Thlenses; // FEM mesh
+
+meshL ThG = extract(Th);
+ThG = trunc(ThG,region==interface);
+ThG = OrientNormal(ThG,unbounded=1); // BEM mesh
+
+// change region labels in the fem mesh to define gradient index in lenses
+fespace Ph(Th,P0);
+Ph reg = region;
+
+int[int] regs(2*nsl.n+2);
+for (int i=0; i< nsl.n; i++){
+  int regi = reg(nsx[i], nsy[i]); // the lenses
+  regs[2*i] = regi;
+  regs[2*i+1] = i+1;
+}
+regs[2*nsl.n] = reg(0,0); // the waveguide
+regs[2*nsl.n+1] = -1;
+Th = change(Th,region=regs);
+
+func ind = region == -1 ? 1 : 2./(1+((x-nsx[region-1])^2+(y-nsy[region-1])^2)); // gradient index in lenses
+
+plot(ThG);
+int[int][int] R;
+real[int] D;
+buildMinimalist(Th, R, D, P1)
+meshL ThL;
+{
+    int[int] labels=labels(Th);
+    int[int] trueLabels;
+    for(int i = 0; i < labels.n; ++i) {
+        if(labels[i] >= 0) {
+            trueLabels.resize(trueLabels.n+1);
+            trueLabels[trueLabels.n-1] = labels[i];
+        }
+    }
+    ThL = extract(Th,label=trueLabels);
+    ThL = trunc(ThL,region==interface);
+}
+int[int] perm;
+fespace Vh(Th, P1);
+fespace VhS(ThL, P1);
+matrix RVtoS = interpolate(VhS, Vh);
+varf varfMass(u,v) = int1d(Th,interface)(u*v) + on(waveguide,u=0);
+matrix<complex> Mass = varfMass(Vh, Vh, tgv = -10);
+macro Grad(u) [dx(u),dy(u)] // EOM
+Mat<complex> A(Vh.ndof, R, D);
+varf varfA(u,v) = int2d(Th)(-ind*k^2*u*v+Grad(u)'*Grad(v)) + on(waveguide,u=0);
+A = varfA(Vh, Vh, tgv = -1);
+{
+    matrix IdV = eye(Vh.ndof);
+    renumbering(Mass, RVtoS, R = IdV);
+}
+Mat<complex> ASurf(Mass.m, R, D, restriction = RVtoS);
+HMatrix<complex> TDL, SL;
+{
+    fespace UhG(ThG, P1);
+    {
+        UhG<complex> numbering;
+        numbering[] = 0:UhG.ndof - 1;
+        VhS<complex> glob2loc = numbering;
+        ChangeNumbering(ASurf, glob2loc[], perm);
+    }
+
+    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);  
+
+    TDL = varfTDL(UhG, UhG);
+    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("SL",k=k),u,v));
+    SL = varfSL(UhG, UhG);
+}
+func complex[int] opSurf(complex[int]& in) {
+    complex[int] u(ThG.nt), v(ThG.nt);
+    for[i, p : perm] u[p] = in[i];
+    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
+    u = SL * v;
+    for[i, p : perm] in[i] = -u[p];
+    return in;
+}
+complex[int,int] dense(1, 1);
+{
+    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(Kernel("SL",k=k),u,v));
+    HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
+    dense.resize(VhS.ndof, VhS.ndof);
+    dense = A;
+    dense = dense^-1;
+}
+func complex[int] opStoV(complex[int]& in) {
+    complex[int] out(in.n), u(ThG.nt), v(ThG.nt);
+    for[i, p : perm] u[p] = in[i];
+    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
+    u = TDL * v;
+    for[i, p : perm] out[i] = u[p];
+    complex[int] outS, outV(RVtoS.m);
+    ChangeNumbering(ASurf, outS, out, inverse = true, exchange = true);
+    renumbering(RVtoS', outS, outV);
+    ChangeNumbering(A, outV, out);
+    return out;
+}
+Mat<complex> VtoS(ASurf, A, Mass);
+Mat<complex> B(ASurf, opSurf);
+func complex[int] precondSurf(complex[int]& in) {
+    complex[int] u, out(in.n);
+    ChangeNumbering(B, u, in, inverse = true);
+    complex[int] v = dense * u;
+    ChangeNumbering(B, v, out);
+    return out;
+}
+Mat<complex> StoV(A, ASurf, opStoV);
+Mat<complex> N = [[A,    StoV],
+                  [VtoS, B   ]];
+complex[int] rhsV(Vh.ndof), rhsS(VhS.ndof);
+complex[int] xV(Vh.ndof), xS(VhS.ndof);
+varf varfRHS(u,v) = int2d(Th)(finc*v) + on(waveguide,u=0);
+rhsV = varfRHS(0, Vh, tgv = -1);
+complex[int] rhs, x;
+ChangeNumbering([A, B], [rhsV, rhsS], rhs);
+{
+    real[int] list(rhs.n);
+    complex[int] nV;
+    ChangeNumbering(A, rhsV, nV);
+    list(0:nV.n-1) = 1.0;
+    list(nV.n:list.n-1) = 2.0;
+    complex[int] test(list.n - nV.n);
+    set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 2000 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_gmres_restart 2000 "+" -fieldsplit_1_pc_type none", fields = list);
+    set(B, parent = N, sparams = "-prefix_push fieldsplit_1_ -pc_type shell -ksp_pc_side right -ksp_max_it 20 -prefix_pop", precon = precondSurf);
+}
+x.resize(rhs.n);
+KSPSolve(N, rhs, x);
+ChangeNumbering([A, B], [xV, xS], x, inverse = true, exchange = true);
+Vh<complex> plt;
+plt[] = xV;
+macro def(u)u//
+plotMPI(Th, real(plt), P1, def, real, cmm = "FEM solution")

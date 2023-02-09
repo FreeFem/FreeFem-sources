@@ -1,0 +1,106 @@
+#!/bin/bash 
+# Apple
+# hdiutil create -srcfolder /Users/hecht/Desktop/FF-dmg/FreeFEM-4.12-Apple-M1 -fs HFS+  FreeFEM-4.12-Apple-M1.dmg
+set -e
+ffapp=@ff_prefix@
+ff_prefix_dir_lib=@ff_prefix_dir_lib@
+ff_prefix_dir_lib_mpi=@ff_prefix_dir_lib_mpi@
+echo which FreeFem++:
+ffpp=`which FreeFem++`
+echo FreeFem++:  $ffpp
+ffsrc=@abs_top_srcdir@
+fftmp=/tmp/ff-$$
+mvdylib=$ffscr/bin/move-dylib
+ver=@VERSION@
+machine=`machine`
+gittag=`git describe --tags`
+conf=`./config.status --config`
+
+arch=xxx
+case $machine in
+arm64e)
+ arch=M1;;
+x86_64)
+  arch=intel;;
+*)
+  echo unknow machine $machine
+  exit 1;;
+esac
+echo " arch = $arch"
+
+
+cd 
+filerc=".profile"
+case "$SHELL" in
+	*zsh) filerc=".zprofile";;
+	*bash) filerc=".bash_profile";;
+	*) echo erreur SHELL $SHELL; exit 1;;
+esac;
+echo filerc : $filerc 
+ver=4.12
+arch=M1
+dirff=$ffapp/bin
+ffexec=$dirff/FreeFem++
+ff=$(which FreeFem++)
+dd=$(dirname "$ff")
+
+if [ ! -d   "$ffapp" ] ; then
+	echo " No FreeFem++.app  $ff-ver so copy FreeFem++.app in /Application (with sudo do be sure)"
+	echo =============================
+	sudo cp -rf /Volumes/FreeFEM-$ver-Apple-$arch/FreeFem++.app /Applications
+	sudo cp /Applications/FreeFem++.app/Contents/ff-4.12/bin/FreeFem++-CoCoa  /usr/local/bin
+fi
+
+if test ! -d "$dd"  ; then
+	echo " bug no directory  $dd !"
+	exit 1; 
+fi
+
+if [ -d  $dirff  ] ; then
+	# verification of com.apple.quarantine
+	quarantine=`xattr -l $ffapp |grep com.apple.quarantine|wc -l`
+	if [  $quarantine -ne 0 ] ; then
+		echo " remove: com.apple.quarantine from $ffapp (need sudo )"
+		echo do sudo xattr -rc $ffapp/..
+		sudo xattr -rc $ffapp/..
+		echo " verif quarantine "
+		xattr -l xattr -rc $ffapp/..
+	fi
+else 
+	echo " OK : No quarantine "
+fi
+# echo test FreeFem++ 
+$ffexec  /Applications/FreeFem++.app/Contents/ff-$ver/share/FreeFEM/$ver/examples/tutorial/Laplace.edp 
+
+if [ $dd != $dirff ] ; then 
+	echo update $filerc 
+	echo =============================
+	
+	test -e $filerc || touch $filerc 
+	echo add export PATH=$dirff:\$PATH " >>$filerc"
+	grep -v FreeFem++.app/Contents $filerc >$filerc.new
+	echo export PATH=$dirff:\"\$PATH\" >>$filerc.new
+	diff -u $filerc.new $filerc
+	if test $? -eq  1; then
+		mv -f $filerc.new $filerc
+		chmod a+x $filerc
+	else
+		rm $filerc.new
+	fi
+	
+fi
+
+cd ~/Desktop
+echo Create Link of example and Doc 
+echo =============================
+test -L  'FreeFEM doc and Examples' && rm 'FreeFEM doc and Examples'
+test -e 'FreeFEM doc and Examples' || ln -s  /Applications/FreeFem++.app/Contents/ff-$ver/share/FreeFEM/ 'FreeFEM doc and Examples'
+cd -
+
+
+vvv=`$dirff/FreeFem++ -nw| grep 'version'| wc -l`
+if [ $vvv -eq 0 ]; then
+  echo Error missing install missing lib ??
+else
+	echo FreeFem++ work
+fi
