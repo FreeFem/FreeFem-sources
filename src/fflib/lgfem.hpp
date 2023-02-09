@@ -33,7 +33,7 @@
 
 #ifndef lgfem_hpp_
 #define lgfem_hpp_
-#include "array_resize.hpp"
+#include <array_resize.hpp>
 
 extern Block *currentblock;
 

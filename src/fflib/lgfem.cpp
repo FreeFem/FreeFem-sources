@@ -1324,7 +1324,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       if (periodic) delete[] periodic;
     }
     AnyType operator( )(Stack s) const {
-        aType pt_tfe = atype< TypeOfFE ** >( );//
+        
         aType t_tfe = atype< TypeOfFE * >( );// 
         aType t_tfe2 = atype< TypeOfFE2 * >( );
 
@@ -1341,15 +1341,13 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
         {
          // verif  type atef[i]  coorection mars 2022 ..
          aType  ttfe =atef[i].left();
-         ffassert( ttfe == t_tfe ||ttfe == t_tfe2 || ttfe == pt_tfe ) ;
+         ffassert( ttfe == t_tfe || t_tfe2) ;
          if(verbosity>9) cout << "OpMake_pfes_np :: " << i << " " << (tedim[i] == dHat && d==dfe) << " " << tedim[i]
                                                                         << dHat << d << dfe
                 << " " << typeid(TypeOfFE).name() << endl;
 
         if (ttfe == t_tfe) // good  type no converstion
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
-        else  if (ttfe == pt_tfe) // good  type no converstion
-              tef[i] = *GetAny< TypeOfFE ** >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
         else if (tedim[i] == 2 && d==3 && dHat == 2)
@@ -1377,7 +1375,6 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       const int d = TypeOfFE::RdHat::d;
     GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
     aType t_tfe = atype< TypeOfFE * >( );
-    aType pt_tfe = atype< TypeOfFE ** >( );
     aType t_tfe2 = atype< TypeOfFE2 * >( );
     ffassert(d>0 && d < 4);
     char  cdim[10];
@@ -1390,7 +1387,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     if (!N) CompileError(sdim + " We wait an array of Type of Element ");
     KN< int > tedim(N);
     for (int i = 0; i < N; i++)
-      if ((*a2)[i].left( ) == t_tfe ||(*a2)[i].left( ) == pt_tfe )
+      if ((*a2)[i].left( ) == t_tfe)
         tedim[i] = d;
       else if ((*a2)[i].left( ) == t_tfe2)
         tedim[i] = 2;
@@ -7152,36 +7149,23 @@ size_t dimFESpaceImage(const basicAC_F0 &args) {
   aType t_tfe3 = atype< TypeOfFE3 * >( );
   aType t_tfeS = atype< TypeOfFES * >( );
   aType t_tfeL = atype< TypeOfFEL * >( );
-    aType pt_tfe = atype0< TypeOfFE ** >( );// no verif because def in plugin !!!!
-    aType pt_tfe3 = atype0< TypeOfFE3 ** >( );
-    aType pt_tfeS = atype0< TypeOfFES ** >( );
-    aType pt_tfeL = atype0< TypeOfFEL ** >( );
   aType t_a = atype< E_Array >( );
   size_t dim23 = 0;
 
-  for (int i = 1; i < args.size( ); i++)// on saut le maillage !!
-    if (   args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS || args[i].left( ) == t_tfeL
-        || args[i].left( ) == pt_tfe || args[i].left( ) == pt_tfe3 || args[i].left( ) == pt_tfeS || args[i].left( ) == pt_tfeL)// A febr 2023 FH et PH-T
+  for (int i = 0; i < args.size( ); i++)
+    if (args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS ||
+        args[i].left( ) == t_tfeL)
       dim23 += args[i].LeftValue( )->nbitem( );
     else if (args[i].left( ) == t_a) {
       const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
       ffassert(&ea);
       for (int i = 0; i < ea.size( ); i++)
-        if   ( ea[i].left( ) == t_tfe || ea[i].left( ) == t_tfe3 || ea[i].left( ) == t_tfeS || ea[i].left( ) == t_tfeL
-            || ea[i].left( ) == pt_tfe || ea[i].left( ) == pt_tfe3 || ea[i].left( ) == pt_tfeS || ea[i].left( ) == pt_tfeL)
+        if (ea[i].left( ) == t_tfe || ea[i].left( ) == t_tfe3 || ea[i].left( ) == t_tfeS ||
+            ea[i].left( ) == t_tfeL)
           dim23 += ea[i].nbitem( );
         else
-        {
-            cout<< " tpye .. " << *ea[i].left() << " " << *ea[i].right() <<endl;
-            ffassert(0);    // bug
-        }
+          ffassert(0);    // bug
     }
-    else
-    {
-        cout<< " tpye .. " << *args[i].left() << " " << *args[i].right() <<endl;
-        ffassert(0);    // bug
-    }
-
   dim23 = dim23 ? dim23 : 1;
   return dim23;
 }
