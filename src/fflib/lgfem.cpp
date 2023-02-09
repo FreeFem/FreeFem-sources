@@ -1324,7 +1324,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       if (periodic) delete[] periodic;
     }
     AnyType operator( )(Stack s) const {
-        aType pt_tfe = atype< TypeOfFE ** >( );//
+        aType pt_tfe = atype0< TypeOfFE ** >( );//
         aType t_tfe = atype< TypeOfFE * >( );// 
         aType t_tfe2 = atype< TypeOfFE2 * >( );
 
@@ -1377,7 +1377,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       const int d = TypeOfFE::RdHat::d;
     GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
     aType t_tfe = atype< TypeOfFE * >( );
-    aType pt_tfe = atype< TypeOfFE ** >( );
+    aType pt_tfe = atype0< TypeOfFE ** >( );
     aType t_tfe2 = atype< TypeOfFE2 * >( );
     ffassert(d>0 && d < 4);
     char  cdim[10];
