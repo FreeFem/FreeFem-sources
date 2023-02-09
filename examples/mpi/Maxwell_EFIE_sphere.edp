@@ -26,21 +26,24 @@ cout << "wave number   = " <<lambda << endl;
 cout << "vacuum impedance = " <<Z0 << endl;
 cout << "frequency = " << f << endl;
 
-// definition of the surface mesh 
-include "MeshSurface.idp"
-real radius = 1;
-int nlambda = 4;                // nuimber of wave lenght 
-real hs = lambda/(1.0*nlambda); // mesh size on the sphere
-meshS ThS =Sphere(radius,hs,7,1); 
+string testcase = "sphere";
+meshS ThS;
+meshS ThOut;
 
-// definition of the mesh for the potentiel view
+int nlambda = 4;                // number of wave lenght 
 
-meshS ThOut; 
-{
+if( testcase == "sphere"){
+    // definition of the surface mesh 
+    include "MeshSurface.idp"
+    real radius = 1;
+    real hs = lambda/(1.0*nlambda); // mesh size on the sphere
+    ThS = Sphere(radius,hs,7,1); 
+
+    // definition of the mesh for the potentiel view
     real Rin = radius*1.05;
     real Rout = radius*1.5;
 
-    int Nin = 120;
+    int Nin = nlambda*40;
     int Nout = Nin*int(Rout/Rin+1);
 
     border circleS(t=0, 2*pi){x=Rin*cos(t); y=Rin*sin(t); z=0;}
@@ -49,25 +52,49 @@ meshS ThOut;
 
     ThOut = movemesh23(Thtmp, transfo=[x,y,0]);
 }
+else if( testcase == "cube" ){
+    int nloc = (1.0*nlambda)/lambda;
+    mesh3 Th3 = cube(nloc,nloc,nloc,[x-0.5,y-0.5,z-0.5]);
+    ThS = extract(Th3);
 
-// macro div(ux,uy,uz) ( dx(ux)+dy(uy)+dz(uz) ) // EOM
+    real xout = 3.0; 
+    int nlocOut = 5.0*(xout/lambda)*nlambda;
+    real dxout = xout/nlocOut;
+    ThOut = square3(nlocOut,nlocOut,[xout*(x-0.5),xout*(y-0.5),0]);
+    ThOut = trunc(ThOut, max(abs(x),abs(y)) > 0.5 + dxout);
+}
+else{
+    cout << "error in the choice of the test case" <<endl;
+    exit(0);
+}
 
 // definition of the wave plane
-
-// case dir =-z
-real theta = -pi; 
-real phi   = pi;
-
-real[int] dir(3), u(3);
-dir[0] = sin(theta)*cos(phi);  u[0] =  cos(theta)*cos(phi);
-dir[1] = sin(theta)*sin(phi);  u[1] =  cos(theta)*sin(phi);
-dir[2] = cos(theta);           u[2] = -sin(theta);
-
 // ========
 //   E_inc = \vec{u}*exp(i*\vec{k}.\vec{x})
 //
 //   where \vec{k} =  k*\vec{dir}
+//         \vec{dir} : direction of propagation
+//         \vec{u} : polarization
 // ========
+real[int] dir(3), u(3);
+
+if( testcase == "sphere"){
+dir[0] =  0;
+dir[1] =  0;
+dir[2] = -1;
+
+u[0] = 1;
+u[1] = 0;
+u[2] = 0;
+}else if( testcase == "cube"){
+dir[0] = 1;
+dir[1] = 0;
+dir[2] = 0;
+
+u[0] = 0;
+u[1] = 1;
+u[2] = 0;
+}
 
 func uinc = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
 func fincx = u[0]*uinc;
@@ -75,18 +102,16 @@ func fincy = u[1]*uinc;
 func fincz = u[2]*uinc;
 // ================================
 
-// def of fespace
+// definition of fespace for EFIE 
 fespace Uh3(ThS,RT0S);
 
 Uh3<complex> [Fincx,Fincy,Fincz] = [uinc*u[0],uinc*u[1],uinc*u[2]]; // wave plane discretization
-Uh3<complex> [ucx,ucy,ucz];  // magnetic current
-Uh3<complex> [rhsx,rhsy,rhsz]; // rhs
+Uh3<complex> [mcx,mcy,mcz];  // FE function for magnetic current
 
-
+BemKernel KerMA("MA_SL",k=k);
 // construction of BEM H-matrix for EFIE operator
-
-varf vk([u1,u2,u3],[v1,v2,v3])=int2dx2d(ThS)(ThS)(BEM(BemKernel("MA_SL",k=k),[u1,u2,u3],[v1,v2,v3])); //-int2d(ThS)( [v1,v2,v3]'*[Fincx,Fincy,Fincz] );   
-HMatrix<complex> H = vk(Uh3,Uh3,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000,nbiter=4000);
+varf vEFIE([u1,u2,u3],[v1,v2,v3])=int2dx2d(ThS)(ThS)(BEM(KerMA,[u1,u2,u3],[v1,v2,v3]));    
+HMatrix<complex> H = vEFIE(Uh3,Uh3,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000,nbiter=4000);
 
 if (mpirank == 0) cout << H.infos << endl;
 display(H);
@@ -94,34 +119,30 @@ display(H);
 
 
 // computation of rhs of EFIE 
-
+Uh3<complex> [rhsx,rhsy,rhsz]; // FE function for rhs
 varf vrhs([u1,u2,u3],[v1,v2,v3]) = -int2d(ThS)( [v1,v2,v3]'*[Fincx,Fincy,Fincz] );
 rhsx[] = vrhs(0,Uh3);
 
 // solving magnetic current
-ucx[] = H^-1*rhsx[];
-
+mcx[] = H^-1*rhsx[];
 
 fespace UhOutV(ThOut,[P1,P1,P1]);
-fespace UhOut(ThOut,P1);
-
-cout << "Uh3.ndof    =" << Uh3.ndof << endl;
-cout << "UhOutV.ndof =" << UhOutV.ndof << endl;
-cout << "ThOut.nv   =" << ThOut.nv << endl;
-
-varf vpMa1([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(BemPotential("MA_SL",k=k),[u1,u2,u3],[v1,v2,v3]));
-HMatrix<complex> B0 = vpMa1(Uh3,UhOutV,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-
-if (mpirank == 0) cout << B0.infos << endl;
-display(B0);
-
-
-// definition of the scattered field E
+// FE function of the scattered field E
 UhOutV<complex> [Ex, Ey, Ez];
 
-// compute the scattered electromagnetic field
-Ex[]  = B0*ucx[];
+// Maxwell potentiel corresponding to EFIE for electromagnetic field
+BemPotential PotMA("MA_SL", k=k);
 
+varf vpotMA([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(PotMA,[u1,u2,u3],[v1,v2,v3]));
+HMatrix<complex> HpotMA = vpotMA(Uh3,UhOutV,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << HpotMA.infos << endl;
+display(HpotMA);
+
+// compute the scattered electromagnetic field
+Ex[]  = HpotMA*mcx[];
+
+fespace UhOut(ThOut,P1);
 // save the real part of scattered electromagnetic field
 UhOut rExScat = real(Ex);
 
@@ -135,8 +156,8 @@ UhOut rEx = real(Ex)+real(fincx);
 UhOut rEy = real(Ey)+real(fincy);
 UhOut rEz = real(Ez)+real(fincz);
 
-plot(rEx, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ex) total");
-plot(rExScat, dim=2, fill=1, value=1, nbiso=20, cmm="real(ExScat)");
-plot(rEy, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ey) total");
-plot(rEz, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ez) total");
+plot(rEx, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ex) total",ps="MaxwellSphereRealEx.ps");
+plot(rExScat, dim=2, fill=1, value=1, nbiso=20, cmm="real(ExScat)",ps="MaxwellSphereRealScatterEx.ps");
+plot(rEy, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ey) total",ps="MaxwellSphererRealEy.ps");
+plot(rEz, dim=2, fill=1, value=1, nbiso=20, cmm="real(Ez) total",ps="MaxwellSphererRealEz.ps");
 
