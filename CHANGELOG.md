@@ -48,6 +48,7 @@ All notable changes to this project will be documented in this file.
 - bug in  plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
 - genere a bug if zero size element in read MeshL from file. 
 - remove  mistake when the border is badly defined , remove empty element in buildmeshL function. 
+- bug in array quadrature FE.
 ## [4.12]
 ### Added
 - add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
