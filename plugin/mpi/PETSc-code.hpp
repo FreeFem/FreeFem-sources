@@ -802,13 +802,16 @@ namespace PETSc {
                           std::copy_n(ptA->_num, dN->HPDDM_n, idx);
                           IS is;
                           ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->HPDDM_n, idx, PETSC_OWN_POINTER, &is);
-                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
                           PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
-                          ISDestroy(&is);
+                          PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
+                          PCSetFromOptions(pc);
                           MatDestroy(&aux);
+                          ISDestroy(&is);
                       }
                       else {
-                          MatHeaderReplace(N, &aux);
+                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                          PCHPDDMSetAuxiliaryMat(pc, NULL, aux, NULL, NULL);
+                          MatDestroy(&aux);
                       }
                   }
               }
@@ -2574,15 +2577,35 @@ namespace PETSc {
                       static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
                     HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
                     Mat aux = ff_to_PETSc(B);
-                    PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
-                    MatDestroy(&aux);
+                    Mat N;
+                    PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                    if(!N) {
+                        PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
+                        PCSetFromOptions(pc);
+                        MatDestroy(&aux);
+                    }
+                    else {
+                        PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                        PCHPDDMSetAuxiliaryMat(pc, NULL, aux, NULL, NULL);
+                        MatDestroy(&aux);
+                    }
                     delete B;
                   }
                 }
                 else {
                   Mat aux = ff_to_PETSc(A);
-                  PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
-                  MatDestroy(&aux);
+                  Mat N;
+                  PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                  if(!N) {
+                      PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
+                      PCSetFromOptions(pc);
+                      MatDestroy(&aux);
+                  }
+                  else {
+                      PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                      PCHPDDMSetAuxiliaryMat(pc, NULL, aux, NULL, NULL);
+                      MatDestroy(&aux);
+                  }
                   Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
                     nargs[12] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
                   if (ptK && ptK->A) {
