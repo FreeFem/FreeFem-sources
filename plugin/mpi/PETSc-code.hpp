@@ -819,9 +819,28 @@ namespace PETSc {
           PetscInt* ja = nullptr;
           PetscScalar* c = nullptr;
           bool free = true;
-          if (ptA->_cnum)
+          if (ptA->_cnum) {
+            PetscInt* cnum = ptA->_num + dN->HPDDM_n;
+            if (ptA->_petsc) {
+                int rank, size, N;
+                MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_petsc), &size);
+                if (size > 1) {
+                  const PetscInt* ranges;
+                  MatGetOwnershipRangesColumn(ptA->_petsc, &ranges);
+                  MPI_Comm_rank(PetscObjectComm((PetscObject)ptA->_petsc), &rank);
+                  MatGetSize(ptA->_petsc, NULL, &N);
+                  if (ranges[1] == N) {
+                      if (rank != 0)
+                          cnum = new PetscInt[N];
+                      MPI_Bcast(cnum, N, MPIU_INT, 0, PetscObjectComm((PetscObject)ptA->_petsc));
+                  }
+                }
+            }
             free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
-              ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, ptA->_num + dN->HPDDM_n);
+              ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, cnum);
+            if (cnum != ptA->_num + dN->HPDDM_n)
+                delete [] cnum;
+          }
           else
             free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
           if (assembled) {
