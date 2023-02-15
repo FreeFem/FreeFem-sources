@@ -199,12 +199,13 @@ Name: modifypath; Description: &Add application directory to your system path (i
 ; unchecked
 
 [Code]
+const
+	ModPathName = 'modifypath';
+	ModPathType = 'user';
+
 function ModPathDir(): TArrayOfString;
-var
-			Dir:	TArrayOfString;
-		begin
-			setArrayLength(Dir, 1)
-			Dir[0] := ExpandConstant('{app}');
-			Result := Dir;
-		end;
+begin
+	setArrayLength(Result, 1)
+	Result[0] := ExpandConstant('{app}');
+end;
 #include "bin\modpath.iss"
