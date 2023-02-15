@@ -55,7 +55,10 @@ fi
 # echo test FreeFem++
 echo try  $bindir/FreeFem++  $ff_data/examples/tutorial/Laplace.edp 
 $bindir/FreeFem++  $ff_data/examples/tutorial/Laplace.edp 
-
+if [ $? -ne 0 ]; then
+   echo open "Preference System / Confidentiality and Security menu to unlock"
+   echo $bindir/FreeFem++ 
+fi
 if [ $dd != $bindir ] ; then 
 	echo update $filerc 
 	echo =============================
@@ -85,7 +88,10 @@ cd -
 
 vvv=`$bindir/FreeFem++ -nw| grep 'version'| wc -l`
 if [ $vvv -eq 0 ]; then
-  echo Error missing install missing lib ??
+  echo Error missing install missing lib ?? or locked application
+  echo open "Preference System / Confidentiality and Security menu to unlock"
+  echo $bindir/FreeFem++ 
+  
 else
-	echo FreeFem++ work
+	echo FreeFem++ work's
 fi
