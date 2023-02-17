@@ -2896,9 +2896,12 @@ namespace PETSc {
           if (c == 1) {
             A = to< KN< long >* >(args[0]);
             in = to< Storage< PetscScalar >* >(args[1]);
-          } else {
+          } else if (c != 4) {
             E.reserve(1);
             E.emplace_back(to< Type* >(args[0]), to< Storage< PetscScalar >* >(args[1]));
+          } else {
+            E.reserve(1);
+            E.emplace_back(to< Type* >(args[0]), to< FEbaseArrayKn< PetscScalar >* >(args[1]));
           }
         } else {
           const E_Array* EA = dynamic_cast< const E_Array* >(args[0].LeftValue( ));
@@ -2937,6 +2940,10 @@ namespace PETSc {
       : OneOperator(atype< long >( ), atype< Type* >( ), atype< Storage< PetscScalar >* >( ),
                     atype< Storage< long >* >( )),
         c(3) {}
+    changeNumbering(int, int, int, int)
+      : OneOperator(atype< long >( ), atype< Type* >( ), atype< FEbaseArrayKn< PetscScalar >* >( ),
+                    atype< Storage< PetscScalar >* >( )),
+        c(4) {}
   };
   template< class Type, template<class> class Storage >
   basicAC_F0::name_and_type changeNumbering< Type, Storage >::changeNumbering_Op::name_param[] = {
@@ -2953,7 +2960,7 @@ namespace PETSc {
     if(inverse)
         ffassert(ptOut->operator PetscScalar*());
     int sum = 0;
-    if (c == 0 || c == 2 || c == 3) {
+    if (c == 0 || c == 2 || c == 3 || c == 4) {
       PetscScalar* pt = *ptOut;
       for (int j = 0; j < E.size( ); ++j) {
         Type* ptA = GetAny< Type* >((*(E[j].first))(stack));
@@ -2961,36 +2968,52 @@ namespace PETSc {
           PetscInt m;
           ffassert(ptA->_petsc);
           MatGetLocalSize(ptA->_petsc, &m, NULL);
-          Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
-          if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
-          if (c != 2) {
-            if (inverse) ffassert(ptOut->N() == m);
-            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
-                                 1, ptIn, ptOut, inverse);
-          } else {
-            sum += m;
-            if (ptOut->N() < sum && !inverse) {
-              ffassert(ptIn->M() == 1);
-              ffassert(ptOut->M() == 1);
-              PETSc::resize(ptOut, sum, ptIn->M());
-              pt = *ptOut + sum - m;
+          if (c != 4) {
+            Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
+            if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
+            if (c != 2) {
+              if (inverse) ffassert(ptOut->N() == m);
+              changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
+                                   1, ptIn, ptOut, inverse);
+            } else {
+              sum += m;
+              if (ptOut->N() < sum && !inverse) {
+                ffassert(ptIn->M() == 1);
+                ffassert(ptOut->M() == 1);
+                PETSc::resize(ptOut, sum, ptIn->M());
+                pt = *ptOut + sum - m;
+              }
+              KN_< PetscScalar > ptOutShift(pt, m);
+              changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
+                                   1, ptIn, &ptOutShift, inverse);
             }
-            KN_< PetscScalar > ptOutShift(pt, m);
-            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
-                                 1, ptIn, &ptOutShift, inverse);
-          }
-          if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
-            for(int i = 0; i < ptIn->M(); ++i)
-              ptA->_A->exchange(*ptIn + i * ptIn->N());
-          }
-          if (c == 2) {
-            pt += m;
-            if (j == E.size( ) - 1)
-              ffassert(ptOut->N() == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
-                       (!inverse && ptOut->N() == sum));
-            KN_<PetscScalar> view = GetAny<KN_<PetscScalar>>((*(v[j]))(stack));
-            if(view.operator PetscScalar*() != ptIn->operator PetscScalar*())
-              view = *ptIn;
+            if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
+              for(int i = 0; i < ptIn->M(); ++i)
+                ptA->_A->exchange(*ptIn + i * ptIn->N());
+            }
+            if (c == 2) {
+              pt += m;
+              if (j == E.size( ) - 1)
+                ffassert(ptOut->N() == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
+                         (!inverse && ptOut->N() == sum));
+              KN_<PetscScalar> view = GetAny<KN_<PetscScalar>>((*(v[j]))(stack));
+              if(view.operator PetscScalar*() != ptIn->operator PetscScalar*())
+                view = *ptIn;
+            }
+          } else {
+            FEbaseArrayKn< PetscScalar >* ptIn = GetAny< FEbaseArrayKn< PetscScalar >* >((*(E[j].second))(stack));
+            ffassert(ptIn && ptIn->N == ptOut->M());
+            ffassert(ptIn->get(0) && ptIn->get(0)->n == ptA->_A->getDof());
+            ffassert(ptOut->N() == m);
+            for(int i = 0; i < ptIn->N; ++i) {
+                KN_< PetscScalar > out(pt + i * m, m);
+                changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
+                                     1, ptIn->get(i), &out, inverse);
+            }
+            if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
+              for(int i = 0; i < ptIn->N; ++i)
+                ptA->_A->exchange(&(*ptIn->get(i))[0]);
+            }
           }
         }
       }
@@ -4943,6 +4966,7 @@ namespace PETSc {
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1, 1));
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >(1, 1, 1, 1));
     Global.Add("MatMult", "(",
                new OneOperator3_< long, Dmat*, KN< PetscScalar >*, KN< PetscScalar >* >(
                  PETSc::MatMult< 'N' >));
