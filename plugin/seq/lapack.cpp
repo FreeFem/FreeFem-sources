@@ -931,7 +931,7 @@ class Mult {
 
   Mult(Transpose< T > aa, Transpose< T > bb) : a(aa), b(bb), ta(1), tb(1) {}
 
-  Mult(T aa, Transpose< T > bb) : a(aa), b(bb), ta(1), tb(1) {}
+  Mult(T aa, Transpose< T > bb) : a(aa), b(bb), ta(0), tb(1) {}
 };
 
 template< class K >
@@ -1031,16 +1031,16 @@ KNM< R > *Solve(KNM< R > *a, Inverse< KNM< R > * > b) {
 }
 
 // Template interface
-inline int gemm(char *transa, char *transb, integer *m, integer *n, integer *k, double *alpha,
+inline int gemm(char transa, char transb, integer *m, integer *n, integer *k, double *alpha,
                 double *a, integer *lda, double *b, integer *ldb, double *beta, double *c,
                 integer *ldc) {
-  return dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  return dgemm_(&transa, &transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
-inline int gemm(char *transa, char *transb, integer *m, integer *n, integer *k, Complex *alpha,
+inline int gemm(char transa, char transb, integer *m, integer *n, integer *k, Complex *alpha,
                 Complex *a, integer *lda, Complex *b, integer *ldb, Complex *beta, Complex *c,
                 integer *ldc) {
-  return zgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  return zgemm_(&transa, &transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 template< class R, bool init = false >
 KNM< R > *mult_ab(KNM< R > *a, const KNM_< R > &A, const KNM_< R > &B, R alpha = R(1.),
@@ -1095,7 +1095,7 @@ KNM< R > *mult_ab(KNM< R > *a, const KNM_< R > &A, const KNM_< R > &B, R alpha =
   }
 
 #else
-  gemm(&tB, &tA, &N, &M, &K, &alpha, A00, &lda, B00, &ldb, &beta, C00, &ldc);
+  gemm(tB, tA, &N, &M, &K, &alpha, A00, &lda, B00, &ldb, &beta, C00, &ldc);
 #endif
   return a;
   /*
@@ -1110,11 +1110,6 @@ KNM< R > *mult_ab(KNM< R > *a, const KNM_< R > &A, const KNM_< R > &B, R alpha =
    */
 }
 
-template< class R, bool init, int ibeta >
-KNM< R > *mult(KNM< R > *a, const KNM_< R > &A, const KNM_< R > &B) {    // C=A*B
-  R alpha = 1., beta = R(ibeta);
-  return mult_ab< R, init >(a, A, B, alpha, beta);
-}
 template< class R >
 long ff_SchurComplement(KNM< R > *const &pS, KNM< R > *const &pA, KN_< long > const &I,
                         KNM< R > *const &pV) {
@@ -1274,18 +1269,44 @@ KNM< R > *Add3(KNM< R > *const &pS, KNM< R > *const &pA, KN_< long > const &I) {
 
 template< class R, bool init, int ibeta >
 KNM< R > *mult(KNM< R > *a, Mult< KNM< R > * > bc) {
-  if ((bc.ta == 0) && (bc.tb == 0)) {
-    return mult< R, init, ibeta >(a, *bc.a, *bc.b);
-  } else if ((bc.ta == 1) && (bc.tb == 0)) {
-    return mult< R, init, ibeta >(a, bc.a->t( ), *bc.b);
-  } else if ((bc.ta == 0) && (bc.tb == 1)) {
-    return mult< R, init, ibeta >(a, *bc.a, bc.b->t( ));
-  } else if ((bc.ta == 1) && (bc.tb == 1)) {
-    return mult< R, init, ibeta >(a, bc.a->t( ), bc.b->t( ));
-  } else {
-    // should never happen
-    return NULL;
+  if (init) {
+    a->init( );
   }
+  const KNM_<R> A = *bc.a, B = *bc.b;
+
+  intblas N = A.N( );
+  intblas M = B.M( );
+  intblas K = A.M( );
+  intblas P = B.N( );
+  if     (bc.ta == 0 && bc.tb == 0) ffassert(K == P);
+  else if(bc.ta == 0 && bc.tb == 1) ffassert(K == M);
+  else if(bc.ta == 1 && bc.tb == 1) ffassert(N == M);
+  else if(bc.ta == 1 && bc.tb == 0) ffassert(N == P);
+  else ffassert(0);
+  KNM< R > &C = *a;
+  R alpha = 1., beta = R(ibeta);
+  if (!init) {
+    if(bc.ta == 0) ffassert(C.N() == N);
+    else           ffassert(C.N() == K);
+    if(bc.tb == 0) ffassert(C.M() == M);
+    else           ffassert(C.M() == P);
+  }
+  C.resize(bc.ta == 0 ? N : K, bc.tb == 0 ? M : P);
+  R *A00 = &A(0, 0), *A10 = &A(1, 0), *A01 = &A(0, 1);
+  R *B00 = &B(0, 0), *B10 = &B(1, 0), *B01 = &B(0, 1);
+  R *C00 = &C(0, 0), *C10 = &C(1, 0), *C01 = &C(0, 1);
+  intblas lsa = A10 - A00, lsb = B10 - B00, lsc = C10 - C00;
+  intblas lda = A01 - A00, ldb = B01 - B00, ldc = C01 - C00;
+  if (verbosity > 10) {
+    cout << " N:" << N << " " << M << " " << K << endl;
+    cout << lsa << " " << lsb << " " << lsc << " init " << init << endl;
+    cout << lda << " " << ldb << " " << ldc << endl;
+  }
+  M = C.N();
+  N = C.M();
+  K = bc.ta == 0 ? A.M() : A.N();
+  gemm(bc.ta == 0 ? 'N' : 'T', bc.tb == 0 ? 'N' : 'T', &M, &N, &K, &alpha, A00, &lda, B00, &ldb, &beta, C00, &ldc);
+  return a;
 }
 
 template< int INIT >
@@ -1374,6 +1395,12 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
     TheOperators->Add("^", new OneBinaryOperatorRNM_inv< double >( ));
     TheOperators->Add(
       "*", new OneOperator2< Mult< KNM< double > * >, KNM< double > *, KNM< double > * >(Build2));
+    TheOperators->Add(
+      "*", new OneOperator2< Mult< KNM< double > * >, Transpose<KNM< double > *>, KNM< double > * >(Build2));
+    TheOperators->Add(
+      "*", new OneOperator2< Mult< KNM< double > * >, KNM< double > *, Transpose<KNM< double > *> >(Build2));
+    TheOperators->Add(
+      "*", new OneOperator2< Mult< KNM< double > * >, Transpose<KNM< double > *>, Transpose<KNM< double > *> >(Build2));
     TheOperators->Add(
       "*",
       new OneOperator2< Mult< KNM< Complex > * >, KNM< Complex > *, KNM< Complex > * >(Build2));
