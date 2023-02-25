@@ -3460,7 +3460,7 @@ namespace PETSc {
             ffassert(in != out);
             if (c != 5) VecConjugate(x);
             KSPSolveTranspose(ptA->_ksp, x, y);
-            VecConjugate(y);
+            if (c != 5) VecConjugate(y);
           }
           VecResetArray(y);
           VecDestroy(&y);
