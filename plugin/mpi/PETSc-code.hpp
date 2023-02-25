@@ -4955,7 +4955,9 @@ namespace PETSc {
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >( ));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
-    if (!std::is_same< PetscScalar, PetscReal >::value)
+    if (std::is_same< PetscScalar, PetscReal >::value)
+      Global.Add("KSPSolveTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
+    else
       Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1, 1));
     Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::GetConvergedReason< Dmat >));
