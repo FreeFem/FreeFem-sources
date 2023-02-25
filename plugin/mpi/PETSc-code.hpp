@@ -3456,11 +3456,9 @@ namespace PETSc {
           PetscScalar* tmpIn, *tmpOut;
           if (c != 3 && c != 5)
             KSPSolve(ptA->_ksp, x, y);
-          else if (c == 5)
-            KSPSolveTranspose(ptA->_ksp, x, y);
           else {
             ffassert(in != out);
-            VecConjugate(x);
+            if (c != 5) VecConjugate(x);
             KSPSolveTranspose(ptA->_ksp, x, y);
             VecConjugate(y);
           }
