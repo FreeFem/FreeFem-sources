@@ -3407,6 +3407,10 @@ namespace PETSc {
       : OneOperator(atype< long >( ), atype< Type* >( ), atype< Type* >( ),
                     atype< Type* >( )),
         c(4) {}
+    LinearSolver(int, int, int, int, int)
+      : OneOperator(atype< long >( ), atype< Type* >( ), atype< KN< PetscScalar >* >( ),
+                    atype< KN< PetscScalar >* >( )),
+        c(5) {}
   };
   template< class Type >
   basicAC_F0::name_and_type LinearSolver< Type >::E_LinearSolver::name_param[] = {
@@ -3450,8 +3454,10 @@ namespace PETSc {
           VecPlaceArray(y, *out);
           PetscInt N, rbegin;
           PetscScalar* tmpIn, *tmpOut;
-          if (c != 3)
+          if (c != 3 && c != 5)
             KSPSolve(ptA->_ksp, x, y);
+          else if (c == 5)
+            KSPSolveTranspose(ptA->_ksp, x, y);
           else {
             ffassert(in != out);
             VecConjugate(x);
@@ -4998,11 +5004,10 @@ namespace PETSc {
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >( ));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
-    if (std::is_same< PetscScalar, PetscReal >::value)
-      Global.Add("KSPSolveTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
-    else
+    if (!std::is_same< PetscScalar, PetscReal >::value)
       Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1, 1));
+    Global.Add("KSPSolveTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1, 1, 1));
     Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::GetConvergedReason< Dmat >));
     Global.Add("KSPGetIterationNumber", "(", new OneOperator1_< long, Dmat* >(PETSc::GetIterationNumber< Dmat >));
     Global.Add("KSPSetResidualHistory", "(", new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::SetResidualHistory< Dmat >));
