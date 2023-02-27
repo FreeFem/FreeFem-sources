@@ -3458,16 +3458,14 @@ namespace PETSc {
             KSPSolve(ptA->_ksp, x, y);
           else {
             ffassert(in != out);
-            if (c != 5) VecConjugate(x);
+            if (c == 3) VecConjugate(x);
             KSPSolveTranspose(ptA->_ksp, x, y);
-            if (c != 5) {
-              VecConjugate(x);
-              VecConjugate(y);
-            }
+            if (c == 3) VecConjugate(y);
           }
           VecResetArray(y);
           VecDestroy(&y);
           if (x != y) {
+            if (c == 3) VecConjugate(x);
             VecResetArray(x);
             VecDestroy(&x);
           }
