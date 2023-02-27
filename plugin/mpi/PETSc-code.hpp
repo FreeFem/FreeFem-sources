@@ -3462,13 +3462,13 @@ namespace PETSc {
             KSPSolveTranspose(ptA->_ksp, x, y);
             if (c == 3) VecConjugate(y);
           }
-          VecResetArray(y);
-          VecDestroy(&y);
           if (x != y) {
             if (c == 3) VecConjugate(x);
             VecResetArray(x);
             VecDestroy(&x);
           }
+          VecResetArray(y);
+          VecDestroy(&y);
         } else {
           Dmat* X = GetAny< Dmat* >((*x)(stack));
           Dmat* Y = GetAny< Dmat* >((*y)(stack));
