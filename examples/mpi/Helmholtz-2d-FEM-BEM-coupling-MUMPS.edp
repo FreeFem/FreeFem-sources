@@ -13,7 +13,7 @@ real lambda = 2*pi/real(k);
 real nloc = 10./lambda;
 real n = nloc*2*pi;
 
-int[int] nsl(2); // number of lenses // 10 normal
+int[int] nsl(10); // number of lenses
 nsl = n;
 
 real theta = 10*2*pi/360; // angular shift between lenses
@@ -23,8 +23,8 @@ nsx[0] = 3.2;
 nsy[0] = 0;
 
 for (int i=1; i< nsl.n; i++) {
-  nsx[i] = nsx[i-1] + 2.01*cos(i*theta); //+0.2; //les lentilles ne se touche pas avec 2 lenses
-  nsy[i] = nsy[i-1] + 2.01*sin(i*theta); //+0.2; //les lentilles ne se touche pas avec 2 lenses
+  nsx[i] = nsx[i-1] + 2.01*cos(i*theta);
+  nsy[i] = nsy[i-1] + 2.01*sin(i*theta);
 }
 
 int interface = 1;
@@ -50,14 +50,9 @@ border gc(t=L, -L){x=t; y=l; z=0; label=waveguide;}
 border gd(t=l, -l){x=-L; y=t; z=0; label=waveguide;}
 
 // Fem mesh :
-
 mesh Th = buildmesh(a(nloc*(2*L+2*dd))+b(nloc*(2*l+2*dd))+c(nloc*(2*L+2*dd))+d(nloc*(2*l+2*dd))
                          +ga(nloc*2*L)+gc(nloc*2*L)+gd(nloc*2*l)+circle(nsl));
 
-/*
-mesh Th = buildmesh(a(nloc*(2*L+2*dd))+b(nloc*(2*l+2*dd))+c(nloc*(2*L+2*dd))+d(nloc*(2*l+2*dd))
-                         +ga(nloc*2*L)+gc(nloc*2*L)+gd(nloc*2*l) );
-*/
 plot(Th, wait=1, dim=2, cmm="FEM mesh Th");
 
 int[int] lab = [interface];
@@ -99,10 +94,8 @@ if (mpirank == 0) cout << HSL.infos << endl;
 display(HSL, wait=1);
 
 // assemble TDL BEM block :
-cout << "HMatrix TDL=" << endl;
 varf TDL(u,v) = int1d(ThL)(0.5*u*v) + int1dx1d(ThL)(ThL)(BEM(BemKernel("TDL",k=k),u,v));
-//varf TDL(u,v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k),u,v));
-HMatrix<complex> HTDL = TDL(UhL,UhL,eta=100,eps=1e-8,minclustersize=15);
+HMatrix<complex> HTDL = TDL(UhL,UhL);
 if (mpirank == 0) cout << HTDL.infos << endl;
 
 // assemble Helmholtz FEM block :
@@ -112,7 +105,7 @@ matrix<complex> mF = F(Uh,Uh);
 
 matrix Rr = interpolate(UhL,Uh);
 matrix<complex> Rc = Rr;
-cout << "mass" << endl;
+
 // assemble mass block, only on rank 0 :
 varf mass(u,v) = int1d(Th,interface)(u*v);
 matrix<complex> mmass(UhL.ndof, Uh.ndof);
@@ -120,19 +113,15 @@ if (mpirank == 0) {
   mmass = mass(Uh,Uh,solver=GMRES);
   mmass = Rc*mmass;
 }
-cout << "MSL" << endl;
+
 complex[int,int] MSL(UhL.ndof,UhL.ndof);
 MSL = HSL; // each MPI process densifies its part of HMatrix HSL
 MSL *= -1;
-cout << "TDL" << endl;
 complex[int,int] MTDL(UhL.ndof,UhL.ndof);
 MTDL = HTDL; // each MPI process densifies its part of HMatrix HTDL
-cout << "MTDL" << endl;
 matrix<complex> mTDL = MTDL;
-cout << "mTDL" << endl;
 mTDL = Rc'*mTDL;
 
-cout << "global A" << endl;
 matrix<complex> A = [[mF,mTDL],[mmass,MSL]];
 
 // compute factorization of distributed matrix A in parallel with MUMPS
