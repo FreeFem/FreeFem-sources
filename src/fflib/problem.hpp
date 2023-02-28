@@ -496,53 +496,6 @@ inline int cestac(const complex<double_st> & z)
 {return min(cestac(z.real()),cestac(z.imag()));}
 #endif
 
-
-// A construire
-// template<class K>
-// class CompositeOperator{
-// vector<BlockOperator> block_op; 
-// };
-template<class K>
-class BlockOperator{
-  /*
-  long offsetI;
-  long offsetJ;
-  */
-                      // defintion type_matrix
-  int type_matrix[2]; // index 0: left + index 1: right
-                      // 0:  
-                      // 1:
-
-
-                      // definition : type_operator
-                      // -1: 
-  int type_operator;  //  0: K*MatrixLeft     assert(pMatrixRight = 0) 
-                      //  1: (sum of matrix) MatrixLeft + MatrixRight
-                      //  2: (matrix multiplication) MatrixLeft * MatrixRight 
-
-  BlockOperator *pMatrixLeft;
-  BlockOperator *pMatrixRight;
-  K coeff;  
-
-  BlockOperator(){};
-
-  bool isSum(){
-    if(type_operator == 1){
-      if( !pMatrixLeft && !pMatrixRight ){
-        cerr << "error we need a Left and Right matrix for multiplication" << endl;
-        ffassert(0);
-      }  
-      return true;
-    } 
-    else{
-      return false;
-    }
-  }
-  bool isMatrixMultiplication(){return false;};
-  bool isCoeffMulltiplication(){return false;};
-  bool isNoOperator(){return false;};
-};
-
 class Problem  : public Polymorphic {
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
