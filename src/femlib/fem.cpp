@@ -1819,7 +1819,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
             cerr << " The generatated 2d mesh is to fine :  hmin = " << hm << " to to small < "<< 1./quadtree->coef  << endl;
             ffassert(0); 
         }
-        if(verbosity>5 || ! iseuil )
+        if( verbosity>5 && ! iseuil )
          cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil << " coef quadtree " <<  quadtree->coef << endl;
 
        //      ffassert(iseuil); //  zero => too smal
