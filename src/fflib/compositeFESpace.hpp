@@ -82,9 +82,10 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
 template<class FESpaceT1,class FESpaceT2>
 MatriceMorse<R> * buildInterpolationMatrixT(const FESpaceT1 & Uh,const FESpaceT2 & Vh,void *data);
 
+/*
 template< >
 MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & Uh,const FESpace & Vh,void *data);
-
+*/
 
 template< class R, class FESpaceT1, class FESpaceT2 >
 Matrice_Creuse<R> *  buildMatrixInterpolationForCompositeFESpace(const FESpaceT1 * Uh ,const FESpaceT2 * Vh);
@@ -167,16 +168,5 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
                 KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A, bool B_from_varf=false);
-
-
-template<class R> 
-void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 
-                const vector< int> &typeUh, const vector< int> &typeVh,
-                const vector< long> &sizeUh, const vector< long> &sizeVh,
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const vector< void *> &LLUh, const vector< void *> &LLVh,
-                bool initmat, bool initx, const int &sym, const double &tgv, 
-                const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A,int *mpirankandsize, bool B_from_varf=false);
 
 #endif
