@@ -914,7 +914,6 @@ class FEbase {
   FESpace *newVh( ) {
     throwassert(pVh);
     const pfes pp = *pVh;
-    // cout << pVh << " " << *pVh << endl;
     return *pp;
   }
 
