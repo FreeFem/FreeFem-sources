@@ -12220,9 +12220,9 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
 
         SHOWVERB(cout << "SetArgs:: form  set parameter " << endl);
         if( ! ( ordre==1 || n%2==0) )
-        CompileError(" Error in test or unkwon function (odd number of function) ");
+        CompileError(" Error in test or unknown function (odd number of function) ");
         ffassert( ordre==1 || n%2==0);
-        int nn=ordre==1 ? 0 : n/2; // ordre == 1 => no unknown function just test function
+        int nn=ordre==1 ? 0 : n/2; // order == 1 => no unknown function just test function
 
         for (int i=0,j=0;i<nb;i++)
         if (l[i].r == 0 && l[i].re  == 0 && l[i].array==0)
