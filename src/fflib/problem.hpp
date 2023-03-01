@@ -1069,8 +1069,8 @@ template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A)
         A.typemat=HA->sym() ;//(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     }
     else {
-	cerr << " unkwon type of matrix " << wm <<endl;
-	ExecError("Erreur read matrix ");
+	cerr << " unknown type of matrix " << wm <<endl;
+	ExecError("Error reading the matrix ");
 	A.A =0; }
     return f;  }
 
