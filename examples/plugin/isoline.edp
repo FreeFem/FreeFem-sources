@@ -126,7 +126,7 @@ border Curve1(t=0,1)
 meshL ThL= buildmeshL(Curve1(-100));
 plot(ThL,wait=1,cmm="ThL");
 
-include "BuildMeshS.idp"
+include "buildmeshS.idp"
 meshS ThS= buildmeshS(ThL,1,1);
 plot(ThS,cmm="ThS",wait=1);
 
