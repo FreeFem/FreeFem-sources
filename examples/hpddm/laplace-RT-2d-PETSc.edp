@@ -18,18 +18,23 @@ border b(t=0,1) { x = -t; y = 1-t; label = 2; };
 border c(t=0,1) { x = t-1; y = -t; label = 3; };
 border d(t=0,1) { x = t; y = -1+t; label = 4; };
 mesh Th = buildmesh(a(getARGV("-global", 20)) + b(getARGV("-global", 20)) + c(getARGV("-global", 20)) + d(getARGV("-global", 20)));
-int s = getARGV("-split", 1); // refinement factor
+mesh ThGlobal = Th;
 fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
+Mat A;
+int[int] n2o;
+macro ThN2O()n2o//
+buildDmesh(Th);
 {
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-    Wh def(u);
-    varf onG(def(u), def(v)) = on(-111111, u = 10 + x + y, uB = 100 + y - x) + int1d(Th, -111111)(vC * 1000);
-    // varf onG(def(u), def(v)) = int1d(Th, -111111)(v * 1000 + vB * 1000 + vC * 1000);
+macro ThPostProcessD(D) {
+    Wh def(u), def(v);
+    varf onG(def(u), def(v)) = on(-111111, u = 10 + x + y, uB = 100 + y - x);
+    v[] = D;
     u[] = onG(0, Wh);
+    for [j, dj : u[]] dj = abs(dj) > 1e-2 ? 0.0 : 1.0;
+    def(u) = [u, uB, vC];
     D = u[];
-    for [j, dj : D] dj = abs(dj) > 1e-1 ? 0.0 : 1.0;
+}// EOM
+createMat(Th, A, Pk);
 }
 
 varf vMixedLaplace([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2 + p*(dx(v1) + dy(v2)) + (dx(u1) + dy(u2))*q)
@@ -38,14 +43,26 @@ varf vMixedLaplace([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2 + p*(
                                              + on(4, u1 = 1.0, u2 = 1.0);
 
 real[int] rhs = vMixedLaplace(0, Wh, tgv = -1);
-Mat A(Wh.ndof, intersection, D);
 A = vMixedLaplace(Wh, Wh, tgv = -1);
 set(A, sparams ="-pc_type lu");
 Wh def(u);
 u[] = A^-1 * rhs;
-macro params()cmm = "Global solution", wait = 1, fill = 1// EOM
-plotMPI(Th, def2(u), PkV, def2, real, params)
-plotMPI(Th, uC, PkP, def1, real, params)
+macro params()// EOM
+fespace WhGlobal(ThGlobal, Pk);
+int[int] rest = restrict(Wh, WhGlobal, n2o);
+WhGlobal def(uGlobal);
+real[int] reduce(uGlobal[].n);
+{
+    real[int] tmp;
+    ChangeNumbering(A, u[], tmp);
+    ChangeNumbering(A, u[], tmp, inverse = true, exchange = false);
+}
+for[i, v : rest] reduce[v] = u[][i];
+mpiReduce(reduce, uGlobal[], processor(0), mpiSUM);
+if(mpirank == 0) {
+    plot(ThGlobal, def2(uGlobal), cmm = "Global solution", wait = 1, fill = 1);
+    plot(ThGlobal, uGlobalC, cmm = "Global solution", wait = 1, fill = 1);
+}
 [u, uB, uC] = [0.0, 0.0, 1.0];
 u[] += 1.0;
 set(A, sparams = "-pc_type fieldsplit -ksp_monitor -ksp_view " +
@@ -54,9 +71,18 @@ set(A, sparams = "-pc_type fieldsplit -ksp_monitor -ksp_view " +
     "-pc_fieldsplit_schur_fact_type full " +
     "-fieldsplit_0_ksp_type preonly " +
     "-fieldsplit_1_ksp_type gmres " +
-    "-fieldsplit_1_ksp_monitor -fieldsplit_1_ksp_rtol 1e-4 " +
+    "-fieldsplit_1_ksp_converged_reason -fieldsplit_1_ksp_rtol 1e-4 " +
     "-pc_fieldsplit_schur_precondition selfp " +
     "-fieldsplit_1_pc_type hypre", fields = u[]);
 u[] = A^-1 * rhs;
-plotMPI(Th, def2(u), PkV, def2, real, params)
-plotMPI(Th, uC, PkP, def1, real, params)
+{
+    real[int] tmp;
+    ChangeNumbering(A, u[], tmp);
+    ChangeNumbering(A, u[], tmp, inverse = true, exchange = false);
+}
+for[i, v : rest] reduce[v] = u[][i];
+mpiReduce(reduce, uGlobal[], processor(0), mpiSUM);
+if(mpirank == 0) {
+    plot(ThGlobal, def2(uGlobal), cmm = "Global solution", wait = 1, fill = 1);
+    plot(ThGlobal, uGlobalC, cmm = "Global solution", wait = 1, fill = 1);
+}

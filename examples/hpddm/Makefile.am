@@ -71,6 +71,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	newton-vi-adaptmesh-2d-PETSc.edp \
 	block-PETSc.edp \
 	laplace-RT-2d-PETSc.edp \
+	laplace-RT-3d-PETSc.edp \
 	stokes-2d-PETSc.edp \
 	stokes-fieldsplit-2d-PETSc.edp \
 	stokes-block-2d-PETSc.edp \
