@@ -4382,13 +4382,16 @@ AnyType Plot::operator( )(Stack s) const {
       // Prepare for the sending 2d iso values for ffglut
       else if (what == 1 || what == 2 || what == 11 || what == 12) {
         ll[ii].eval(fe, cmp);
-        if (fe[0]->x( )) th = &fe[0]->Vh->Th;
+        if (fe[0]->x( ) && !th) th = &fe[0]->Vh->Th;
+        if (fe[1] && fe[1]->x( ) && !th) th = &fe[1]->Vh->Th;
         if (fe[1] && fe[1]->x( )) ffassert(th == &fe[1]->Vh->Th);
       }
       // Prepare for the sending 3D volume iso values for ffglut
       else if (what == 6 || what == 7 || what == 16 || what == 17) {
         ll[ii].eval(fe3, cmp);
-        if (fe3[0]->x( )) th3 = &fe3[0]->Vh->Th;
+        if (fe3[0]->x( ) &&!th3) th3 = &fe3[0]->Vh->Th;
+        if (fe[1] && fe3[1]->x( ) &&!th3) th3 = &fe3[1]->Vh->Th;
+        if (fe[2] && fe3[2]->x( ) &&!th3) th3 = &fe3[1]->Vh->Th;
         if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
         if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
 
@@ -4397,6 +4400,7 @@ AnyType Plot::operator( )(Stack s) const {
       else if (what == 8 || what == 9 || what == 18 || what == 19) {
         ll[ii].eval(feS, cmp);
         if (feS[0]->x( )) thS = &feS[0]->Vh->Th;
+        if (feS[1] && feS[1]->x( )  &&!thS) thS = &feS[1]->Vh->Th;
         if (feS[1] && feS[1]->x( )) ffassert(thS == &feS[1]->Vh->Th);
         if (feS[2] && feS[2]->x( )) ffassert(thS == &feS[2]->Vh->Th);
       }
@@ -4404,6 +4408,7 @@ AnyType Plot::operator( )(Stack s) const {
       else if (what == 14 || what == 15 || what == 20 || what == 21) {
         ll[ii].eval(feL, cmp);
         if (feL[0]->x( )) thL = &feL[0]->Vh->Th;
+        if (feL[1] && feL[1]->x( ) &&!thL) thL = &feL[1]->Vh->Th;
         if (feL[1] && feL[1]->x( )) ffassert(thL == &feL[1]->Vh->Th);
         if (feL[2] && feL[2]->x( )) ffassert(thL == &feL[2]->Vh->Th);
       }
