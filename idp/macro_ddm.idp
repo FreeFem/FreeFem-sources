@@ -485,6 +485,9 @@ ENDIFMACRO
         defPart(func2vec) = initPart(khi);
     }
     D[level - 1] = func2vec[];
+IFMACRO(privateDmesh#PostProcessD)
+    privateDmesh#PostProcessD(D[level - 1]);
+ENDIFMACRO
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
 IFMACRO(privateBuildDmesh)
@@ -859,6 +862,9 @@ IFMACRO(ThName#CartesianPartitioning)
 IFMACRO(!dimension)
     NewMacro dimension()2 EndMacro
 ENDIFMACRO
+ENDIFMACRO
+IFMACRO(ThName#PostProcessD)
+    NewMacro privateDmesh#PostProcessD(arg)ThName#PostProcessD(arg) EndMacro
 ENDIFMACRO
     partitionPrivate(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
