@@ -5997,14 +5997,12 @@ void ff_createMatIS( MatriceMorse<PetscScalar> &ff_mat, Mat &matIS){
 
   MatConvert(matIS, MATAIJ, MAT_INPLACE_MATRIX, &matIS);
 
-  // delete [] IA;
-  // delete [] JA;
-  // delete [] aa;
-
-  delete IA;
-  delete JA;
-  delete aa;
   MatDestroy(&matISlocal);
+
+  // delete IA,JA aa
+  delete [] IA;
+  delete [] JA;
+  delete [] aa;
 }
 
 template<class HpddmType>
