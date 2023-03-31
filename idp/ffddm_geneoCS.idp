@@ -780,6 +780,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   ENDIFMACRO
 
   if (ffddminertia) {
+    nev = ffddmnu;
     matrix<pr#prfe#K> NA = pr#matN-ffddmtau*weighted;
     int[int] info(40);
     set(NA,solver = sparsesolver,sym=1,commworld=pr#prfe#prmesh#commself,factorize=3,info=info);
