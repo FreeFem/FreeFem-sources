@@ -234,7 +234,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 27 : 20;
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 28 : 21;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -301,6 +301,7 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 //{"rmc"               , &typeid(double)},/*!< [-1/val], Remove small connex componants in level-set mode */
 {"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], References of surfaces with required triangles */
+{"requiredVertex"    , &typeid(KN<long>*)},/*!< [val], Indices of required vertices */
 {"localParameter"    , &typeid(KNM<double>*)}/*!< [val], Local parameters on given surfaces */
 };
 
@@ -326,7 +327,8 @@ basicAC_F0::name_and_type mmg_Op<MeshS>::name_param[] = {
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
-{"requiredEdge"      , &typeid(KN<long>*)}/*!< [val], References of boundaries with required edges */
+{"requiredEdge"      , &typeid(KN<long>*)},/*!< [val], References of boundaries with required edges */
+{"requiredVertex"    , &typeid(KN<long>*)}/*!< [val], Indices of required vertices */
 };
 
 template<class ffmesh>
@@ -352,6 +354,7 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
 
   KN< double > *pmetric = 0;
   KN< long > *prequiredTriangle = 0;
+  KN< long > *prequiredVertex = 0;
   KNM< double > *plocalParameter = 0;
 
   if (nargs[0]) {
@@ -361,7 +364,10 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
     prequiredTriangle = GetAny< KN< long > * >((*nargs[25])(stack));
   }
   if (nargs[26]) {
-    plocalParameter = GetAny< KNM< double > * >((*nargs[26])(stack));
+    prequiredVertex = GetAny< KN< long > * >((*nargs[26])(stack));
+  }
+  if (nargs[27]) {
+    plocalParameter = GetAny< KNM< double > * >((*nargs[27])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -422,6 +428,14 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
           if ( MMG3D_Set_requiredTriangle(mesh,k) != 1 ) {
             exit(EXIT_FAILURE);
           }
+        }
+      }
+    }
+    if (prequiredVertex && prequiredVertex->N( ) > 0) {
+      const KN< long > &requiredVertex = *prequiredVertex;
+      for (int k=0; k<requiredVertex.N( ); k++) {
+        if ( MMG3D_Set_requiredVertex(mesh,requiredVertex[k]+1) != 1 ) {
+          exit(EXIT_FAILURE);
         }
       }
     }
@@ -502,12 +516,16 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 
   KN< double > *pmetric = 0;
   KN< long > *prequiredEdge = 0;
+  KN< long > *prequiredVertex = 0;
 
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
   if (nargs[19]) {
     prequiredEdge = GetAny< KN< long > * >((*nargs[19])(stack));
+  }
+  if (nargs[20]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[20])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -566,6 +584,14 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
           if ( MMG3D_Set_requiredEdge(mesh,k) != 1 ) {
             exit(EXIT_FAILURE);
           }
+        }
+      }
+    }
+    if (prequiredVertex && prequiredVertex->N( ) > 0) {
+      const KN< long > &requiredVertex = *prequiredVertex;
+      for (int k=0; k<requiredVertex.N( ); k++) {
+        if ( MMGS_Set_requiredVertex(mesh,requiredVertex[k]+1) != 1 ) {
+          exit(EXIT_FAILURE);
         }
       }
     }
