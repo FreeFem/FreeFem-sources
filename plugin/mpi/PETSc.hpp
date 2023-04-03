@@ -9,6 +9,10 @@
 #define MATHERMITIANTRANSPOSEVIRTUAL MATTRANSPOSEMAT
 #endif
 
+#if PETSC_VERSION_LT(3, 19, 0)
+#define PETSC_SUCCESS 0
+#endif
+
 namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {
