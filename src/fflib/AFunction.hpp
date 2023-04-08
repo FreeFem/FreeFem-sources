@@ -183,8 +183,11 @@ Expression NewExpression(Function2,Expression,Expression);
 inline Type_Expr make_Type_Expr(aType t, E_F0  * e) {return make_pair(t,e);}
 inline Type_Expr make_Type_Expr( E_F0  * e,aType t) {return make_pair(t,e);}
 
-struct Keyless : binary_function<const char *,const char *, bool>
+struct Keyless
    { 
+    using first_argument_type  = const char *;
+    using second_argument_type = const char *;
+    using result_type          = bool;
     typedef const char * Key;
     bool operator()(const Key& x, const Key& y) const { return strcmp(x,y)<0;} };
     
@@ -372,8 +375,12 @@ class E_F0 :public CodeAlloc
    {
    public:
        static E_F0 *tnull;
-  struct kless : binary_function<Expression,Expression, bool>
-   { bool operator()(const Expression& x, const Expression& y) const{ 
+  struct kless
+   {
+     using first_argument_type  = Expression;
+     using second_argument_type = Expression;
+     using result_type          = bool;
+     bool operator()(const Expression& x, const Expression& y) const{
      //cout << x << " " << y << x->compare(y) << " ::: ";
       int r1 = x->compare(y);// , r2 = y->compare(x);
      //assert(r1+r2==0);

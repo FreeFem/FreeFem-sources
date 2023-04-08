@@ -45,8 +45,12 @@ class mylex : public CodeAlloc {
    struct MacroData{ deque<string> d; int l; string f;};// f is not a pointeur (pb of delete) 
     //   Warning  f not a pointeur because
     //
-  struct Keyless : binary_function<Key,Key, bool>
-   { bool operator()(const Key& x, const Key& y) const{ return strcmp(x,y)<0;} };  
+  struct Keyless
+   {
+    using first_argument_type  = Key;
+    using second_argument_type = Key;
+    using result_type          = bool;
+    bool operator()(const Key& x, const Key& y) const{ return strcmp(x,y)<0;} };
   typedef   map<const char *,Value,Keyless> MapMotClef;
   typedef   map<const char *,MacroData ,Keyless >  MapMacroDef;
   typedef   map<string, string  >  MapMacroParam;

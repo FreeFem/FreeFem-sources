@@ -3168,8 +3168,10 @@ LinkToInterpreter::LinkToInterpreter( ) {
 }
 
 template< class K >
-struct set_eqmatrice_creuse_fbl
-  : public binary_function< Matrice_Creuse< K > *, const Matrice_Creuse< K > *, const C_args * > {
+struct set_eqmatrice_creuse_fbl {
+   using first_argument_type  = Matrice_Creuse< K > *;
+   using second_argument_type = const Matrice_Creuse< K > *;
+   using result_type          = const C_args *;
   static Matrice_Creuse< K > *f(Matrice_Creuse< K > *const &a, const C_args *const &b) {
     // 1  verif the FESpace
 
@@ -3181,7 +3183,10 @@ struct set_eqmatrice_creuse_fbl
 };
 
 template< class K >
-struct set_eqvect_fl : public binary_function< KN< K > *, const FormLinear *, KN< K > * > {
+struct set_eqvect_fl {
+   using first_argument_type  = KN< K > *;
+   using second_argument_type = const FormLinear *;
+   using result_type          = KN< K > *;
   static KN< K > *f(KN< K > *const &a, const FormLinear *const &b) {
     ffassert(0);
     return a;
@@ -5753,19 +5758,28 @@ template<  class A >
             OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
         };
 template <class R,class A, class B> 
-struct OppR3dot: public binary_function<A,B,R> {
+struct OppR3dot {
+   using first_argument_type  = A;
+   using second_argument_type = B;
+   using result_type          = R;
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (*pu,*b);} };
 
 template <class R,class A, class B>
-struct OppqR3dot: public binary_function<A,B,R> {
+struct OppqR3dot {
+   using first_argument_type  = A;
+   using second_argument_type = B;
+   using result_type          = R;
   static R f(const A & a,const B & b)  {
       B* pu = a;
       return (*pu,b);} };
 
 template <class R,class A, class B>
-struct OpR3dot: public binary_function<A,B,R> {
+struct OpR3dot {
+   using first_argument_type  = A;
+   using second_argument_type = B;
+   using result_type          = R;
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (pu,b);} };
