@@ -90,8 +90,11 @@ AnyType tM2L3 (Stack , const AnyType & pp)
 
 
 template<class R>
-struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCM
  {
+   using first_argument_type  = R;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -130,8 +133,11 @@ template<class R> void PrintL(const char* cc, list<tuple<R,VirtualMatrix<int,R>*
     cout << ") "<< endl;
 }
 template<class R>
-struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMC
  {
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = R;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -148,8 +154,11 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,Mat
 //  ADD FH 16/02/2007
 
 template<class R>
-struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCMt
 {
+   using first_argument_type  = R;
+   using second_argument_type = Matrice_Creuse_Transpose<R> ;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -165,8 +174,11 @@ struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<t
 };
 
 template<class R>
-struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMtC
 {
+   using first_argument_type  = Matrice_Creuse_Transpose<R> ;
+   using second_argument_type = R;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -185,9 +197,10 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
 
 
 template<class R,int c=-1>
-struct Op1_LCMd: public unary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op1_LCMd
 {  //  - ...
+  using argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+  using result_type    = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -204,10 +217,11 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 };
 
 template<class R>
-struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMadd
 {  //  ... + ...
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -222,10 +236,11 @@ struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,b
 
 };
 template<class R>
-struct Op2_ListCMCMsub: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMsub
 {  //  ... + ...
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -245,10 +260,11 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 };
 
 template<class R,int cc=1>
-struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
-                                              list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListMCMadd
 {  //  M + ....
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -268,10 +284,11 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
 };
 
 template<class R,int cc=1>
-struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               Matrice_Creuse<R> * ,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCMMadd
 {  //   .... + M
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -288,10 +305,11 @@ struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,b
 };
 
 template<class R,int cc=1>
-struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
-                                              Matrice_Creuse<R> * ,
-                                              list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMMadd
 {  //  M + M
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -1794,7 +1812,10 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
 }
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_pair: public binary_function<AA,BB,RR> {
+struct Op2_pair {
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return RR( a, b);}
 };
@@ -1898,13 +1919,19 @@ R  get_element2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c)
     return  r;}
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_mulAv: public binary_function<AA,BB,RR> {
+struct Op2_mulAv{
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return (*a->A * *b );}
 };
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
+struct Op2_mulvirtAv{
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return RR( (*a).A, b );}
 };

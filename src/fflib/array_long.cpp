@@ -92,7 +92,10 @@ template<class A> inline AnyType Destroy_KN(Stack,const AnyType &x) {
 // end add
 
 template<class A,class B>
-struct set_Inv_KN_long : public binary_function<A,B,A> {
+struct set_Inv_KN_long {
+  using first_argument_type  = A;
+  using second_argument_type = B;
+  using result_type          = A;
   static A f(const A & a, B const & b) {
     int n = a.N();
     KN_<long> I(b.t);
@@ -106,7 +109,10 @@ struct set_Inv_KN_long : public binary_function<A,B,A> {
 };
 
 template<class A,class B>
-struct set_Inv_pKN_longI: public binary_function<A,B,A> {
+struct set_Inv_pKN_longI {
+  using first_argument_type  = A;
+  using second_argument_type = B;
+  using result_type          = A;
   static A f(const A & a, B const & b) {
     KN_<long> I(b.t);
     int n = I.max() + 1;

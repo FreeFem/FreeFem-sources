@@ -148,7 +148,10 @@ template<class T> inline T Max (const T &a,const T & b,const T & c,const T & d){
 
 template<class T> inline T Square (const T &a){return a*a;}
 
-struct SubArray2: public binary_function<long,long,SubArray> {
+struct SubArray2 {
+  using first_argument_type  = long;
+  using second_argument_type = long;
+  using result_type          = SubArray;
   static SubArray f(const long & a,const long & b)  {
     return SubArray(b-a+1,a);} };
 struct SubArray3: public ternary_function<long,long,long,SubArray> {
@@ -236,12 +239,17 @@ R *MakePtrWithDel( A  const & a)
   return r;}
 
 template<class R,class RR>
-struct Op1_new_pstring: public unary_function<string*,R> {
+struct Op1_new_pstring{
+  using argument_type  = string*;
+  using result_type    = R;
   static R f(string * const & a)  {R r =  new RR(a->c_str());
     return r;} };
 
 template<class R,class RR>
-struct Op2_set_pstring: public binary_function<R,string*,R> {
+struct Op2_set_pstring {
+  using first_argument_type  = R;
+  using second_argument_type = string*;
+  using result_type          = R;
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
    if ( !*p || !**p) {
        cerr << " Error opening file " << *a << endl;
