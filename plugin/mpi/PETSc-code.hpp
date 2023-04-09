@@ -1050,7 +1050,7 @@ namespace PETSc {
     return A;
   }
   template<class K>
-  struct Op2 : {
+  struct Op2 {
     using first_argument_type  = K;
     using second_argument_type = Dmat*;
     using result_type          = std::pair<K, Dmat*>*;
