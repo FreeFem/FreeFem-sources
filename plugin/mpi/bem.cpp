@@ -206,7 +206,10 @@ ostream & operator << (ostream &out, const std::map<std::string, std::string> & 
 }
 
 template<class A>
-struct PrintPinfos: public binary_function<ostream*,A,ostream*> {
+struct PrintPinfos {
+    using first_argument_type  = ostream*;
+    using second_argument_type = A;
+    using result_type          = ostream*;
     static ostream* f(ostream* const  & a,const A & b)  {  *a << *b;
         return a;
     }

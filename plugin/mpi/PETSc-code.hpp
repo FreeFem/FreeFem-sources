@@ -1014,14 +1014,20 @@ namespace PETSc {
     return dA;
   }
   template<class A, class B>
-  struct scale : public binary_function<A, B, long> {
+  struct scale {
+    using first_argument_type  = A;
+    using second_argument_type = B;
+    using result_type          = long;
     static long f(A const& a, const B& b) {
       MatScale(a->_petsc, PetscScalar(b));
       return 0L;
     }
   };
   template<class A, class B>
-  struct AXPY : public binary_function<A, B, long> {
+  struct AXPY {
+    using first_argument_type  = A;
+    using second_argument_type = B;
+    using result_type          = long;
     static long f(A const& a, const B& b) {
       MatAXPY(a->_petsc, 1.0, b->_petsc, DIFFERENT_NONZERO_PATTERN);
       return 0L;
@@ -1044,7 +1050,10 @@ namespace PETSc {
     return A;
   }
   template<class K>
-  struct Op2 : public binary_function<K, Dmat*, std::pair<K, Dmat*>*> {
+  struct Op2 : {
+    using first_argument_type  = K;
+    using second_argument_type = Dmat*;
+    using result_type          = std::pair<K, Dmat*>*;
     typedef std::pair<K, Dmat*> P;
     static P* f(K const& a,Dmat* const& b) {
       return new P{a, b};

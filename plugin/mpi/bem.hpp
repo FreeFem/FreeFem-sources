@@ -323,7 +323,10 @@ public:
 
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op_addBemKernel: public binary_function<AA,BB,RR> {
+struct Op_addBemKernel {
+    using first_argument_type  = AA;
+    using second_argument_type = BB;
+    using result_type          = RR;
     static RR f(Stack s,const AA & a,const BB & b) {
         if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
         return RR(s,a,b);}
@@ -331,7 +334,10 @@ struct Op_addBemKernel: public binary_function<AA,BB,RR> {
 
 
 template<bool INIT,class RR,class AA=RR,class BB=AA>
-struct Op_setBemKernel: public binary_function<AA,BB,RR> {
+struct Op_setBemKernel {
+    using first_argument_type  = AA;
+    using second_argument_type = BB;
+    using result_type          = RR;
     static RR f(Stack stack, const AA & a,const BB & b)
     {
         ffassert(a);
@@ -346,7 +352,10 @@ struct Op_setBemKernel: public binary_function<AA,BB,RR> {
 
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op_coeffBemKernel1: public binary_function<AA,BB,RR> {
+struct Op_coeffBemKernel1 {
+    using first_argument_type  = AA;
+    using second_argument_type = BB;
+    using result_type          = RR;
     static RR f(Stack s,const AA & a,const BB & b) {
         if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
         
