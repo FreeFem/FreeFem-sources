@@ -1251,6 +1251,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
         switch (ker1) {
             case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA,bemtool::SL_OP,3,bemtool::RT0_2D,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,kappaRe1);
                 if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<HE,SL_OP ..." << endl; break;
+            default: ffassert(0);
         }
     }
     else {
@@ -1327,6 +1328,7 @@ void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotentia
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<MA,SL_POT ..." << endl;
             }
             break;    
+        default: ffassert(0);
         
     }
 }

@@ -423,7 +423,7 @@ public:
         RN_ f0(val('.',0,op_id));
         for(int i=0; i<this->NbDoF;++i)
           f0[i] =0.;
-        if (whatd & Fop_D0)
+        if (whatd & Fop_D0) {
             if(k==1) // edge
             {   // close edge ie = arg min_e l[e2]+l[e1]
                 int ie = 0;
@@ -470,6 +470,7 @@ public:
             }
             else
                 ffassert(0);
+        }
     }
                             
     
