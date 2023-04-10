@@ -185,7 +185,9 @@ m4_define([TOOL_DISABLE_NO],
     TOOL_PARAMETERS($1,$2,$3)
 ])
 
-BUILD_DATE="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
+DATE_FMT="+%Y-%m-%d"
+SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
+BUILD_DATE=$(date -u -d "@$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u -r "$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u "$DATE_FMT")```
 
 echo "#  Build with FreeFEM with ./configure $BUILD_DATE" >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
