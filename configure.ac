@@ -743,19 +743,25 @@ m4_include(etc/config/m4/ax_lib_gsl.m4)
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
 ##  for  bem.cpp  need c++14 for intel compiler 
-CHECK_COMPILE_FLAG(C++,[-std=c++14],CXXFLAGS,ff_cxx11)
+CHECK_COMPILE_FLAG(C++,[-std=gnu++14],CXXFLAGS,ff_cxx11)
 if test "$ff_cxx11" = yes ; then
-   CXX11FLAGS="-std=c++14";
+   CXX11FLAGS="-std=gnu++14";
    AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
 else
-   CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+   CHECK_COMPILE_FLAG(C++,[-std=c++14],CXXFLAGS,ff_cxx11)
    if test "$ff_cxx11" = yes ; then
-      CXX11FLAGS="-std=c++11";
+      CXX11FLAGS="-std=c++14";
       AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
    else
-     AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
-     AC_MSG_ERROR([ Sorry no c++ compiler !])
-     AC_MSG_ERROR([ Fatal error no  c++11 or  c++14  ],1);
+      CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+      if test "$ff_cxx11" = yes ; then
+         CXX11FLAGS="-std=c++11";
+         AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+      else
+        AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+        AC_MSG_ERROR([ Sorry no c++ compiler !])
+        AC_MSG_ERROR([ Fatal error no  c++11 or  c++14  ],1);
+      fi
    fi
 fi
 ##CXXFLAGS="$ff_cxx_save"

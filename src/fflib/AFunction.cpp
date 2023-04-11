@@ -28,12 +28,6 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
-//  for bessel function
-// c++11   => __STRICT_ANSI__ => error FH..
-#ifdef __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
-
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE
 #include <config.h>

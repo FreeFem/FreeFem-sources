@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
+//ff-c++-LIBRARY-dep: hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
 //ff-c++-cpp-dep:
 
 #define HPDDM_SCHWARZ 0

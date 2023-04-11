@@ -15,10 +15,6 @@
 #    define GLUT_WINDOW_SCALE 199
 #endif
 */
-//  FOR M_PI
-#ifdef __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
 #include <limits>
 #include <cfloat>
 #include <cstdlib>

@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool bemtool boost
+//ff-c++-LIBRARY-dep: [mkl|blas] mpi pthread htool bemtool boost
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
