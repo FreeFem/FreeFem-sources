@@ -94,7 +94,7 @@ func  real[int]   Precon(real[int] & p)
  {
      brhs1 = vrhs1(0,Xh);
      brhs2 = vrhs2(0,Xh);
-     int res=LinearCG(JUzawa,p[],precon=Precon,nbiter=100,verbosity=10,veps=eps); 
+     int res=AffineCG(JUzawa,p[],precon=Precon,nbiter=100,verbosity=10,veps=eps); 
      assert(res==1) ; 
      eps = -abs(eps); 
      w = -dy(u1)+dx(u2);

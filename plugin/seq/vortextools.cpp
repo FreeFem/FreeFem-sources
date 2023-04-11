@@ -935,7 +935,8 @@ double interpol(KN_<double> const &  so,KN_<double> const &  xo,KN_<double> cons
         
         double si0 = so[i0];
         double si1 = so[i0+1];
-        ffassert(si0 <= si && si <= si1);
+        if(verbosity>19)  cout << " iinterpole :" <<i0 << " " << si  << ":  " << si0 << " " << " " << si1 << endl;
+        ffassert(si0 <= si || si <= si1);
         double l = (si-si0)/(si1-si0);
         xn[i] = xo[i0]*(1-l)+xo[i0+1]*(l);
     }
