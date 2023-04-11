@@ -1102,6 +1102,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<LA,SL_OP ... LA,TDL_OP" << endl; break;
                     case bemtool::CST_OP : if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,SL_OP ... LA,CST_OP" << endl; ffassert(0); break;
                 }
+                break;
             case bemtool::DL_OP :
                 switch (ker2) {
                     case bemtool::SL_OP : generator= new bemtool::Combined_BIO_Generator<bemtool::BIOpKernel<LA,bemtool::DL_OP,MMesh::RdHat::d+1,P,P>,bemtool::BIOpKernel<LA,bemtool::SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappaRe1,coeff1,coeff2,alpha);
@@ -1114,6 +1115,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<LA,DL_OP ... LA,TDL_OP" << endl; break;
                     case bemtool::CST_OP :  if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,DL_OP ... LA,CST_OP" << endl; ffassert(0); break;
                 }
+                break;
             case bemtool::HS_OP :
                 switch (ker2) {
                     case bemtool::SL_OP : generator= new bemtool::Combined_BIO_Generator<bemtool::BIOpKernel<LA,bemtool::HS_OP,MMesh::RdHat::d+1,P,P>,bemtool::BIOpKernel<LA,bemtool::SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappaRe1,coeff1,coeff2,alpha);
@@ -1126,6 +1128,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<LA,HS_OP ... LA,TDL_OP" << endl; break;
                     case bemtool::CST_OP :  if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,HS_OP ... LA,CST_OP" << endl; ffassert(0); break;
                 }
+                break;
             case bemtool::TDL_OP :
                 switch (ker2) {
                     case bemtool::SL_OP : generator= new bemtool::Combined_BIO_Generator<bemtool::BIOpKernel<LA,bemtool::TDL_OP,MMesh::RdHat::d+1,P,P>,bemtool::BIOpKernel<LA,bemtool::SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappaRe1,coeff1,coeff2,alpha);
@@ -1138,6 +1141,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<LA,TDL_OP ... LA,TDL_OP" << endl; break;
                     case bemtool::CST_OP :  if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,TDL_OP ... LA,CST_OP" << endl; ffassert(0); break;
                 }
+                break;
             case bemtool::CST_OP : if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,CST_OP ... LA,CST_OP" << endl; ffassert(0); break;
         }
     }
