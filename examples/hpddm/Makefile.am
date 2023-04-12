@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh_wo_PETSc.edp convect.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp convect.edp
 
 TESTS_HPDDM = diffusion-substructuring-2d.edp \
 	diffusion-substructuring-withPartitioning-2d.edp \
@@ -87,26 +87,33 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	minimal-surface-Tao-2d-PETSc.edp \
 	maxwell-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
-	laplace-adapt-3d-PETSc.edp \
 	diffusion-mg-2d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
 	oseen-2d-PETSc.edp \
-	transfer.edp \
 	DMPlex-PETSc.edp \
 	PtAP-2d-PETSc.edp \
 	restriction-2d-PETSc.edp \
 	function-PETSc.edp \
 	bilaplace-2d-PETSc.edp \
-	redistributeDmesh_w_PETSc.edp \
 	toy-Tao-PETSc.edp \
 	stokes-fieldsplit-3d-PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_MUMPS = Schur-complement-PETSc.edp
 
-TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
+TESTS_SCOTCH = redistributeDmesh_wo_PETSc.edp
+
+TESTS_PETSC_SCOTCH = redistributeDmesh_w_PETSc.edp
+
+TESTS_PETSC_MMG = transfer.edp
+
+TESTS_PETSC_MMG_MSHMET = laplace-adapt-3d-PETSc.edp
+
+TESTS_PETSC_PARMMG = distributed-parmmg.edp
+
+TESTS_PETSC_PARMMG_MSHMET = laplace-adapt-dist-3d-PETSc.edp
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-spherical-harmonics-2d-SLEPc.edp \
@@ -144,13 +151,29 @@ CONDITIONAL_HPDDM_ARPACK = $(TESTS_HPDDM_ARPACK)
 endif ARPACK
 endif HPDDM
 
+if SCOTCH
+CONDITIONAL_SCOTCH = $(TESTS_SCOTCH)
+endif SCOTCH
+
 if PETSC
 CONDITIONAL_PETSC = $(TESTS_PETSC)
+if SCOTCH
+CONDITIONAL_PETSC_SCOTCH = $(TESTS_PETSC_SCOTCH)
+endif SCOTCH
 if MUMPS
 CONDITIONAL_PETSC_MUMPS = $(TESTS_PETSC_MUMPS)
-endif
+endif MUMPS
+if MMG
+CONDITIONAL_PETSC_MMG = $(TESTS_PETSC_MMG)
+if MSHMET
+CONDITIONAL_PETSC_MMG_MSHMET = $(TESTS_PETSC_MMG_MSHMET)
+endif MSHMET
+endif MMG
 if PARMMG
 CONDITIONAL_PETSC_PARMMG = $(TESTS_PETSC_PARMMG)
+if MSHMET
+CONDITIONAL_PETSC_PARMMG_MSHMET = $(TESTS_PETSC_PARMMG_MSHMET)
+endif MSHMET
 endif PARMMG
 if SLEPC
 CONDITIONAL_PETSC_SLEPC = $(TESTS_PETSC_SLEPC)
@@ -179,9 +202,14 @@ endif MPI
 TESTS = $(TESTS_MPI) \
 	$(TESTS_HPDDM) \
 	$(TESTS_HPDDM_ARPACK) \
+	$(TESTS_SCOTCH) \
 	$(TESTS_PETSC) \
+	$(TESTS_PETSC_SCOTCH) \
 	$(TESTS_PETSC_MUMPS) \
+	$(TESTS_PETSC_MMG) \
+	$(TESTS_PETSC_MMG_MSHMET) \
 	$(TESTS_PETSC_PARMMG) \
+	$(TESTS_PETSC_PARMMG_MSHMET) \
 	$(TESTS_PETSC_SLEPC) \
 	$(TESTS_PETSCCOMPLEX) \
 	$(TESTS_PETSCCOMPLEX_MUMPS) \
@@ -191,9 +219,14 @@ TESTS = $(TESTS_MPI) \
 LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_HPDDM) \
 	$(CONDITIONAL_HPDDM_ARPACK) \
+	$(CONDITIONAL_SCOTCH) \
 	$(CONDITIONAL_PETSC) \
+	$(CONDITIONAL_PETSC_SCOTCH) \
 	$(CONDITIONAL_PETSC_MUMPS) \
+	$(CONDITIONAL_PETSC_MMG) \
+	$(CONDITIONAL_PETSC_MMG_MSHMET) \
 	$(CONDITIONAL_PETSC_PARMMG) \
+	$(CONDITIONAL_PETSC_PARMMG_MSHMET) \
 	$(CONDITIONAL_PETSC_SLEPC) \
 	$(CONDITIONAL_PETSCCOMPLEX) \
 	$(CONDITIONAL_PETSCCOMPLEX_MUMPS) \
