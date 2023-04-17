@@ -6035,6 +6035,8 @@ AnyType OpMatrixtoBilinearFormVGPETSc<HpddmType>::Op::operator()(Stack stack) co
   int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
 
+  MPI_Comm comm = ds.commworld ? *static_cast< MPI_Comm* >(ds.commworld) : PETSC_COMM_WORLD;
+
   // J'ai repris ce qu'il y avait. 
   // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
   // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
