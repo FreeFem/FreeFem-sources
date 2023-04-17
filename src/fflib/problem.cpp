@@ -12461,7 +12461,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                 // Assemblage // inside
                 varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, typeUh[i], typeVh[j], 
                                                         offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
-                                                        ds.initmat, initx, sym, ds.tgv, 
+                                                        ds.initmat, initx, sym, ds.tgv, ds.commworld,
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
                 //deleteNewLargs(largs_FEM);

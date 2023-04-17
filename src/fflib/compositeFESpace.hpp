@@ -166,7 +166,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
                 const long &offsetUh, const long &offsetVh,
                 const generic_v_fes *pfesUh, const generic_v_fes *pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
-                const list<C_F0> & b_largs_zz, Stack stack, 
+                const pcommworld &comm, const list<C_F0> & b_largs_zz, Stack stack,
                 KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A, bool B_from_varf=false);
 
 #endif
