@@ -1447,8 +1447,7 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
   // get tgv value 
   double tgv= ff_tgv;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
-  pcommworld commworld; // PLACEHOLDER FOR DISTRIBUTED PARAMETER FOR LINEAR FORMS
-  if (l->nargs[0]) commworld = GetAny<void*>((*l->nargs[0])(stack));
+  pcommworld commworld = nullptr; // PLACEHOLDER FOR DISTRIBUTED PARAMETER FOR LINEAR FORMS
 
   // get the composite FESpace
   pvectgenericfes  *  pCompoVh= GetAny<pvectgenericfes * >((*l->ppfes)(stack));
