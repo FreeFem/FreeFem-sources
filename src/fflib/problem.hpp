@@ -27,7 +27,6 @@
  */
 #ifndef PROBLEM_HPP_
 #define PROBLEM_HPP_
-
 extern Block *currentblock;
 
 template<class K> class Matrice_Creuse;

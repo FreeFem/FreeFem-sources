@@ -2430,7 +2430,7 @@ test "$enable_download" = yes  -a "$enable_bemtool" != no && enable_bemtool=yes
 test "$enable_download" = yes -a "$enable_boost" != no && enable_boost=yes
 
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no 
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no
 
 FF_PETSC_DYLIB=""
