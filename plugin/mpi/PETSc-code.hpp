@@ -5049,8 +5049,6 @@ namespace PETSc {
               HPDDM::Subdomain< K >::template distributedVec< 0 >(
                 t->_cnum, t->_cfirst, t->_clast, p, ptr, static_cast<PetscInt>(u->n), 1);
           }
-
-
           VecRestoreArray(x, &ptr);
           if (N == 'T')
             MatMultTranspose(t->_petsc, x, y);
