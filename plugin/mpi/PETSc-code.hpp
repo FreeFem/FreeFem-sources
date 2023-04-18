@@ -4982,7 +4982,7 @@ namespace PETSc {
           
           if((*t)._vector_global){
             int nb_comm_size;
-            MPI_Comm_size(PETSC_COMM_WORLD,&nb_comm_size);
+            MPI_Comm_size(PetscObjectComm((PetscObject)(*t)._petsc),&nb_comm_size);
             for(int i = 0; i < u->n; ++i)
               p[i] = u->operator[](i)/nb_comm_size; // Is there I divided by mpisize
             MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)(*t)._petsc));
