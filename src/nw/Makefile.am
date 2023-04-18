@@ -55,4 +55,4 @@ FreeFem___DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 
 #LDADD = ../lglib/liblg.a ../fflib/libff.a 
 
-AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib $(UMFPACK_CPPFLAGS) -DHAVE_ZLIB
+AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib $(UMFPACK_CPPFLAGS)

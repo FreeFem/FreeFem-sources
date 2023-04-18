@@ -3468,7 +3468,6 @@ namespace PETSc {
           ffassert(ptA->_petsc);
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-          KSPSetFromOptions(ptA->_ksp);
         }
         if (c != 4) {
           Vec x = NULL, y;

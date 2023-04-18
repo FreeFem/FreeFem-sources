@@ -42,10 +42,8 @@ class DistributedCSR {
                 MatGetType(_petsc, &type);
                 PetscStrcmp(type, MATNEST, &isType);
                 if(isType) {
-                    if(_exchange){
-                        delete [] reinterpret_cast<decltype(this)*>(_exchange);
-                        _exchange = nullptr;
-                    }
+                    delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                    _exchange = nullptr;
                 }
                 PetscContainer ptr;
                 PetscObjectQuery((PetscObject)_petsc, "HtoolCtx", (PetscObject*)&ptr);
