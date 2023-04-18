@@ -1,4 +1,4 @@
-`/*
+/*
 solving Stokes problem with the following boundary condition for velocity:
 - periodic boundary condition in x-direction 
 - dirichlet boundary condition in y-direction
@@ -39,7 +39,7 @@ varf Stokes ( [u1,u2,p], [v1,v2,q])
 + int2d(Th) ( [f1,f2]'*[v1,v2] ) 
 + on(1,2,3,4,u2=g2) + on(1,3,u1=g1);
 
-matrix A = Stokes(Vh,Vh,solver=sparsesolver);
+matrix A = Stokes(Vh,Vh,solver=sparsesolver,master=-1);
 real[int] b1 = Stokes(0,Vh);
 real[int] sol = A^(-1)*b1;
 

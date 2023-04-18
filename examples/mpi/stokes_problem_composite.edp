@@ -39,7 +39,7 @@ varf Stokes ( [u1,u2,p], [v1,v2,q]) = int2d(ThU)( (Grad(u1,u2):Grad(v1,v2)) )
 + int2d(ThU) ( [f1,f2]'*[v1,v2] ) 
 + on(1,2,3,4,u1=g1,u2=g2);
 
-matrix A = Stokes(Xh,Xh);
+matrix A = Stokes(Xh,Xh,solver=sparsesolver,master=-1);
 real[int] rhs = Stokes(0,Xh); // transformer b1 en rhs dans le code
 real[int] sol = A^(-1)*rhs;
 [u1[],p[]]=sol; // dispatch the solution.
