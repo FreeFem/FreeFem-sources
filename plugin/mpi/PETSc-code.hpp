@@ -4980,10 +4980,6 @@ namespace PETSc {
           PetscStrcmp(type, MATNEST, &isType);
           
           if((*t)._vector_global){
-            int nb_comm_size;
-            MPI_Comm_size(PetscObjectComm((PetscObject)(*t)._petsc),&nb_comm_size);
-            for(int i = 0; i < u->n; ++i)
-              p[i] = u->operator[](i)/nb_comm_size; // Is there I divided by mpisize
             MPI_Allreduce(MPI_IN_PLACE, p, u->n, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)(*t)._petsc));
             // VecGetArray(x, &ptr) is defined before
             if(isType) { // case nested matrix
