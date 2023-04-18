@@ -11539,7 +11539,7 @@ void InitProblem( int Nb, const FESpace & Uh,
 
 }
 
-// version InitProblem epurer pour les FESpace composite
+// version InitProblem epuree pour les FESpace composite
 template< class R, class FESpace, class v_fes>
 void InitProblem( int Nb, const FESpace & Uh,
                  KN<R> *&B,KN<R> *&X,
@@ -11830,7 +11830,7 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 #endif
 */
 
-template<class R,class FESpace,class v_fes>    // TODO if coupling FE wit problem
+template<class R,class FESpace,class v_fes>    // TODO if coupling FE with problem
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
                       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
 {
@@ -11911,7 +11911,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     const MeshT * pTh= &LL[0]->Th;
     for (int i=0;i<Nb2;i++)
     if ( &LL[i]->Th != pTh)
-    ExecError("all the finites elements spaces must be defined on the same mesh in solve");
+    ExecError("all the finite element spaces must be defined on the same mesh in solve");
 
     if ( pTh != data->pTh )
     {
@@ -12118,7 +12118,6 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
     int max_i = min_i+size_component;
 
     for (int i=min_i; i<max_i; i++){
-        //
         if( type_varFE[i]== 2){
             FEbase<R, v_fes> * tyty = (FEbase<R, v_fes> *) u_h[i];
             FESpace * tmpVarToUpdateUh = tyty->newVh(); // get FESpace and update FESpace
@@ -12166,7 +12165,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
 }
 bool FieldOfForm( list<C_F0> & largs ,bool complextype);
 
-template<class R>    // TODO if coupling FE wit problem
+template<class R>    // TODO if coupling FE with problem
 AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<MatriceCreuse<R> > & dataA ) const
 {
     //
@@ -12358,14 +12357,10 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
 
         }
     }
-    //cout << "ds.initmat=" << ds.initmat << endl;
-    
 
     // initialisation des vecteurs de data->pThV 
     if( !data->pThV ){
         data->pThV = new vector<void*>(NpVh);
-        //data->pThV->resize(NpVh);
-        //data->pThV = new (void*)[NpVh];
         for(int i=0; i<NpVh; i++){ (*data->pThV)[i]=nullptr; }
         ds.initmat=true;
     }
@@ -13404,7 +13399,7 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
         precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false));
         ffassert(precon);
     }
-    
+
     VF=isVF(op->largs);
     // cout << " Problem ) VF = " << VF << endl;
 
@@ -14076,48 +14071,3 @@ template class Call_FormBilinear<v_fes3, v_fesS>;  //  3D volume / 3D Surf on me
 template class Call_FormBilinear<v_fesS, v_fes>;
 
 template class Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes>; // Morice: added vector FESpace (composite FESpace)
-
-/*
-// Mesh - Mesh
-template void varfToCompositeBlockLinearSystem< double, Mesh, FESpace, FESpace>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, Mesh, FESpace, FESpace>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-// MeshL - MeshL
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpaceL>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpaceL>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-
-// Mesh - MeshL
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpace, FESpaceL>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpace, FESpaceL>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-
-// MeshL - Mesh
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpace>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpace>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-*/

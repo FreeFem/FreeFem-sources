@@ -5944,27 +5944,6 @@ void init_lgfem( ) {
   Dcl_Type< pfLc >( );
   Dcl_Type< pfLcarray >( );
 
-  /*
-  // begin :: vector generic FE
-  // the typedef <<pvgfe*>> are definied in [[ file:fflib/lgmesh3.hpp ]]
-  // Dcl type for vector generic FE case real v 4.???
-  Dcl_TypeandPtr< pvgferbase >( );         // il faut le 2 pour pourvoir initialiser
-  Dcl_TypeandPtr< pvgferbasearray >( );    // il faut le 2 pour pourvoir initialiser
-  Dcl_Type< pvgfer >( );
-  Dcl_Type< pvgferarray >( );
-
-  //  case complex
-  Dcl_TypeandPtr< pvgfecbase >( );         // il faut le 2 pour pourvoir initialiser
-  Dcl_TypeandPtr< pvgfecbasearray >( );    // il faut le 2 pour pourvoir initialiser
-  Dcl_Type< pvgfec >( );
-  Dcl_Type< pvgfecarray >( );
-
-  // end :: vector generic FE
-  */
-
-
-
-
   //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn< double > *).name( )]->AddCast
   (
@@ -7235,7 +7214,6 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
     if (i < n - 1) str += ",";
   }
   str += "]";
-  // cout <<" str=" << str << endl; // morice
   bool binit = !init.Empty( );
   char *name = strcpy(CodeAllocT< char >::New(str.size( ) + 1), str.c_str( ));
   C_F0 ret;
@@ -7259,83 +7237,9 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
 
   return ret;
 }
-/*
-// Morice :: A supprimer
-// classe pour la creation d'une NewVecVariable
-// << v_generic_fes >> correspond à : v_vect_generic_fes  
-C_F0 NewVecFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
-                    int dim) {
-  ffassert(dim == DIM);
-  typedef vecFEbase< double> FE;
-  typedef E_vecFEcomp< R> FEi;
-  typedef typename FEi::Result FEiR;
-
-  typedef vecFEbase< Complex > CFE;
-  typedef E_vecFEcomp< Complex > CFEi;
-  typedef typename CFEi::Result CFEiR;
-
-  Expression fes = fespacetype;
-  
-  aType dcltype = atype< FE ** >( );
-  aType cf0type = atype< C_F0 >( );
-  aType rtype = atype< FEiR >( );
-  
-  if (cplx) {
-    dcltype = atype< CFE ** >( );
-    rtype = atype< CFEiR >( );
-  }
-  ffassert(pids);
-  ListOfId &ids(*pids);
-
-  string str("[");
-
-  const int n = ids.size( );
-  cout << "ids.size( )" << n  << " " << fes->nbitem() << endl;
-  ffassert(n > 0);
-  if (fes->nbitem( ) != (size_t)n) {
-    cerr << " the array size must be " << fes->nbitem( ) << " not " << n << endl;
-    CompileError("Invalid array size  for  vectorial fespace function");
-  }
-  for (int i = 0; i < n; i++) {
-    str += ids[i].id;
-    if (i < n - 1) str += ",";
-  }
-  str += "]";
-  cout <<" str=" << str << endl;
-  bool binit = !init.Empty( );
-  char *name = strcpy(CodeAllocT< char >::New(str.size( ) + 1), str.c_str( ));
-  C_F0 ret;
-
-  // modif  100109 (add Block::  before NewVar for g++ 3.3.3 on Suse 9)
-  if( binit == true){
-    cerr << " Pas coder pour l'instant " << endl; 
-    ffassert(0);
-  }
-  ret = binit
-          ? currentblock->Block::NewVar< LocalVariable >(name, dcltype,
-                                                         basicAC_F0_wa(fespacetype, init))
-          : currentblock->Block::NewVar< LocalVariable >(name, dcltype, basicAC_F0_wa(fespacetype));
-  C_F0 base = currentblock->Find(name);
-  cout << "block NewVar Okay" << endl;
-
-  // Morice : Ajout dans la table du block un NewId 
-  //          NewId = "une nouvelle variable", PAC: [u,v,w] ajout de 3 variables et non 1 variable. 
-  //          E_FEcomp est l'expression qui contient la FEbase
-  if (cplx)
-    for (int i = 0; i < n; i++)
-      currentblock->NewID(cf0type, ids[i].id, C_F0(new CFEi(base, i, n), rtype));
-  else
-    for (int i = 0; i < n; i++)
-      currentblock->NewID(cf0type, ids[i].id, C_F0(new FEi(base, i, n), rtype)); 
-  delete pids;    // add FH 25032005
-  cout << "block NewID Okay" << endl;
-  return ret;
-}
-*/
 
 C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
                    int dim) {
-  // cout << "version :: NewFEvariable :: ListOfId :: dim=" << dim << endl;
   if (dim == 2)
     return NewFEvariableT< v_fes, 2 >(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 3)
@@ -7345,12 +7249,13 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
   else if (dim == 5)
     return NewFEvariableT< v_fesL, 5 >(pids, currentblock, fespacetype, init, cplx, dim);
   //else if (dim == 6)
-  //  return NewVecFEvariableT(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non tester
+  //  return NewVecFEvariableT(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non testee
   //else if (dim == 7)
-  //  return NewFEvariableT< generic_v_fes, 7 >(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non tester
-  else
+  //  return NewFEvariableT< generic_v_fes, 7 >(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non testee
+  else {
     cerr << "value dim=" << dim << endl;
     CompileError("Invalid fespace on Rd  ( d != 2 or 3) ");
+  }
   return C_F0( );
 }
 

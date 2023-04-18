@@ -260,7 +260,7 @@ class generic_v_fes : public RefCounter {
 };
 
 // 2d
-class v_fes : public generic_v_fes{ //: public RefCounter {
+class v_fes : public generic_v_fes{
  public:
   typedef ::pfes pfes;
   typedef ::FESpace FESpace;
@@ -269,7 +269,6 @@ class v_fes : public generic_v_fes{ //: public RefCounter {
   const int N;
   const pmesh *ppTh;    // adr du maillage
   CountPointer< FESpace > pVh;
-
   Stack stack;    // the stack is use whith periodique expression
 
   int nbcperiodic;
@@ -306,7 +305,7 @@ class v_fes : public generic_v_fes{ //: public RefCounter {
 };
 
 // 3D volume
-class v_fes3 : public generic_v_fes { //: public RefCounter {
+class v_fes3 : public generic_v_fes {
  public:
   typedef pfes3 pfes;
   typedef FESpace3 FESpace;
@@ -346,7 +345,7 @@ class v_fes3 : public generic_v_fes { //: public RefCounter {
 };
 
 // 3D surface
-class v_fesS : public generic_v_fes { //: public RefCounter {
+class v_fesS : public generic_v_fes {
  public:
   typedef pfesS pfes;
   typedef FESpaceS FESpace;
@@ -388,7 +387,7 @@ class v_fesS : public generic_v_fes { //: public RefCounter {
 };
 
 // 3D curve
-class v_fesL : public generic_v_fes { //: public RefCounter {
+class v_fesL : public generic_v_fes {
  public:
   typedef pfesL pfes;
   typedef FESpaceL FESpace;
@@ -450,7 +449,6 @@ class pfes_tefk : public v_fes {
   pfes_tefk(const pmesh *t, const TypeOfFE **tt, int kk, Stack s = NullStack, int n = 0,
             Expression *p = 0)
     : v_fes(sum(tt, &Fem2D::TypeOfFE::N, kk), t, s, n, p), tef(tt), k(kk) {
-    //cout << "pfes_tefk const" << tef << " " << this << endl; // Morice
     operator FESpace *( );
   }
   FESpace *buildupdate( ) {
@@ -639,12 +637,11 @@ class vect_generic_v_fes {  //: public RefCounter{
   
   // constructor
   vect_generic_v_fes(const E_FEarray &args, Stack s): N( args.size() ), typeFE( args.size() ), stack(s){ 
-  
- 
-  // constructor
-  //vect_generic_v_fes(const E_FEarray &args, Stack s=NullStack): N( args.size() ), typeFE( args.size() ){ 
+
+    // constructor
+    //vect_generic_v_fes(const E_FEarray &args, Stack s=NullStack): N( args.size() ), typeFE( args.size() ){
     // == PAC(e) == //
-    // Morice :: attention <<pfes>> est redéfinis pour cette classe.
+    // Morice :: attention <<pfes>> est redéfini pour cette classe.
     //           Il faut faire appel au type de <<pfes>> associé à v_fes:
     //                 ::pfes == typedef v_fes *pfes;
     //
@@ -701,11 +698,6 @@ class vect_generic_v_fes {  //: public RefCounter{
           ffassert(0);
         }
     }
-    /*
-    for( int i=0; i<args.size(); i++ ){
-      cout << "getpVh(), i= " << i << "; " << vect[i]->getpVh() << endl;
-    }
-    */
     update();
   }
 
@@ -730,12 +722,10 @@ class vect_generic_v_fes {  //: public RefCounter{
       if(tt == 2){
         pfes pFES = dynamic_cast<pfes>( vect[i] );
         ffassert(pFES);
-        // cout << "est ce que je vais  :"<< (!mac->pVh || *(mac->ppTh) != &mac->pVh->Th) << endl;
         pmesh* ppTh = (pmesh *) vect[i]->getppTh();
         FESpace * pVh = (FESpace *) vect[i]->getpVh(); 
         // pfes pFES = dynamic_cast<pfes>( vect[i] );
         // cout << &pVh->Th << " "<< &mac->pVh->Th << endl;
-        // cout << "est ce que je vais 2: "<< (!pVh || *(ppTh) != &pVh->Th) << endl;
         if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpace >(pFES->update( ), true);
       }
       else if(tt == 3){

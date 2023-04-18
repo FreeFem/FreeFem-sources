@@ -2033,8 +2033,6 @@ public:
 	v = new E_Array(basicAC_F0_wa(to<K>(args[2]))); 
       else 
 	v = dynamic_cast<const E_Array *>( args[2].LeftValue() );
-  //cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
-  //exit(0);
       if (!v) {
 	cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
 	ErrorCompile(" We wait  a double/complex expression or a array expression",1);

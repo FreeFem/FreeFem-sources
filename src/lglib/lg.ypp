@@ -228,7 +228,6 @@ void signalCPUHandler( int signum ) {
 %type <args>  array
 %type <args>  FEarray
 %type <args>  parameters_list
-/*%type <args>  parameters_list_vect*/ /* ne sert à rien Morice */
 %type  <cexp> begin
 %type  <endb> end
 %type  <clist_id> list_of_id_args

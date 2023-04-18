@@ -1747,10 +1747,6 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
     Matrice_Creuse<double> * MI = buildBlockMatrixInterpolation( i, j, typeUh, typeVh, LLUh, LLVh );
     MatriceMorse<double> *mMI = MI->pHM(); 
 
-    // {
-    //   ofstream toto("interpolate_matrix.mat");
-    //   toto << " matrice c'interpolation= "<< *mMI << endl; 
-    // }
     if(isNeedInterpolationMatrixLeft ){
 
       // BBB=MI'*BBB;
@@ -2026,7 +2022,7 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
 
 
   // J'ai repris ce qu'il y avait. 
-  // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
+  // PAC(e)     :: Attention peut être pas compatible avec les matrices bloc.
   // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
   // set ds.sym = 0 
 
@@ -2055,7 +2051,7 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack) const
   // test function (Vh) are the line
   // inconnu function (Uh) are the column
 
-  // Assemble the variationnal form
+  // Assemble the variational form
   int maxJVh=NpVh;
   
   int offsetMatrixUh = 0;
@@ -2113,7 +2109,7 @@ if(method == 1){
           HMatrixVirt<R> ** Hmat = new HMatrixVirt<R> *();
          
           //
-          // avoir dans le futur si la difference entre bloc diagonal et bloc non diagonal a un sens. ::: 08/2022 :::  Morice
+          // a voir dans le futur si la difference entre bloc diagonal et bloc non diagonal a un sens. ::: 08/2022 :::  Morice
           //
           if( i==j ){
 

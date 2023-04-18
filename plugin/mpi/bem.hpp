@@ -7,7 +7,7 @@ class BemKernel : public RefCounter {
 public:
     int typeKernel[2]={0,0};  // Laplace, Helmholtz, Yukawa
     // typeKernel ={SL, DL, HS, TDL} and determine equation Laplace, Helmholtz if k==0 or not
-    std::complex<double> wavenum[2]={0.0+1i*0.0,0.0+1i*0.0}; // parameter to Helmholtz
+    std::complex<double> wavenum[2]={0,0}; // parameter to Helmholtz
     std::complex<double> coeffcombi[2]={0,0};
     BemKernel(){}
     BemKernel(string *tkernel, Complex alpha , Complex k) {
@@ -633,8 +633,8 @@ class FoperatorKBEM : public E_F0mps { public:
     Fi fi;
     Ft ft;
     Expression kbem;
-    // Morice : Ils ne sont pas utiliser dans cette version.
-    //          Mais sont rajouter pour clarrifier la valeur "fi->v[0].first.first;"
+    // Morice : Ils ne sont pas utilises dans cette version.
+    //          Mais sont rajoutes pour clarifier la valeur "fi->v[0].first.first;"
     //int nb_component_FEspace_inc; 
     //int nb_component_FEspace_test;
     
@@ -740,9 +740,8 @@ class BemKFormBilinear : public BemFormBilinear { public:
     BemKFormBilinear operator-() const { return  BemKFormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<FoperatorKBEM>())));}
     
     BemKFormBilinear(const BemKFormBilinear & fb) : di(fb.di),b(new FoperatorKBEM(*fb.b) ){ type=1;}
-    
-    BemKFormBilinear(A a, const FoperatorKBEM &fb) : di(a),b(new FoperatorKBEM(fb))
-    { type=1;}  //exit(0); }
+
+    BemKFormBilinear(A a, const FoperatorKBEM &fb) : di(a),b(new FoperatorKBEM(fb)) { type=1;}
 };
 
 
@@ -1070,7 +1069,7 @@ pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             haveBemBilinearOperator=true;
         }
         else if (r==atype<const  FormBilinear *>() && !haveBilinearOperator && !IsVectorBem) {
-            // These line are not valid for vectorial BEM
+            // These lines are not valid for vectorial BEM
 
             const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
             const CDomainOfIntegration & di= *bb->di;
@@ -1100,7 +1099,7 @@ pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             haveBilinearOperator=true; // or ffassert(Op->v.size()==1); // check size 1
         }
         else if (r==atype<const FormLinear *>()){
-            if(verbosity>3) cout << "getBemKernel: FormLinear in variationnal form" << endl;
+            if(verbosity>3) cout << "getBemKernel: FormLinear in variational form" << endl;
         }
         else
             ffassert(0);
@@ -1882,14 +1881,6 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
     bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
 
-    // if(mpirank == 0){
-    //     cout << "Vh->TFE[0]->N=" << Vh->TFE[0]->N << endl;
-    //     //cout << "Vh->TFE[0].N=" << Vh->TFE[0].N << endl;
-    //     cout << "Vh->TFE.N()=" << Vh->TFE.N() << endl;
-    //     cout << "Vh->MaxNbNodePerElement=" << Vh->MaxNbNodePerElement << endl;
-    //     cout << "SRT0=" << SRT0 << endl;
-    // }
-
     if (SP2) {
         bemtool::Dof<P2> dof(mesh,true);
         for (int i=0; i<n; i++) {
@@ -1933,7 +1924,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
 
     if(!samemesh) {
         if( Vh->TFE[0]->N == 1){
-            // case the targer FE is scalar
+            // case the target FE is scalar
             for (int i=0; i<m; i++) {
                 if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
                     pp = ThV.vertices[i];
@@ -1958,13 +1949,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             // 
             // ==> on n'a pas besoin de resize les points p2
             int nnn= Vh->TFE[0]->N; // the size of the vector FESpace. For [P1,P1,P1], nnn=3;
-            // if(verbosity){
-            //     cout << "nnn=" << nnn << endl;
-            //     cout << "p2.size= " << p2.size() << endl; 
-            //     cout << "p2.resize :"<< nnn*3*m << " "<< 3*m << endl;
-            //     cout << "m=" << m << endl; 
-            //     cout << "n=" << n << endl;
-            // }
+
             int mDofScalar = m/nnn; // computation of the dof of one component 
 
             for (int i=0; i<mDofScalar; i++) {
@@ -1976,24 +1961,21 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
                     if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
                     ffassert(0);
                 }
-                //if( i%2 ==0) cout << i << ",  pp.x =" << pp.x << endl;
+
                 for(int iii=0; iii<nnn; iii++){
                     ffassert( nnn*3*i+3*iii+2 < nnn*3*m );
-                    //if(i== m-1) cout << "pp.x =" << pp.x << endl;
                     p2[nnn*3*i+3*iii+0] = pp.x;
                     p2[nnn*3*i+3*iii+1] = pp.y;
                     p2[nnn*3*i+3*iii+2] = pp.z;
                 }
             }
         }
-        //cout << "call s->build( (Vh->TFE[0]->N)*m,p2.data(),2,comm);" << endl;
         s->build( m,p2.data(),2,comm);  
     }
     else{
         p2=p1;
         s=t;
     }
-
 
     // creation of the generator for htool and creation the matrix
 

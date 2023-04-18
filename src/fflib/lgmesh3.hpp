@@ -36,19 +36,7 @@ typedef FEbase<Complex,v_fesL> * pfLcbase ;
 typedef FEbaseArray<Complex,v_fesL> * pfLcbasearray ;
 typedef pair<pfLcbase,int> pfLc ;
 typedef pair<pfLcbasearray,int> pfLcarray ;       
-/*
-// vector generice FE real (2d equivalent at [[file:problem.hpp::pferbase]])
-typedef FEbase< double, vect_generic_v_fes> * pvgferbase ;
-typedef FEbaseArray< double, vect_generic_v_fes> * pvgferbasearray ;
-typedef pair< pvgferbase, int> pvgfer ;
-typedef pair< pvgferbasearray, int> pvgferarray ;
 
-// vector generice complex (2d equivalent at [[file:problem.hpp::pfecbase]])
-typedef FEbase<Complex, vect_generic_v_fes> * pvgfecbase ;
-typedef FEbaseArray<Complex, vect_generic_v_fes> * pvgfecbasearray ;
-typedef pair< pvgfecbase, int> pvgfec ;
-typedef pair< pvgfecbasearray, int> pvgfecarray ;
-*/
 // fin
 
 

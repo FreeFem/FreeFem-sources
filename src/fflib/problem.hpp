@@ -962,11 +962,6 @@ struct OpArraytoLinearFormVG
               ffassert( (iscmplx) == IsComplexType<R>::value);
               if( !total_iscmplx ) total_iscmplx=iscmplx;
           }
-
-        	// bool iscmplx=FieldOfForm(l->largs,IsComplexType<R>::value);
-	        // //cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " <<( (iscmplx) == IsComplexType<R>::value) << endl;
-	        // ffassert( (iscmplx) == IsComplexType<R>::value);
-
         }
     operator aType () const { return atype<KN<R> *>();}
 
@@ -1682,7 +1677,7 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
   const FESpace2 & Vh =  *PVh ;
   const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
   const MMesh &Th= *pTh ;    // integration Th
-  bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
+  bool same=isSameMesh(largs, &Uh.Th, &Vh.Th, stack);
   if ( same)
    {
      if ( A.Uh != Uh  || A.Vh != Vh )
@@ -1702,7 +1697,7 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
      if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym>0,A.A,0,largs,mpirankandsize) )
        AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
    }
-  else 
+  else
    { // add FH 17 06 2005  int on different meshes.
 #ifdef V3__CODE
      MatriceMap<R>   AAA;

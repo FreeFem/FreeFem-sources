@@ -1341,8 +1341,8 @@ class LocalVariableFES : public LocalVariable {
   public:
   LocalVariableFES(size_t o,aType tt,const  KN<size_t> & d) 
    : LocalVariable(o,tt),data(d) {}
-  size_t nbitem() const { /*cout << "LocalVariableFES :: nbitem = " << data <<  endl;*/ return data.sum();}
-  KN<size_t> componentNbitem() const{  /*cout << "data=" << data << endl;*/ return data;}  // return the nbitem of each component of a composite FESpace.
+  size_t nbitem() const { return data.sum();}
+  KN<size_t> componentNbitem() const{ return data;}  // return the nbitem of each component of a composite FESpace.
 };
 
 template <class U>
@@ -1636,33 +1636,24 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
  template<class... T>
  using AllC_F0 = typename std::enable_if<std::is_same<pack<true, std::is_convertible<T, C_F0>::value...>, pack<std::is_convertible<T, C_F0>::value..., true>>::value>::type;
  template<class... T, typename = AllC_F0<T...>>
- basicAC_F0_wa(T... a) : basicAC_F0_wa({std::forward<T>(a)...}) { /*cout << " basicAC_F0_wa(T... a) ::" << endl; // Morice */}
+ basicAC_F0_wa(T... a) : basicAC_F0_wa({std::forward<T>(a)...}) { }
  basicAC_F0_wa(const std::initializer_list<C_F0>& e) {
-   //cout << " basicAC_F0_wa(const std::initializer_list<C_F0>& e) ::" << endl; // Morice
    named_parameter=0;
    nb = e.size();
-   //cout << " nb ::"<< nb << endl; // Morice
    a = new C_F0[nb];
    int i = 0;
    for(auto n : e){      
-      //cout << " i ::"<< i << endl; // Morice
       a[i++] = n;
-      //cout << "a[i-1]="<< *(a[i-1].RightValue()) << endl; // Morice
-      //cout << " i ::"<< i << endl;                        // Morice
    }
  }
 
  basicAC_F0_wa(C_F0 e,const basicAC_F0 & b) { 
-   //cout << "call basicAC_F0_wa(C_F0 e,const basicAC_F0 & b)" << endl; // Morice
    named_parameter=0;
    if (b.named_parameter) named_parameter = new maptype(*b.named_parameter);
-   //cout << "named_parameter " << *named_parameter << endl;
    nb=1+b.size();
    a= new C_F0[nb];
    a[0]=e;
-   //cout << "a[0]= "<< *(a[0].RightValue()) << endl; // Morice
    for (int i=1;i<nb;i++){
-     //cout << "a["<<i<<"]= "<< *(b[i-1].RightValue()) << endl; // Morice
      a[i]=b[i-1];
    } 
   }
@@ -1673,7 +1664,6 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
  
 
  basicAC_F0_wa(const basicAC_F0 & b) { 
-   //cout << "call basicAC_F0_wa(const basicAC_F0 & b)" << endl;
    named_parameter=0;
    if (b.named_parameter) named_parameter = new maptype(*b.named_parameter);
    nb=b.size();
@@ -1688,7 +1678,7 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
 // <<E_Array>>
 class E_Array  :public E_F0 {  public: 
   basicAC_F0_wa *v;// the value
-  E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {/*cout << "construction of E_array" <<endl;*/ throwassert(v);}
+  E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
   AnyType operator()(Stack)  const {
      cerr << " No evaluation of an E_array" << endl;
      throwassert(0);
@@ -1713,7 +1703,7 @@ class E_Array  :public E_F0 {  public:
 // Remark:  c'est un cc de E_Array + Fusionner ??
 class E_FEarray  :public E_F0 {  public: 
   basicAC_F0_wa *v;// the value
-  E_FEarray(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {/*cout << "construction of E_FEarray" <<endl;*/ throwassert(v);}
+  E_FEarray(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
   AnyType operator()(Stack)  const {
      cerr << " No evaluation of an E_FEarray" << endl;
      throwassert(0);
@@ -1963,7 +1953,7 @@ inline Type_Expr  NewVariable(aType t,size_t &off)
    size_t o= align8(off);//  align    
  //  off += t->un_ptr_type->size;
  // bug    off += t->size;
-   off += t->un_ptr_type->size; // correction 16/09/2003 merci � Richard MICHEL
+   off += t->un_ptr_type->size; // correction 16/09/2003 merci a Richard MICHEL
    return  Type_Expr(t,new T(o,t));
 } 
 
@@ -1979,9 +1969,7 @@ template<class T,class U>
 inline Type_Expr  NewVariable(aType t,size_t &off,const U & data) 
 { 
    size_t o= align8(off);//  align   
-   //cout << "inline Type_Expr  NewVariable(aType t,size_t &off,const U & data)  : "<< off << endl;  
    off += t->un_ptr_type->size;
-   //cout << "inline Type_Expr  NewVariable(aType t,size_t &off,const U & data)  : "<< off << endl;  
    return  Type_Expr(t,new T(o,t,data));
 }
 //extern int NbNewVarWithDel; // def in global.cpp sep 2016 FH.
@@ -1989,14 +1977,12 @@ inline Type_Expr  NewVariable(aType t,size_t &off,const U & data)
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const C_F0 &i) 
    {
-     //cout << " call TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const C_F0 &i) " << endl; 
  //     if( t-> ExistDestroy()) NbNewVarWithDel++;
      return C_F0(TheOperators,"<-",New(k,NewVariable<T>(t,top)),i);}
 
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_F0 &args) 
    {  
-        //cout << " call TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_F0 &args) " << endl; 
  //      return C_F0(TheOperators,"<-",New(k,NewVariable(t,top)),t->Find("<-",args));}
  //       if( t-> ExistDestroy()) NbNewVarWithDel++;
         return C_F0(TheOperators,"<-",basicAC_F0_wa(New(k,NewVariable<T>(t,top)),args));}
@@ -2020,20 +2006,17 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top) 
    { //  if( t-> ExistDestroy()) NbNewVarWithDel++;
-       //cout << " call t->Initialization(New(k,NewVariable<T>(t,top)))" << endl; 
        return t->Initialization(New(k,NewVariable<T>(t,top))); }
 
 // save a expression 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) 
    {  // Add an expression in the list; 
       //(Par exemple: Uh ux; Maintenant on ajoute [[ux]] à la table des identifiants ou table des variables).
-     //cout << " C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) " << endl;
      New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
  //  { return r->Initialization(New(k,r->SetParam(c,ListOfId(),top),del));}
 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del) 
-   { // cout << " TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del)" << endl;
-     return r->Initialization(New(k,r->SetParam(c,&l,top),del));}
+   { return r->Initialization(New(k,r->SetParam(c,&l,top),del));}
    
 /// <<tables_of_identifier>> allocated at [[file:global.cpp::tables_of_identifier]]
 
@@ -2078,7 +2061,6 @@ inline	  C_F0::C_F0(const C_F0 & a,const C_F0 & b)
          {r=a.r,f=b.f;}
       else 
         {r=b.r;
-        //cout << "=== call E_comma ===" << a.f << " " << b.f << endl; // Morice
         f= new E_comma(a.f,b.f);}
   }
 
@@ -2120,7 +2102,6 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)
 
 inline	  C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b)  
 {
-    cout << " C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b)" << endl;
     C_F0 tab[2]={a,b};
     basicAC_F0  p;
     p=make_pair(2,tab);
@@ -2225,14 +2206,12 @@ template<class T>
       return r;}
 template<class T>   
    C_F0 NewVar(Key k,aType t,const basicAC_F0 &args) 
-     {//cout << " call NewVar(Key k,aType t,const basicAC_F0 &args) " << endl; // Morice
-       C_F0 r= table.NewVar<T>(k, t,top,args);
+     {C_F0 r= table.NewVar<T>(k, t,top,args);
       topmax=Max(topmax,top);
       return r;}
 template<class T,class U>   
    C_F0 NewVar(Key k,aType t,const basicAC_F0 &args,const U & data) 
-     {//cout << " call NewVar(Key k,aType t,const basicAC_F0 &args,const U & data) " << endl; // Morice
-      C_F0 r= table.NewVar<T,U>(k, t,top,args,data);
+     {C_F0 r= table.NewVar<T,U>(k, t,top,args,data);
       topmax=Max(topmax,top);
       return r;}
 //   C_F0 NewVar(Key k,aType t,const AC_F0 &args,const C_F0 & f) 
