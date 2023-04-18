@@ -28,6 +28,12 @@
      along with Freefem++; if not, write to the Free Software
      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
      */
+/*
+  bug of clang if optimisation !!!!!
+*/
+#ifdef   __clang__
+#pragma clang optimize off
+#endif
 
 #include <config.h>
 #include <iostream>
