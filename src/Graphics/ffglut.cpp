@@ -15,10 +15,9 @@
 #    define GLUT_WINDOW_SCALE 199
 #endif
 */
-//  FOR M_PI
-#ifdef __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
+
+constexpr double my_pi = 3.141592653589793238462643383279502884;
+
 #include <limits>
 #include <cfloat>
 #include <cstdlib>
@@ -56,7 +55,7 @@ int glutscreenscale=1;//  High Resolution Explained: Features and Benefit
 
 using namespace Fem2D;
 using std::numeric_limits;
-const R pi=M_PI;//4*atan(1.);
+const R pi=my_pi;//4*atan(1.);
 using namespace std;
 
 static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
@@ -875,7 +874,7 @@ void OnePlotError::Draw(OneWindow *win)
     glColor3d(0.,0.,0.);
     cout << " Error plot item empty " << item <<  endl;
     char s[100];
-    sprintf(s,"Warning the item %ld fot the plot is empty",item);
+    snprintf(s,100,"Warning the item %ld fot the plot is empty",item);
     win->Show(s,4+item*2);
     win->SetView() ;
 }
@@ -2219,7 +2218,7 @@ void  OneWindow::SetView()
         cam.z=Pvue3.z*rapz+dist*sin(phi);
         R znear=max(dist-dmax,1e-30);
         R zfare=dist+dmax;
-        gluPerspective(focal*180./M_PI,aspect,znear,zfare);
+        gluPerspective(focal*180./my_pi,aspect,znear,zfare);
         if(debug>2)
         {
             cout << " BB " << Bmin3 << " , " << Bmax3 << " rapz " << rapz << " dmax: "<< dmax << endl;
@@ -2626,7 +2625,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 :  count(kcount), state(0),
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
-plotdim(2),changePlotdim(false),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
+plotdim(2),changePlotdim(false),theta(30.*my_pi/180.),phi(20.*my_pi/180.),dcoef(1),focal(20.*my_pi/180.),
 datadim(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
@@ -3671,7 +3670,7 @@ bool WindowDump (int width, int height) {
   }
 
   /* Open the file */
-  sprintf(fname, "ffglut_%04d.ppm", counter);
+  snprintf(fname,32, "ffglut_%04d.ppm", counter);
   if ((fptr = fopen(fname, MODE_WRITE_BINARY)) == NULL) {
     fprintf(stderr, "WindowDump - Failed to open file for window dump\n");
     delete[] image;
@@ -3999,7 +3998,7 @@ static void Key( unsigned char key, int x, int y )
         }
             break;
         case 'z':
-            if(win->focal < M_PI/1.2 )
+            if(win->focal < my_pi/1.2 )
             {
                 win->coef_dist*=sin(win->focal*1.2/2)/sin(win->focal/2);
                 win->focal *=1.2;
