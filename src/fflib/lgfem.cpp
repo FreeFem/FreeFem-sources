@@ -7406,10 +7406,11 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
   }
 
 
-  for (int i = 1; i < args.size( ); i++)// on saut le maillage !!
+  for (int i = !compositeFESpace; i < args.size( ); i++) { // on saute le maillage si pas de composite !!
     if (   args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS || args[i].left( ) == t_tfeL
-        || args[i].left( ) == pt_tfe || args[i].left( ) == pt_tfe3 || args[i].left( ) == pt_tfeS || args[i].left( ) == pt_tfeL)// A febr 2023 FH et PH-T
-      dim23+= args[i].LeftValue( )->nbitem( ) ; 
+        || args[i].left( ) == pt_tfe || args[i].left( ) == pt_tfe3 || args[i].left( ) == pt_tfeS || args[i].left( ) == pt_tfeL) { // A febr 2023 FH et PH-T
+      dim23+= args[i].LeftValue( )->nbitem( );
+    }
       // if(verbosity >99) cout << " args[i].LeftValue( )->nbitem( ) ="<< args[i].LeftValue( )->nbitem( ) << " "<< dim23 << endl;
     // case E_array of TypeOfFE
     else if (args[i].left( ) == t_a) {
@@ -7438,6 +7439,7 @@ KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
           ffassert(0);    // bug
       }
     }
+  }
 
   if(compositeFESpace){
     KN<size_t> result(dimComposite.size()); 
