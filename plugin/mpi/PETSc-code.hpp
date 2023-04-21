@@ -29,6 +29,7 @@ struct HtoolCtx {
 
 template<typename P, typename MeshBemtool>
 static PetscErrorCode GenEntriesFromCtx(PetscInt sdim,PetscInt M,PetscInt N, const PetscInt *const J, const PetscInt *const K, PetscScalar* ptr,void *ctx) {
+    PetscFunctionBeginUser;
     HtoolCtx<P,MeshBemtool>* user = reinterpret_cast<HtoolCtx<P,MeshBemtool>*>(ctx);
     user->generator->copy_submatrix(M,N,J,K,ptr);
     PetscFunctionReturn(PETSC_SUCCESS);

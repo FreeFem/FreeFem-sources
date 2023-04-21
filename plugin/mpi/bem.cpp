@@ -1383,7 +1383,7 @@ void AddHMatrixUser() {
 }
 
 static void Init_Bem() {
-    if(mpirank==0) cout << "\nInit_Bem\n";
+    if(mpirank == 0 && verbosity > 0) cout << "\nInit_Bem\n";
 
     map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
     
