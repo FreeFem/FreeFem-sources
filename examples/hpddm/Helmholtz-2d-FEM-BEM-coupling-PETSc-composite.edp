@@ -81,41 +81,34 @@ func ind = reg == -1 ? 1 : 2./(1+((x-nsx[max(0.,reg-1)])^2+(y-nsy[max(0.,reg-1)]
 fespace Uh(Th,P1);
 fespace UhL(ThL,P1);
 fespace Ch=Uh*UhL;
+
 macro Grad(u) [dx(u),dy(u)] // EOM
 
 /* the coupled problem we want to solve is :
 (  F     TDL ) (ufem) = (Frhs)
 (  mass  -SL ) (ubem)   ( 0  ) */
 
-complex c1=-1.0+1i*0.0; // c1 = -1.0
-complex c2=1.0+1i*0.0;  // c2 =  1.0
-
-Uh<complex> ufem,v1;   // ufem
-UhL<complex> ubem,v2;  // ubem
-
+Uh<complex> ufem,v1;
+UhL<complex> ubem,v2;
 
 // problem formulation
-  
-varf vfLenses(<[ufem],[ubem]>,<[v1],[v2]>,solver=sparsesolver,master=-1) = int2d(Th)( (-ind*k^2*ufem*v1 + Grad(ufem)'*Grad(v1)) ) // F
-                              + int1dx1d(ThL)(ThL)(BEM(c2*BemKernel("TDL",k=k),ubem,v1)) + int1d(ThL)(0.5*ubem*v1) // TDL
+varf vfLenses(<[ufem],[ubem]>,<[v1],[v2]>) =
+                                int2d(Th)(-ind*k^2*ufem*v1 + Grad(ufem)'*Grad(v1)) // F
+                              + int1dx1d(ThL)(ThL)(BEM(BemKernel("TDL",k=k),ubem,v1)) + int1d(ThL)(0.5*ubem*v1) // TDL
                               + int1d(ThL)(ufem*v2)                        // mass
-                              + int1dx1d(ThL)(ThL)(BEM(c1*BemKernel("SL",k=k),ubem,v2))  // -SL
-                              + int2d(Th)(finc*v1)  + on(waveguide,ufem=0) ; // RHS
+                              + int1dx1d(ThL)(ThL)(BEM(-1*BemKernel("SL",k=k),ubem,v2))  // -SL
+                              + int2d(Th)(finc*v1) + on(waveguide,ufem=0) ; // RHS
 
-
-complex[int] rhs = vfLenses(0,Ch); // right and side assembled in //
+// the linear system is assembled in parallel ; the distributed matrix is then passed to PETSc as a nested Mat (MatNest)
 Mat<complex> HC = vfLenses(Ch,Ch);
-  
-// example of instruction for petsc solver
-set(HC,sparams="-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -ksp_gmres_restart 200 -pc_type fieldsplit -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_max_it 20");
-// example of instruction for petsc solver
+complex[int] rhs = vfLenses(0,Ch);
 
-//complex[int] u(Uh.ndof+UhL.ndof);
+// example of fieldsplit preconditioner ; the fields are automatically deduced from the composite FE space Ch
+set(HC,sparams="-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -ksp_gmres_restart 200 -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_pc_mat_solver_type mumps "+"-fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_max_it 20");
 
 complex[int] u = HC^-1*rhs;
 
 [ufem[],ubem[]] = u; // dispatch solution
-
 
 plot(ufem, fill=1, value=1, wait=1, dim=2, cmm="FEM solution");
 plot(ubem, fill=1, value=1, wait=1, dim=2, cmm="BEM ansatz on ThL");

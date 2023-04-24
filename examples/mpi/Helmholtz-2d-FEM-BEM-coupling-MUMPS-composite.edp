@@ -1,4 +1,4 @@
-//ff-mpirun -np 4 Helmholtz-2d-FEM-BEM-coupling-MUMPS-problem-composite.edp -wg
+//ff-mpirun -np 4 Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp -wg
 
 /* example of wave guiding with gradient-index lenses */
 
@@ -87,20 +87,16 @@ macro Grad(u) [dx(u),dy(u)] // EOM
 (  F     TDL ) (ufem) = (Frhs)
 (  mass  -SL ) (ubem)   ( 0  ) */
 
-complex c1=-1.0+1i*0.0; // c1 = -1.0
-complex c2=1.0+1i*0.0;  // c2 =  1.0
+Uh<complex> ufem,v1;
+UhL<complex> ubem,v2;
 
-Uh<complex> ufem,v1;   // ufem
-UhL<complex> ubem,v2;  // ubem
-
-
-// problem formulation
-  
-problem pbLenses(<[ufem],[ubem]>,<[v1],[v2]>,solver=sparsesolver,master=-1) = int2d(Th)( (-ind*k^2*ufem*v1 + Grad(ufem)'*Grad(v1)) ) // F
-                              + int1dx1d(ThL)(ThL)(BEM(c2*BemKernel("TDL",k=k),ubem,v1)) + int1d(ThL)(0.5*ubem*v1) // TDL
+// problem formulation ; the linear system is assembled in parallel and solved in a distributed way with MUMPS
+problem pbLenses(<[ufem],[ubem]>,<[v1],[v2]>,solver=sparsesolver,master=-1) =
+                                int2d(Th)(-ind*k^2*ufem*v1 + Grad(ufem)'*Grad(v1)) // F
+                              + int1dx1d(ThL)(ThL)(BEM(BemKernel("TDL",k=k),ubem,v1)) + int1d(ThL)(0.5*ubem*v1) // TDL
                               + int1d(ThL)(ufem*v2)                        // mass
-                              + int1dx1d(ThL)(ThL)(BEM(c1*BemKernel("SL",k=k),ubem,v2))  // -SL
-                              - int2d(Th)(finc*v1)  + on(waveguide,ufem=0) ; // RHS
+                              + int1dx1d(ThL)(ThL)(BEM(-1*BemKernel("SL",k=k),ubem,v2))  // -SL
+                              - int2d(Th)(finc*v1) + on(waveguide,ufem=0); // RHS
 
 pbLenses;
 
