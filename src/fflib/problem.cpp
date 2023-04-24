@@ -11969,7 +11969,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case
     // more safe for the future ( 4 days lose with is optimization FH )
 
-    InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X, u_hh, &ds, u_h,  LL,  initx);
+    InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,&ds , u_h,  LL,  initx);
 
     if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
 

@@ -7189,7 +7189,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   typedef typename CFEi::Result CFEiR;
 
   Expression fes = fespacetype;
-  
+
   aType dcltype = atype< FE ** >( );
   aType cf0type = atype< C_F0 >( );
   aType rtype = atype< FEiR >( );
@@ -7232,7 +7232,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
       currentblock->NewID(cf0type, ids[i].id, C_F0(new CFEi(base, i, n), rtype));
   else
     for (int i = 0; i < n; i++)
-      currentblock->NewID(cf0type, ids[i].id, C_F0(new FEi(base, i, n), rtype)); 
+      currentblock->NewID(cf0type, ids[i].id, C_F0(new FEi(base, i, n), rtype));
   delete pids;    // add FH 25032005
 
   return ret;
@@ -7483,7 +7483,6 @@ aType typeFESpace(const basicAC_F0 &args) {
     return ret; 
   }
 }
-
 
 template< class v_fes, int DIM >
 C_F0 NewFEarrayT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 sizeofarray,

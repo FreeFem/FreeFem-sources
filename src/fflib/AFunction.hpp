@@ -1642,9 +1642,8 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
    nb = e.size();
    a = new C_F0[nb];
    int i = 0;
-   for(auto n : e){      
-      a[i++] = n;
-   }
+   for(auto n : e)
+       a[i++] = n;
  }
 
  basicAC_F0_wa(C_F0 e,const basicAC_F0 & b) { 
@@ -1653,14 +1652,11 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
    nb=1+b.size();
    a= new C_F0[nb];
    a[0]=e;
-   for (int i=1;i<nb;i++){
-     a[i]=b[i-1];
-   } 
-  }
-  ~basicAC_F0_wa(){delete [] a;
-      a=0;
-      delete named_parameter;
-      named_parameter=0;}
+   for (int i=1;i<nb;i++) a[i]=b[i-1];}
+    ~basicAC_F0_wa(){delete [] a;
+        a=0;
+        delete named_parameter;
+        named_parameter=0;}
  
 
  basicAC_F0_wa(const basicAC_F0 & b) { 
@@ -1968,7 +1964,7 @@ inline Type_Expr  NewVariable(aType t,size_t &off,const basicAC_F0 &args)
 template<class T,class U>
 inline Type_Expr  NewVariable(aType t,size_t &off,const U & data) 
 { 
-   size_t o= align8(off);//  align   
+   size_t o= align8(off);//  align    
    off += t->un_ptr_type->size;
    return  Type_Expr(t,new T(o,t,data));
 }
@@ -2069,8 +2065,7 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *op, AC_F0 & p)
         p.destroy();
    }          
 inline	  C_F0::C_F0(const Polymorphic * poly,const char *op, AC_F0 & p)
-   {    
-        *this=C_F0(poly,op,(const basicAC_F0 &) p);
+   {    *this=C_F0(poly,op,(const basicAC_F0 &) p);
         p.destroy();
    }          
 

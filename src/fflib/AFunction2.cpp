@@ -366,10 +366,8 @@ void Polymorphic::Add(const char * op,Value *pp) const
       {
       TableOfIdentifier * ti=*i;
       r = ti->Find(name);
-      if (r.NotNull()){ 
-        return r.TYPEOFID();
-      }
-      }
+      if (r.NotNull()) return r.TYPEOFID();
+    }
      return 0;
    }
 
