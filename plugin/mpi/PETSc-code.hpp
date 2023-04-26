@@ -6105,13 +6105,7 @@ namespace PETSc {
 
             int VFBEM = typeVFBEM(b_largs_zz,stack);
             if(VFBEM == 2){ cerr << " not implemented with BEM POTENTIAL" << endl; ffassert(0);}
-            Data_Bem_Solver dsbem;
-            dsbem.factorize=0;
-            dsbem.initmat=true;
-            SetEnd_Data_Bem_Solver<R>(stack, dsbem, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT
 
-            HMatrixVirt<R> ** Hmat = new HMatrixVirt<R> *();
-          
             //
             // avoir dans le futur si la difference entre bloc diagonal et bloc non diagonal a un sens.
             //
@@ -6133,7 +6127,7 @@ namespace PETSc {
 
                 MatCreate(comm, &Abemblock->_petsc);
                 MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+                varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
 
 
               }
@@ -6146,7 +6140,7 @@ namespace PETSc {
 
                 MatCreate(comm, &Abemblock->_petsc);
                 MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
 
               }
               else{
@@ -6161,13 +6155,6 @@ namespace PETSc {
             else{
 
               bool samemesh = (void*) (*pUh)->vect[i]->getppTh() == (void*) (*pVh)->vect[j]->getppTh();  // same Fem2D::Mesh     +++ pot or kernel
-            
-              if(init)
-                *Hmat =0;
-              //*Hmat =0;
-              if( *Hmat)
-                delete *Hmat;
-              *Hmat =0;
               
               PETSc::DistributedCSR< HpddmType > * Abemblock = new PETSc::DistributedCSR< HpddmType >;
 
@@ -6180,7 +6167,7 @@ namespace PETSc {
 
                 MatCreate(comm, &Abemblock->_petsc);
                 MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, dsbem, Abemblock);
+                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
               }
 
               else{

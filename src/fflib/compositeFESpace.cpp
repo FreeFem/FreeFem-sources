@@ -36,6 +36,7 @@ using namespace std;
 //typedef  const Ftest ftest;
 //class CDomainOfIntegration;
 //class FormBilinear;
+#include "common_bem.hpp"
 #include "bem.hpp"
 
 #endif

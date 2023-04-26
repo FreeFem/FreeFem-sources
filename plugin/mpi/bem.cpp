@@ -29,6 +29,7 @@ using namespace htool;
 using namespace bemtool;
 
 #include <type_traits>
+#include "common_bem.hpp"
 #include "bem.hpp"
 
 template< class K >
