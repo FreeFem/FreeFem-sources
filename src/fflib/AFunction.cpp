@@ -191,6 +191,14 @@ class  OneOperator_array : public OneOperator {public:
      { return  new E_Array(a);}
     OneOperator_array(): OneOperator(atype<E_Array>(),true) {}
 };
+
+class  OneOperator_FEarray : public OneOperator {public:
+    E_F0 * code(const basicAC_F0 & a) const
+     { /*cout << "call OneOperator_FEarray=" << endl;*/ return  new E_FEarray(a);}
+    OneOperator_FEarray(): OneOperator(atype<E_FEarray>(),true) {}
+};
+
+
 class  OneOperator_border : public OneOperator {public:
     E_F0 * code(const basicAC_F0 & a) const {
         if (a.size()==1 && a[0].left()==atype<E_Array>() )
@@ -1058,6 +1066,7 @@ void Init_map_type()
 
     basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
+    Dcl_Type<E_FEarray>();
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
@@ -1507,6 +1516,7 @@ void Init_map_type()
     // add 3.20
     Global.Add("Cofactor","(",new opFormal(atype<E_Array>(),formalMatCofactor ));
 
+    TheOperators->Add("<>",new OneOperator_FEarray );
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
 

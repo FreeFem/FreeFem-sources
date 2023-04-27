@@ -14,7 +14,7 @@
 #include <bemtool/fem/dof.hpp>
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
-#include "bem.hpp"
+#include "common_bem.hpp"
 #endif
 
 #if defined(WITH_mkl) && !defined(HTOOL_HTOOL_HPP)

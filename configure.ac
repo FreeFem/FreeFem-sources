@@ -2453,6 +2453,12 @@ TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX RadiativeTransfer_htool.$DYLIB_SUFFIX"])
 if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
 fi
+ff_inc_htool=$ff_HTOOL_INCLUDE
+if test -n "$TOOL_COMPILE_htool"; then
+	# install htool
+	ff_inc_htool=-I@abs_top_builddir@/3rdparty/include/htool/include
+fi
+AC_SUBST(HTOOL_INCLUDE_DIR,$ff_inc_htool)
 if test -z "$TOOL_COMPILE_bem"; then
     enable_bemtool=no
 fi

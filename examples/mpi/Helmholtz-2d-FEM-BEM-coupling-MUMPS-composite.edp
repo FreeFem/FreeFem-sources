@@ -1,0 +1,131 @@
+//ff-mpirun -np 4 Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp -wg
+
+/* example of wave guiding with gradient-index lenses */
+
+load "bem"
+load "msh3"
+load "MUMPS"
+
+complex k = 10; // wavenumber
+
+real lambda = 2*pi/real(k);
+
+real nloc = 10./lambda;
+real n = nloc*2*pi;
+
+int[int] nsl(10); // number of lenses
+nsl = n;
+
+real theta = 10*2*pi/360; // angular shift between lenses
+
+real[int] nsx(nsl.n), nsy(nsl.n);
+nsx[0] = 3.2;
+nsy[0] = 0;
+
+for (int i=1; i< nsl.n; i++) {
+  nsx[i] = nsx[i-1] + 2.01*cos(i*theta);
+  nsy[i] = nsy[i-1] + 2.01*sin(i*theta);
+}
+
+int interface = 1;
+int waveguide = 2;
+
+border circle(t=0, 2*pi; i){x=cos(t)+nsx[i]; y=sin(t)+nsy[i]; z=0; label=interface;}
+
+real L = 2;
+real l = 0.3;
+real dd = 0.1;
+
+func finc = exp(-100*((x+L-0.1)^2+y^2+z^2)); // source for waveguide excitation
+
+// interface around the waveguide :
+border a(t=-L-dd, L+dd){x=t; y=-l-dd; z=0; label=interface;}
+border b(t=-l-dd, l+dd){x=L+dd; y=t; z=0; label=interface;}
+border c(t=L+dd, -L-dd){x=t; y=l+dd; z=0; label=interface;}
+border d(t=l+dd, -l-dd){x=-L-dd; y=t; z=0; label=interface;}
+
+// waveguide :
+border ga(t=-L, L){x=t; y=-l; z=0; label=waveguide;}
+border gc(t=L, -L){x=t; y=l; z=0; label=waveguide;}
+border gd(t=l, -l){x=-L; y=t; z=0; label=waveguide;}
+
+// Fem mesh :
+mesh Th = buildmesh(a(nloc*(2*L+2*dd))+b(nloc*(2*l+2*dd))+c(nloc*(2*L+2*dd))+d(nloc*(2*l+2*dd))
+                         +ga(nloc*2*L)+gc(nloc*2*L)+gd(nloc*2*l)+circle(nsl));
+
+plot(Th, wait=1, dim=2, cmm="FEM mesh Th");
+
+int[int] lab = [interface];
+meshL ThL = extract(Th, label=lab); // BEM mesh
+ThL = OrientNormal(ThL,unbounded=1); // BEM mesh
+
+plot(ThL, wait=1, dim=2, cmm="BEM mesh ThL");
+
+// change region labels in the fem mesh to define gradient index in lenses
+fespace Ph(Th,P0);
+Ph reg = region;
+
+int[int] regs(2*nsl.n+2);
+for (int i=0; i< nsl.n; i++){
+  int regi = reg(nsx[i], nsy[i]); // the lenses
+  regs[2*i] = regi;
+  regs[2*i+1] = i+1; 
+}
+regs[2*nsl.n] = reg(0,0); // the waveguide
+regs[2*nsl.n+1] = -1;
+Th = change(Th,region=regs);
+reg = region;
+
+func ind = reg == -1 ? 1 : 2./(1+((x-nsx[max(0.,reg-1)])^2+(y-nsy[max(0.,reg-1)])^2)); // gradient index in lenses
+
+fespace Uh(Th,P1);
+fespace UhL(ThL,P1);
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+
+/* the coupled problem we want to solve is :
+(  F     TDL ) (ufem) = (Frhs)
+(  mass  -SL ) (ubem)   ( 0  ) */
+
+Uh<complex> ufem,v1;
+UhL<complex> ubem,v2;
+
+// problem formulation ; the linear system is assembled in parallel and solved in a distributed way with MUMPS
+problem pbLenses(<[ufem],[ubem]>,<[v1],[v2]>,solver=sparsesolver,master=-1) =
+                                int2d(Th)(-ind*k^2*ufem*v1 + Grad(ufem)'*Grad(v1)) // F
+                              + int1dx1d(ThL)(ThL)(BEM(BemKernel("TDL",k=k),ubem,v1)) + int1d(ThL)(0.5*ubem*v1) // TDL
+                              + int1d(ThL)(ufem*v2)                        // mass
+                              + int1dx1d(ThL)(ThL)(BEM(-1*BemKernel("SL",k=k),ubem,v2))  // -SL
+                              - int2d(Th)(finc*v1) + on(waveguide,ufem=0); // RHS
+
+pbLenses;
+
+plot(ufem, fill=1, value=1, wait=1, dim=2, cmm="FEM solution");
+plot(ubem, fill=1, value=1, wait=1, dim=2, cmm="BEM ansatz on ThL");
+
+// output mesh for visualization
+int np = 200/2;
+real R = 20;
+real rr = 20;
+
+border b1(t=-rr, R){x=t; y=-rr;}
+border b2(t=-rr, rr){x=R; y=t;}
+border b3(t=R, -rr){x=t; y=rr;}
+border b4(t=rr, -rr){x=-rr; y=t;}
+
+nsl = -nsl;
+// exterior mesh
+mesh ThOut = buildmesh(b1(np*R/rr)+b2(np)+b3(np*R/rr)+b4(np)+circle(nsl)
+              +a(-nloc*(2*L+2*dd))+b(-nloc*(2*l+2*dd))+c(-nloc*(2*L+2*dd))+d(-nloc*(2*l+2*dd)));
+
+fespace UhOut(ThOut,P1);
+
+varf vp(u,v)=int1d(ThL)(POT(BemPotential("SL",k=k),u,v));
+HMatrix<complex> B = vp(UhL,UhOut);
+if (mpirank == 0) cout << B.infos << endl;
+
+UhOut<complex> uext;
+
+uext[] = B*ubem[];
+
+plot(ufem, uext, dim=2, fill=1, value=1, nbiso=40, cmm="u");

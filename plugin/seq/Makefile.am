@@ -111,7 +111,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/fflib/showverb.hpp ../../src/femlib/splitsimplex.hpp ../../src/fflib/String.hpp				\
 	../../src/fflib/strversionnumber.hpp ../../src/fflib/throwassert.hpp ../../src/femlib/ufunction.hpp			\
 	../../src/fflib/versionnumber.hpp ../../src/bamglib/write_hdf5.hpp	../../src/bamglib/write_xdmf.hpp                   \
-	../../src/fflib/P1IsoValue.hpp \
+	../../src/fflib/P1IsoValue.hpp ../../src/fflib/compositeFESpace.hpp \
 	../../src/femlib/SkyLineSolver.hpp \
 	../../src/femlib/SolverSkyLine.hpp \
 	../../src/femlib/SparseLinearSolver.hpp \

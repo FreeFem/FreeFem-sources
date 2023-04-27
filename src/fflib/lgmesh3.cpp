@@ -2056,8 +2056,7 @@ public:
   E_F0 * code(const basicAC_F0 & args) const 
   { return  new CODE(args);}
   OneOperatorMakePtrFE3(aType tt):  // tt= aType<double>() or aType<E_Array>()  
-    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt)
-  {}
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt){}
 };
 
 
@@ -2955,7 +2954,7 @@ void init_lgmesh3() {
 
     //GlgElement<Mesh3>
     
-    
+ // Morice: La version 2D de la suite sont dans [[lgmesh.cpp]] chercher MakePtrFE2
  // 3D volume
  TheOperators->Add("<-",
        new OneOperator2_<pf3rbase*,pf3rbase*,pfes3* >(MakePtrFE3_2),
