@@ -6080,7 +6080,7 @@ namespace PETSc {
         Afem.init();
         Afem.resize(M_block,N_block);
         int nsparseblocks = 0;
-        Mat Abem = PETSC_NULL;
+        Mat Abem = nullptr;
 
         if(verbosity>2) cout << "size_block =" << b_largs.size() << endl; 
         if( b_largs.size()> 0){
@@ -6257,7 +6257,7 @@ namespace PETSc {
           Afem.destroy();
         }
       
-        if (Abem != PETSC_NULL) {
+        if (Abem != nullptr) {
           if (!nsparseblocks) {
             a[j * maxJVh + i] = Abem;
           }
@@ -6285,7 +6285,7 @@ namespace PETSc {
     if( NpUh==1 && maxJVh==1 ){
       Ares->_petsc = a[0];
       Ares->_vector_global = (PetscBool) 1;
-      a = PETSC_NULL; // ???
+      a = nullptr; // ???
     }else{
       MatCreateNest(comm, NpUh, NULL, maxJVh, NULL, a, &Ares->_petsc);
       Ares->_vector_global = (PetscBool) 1;
