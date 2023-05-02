@@ -13,6 +13,8 @@ mesh ThNew, Th = square(getARGV("-global", 20), getARGV("-global", 20));
     border d(t=0,1) { x=0;   y=1-t; };
     ThNew = buildmesh(a(N)+b(N)+c(N)+d(N));
 }
+macro ThRefinementFactor()getARGV("-first_split", 1)//
+macro ThNewRefinementFactor()getARGV("-second_split", 1)//
 buildDmesh(Th)
 buildDmesh(ThNew)
 plotDmesh(Th, cmm = "First mesh");

@@ -617,11 +617,20 @@ NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
 NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
 IFMACRO(ThName#N2O)
 NewMacro privateDmesh#N2O()ThName#N2O EndMacro
+IFMACRO(ThName#RefinementFactor)
+exit(10); /* not currently implemented */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(ThName#UserPartitioning)
+IFMACRO(ThName#RefinementFactor)
+exit(11); /* not currently implemented */
+ENDIFMACRO
 buildWithPartitioning(ThName, ThName#UserPartitioning, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
 IFMACRO(ThName#Periodicity)
+IFMACRO(ThName#RefinementFactor)
+exit(12); /* not currently implemented */
+ENDIFMACRO
 buildPeriodic(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, ThName#Periodicity);
 ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
@@ -631,8 +640,17 @@ IFMACRO(!dimension)
 NewMacro dimension()2 EndMacro
 ENDIFMACRO
 NewMacro privateDmesh#CartesianPartitioning() EndMacro
+IFMACRO(ThName#RefinementFactor)
+exit(13); /* not currently implemented */
 ENDIFMACRO
-build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
+IFMACRO(!ThName#RefinementFactor)
+int privateS = 1;
+ENDIFMACRO
+IFMACRO(ThName#RefinementFactor)
+int privateS = ThName#RefinementFactor;
+ENDIFMACRO
+build(ThName, privateS, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
 ENDIFMACRO
 }
