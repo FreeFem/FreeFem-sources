@@ -805,7 +805,7 @@ real[int][int] privateDmesh#NewName#intersection;
 ENDIFMACRO
 EndMacro
 macro copyDmesh(OldName, NewName)
-initializeDmesh(NewName)
+DmeshInitialize(NewName)
 IFMACRO(privateDmesh#OldName)
 NewName = OldName;
 privateDmesh#NewName#khi[0].resize(privateDmesh#OldName#khi[0].n);
@@ -845,7 +845,7 @@ NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
 IFMACRO(!privateCreateMatCheckDmesh)
 if(ThName.nv != privateDmesh#ThName#khi[0].n || (privateDmesh#ThName#khi[1].n && ThName.nt != privateDmesh#ThName#khi[1].n)) {
-    buildDmesh(ThName)
+    DmeshBuild(ThName)
 }
 ENDIFMACRO
 NewMacro privateCreateMat()1 EndMacro
@@ -910,7 +910,7 @@ ENDIFMACRO
 }
 ENDIFMACRO
 IFMACRO(!privateDmesh#ThName)
-buildDmesh(ThName)
+DmeshBuild(ThName)
 {
 IFMACRO(!meshN)
 IFMACRO(dimension,3)
@@ -931,19 +931,19 @@ IFMACRO(!meshN)
 ENDIFMACRO
 ENDIFMACRO
     NewMacro privateCreateMatCheckDmesh()1 EndMacro
-    createMat(ThName, MatName, PkName)
+    MatCreate(ThName, MatName, PkName)
 }
 ENDIFMACRO
 EndMacro
 
 macro createPartition(ThName, PartName, PkName)
 IFMACRO(!privateDmesh#ThName)
-buildDmesh(ThName)
+DmeshBuild(ThName)
 ENDIFMACRO
 {
     NewMacro privateCreateMatCheckDmesh()1 EndMacro
     NewMacro privateCreatePartition()PartName EndMacro
-    createMat(ThName, privateCreatePartition, PkName)
+    MatCreate(ThName, privateCreatePartition, PkName)
 }
 EndMacro
 
@@ -1875,13 +1875,11 @@ ENDIFMACRO
 macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P) {
 NewMacro transfer#Q() EndMacro
 transferBase(ThName, Pk, A, ThNew, PkNew, ANew, P)
-}
-// EOM
+}// EOM
 
 macro transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew) {
 transferBase(ThName, Pk, uPrivate, ThNew, PkNew, uNew, 1)
-}
-// EOM
+}// EOM
 
 macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
 IFMACRO(!privateDmesh#ThName)
@@ -1953,8 +1951,7 @@ ENDIFMACRO
             cout.scientific << " --- distributed mesh gathered (in " << mpiWtime() - timerGather << ")" << endl;
     }
 }
-reconstructDmesh(ThGatherName)
-// EOM
+reconstructDmesh(ThGatherName)// EOM
 
 macro scatterDmesh(ThName, comm, ThScatterName) {
 IFMACRO(!privateDmesh#ThName)
@@ -2011,8 +2008,7 @@ ENDIFMACRO
             cout.scientific << " --- distributed mesh scattered (in " << mpiWtime() - timerScatter << ")" << endl;
     }
 }
-reconstructDmesh(ThScatterName)
-// EOM
+reconstructDmesh(ThScatterName)// EOM
 
 macro gatherSolution(ThName, comm, ThGatherName, Pk, uPrivate, uNew) {
 IFMACRO(!privateDmesh#ThName)
@@ -2121,7 +2117,7 @@ ENDIFMACRO
         if(mpiRank(ThName#Comm) == 0)
             cout.scientific << " --- distributed solution gathered (in " << mpiWtime() - timerGather << ")" << endl;
     }
-} // EOM
+}// EOM
 
 macro scatterSolution(ThName, comm, ThScatterName, Pk, uPrivate, uNew) {
 IFMACRO(!privateDmesh#ThName)
@@ -2163,12 +2159,10 @@ ENDIFMACRO
         if(mpiRank(ThScatterName#Comm) == 0)
             cout.scientific << " --- distributed solution scattered (in " << mpiWtime() - timerScatter << ")" << endl;
     }
-}
-// EOM
+}// EOM
 ENDIFMACRO
 
-macro CoherentGlobalMesh(MatT, MatV, ThName, ThGlobal)
-{
+macro CoherentGlobalMesh(MatT, MatV, ThName, ThGlobal) {
 IFMACRO(!ThName#Comm)
     NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
@@ -2218,5 +2212,21 @@ ENDIFMACRO
     for[i, value : globalT] globalIntT[i] = abs(value);
     for[i, value : globalV] globalIntV[i] = abs(value);
     ThGlobal = change(ThGlobal, renumt = globalIntT, renumv = globalIntV);
-}
-// EOM
+}// EOM
+
+macro DmeshSave(ThName, name)saveDmesh(ThName, name)// EOM
+macro DmeshLoad(ThName, name)loadDmesh(ThName, name)// EOM
+macro DmeshBuild(ThName)buildDmesh(ThName)// EOM
+macro DmeshReconstruct(ThName)reconstructDmesh(ThName)// EOM
+macro DmeshReconstructWithNeighbors(ThName, neighborsName)reconstructDmeshWithNeighbors(ThName, neighborsName)// EOM
+macro DmeshInitialize(NewName)initializeDmesh(NewName)// EOM
+macro DmeshCopy(OldName, NewName)copyDmesh(OldName, NewName)// EOM
+macro DmeshScatter(ThName, comm, ThScatterName)scatterDmesh(ThName, comm, ThScatterName)// EOM
+macro DmeshGather(ThName, comm, ThGatherName)gatherDmesh(ThName, comm, ThGatherName)// EOM
+macro PartitionCreate(ThName, PartName, PkName)createPartition(ThName, PartName, PkName)// EOM
+macro ParMmgCreateCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)// EOM
+macro VecScatter(ThName, comm, ThScatterName, Pk, uPrivate, uNew)scatterSolution(ThName, comm, ThScatterName, Pk, uPrivate, uNew)// EOM
+macro VecGather(ThName, comm, ThGatherName, Pk, uPrivate, uNew)gatherSolution(ThName, comm, ThGatherName, Pk, uPrivate, uNew)// EOM
+macro VecInterpolate(ThName, Pk, uPrivate, ThNew, PkNew, uNew)transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew)// EOM
+macro MatCreate(ThName, MatName, PkName)createMat(ThName, MatName, PkName)// EOM
+macro MatInterpolate(ThName, Pk, A, ThNew, PkNew, ANew, P)transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P)// EOM

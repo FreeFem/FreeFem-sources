@@ -29,14 +29,14 @@ func b2 = -2 * (2*x - 1) * (1 - (2*y - 1)^2);
 //   mesh
 //--------------------
 mesh Th = square(n, n);
-buildDmesh(Th);
+DmeshBuild(Th);
 fespace Ph(Th, P0);
 Ph part;
-createPartition(Th, part[], P0);
+PartitionCreate(Th, part[], P0);
 mesh ThNo = trunc(Th, abs(part-1.0)<1e-1, split=2^s, label=-111111, renum=true);
 if(s > 0) {
     Th = ThNo;
-    reconstructDmesh(Th);
+    DmeshReconstruct(Th);
 }
 
 //------------------------
@@ -67,9 +67,9 @@ Mat dF, dC;
 {
     macro def(u) [u, u#B] // for velocity
     macro init(u) [u, u] // for velocity
-    createMat(Th, dF, feV);
+    MatCreate(Th, dF, feV);
 }
-createMat(Th, dC, feQ);
+MatCreate(Th, dC, feQ);
 dF = vF(Vh, Vh, tgv=-1);
 dC = vC(Qh, Qh);
 matrix B = vB(Qh, Vh);

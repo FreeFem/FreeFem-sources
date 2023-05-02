@@ -44,11 +44,11 @@ func int funcJ(real[int]& inPETSc) {
 }
 Wh xu;
 xu = sqrt((x - 0.5)^2 + (y - 0.5)^2) < 0.4 ? 0.1 : 1.0;
-plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
+plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound");
 real[int] xPETSc, xuPETSc;
 u[] = 0;
 ChangeNumbering(A, u[], xPETSc);
 ChangeNumbering(A, xu[], xuPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_view -snes_vi_monitor -snes_type vinewtonrsls", xu = xuPETSc);
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution");

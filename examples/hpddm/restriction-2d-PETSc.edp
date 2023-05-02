@@ -41,8 +41,8 @@ func Pk = P2;
 
     }
     macro ThUserPartitioning()part// EOM
-    buildDmesh(Th)
-    createMat(Th, A, Pk)
+    DmeshBuild(Th);
+    MatCreate(Th, A, Pk);
 }
 
 fespace Ph(Th, P0);
@@ -79,11 +79,11 @@ real[int] rhsCond = vPbCond(0, VhCond, tgv = -1);
 VhCond uCond;
 uCond[] = B^-1 * rhsCond;
 macro params()cmm = "Solution", wait = 1, dim = 3, value = 1//
-plotD(Th, u, params)
-plotD(ThCond, uCond, params)
+plotD(Th, u, params);
+plotD(ThCond, uCond, params);
 u[] = 0;
 u[](restCond) = uCond[];
 // u[] = R' * uCond[];
 // the two lines above are strictly equivalent! I prefer line 82 because you can see that it's just
 // a matter of picking up the correct indices to prolong uCond into u
-plotD(Th, u, params)
+plotD(Th, u, params);

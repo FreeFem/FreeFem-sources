@@ -27,16 +27,16 @@ Mat dA, dC;
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    buildDmesh(Th)
+    DmeshBuild(Th);
     {
         macro def(u)def2(u)//
         macro init(u)init2(u)//
-        createMat(Th, dA, PkV);
+        MatCreate(Th, dA, PkV);
     }
     {
         macro def(u)def1(u)//
         macro init(u)init1(u)//
-        createMat(Th, dC, PkP);
+        MatCreate(Th, dC, PkP);
     }
 }
 
@@ -61,8 +61,8 @@ int pPETSc;
     solV[] = sol(0:sol.n - VhP.ndof - 1);
     VhP solP;
     solP[] = sol(sol.n - VhP.ndof:sol.n - 1);
-    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
-    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
+    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity");
+    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure");
 }
 {
     matrix B = vPbB(VhP, VhV);
@@ -98,8 +98,8 @@ int pPETSc;
     }
     KSPSolve(dF, rhsPETSc, sol);
     ChangeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
-    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
-    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
+    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity");
+    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure");
 }
 matrix<real> B = vPbB(VhP, VhV);
 
@@ -146,8 +146,8 @@ for(int i = 0; i < 2; ++i) {
     }
     ChangeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
     string plus = (i == 1 ? " + mAL preconditioning" : "");
-    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity with tgv = -1" + plus)
-    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure with tgv = -1" + plus)
+    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity with tgv = -1" + plus);
+    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure with tgv = -1" + plus);
 }
 {
     ObjectView(dS);

@@ -14,7 +14,7 @@ mesh3 ThGlobal = Th;
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o//
-buildDmesh(Th);
+DmeshBuild(Th);
 func Pk = [RT03d, P0];
 fespace Wh(Th, Pk);
 {
@@ -29,7 +29,7 @@ macro ThPostProcessD(D) {
     def(u) = [u, uB, uC, vD];
     D = u[];
 }// EOM
-createMat(Th, A, Pk);
+MatCreate(Th, A, Pk);
 }
 
 macro div(u1, u2, u3)(dx(u1) + dy(u2) + dz(u3))//

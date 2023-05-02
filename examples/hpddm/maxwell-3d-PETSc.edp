@@ -24,10 +24,10 @@ fespace Wh(Th, Pk);
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o// EOM
-buildDmesh(Th)
+DmeshBuild(Th);
 {
     macro ThPkPart()Edge03ds0// EOM special FE for the domain partitioning
-    createMat(Th, A, Pk)
+    MatCreate(Th, A, Pk);
 }
 
 real[int] rhs(Wh.ndof);
@@ -44,7 +44,7 @@ rhs = vPbRhs(0, Wh);
 
 {
     Mat B;
-    createMat(Th, B, P1)
+    MatCreate(Th, B, P1);
     fespace VhNode(Th, PkNode);
     matrix GLoc;
     MatrixEdgeP1(GLoc, Th);

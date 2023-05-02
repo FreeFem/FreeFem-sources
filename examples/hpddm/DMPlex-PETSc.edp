@@ -13,10 +13,10 @@ int[int] part;
     macro dimension()2//
     include "macro_ddm.idp"
     plotDmesh(localMesh2D, cmm = "Distributed 2D mesh");
-    reconstructDmesh(localMesh2D)
+    DmeshReconstruct(localMesh2D);
     fespace Vh(localMesh2D, P1);
     Vh u;
-    createPartition(localMesh2D, u[], P1);
+    PartitionCreate(localMesh2D, u[], P1);
     plotD(localMesh2D, u, cmm = "Reconstructed 2D partition of unity");
 }
 if(0) { // not sure why this doesn't work on Jenkins
@@ -36,10 +36,10 @@ localMesh3D = dm;
 macro dimension()3//
 include "macro_ddm.idp"
 plotDmesh(localMesh3D, cmm = "Distributed 3D mesh");
-reconstructDmesh(localMesh3D)
+DmeshReconstruct(localMesh3D);
 fespace Vh(localMesh3D, P1);
 Vh u;
-createPartition(localMesh3D, u[], P1);
+PartitionCreate(localMesh3D, u[], P1);
 plotD(localMesh3D, u, cmm = "Reconstructed 3D partition of unity");
 DM overlap("cube.msh", overlap = 1, prefix = "with_overlap_", sparams = "-petscpartitioner_type ptscotch");
 localMesh3D = overlap;

@@ -19,7 +19,7 @@ varf vPb([u, ux, uy], [v, vx, vy]) = int2d(Th)(bilaplacian(u, v))
                                    + on(1, 2, 3, 4, u=0, ux=0, uy=0);
 
 Mat A;
-createMat(Th, A, P2) // trick => use P2, not P2Morley!
+MatCreate(Th, A, P2) // trick => use P2, not P2Morley!
 A = vPb(Vh, Vh, tgv = -2);
 real[int] rhs = vPb(0, Vh, tgv = -2);
 Vh [u, ux, uy];
@@ -27,9 +27,9 @@ set(A, sparams = "-pc_type cholesky");
 u[] = A^-1 * rhs;
 
 macro def1(i)i// EOM
-plotMPI(Th, u , P2, def1, real, wait = 1)
-plotMPI(Th, ux, P2, def1, real, wait = 1)
-plotMPI(Th, uy, P2, def1, real, wait = 1)
+plotMPI(Th, u , P2, def1, real, wait = 1);
+plotMPI(Th, ux, P2, def1, real, wait = 1);
+plotMPI(Th, uy, P2, def1, real, wait = 1);
 
 Wh v = u;
 real loc = v[].max;

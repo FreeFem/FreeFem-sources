@@ -113,13 +113,13 @@ while(nuCurrent > nuFinal) {
         fespace Vh(Th, P1);
         Vh only = T;
         macro def1(i)i//
-        plotMPI(Th, only, P1, def1, real, cmm = "Global temperature for viscosity = " + nuCurrent)
+        plotMPI(Th, only, P1, def1, real, cmm = "Global temperature for viscosity = " + nuCurrent);
         only = p;
-        plotMPI(Th, only, P1, def1, real, cmm = "Global pressure for viscosity = " + nuCurrent)
+        plotMPI(Th, only, P1, def1, real, cmm = "Global pressure for viscosity = " + nuCurrent);
         fespace Zh(Th, [P2, P2]);
         Zh [onlyU, onlyV] = [u1, u2];
         macro def2(i)[i, i#B]//
-        plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Global velocity for viscosity = " + nuCurrent)
+        plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Global velocity for viscosity = " + nuCurrent);
     }
     nuCurrent = max(nuFinal, nuCurrent/2.0);
 }

@@ -122,4 +122,4 @@ A = vPb(Wh, Wh);
 u[] = A^-1 * rhs;
 
 macro def(u)u//
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution");

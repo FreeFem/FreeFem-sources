@@ -35,7 +35,7 @@ Mat J;
 int[int] n2o;       // need to know how to go from the local to the global mesh
 mesh ThBackup = Th; // need to backup the original global mesh
 macro ThN2O()n2o//
-createMat(Th, J, Pk)
+MatCreate(Th, J, Pk);
 Wh [uc1, uc2, pc] = [1, 0, 0];
 varf vRes([u1, u2, p], [v1, v2, q]) = int2d(Th)(
       nu * (grad(uc1)' * grad(v1) +
@@ -75,11 +75,11 @@ for(int i = 0; i < 50 && Re < 100.0; ++i) {
     if(!NoGraphicWindow) {
         Qh only = pc;
         macro def1(i)i//
-        plotMPI(Th, only, P1, def1, real, cmm = "Pressure for Re = " + Re)
+        plotMPI(Th, only, P1, def1, real, cmm = "Pressure for Re = " + Re);
         fespace Zh(Th, [P2, P2]);
         Zh [onlyU, onlyV] = [uc1, uc2];
         macro def2(i)[i, i#B]//
-        plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Velocity for Re = " + Re)
+        plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Velocity for Re = " + Re);
     }
     Re *= 1.5;
     if(usedARGV("-adaptation") != -1) {
@@ -97,13 +97,13 @@ for(int i = 0; i < 50 && Re < 100.0; ++i) {
         def(uG) = def(uG);
         Th = ThBackup;
         Mat Adapt;
-        createMat(Th, Adapt, Pk) // decompose the adapted mesh
+        MatCreate(Th, Adapt, Pk) // decompose the adapted mesh
         J = Adapt; // replace the old Jacobian
         rest = restrict(Wh, WhBackup, n2o);
         [uc1, uc2, pc] = [0, 0, 0]; // just to trigger a resize
         for[i, v : rest] uc1[][i] = uG[][v]; // going from global to local
     }
 }
-saveDmesh(Th, "navier-stokes-2d")
+DmeshSave(Th, "navier-stokes-2d");
 ofstream sol("navier-stokes-2d_" + mpirank + "_" + mpisize + ".sol");
 sol << uc1[];

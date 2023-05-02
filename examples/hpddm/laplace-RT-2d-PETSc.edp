@@ -23,7 +23,7 @@ fespace Wh(Th, Pk);           // local finite element space
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o//
-buildDmesh(Th);
+DmeshBuild(Th);
 {
 macro ThPostProcessD(D) {
     Wh def(u), def(v);
@@ -34,7 +34,7 @@ macro ThPostProcessD(D) {
     def(u) = [u, uB, vC];
     D = u[];
 }// EOM
-createMat(Th, A, Pk);
+MatCreate(Th, A, Pk);
 }
 
 varf vMixedLaplace([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2 + p*(dx(v1) + dy(v2)) + (dx(u1) + dy(u2))*q)

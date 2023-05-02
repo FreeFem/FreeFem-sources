@@ -2,8 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
-macro vectorialfe()P2// EOM
 include "macro_ddm.idp"             // additional DDM functions
 
 macro def(i)[i, i#B]// EOM          // vector field definition
@@ -11,12 +9,13 @@ macro init(i)[i, i]// EOM           // vector field initialization
 real Sqrt = sqrt(2.0);
 macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
 macro div(u)(dx(u) + dy(u#B))// EOM
-func Pk = [vectorialfe, vectorialfe]; // finite element space
+func Pk = [P2, P2]; // finite element space
 
 int[int] l = [2, 1, 2, 2];
 mesh Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l); // global mesh
 Mat A;
-buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld, 2)
+macro ThRefinementFactor()getARGV("-split", 1)//
+MatCreate(Th, A, Pk);
 
 real f = -90000.0;
 real strain = 100.0;
@@ -30,7 +29,7 @@ fespace Wh(Th, Pk);                 // local finite element space
 matrix Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-set(A, sparams = "-ksp_view");
+set(A, sparams = "-ksp_view", bs = 2);
 Wh<real> def(u);                    // local solution
 
 A = Loc;
@@ -42,10 +41,10 @@ real[int] err = A * u[];            // global matrix-vector product
 exchange(A, rhs, scaled = true);
 err -= rhs;
 
-plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
+plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution");
 u[] = err;
 macro def1(u)u// EOM
-plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual")
+plotMPI(Th, u, P2, def1, real, cmm = "Global residual");
 
 Wh<real> def(Rb)[3];
 [Rb[0], RbB[0]] = [1, 0];
@@ -58,11 +57,11 @@ KSPSetResidualHistory(A, residuals);
 u[] = A^-1 * rhs;
 if(mpirank == 0)
     cout << "KSPResidualHistory = " << residuals(0:KSPGetIterationNumber(A)) << endl;
-plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
+plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution");
 real alpha = 1.0e+1;
 mesh ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;
-plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")
+plotMPI(ThMoved, u, P2, def1, real, cmm = "Global moved solution");
 if(HasType("PC", "hpddm")) {
     u[] = 0;
     set(A, sparams = "-pc_type hpddm -pc_hpddm_coarse_p 2 -pc_hpddm_levels_1_eps_nev 20 -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -pc_hpddm_levels_1_pc_type asm -ksp_monitor");

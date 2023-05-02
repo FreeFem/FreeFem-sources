@@ -89,4 +89,4 @@ else
     u[] = A^-1 * rhs;
 
 macro def1(u)u// EOM
-plotMPI(Th, u, P2, def1, real, cmm = "Global solution")
+plotMPI(Th, u, P2, def1, real, cmm = "Global solution");

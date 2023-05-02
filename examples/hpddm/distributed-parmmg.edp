@@ -8,21 +8,21 @@ macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 mesh3 Th = cube(getARGV("-global", 30), getARGV("-global", 30), getARGV("-global", 30));
-buildDmesh(Th)
+DmeshBuild(Th);
 fespace Vh(Th, P1);
 {
     mesh3 ThParMmg;
     int[int] n2o;
     int[int][int] communicators;
-    createParMmgCommunicators(Th, ThParMmg, n2o, communicators)
+    ParMmgCreateCommunicators(Th, ThParMmg, n2o, communicators);
     fespace VhParMmg(ThParMmg, P1);
     VhParMmg met = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
     real hmin = 2.0e-2;
     real hmax = 1.0e-0;
     met = max(hmin, min(hmax, abs(met)));
     mesh3 ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 0.05, nodeCommunicators = communicators);
-    reconstructDmesh(ThNew)
-    copyDmesh(ThNew, Th)
+    DmeshReconstruct(ThNew);
+    DmeshCopy(ThNew, Th);
 }
 Vh u = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
 medit("Th", Th, u);

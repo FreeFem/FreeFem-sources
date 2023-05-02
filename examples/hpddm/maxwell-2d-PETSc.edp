@@ -50,4 +50,4 @@ set(A, sparams = "-pc_type lu");
 Wh def(sol);
 sol[] = A^-1 * rhs;
 macro params()cmm = "Global solution", wait = 1, fill = 1// EOM
-plotMPI(Th, def(sol), Pk, def, real, params)
+plotMPI(Th, def(sol), Pk, def, real, params);

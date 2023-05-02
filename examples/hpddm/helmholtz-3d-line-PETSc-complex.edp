@@ -31,9 +31,9 @@ varf vk(u, v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k), u, v));
 Mat<complex> H, MatT, MatV;
 {
 macro dimension()3L// EOM
-createMat(ThL, H, Pk);
-createMat(ThL, MatT, P0)
-createMat(ThL, MatV, P1);
+MatCreate(ThL, H, Pk);
+MatCreate(ThL, MatT, P0);
+MatCreate(ThL, MatV, P1);
 }
 CoherentGlobalMesh(MatT, MatV, ThL, ThG);
 MatDestroy(MatT);
@@ -71,9 +71,9 @@ if(!NoGraphicWindow) {
     int[int] n2o;//
     macro ThOutLN2O()n2o//
     Mat<complex> B;
-    createMat(ThOutL, B, Qk)
-    createMat(ThOutL, MatT, P0)
-    createMat(ThOutL, MatV, P1)
+    MatCreate(ThOutL, B, Qk);
+    MatCreate(ThOutL, MatT, P0);
+    MatCreate(ThOutL, MatV, P1);
     CoherentGlobalMesh(MatT, MatV, ThOutL, ThOutG);
     MatDestroy(MatT);
     MatDestroy(MatV);
@@ -88,5 +88,5 @@ if(!NoGraphicWindow) {
     v[] = HPot*u;
     v[] += vinc[];
     UhOutL vr = abs(v);
-    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution")
+    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution");
 }

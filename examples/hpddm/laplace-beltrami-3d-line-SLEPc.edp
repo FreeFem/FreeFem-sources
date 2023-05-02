@@ -20,7 +20,7 @@ meshL Th = segment(nx, [tx,ty,tz], removeduplicate=true);
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o//
-createMat(Th,A,P1)
+MatCreate(Th,A,P1);
 fespace Vh(Th,P1);
 
 macro Grad3(uvw) [dx(uvw), dy(uvw), dz(uvw)]//

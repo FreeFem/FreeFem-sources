@@ -12,16 +12,10 @@ macro init(i)i// EOM                // scalar field initialization
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
 func Pk = P1;                       // finite element space
 
-int s = getARGV("-split", 1);                                   // refinement factor
 
-mesh Th = square(1, 1);
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
+DmeshBuild(Th);
 fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-{
-    Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
 
 varf vPb(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
 varf vPbT(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(u) * v) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
@@ -29,18 +23,20 @@ matrix<real> Loc  = vPb(Wh, Wh);
 matrix<real> LocT = vPbT(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-Mat A(Loc, intersection, D);
+Mat A;
+MatCreate(Th, A, Pk);
+A = Loc;
 Mat AT(A, LocT);
 Wh<real> def(u);  // local solution
 Wh<real> def(v);  // local solution
 
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
 u[] = A'^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution transpose")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution transpose");
 v[] = AT^-1 * rhs;
 u[] -= v[];
 real local = u[].linfty;
 real norm;
 mpiAllReduce(local, norm, mpiCommWorld, mpiMAX);
-plotMPI(Th, v, Pk, def, real, cmm = "Global solution transposed problem (linfty of error = " + norm + ")")
+plotMPI(Th, v, Pk, def, real, cmm = "Global solution transposed problem (linfty of error = " + norm + ")");

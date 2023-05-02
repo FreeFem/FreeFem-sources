@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 macro def(i)i// EOM                         // scalar field definition
@@ -10,17 +9,12 @@ macro init(i)i// EOM                        // scalar field initialization
 macro grad(u)[dx(u), dy(u)]// EOM           // two-dimensional gradient
 func Pk = P1;                               // finite element space
 
-int s = getARGV("-split", 1);                                   // refinement factor
-
-mesh Th = square(1, 1);
+macro ThRefinementFactor()getARGV("-split", 1)//
+int[int] l = [1, 2, 2, 2];
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);
 fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-{
-    int[int] l = [1, 2, 2, 2];
-    Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
+Mat T;
+MatCreate(Th, T, Pk);
 
 real[int] rhs(Wh.ndof);                     // local right-hand side
 matrix<real> Loc;                           // local operator
@@ -32,7 +26,6 @@ matrix<real> Loc;                           // local operator
     rhs = vPb(0, Wh, tgv = -2);
 }
 
-Mat T(Loc, intersection, D);
 func real[int] funcRes(real t, real[int]& in, real[int]& inT) {
     real[int] out(in.n);
     T = Loc;
@@ -56,7 +49,7 @@ func int funcJ(real t, real[int]& in, real[int]& inT, real a) {
 Wh w;
 func int funcM(int s, real t, real[int]& u) {
     ChangeNumbering(T, w[], u, exchange = true, inverse = true);
-    plotMPI(Th, w, Pk, def, real, cmm = "Global solution at step " + s + " (time " + t + ")")
+    plotMPI(Th, w, Pk, def, real, cmm = "Global solution at step " + s + " (time " + t + ")");
 }
 w = (0.5 - x)^2 + (0.5 - y)^2 < 0.2 ? 1.0 : 0.0;
 real[int] wPETSc;

@@ -102,6 +102,6 @@ complex[int] err(u[].n);
 err = A * u[];      // global matrix-vector product
 err -= rhs;
 
-plotMPI(Th, u, Pk, def, complex, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, complex, cmm = "Global solution");
 u[] = err;
-plotMPI(Th, u, Pk, def, complex, cmm = "Global residual")
+plotMPI(Th, u, Pk, def, complex, cmm = "Global residual");
