@@ -100,5 +100,5 @@ for(int i = 0; i < iMax; ++i) {
     else
         u[] = A^-1 * newRhs;
 
-    plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
 }

@@ -15,11 +15,11 @@ macro def(u)u//
     }
     partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
     mesh Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1, label = -111112);
-    reconstructDmesh(Th)
+    DmeshReconstruct(Th);
     fespace Wh(Th, Pk);
     Wh<real> u;
-    createPartition(Th, u[], Pk)
-    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity")
+    PartitionCreate(Th, u[], Pk);
+    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity");
 }
 {
     macro dimension()3// EOM
@@ -33,9 +33,9 @@ macro def(u)u//
     }
     partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
     mesh3 Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1, label = -111112);
-    reconstructDmesh(Th)
+    DmeshReconstruct(Th);
     fespace Wh(Th, Pk);
     Wh<real> u;
-    createPartition(Th, u[], Pk)
-    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity")
+    PartitionCreate(Th, u[], Pk);
+    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity");
 }

@@ -57,7 +57,7 @@ VhBzero<complex> [fG1,fG2];
     {
         macro def(u)[u, u#B]//EOM
         macro init(i)[i, i]//EOM
-        createMat(thL2, dJ, Pb2)
+        MatCreate(thL2, dJ, Pb2);
     }
     set(dJ, sparams = "-ksp_type preonly -pc_type lu");
 
@@ -134,9 +134,9 @@ Mat<complex>[int] Apep(3);
 macro def(u)[u, u#B, u#C]//EOM
 macro init(i)[i, i, i]//EOM
 {
-    createMat(thL, Apep[0], Pc)
-    createMat(thL, Apep[1], Pc)
-    createMat(thL, Apep[2], Pc)
+    MatCreate(thL, Apep[0], Pc);
+    MatCreate(thL, Apep[1], Pc);
+    MatCreate(thL, Apep[2], Pc);
 }
 
 Apep[2] = A2mat(VhC,VhC,tgv=-1);

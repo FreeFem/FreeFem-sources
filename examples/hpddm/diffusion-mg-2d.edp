@@ -66,7 +66,7 @@ if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwa
 
 Wh<real> def(u);    // local solution
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a redundant coarse correction")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a redundant coarse correction");
 
 int[int][int] intersectionCoarse;
 real[int] DCoarse;
@@ -89,14 +89,14 @@ func real[int] correctionInexact(real[int]& in) {
     if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
         Wh outW;
         outW[] = in;
-        plotMPI(Th, outW, Pk, def, real, mplot)
+        plotMPI(Th, outW, Pk, def, real, mplot);
     }
     tmpReduced = R' * in;
     exchange(ACoarse, tmpReduced, scaled = true);
     if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
         WhCoarse outWCoarse;
         outWCoarse[] = tmpReduced;
-        plotMPI(ThCoarse, outWCoarse, Pk, def, real, mplot)
+        plotMPI(ThCoarse, outWCoarse, Pk, def, real, mplot);
         ++ijk;
     }
     tmp = ACoarse^-1 * tmpReduced;
@@ -111,7 +111,7 @@ else
 
 u[] = 0;
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)");
 
 set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "4" : "0") + " -hpddm_level_2_schwarz_coarse_correction deflated -hpddm_level_2_geneo_nu 10");
 AttachCoarseOperator(mpiCommWorld, ACoarse, A = NeumannCoarse);
@@ -120,7 +120,7 @@ set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " 
 ijk = 0;
 u[] = 0;
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a two-level inner coarse correction (three levels in total)")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a two-level inner coarse correction (three levels in total)");
 
 statistics(A);
 statistics(ACoarse);

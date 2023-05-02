@@ -13,11 +13,11 @@ macro grad(u)[dx(u), dy(u)]// EOM
 mesh ThNo, Th = square(getARGV("-global", 20), getARGV("-global", 20), [1 + x, y]);
 fespace Vh(Th, Pk);
 Mat H;
-createMat(Th, H, Pk)
+MatCreate(Th, H, Pk);
 {
     fespace Ph(Th, P0);
     Ph part;
-    createPartition(Th, part[], P0)
+    PartitionCreate(Th, part[], P0);
     ThNo = trunc(Th, abs(part - 1.0) < 1e-1);
 }
 func g = cos(pi*x)*cos(pi*y);
@@ -67,7 +67,7 @@ real[int] lbPETSc, ubPETSc;
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bqnls -tao_max_it 40 -tao_gatol 1e-4");
     ChangeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
-    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju);
 }
 {
     Vh u = onG != 0 ? g : 0;
@@ -76,5 +76,5 @@ real[int] lbPETSc, ubPETSc;
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bnls -tao_max_it 40 -tao_gatol 1e-4", HessianRoutine = HJ);
     ChangeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
-    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju);
 }

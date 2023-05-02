@@ -93,11 +93,11 @@ real[int] err(u[].n);
 err = A * u[];      // global matrix-vector product
 err -= rhs;
 
-plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
+plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution");
 u[] = err;
 macro def1(u)u// EOM
-plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual")
+plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual");
 real alpha = 1.0e+1;
 mesh ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;
-plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")
+plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution");

@@ -89,5 +89,5 @@ else
 
 macro def2(u)[u, u#B]// EOM
 macro def1(u)u// EOM
-plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity")
-plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure")
+plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity");
+plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure");

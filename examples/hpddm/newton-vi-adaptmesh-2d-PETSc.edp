@@ -12,7 +12,8 @@ func Pkdc = P1dc;                   // finite element space
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
 mesh ThBackup = Th;
 Mat A;
-buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
+macro ThRefinementFactor()getARGV("-split", 1)//
+MatCreate(Th, A, Pk);
 
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
@@ -62,7 +63,7 @@ for(int i = 0; i < step; ++i) {
     ChangeNumbering(A, u[], bPETSc);
     {
         Vh xu = fu;
-        plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
+        plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound");
         ChangeNumbering(A, xu[], xuPETSc);
     }
     SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -snes_max_it " + (i != step - 1 ? 4 : 40) + " -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
@@ -82,12 +83,12 @@ for(int i = 0; i < step; ++i) {
         {
             Th = ThBackup;
             Mat Adapt;
-            buildMat(Th, getARGV("-split", 1), Adapt, Pk, mpiCommWorld)
+            MatCreate(Th, Adapt, Pk);
             A = Adapt;
         }
         u = uG;
-        plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+        plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
     }
 }
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution");

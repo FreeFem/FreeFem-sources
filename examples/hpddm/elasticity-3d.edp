@@ -108,11 +108,11 @@ err -= rhs;
 mpiBarrier(mpiCommWorld);
 
 macro def1(u)u// EOM
-plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global solution")
+plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global solution");
 real alpha = 2000.0;
 mesh3 ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 u[] = err;
-plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual")
+plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual");
 u[] = mpirank;
-plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")
+plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution");
 /*# SolvePlotEnd #*/

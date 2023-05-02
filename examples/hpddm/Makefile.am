@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp convect.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp PartitionCreate.edp DmeshReconstruct.edp convect.edp
 
 TESTS_HPDDM = diffusion-substructuring-2d.edp \
 	diffusion-substructuring-withPartitioning-2d.edp \
@@ -89,7 +89,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
 	diffusion-mg-2d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
-	save-load-Dmesh.edp \
+	Dmesh-Save-Load.edp \
 	navier-stokes-2d-PETSc.edp \
 	oseen-2d-PETSc.edp \
 	DMPlex-PETSc.edp \
@@ -103,9 +103,9 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 
 TESTS_PETSC_MUMPS = Schur-complement-PETSc.edp
 
-TESTS_SCOTCH = redistributeDmesh_wo_PETSc.edp
+TESTS_SCOTCH = DmeshRedistribute_wo_PETSc.edp
 
-TESTS_PETSC_SCOTCH = redistributeDmesh_w_PETSc.edp
+TESTS_PETSC_SCOTCH = DmeshRedistribute_w_PETSc.edp
 
 TESTS_PETSC_MMG = transfer.edp
 
@@ -243,4 +243,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-* oseen-2d_* Blasius_EV.dat
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* PartitionCreate_* dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-* oseen-2d_* Blasius_EV.dat
