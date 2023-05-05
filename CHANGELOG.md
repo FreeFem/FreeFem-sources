@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add new interface for metis (see examples/plugin/metis.edp)
 - Correct jump, mean, otherside of finite element function on mesh3, meshS, meshL 
    (add missing code in method: MeshPoint::SetAdj()  thank to zuqi.tang@univ-lille.fr)  
 -  try to  and build dmg install mac version 
