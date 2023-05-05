@@ -919,38 +919,138 @@ class MeshPoint : public MeshPointBase { public:
    bool operator==(const MeshPoint & mp) const {
       return T == mp.T &&  P.x == mp.P.x && P.y == mp.P.y
           && P.z == mp.P.z ;}
-  bool  SetAdj() {
-     if (!(Th && T && t >=0 && e>=0)) return false;//  modif
-     if(VF==0)
-     {
-     int ieo=e,to=t,ie=e;
+  bool  SetAdj() {// for jump, mean , etc ...
+      if( d==2) {
+          if (!(Th && T && t >=0 && e>=0)) return false;//  modif
+          if(VF==0)
+          {
+              int ieo=e,to=t,ie=e;
+              
+              t=Th->ElementAdj(t,ie);
+              if ( t == to && t >= 0 ) return false;
+              e=ie;
+              int io0=VerticesOfTriangularEdge[ieo][0];
+              //     int io1=VerticesOfTriangularEdge[ieo][1];
+              int i0=VerticesOfTriangularEdge[e][0];
+              int i1=VerticesOfTriangularEdge[e][1];
+              T= &(*Th)[t];
+              region = T->lab;
+              R l[3];
+              l[1]=PHat.x;
+              l[2]=PHat.y;
+              l[0]=1-PHat.x-PHat.y;
+              R le=l[io0];
+              l[i1]=le;
+              l[i0]=1-le;
+              l[3-i1-i0]=0;
+              PHat.x=l[1];
+              PHat.y=l[2];
+              gsens = -gsens;
+          }
+          else
+          { //
+              VF = 1 + VF%2;
+              ffassert(0); // a faire
+          }}
+      else if (d==3)
+      { //  long region, t,v,f,e,gsens; // triangle,vertex, face or edge
 
-     t=Th->ElementAdj(t,ie);
-     e=ie;
-     if ( t == to && t >= 0 ) return false;
-     int io0=VerticesOfTriangularEdge[ieo][0];
-     //     int io1=VerticesOfTriangularEdge[ieo][1];
-     int i0=VerticesOfTriangularEdge[e][0];
-     int i1=VerticesOfTriangularEdge[e][1];
-     T= &(*Th)[t];
-     region = T->lab;
-     R l[3];
-     l[1]=PHat.x;
-     l[2]=PHat.y;
-     l[0]=1-PHat.x-PHat.y;
-     R le=l[io0];
-     l[i1]=le;
-     l[i0]=1-le;
-     l[3-i1-i0]=0;
-     PHat.x=l[1];
-     PHat.y=l[2];
-     gsens = -gsens;
-     }
-     else
-     { //
-       VF = 1 + VF%2;
-       ffassert(0); // a faire
-     }
+          if( dHat==1)
+              if(VF==0)
+              {
+                  int ieo=v,to=t,ie=v;
+                  t=ThS->ElementAdj(t,ie);
+                  if ( t == to ||  t <  0 ) { t=to; return false;}
+                  v=ie;
+                  TL = &(*ThL)[t];
+                  region = TL->lab;
+                  PHat.x = v; //  absisse is   local number of vertex. FH 2023
+                  gsens = -gsens;
+                  if(verbosity > 999)
+                   cout << " SetAdj L"<<  to << " -> " << t << " P "<< P << " " << ieo<< " ->  " << v << endl;
+              }
+              else
+              { //
+                  VF = 1 + VF%2;
+                  ffassert(0); // a faire
+              }          else if( dHat==2)
+          {
+              if (!(ThS && TS && t >=0 && e>=0)) return false;//  modif
+              if(VF==0)
+              {
+                  int ieo=e,to=t,ie=e;
+                  
+                  t=ThS->ElementAdj(t,ie);
+   
+                  if ( t == to ||  t <  0 ) { t=to; return false;}
+                  e=ie;
+                  TS = &(*ThS)[t];
+                  int io0=VerticesOfTriangularEdge[ieo][0];
+                  //     int io1=VerticesOfTriangularEdge[ieo][1];
+                  int i0=VerticesOfTriangularEdge[e][0];
+                  int i1=VerticesOfTriangularEdge[e][1];
+                  region = TS->lab;
+                  R l[3];
+                  l[1]=PHat.x;
+                  l[2]=PHat.y;
+                  l[0]=1-PHat.x-PHat.y;
+                  R le=l[io0];
+                  l[i1]=le;
+                  l[i0]=1-le;
+                  l[3-i1-i0]=0;
+                  PHat.x=l[1];
+                  PHat.y=l[2];
+                  gsens = -gsens;
+                  if(verbosity > 999)
+                   cout << " SetAdj S"<<  to << " -> " << t << " P "<< P << endl;
+              }
+              else
+              { //
+                  VF = 1 + VF%2;
+                  ffassert(0); // a faire
+              }
+             
+          }
+          if( dHat==3)
+          {
+              if (!(Th3 && T3 && t >=0 && f>=0)) return false;//  modif
+              if(VF==0)
+              {
+                  int ieo=f,to=t,ie=f;
+                  
+                  t=Th3->ElementAdj(t,ie);
+   
+                  if ( t == to ||  t <  0 ) { t=to; return false;}
+                  f=ie;
+                  T3 = &(*Th3)[t];
+                  double l[4];
+                  const Tet & K = *T3;
+                  R3 Po =P;
+                  R detK = 6.*K.mesure() ;
+                  l[1]=det(K[0],P,K[2],K[3])/detK;
+                  l[2]=det(K[0],K[1],P,K[3])/detK;
+                  l[3]=det(K[0],K[1],K[2],P)/detK;
+                  l[0]=1-l[1]-l[2]-l[3];
+                  PHat= R3(l+1);
+                  region = T3->lab;
+                  gsens = -gsens;
+                  if(verbosity > 999)
+                  cout << " SetAdj 3"<<  to << " -> " << t << " P "<< P << endl;
+              }
+              else
+              { //
+                  VF = 1 + VF%2;
+                  ffassert(0); // a faire
+              }
+             
+          }
+          else
+          {
+              ffassert(0); // bug !!!!
+          }
+
+      }
+      else ffassert(0); // Bof Bof
      return true;
    }
   };
