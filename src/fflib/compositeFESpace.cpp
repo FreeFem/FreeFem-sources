@@ -2,7 +2,7 @@
 //#include "lgmat.hpp"
 
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
 
 #define BOOST_NO_CXX17_IF_CONSTEXPR
 #include <ff++.hpp>
@@ -280,7 +280,7 @@ list<C_F0>  creationLargsForCompositeFESpace( const list<C_F0> & largs, const in
       delete [] okBC;
     } // end BC
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
@@ -442,7 +442,7 @@ KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, 
 
     }
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
@@ -607,7 +607,7 @@ KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, 
       cerr << "                       :: linear form" << endl;
       cerr << "                       :: BC" << endl;
       #ifndef FFLANG
-      #ifdef PARALLELE
+      #if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
       cerr << "                       :: BemFormBilinear" << endl;
       #endif
       #endif
@@ -677,7 +677,7 @@ void changeComponentFormCompositeFESpace( const KN<int> &localIndexInTheBlockUh,
           }  
 
           #ifndef FFLANG
-          #ifdef PARALLELE
+          #if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
           // ******************************************
           // Case BemKFormBilinear (KERNEL FORM ONLY)
           // ******************************************
@@ -833,7 +833,7 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
           }  
       
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
           // ******************************************
           // Case BemKFormBilinear (KERNEL FORM ONLY)
           // ******************************************
@@ -1042,7 +1042,7 @@ void listOfComponentBilinearForm(const list<C_F0> & largs){
       }
     }
     #ifndef FFLANG
-    #ifdef PARALLELE
+    #if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
@@ -1128,7 +1128,7 @@ int haveBemSubMatrixBlock(const list<C_F0> & largs, int Uh_NbItem, int Vh_NbItem
   list<C_F0>::const_iterator ii, b_ib=largs.begin(), b_ie=largs.end(); 
   
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
   for( ii=b_ib;ii != b_ie;ii++){
     Expression e=ii->LeftValue();
     aType r = ii->left();
@@ -1237,7 +1237,7 @@ void separateFEMpartBemPart(const list<C_F0> & largs, list<C_F0> &largs_FEM, lis
   list<C_F0>::const_iterator ii, b_ib=largs.begin(), b_ie=largs.end(); 
   
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
   for( ii=b_ib;ii != b_ie;ii++){
     Expression e=ii->LeftValue();
     aType r = ii->left();
@@ -1434,7 +1434,7 @@ void deleteNewLargs(list<C_F0> &newlargs){
       delete bb;
     }
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
@@ -1566,7 +1566,7 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
 }
 
 #ifndef FFLANG
-#ifdef PARALLELE
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
 
 /**
  * @brief
@@ -1777,7 +1777,7 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
 #endif
 
 
-#ifndef PARALLELE
+#if !defined(PARALLELE) || !defined(WITH_bemtool) || !defined(WITH_htool)
 
 template< class R>
 void varfBemToCompositeBlockLinearSystem(const int& i, const int &j, 
@@ -1787,7 +1787,11 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
                 const generic_v_fes * LLUh, const generic_v_fes * LLVh,
                 const list<C_F0> & b_largs_zz, Stack stack, Expression const * nargs,
                 HashMatrix<int,R> *hm_A,const int &n_name_param){
-                  cerr << "BEM only valid in parallel" << endl; 
+                  #if !defined(WITH_bemtool) || !defined(WITH_htool)
+                  cerr << "no BEM library" << endl;
+                  #else
+                  cerr << "BEM only valid in parallel" << endl;
+                  #endif
                   ffassert(0);
                 }
 #endif
@@ -1894,7 +1898,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
   mpirankandsize[0] = 0;
   mpirankandsize[1] = 1;
   #ifndef FFLANG
-  #ifdef PARALLELE
+  #if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
   #include <mpi.h>
   MPI_Comm comm;
   if(commworld)
@@ -2097,7 +2101,7 @@ if(method == 1){
 
         if( largs_BEM.size() >0 ){
 #ifndef FFLANG
-#ifdef PARALLELE  
+#if defined(PARALLELE) && defined(WITH_bemtool) && defined(WITH_htool)
           const list<C_F0> & b_largs_zz = largs_BEM;
           
           int VFBEM = typeVFBEM(b_largs_zz,stack);

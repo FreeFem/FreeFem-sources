@@ -2458,10 +2458,14 @@ if test -n "$TOOL_COMPILE_htool"; then
 	# install htool
 	ff_inc_htool=-I@abs_top_builddir@/3rdparty/include/htool/include
 fi
-AC_SUBST(HTOOL_INCLUDE_DIR,$ff_inc_htool)
+if test -n "$ff_inc_htool"; then
+    ff_inc_htool="$ff_inc_htool -DWITH_bemtool -DWITH_htool"
+fi
 if test -z "$TOOL_COMPILE_bem"; then
     enable_bemtool=no
+    ff_inc_htool=""
 fi
+AC_SUBST(HTOOL_INCLUDE_DIR,$ff_inc_htool)
 
 ##
 if test "$ff_mkl_ok" = yes ; then
