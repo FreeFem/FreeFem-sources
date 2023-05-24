@@ -1259,7 +1259,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     // combined kernel ... coeff1 ker1 + coeff2 ker2 + alpha * mass_matrix
 
     // eq HELMHOLTZ
-    else if ( (kappaRe1 && !kappaIm1) && (kappaRe2 &&!kappaIm2) && iscombined && alpha != 0.) {
+    else if ( (kappaRe1 && !kappaIm1) && (kappaRe2 &&!kappaIm2) && iscombined ) {
         
         switch (ker1) {
             case bemtool::SL_OP :
@@ -1320,7 +1320,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     }
     
     // Eq LAPLACE
-    else if ( (!kappaRe1 && !kappaIm1) && (!kappaRe2 && !kappaIm2) && iscombined && alpha != 0.) {
+    else if ( (!kappaRe1 && !kappaIm1) && (!kappaRe2 && !kappaIm2) && iscombined ) {
         
         switch (ker1) {
             case bemtool::SL_OP :
@@ -1381,7 +1381,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     
     
     // Eq YUKAWA
-    else if ( (!kappaRe1 && kappaIm1) && (!kappaRe2 && kappaIm2) && iscombined && alpha != 0.) {
+    else if ( (!kappaRe1 && kappaIm1) && (!kappaRe2 && kappaIm2) && iscombined ) {
         
         switch (ker1) {
             case bemtool::SL_OP :
