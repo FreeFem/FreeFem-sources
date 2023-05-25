@@ -255,6 +255,13 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           for (int i=0;i<pr#si;i++)
           tmp[i]=pr#Z[i]'*l; /* local vector Z'_i l_i */
           if(!preffe#prmesh#binexactCS) {
+            IFMACRO(pr#CSwithpetsc)
+            if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS)
+              preffe#prmesh#tic(pr#tcsi)
+              tmp = pr#petscE^-1*tmp;
+              preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
+            ENDIFMACRO
+            IFMACRO(!pr#CSwithpetsc)
             mpiGatherv(tmp,vaux,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
             /* mpiGatherv puts together inside vaux the local vectors (whose sizes are in sizelg) */
             if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
@@ -268,6 +275,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
               preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
             }
             mpiScatterv(zaux,tmp,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
+            ENDIFMACRO
             /* inverse of mpiGatherv, cut the global zaux into the local tmp[i] */
             for (int i=0;i<pr#si;i++) {
               res += tmp[i]*pr#Z[i];
