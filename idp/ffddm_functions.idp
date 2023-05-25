@@ -433,8 +433,13 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l, int mrhs)
 
 func preffe#K[int] pr#PREC1(preffe#K[int] &l)
 {
-  assert(l.n%preffe#Vhi.ndof == 0);
-  return pr#PREC1(l, l.n/preffe#Vhi.ndof);
+  int mrhs = 1;
+  if (preffe#prmesh#isincomm) {
+    int ndof = bpara ? preffe#Dk[mpiRank(preffe#prmesh#commddm)].n : preffe#Vhglob.ndof;
+    assert(l.n%ndof == 0);
+    mrhs = l.n/ndof;
+  }
+  return pr#PREC1(l, mrhs);
 }
 ENDIFMACRO
 
