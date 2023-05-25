@@ -76,7 +76,7 @@ public:
     const V u;
     Prod(HMatrixVirt<K>** v, V w) : h(*v), u(w) {}
     
-    void prod(V x) const {h->mvprod_global(*(this->u), *x);};
+    void prod(V x) const {int mu = this->u->n/h->nb_cols(); h->mvprod_global(*(this->u), *x, mu);};
     
     static V mv(V Ax, Prod<V, K> A) {
         *Ax = K();
