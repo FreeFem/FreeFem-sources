@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add New finite element:  P4S P^4 on meshS , P3pnc3d in Element_P3pnc_3d (Couziex-Raviart with P3 )
+   see loic.balaziatchynillama@cea.fr for more information. 
 - add new interface for metis (see examples/plugin/metis.edp)
 - Correct jump, mean, otherside of finite element function on mesh3, meshS, meshL 
    (add missing code in method: MeshPoint::SetAdj()  thank to zuqi.tang@univ-lille.fr)  

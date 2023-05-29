@@ -618,7 +618,7 @@ template<class R>
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 
         bool same = &Ku == & Kv;
-        assert(same);
+
         const Triangle & T  = Ku.T;
         int nTonEdge =  &Ku == &KKu ? 1 : 2;
         double cmean = 1./nTonEdge;
@@ -640,7 +640,7 @@ template<class R>
         long nv=Kv.NbDoF();
         long nnv=Kv.NbDoF();
         assert(mu==mmu && nv == nnv) ;
-
+        if(verbosity>9999) cout << " Element_OpVF:" <<" edge between " << Ku.number << " , " <<  KKu.number   << endl;
 
 
         const Opera &Op(*mat.bilinearform);
@@ -661,8 +661,15 @@ template<class R>
         RNMK_ fv(p,nv,N,lastop); //  the value for basic fonction in K
         RNMK_ ffv(p + lffv ,nnv,N,lastop); //  the value for basic fonction in KK
         RNMK_ fu(  (double*) fv   + loffset  ,mu,M,lastop); //  the value for basic fonction
-        RNMK_ ffu( (double*) fu  + lffu  ,mmu,M,lastop); //  the value for basic fonction
-
+        RNMK_ ffu( (double*) fu  +  loffset+ lffu  ,mmu,M,lastop); //  the value for basic fonction
+        if( verbosity>99999)
+        {
+            cout << " nv " << nv << " " << nnv << " mu = " <<  mu << " " << mmu << " / n " << n << " m " << m << endl;
+            cout << " fv " << fv << endl;
+            cout << "ffv " << ffv << endl;
+            cout << " fu " << fu << endl;
+            cout << "ffu " << ffu << endl;
+        }
         R2 E=T.Edge(ie);
         double le = sqrt((E,E));
         R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
@@ -740,7 +747,7 @@ template<class R>
                         else if (jjcase==Code_OtherSide) w_j = ww_j;  //  valeur de l'autre cote
 
                         // R ccc = GetAny<R>(ll.second.eval(stack));
-
+                        if(verbosity>99999) cout << " w_i w_j : " << i << " "<< j << " "<< w_i << " " << ww_i << " " << wi(0,0 ) <<   "/  " << w_j << endl;
                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                         if ( copt && ( mat.optim==1) && Kv.number <1)
                         {
@@ -763,6 +770,16 @@ template<class R>
         if ( (verbosity > 9999) ||( (verbosity > 55) && (Ku.number <=0 || KKu.number <=0 )))  {
             cout <<endl  << " edge between " << Ku.number << " , " <<  KKu.number   << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
             cout << " K u, uu =  " << Ku.number << " " << KKu.number << " " <<  " K v, vv =  " << Kv.number << " " << KKv.number << " " <<endl;
+            cout << " nj = " ;
+            for (int j=0;j<m;j++)
+                cout << setw(5)  << mat.nj[j] <<  " ";
+            cout << "\n njk = " ;
+            for (int j=0;j<m;j++)
+                cout << setw(5)  << mat.njk[j] <<  " ";
+            cout << "\n njkk = " ;
+            for (int j=0;j<m;j++)
+                cout << setw(5)  << mat.njkk[j] <<  " ";
+            cout << endl ;
             for (int i=0;i<n;i++)
             {
                 cout << setw(2) << i << setw(4) << mat.ni[i] <<  setw(4) << mat.nik[i] << setw(4) << mat.nikk[i]  <<  " :";
@@ -910,11 +927,14 @@ template<class R>
             else cout << endl;
         }
         if(VF) {
-            if(&Uh != &Vh || sym)
-            cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
-                     "  test or unknown function must be  defined on the same FEspace, \n"
-                     "  and the matrix is not symmetric. \n"
-                     " To do other case in a future (F. Hecht) dec. 2003 ");
+            if( !sameMesh || sym) {
+                (cout << "To Day in bilinear form with discontinuous Galerkin (2d):   \n"
+                "  test or unknown function must be  defined on the same mesh, \n"
+                "  and the matrix is not symmetric. \n"
+                "To hard to do !!!! ")
+                ;
+               // cput << " " << di.kind  << endl;
+            }
             if(&Uh == &Vh)
             matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE,useopt);
             else
@@ -1223,11 +1243,11 @@ template<class R>
             else cout << endl;
         }
         if(VF) {
-            if(&Uh != &Vh || sym)
+            if( sym)
             cout <<  ("To Day in bilinear form with discontinuous Galerkin (3d):   \n"
-                      "  test or unknown function must be  defined on the same FEspace, \n"
+                      "  test or unknown function must be  defined on the same mesh, \n"
                       "  and the matrix is not symmetric. \n"
-                      " To do other case in a future (F. Hecht) dec. 2014 ");
+                      " To HArd !!!! ");
             if(&Uh == &Vh)
             matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIV,FIT,useopt);
             else
@@ -1547,9 +1567,9 @@ template<class R>
             else cout << endl;
         }
         if(VF) {
-            if(&Uh != &Vh || sym)
-            cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
-                     "  test or unknown function must be  defined on the same FEspace, \n"
+            if(!sameMesh || sym)
+            cout << ("To Day in bilinear form with discontinuous Galerkin (MeshS):   \n"
+                     "  test or unknown function must be  defined on the same mesh, \n"
                      "  and the matrix is not symmetric. \n"
                      " To do other case in a future (F. Hecht) dec. 2003 ");
             if(&Uh == &Vh)
@@ -1832,9 +1852,9 @@ template<class R>
             else cout << endl;
         }
         if(VF) {
-            if(&Uh != &Vh || sym)
-                cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
-                         "  test or unknown function must be  defined on the same FEspace, \n"
+            if(sameMesh || sym)
+                cout << ("To Day in bilinear form with discontinuous Galerkin (3d curve):   \n"
+                         "  test or unknown function must be  defined on the same meshL, \n"
                          "  and the matrix is not symmetric. \n"
                          " To do other case in a future (F. Hecht) dec. 2003 ");
             if(&Uh == &Vh)
