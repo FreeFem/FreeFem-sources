@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: [mkl|blas] mpi pthread htool bemtool boost
+//ff-c++-LIBRARY-dep: [mkl|blas] mpi pthread htool bemtool boost [metis]
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -397,7 +397,7 @@ basicAC_F0::name_and_type  CompressMat<K>::Op::name_param[]= {
   {  "maxblocksize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
-  {  "compressor", &typeid(string*)}
+  {  "compressor", &typeid(string*)},
 };
 
 template<class K>
@@ -739,7 +739,7 @@ class OpHMatrixUser : public OneOperator
         class Op : public E_F0info {
             public:
                 Expression g, uh1, uh2;
-                static const int n_name_param = 8;
+                static const int n_name_param = 9;
                 static basicAC_F0::name_and_type name_param[] ;
                 Expression nargs[n_name_param];
                 long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
@@ -768,7 +768,8 @@ basicAC_F0::name_and_type  OpHMatrixUser<K,v_fes1,v_fes2>::Op::name_param[]= {
   {  "maxblocksize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
-  {  "compressor", &typeid(string*)}
+  {  "compressor", &typeid(string*)},
+  {  "initialclustering", &typeid(string*)}
 };
 
 template<class R, class v_fes1,class v_fes2, int init>
@@ -811,6 +812,7 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     ds.mintargetdepth = op->argl(5,stack,ds.mintargetdepth);
     ds.minsourcedepth = op->argl(6,stack,ds.minsourcedepth);
     ds.compressor = *(op->args(7,stack,&ds.compressor));
+    ds.initialclustering = *(op->args(8,stack,&ds.initialclustering));
 
     const SMesh & ThU =Uh->Th;
     const TMesh & ThV =Vh->Th;
@@ -885,7 +887,10 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     VirtualGenerator<R>** generator = GetAny<VirtualGenerator<R>**>((*op->g)(stack));
 
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
-    builHmat<R>(Hmat,*generator,ds,p1,p2,comm);
+    std::shared_ptr<VirtualCluster> t, s;
+    t = build_clustering(n, Uh, p1, ds, comm);
+    s = build_clustering(m, Vh, p2, ds, comm);
+    buildHmat(Hmat, *generator, ds, t, s, p1, p2, comm);
 
     return Hmat;
 }

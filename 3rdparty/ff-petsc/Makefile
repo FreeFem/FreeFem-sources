@@ -61,7 +61,7 @@ endif
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool --download-htool-commit=946875d79d0036afb4dc2c0c13c165a607d830df
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
 else

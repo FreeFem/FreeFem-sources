@@ -1,6 +1,76 @@
 #ifndef BEM_HPP_
 #define BEM_HPP_
 
+#if defined(WITH_metis)
+extern "C" {
+#include <metis.h>
+}
+
+#ifdef METIS_VER_MAJOR
+extern "C" {
+real_t libmetis__ComputeElementBalance(idx_t ne, idx_t nparts, idx_t *where);
+}
+#else
+typedef idxtype idx_t;
+#endif
+
+template< class FESPACE, int NO, typename R >
+KN< R > *partmetis( KN< R > *const &part, const FESPACE * pVh, long const &lparts) {
+  ffassert(pVh);
+  const FESPACE &Vh(*pVh);
+   int nve = Vh[0].NbDoF( );
+  const typename FESPACE::Mesh & Th = Vh.Th;
+    idx_t nt = Th.nt, nv = Vh.NbOfDF;
+
+  KN< idx_t > eptr(nt + 1), elmnts(nve * nt), epart(nt), npart(nv);
+  if(lparts > 1) {
+      for (idx_t k = 0, i = 0; k < nt; ++k) {
+          eptr[k] = i;
+          for (idx_t j = 0; j < nve; j++) {
+              elmnts[i++] = Vh(k, j);
+          }
+          eptr[k + 1] = i;
+      }
+
+      idx_t numflag = 0;
+      idx_t nparts = lparts;
+      idx_t edgecut;
+      idx_t etype = nve - 2;    // triangle or tet .  change FH fevr 2010
+      idx_t ncommon = 1;
+#ifdef METIS_VER_MAJOR
+      if (NO == 0) {
+          METIS_PartMeshNodal(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &nparts, 0, 0, &edgecut,
+                  (idx_t *)epart, (idx_t *)npart);
+      } else {
+          METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
+                  (idx_t *)epart, (idx_t *)npart);
+      }
+
+      if (verbosity) {
+          printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
+                  libmetis__ComputeElementBalance(nt, nparts, epart), NO);
+      }
+
+#else
+      if (NO == 0) {
+          METIS_PartMeshNodal(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+      } else {
+          METIS_PartMeshDual(&nt, &nv, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+      }
+
+      if (verbosity) {
+          printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
+                  ComputeElementBalance(nt, nparts, epart), NO);
+      }
+
+#endif
+  } else npart = 0;
+  part->resize(nv);
+  *part = npart;
+  return part;
+}
+#endif
+
 double ff_htoolEta=10., ff_htoolEpsilon=1e-3;
 long ff_htoolMinclustersize=10, ff_htoolMaxblocksize=1000000, ff_htoolMintargetdepth=0, ff_htoolMinsourcedepth=0;
 
@@ -100,7 +170,7 @@ struct Data_Bem_Solver
 : public Data_Sparse_Solver {
     double eta;
     int minclustersize,maxblocksize,mintargetdepth,minsourcedepth;
-    string compressor;
+    string compressor, initialclustering;
        
     Data_Bem_Solver()
        : Data_Sparse_Solver(),
@@ -109,7 +179,8 @@ struct Data_Bem_Solver
        maxblocksize(ff_htoolMaxblocksize),
        mintargetdepth(ff_htoolMintargetdepth),
        minsourcedepth(ff_htoolMinsourcedepth),
-       compressor("partialACA")
+       compressor("partialACA"),
+       initialclustering("pca")
     
         {epsilon=ff_htoolEpsilon;}
      
@@ -201,6 +272,7 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.mintargetdepth = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.compressor = *GetAny<string*>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.initialclustering = *GetAny<string*>((*nargs[kk])(stack));
         ffassert(++kk == n_name_param);
     }   
 }
@@ -230,15 +302,61 @@ KNM<K>* HMatrixVirtToDense(HMatrixVirt<K> **Hmat)
     }
 }
 
+template< class FESPACE>
+std::shared_ptr<htool::VirtualCluster> build_clustering(int n, const FESPACE * Uh, const std::vector<double> & p, const Data_Bem_Solver& ds, MPI_Comm comm) {
+    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> c = std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
+
+    c->set_minclustersize(ds.minclustersize);
+    if (ds.initialclustering == "" || ds.initialclustering == "pca") {
+        c->build(n,p.data(),2,comm);
+    }
+    else if (ds.initialclustering == "metis") {
+    #if defined(HTOOL_VERSION_GE)
+    #if HTOOL_VERSION_GE(0,8,1)
+    #if defined(WITH_metis)
+    KN<double> parts(n);
+    int npart;
+    int rank;
+    MPI_Comm_size(comm, &npart);
+    MPI_Comm_rank(comm, &rank);
+    std::vector<int> part(n);
+
+    if (npart > 1) {
+        if (rank == 0) {
+            partmetis<FESPACE,0,double>(&parts, Uh, npart);
+            for (int i=0; i<n; i++)
+                part[i] = parts[i];
+        }
+        MPI_Bcast(part.data(), n, MPI_INT, 0, comm);
+    }
+    else
+        std::fill(part.begin(),part.end(),0);
+
+    c->build_with_perm(n,p.data(),part.data(),2,comm);
+    #else
+    if (mpirank == 0) std::cerr << "Error: cannot use metis for initial htool clustering ; no metis library" << std::endl;
+    ffassert(0);
+    #endif
+    #else
+    if (mpirank == 0) std::cerr << "Error: cannot use metis for initial htool clustering ; need htool 0.8.1 or later" << std::endl;
+    ffassert(0);
+    #endif
+    #else
+    if (mpirank == 0) std::cerr << "Error: cannot use metis for initial htool clustering ; need htool 0.8.1 or later" << std::endl;
+    ffassert(0);
+    #endif
+    }
+    else {
+        if (mpirank == 0) std::cerr << "Error: unknown initial clustering \"" << ds.initialclustering << "\", please use \"pca\" or \"metis\"" << std::endl;
+        ffassert(0);
+    }
+    return c;
+}
 
 template <class R>
-void builHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,vector<double> &p1,vector<double> &p2,MPI_Comm comm)  {
-    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> t =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
-    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> s =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
-    t->set_minclustersize(data.minclustersize);
-    s->set_minclustersize(data.minclustersize);
-    t->build(generatorP->nb_rows(),p2.data(),2,comm);
-    s->build(generatorP->nb_cols(),p1.data(),2,comm);
+void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,
+                std::shared_ptr<htool::VirtualCluster> s, std::shared_ptr<htool::VirtualCluster> t,
+                vector<double> &p1,vector<double> &p2,MPI_Comm comm) {
 
     *Hmat = new HMatrixImpl<R>(t,s,data.epsilon,data.eta,data.sym?'S':'N',data.sym?'U':'N',-1,comm);
     std::shared_ptr<htool::VirtualLowRankGenerator<R>> LowRankGenerator = nullptr;
@@ -258,15 +376,11 @@ void builHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,cons
     (*Hmat)->set_mintargetdepth(data.mintargetdepth);
     (*Hmat)->set_minsourcedepth(data.minsourcedepth);
     // TODO set options
-    (*Hmat)->build(*generatorP,p2.data(),p1.data());
-
+    if (s == t)
+        (*Hmat)->build(*generatorP,p1.data());
+    else
+        (*Hmat)->build(*generatorP,p1.data(),p2.data());
 }
-
-template<class Matrix, class R, typename std::enable_if< std::is_same< Matrix, HMatrixVirt<R>* >::value >::type* = nullptr>
-void Assembly(Matrix* A, htool::VirtualGenerator<R>* generator, const Data_Bem_Solver& data,vector<double> &p1,vector<double> &p2,MPI_Comm comm,int dim,bool = false) {
-    builHmat<R>(A,generator,data,p1,p2,comm);
-}
-
 
 template<class R, class MMesh, class FESpace1, class FESpace2> 
 void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const int & VFBEM, 
@@ -362,11 +476,8 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         p1[3*i+2] = pp.z;
     }
 
-    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> t =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
-    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> s =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
-    t->set_minclustersize(ds.minclustersize);
-    s->set_minclustersize(ds.minclustersize);
-    t->build(n,p1.data(),2,comm);
+    std::shared_ptr<htool::VirtualCluster> t, s;
+    t = build_clustering(n, Uh, p1, ds, comm);
 
     if(!samemesh) {
         if( Vh->TFE[0]->N == 1){
@@ -416,7 +527,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
                 }
             }
         }
-        s->build( m,p2.data(),2,comm);  
+        s = build_clustering(m, Vh, p2, ds, comm);
     }
     else{
         p2=p1;
@@ -424,7 +535,6 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     }
 
     // creation of the generator for htool and creation the matrix
-
     if (VFBEM==1) {
         // info kernel
         pair<BemKernel*,Complex> kernel = getBemKernel(stack,largs);
@@ -473,25 +583,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             ffassert(0);
 
         // build the Hmat
-        *Hmat = new HMatrixImpl<R>(t,s,ds.epsilon,ds.eta,ds.sym?'S':'N',ds.sym?'U':'N',-1,comm);
-        std::shared_ptr<htool::VirtualLowRankGenerator<R>> compressor = nullptr;
-        if ( ds.compressor == "" || ds.compressor == "partialACA")
-            compressor = std::make_shared<htool::partialACA<R>>();
-        else if (ds.compressor == "fullACA")
-            compressor = std::make_shared<htool::fullACA<R>>();
-        else if (ds.compressor == "SVD")
-            compressor = std::make_shared<htool::SVD<R>>();
-        else {
-            cerr << "Error: unknown htool compressor \""+ds.compressor+"\"" << endl;
-            ffassert(0);
-        }
-
-        (*Hmat)->set_compression(compressor);
-        (*Hmat)->set_maxblocksize(ds.maxblocksize);
-        (*Hmat)->set_mintargetdepth(ds.mintargetdepth);
-        (*Hmat)->set_minsourcedepth(ds.minsourcedepth);
-        (*Hmat)->build(*generator,p1.data());
-
+        buildHmat(Hmat, generator, ds, t, s, p1, p2, comm);
 
         delete generator;
     }
@@ -535,7 +627,9 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         }
         else
             ffassert(0);
-        Assembly(Hmat,generator,ds,p1,p2,comm,MMesh::RdHat::d+1);
+
+        buildHmat(Hmat, generator, ds, t, s, p1, p2, comm);
+
         delete generator;
     }
 }
