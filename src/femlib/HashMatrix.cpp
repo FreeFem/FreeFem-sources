@@ -1196,9 +1196,13 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
 {
     tgv = ttgv;
     ntgv =0;
-    if(ttgv<0)
-        CSR();
     if ( this->n != this->m) MATERROR(1,"SetBC on none square matrix  ?????");
+    if(ttgv<0) {
+        for(I ii=0; ii< this->n; ++ii)
+            if( wbc[ii] )
+                operator()(ii,ii) += 0; // create diag coef if it does not exist
+        CSR();
+    }
     for(I ii=0; ii< this->n; ++ii)
         if( wbc[ii] )
         {

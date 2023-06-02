@@ -1303,11 +1303,7 @@ template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>  bool As
 template<class R,class MMesh,class FESpace1,class FESpace2>   void AssembleBC(Stack stack,const MMesh & Th,
                                                   const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                                                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
-                                                  const list<C_F0> &largs , double tgv  );
-template<class R,class MMesh,class FESpace1,class FESpace2>  void AssembleBC(Stack stack,const MMesh & Th,const FESpace1 & Uh,
-                                                  const FESpace2 & Vh,bool sym, MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
-                                                  const list<C_F0> &largs , double tgv  );
-
+                                                  const list<C_F0> &largs , double tgv , int * mpirankandsize = nullptr);
 
 // 2d case
 template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
@@ -1318,7 +1314,7 @@ template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,c
 template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label,
                                      void * stack,R2 *B);
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th3,const FESpace & Uh3,const FESpace & Vh3,bool sym,
-                                    MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
+                                    MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv, int * mpirankandsize = nullptr);
 
 
 // 3d volume case

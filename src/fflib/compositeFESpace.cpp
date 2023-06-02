@@ -1531,7 +1531,7 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
         for (int i=0, n= B->N(); i< n; i++)
         if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
       }
-      AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
+      AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv, mpirankandsize);   // TODO with problem
     }
     else{
       if( B && !B_from_varf ) *B = - *B; // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
@@ -1557,7 +1557,7 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
         for (int i=0, n= B->N(); i< n; i++)
         if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
       }
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
+      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv, mpirankandsize);   // TODO with problem
     }
     else{
       if( B && !B_from_varf ) *B = - *B; // case problem or solve : b = int2d(Th)( f*v ) but we evaluate before  -int2d(Th)( f*v ) in AssembleVarForm
