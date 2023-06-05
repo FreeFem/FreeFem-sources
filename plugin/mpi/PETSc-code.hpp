@@ -2019,7 +2019,7 @@ namespace PETSc {
     {"schurPreconditioner", &typeid(KN< Matrice_Creuse< upscaled_type<PetscScalar> > >*)},        // 5
     {"schurList", &typeid(KN< double >*)},                                                        // 6
     {"parent", &typeid(Type*)},                                                                   // 7
-    {"MatNullSpace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                                // 8
+    {"nullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                                // 8
     {"fieldsplit", &typeid(long)},                                                                // 9
     {"schurComplement", &typeid(KNM< upscaled_type<PetscScalar> >*)},                             // 10
     {"schur", &typeid(KN< Dmat >*)},                                                              // 11
