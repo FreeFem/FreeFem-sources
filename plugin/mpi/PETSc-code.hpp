@@ -2538,7 +2538,8 @@ namespace PETSc {
             delete[] dots;
             MatNullSpace sp;
             MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
-            MatSetNullSpace(ptA->_petsc, sp);
+            if (dim) MatSetNearNullSpace(ptA->_petsc, sp);
+            else MatSetNullSpace(ptA->_petsc, sp);
             MatNullSpaceDestroy(&sp);
             VecDestroyVecs(std::max(dim, dimPETSc), &ns);
           }
