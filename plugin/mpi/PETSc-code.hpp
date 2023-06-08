@@ -6161,16 +6161,25 @@ namespace PETSc {
 
               // block non diagonal matrix        
               if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
-                // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
+                // case Uh[i] == MeshL et Vh[j] = Mesh2
                 
-                if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+                if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
                 const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
 
                 MatCreate(comm, &Abemblock->_petsc);
                 MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
                 varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
               }
+              else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
+                // case Uh[i] == Mesh2 et Vh[j] = MeshL
 
+                if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
+                const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+
+                MatCreate(comm, &Abemblock->_petsc);
+                MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
+                varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
+              }
               else{
                 cerr << " BEM bilinear form " << endl;
                 cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
@@ -6223,6 +6232,39 @@ namespace PETSc {
                 // Abemblock->dtor();  // ???
                 MatDestroy(&mAAT);  // ???
                 // we need to do that because R=Complex with BEM
+                MI_BBB->destroy();
+                delete MI_BBB;
+              }
+              else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
+                // case Uh[i] == Mesh2 et Vh[j] = MeshL
+                const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
+                const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+                // construction of the matrix of interpolation
+
+                bool transpose_MI = false;
+                Matrice_Creuse<double> *  MI_BBB = PETSC_buildMatrixInterpolationForCompositeFESpace<double,FESpaceL,FESpace>( PVh, PUh, transpose_MI );
+                MatriceMorse<double> * mr =MI_BBB->pHM();
+
+                // Transform Real Matrix in Complex Matrix
+                MatriceMorse<R> * mA = new MatriceMorse<R>(mr->n,mr->m,0,0);
+                // we divide by mpisize because the interpolation matrix is computed in sequential
+                int size;
+                MPI_Comm_size(comm, &size);
+                *mr *= 1.0/size;
+                *mA = *mr;
+
+                // transform intrerpolation matrix to matrix IS
+                Mat matIS_MI;
+                ff_createMatIS( *mA, matIS_MI, comm);
+
+                // create composite
+                Mat mats[2] = { matIS_MI, Abemblock->_petsc };
+                Mat C;
+                MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
+                MatCompositeSetType(C, MAT_COMPOSITE_MULTIPLICATIVE);
+                Abem = C;
+
+                MatDestroy(&matIS_MI);
                 MI_BBB->destroy();
                 delete MI_BBB;
               }

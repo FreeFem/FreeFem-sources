@@ -1617,7 +1617,7 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
     }
     else if( typeUh == 5 && typeVh == 2 ){
       //ffassert( !(iUh==jVh) );
-      // case Uh[i] == MeshL et Vh[j] = Mesh2  // Est ce que cela a un sens?
+      // case Uh[i] == MeshL et Vh[j] = Mesh2
                     
       if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
       if(verbosity>3) cout << " ===      hypothesis:: FESpace become FESpaceL for Vh      === " << endl;
@@ -1628,12 +1628,29 @@ void varfBemToCompositeBlockLinearSystem_hmat(const int& iUh, const int &jVh,
     }
     else if( typeUh == 4 && typeVh == 3 ){
       //ffassert( !(iUh==jVh) );
-      // case Uh[i] == MeshS et Vh[j] = Mesh3  // Est ce que cela a un sens?
+      // case Uh[i] == MeshS et Vh[j] = Mesh3
    
       if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
       if(verbosity>3) cout << " ===      hypothesis:: FESpace3 become FESpaceS for Vh      === " << endl;
       const FESpaceS * PUh = (FESpaceS *) LLUh->getpVh();
       creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS> ( PUh, PUh, VFBEM, 
+                        b_largs_zz, stack, dsbem, Hmat );
+    }
+    else if( typeUh == 2 && typeVh == 5 ){
+      // case Uh[i] == Mesh2 et Vh[j] = MeshL
+      if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+      if(verbosity>3) cout << " ===      hypothesis:: FESpace become FESpaceL for Uh      === " << endl;
+
+      const FESpaceL * PVh = (FESpaceL *) LLVh->getpVh();
+      creationHMatrixtoBEMForm<R, MeshL, FESpaceL, FESpaceL> ( PVh, PVh, VFBEM,
+                        b_largs_zz, stack, dsbem, Hmat );
+    }
+    else if( typeUh == 3 && typeVh == 4 ){
+      // case Uh[i] == Mesh3 et Vh[j] = MeshS
+      if(verbosity>3) cout << " === creation de la matrice BEM pour un bloc non diagonaux === " << endl;
+      if(verbosity>3) cout << " ===      hypothesis:: FESpace3 become FESpaceS for Uh      === " << endl;
+      const FESpaceS * PVh = (FESpaceS *) LLVh->getpVh();
+      creationHMatrixtoBEMForm<R, MeshS, FESpaceS, FESpaceS> ( PVh, PVh, VFBEM,
                         b_largs_zz, stack, dsbem, Hmat );
     }
     else{
@@ -1702,6 +1719,14 @@ Matrice_Creuse<double> * buildBlockMatrixInterpolation( const int &i, const int&
     return MI_BBB;
     // return  MI_BBB->pHM(); // (HashMatrix return) 
   }
+  else if( typeUh == 2 && typeVh == 5 ){
+    // case Uh[i] == MeshL et Vh[j] = Mesh2
+    const FESpace * PUh = (FESpace *) LLUh->getpVh();
+    const FESpaceL * PVh = (FESpaceL *) LLVh->getpVh();
+
+    Matrice_Creuse<double> *  MI_BBB = buildMatrixInterpolationForCompositeFESpace<double,FESpaceL,FESpace>( PVh, PUh );
+    return MI_BBB;
+  }
   else{
     cerr << "other case in construction" << endl;
     ffassert(0); 
@@ -1742,6 +1767,10 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
     isNeedInterpolationMatrix = true;
     isNeedInterpolationMatrixLeft = true;
   }
+  else if( typeUh == 2 && typeVh == 5){
+    isNeedInterpolationMatrix = true;
+    isNeedInterpolationMatrixLeft = false;
+  }
   if( isNeedInterpolationMatrix ){
     if(verbosity>3) cout << " creation of interpolation matrix " << endl;
     // Creation of the Interpolation Matrix
@@ -1760,8 +1789,15 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
       delete mAB;
     }
     else{ 
-      cerr << "only left multiplication is implemented" << endl;
-      ffassert(0);
+
+      // BBB=BBB*MI;
+      MatriceMorse<R> *mAB=new MatriceMorse<R>(hm_A_block->m,MI->M(),0,0);
+      AddMul<int,R,double,R>(*mAB,*hm_A_block,*mMI,false,false);
+
+      hm_A->Add(mAB, R(1.0), false, (int) offsetVh,(int) offsetUh);
+      // test function (Vh) are the line and inconnu function (Uh) are the column
+
+      delete mAB;
     }
 
     MI->destroy();
