@@ -22,6 +22,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
+      	see exemple plugin/RT0dc.edp 
+  and P1nc (Crouziex-Raviat) + bulle : name P1bnc in plugin Element_P1ncdc
+  and P1nc totaly discontinous + bulle  ; name P1bdcnc in plugin Element_P1ncdc
+      	see exemple plugin/example testp1dcnc.edp
+	for akram.beni-hamad@inria.fr 
 - add New finite element:  P4S P^4 on meshS , P3pnc3d in Element_P3pnc_3d (Couziex-Raviart with P3 )
    see loic.balaziatchynillama@cea.fr for more information. 
 - add new interface for metis (see examples/plugin/metis.edp)

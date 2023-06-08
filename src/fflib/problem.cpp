@@ -1852,11 +1852,11 @@ template<class R>
             else cout << endl;
         }
         if(VF) {
-            if(sameMesh || sym)
+ /*           if(sameMesh || sym) // remove done  in june 23 FH.
                 cout << ("To Day in bilinear form with discontinuous Galerkin (3d curve):   \n"
                          "  test or unknown function must be  defined on the same meshL, \n"
                          "  and the matrix is not symmetric. \n"
-                         " To do other case in a future (F. Hecht) dec. 2003 ");
+                         " To do other case in a future (F. Hecht) dec. 2003 "); */
             if(&Uh == &Vh)
                 matep= new MatriceElementairePleine<R,FESpaceL>(Uh,VF,FIT,0,useopt);
             else
