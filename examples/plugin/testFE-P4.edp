@@ -23,7 +23,7 @@ func bool pvi(real[int] & v)
 	return true;
 } 
 varf vFlux([a],[e]) = intallfaces(Th)( dn(a1)*e*(jump(real(nuTriangle))<= 0));
-varf vMean([a],[e]) = intallfaces(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/lenEdge);
+varf vMean([a],[e]) = intallfaces(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/area);
 
 
 for (int i=0;i<Vh.ndofK;++i)
