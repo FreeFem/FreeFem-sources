@@ -22,6 +22,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Composite FE spaces and variational forms for coupled problems:
+  - can now define composite FE spaces with different meshes/mesh types as
+    ```
+    fespace Uh(Th1,[P2,P2]);
+    fespace Ph(Th2,P1);
+    fespace Vh=Uh*Ph;
+    ```
+  - can define coupled problems using composite FE spaces, or directly with `<` `>` syntax:
+    ```
+    fespace Uh(Th1,[P2,P2]);
+    fespace Ph(Th2,P1);
+    Uh [u1,u2],[v1,v2];
+    Ph p,q;
+
+    solve Pb (<[u1,u2],[p]>, <[v1,v2],[q]>) = ...
+    ```
+    see `examples/examples/stokes_composite.edp` and `examples/examples/stokes_periodic_composite.edp`
+  - this new type of composite problem can be used for FEM-BEM coupling and also benefits from automatic parallel assembly (in test) and can be easily solved using the distributed solver MUMPS, see `examples/mpi/Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp`
+  - composite problems can also be solved using PETSc (in test), see `examples/hpddm/Helmholtz-2d-FEM-BEM-coupling-PETSc-composite.edp`
 - add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
       	see exemple plugin/RT0dc.edp 
   and P1nc (Crouziex-Raviat) + bulle : name P1bnc in plugin Element_P1ncdc
