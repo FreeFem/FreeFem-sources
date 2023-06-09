@@ -2456,7 +2456,7 @@ fi
 ff_inc_htool=$ff_HTOOL_INCLUDE
 if test -n "$TOOL_COMPILE_htool"; then
 	# install htool
-	ff_inc_htool=-I@abs_top_builddir@/3rdparty/include/htool/include
+	ff_inc_htool='-I$(abs_top_builddir)/3rdparty/include/htool/include'
 fi
 if test -n "$ff_inc_htool"; then
     ff_inc_htool="$ff_inc_htool -DWITH_bemtool -DWITH_htool"
