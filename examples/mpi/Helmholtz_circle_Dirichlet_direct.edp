@@ -29,15 +29,15 @@ BemKernel DL("DL",k=k);
 BemKernel TDL("TDL",k=k);
 BemKernel HS("HS",k=k);
 BemKernel CFIE=k*1i*SL+TDL;
-BemKernel CFIERHS=-1*k*1i*DL+(-1)*HS;
+BemKernel CFIERHS=1*k*1i*DL+HS;
 
 // varf
 varf vSL(u,v)=int1dx1d(Th)(Th)(BEM(SL,u,v)) ;  
 varf vDL(u,v)=int1dx1d(Th)(Th)(BEM(DL,u,v))-int1d(Th)(0.5*u*v) ;  
 varf vTDL(u,v)=int1dx1d(Th)(Th)(BEM(TDL,u,v))-int1d(Th)(0.5*u*v) ;  
 varf vHS(u,v)=int1dx1d(Th)(Th)(BEM(HS,u,v)) ;  
-varf vCFIE(u,v)=int1dx1d(Th)(Th)(BEM(CFIE,u,v))-int1d(Th)(0.5*u*v) ;  
-varf vCFIERHS(u,v)=int1d(Th)(1i*k*0.5*u*v)+int1dx1d(Th)(Th)(BEM(CFIERHS,u,v)) ;  
+varf vCFIE(u,v)=int1dx1d(Th)(Th)(BEM(CFIE,u,v))+int1d(Th)(-0.5*u*v) ;  
+varf vCFIERHS(u,v)=int1d(Th)(-1i*k*0.5*u*v)+int1dx1d(Th)(Th)(BEM(CFIERHS,u,v)) ;  
 
 // hmat
 HMatrix<complex> HFirstKind     = vSL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
@@ -72,7 +72,8 @@ plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");
 // Solve combined formulation
 Uh<complex> uCombined, bCombined;
 bCombined[] = HCFIERHS*gd[];
-uCombined[] = HCombined^-1*bCombined[];
+uCombined[] = HCFIE^-1*bCombined[];
+uCombined[] *=-1;
 plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
 
 
@@ -132,6 +133,6 @@ UhOut<complex> vCombined1,vCombined2;
 vCombined1[] = HSLPot*uCombined[];
 vCombined2[] = HDLPot*gd[];
 vCombined1[] += vCombined2[]+ vinc[];
-UhOut vCombinedabs = abs(vCombined2);
+UhOut vCombinedabs = abs(vCombined1);
 
 plot(vCombinedabs, dim=1, fill=1, value=1, nbiso=20,cmm="Combined");

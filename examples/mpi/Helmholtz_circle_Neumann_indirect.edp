@@ -41,8 +41,8 @@ if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-BemKernel ker5=ker1+(k*1i)*ker2;
-varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v)) +int1d(Th)((k*1i)* 0.5*u*v); 
+BemKernel ker5=(-1i*k)*ker2+ker1;
+varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v)) +int1d(Th)((-1i*k)* 0.5*u*v); 
 
 HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HCombined.infos << endl;
@@ -122,6 +122,6 @@ plot(vSecondKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="Second kind");
 UhOut<complex> vCombined1,vCombined2;
 vCombined1[] = HSLPot*uCombined[];
 vCombined2[] = HDLPot*uCombined[];
-UhOut vCombinedabs = abs(1i*kappa*vCombined1+vCombined2+vinc);
+UhOut vCombinedabs = abs(-1i*k*vCombined1+vCombined2+vinc);
 
 plot(vCombinedabs, dim=1, fill=1, value=1, nbiso=20,cmm="Combined");
