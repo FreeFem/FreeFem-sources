@@ -1,10 +1,16 @@
 //ff-mpirun -np 4 Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp -wg
 
+// for the make check:
+// NBPROC 4
+// PARAM -nlenses 1 -Rout 5
+
 /* example of wave guiding with gradient-index lenses */
 
 load "bem"
 load "msh3"
 load "MUMPS"
+
+include "getARGV.idp"
 
 complex k = 10; // wavenumber
 
@@ -13,7 +19,8 @@ real lambda = 2*pi/real(k);
 real nloc = 10./lambda;
 real n = nloc*2*pi;
 
-int[int] nsl(10); // number of lenses
+int nlenses = getARGV("-nlenses",10); // number of lenses
+int[int] nsl(nlenses);
 nsl = n;
 
 real theta = 10*2*pi/360; // angular shift between lenses
@@ -104,9 +111,9 @@ plot(ufem, fill=1, value=1, wait=1, dim=2, cmm="FEM solution");
 plot(ubem, fill=1, value=1, wait=1, dim=2, cmm="BEM ansatz on ThL");
 
 // output mesh for visualization
-int np = 200/2;
-real R = 20;
-real rr = 20;
+int np = 5;
+real R = getARGV("-Rout",20.);
+real rr = R;
 
 border b1(t=-rr, R){x=t; y=-rr;}
 border b2(t=-rr, rr){x=R; y=t;}
@@ -115,7 +122,7 @@ border b4(t=rr, -rr){x=-rr; y=t;}
 
 nsl = -nsl;
 // exterior mesh
-mesh ThOut = buildmesh(b1(np*R/rr)+b2(np)+b3(np*R/rr)+b4(np)+circle(nsl)
+mesh ThOut = buildmesh(b1(np*R)+b2(np*rr)+b3(np*R)+b4(np*rr)+circle(nsl)
               +a(-nloc*(2*L+2*dd))+b(-nloc*(2*l+2*dd))+c(-nloc*(2*L+2*dd))+d(-nloc*(2*l+2*dd)));
 
 fespace UhOut(ThOut,P1);

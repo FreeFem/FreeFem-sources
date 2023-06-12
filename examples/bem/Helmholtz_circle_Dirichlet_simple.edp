@@ -1,0 +1,112 @@
+//ff-mpirun -np 4 Helmholtz_circle_Dirichlet_simple.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM -k 1
+
+/*
+    This example solves the Dirichlet scattering problem with an indirect formulation of the first kind.
+    You can find an overview of all standard direct and indirect BEM formulations for Dirichlet
+    and Neumann problems in Helmholtz_circle_Dirichlet_all_direct.edp, Helmholtz_circle_Dirichlet_all_indirect.edp,
+    Helmholtz_circle_Neumann_all_direct.edp and Helmholtz_circle_Neumann_all_indirect.edp
+*/
+
+load "bem"
+load "msh3"
+load "gsl"
+
+include "getARGV.idp"
+
+complex k = getARGV("-k",10.); // wavenumber
+
+// incident wave
+real angle = 0;
+func finc = exp(-1i*k*(x*cos(angle)+y*sin(angle)));
+
+//  Mesh
+int n = 100;
+border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+meshL Th = buildmeshL(circle(n));
+
+Th = OrientNormal(Th,unbounded=1);
+
+// Dof
+fespace Uh(Th,P1);
+
+real Robj = 1;
+func complex exactsol(real xi, real yi){
+    real r = sqrt(xi^2 + yi^2);
+    real theta = atan2(yi,xi);
+    complex value = 0;
+    for (int n=0;n<100;n++){
+        real JnAtr    = gslsfbesselJn(n,real(k)*r);
+        real YnAtr    = gslsfbesselYn(n,real(k)*r);
+        real JnAtRobj = gslsfbesselJn(n,real(k)*Robj);
+        real YnAtRobj = gslsfbesselYn(n,real(k)*Robj);
+        value+=2*(-1*JnAtRobj*(JnAtr+1i*YnAtr)/(JnAtRobj+1i*YnAtRobj))*exp(-1i*n*pi/2.)*cos(n*(theta-angle));
+        if (n==0){
+            value*=0.5;
+        }
+    }
+    return value;
+}
+
+// Hmatrix for formulation of first kind
+BemKernel ker1("SL",k=k);
+varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v));
+HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000,initialclustering="metis");
+if (mpirank == 0) cout << HFirstKind.infos << endl;
+display(HFirstKind);
+
+// Solve formulation of first kind
+Uh<complex> uFirstKind, bFirstKind;
+varf vmassFirstKind(u,v) = int1d(Th)(-(finc)*v);
+bFirstKind[] = vmassFirstKind(0,Uh);
+uFirstKind[] = HFirstKind^-1*bFirstKind[];
+plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
+
+// Mesh output
+int R = 4;
+int np = 5*R*real(k);
+
+border b1(t=-R, R){x=t; y=-R;}
+border b2(t=-R, R){x=R; y=t;}
+border b3(t=-R, R){x=-t; y=R;}
+border b4(t=-R, R){x=-R; y=-t;}
+border circleout(t=0, 2*pi){x=1.1*cos(t); y=1.1*sin(t); z=0;}
+
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circleout(-np*pi/R));
+
+// Incident wave in volume
+fespace UhOut(ThOut,P1);
+UhOut<complex> vinc;
+vinc = finc;
+
+// HMatrix for potential
+BemPotential Pot("SL",k=k);
+varf vp(u,v)=int1d(Th)(POT(Pot,u,v));
+HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << HPot.infos << endl;
+display(HPot);
+
+// Solution for formulation of first kind
+UhOut<complex> vFirstKind, exacti = 0, exact;
+
+// Compare to the exact solution:
+for [i, bi : exacti[]]
+if (i >= mpirank*ceil(1.*UhOut.ndof/mpisize) && i < (mpirank+1)*ceil(1.*UhOut.ndof/mpisize))
+    bi = exactsol(ThOut(i).x,ThOut(i).y);
+mpiReduce(exacti[],exact[],processor(0,mpiCommWorld),mpiSUM);
+
+exact = exact + finc;
+
+vFirstKind[] = HPot*uFirstKind[];
+vFirstKind[] += vinc[];
+
+UhOut<complex> diff = exact-vFirstKind;
+if (mpirank == 0) cout << "relative L2 error = " << diff[].l2/exact[].l2 << endl;
+
+plot(vFirstKind, dim=1, fill=1, value=1, nbiso=20,cmm="u");
+plot(exact, dim=1, fill=1, value=1, nbiso=20,cmm="u exact");
+plot(diff, dim=1, fill=1, value=1, nbiso=20,cmm="error");

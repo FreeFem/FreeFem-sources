@@ -436,6 +436,7 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/tutorial/Makefile.in \
     examples/misc/Makefile.in \
     examples/mpi/Makefile.in \
+    examples/bem/Makefile.in \
     examples/hpddm/Makefile.in \
     examples/ffddm/Makefile.in \
     examples/eigen/Makefile.in \
@@ -476,6 +477,7 @@ LIST_GENERATE_FILE_AM= \
     examples/tutorial/Makefile.am \
     examples/misc/Makefile.am \
     examples/mpi/Makefile.am \
+    examples/bem/Makefile.am \
     examples/hpddm/Makefile.am \
     examples/ffddm/Makefile.am \
     examples/eigen/Makefile.am \

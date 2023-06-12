@@ -1,0 +1,142 @@
+//ff-mpirun -np 4 Helmholtz_circle_Neumann_all_direct.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM -k 2
+
+load "bem"
+load "msh3"
+
+include "getARGV.idp"
+
+complex k = getARGV("-k",10.); // wavenumber
+
+// incident wave
+real[int] dir=[1,0];
+func finc = exp(1i*k*(x*dir[0]+y*dir[1]));
+func dxfinc = 1i*k*dir[0]*finc;
+func dyfinc = 1i*k*dir[1]*finc;
+
+//  Mesh
+int n = 100;
+border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+meshL Th = buildmeshL(circle(n));
+
+Th = OrientNormal(Th,unbounded=1);
+
+// Dof
+fespace Uh(Th,P1);
+
+// Bemkernels
+BemKernel SL("SL",k=k);
+BemKernel DL("DL",k=k);
+BemKernel TDL("TDL",k=k);
+BemKernel HS("HS",k=k);
+BemKernel CFIE=1i*k*DL+HS;
+BemKernel CFIERHS=k*1i*SL+TDL;
+
+// varf
+varf vSL(u,v)=int1dx1d(Th)(Th)(BEM(SL,u,v)) ;  
+varf vDL(u,v)=int1dx1d(Th)(Th)(BEM(DL,u,v))-int1d(Th)(0.5*u*v) ;  
+varf vTDL(u,v)=int1dx1d(Th)(Th)(BEM(TDL,u,v))-int1d(Th)(0.5*u*v) ;  
+varf vHS(u,v)=int1dx1d(Th)(Th)(BEM(HS,u,v)) ;  
+varf vCFIE(u,v)=int1d(Th)(-1i*k*0.5*u*v)+int1dx1d(Th)(Th)(BEM(CFIE,u,v)) ;  
+varf vCFIERHS(u,v)=int1dx1d(Th)(Th)(BEM(CFIERHS,u,v))-int1d(Th)(0.5*u*v) ;  
+
+
+// hmat
+HMatrix<complex> HSecondKindRHS     = vSL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HFirstKindRHS    = vTDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HSecondKind  = vDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HFirstKind = vHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HCFIE = vCFIE(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HCFIERHS = vCFIERHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+
+if (mpirank == 0) cout << HFirstKind.infos << endl;
+if (mpirank == 0) cout << HSecondKind.infos << endl;
+if (mpirank == 0) cout << HFirstKindRHS.infos << endl;
+if (mpirank == 0) cout << HSecondKindRHS.infos << endl;
+
+
+// Solve formulation of first kind
+Uh<complex> uFirstKind, bFirstKind, gN;
+gN=-(dxfinc*Tl.y-dyfinc*Tl.x);
+bFirstKind[] = HFirstKindRHS*gN[];
+bFirstKind[] *=-1; // because we cannot compute I/2-TDL, we computed TDL-I/2...
+uFirstKind[] = HFirstKind^-1*bFirstKind[];
+plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
+
+// Solve formulation of second kind 
+Uh<complex> uSecondKind, bSecondKind;
+bSecondKind[] = HSecondKindRHS*gN[];
+uSecondKind[] = HSecondKind^-1*bSecondKind[];
+plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");
+
+// Solve combined formulation
+Uh<complex> uCombined, bCombined;
+bCombined[] = HCFIERHS*gN[];
+bCombined[]*=-1;
+uCombined[] = HCFIE^-1*bCombined[];
+plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
+
+
+// Mesh output
+int R = 4;
+int np = 5*R*real(k);
+
+border b1(t=-R, R){x=t; y=-R;}
+border b2(t=-R, R){x=R; y=t;}
+border b3(t=-R, R){x=-t; y=R;}
+border b4(t=-R, R){x=-R; y=-t;}
+border circleout(t=0, 2*pi){x=1.1*cos(t); y=1.1*sin(t); z=0;}
+
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circleout(-np*pi/R));
+
+// Incident wave in volume
+fespace UhOut(ThOut,P1);
+UhOut<complex> vinc;
+vinc = finc;
+
+// HMatrix for single layer potential
+BemPotential SLPot("SL",k=k);
+varf vpSL(u,v)=int1d(Th)(POT(SLPot,u,v)) ;  
+HMatrix<complex> HSLPot = vpSL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << HSLPot.infos << endl;
+display(HSLPot);
+
+// HMatrix for double layer potential
+BemPotential DLPot("DL",k=k);
+varf vpDL(u,v)=int1d(Th)(POT(DLPot,u,v)) ;  
+HMatrix<complex> HDLPot = vpDL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << HDLPot.infos << endl;
+display(HDLPot);
+
+// Solution for formulation of first kind
+UhOut<complex> vFirstKind1,vFirstKind2;
+vFirstKind1[] = HSLPot*gN[];
+vFirstKind2[] = HDLPot*uFirstKind[];
+vFirstKind1[] += vFirstKind2[]+ vinc[];
+UhOut vFirstKindabs = abs(vFirstKind1);
+
+plot(vFirstKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="First kind");
+
+// Solution for formulation of second kind
+UhOut<complex> vSecondKind1,vSecondKind2;
+vSecondKind1[] = HSLPot*gN[];
+vSecondKind2[] = HDLPot*uFirstKind[];
+vSecondKind1[] += vSecondKind2[]+vinc[];
+UhOut vSecondKindabs = abs(vSecondKind1);
+
+plot(vSecondKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="Second kind");
+
+// Solution for combined formulation
+UhOut<complex> vCombined1,vCombined2;
+vCombined1[] = HSLPot*gN[];
+vCombined2[] = HDLPot*uCombined[];
+vCombined1[] += vCombined2[]+ vinc[];
+UhOut vCombinedabs = abs(vCombined1);
+
+plot(vCombinedabs, dim=1, fill=1, value=1, nbiso=20,cmm="Combined");
