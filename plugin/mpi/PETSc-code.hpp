@@ -494,6 +494,7 @@ namespace PETSc {
     if (ia) {
       if (sym) {
         MatSetType(ptA->_petsc, MATSBAIJ);
+        MatSetUp(ptA->_petsc);
         MatSeqSBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
         MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
       } else {
@@ -540,6 +541,7 @@ namespace PETSc {
     Mat local;
     MatISGetLocalMat(ptA->_petsc, &local);
     MatSetType(local, MATSEQSBAIJ);
+    MatSetUp(local);
     std::vector< std::vector< std::pair< int, PetscScalar > > > transpose(M->HPDDM_n);
     for (int i = 0; i < transpose.size( ); ++i)
       for (int j = M->HPDDM_ia[i]; j < M->HPDDM_ia[i + 1]; ++j) {
@@ -630,6 +632,7 @@ namespace PETSc {
       MatCreate(PETSC_COMM_SELF, &aux);
       MatSetSizes(aux, A->HPDDM_n, A->HPDDM_n, A->HPDDM_n, A->HPDDM_n);
       MatSetType(aux, MATSEQSBAIJ);
+      MatSetUp(aux);
       MatSeqSBAIJSetPreallocationCSR(aux, 1, ia, ja, c);
       delete[] c;
       delete[] ja;
@@ -884,6 +887,7 @@ namespace PETSc {
             }
             if (ptA->_A && ptA->_A->getMatrix( )->HPDDM_sym) {
               MatSetType(ptA->_petsc, MATSBAIJ);
+              MatSetUp(ptA->_petsc);
               MatSeqSBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
               MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
             } else {
