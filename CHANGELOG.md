@@ -605,6 +605,7 @@ All notable changes to this project will be documented in this file.
 - The main distribution is now on Github
 
 [Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..develop
+[4.13]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..v4.13
 [4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12
 [4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
