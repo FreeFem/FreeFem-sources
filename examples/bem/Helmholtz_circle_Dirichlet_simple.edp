@@ -54,7 +54,7 @@ func complex exactsol(real xi, real yi){
 // Hmatrix for formulation of first kind
 BemKernel ker1("SL",k=k);
 varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v));
-HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000,initialclustering="metis");
+HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
