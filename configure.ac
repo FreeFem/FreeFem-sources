@@ -2561,6 +2561,7 @@ AC_CONFIG_FILES([Makefile
     examples/tutorial/Makefile
     examples/misc/Makefile
     examples/mpi/Makefile
+    examples/bem/Makefile
     examples/hpddm/Makefile
     examples/ffddm/Makefile
     examples/eigen/Makefile
