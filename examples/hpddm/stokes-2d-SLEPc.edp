@@ -21,17 +21,17 @@ int s = getARGV("-split", 1); // refinement factor
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);
 fespace VhV(Th, PkV);         // local finite element space for the velocities
 fespace VhP(Th, PkP);         // local finite element space for the pressure
-buildDmesh(Th)
+DmeshBuild(Th);
 Mat A, M;
 {
     macro def(u)def2(u)//
     macro init(u)init2(u)//
-    createMat(Th, A, PkV);
+    MatCreate(Th, A, PkV);
 }
 {
     macro def(u)def1(u)//
     macro init(u)init1(u)//
-    createMat(Th, M, PkP);
+    MatCreate(Th, M, PkP);
 }
 
 varf vPbA([u, uB], [v, vB]) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, 2, 4, u = 0, uB = 0) + on(3, u = 1.0, uB = 0);

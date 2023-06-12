@@ -8,9 +8,9 @@ mesh Th = square(40, 40);
 func Pk = P1;
 fespace Vh(Th, Pk);
 varf vPb(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) + on(1, 2, 3, 4, u = 0.0);
-buildDmesh(Th)
+DmeshBuild(Th);
 Mat A;
-createMat(Th, A, Pk)
+MatCreate(Th, A, Pk);
 matrix Loc = vPb(Vh, Vh, tgv = -2);
 A = Loc;
 mesh ThTrunc;

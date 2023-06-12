@@ -5,13 +5,14 @@
 
 long initialized() {
     PetscBool isInitialized;
-    PetscInitialized(&isInitialized);
+    PetscErrorCode ierr = PetscInitialized(&isInitialized);
 #ifdef _WIN32
     if(!isInitialized) {
-        PetscInitializeNoArguments();
-        PetscInitialized(&isInitialized);
+        ierr = PetscInitializeNoArguments();
+        ierr = PetscInitialized(&isInitialized);
     }
 #endif
+    (void)ierr;
     return static_cast<long>(isInitialized);
 }
 

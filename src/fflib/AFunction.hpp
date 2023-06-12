@@ -123,22 +123,26 @@ struct UnId {
   Expression  e; 
   deque<UnId> * array; //  to store a array 
   aType re; 
-  bool ref; // a ref or non 
-  UnId() :id(0),r(0),e(0),array(0),re(0),ref(false) {}
-  UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false) {}
+  bool ref; // a ref or non
+  bool compo_begin; // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
+  bool compo_end;  // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
+  UnId() :id(0),r(0),e(0),array(0),re(0),ref(false),compo_begin(false),compo_end(false) {}
+  UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false), compo_begin(false), compo_end(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  
-  UnId(deque<UnId>  * d) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false) {}
+  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false),compo_begin(cc_b),compo_end(cc_e) { }
   UnId(const UnId & u) : 
     id(u.id),r(u.r),e(u.e),
     array(u.array?new deque<UnId>(*u.array):0),
-    re(u.re),ref(u.ref) {}
-   // Modif 24032005  
+    re(u.re),ref(u.ref),compo_begin(u.compo_begin),compo_end(u.compo_end) {}
+   // Modif 24032005 
   void  operator= (const UnId & u) {
     id=u.id;
     r=u.r;
     e=u.e;
     re=u.re;
     ref=u.ref;
+    compo_begin=u.compo_begin;
+    compo_end=u.compo_end;
     if(array) delete array;
     array=0;
     if(u.array) array= new deque<UnId>(*u.array);
@@ -183,8 +187,11 @@ Expression NewExpression(Function2,Expression,Expression);
 inline Type_Expr make_Type_Expr(aType t, E_F0  * e) {return make_pair(t,e);}
 inline Type_Expr make_Type_Expr( E_F0  * e,aType t) {return make_pair(t,e);}
 
-struct Keyless : binary_function<const char *,const char *, bool>
+struct Keyless
    { 
+    using first_argument_type  = const char *;
+    using second_argument_type = const char *;
+    using result_type          = bool;
     typedef const char * Key;
     bool operator()(const Key& x, const Key& y) const { return strcmp(x,y)<0;} };
     
@@ -372,8 +379,12 @@ class E_F0 :public CodeAlloc
    {
    public:
        static E_F0 *tnull;
-  struct kless : binary_function<Expression,Expression, bool>
-   { bool operator()(const Expression& x, const Expression& y) const{ 
+  struct kless
+   {
+     using first_argument_type  = Expression;
+     using second_argument_type = Expression;
+     using result_type          = bool;
+     bool operator()(const Expression& x, const Expression& y) const{
      //cout << x << " " << y << x->compare(y) << " ::: ";
       int r1 = x->compare(y);// , r2 = y->compare(x);
      //assert(r1+r2==0);
@@ -385,6 +396,7 @@ class E_F0 :public CodeAlloc
    // virtual E_F0 * destroy(Stack ) const {return 0;}
   //  virtual const E_F0 * Parameter(Stack ) const {return this;}
     virtual size_t nbitem() const {return 1;}
+    virtual KN<size_t> componentNbitem() const { ffassert(0);};
     virtual bool EvaluableWithOutStack() const {return false;} // 
     virtual bool MeshIndependent() const {return true;} // 
     virtual bool Zero() const {return false;} //
@@ -1323,11 +1335,14 @@ template<class R> class EConstant:public E_F0
 };
 
 
-class LocalVariableFES : public LocalVariable { public:
-  size_t data;
-  LocalVariableFES(size_t o,aType tt,const  size_t & d) 
+class LocalVariableFES : public LocalVariable { 
+  private:
+  KN<size_t> data;
+  public:
+  LocalVariableFES(size_t o,aType tt,const  KN<size_t> & d) 
    : LocalVariable(o,tt),data(d) {}
-  size_t nbitem() const { return data;}
+  size_t nbitem() const { return data.sum();}
+  KN<size_t> componentNbitem() const{ return data;}  // return the nbitem of each component of a composite FESpace.
 };
 
 template <class U>
@@ -1528,6 +1543,7 @@ inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i
 
 class basicAC_F0 {
   friend class E_Array; // for mapping fonction 
+  friend class E_FEarray; // for mapping fonction 
   protected:
   typedef const C_F0 const_C_F0;
  int nb;
@@ -1582,7 +1598,7 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
         for(int j=0; j<c.size();++j)
          a[nb++]=c[j];
       // add named parameter ..
-   //   ffassert( named_parameter==0); // modif FH & JM June 2022
+      //   ffassert( named_parameter==0); // modif FH & JM June 2022
       if(c.named_parameter)
       {  if(!named_parameter)
           named_parameter=new maptype(); // map vide
@@ -1661,6 +1677,31 @@ class E_Array  :public E_F0 {  public:
   E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
   AnyType operator()(Stack)  const {
      cerr << " No evaluation of an E_array" << endl;
+     throwassert(0);
+     return  Nothing;}
+ const C_F0 & operator [] (int i) const {throwassert(v );return (*v)[i];}
+ int size() const {return v->size();}
+ size_t nbitem() const {return v->size();}
+ void map(C_F0 (*mapping)(const C_F0 & )) const 
+   { for (int i=0;i<v->size();i++) 
+      v->a[i]=(*mapping)(v->a[i]);}
+  virtual bool MeshIndependent() const {
+    for (int i=0;i<v->size();i++) 
+      if (v->a[i].MeshIndependent()) return false;
+     return false;
+   
+  } // 
+  operator aType () const { return atype<void>();} 
+ 
+};
+
+// A voir le nom avec F
+// Remark:  c'est un cc de E_Array + Fusionner ??
+class E_FEarray  :public E_F0 {  public: 
+  basicAC_F0_wa *v;// the value
+  E_FEarray(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
+  AnyType operator()(Stack)  const {
+     cerr << " No evaluation of an E_FEarray" << endl;
      throwassert(0);
      return  Nothing;}
  const C_F0 & operator [] (int i) const {throwassert(v );return (*v)[i];}
@@ -1908,7 +1949,7 @@ inline Type_Expr  NewVariable(aType t,size_t &off)
    size_t o= align8(off);//  align    
  //  off += t->un_ptr_type->size;
  // bug    off += t->size;
-   off += t->un_ptr_type->size; // correction 16/09/2003 merci à Richard MICHEL
+   off += t->un_ptr_type->size; // correction 16/09/2003 merci a Richard MICHEL
    return  Type_Expr(t,new T(o,t));
 } 
 
@@ -1965,7 +2006,9 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top)
 
 // save a expression 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) 
-   {  New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
+   {  // Add an expression in the list; 
+      //(Par exemple: Uh ux; Maintenant on ajoute [[ux]] Ã  la table des identifiants ou table des variables).
+     New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
  //  { return r->Initialization(New(k,r->SetParam(c,ListOfId(),top),del));}
 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del) 
@@ -2986,12 +3029,17 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
    return a;
 }
 */
+// Morice 06/2022
+// check if <<T> in the map_type/
 template<typename T>
 void CheckDclTypeEmpty() {
     if(map_type.find(typeid(T).name())!=map_type.end())
         cout << " Erreur  fftype dcl twist "<< typeid(T).name() << endl; 
-        }
-                            
+}
+
+// Morice 06/2022
+// Add the << T >> and << PT >> in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<typename T,typename PT>
 void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
    {
@@ -3000,6 +3048,10 @@ void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function
       map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn);
       map_type[typeid(PT).name()] = new ForEachTypePtr<T,PT>(pi,pd,pOnReturn); 
    }
+
+// Morice 06/2022
+// Add the << T >> and << T* >>in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
 void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
 {
@@ -3010,7 +3062,9 @@ map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn);
 map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn); 
 }
 
-
+// Morice 06/2022
+// Add the << T >> and << T* >>in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
   void Dcl_TypeandPtr (Function1 pi,Function1 pd)
    {
@@ -3020,6 +3074,9 @@ template<class T>
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd); 
    }
    
+// Morice 06/2022
+// Add the << T >> and << T* >>in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
   void Dcl_TypeandPtr (Function1 pd)
    {
@@ -3028,7 +3085,10 @@ template<class T>
       map_type[typeid(T).name()] = new ForEachType<T>();
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pd); 
    }
-   
+
+// Morice 06/2022
+// Add the << T >> and << T* >>in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
   void Dcl_TypeandPtr ()
    {
@@ -3037,7 +3097,10 @@ template<class T>
       map_type[typeid(T).name()] = new ForEachType<T>();
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(); 
    }
-   
+
+// Morice 06/2022
+// Add the class T in the map_type.
+// The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
   aType Dcl_Type (Function1 iv=0,Function1 id=0,Function1 Onreturn=0)
    {
@@ -3161,7 +3224,7 @@ inline Expression basicForEachType::OnReturn(Expression f) const {
 inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Array>();};
 
 inline  UnId::UnId(const char * idd,const C_F0 & ee,aType rr=0,bool reff=false) 
-  :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff){}
+  :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff), compo_begin(false), compo_end(false){};
 
 
 class E_exception : public exception { public:

@@ -1052,7 +1052,10 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
 }
 
 template<class A>
-struct Op_Readmpi : public binary_function<MPIrank,A*,MPIrank> {
+struct Op_Readmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A*;
+  using result_type          = MPIrank;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
     f.Recv(*a);
@@ -1061,7 +1064,10 @@ struct Op_Readmpi : public binary_function<MPIrank,A*,MPIrank> {
 };
 
 template<class A>
-struct Op_Recvmpi : public binary_function<MPIrank,A*,long> {
+struct Op_Recvmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A*;
+  using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
     ffassert(f.rq ==0 || f.rq == Syncro_block); // Block
@@ -1070,7 +1076,10 @@ struct Op_Recvmpi : public binary_function<MPIrank,A*,long> {
   }
 };
 template<class A>
-struct Op_IRecvmpi : public binary_function<MPIrank,A*,long> {
+struct Op_IRecvmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A*;
+  using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
     ffassert(f.rq !=0 || f.rq != Syncro_block); // no Block
@@ -1081,7 +1090,10 @@ struct Op_IRecvmpi : public binary_function<MPIrank,A*,long> {
 
 
 template<class A>
-struct Op_Writempi : public binary_function<MPIrank,A,MPIrank> {
+struct Op_Writempi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A;
+  using result_type          = MPIrank;
   static MPIrank  f(MPIrank const  & f,A   const  &  a)
   {
     f.Send(a);
@@ -1091,7 +1103,10 @@ struct Op_Writempi : public binary_function<MPIrank,A,MPIrank> {
 
 
 template<class A>
-struct Op_Bcastmpi : public binary_function<MPIrank,A*,MPIrank> {
+struct Op_Bcastmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A*;
+  using result_type          = MPIrank;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
     f.Bcast(*a);
@@ -1100,7 +1115,10 @@ struct Op_Bcastmpi : public binary_function<MPIrank,A*,MPIrank> {
 };
 
 template<class A>
-struct Op_ISendmpi : public binary_function<MPIrank,A,long> {
+struct Op_ISendmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A;
+  using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A   const  & a)
   {
     ffassert(f.rq != Syncro_block);
@@ -1108,7 +1126,10 @@ struct Op_ISendmpi : public binary_function<MPIrank,A,long> {
   }
 };
 template<class A>
-struct Op_Sendmpi : public binary_function<MPIrank,A,long> {
+struct Op_Sendmpi {
+  using first_argument_type  = MPIrank;
+  using second_argument_type = A;
+  using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A  const  & a)
   {
 	MPIrank ff(f.who,f.comm,Syncro_block);
@@ -1118,7 +1139,10 @@ struct Op_Sendmpi : public binary_function<MPIrank,A,long> {
 
 
 template<class R>
-struct Op_All2All : public binary_function<KN_<R>,KN_<R>,long> {
+struct Op_All2All {
+  using first_argument_type  = KN_<R>;
+  using second_argument_type = KN_<R>;
+  using result_type          = long;
   static long  f( KN_<R>  const  & s, KN_<R>  const  &r)
   {
       CheckContigueKN(s);
@@ -1137,7 +1161,10 @@ struct Op_All2All : public binary_function<KN_<R>,KN_<R>,long> {
 
 
 template<class R>
-struct Op_Allgather1 : public binary_function<R*,KN_<R>,long> {
+struct Op_Allgather1 {
+  using first_argument_type  = R*;
+  using second_argument_type = KN_<R>;
+  using result_type          = long;
   static long  f( R*  const  & s, KN_<R>  const  &r)
     {
       MPI_Comm comm=MPI_COMM_WORLD;
@@ -1154,7 +1181,10 @@ struct Op_Allgather1 : public binary_function<R*,KN_<R>,long> {
 };
 
 template<class R>
-struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
+struct Op_Allgather {
+  using first_argument_type  = KN_<R>;
+  using second_argument_type = KN_<R>;
+  using result_type          = long;
   static long  f( KN_<R>  const  & s, KN_<R>  const  &r)
     {
 	CheckContigueKN(s);
@@ -1682,7 +1712,10 @@ long  Op_Gatherv3(KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, 
 // Add J. Morice communications entre processeurs complex
 
 template<>
-struct Op_All2All<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
+struct Op_All2All<Complex> {
+  using first_argument_type  = KN_<Complex>;
+  using second_argument_type = KN_<Complex>;
+  using result_type          = long;
   static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)
   {
       CheckContigueKN(r);
@@ -1706,7 +1739,10 @@ struct Op_All2All<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,lo
 };
 
 template<>
-struct Op_Allgather1<Complex> : public binary_function<Complex *,KN_<Complex>,long> {
+struct Op_Allgather1<Complex> {
+  using first_argument_type  = Complex*;
+  using second_argument_type = KN_<Complex>;
+  using result_type          = long;
   static long  f( Complex *  const  & s, KN_<Complex>  const  &r)
   {
       CheckContigueKN(r);
@@ -1730,7 +1766,10 @@ struct Op_Allgather1<Complex> : public binary_function<Complex *,KN_<Complex>,lo
 
 
 template<>
-struct Op_Allgather<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
+struct Op_Allgather<Complex> {
+  using first_argument_type  = KN_<Complex>;
+  using second_argument_type = KN_<Complex>;
+  using result_type          = long;
   static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)
     {
 	CheckContigueKN(r);

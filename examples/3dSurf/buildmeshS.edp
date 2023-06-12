@@ -1,0 +1,17 @@
+include "buildmeshS.idp"
+border bc(t=0,2*pi) {  x = 1+cos(t); z= 2+sin(t); y = 3+0.5*sin(5*t);label=1;region=3;}
+border bci(t=0,2*pi) {  x = 1+0.5*cos(-t); z= 2+0.5*sin(-t); y = 3+0.1*cos(2*t);label=2;region=4;}
+verbosity=1; 
+meshL TL= buildmeshL(bc(100)+bci(50));
+cout << " TL: regions "<< regions(TL) << endl;
+cout << " TL: labels "<< labels(TL) << endl;
+meshS Ts=buildmeshSminsurf(TL,1); // minimal  surface 
+meshS Tsl=buildmeshSLap(TL,1); // Lapace   surface  
+plot(Ts,Tsl,TL,wait=1); 
+
+cout << " TL: regions "<< regions(Ts) << endl;
+cout << " TL: labels "<< labels(Ts) << endl;
+
+
+
+

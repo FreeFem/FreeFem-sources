@@ -11,7 +11,8 @@ func Pk = P1;                       // finite element space
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
 Mat<complex> A;
 int s = getARGV("-split", 1);
-buildMat(Th, s, A, Pk, mpiCommWorld)
+macro ThRefinementFactor()s//
+MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);                 // local finite element space
 
@@ -46,4 +47,4 @@ Wh<complex> u;                      // local solution
 u[] = A^-1 * rhs;
 
 macro def(u)u//
-plotMPI(Th, u, Pk, def, complex, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, complex, cmm = "Global solution");

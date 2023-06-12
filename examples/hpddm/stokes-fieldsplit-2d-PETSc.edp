@@ -21,7 +21,8 @@ mesh Th;
     Th = ThGlobal + Th;
 }
 Mat A;
-buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
+macro ThRefinementFactor()getARGV("-split", 1)//
+MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);
 varf vPb([u, uB, p], [v, vB, q]) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
@@ -39,10 +40,10 @@ u[] = 0.0;
 u[] = A^-1 * rhs;
 macro def2(u)[u, u#B]// EOM
 macro def1(u)u// EOM
-plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity with fieldsplit preconditioner")
-plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure with fieldsplit preconditioner")
+plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity with fieldsplit preconditioner");
+plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure with fieldsplit preconditioner");
 set(A, prefix = "monolithic_", sparams = "-monolithic_pc_type lu -monolithic_ksp_view -monolithic_ksp_rtol 1e-6");
 u[] = 0.0;
 u[] = A^-1 * rhs;
-plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity with monolithic preconditioner")
-plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure with monolithic preconditioner")
+plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity with monolithic preconditioner");
+plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure with monolithic preconditioner");

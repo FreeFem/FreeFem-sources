@@ -293,7 +293,7 @@ static inline void handler_ff_cholmod (int status, const char *file, int line,
 {
    
     char  serr[256];
-    sprintf (serr,"cholmod error: file: %s line: %d status: %d: %s\n",
+    snprintf (serr,256,"cholmod error: file: %s line: %d status: %d: %s\n",
         file, line, status, message) ;
     if(verbosity) cout << serr << endl;
     if (status < 0)

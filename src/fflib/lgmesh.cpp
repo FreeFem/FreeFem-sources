@@ -925,7 +925,7 @@ AnyType Adaptation::operator()(Stack stack) const
   Th.SmoothMetric(raison);
   Th.MaxSubDivision(maxsubdiv);
   Th.BoundAnisotropy(anisomax);
-   if(nbcperiodic && 0 ) // in test
+   if(nbcperiodic && false ) // in test
        // to be sure that the metric is ok with periotic BC
    {  // bof Bof ...
        if(verbosity>1) cout << "  inforce de periodic BC on Metric" << endl;

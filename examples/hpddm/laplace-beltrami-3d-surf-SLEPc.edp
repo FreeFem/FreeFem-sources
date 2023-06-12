@@ -18,7 +18,7 @@ func tz = r*sin(y*pi*2);
 meshS Th = square3(nx, ny, [tx,ty,tz], removeduplicate=true);
 
 Mat A;
-createMat(Th,A,P1)
+MatCreate(Th,A,P1);
 fespace Vh(Th,P1);
 
 macro Grad3(uvw) [dx(uvw), dy(uvw), dz(uvw)]//

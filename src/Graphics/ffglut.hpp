@@ -430,7 +430,7 @@ public:
     vector<RGB>  tbc;
     void color(int i,R alpha=1.) {
         ffassert(tbc.size());
-        RGB c(tbc[min(max(0,i),(const int) tbc.size())]);
+        RGB c(tbc[min(max(0,i),(const int) tbc.size()-1)]);
         if(alpha<1) {
             R a1=1.-alpha;
             c.r=c.r*alpha+a1;

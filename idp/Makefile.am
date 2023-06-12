@@ -31,7 +31,7 @@ LIST_IDP=cobrameshcavity.idp cube.idp \
 	macro_ddm_substructuring.idp macro_ddm.idp \
 	MeshSurface.idp mortar-msh.idp \
 	movemeshsmooth.idp MPIGMRESmacro.idp \
-	MPIplot.idp
+	MPIplot.idp buildmeshS.idp 
 
 install-exec-local:
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"

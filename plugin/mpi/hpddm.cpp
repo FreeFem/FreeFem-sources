@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
+//ff-c++-LIBRARY-dep: hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
 //ff-c++-cpp-dep:
 
 #define HPDDM_PRECISION                 2
@@ -252,9 +252,9 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
     pcommworld ptComm = GetAny<pcommworld>((*comm)(stack));
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
-    if(ptA->_cc) {
-        delete ptA->_cc;
-        ptA->_cc = nullptr;
+    if(ptA->HPDDM_cc) {
+        delete ptA->HPDDM_cc;
+        ptA->HPDDM_cc = nullptr;
     }
     if(c == 0) {
         MatriceMorse<HPDDM::upscaled_type<K>>* mA = nargs[0] ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[0])(stack))->A)) : 0;
@@ -267,7 +267,7 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
             ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
             MatriceMorse<HPDDM::upscaled_type<K>>* mB = nargs[1] ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[1])(stack))->A)) : nullptr;
             MatriceMorse<HPDDM::upscaled_type<K>>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[2])(stack))->A)) : nullptr;
-            if(dA._n == dA._m && !deflation) {
+            if(dA.HPDDM_n == dA.HPDDM_m && !deflation) {
                 if(timing) { // tic
                     timing->resize(timing->n + 1);
                     (*timing)[timing->n - 1] = MPI_Wtime();
@@ -335,9 +335,9 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
     }
     else {
         if(codeMatC)
-            ptA->_cc = new attachCoarseOperator<Type, K>::MatMatF_O(ptA->getDof(), stack, codeMatC);
+            ptA->HPDDM_cc = new attachCoarseOperator<Type, K>::MatMatF_O(ptA->getDof(), stack, codeMatC);
         else if(codeC)
-            ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
+            ptA->HPDDM_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
         else
             ffassert(0);
         return 0L;
@@ -397,10 +397,10 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, ptA->getCommunicator());
     const HPDDM::MatrixCSR<K>* A = ptA->getMatrix();
     bool alreadyRenumbered = false;
-    if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::_numbering == 'F' && mu > 1) {
+    if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::HPDDM_numbering == 'F' && mu > 1) {
         alreadyRenumbered = true;
-        std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
-        std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
+        std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { ++i; });
+        std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { ++i; });
     }
     if(timing) { // tic
         timing->resize(timing->n + 1);
@@ -421,9 +421,9 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(timing) { // toc
         (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
     }
-    if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::_numbering == 'C' && mu > 1) {
-        std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
-        std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
+    if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::HPDDM_numbering == 'C' && mu > 1) {
+        std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { ++i; });
+        std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { ++i; });
     }
     bool excluded = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(excluded)
@@ -480,8 +480,8 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(!excluded && verbosity > 0 && rank == 0)
         std::cout << std::scientific << " --- system solved (in " << timer << ")" << std::endl;
     if(HPDDM::Wrapper<K>::I == 'F' && mu > 1) {
-        std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { --i; });
-        std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { --i; });
+        std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { --i; });
+        std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { --i; });
     }
     return 0L;
 }
@@ -667,10 +667,10 @@ class InvSchwarz {
             MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, (*t).getCommunicator());
             const HPDDM::MatrixCSR<K>* A = (*t).getMatrix();
             bool alreadyRenumbered = false;
-            if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::_numbering == 'F' && mu > 1) {
+            if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::HPDDM_numbering == 'F' && mu > 1) {
                 alreadyRenumbered = true;
-                std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
-                std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
+                std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { ++i; });
+                std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { ++i; });
             }
             if(!alreadyRenumbered)
                 (*t).callNumfact();
@@ -678,9 +678,9 @@ class InvSchwarz {
             else
                 (*t).template callNumfact<'F'>();
 #endif
-            if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::_numbering == 'C' && mu > 1) {
-                std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
-                std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
+            if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::HPDDM_numbering == 'C' && mu > 1) {
+                std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { ++i; });
+                std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { ++i; });
             }
             if(mpirank != 0)
                 HPDDM::Option::get()->remove((*t).prefix("verbosity"));
@@ -704,8 +704,8 @@ class InvSchwarz {
                 }
             }
             if(HPDDM::Wrapper<K>::I == 'F' && mu > 1) {
-                std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { --i; });
-                std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { --i; });
+                std::for_each(A->HPDDM_ja, A->HPDDM_ja + A->HPDDM_nnz, [](int& i) { --i; });
+                std::for_each(A->HPDDM_ia, A->HPDDM_ia + A->HPDDM_n + 1, [](int& i) { --i; });
             }
         }
         static U inv(U Ax, InvSchwarz<T, U, K, trans> A) {
@@ -795,15 +795,15 @@ class IterativeMethod : public OneOperator {
                 Op& prec;
                 Operator(Op& m, Op& p) : HPDDM::EmptyOperator<R>(m.x.N()), mat(m), prec(p) { }
                 int GMV(const R* const in, R* const out, const int& mu = 1) const {
-                    mat.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
+                    mat.mv(in, HPDDM::EmptyOperator<R>::HPDDM_n, mu, out);
                     return 0;
                 }
                 template<bool>
                 int apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
-                        prec.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
+                        prec.mv(in, HPDDM::EmptyOperator<R>::HPDDM_n, mu, out);
                     else
-                        std::copy_n(in, HPDDM::EmptyOperator<R>::_n * mu, out);
+                        std::copy_n(in, HPDDM::EmptyOperator<R>::HPDDM_n * mu, out);
                     return 0;
                 }
         };
@@ -815,9 +815,9 @@ class IterativeMethod : public OneOperator {
                 template<bool>
                 int apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
-                        prec.mv(in, HPDDM::Subdomain<R>::_dof, mu, out);
+                        prec.mv(in, HPDDM::Subdomain<R>::HPDDM_dof, mu, out);
                     else
-                        std::copy_n(in, HPDDM::Subdomain<R>::_dof * mu, out);
+                        std::copy_n(in, HPDDM::Subdomain<R>::HPDDM_dof * mu, out);
                     return 0;
                 }
         };
@@ -925,7 +925,7 @@ basicAC_F0::name_and_type IterativeMethod<R, S>::E_LCG::name_param[] = {
 template<class Type>
 long globalNumbering(Type* const& A, KN<long>* const& numbering) {
     if(A) {
-        numbering->resize(2 + A->getMatrix()->_n);
+        numbering->resize(2 + A->getMatrix()->HPDDM_n);
         long long g;
         long* num = numbering->operator long*();
         A->distributedNumbering(num + 2, num[0], num[1], g);

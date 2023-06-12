@@ -35,7 +35,7 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	LapP1withflux.edp \
 	cauchyproblem.edp \
 	periodicS.edp Connectivite-S.edp \
-	LaplaceRT1Surf.edp
+	LaplaceRT1Surf.edp buildmeshS.edp 
 
 
 TESTS_TETGEN = HeatTorus.edp

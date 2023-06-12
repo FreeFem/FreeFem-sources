@@ -19,7 +19,8 @@ mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
 load "Element_P3"
 func Pk = P1;
 Mat A;
-buildMat(M, getARGV("-split", 1), A, Pk, mpiCommWorld)
+macro MRefinementFactor()getARGV("-split", 1)//
+MatCreate(M, A, Pk);
 fespace Vh(M, Pk);
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);
@@ -71,7 +72,7 @@ if(HasType("PC", "hpddm")) {
         SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_converged_reason -ksp_converged_reason -snes_view");
         ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
         macro def(u)u//
-        plotMPI(M, u, Pk, def, real, cmm = "Global solution")
+        plotMPI(M, u, Pk, def, real, cmm = "Global solution");
         set(A, sparams = "-pc_type none");
         if(stage)
             PetscLogStagePop();

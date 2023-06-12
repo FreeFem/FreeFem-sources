@@ -10,7 +10,8 @@ func Pk = P1;                       // finite element space
 
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
 Mat A;
-buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
+macro ThRefinementFactor()getARGV("-split", 1)//
+MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
@@ -41,7 +42,7 @@ if(mpirank == 0) {
     sol[] = x;
     macro params()cmm = "Global solution #1", wait = 1, dim = 3// EOM
     macro def(u)u//
-    plotMPI(Th, sol, Pk, def, real, params)
+    plotMPI(Th, sol, Pk, def, real, params);
 }
 {
     Mat C;
@@ -54,7 +55,7 @@ if(mpirank == 0) {
     ChangeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
     macro def(u)u//
-    plotMPI(Th, sol, Pk, def, real, params)
+    plotMPI(Th, sol, Pk, def, real, params);
 }
 {
     real[int] split(pF.n);
@@ -69,7 +70,7 @@ if(mpirank == 0) {
     ChangeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #3", wait = 1, dim = 3// EOM
     macro def(u)u//
-    plotMPI(Th, sol, Pk, def, real, params)
+    plotMPI(Th, sol, Pk, def, real, params);
 }
 {
     Mat M = [[ 0 , pB'],
@@ -90,5 +91,5 @@ if(mpirank == 0) {
     sol[] = x;
     macro params()cmm = "Global solution #4", wait = 1, dim = 3// EOM
     macro def(u)u//
-    plotMPI(Th, sol, Pk, def, real, params)
+    plotMPI(Th, sol, Pk, def, real, params);
 }

@@ -225,19 +225,20 @@ class BC_set : public E_F0mps { public:
         const MGauche *ui=uu->simple();
         ffassert(ui && ui->second == op_id);
         if(verbosity>9)
-         cout << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
+          cout <<"bc=" << kk << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
         else
         bc[kk]= make_pair(ui->first,CastTo<double>(ii->second));
-        //ii->second;
+        
       }
-    //  sort bc / num de composante
-
-        std::sort(bc.begin(),bc.end());
-        if(verbosity>9)
+      
+      //  sort bc / num de composante
+      
+      std::sort(bc.begin(),bc.end());
+      if(verbosity>9)
         for (vector<pair<int,Expression> >::iterator i=bc.begin(); i !=bc.end();++i)
-            cout <<"  on " <<  i->first << " " << i->second << endl;
+          cout <<"bc:  on " <<  i->first << " " << i->second << endl;
 
     for (int i=0;i<n;i++)
       if( ! BCastTo<KN_<long> >(args[i]))
@@ -251,6 +252,33 @@ class BC_set : public E_F0mps { public:
 	   onis[i]=1;
 	 }
   }
+
+  // operator by copy : used for FESpace composite to renum block index of finconnue et ftest.
+  // Remark: it used also in other part of Freefem
+  //         In this, we loose the optimal information
+  BC_set(  const BC_set & bcold ): complextype(bcold.complextype), on(bcold.on), 
+                                  onis(bcold.onis), bc(bcold.bc){} 
+  int nbtrue(bool *ok) const 
+     { 
+        int k=0; 
+        for (size_t i=0;i<bc.size();i++) 
+          if (ok[i]) k++;
+         return k;
+     }
+  BC_set(  const BC_set & bcold, bool * ok ): complextype(bcold.complextype), on(bcold.on), 
+                                  onis(bcold.onis){
+                                    bc.resize( bcold.nbtrue(ok) );
+                                    int kk=0;
+                                    for (size_t i=0;i<bcold.bc.size();i++){
+                                      if(ok[i]){
+                                          bc[kk].first  = bcold.bc[i].first;
+                                          bc[kk].second = bcold.bc[i].second;
+                                          kk++;
+                                      }
+                                    }
+                                    ffassert( kk== bc.size() );
+                                  } 
+
     template<class K>
      void CastToK()
     {
@@ -470,7 +498,7 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic {
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =3+NB_NAME_PARM_MAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
+  static const int n_name_param =3+NB_NAME_PARM_MAT + NB_NAME_PARM_HMAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
   int Nitem,Mitem;
   const int dim;
 public:
@@ -499,10 +527,41 @@ public:
       if(AcadnaC) AcadnaC->destroy();
       }
   } ;
+  
+  struct DataComposite{
+    vector< void * > *pThU; 
+    vector< void * > *pThV; 
+
+    CountPointer<MatriceCreuse<double> > ARglobal;
+    CountPointer<MatriceCreuse<Complex> > ACglobal;
+    void init()  { pThU=0; pThV=0; ARglobal.init(); ACglobal.init();}
+    void destroy() {
+      if(pThU){
+        if(! pThU->empty()){
+          for( int i=0;i<pThU->size(); i++) (*pThU)[i] = nullptr;
+          pThU->clear();
+        }
+        delete pThU;
+      }
+      if(pThV){
+        if(! pThV->empty()){
+          for( int i=0;i<pThV->size(); i++) (*pThV)[i] = nullptr;
+          pThV->clear();
+        }
+        delete pThV;
+      }
+      if(ARglobal){ ARglobal->SetSolver(); ARglobal.destroy(); }
+      if(ACglobal){ ACglobal->SetSolver(); ACglobal.destroy(); }
+    }
+  };
+  
   const OneOperator *precon;
 
   C_args *op; // the list of all operator
+  KNM<list<C_F0>> block_largs;
+  // list<C_F0> largs;  
   mutable vector<Expression> var; // list des var pour les solutions et test
+  mutable vector<int> type_var;   // list des type des FESpace for each var pour les solutions et test (used only different type of FESpace)
   bool complextype,VF;
 
   //   Expression noinit,type,epsilon;
@@ -512,14 +571,14 @@ public:
   Problem(const C_args * ca,const ListOfId &l,size_t & top) ;
   static ArrayOfaType  typeargs() { return ArrayOfaType(true);}// all type
 
-  Data<FESpace> * dataptr (Stack stack) const {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
+  Data<FESpace> * dataptr (Stack stack) const   {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
   Data<FESpace3> * dataptr3 (Stack stack) const {return   (Data<FESpace3> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceS> * dataptrS (Stack stack) const {return   (Data<FESpaceS> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceL> * dataptrL (Stack stack) const {return   (Data<FESpaceL> *) (void *) (((char *) stack)+offset);}
 
+  DataComposite *dataptrCompo(Stack stack) const {return  (DataComposite *) (void *) (((char *) stack)+offset);}
     
   void init(Stack stack) const  {
-      // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl;
       if(dim==2)
       dataptr(stack)->init();
       else if(dim==3)
@@ -528,17 +587,21 @@ public:
       dataptrS(stack)->init();
       else if(dim==5)
       dataptrL(stack)->init();
+      else if(dim==6) dataptrCompo(stack)->init(); // allocation pour que les offset soit correct
   }
   void destroy(Stack stack)  const  {
       if(dim==2) dataptr(stack)->destroy();
       else if(dim==3) dataptr3(stack)->destroy();
       else if(dim==4) dataptrS(stack)->destroy();
       else if(dim==5) dataptrL(stack)->destroy();
+      else if(dim==6) dataptrCompo(stack)->destroy(); // allocation pour que les offset soit correct
   }
 
   template<class R,class FESpace,class v_fes>
   AnyType eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
   MatriceCreuse< typename CadnaType<R>::Scalaire >  * & dataCadna) const;
+  template<class R>    // TODO if coupling FE wit problem
+  AnyType evalComposite(Stack stack,DataComposite *data, CountPointer<MatriceCreuse<R> > & dataA) const;
   AnyType operator()(Stack stack) const; // move in Problem.cpp  dec. 2018 FH
 
   bool Empty() const {return false;}
@@ -576,6 +639,12 @@ class FormBilinear : public E_F0mps { public:
   static  E_F0 * f(const basicAC_F0 & args) { return new FormBilinear(args);}
   FormBilinear(A a,Expression bb) : di(a),b(new Foperator(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */)
   {ffassert(b);}
+
+  // Added J. Morice to recreate largs
+  // FormBilinear(A a, Foperator &bb) : di(a),b(&bb)/*->Optimize(currentblock) FH1004 */
+  // {ffassert(b);}
+  // Fin Added J. Morice 
+
   FormBilinear operator-() const { return  FormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
   bool VF() const { return MaxOp(b) >= last_operatortype;}
   int dim() const {return di->d;}
@@ -597,7 +666,6 @@ class FormLinear : public E_F0mps { public:
     assert(di);
     Expression a1=CastTo<B>(args[1]);
     assert(a1);
-   // cout << "  ---FormLinear: "<< a1 << "  " << typeid(*a1).name() << *a1 <<endl;
     B ll= dynamic_cast<B>(a1);
     assert(ll);
     l = new Ftest(*ll); // FH1004 ->Optimize(currentblock);  same as bilinear
@@ -636,6 +704,24 @@ public:
 
 };
 
+// specification of Linear Form in the case of composite
+template<>
+class Call_FormLinear< vect_generic_v_fes>: public E_F0mps
+{
+public:
+  KN<list<C_F0>> block_largs;
+  Expression *nargs;
+  typedef list<C_F0>::const_iterator const_iterator;
+  const int N;
+  Expression ppfes;
+
+  Call_FormLinear(Expression * na,Expression  LL, Expression ft);
+  AnyType operator()(Stack stack) const
+  { InternalError(" bug: no eval of Call_FormLinear ");}
+   operator aType () const { return atype<void>();}
+
+};
+
 template<class VFES1,class VFES2>
 class Call_FormBilinear: public E_F0mps
 {
@@ -649,7 +735,26 @@ public:
   Call_FormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
   AnyType operator()(Stack stack) const
   { InternalError(" bug: no eval of Call_FormBilinear ");}
-   operator aType () const { return atype<void>();}
+  
+operator aType () const { return atype<void>();}
+};
+
+template<class VFES1,class VFES2>
+class Call_CompositeFormBilinear: public E_F0mps
+{
+public:
+  Expression *nargs;
+  KNM<list<C_F0>> block_largs;
+
+  typedef list<C_F0>::const_iterator const_iterator;
+
+  const int N,M;
+  Expression euh,evh;
+  Call_CompositeFormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
+  AnyType operator()(Stack stack) const
+  { InternalError(" bug: no eval of Call_CompositeFormBilinear ");}
+  
+operator aType () const { return atype<void>();}
 
 };
 
@@ -714,13 +819,29 @@ struct OpCall_FormBilinear
   E_F0 * code(const basicAC_F0 & args) const
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
-    // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
     return  new Call_FormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
   OpCall_FormBilinear() :
     OneOperator(atype<const Call_FormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
 
+template<class T,class v_fes1, class v_fes2>
+struct OpCall_CompositeFormBilinear
+  : public OneOperator ,
+  OpCall_FormBilinear_np
+{
+  typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
+  
+  E_F0 * code(const basicAC_F0 & args) const
+  { Expression * nargs = new Expression[n_name_param];
+    args.SetNameParam(n_name_param,name_param,nargs);
 
+    return  new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));
+
+  }
+  
+  OpCall_CompositeFormBilinear() :
+    OneOperator(atype<const Call_CompositeFormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
+};
 
 
 
@@ -802,6 +923,60 @@ struct OpMatrixtoBilinearForm
     OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
     init(initt)
  {}
+};
+
+template<class R>  //  to make   x=linearform(x)
+struct OpArraytoLinearFormVG
+  : public OneOperator
+{
+  typedef typename Call_FormLinear<vect_generic_v_fes>::const_iterator const_iterator;
+  const bool isptr;
+  const bool init;
+  const bool zero;
+  class Op : public E_F0mps
+  {
+  public:
+    Call_FormLinear<vect_generic_v_fes> *l;
+    Expression x;
+    const  bool isptr;
+    const  bool init;
+    const  bool zero;
+
+    AnyType operator()(Stack s)  const ;
+    Op(Expression xx,Expression  ll,bool isptrr,bool initt,bool zzero)
+      : l(new Call_FormLinear<vect_generic_v_fes>(*dynamic_cast<const Call_FormLinear<vect_generic_v_fes> *>(ll))),
+        x(xx),
+        isptr(isptrr),init(initt),zero(zzero)
+        {
+          assert(l);
+
+          int NN = (int) l->ppfes->componentNbitem().size();
+      
+          bool total_iscmplx=false;
+          // loop over block
+          for(int i=0; i<NN; i++){
+              // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
+              bool iscmplx=FieldOfForm(l->block_largs(i),IsComplexType<R>::value)  ;
+              // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
+              ffassert( (iscmplx) == IsComplexType<R>::value);
+              if( !total_iscmplx ) total_iscmplx=iscmplx;
+          }
+        }
+    operator aType () const { return atype<KN<R> *>();}
+
+  };
+  E_F0 * code(const basicAC_F0 & args) const
+  { if(isptr) return new Op(to<KN<R> *>(args[0]),args[1],isptr,init,zero);
+    else      return new Op(to<KN_<R> >(args[0]),args[1],isptr,init,zero);}
+
+
+  //  OpArraytoLinearForm(const basicForEachType * tt) :
+  //    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
+
+  OpArraytoLinearFormVG(const basicForEachType * tt,bool isptrr, bool initt,bool zzero=1) :
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<vect_generic_v_fes>*>()),
+    isptr(isptrr), init(initt),zero(zzero) {}
+
 };
 
 template<class R>
@@ -1069,8 +1244,8 @@ template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A)
         A.typemat=HA->sym() ;//(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     }
     else {
-	cerr << " unkwon type of matrix " << wm <<endl;
-	ExecError("Erreur read matrix ");
+	cerr << " unknown type of matrix " << wm <<endl;
+	ExecError("Error reading the matrix ");
 	A.A =0; }
     return f;  }
 
@@ -1098,9 +1273,6 @@ template<class K> class Matrice_Creuse_inv_trans  { public:// add aug 2018 FH.
     operator Matrice_Creuse<K> * () const {return A;}
 };
 
-
-
-
 namespace Fem2D {
 
   inline void F_Pi_h(R* v, const R2 & P,const baseFElement & K,int i,const R2 & Phat,void * arg)
@@ -1126,19 +1298,15 @@ namespace Fem2D {
 //general templates for 2d and 3d volume // for Surf version ...
 template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>  bool AssembleVarForm(Stack stack,const MMesh & Th,
                                                                    const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
-                                                                   MC  * A,KN_<R> * B,const list<C_F0> &largs );
+                                                                   MC  * A,KN_<R> * B,const list<C_F0> &largs, int * mpirankandsize = nullptr);
 
 template<class R,class MMesh,class FESpace1,class FESpace2>   void AssembleBC(Stack stack,const MMesh & Th,
                                                   const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                                                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
-                                                  const list<C_F0> &largs , double tgv  );
-template<class R,class MMesh,class FESpace1,class FESpace2>  void AssembleBC(Stack stack,const MMesh & Th,const FESpace1 & Uh,
-                                                  const FESpace2 & Vh,bool sym, MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
-                                                  const list<C_F0> &largs , double tgv  );
-
+                                                  const list<C_F0> &largs , double tgv , int * mpirankandsize = nullptr);
 
 // 2d case
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,
@@ -1146,11 +1314,11 @@ template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,c
 template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label,
                                      void * stack,R2 *B);
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th3,const FESpace & Uh3,const FESpace & Vh3,bool sym,
-                                    MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
+                                    MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv, int * mpirankandsize = nullptr);
 
 
 // 3d volume case
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,
@@ -1159,7 +1327,7 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & 
                                      void * stack,R3 *B);
 
 // 3d surface case
-template<class R>   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElementS & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElementS & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceS> & mat,const FElementS & Ku,const FElementS & Kv,double * p,
@@ -1168,7 +1336,7 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceS> & 
                                     void * stack,R3 *B);
 
 // 3d curve case
-template<class R>   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * const l, int * mpirankandsize = nullptr);
 template<class R>   void  Element_rhs(const FElementL & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
 template<class R>   void  Element_rhs(const FElementL & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
 template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceL> & mat,const FElementL & Ku,const FElementL & Kv,double * p,
@@ -1219,6 +1387,185 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
   return SetAny<KN_<R> >(xx);
 }
 
+#include "compositeFESpace.hpp"
+
+/**
+       *  @brief  Builds a new largs  whit each element are included in one block
+       *  @param  largs list of argument of the initial Forms 
+       *  @param  NpVh  number of FESpace in Vh 
+       *  @param  indexBlockVh give the index of the block for a given component of FESpace Vh  
+       * 
+       */
+
+// 
+inline KN< list<C_F0> >  creationLinearFormCompositeFESpace( const list<C_F0> & largs, const int& NpVh, const KN<int> & indexBlockVh
+                                                           ,const KN<int> &localIndexInTheBlockVh )
+{ 
+  // hypothesis ::                   NpUh =                   NpVh
+  //            ::           indexBlockUh =           indexBlockVh
+  //            :: localIndexInTheBlockUh = localIndexInTheBlockVh
+  // This hypothesis is BC_set condition
+
+  KNM< list<C_F0> > block_largs;
+  block_largs.resize( (long) NpVh, (long) NpVh );
+  
+  list<C_F0> tmp_largs = creationLargsForCompositeFESpace( largs, NpVh, NpVh, indexBlockVh, indexBlockVh );
+  block_largs = computeBlockLargs( tmp_largs, NpVh, NpVh, indexBlockVh, indexBlockVh );
+  changeComponentFormCompositeFESpace( localIndexInTheBlockVh, localIndexInTheBlockVh, block_largs );
+
+  // Remark : block_largs contains Bilinear and Non diagonnal if you use one varf to define Matrix and rhs
+  KN< list<C_F0> > block_diag_largs( (long) NpVh);
+  for( int i=0; i<NpVh; i++){
+    const list<C_F0> & tp_largs = block_largs(i,i);
+    list<C_F0>::const_iterator ii,ib=tp_largs.begin(),ie=tp_largs.end(); 
+    for (ii=ib;ii != ie;ii++) {
+      aType r = ii->left(); 
+      if(r == atype<const  BC_set  *>() || r==atype<const  FormLinear *>() ){
+        // only add BC_set in  FormLinear in the varf that we want to evaluate
+        block_diag_largs(i).push_back(*ii);
+      }
+    }
+  }
+
+  return block_diag_largs; 
+}
+
+template<class R>
+AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
+{
+  // typedef typename  v_fes::FESpace FESpaceT;
+  // get tgv value 
+  double tgv= ff_tgv;
+  if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
+  pcommworld commworld = nullptr; // PLACEHOLDER FOR DISTRIBUTED PARAMETER FOR LINEAR FORMS
+
+  // get the composite FESpace
+  pvectgenericfes  *  pCompoVh= GetAny<pvectgenericfes * >((*l->ppfes)(stack));
+  ffassert( *pCompoVh );
+  (*pCompoVh)->update();
+
+// get info the composite FESpace
+  int  NpVh = (*pCompoVh)->N;
+  KN<int> VhNbItem = (*pCompoVh)->vectOfNbitem();
+  KN<int> VhNbOfDf = (*pCompoVh)->vectOfNbOfDF();
+  // get x from the stack 
+  long totalNbOfDF =  (*pCompoVh) ? (*pCompoVh)->totalNbOfDF(): 0;
+  KN<R> *px=0;
+  if(isptr)
+    {
+     px = GetAny<KN<R> * >((*x)(stack) );
+     if(init )
+       px->init(totalNbOfDF);
+
+     if(px->N() != totalNbOfDF) //add Dec 2009
+     {
+        if(!zero ) ExecError("Error in OpArraytoLinearForm   += not correct size:  n != NbOfDF !");
+	      px->resize(totalNbOfDF);
+     }
+     ffassert(px->N() == totalNbOfDF);
+   }
+  // construction of the Array of Composite FESpace
+  KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
+  if(zero && totalNbOfDF )
+   xx=R();
+
+  int VhtotalNbItem=0;
+  for(int i=0; i< NpVh; i++) VhtotalNbItem += VhNbItem[i];
+
+
+  KN<int> beginBlockVh( NpVh );
+  KN<int> indexBlockVh( VhtotalNbItem );
+  KN<int> localIndexInTheBlockVh( VhtotalNbItem );
+
+  int current_index=0;
+  for(int i=0; i<NpVh; i++){
+    beginBlockVh[i] = current_index;
+    for(int j=0; j< VhNbItem[i]; j++){
+      indexBlockVh[current_index] = i;
+      localIndexInTheBlockVh[current_index] = j;
+      current_index++;
+    }
+
+  }
+  ffassert( current_index == VhtotalNbItem );
+
+
+  bool parallel_assemble=true;
+  // ===  loop over the block ===//
+  int offsetVh = 0;
+  for( int j=0; j<NpVh; j++){
+    // get the information of the block
+    const list<C_F0> & b_largs=l->block_largs(j); 
+    int M_block = VhNbOfDf[j];
+
+    if( b_largs.size() > 0 ){
+      
+      if(!parallel_assemble){
+        KN<R> xxblock2(M_block);
+        xxblock2=R();   // initiallise the block to zero ??? (get previous value of xxblock2).
+
+        if( (*pCompoVh)->typeFE[j] == 2 ){
+          // 2d Mesh 
+          FESpace * pVh = (FESpace*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpace & Vh = *pVh;
+
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,Mesh,FESpace,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+
+        }else if( (*pCompoVh)->typeFE[j] == 3 ){
+          // 3d Mesh
+          FESpace3 * pVh = (FESpace3*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpace3 & Vh = *pVh;
+
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,Mesh3,FESpace3,FESpace3>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+
+        }else if( (*pCompoVh)->typeFE[j] == 4 ){
+          // 3d Surface Mesh 
+          FESpaceS * pVh = (FESpaceS*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpaceS & Vh = *pVh;
+
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,MeshS,FESpaceS,FESpaceS>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+
+        }else if( (*pCompoVh)->typeFE[j] == 5 ){
+          // 3d Curve Mesh
+          FESpaceL * pVh = (FESpaceL*) (*pCompoVh)->vect[j]->getpVh();;
+          FESpaceL & Vh = *pVh;
+
+          if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,b_largs) )
+            AssembleBC<R,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
+
+        }
+        else{
+          cerr << "Error in the definition in the type of FESpace."  << endl;
+          ffassert(0);
+        }
+        for(int indexJ=0; indexJ<M_block; indexJ++){
+          xx[indexJ+offsetVh] += xxblock2[indexJ]; 
+        }
+        // delete [] xxblock2; 
+      }
+      else{
+        KN<R> bidon(totalNbOfDF);
+        bool rhs_from_varf=true;
+        //KN<R> bidon(1); ???
+        varfToCompositeBlockLinearSystemALLCASE_pfes<R>( j, j, 
+                (*pCompoVh)->typeFE[j], (*pCompoVh)->typeFE[j],
+                offsetVh, offsetVh,
+                 (*pCompoVh)->vect[j], (*pCompoVh)->vect[j],
+                false, false, false, tgv, commworld,
+                b_largs, stack, 
+                &xx , &bidon, nullptr,rhs_from_varf);
+      }
+    }
+    offsetVh += M_block;
+  }
+  return SetAny<KN_<R> >(xx);
+}
+
+
+
 template<typename KK,typename vv_fes,typename CC>
 struct FF_L_args {
     typedef  KK K;
@@ -1256,6 +1603,9 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
+template<class R,class MMESH, class FESpace1, class FESpace2>
+void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 * PVh, const int &sym, const double &tgv, 
+                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A, int * mpirankandsize = nullptr);
 
 template<class R,class MMesh,class v_fes1,class v_fes2>
 AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
@@ -1295,60 +1645,73 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
 
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
+  // 
   if(init) A.init(); //
   if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
+
+  creationBlockOfMatrixToBilinearForm<R,MMesh,FESpace1,FESpace2>( PUh, PVh, ds.sym, ds.tgv, b->largs, stack, A);
+
+   A.pHM()->half = ds.sym;
+   if (A_is_square)
+        SetSolver(stack,VF,*A.A,ds);
+    
+  return SetAny<Matrice_Creuse<R>  *>(&A);
+
+}
+
+template<class R,class MMesh, class FESpace1, class FESpace2>
+void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 * PVh, const int &sym, const double &tgv, 
+                             const list<C_F0> & largs, Stack stack, Matrice_Creuse<R> &A, int * mpirankandsize){
+  typedef typename  FESpace1::Mesh Mesh1;
+  typedef typename  FESpace2::Mesh Mesh2;
+
+  // this lines must be defined outside this function
+  // if(init) A.init();
+  // if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
   const FESpace1 & Uh =  *PUh ;
   const FESpace2 & Vh =  *PVh ;
   const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
   const MMesh &Th= *pTh ;    // integration Th
-  bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);
+  bool same=isSameMesh(largs, &Uh.Th, &Vh.Th, stack);
   if ( same)
    {
      if ( A.Uh != Uh  || A.Vh != Vh )
-       { // reconstruct all the matrix
-	 A.A=0; // to delete  old  matrix ADD FH 16112005
-	 A.Uh=Uh;
-	 A.Vh=Vh;
-	 if (ds.sym )
-	   {  A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Vh.NbOfDF,ds.sym) );
-	     ffassert( (void*)&Uh == (void*)&Vh);}
-	 else
-	     A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions
-           // reset the solver ...
-       }
+      { // reconstruct all the matrix
+        A.A=0; // to delete  old  matrix ADD FH 16112005
+        A.Uh=Uh;
+        A.Vh=Vh;
+        if (sym ){
+          A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Vh.NbOfDF,sym) );
+	        ffassert( (void*)&Uh == (void*)&Vh);
+        }
+	      else
+	        A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions
+          // reset the solver ...
+      }
      *A.A=R(); // reset value of the matrix
-
-     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )
-       AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym>0,A.A,0,largs,mpirankandsize) )
+       AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes.
 #ifdef V3__CODE
      MatriceMap<R>   AAA;
-     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym>0);
-       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
+     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),sym>0);
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,&AAA,0,largs);
      pMA->addMap(1.,AAA);
 #else
-       MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
+       MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,&AAA,0,largs,mpirankandsize);
 
 #endif
        A.A.master(pMA ) ;
 
        if (bc)
-           AssembleBC<R>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
+           AssembleBC<R>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
 
    }
-   A.pHM()->half = ds.sym;
-   if (A_is_square)
-        SetSolver(stack,VF,*A.A,ds);
-
-  return SetAny<Matrice_Creuse<R>  *>(&A);
-
 }
-
-
 
 //bool SetGMRES();
 //bool SetCG();

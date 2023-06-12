@@ -13,14 +13,18 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
     res = pr#Aglobal*u;
     else if (!preffe#prmesh#excluded){
       IFMACRO(pr#bem,1)
-      preffe#K[int] scaledu = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*u;
-      preffe#K[int] scaledug(preffe#Vhglob.ndof);
-      scaledug = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledu;
-      preffe#K[int] ug(scaledug.n);
-      ug = 0;
+      int mrhs = u.n / pr#prfe#Vhi.ndof; /* multi rhs */
+      preffe#K[int] ug(preffe#Vhglob.ndof*mrhs), scaledug(preffe#Vhglob.ndof*mrhs);
+      ug = 0; scaledug = 0;
+      for (int i=0; i<mrhs; i++) {
+        preffe#K[int] scaledu = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*u(i*pr#prfe#Vhi.ndof:(i+1)*pr#prfe#Vhi.ndof-1);
+        scaledug(i*preffe#Vhglob.ndof:(i+1)*preffe#Vhglob.ndof-1) = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledu;
+      }
       mpiAllReduce(scaledug,ug,preffe#prmesh#commddm,mpiSUM);
       preffe#K[int] resg = pr#Aglobal*ug;
-      res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
+      for (int i=0; i<mrhs; i++) {
+        res(i*pr#prfe#Vhi.ndof:(i+1)*pr#prfe#Vhi.ndof-1) = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg(i*preffe#Vhglob.ndof:(i+1)*preffe#Vhglob.ndof-1);
+      }
       ENDIFMACRO
 
       IFMACRO(!pr#bem)
@@ -255,6 +259,13 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           for (int i=0;i<pr#si;i++)
           tmp[i]=pr#Z[i]'*l; /* local vector Z'_i l_i */
           if(!preffe#prmesh#binexactCS) {
+            IFMACRO(pr#CSwithpetsc)
+            if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS)
+              preffe#prmesh#tic(pr#tcsi)
+              tmp = pr#petscE^-1*tmp;
+              preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
+            ENDIFMACRO
+            IFMACRO(!pr#CSwithpetsc)
             mpiGatherv(tmp,vaux,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
             /* mpiGatherv puts together inside vaux the local vectors (whose sizes are in sizelg) */
             if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
@@ -268,6 +279,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
               preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
             }
             mpiScatterv(zaux,tmp,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
+            ENDIFMACRO
             /* inverse of mpiGatherv, cut the global zaux into the local tmp[i] */
             for (int i=0;i<pr#si;i++) {
               res += tmp[i]*pr#Z[i];
@@ -366,7 +378,7 @@ IFMACRO (pr#myPREC1)
 pr#myPREC1
 ENDIFMACRO
 IFMACRO (!pr#myPREC1)
-func preffe#K[int] pr#PREC1(preffe#K[int] &l)
+func preffe#K[int] pr#PREC1(preffe#K[int] &l, int mrhs)
 {
   /* Application of the 1 level preconditioner
   M^{-1}*y = \sum Ri^T*Di*Ai^{-1}*Ri*y
@@ -383,6 +395,7 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l)
     }
     else {
       if (!bpara) {
+        assert(mrhs == 1);
         for(int i=0; i<preffe#prmesh#npart; ++i)  {
           preffe#K[int] bi(preffe#Rih[i].n);
           bi = preffe#Rih[i]*l;           /* restricts rhs */
@@ -397,21 +410,36 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l)
       else if (!preffe#prmesh#excluded){
         preffe#K[int] aux = l;
         if(pr#prec == "soras")
-        aux = aux .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+        for (int m=0; m<mrhs; m++)
+          aux(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1) = aux(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1) .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
         /* s = aR[mpirank]^-1 * l; */
         s = pr#aR[mpiRank(preffe#prmesh#commddm)]^-1 * aux;
         if(pr#prec != "asm"){
-          pr#prfe#update(s,true);
+          for (int m=0; m<mrhs; m++)
+            pr#prfe#update(s(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1),true);
         }
         else{
-          pr#prfe#update(s,false);	
-          pr#prfe#update(s,true);
+          for (int m=0; m<mrhs; m++) {
+            pr#prfe#update(s(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1),false);
+            pr#prfe#update(s(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1),true);
+          }
         }       
       }
     }
     preffe#prmesh#toc(pr#tpreci,"",pr#tprec)
   }
   return s;
+}
+
+func preffe#K[int] pr#PREC1(preffe#K[int] &l)
+{
+  int mrhs = 1;
+  if (preffe#prmesh#isincomm) {
+    int ndof = bpara ? preffe#Dk[mpiRank(preffe#prmesh#commddm)].n : preffe#Vhglob.ndof;
+    assert(l.n%ndof == 0);
+    mrhs = l.n/ndof;
+  }
+  return pr#PREC1(l, mrhs);
 }
 ENDIFMACRO
 

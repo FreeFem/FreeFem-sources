@@ -13,15 +13,17 @@ mesh ThNew, Th = square(getARGV("-global", 20), getARGV("-global", 20));
     border d(t=0,1) { x=0;   y=1-t; };
     ThNew = buildmesh(a(N)+b(N)+c(N)+d(N));
 }
-buildDmesh(Th)
-buildDmesh(ThNew)
+macro ThRefinementFactor()getARGV("-first_split", 1)//
+macro ThNewRefinementFactor()getARGV("-second_split", 1)//
+DmeshBuild(Th);
+DmeshBuild(ThNew);
 plotDmesh(Th, cmm = "First mesh");
 plotDmesh(ThNew, cmm = "Second mesh");
 func Pk = P2;
 Mat A, B, P;
-createMat(Th, A, Pk)
-createMat(ThNew, B, Pk)
-transferMat(ThNew, Pk, B, Th, Pk, A, P)
+MatCreate(Th, A, Pk);
+MatCreate(ThNew, B, Pk);
+MatInterpolate(ThNew, Pk, B, Th, Pk, A, P);
 
 macro grad(u)[dx(u), dy(u)]// EOM
 varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);

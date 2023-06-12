@@ -207,15 +207,22 @@ fi
            test -n "$MPICXX" && ff_mpishow=`$MPICXX -show` 2>/dev/null
            test -n "$MPICC" && ff_mpicshow=`$MPICC -show` 2>/dev/null
            test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+	   if test "$with_mpiinc" = no -o -z "$with_mpiinc" ; then
+	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n' | sed '1 d'| grep -E '^[-/][^WLlOgpf]|^-Wp,'|tr '\n' ' '`]
+	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+	    else
+	      [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+	    fi
 	    if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then
-		[ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n' | sed '1 d'| grep -E '^[-/][^WLlOgpf]|^-Wp,'|tr '\n' ' '`]
 		ff_MPI_LIB_DIRS=""
 		[ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 		[ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 		[ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|grep -v 'commons,use_dylibs' |tr '\n' ' '`]
-		[ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+            else
+	      ff_MPI_LIB="$with_mpilibs"
+	      ff_MPI_LIBC="$with_mpilibs"
+	      ff_MPI_LIBFC="$with_mpilibs"
 	    fi
-	    [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
 	    [ff_mpi_ldir=`echo $ff_MPI_LIB|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|sed -e 's/^-[Llp]//' -e 's/^-Wl,]//'  |tr '\n' ' '`' /usr/lib']
 
 	    if  test -z "$ff_MPI_INCLUDE_DIR" ; then

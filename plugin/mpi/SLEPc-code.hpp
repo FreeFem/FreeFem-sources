@@ -174,7 +174,7 @@ PetscErrorCode FormFun(NEP nep, PetscScalar lambda, Mat F, Mat P, void* ctx) {
         reinterpret_cast< typename eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>::ScalarF_O* >((*user)->F);
     int ret;
     f->apply(lambda, &ret);
-    PetscFunctionReturn(ret);
+    PetscFunctionReturn(PetscErrorCode(ret));
 }
 PetscErrorCode FormJac(NEP nep, PetscScalar lambda, Mat J, void* ctx) {
     User<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>* user;
@@ -185,7 +185,7 @@ PetscErrorCode FormJac(NEP nep, PetscScalar lambda, Mat J, void* ctx) {
         reinterpret_cast< typename eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>::ScalarF_O* >((*user)->J);
     int ret;
     f->apply(lambda, &ret);
-    PetscFunctionReturn(ret);
+    PetscFunctionReturn(PetscErrorCode(ret));
 }
 template<class Type, class K, class SType>
 AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) const {
@@ -563,7 +563,7 @@ static PetscErrorCode MatMult_User(Mat A, Vec x, Vec y) {
     yy = *mat * xx;
     VecRestoreArray(y, &out);
     VecRestoreArrayRead(x, &in);
-    PetscFunctionReturn(0);
+    PetscFunctionReturn(PETSC_SUCCESS);
 }
 void finalizeSLEPc() {
     SlepcFinalize();
