@@ -810,6 +810,14 @@ namespace PETSc {
                           IS is;
                           ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->HPDDM_n, idx, PETSC_OWN_POINTER, &is);
                           PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                          if (!A->HPDDM_sym && ptA->_petsc) {
+                              PetscInt bs;
+                              MatGetBlockSize(ptA->_petsc, &bs);
+                              if (bs > 1) {
+                                  ISSetBlockSize(is, bs);
+                                  MatSetBlockSize(aux, bs);
+                              }
+                          }
                           PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                           PCSetFromOptions(pc);
                           MatDestroy(&aux);
@@ -817,6 +825,12 @@ namespace PETSc {
                       }
                       else {
                           PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                          if (!A->HPDDM_sym && ptA->_petsc) {
+                              PetscInt bs;
+                              MatGetBlockSize(ptA->_petsc, &bs);
+                              if (bs > 1)
+                                  MatSetBlockSize(aux, bs);
+                          }
                           PCHPDDMSetAuxiliaryMat(pc, NULL, aux, NULL, NULL);
                           MatDestroy(&aux);
                       }
@@ -2596,6 +2610,15 @@ namespace PETSc {
                     Mat aux = ff_to_PETSc(B);
                     Mat N;
                     PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                    if (!A->HPDDM_sym && ptA->_petsc) {
+                        PetscInt bs;
+                        MatGetBlockSize(ptA->_petsc, &bs);
+                        if (bs > 1) {
+                            if (!N)
+                                ISSetBlockSize(is, bs);
+                            MatSetBlockSize(aux, bs);
+                        }
+                    }
                     if(!N) {
                         PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                         PCSetFromOptions(pc);
@@ -2613,6 +2636,15 @@ namespace PETSc {
                   Mat aux = ff_to_PETSc(A);
                   Mat N;
                   PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                  if (!A->HPDDM_sym && ptA->_petsc) {
+                      PetscInt bs;
+                      MatGetBlockSize(ptA->_petsc, &bs);
+                      if (bs > 1) {
+                          if (!N)
+                              ISSetBlockSize(is, bs);
+                          MatSetBlockSize(aux, bs);
+                      }
+                  }
                   if(!N) {
                       PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                       PCSetFromOptions(pc);
