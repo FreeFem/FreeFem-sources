@@ -3457,9 +3457,9 @@ void plot_vector2flow( std::stringstream &Content, const Fem2D::Mesh &Th,
 	(fmax - fmin)/nbfill;
 
     if( varrow )
-	std::cout << "plotPDF(): Option 'varrow' is not implmeneted yet." << endl;
+	std::cout << "plotPDF(): Option 'varrow' is not implemented yet." << endl;
     if( nbarrow != 0 )
-	std::cout << "plotPDF(): Option 'nbarrow' is not implmeneted yet." << endl;
+	std::cout << "plotPDF(): Option 'nbarrow' is not implemented yet." << endl;
 
     std::stringstream &st = Content;
     st.str("");
