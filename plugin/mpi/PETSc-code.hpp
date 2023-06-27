@@ -6152,40 +6152,57 @@ namespace PETSc {
               if (VFBEM==1)
                 ffassert (samemesh);
 
-              PETSc::DistributedCSR< HpddmType > * Abemblock = new PETSc::DistributedCSR< HpddmType >;
+              PETSc::DistributedCSR< HpddmType > *Abemblocki = nullptr, *Abemblock = nullptr;
 
               // block diagonal matrix
-              if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
-                ffassert( i==j ); // If not a block diagonal not coded yet
-                // MeshS --- MeshS
-                // ==== FESpace 3d Surf: inconnue et test ===
-                const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-                const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
+              for (list<C_F0>::const_iterator ii=b_largs_zz.begin(); ii!=b_largs_zz.end(); ii++) {
+                list<C_F0> bi;
+                bi.clear();
+                bi.push_back(*ii);
 
-                MatCreate(comm, &Abemblock->_petsc);
-                MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
+                if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
+                  ffassert( i==j ); // If not a block diagonal not coded yet
+                  // MeshS --- MeshS
+                  // ==== FESpace 3d Surf: inconnue et test ===
+                  const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
+                  const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
 
+                  Abemblocki = new PETSc::DistributedCSR< HpddmType >;
+                  MatCreate(comm, &Abemblocki->_petsc);
+                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
+                }
+                else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
+                  ffassert( i==j ); // If not a block diagonal not coded yet
+                  // MeshL --- MeshL
+                  // ==== FESpace 3d Curve: inconnue et test ===
+                  const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+                  const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
-              }
-              else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
-                ffassert( i==j ); // If not a block diagonal not coded yet
-                // MeshL --- MeshL
-                // ==== FESpace 3d Curve: inconnue et test ===
-                const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-                const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-
-                MatCreate(comm, &Abemblock->_petsc);
-                MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
-
-              }
-              else{
-                cerr << " BEM bilinear form " << endl;
-                cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
-                cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
-                cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
-                ffassert(0);
+                  Abemblocki = new PETSc::DistributedCSR< HpddmType >;
+                  MatCreate(comm, &Abemblocki->_petsc);
+                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
+                }
+                else{
+                  cerr << " BEM bilinear form " << endl;
+                  cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
+                  cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
+                  cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
+                  ffassert(0);
+                }
+                if (Abemblock == nullptr) {
+                  Abemblock = Abemblocki;
+                }
+                else {
+                  Mat mats[2] = { Abemblocki->_petsc, Abemblock->_petsc };
+                  Mat C;
+                  MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
+                  MatCompositeSetType(C, MAT_COMPOSITE_ADDITIVE);
+                  MatDestroy(&Abemblock->_petsc);
+                  Abemblock->_petsc = C;
+                  delete Abemblocki;
+                }
               }
               Abem = Abemblock->_petsc;
             }
@@ -6193,37 +6210,56 @@ namespace PETSc {
 
               bool samemesh = (void*) (*pUh)->vect[i]->getppTh() == (void*) (*pVh)->vect[j]->getppTh();  // same Fem2D::Mesh     +++ pot or kernel
               
-              PETSc::DistributedCSR< HpddmType > * Abemblock = new PETSc::DistributedCSR< HpddmType >;
+              PETSc::DistributedCSR< HpddmType > *Abemblocki = nullptr, *Abemblock = nullptr;
 
-              // block non diagonal matrix        
-              if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
-                // case Uh[i] == MeshL et Vh[j] = Mesh2
-                
-                if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
-                const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+              // block non diagonal matrix
+              for (list<C_F0>::const_iterator ii=b_largs_zz.begin(); ii!=b_largs_zz.end(); ii++) {
+                list<C_F0> bi;
+                bi.clear();
+                bi.push_back(*ii);
 
-                MatCreate(comm, &Abemblock->_petsc);
-                MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
-                varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
+                if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
+                  // case Uh[i] == MeshL et Vh[j] = Mesh2
+
+                  if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
+                  const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
+
+                  Abemblocki = new PETSc::DistributedCSR< HpddmType >;
+                  MatCreate(comm, &Abemblocki->_petsc);
+                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
+                }
+                else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
+                  // case Uh[i] == Mesh2 et Vh[j] = MeshL
+
+                  if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
+                  const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
+
+                  Abemblocki = new PETSc::DistributedCSR< HpddmType >;
+                  MatCreate(comm, &Abemblocki->_petsc);
+                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
+                  varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, bi, ds, Abemblock);
+                }
+                else{
+                  cerr << " BEM bilinear form " << endl;
+                  cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
+                  cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
+                  cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
+                  ffassert(0);
+                }
+                if (Abemblock == nullptr) {
+                  Abemblock = Abemblocki;
+                }
+                else {
+                  Mat mats[2] = { Abemblocki->_petsc, Abemblock->_petsc };
+                  Mat C;
+                  MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
+                  MatCompositeSetType(C, MAT_COMPOSITE_ADDITIVE);
+                  MatDestroy(&Abemblock->_petsc);
+                  Abemblock->_petsc = C;
+                  delete Abemblocki;
+                }
               }
-              else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
-                // case Uh[i] == Mesh2 et Vh[j] = MeshL
-
-                if(verbosity >3) cout << " === creation de la matrice BEM pour un bloc non diagonal === " << endl;
-                const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-
-                MatCreate(comm, &Abemblock->_petsc);
-                MatSetSizes(Abemblock->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
-                varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, b_largs_zz, ds, Abemblock);
-              }
-              else{
-                cerr << " BEM bilinear form " << endl;
-                cerr << " Block ("<< i <<" ,"<< j << ")" << endl;
-                cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
-                cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
-                ffassert(0);
-              }
-              
               // creation de la matrice dense 
               
               // BEM matrix is constructed with different FESpace
