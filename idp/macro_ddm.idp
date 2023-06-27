@@ -2160,7 +2160,6 @@ ENDIFMACRO
             cout.scientific << " --- distributed solution scattered (in " << mpiWtime() - timerScatter << ")" << endl;
     }
 }// EOM
-ENDIFMACRO
 
 macro CoherentGlobalMesh(MatT, MatV, ThName, ThGlobal) {
 IFMACRO(!ThName#Comm)
@@ -2230,3 +2229,4 @@ macro VecGather(ThName, comm, ThGatherName, Pk, uPrivate, uNew)gatherSolution(Th
 macro VecInterpolate(ThName, Pk, uPrivate, ThNew, PkNew, uNew)transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew)// EOM
 macro MatCreate(ThName, MatName, PkName)createMat(ThName, MatName, PkName)// EOM
 macro MatInterpolate(ThName, Pk, A, ThNew, PkNew, ANew, P)transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P)// EOM
+ENDIFMACRO
