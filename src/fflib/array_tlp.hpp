@@ -60,29 +60,20 @@ namespace Fem2D {
 #include "R3.hpp"
 }
 template <class T>
-struct affectation
+struct affectation: binary_function<T, T, T>
 {
-	using first_argument_type  = T;
-	using second_argument_type = T;
-	using result_type          = T;
 	T& operator()(T& x, const T& y) const {return (x=y);}
 };
 
 template <class T>
-struct affectation_add
+struct affectation_add: binary_function<T, T, T>
 {
-	using first_argument_type  = T;
-	using second_argument_type = T;
-	using result_type          = T;
 	T& operator()(T& x, const T& y) const {return (x+=y);}// correct FH 25/10/2013
 };
 
 template <class T>
-struct affectation_sub
+struct affectation_sub: binary_function<T, T, T>
 {
-	using first_argument_type  = T;
-	using second_argument_type = T;
-	using result_type          = T;
 	T& operator()(T& x, const T& y) const {return (x-=y);}// correct FH 25/10/2013
 };
 
@@ -101,18 +92,12 @@ template<class T> inline T Square (const T &a){return a*a;}
 
 
 template<class K>
-struct Op2_dotproduct {
-  using first_argument_type  = Transpose<KN_<K> >;
-  using second_argument_type = KN<K> *;
-  using result_type          = K;
+struct Op2_dotproduct: public binary_function<Transpose<KN_<K> >,KN<K> *,K> {
   static K f( Transpose<KN_<K> > const & a, KN<K> * const& b)
    { return (conj(a.t),*b);} };
 
 template<class K>
-struct Op2_dotproduct_ {
-  using first_argument_type  = Transpose<KN_<K> >;
-  using second_argument_type = KN_<K>;
-  using result_type          = K;
+struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> {
   static K f( Transpose<KN_<K> > const & a, KN_<K>  const& b)
    { return (conj(a.t),b);} };
 
@@ -976,10 +961,7 @@ template<class A,class B> pair<A,B> * pBuild(const A & a,const B & b)
 
 // add mars 2006
 template<class K,class L,class OP>
-struct set_A_BI {
-  using first_argument_type  = KN_<K>;
-  using second_argument_type = pair<KN_<K>, KN_<L> > *;
-  using result_type          = KN_<K>;
+struct set_A_BI: public binary_function<KN_<K>,pair<KN_<K>, KN_<L> > *,KN_<K> > {
   static KN_<K> f(const KN_<K>   & a, pair<KN_<K>, KN_<L> > * const & b)  {
     KN_<K> x(a);
     OP op;
@@ -1007,10 +989,7 @@ struct set_A_BI {
 };
 //  add oct 2019  To:  real[int] b = a(I); // where a and I is also a array..
 template<class K,class L,class OP>
-struct init_A_BI {
-  using first_argument_type  = KN<K>*;
-  using second_argument_type = pair<KN_<K>, KN_<L> > *;
-  using result_type          = KN<K>*;
+struct init_A_BI: public binary_function<KN<K>* ,pair<KN_<K>, KN_<L> > *,KN<K>* > {
     static KN<K>* f( KN<K>  * const  & a, pair<KN_<K>, KN_<L> > * const & b)  {
         KN<K> * px(a);
         OP op;
@@ -1039,10 +1018,7 @@ struct init_A_BI {
     }
 };
 template<class K,class L,class OP>
-struct set_AI_B {
-  using first_argument_type  = pair<KN_<K>, KN_<L> > *;
-  using second_argument_type = KN_<K>;
-  using result_type          = NothingType;
+struct set_AI_B: public binary_function<pair<KN_<K>, KN_<L> > * ,KN_<K>, NothingType > {
   static NothingType  f( pair<KN_<K>, KN_<L> > * const & b,const KN_<K>   & a)  {
     KN_<K> x(a);
     OP op;
@@ -1094,10 +1070,7 @@ struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> {
 };
 template<class K> KNM_<K> Transp(KNM_<K>  M){ return M.t();} // Add FH July 2015
 template<class K>
-struct SetArray2{
-  using first_argument_type  = K;
-  using second_argument_type = K;
-  using result_type          = SetArray<K>;
+struct SetArray2: public binary_function<K,K,SetArray<K> > {
   static SetArray<K> f(const K & a,const K & b)  {
     // cout << "SubArray: " << a << " " << b << endl;
     //     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}

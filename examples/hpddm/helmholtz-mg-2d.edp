@@ -75,7 +75,7 @@ set(A, sparams = "-hpddm_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_schwarz
 
 Wh<complex> u;
 u[] = A^-1 * rhs;
-plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a one-level method");
+plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a one-level method")
 
 set(A, sparams = "-hpddm_verbosity " + (!mpirank ? "3" : "0") + " -hpddm_schwarz_coarse_correction deflated -hpddm_variant flexible -hpddm_level_2_verbosity 0");
 func complex[int] correctionExact(complex[int]& in) {
@@ -92,7 +92,7 @@ if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) // two-level Schwarz
 
 u[] = 0;
 u[] = A^-1 * rhs;
-plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a redundant coarse correction");
+plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a redundant coarse correction")
 
 int[int][int] intersectionCoarse;
 real[int] DCoarse;
@@ -115,14 +115,14 @@ func complex[int] correctionInexact(complex[int]& in) {
     if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
         Wh outW;
         for[i, xi: in] outW[][i] = real(xi);
-        plotMPI(Th, outW, Pk, def, real, mplot);
+        plotMPI(Th, outW, Pk, def, real, mplot)
     }
     tmpReduced = R' * in;
     exchange(ACoarse, tmpReduced, scaled = true);
     if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
         WhCoarse outWCoarse;
         for[i, xi: tmpReduced] outWCoarse[][i] = real(tmpReduced[i]);
-        plotMPI(ThCoarse, outWCoarse, Pk, def, real, mplot);
+        plotMPI(ThCoarse, outWCoarse, Pk, def, real, mplot)
         ++ijk;
     }
     tmp = ACoarse^-1 * tmpReduced;
@@ -137,4 +137,4 @@ else
 
 u[] = 0;
 u[] = A^-1 * rhs;
-plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)");
+plotMPI(Th, real(u), Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)")

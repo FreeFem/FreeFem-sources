@@ -66,7 +66,7 @@ TypeOfFE_P2pnc_3d::TypeOfFE_P2pnc_3d( )
    static  R3 Pt[] = {R3(0., 0., 0.), R3(1., 0., 0.), R3(0., 1., 0.),
                R3(0., 0., 1.)};    // 4 ref tetrahedron vertices
    static const int  nvfo[4][3]  ={{1,2,3}, {0,2,3},{0,1,3},{ 0,1,2}};
-    if(verbosity > 0 && mpirank == 0) cout << "TypeOfFE_P2pnc_3d QFf exact:"<< QFf.exact << ", QFt exact " <<QFt.exact<< endl;
+    cout << "TypeOfFE_P2pnc_3d QFf exact:"<< QFf.exact << ", QFt exact " <<QFt.exact<< endl;
     int ipt=0;
     int doft = 4*3; // last dof
     
@@ -82,7 +82,7 @@ TypeOfFE_P2pnc_3d::TypeOfFE_P2pnc_3d( )
       this->PtInterpolation[ipt] = QFt[q];
 
     ffassert(ipt == this->NbPtforInterpolation); // verif
-    if(verbosity>99 && mpirank == 0)
+    if(verbosity>99)
     for( int i=0; i< ipt;++i)
         cout << i << " P/i " <<  this->PtInterpolation[i] << endl;
     {
@@ -102,7 +102,7 @@ TypeOfFE_P2pnc_3d::TypeOfFE_P2pnc_3d( )
                   int kfK = nvfo[f][kf];// vertex dans K ..
                   int dof = 3*f+kf;
                   if(qq==0)
-                  if (verbosity > 0 && mpirank == 0) cout << " dof " << dof << " " << f << " "<< kfK << endl;
+                  cout << " dof " << dof << " " << f << " "<< kfK << endl;
                   {
                       this->pInterpolation[i] = ipt;          // pk in (13.1)
                       this->cInterpolation[i] = 0;          // jk in (13.1)
@@ -140,7 +140,7 @@ void TypeOfFE_P2pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
                             int ocoef, int odf, int *nump) const {
     static int count =0;count++;
     int k = Th(K);
-    int verb = (mpirank == 0 && (verbosity>99 || (verbosity>9 && count < 4 )));//||  ocoef+odf || nump  ;
+    int verb = verbosity>99 || (verbosity>9 && count < 4 ) ;//||  ocoef+odf || nump  ;
     int n = this->NbDoF;
     int np=M.np;
     int ncoef=M.ncoef;

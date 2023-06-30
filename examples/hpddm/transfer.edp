@@ -23,15 +23,15 @@ int[int] fforder = [1];
         border d(t=0,1) { x=0;   y=1-t; };
         ThNew = buildmesh(a(N)+b(N)+c(N)+d(N));
     }
-    DmeshBuild(Th);
-    DmeshBuild(ThNew);
+    buildDmesh(Th)
+    buildDmesh(ThNew)
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
     Vh u = cos(8*pi*x) * sin(8*pi*y);
     VhNew uNew;
-    VecInterpolate(Th, Pk, u, ThNew, PkNew, uNew);
-    plotMPI(Th, u, Pk, def1, real, cmm = "Old FE function");
-    plotMPI(ThNew, uNew, PkNew, def1, real, cmm = "New FE function");
+    transfer(Th, Pk, u, ThNew, PkNew, uNew)
+    plotMPI(Th, u, Pk, def1, real, cmm = "Old FE function")
+    plotMPI(ThNew, uNew, PkNew, def1, real, cmm = "New FE function")
     savevtk("transfer_2d.vtu", Th, u, order = fforder);
     savevtk("transfer_2d.vtu", ThNew, uNew, order = fforder, append = true);
 }
@@ -49,15 +49,15 @@ int[int] fforder = [1];
     if(mpirank == 0)
         ThNew = mmg3d(Th, hmax = 8.0e-2);
     broadcast(processor(0), ThNew);
-    DmeshBuild(Th);
-    DmeshBuild(ThNew);
+    buildDmesh(Th)
+    buildDmesh(ThNew)
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
     Vh def(u) = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
     VhNew def(uNew);
-    VecInterpolate(Th, Pk, u, ThNew, PkNew, uNew);
-    plotMPI(Th, def1(u), PkSingle, def1, real, cmm = "Old FE function");
-    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "New FE function");
+    transfer(Th, Pk, u, ThNew, PkNew, uNew)
+    plotMPI(Th, def1(u), PkSingle, def1, real, cmm = "Old FE function")
+    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "New FE function")
     savevtk("transfer_3d.vtu", Th, u, order = fforder);
     savevtk("transfer_3d.vtu", ThNew, uNew, order = fforder, append = true);
 }

@@ -19,8 +19,7 @@ mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
 load "Element_P3"
 func Pk = P3;
 Mat A;
-macro MRefinementFactor()getARGV("-split", 1)//
-MatCreate(M, A, Pk);
+buildMat(M, getARGV("-split", 1), A, Pk, mpiCommWorld)
 fespace Vh(M, Pk);
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);
@@ -48,4 +47,4 @@ real[int] xPETSc = bPETSc;
 SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtontr -snes_converged_reason -snes_view");
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 macro def(u)u//
-plotMPI(M, u, Pk, def, real, cmm = "Global solution");
+plotMPI(M, u, Pk, def, real, cmm = "Global solution")

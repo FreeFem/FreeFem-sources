@@ -71,7 +71,7 @@ namespace Fem2D {
 
     if (op == 0) {
       R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-      R ll0 = 1 - l0 * 2, ll1 = 1 - l1 * 2, ll2 = 1 - l2 * 2;
+      R ll0 = 1 - l0 * 2, ll1 = 1 - l1 * 2, ll2 = 1 - l1 * 2;
       r = u0 * ll0 + u1 * ll1 + ll2 * u2;
     } else {
       const Triangle &T = K.T;
@@ -124,210 +124,14 @@ namespace Fem2D {
       }
     }
   }
-// P1nc ttdc + bulle
-class TypeOfFE_P1bttdcnc1_ : public TypeOfFE {
- public:
-  static int Data[];
-  static double Pi_h_coef[];
-
-  TypeOfFE_P1bttdcnc1_( ) : TypeOfFE(0, 0, 4, 1, Data, 4, 1, 4, 4, Pi_h_coef) {
-    const R2 Pt[] = {R2(0.5, 0.5), R2(0.0, 0.5), R2(0.5, 0.0),R2(1./3., 1./3.)};
-
-    for (int i = 0; i < NbDoF; i++) {
-      pij_alpha[i] = IPJ(i, i, 0);
-      P_Pi_h[i] = Pt[i];
-    }
-  }
-
-  void FB(const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat,
-          RNMK_ &val) const;
-
-  virtual R operator( )(const FElement &K, const R2 &PHat, const KN_< R > &u, int componante,
-                        int op) const;
-};
-
-// on what   nu df on node  node of df
-int TypeOfFE_P1bttdcnc1_::Data[] = {6, 6, 6, 6,  0, 1, 2, 3,  0, 0, 0, 0,  0, 0, 0, 0,  0, 1, 2, 3, 0, 0, 4};
-;
-double TypeOfFE_P1bttdcnc1_::Pi_h_coef[] = {1., 1., 1.,1.};
-R TypeOfFE_P1bttdcnc1_::operator( )(const FElement &K, const R2 &PHat, const KN_< R > &u,
-                                   int componante, int op) const {
-  R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3)));
-//    cout << " U " << u0 << " " << u1 << " " << u2 << " "<< u3 << endl;
-  R r = 0;
-  R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-  R lb = 27*l0*l1*l2;
-    
-  R llb = lb * 1./3;
-  if (op == 0) {
-    R ll0 = 1 - l0 * 2 -llb , ll1 = 1 - l1 * 2 -llb , ll2 = 1 - l2 * 2 -llb ;
-      r = u0 * ll0 + u1 * ll1 + ll2 * u2 + lb * u3 ;
-  } else {
-    const Triangle &T = K.T;
-    R2 D0 = T.H(0), D1 = T.H(1), D2 = T.H(2);
-    R2 Dlb = 27.*(D0*l1*l2 +l0*D1*l2 +l0*l1*D2);
-
-    if (op == 1) {
-      r = -(D0.x * u0 + D1.x * u1 + D2.x * u2) * 2 + (-(u0+u1+u2)/3.+u3)*Dlb.x  ;
-    } else if(op == 2) {
-      r = -(D0.y * u0 + D1.y * u1 + D2.y * u2) * 2 + (-(u0+u1+u2)/3.+u3)*Dlb.y  ;
-    }
-    else if(op>2) ffassert(0); // to do ..
-  }
-
-  return r;
-}
-
-void TypeOfFE_P1bttdcnc1_::FB(const bool *whatd, const Mesh &, const Triangle &K,
-                             const RdHat &PHat, RNMK_ &val) const {
-  // const Triangle & K(FE.T);
-  R2 A(K[0]), B(K[1]), C(K[2]);
-  // l1(  cshrink1*(cshrink*((1,0)-G)+G)-G)+G  = 1
-  R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-  R lb = 27*l0*l1*l2;
-  R clb = (1-2./3.);
-  if (val.N( ) < 4) {
-    throwassert(val.N( ) >= 4);
-  }
-
-  throwassert(val.M( ) == 1);
-
-  val = 0;
-  if (whatd[op_id]) {
-    RN_ f0(val('.', 0, 0));
-    f0[0] = 1 - l0 * 2 - clb*lb;
-    f0[1] = 1 - l1 * 2 - clb*lb;
-    f0[2] = 1 - l2 * 2 - clb*lb ;
-    f0[3] = lb;
-  }
-
-  if (whatd[op_dx] || whatd[op_dy]) {
-    R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
-      R2 Dlb = 27.*(Dl0*l1*l2 +l0*Dl1*l2 +l0*l1*Dl2);
-    if (whatd[op_dx]) {
-      RN_ f0x(val('.', 0, op_dx));
-        f0x[0] = -Dl0.x * 2 - clb*Dlb.x;
-        f0x[1] = -Dl1.x * 2 - clb*Dlb.x;
-        f0x[2] = -Dl2.x * 2 - clb*Dlb.x;
-        f0x[3] = Dlb.x;
-    }
-
-    if (whatd[op_dy]) {
-      RN_ f0y(val('.', 0, op_dy));
-        f0y[0] = -Dl0.y * 2 - clb*Dlb.y;
-        f0y[1] = -Dl1.y * 2 - clb*Dlb.y;
-        f0y[2] = -Dl2.y * 2 - clb*Dlb.y;
-        f0y[3] = Dlb.y;
-    }
-  }
-}
-
-class TypeOfFE_P1bncLagrange : public  TypeOfFE { public:
-  static int Data[];
-  static double Pi_h_coef[];
-  TypeOfFE_P1bncLagrange(): TypeOfFE(0,1,1,1,Data,4,1,4,4,Pi_h_coef)
-  {
-    const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0),R2(1./3.,1./3.) };
-    for (int i=0;i<NbDoF;i++) {
-      pij_alpha[i]= IPJ(i,i,0);
-      P_Pi_h[i]=Pt[i]; }
-  }
-
-   void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-    R operator( )(const FElement &K, const R2 &PHat, const KN_< R > &u,
-                  int componante, int op) const;
-} ;
-    
-//                     on what     nu df on node node of df
-  int TypeOfFE_P1bncLagrange::Data[]={3,4,5,6,       0,0,0,0,       0,1,2,3,       0,0,0,0,        0,1,2,3,       0, 0,4};
-double TypeOfFE_P1bncLagrange::Pi_h_coef[]={1.,1.,1.,1.};
-
-R TypeOfFE_P1bncLagrange::operator( )(const FElement &K, const R2 &PHat, const KN_< R > &u,
-                                   int componante, int op) const {
-  R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3)));
-  R r = 0;
-  R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-  R lb = 27*l0*l1*l2;
-
-  R llb = lb * 1./3;
-  if (op == 0) {
-    R ll0 = 1 - l0 * 2 -llb , ll1 = 1 - l1 * 2 -llb , ll2 = 1 - l2 * 2 -llb ;
-      r = u0 * ll0 + u1 * ll1 + ll2 * u2 + lb * u3 ;
-  } else {
-    const Triangle &T = K.T;
-    R2 D0 = T.H(0), D1 = T.H(1), D2 = T.H(2);
-    R2 Dlb = 27.*(D0*l1*l2 +l0*D1*l2 +l0*l1*D2);
-
-    if (op == 1) {
-      r = -(D0.x * u0 + D1.x * u1 + D2.x * u2) * 2 + (-(u0+u1+u2)/3.+u3)*Dlb.x  ;
-    } else if(op == 2) {
-      r = -(D0.y * u0 + D1.y * u1 + D2.y * u2) * 2 + (-(u0+u1+u2)/3.+u3)*Dlb.y  ;
-    }
-    else if(op>2) ffassert(0); // to do ..
-  }
-  // cout << " U " << u0 << " " << u1 << " " << u2 << " "<< u3 << " / " << l0 << " "<< l1 << " "<< l2 << "=> " << r <<  endl;
-
-  return r;
-}
-void TypeOfFE_P1bncLagrange::FB(const bool *whatd, const Mesh &, const Triangle &K,
-                             const RdHat &PHat, RNMK_ &val) const
-{
-    // const Triangle & K(FE.T);
-    R2 A(K[0]), B(K[1]), C(K[2]);
-    // l1(  cshrink1*(cshrink*((1,0)-G)+G)-G)+G  = 1
-    R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-    R lb = 27*l0*l1*l2;
-    R clb = (1-2./3.);
-    if (val.N( ) < 4) {
-      throwassert(val.N( ) >= 4);
-    }
-
-    throwassert(val.M( ) == 1);
-
-    val = 0;
-    if (whatd[op_id]) {
-      RN_ f0(val('.', 0, 0));
-      f0[0] = 1 - l0 * 2 - clb*lb;
-      f0[1] = 1 - l1 * 2 - clb*lb;
-      f0[2] = 1 - l2 * 2 - clb*lb ;
-      f0[3] = lb;
-    }
-
-    if (whatd[op_dx] || whatd[op_dy]) {
-      R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
-        R2 Dlb = 27.*(Dl0*l1*l2 +l0*Dl1*l2 +l0*l1*Dl2);
-      if (whatd[op_dx]) {
-        RN_ f0x(val('.', 0, op_dx));
-          f0x[0] = -Dl0.x * 2 - clb*Dlb.x;
-          f0x[1] = -Dl1.x * 2 - clb*Dlb.x;
-          f0x[2] = -Dl2.x * 2 - clb*Dlb.x;
-          f0x[3] = Dlb.x;
-      }
-
-      if (whatd[op_dy]) {
-        RN_ f0y(val('.', 0, op_dy));
-          f0y[0] = -Dl0.y * 2 - clb*Dlb.y;
-          f0y[1] = -Dl1.y * 2 - clb*Dlb.y;
-          f0y[2] = -Dl2.y * 2 - clb*Dlb.y;
-          f0y[3] = Dlb.y;
-      }
-    }
-}
-
-
 
   // link with FreeFem++
   static TypeOfFE_P1ttdcnc1_ P1dc1LagrangeP1dc1;
-  static TypeOfFE_P1bttdcnc1_ P1bdc1LagrangeP1dc1;
-  static TypeOfFE_P1bncLagrange      P1bncLagrangeP1;
   // static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt(1);
 
   // a static variable to add the finite element to freefem++
   static AddNewFE P1dcLagrange("P1dcnc", &P1dc1LagrangeP1dc1);
-static AddNewFE P1bdcncLagrange("P1bdcnc", &P1bdc1LagrangeP1dc1);
-static AddNewFE P1bncLagrange("P1bnc", &P1bncLagrangeP1);
-
- // static AddNewFE3  P1dttLagrange3d("P1dcnc3d",&TypeOfFE_LagrangeDC3dtt,"P1dcnc");
+  // static AddNewFE3  P1dttLagrange3d("P1dcnc3d",&TypeOfFE_LagrangeDC3dtt,"P1dcnc");
 }    // namespace Fem2D
 
 // --- fin --

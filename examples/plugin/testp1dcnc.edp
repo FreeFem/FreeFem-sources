@@ -8,24 +8,16 @@ macro Test(Th,FE,nFE)
 int err=0; 	
 fespace Wh(Th,FE);
 Wh u=x,v,w;
-int[int] I(Wh.ndof), K(Wh.ndof);
-for(int k=0; k<Th.nt;++k)
-for(int i=0; i< Wh.ndofK;++i)
-{  int j = Wh(k,i);
-	I[j]= i;
-	K[j]=k;
-}
+
 for(int i=0; i< Wh.ndof;++i)
 {
-	if(0) cout << " i "<< i << endl;
 	u=0;
 	u[][i]=1;
 	v=u;
 	v[]-=u[];
 	err += v[].linfty>1e-7;
-	if(v[].linfty>1e-7) {v=u;cout << " err" << i<< " " << "Wh(k,i) " << K[i] << " " << I[i] << v[] << endl;}
 }
-cout << " ** " << nFE << " Nb err = "<< err<< " " << Wh.ndof << " errT =" << errT << endl; 
+cout << " ** " << nFE << " Nb err = "<< err<< endl; 
 errT += err;
 }
 // 
@@ -33,8 +25,7 @@ errT += err;
 mesh Th=square(1,1);
 
 {
-	fespace Vh(Th,P1bnc);
-	
+	fespace Vh(Th,P1dcnc);
 
 Vh u=x;
 
@@ -53,8 +44,6 @@ matrix M=vm(Vh,Vh);
 //	Test(Th,P1dcnc,"P1dcnc")
 Test(Th,P1dc,"P1dc")
 Test(Th,P1dc1,"P1dc1")
-Test(Th,P1bnc,"P1bnc")
-Test(Th,P1bdcnc,"P1bdcnc")
 
 mesh3 Th3=cube(1,1,1);
 

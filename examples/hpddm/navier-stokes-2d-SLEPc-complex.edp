@@ -18,12 +18,12 @@ real nu = 1.0/Re;
 
 mesh Th;
 fespace Wh(Th, Pk); // complete space [u, v, p]
-DmeshLoad(Th, "navier-stokes-2d");
+loadDmesh(Th, "navier-stokes-2d")
 Wh<complex> [uc1, uc2, pc];
 ifstream sol("navier-stokes-2d_" + mpirank + "_" + mpisize + ".sol");
 sol >> uc1[];
 Mat<complex> J;
-MatCreate(Th, J, Pk);
+createMat(Th, J, Pk)
 varf vJ([u1, u2, p], [v1, v2, q]) = int2d(Th)(
       (UgradV(uc, u) + UgradV(u, uc))' * [v1, v2]
     + nu * (grad(u1)' * grad(v1) +
@@ -54,8 +54,8 @@ if(!NoGraphicWindow) {
     fespace Qh(Th, P1); // pressure space
     macro def1(i)i//
     Qh only = real(vecC[0]);
-    plotMPI(Th, only, P1, def1, real, cmm = "Leading pressure eigenmode for Re = " + Re + ", eigenvalue = " + val[0]);
+    plotMPI(Th, only, P1, def1, real, cmm = "Leading pressure eigenmode for Re = " + Re + ", eigenvalue = " + val[0])
     macro def2(i)[i, i#B]//
     Zh [onlyU, onlyV] = [real(vec[0]), real(vecB[0])];
-    plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Leading velocity eigenmode for Re = " + Re + ", eigenvalue = " + val[0]);
+    plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Leading velocity eigenmode for Re = " + Re + ", eigenvalue = " + val[0])
 }

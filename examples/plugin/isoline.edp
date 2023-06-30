@@ -1,5 +1,5 @@
 load "isoline"
-load "msh3"
+
 real[int,int] xy(3,1);
 int[int] be(1);
 {
@@ -10,7 +10,7 @@ real iso= 0.2 ;
 real[int] viso=[iso];
 plot(u,viso=viso,Th);
 
-int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.0);
+int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1);
 /*
 
   	iso =  value of the iso to compute
@@ -34,29 +34,11 @@ cout << "be = " << be << endl; //  begin end of the componant
 for( int c=0;c<nbc; ++c) 
 {
     int i0 = be[2*c], i1 = be[2*c+1]-1; // begin and end  the  connexe line comp. c       
-    if(verbosity>4)          
     for(int i=i0; i<= i1; ++i)
        cout << " x = " <<  xy(0,i) << " y =  " << xy(1,i) << " s =  " << xy(2,i) << endl; 
     plot([xy(0,i0:i1),xy(1,i0:i1)],wait=1,viso=viso,cmm = " curve "+c);
 }
-
-border Curve2(t=0,1;i) 
-{ int c =i; 
-  int i0 = be[2*c], i1 = be[2*c+1]-1;   
-  P=Curve(xy,i0,i1,t); 
-  label=1; 
-} 
-int[int] NN(nbc);
-for(int c=0;c<nbc;++c)
-{
-        int i0 = be[2*c], i1 = be[2*c+1]-1;   
-	
-	NN(c)=i1-i0;
 }
-plot(Curve2(NN),wait=1,cmm="2d nbc="+nbc);
-
-}
-
 
 cout << " len of the curve 1 = " << xy(2,xy.m-1) << endl;; 
 
@@ -79,56 +61,4 @@ plot(Curve1(100));
 mesh Th= buildmesh(Curve1(-100));
 plot(Th,wait=1);
 
-//  test sur meshS 
-{
-meshS Th=square3(10,10,[0,x,y]);//,[x*.5,y*0.5]);
-fespace Vh(Th,P1);
-Vh u= sqrt(square(y-0.5)+square(z-0.5));
-real iso= 0.2 ;
-real[int] viso=[iso];
-plot(u,viso=viso,Th);
 
-int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.0);
-
-border Curve2(t=0,1;i) 
-{ int c =i; 
-  int i0 = be[2*c], i1 = be[2*c+1]-1;   
-  P=Curve(xy,i0,i1,t); 
-  label=1; 
-} 
-// pour afficher toute les iso !!!!
-int[int] NN(nbc);
-for(int c=0;c<nbc;++c)
-   NN(c)=be[2*c+1]-1-be[2*c];
-
-plot(Curve2(NN),wait=1,cmm="nbc="+nbc);
-
-cout << " nb of the line  componant   = " << nbc << endl; 
-cout << " n = " << xy.m << endl; // nombre of points 
-cout << " m = " << xy.n << endl; // nombre of data 
-cout << "be = " << be << endl; //  begin end of the componant
-
-// show the lines 
-for( int c=0;c<nbc; ++c) 
-{
-    int i0 = be[2*c], i1 = be[2*c+1]-1; // begin and end  the  connexe line comp. c  
-    if(verbosity>4)      
-    for(int i=i0; i<= i1; ++i)
-       cout << " x = " <<  xy(0,i) << " y =  " << xy(1,i) << " " << xy(2,i) << " s =  " << xy(3,i) << endl; 
-    plot([xy(0,i0:i1),xy(1,i0:i1),xy(2,i0:i1)],wait=1,viso=viso,cmm = " curveS "+c);
-}
-border Curve1(t=0,1) 
-{ int c =1; 
-  int i0 = be[2*c], i1 = be[2*c+1]-1;   
-  P=Curve(xy,i0,i1,t); 
-  label=1; 
-} 
-meshL ThL= buildmeshL(Curve1(-100));
-plot(ThL,wait=1,cmm="ThL");
-
-include "buildmeshS.idp"
-meshS ThS= buildmeshS(ThL,1,1);
-plot(ThS,cmm="ThS",wait=1);
-
-
-}

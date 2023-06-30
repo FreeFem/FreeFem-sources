@@ -43,7 +43,7 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 
 TESTS_METIS = Maxwell_Cobracavity.edp
 
-TESTS_BEM_HPDDM = Helmholtz_Cobracavity_BEM.edp Helmholtz_circle_BEM.edp Helmholtz-2d-FEM-BEM-coupling.edp Helmholtz-2d-interfaceBCs-comp.edp
+TESTS_BEM_HPDDM = Helmholtz_Cobracavity_BEM.edp Helmholtz_circle_BEM.edp Helmholtz-2d-FEM-BEM-coupling.edp
 
 if MPI
 if HPDDM

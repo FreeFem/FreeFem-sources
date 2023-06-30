@@ -190,19 +190,13 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1,double eps=-1)
 }
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_addmesh {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op2_addmesh: public binary_function<AA,BB,RR> {
   static RR f(Stack s,const AA & a,const BB & b)
   { return RR(s, a, b );}
 };
 
 template<bool INIT,class RR,class AA=RR,class BB=AA>
-struct Op2_setmesh {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op2_setmesh: public binary_function<AA,BB,RR> {
   static RR f(Stack stack, const AA & a,const BB & b)
   {
     ffassert(a );

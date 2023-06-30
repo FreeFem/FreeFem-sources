@@ -54,7 +54,6 @@ cout << int3d(Th)(z) << " == " << int3d(Th)(zh) << endl;
 cout << int3d(Th)(ff) << " == " << int3d(Th)(ffh) << endl; 
 FiniteElement3d EFQF3(qfVp14);
 fespace Zh(Th,EFQF3);
-fespace Zh2(Th,[EFQF3,EFQF3]);
 
 }
 ;

@@ -642,12 +642,12 @@ namespace Fem2D
             
             //&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
             
-            //delete [] newNumero_Som;  debile !!!
+            delete [] newNumero_Som;
         }
         else{
             cout << " no need to change the mesh " << endl;
         }
-        //delete [] Numero_Som;debile !!!
+        delete [] Numero_Som;
         
         
         BuildBound();

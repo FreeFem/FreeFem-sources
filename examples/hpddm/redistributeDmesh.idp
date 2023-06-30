@@ -17,13 +17,13 @@ macro init(u)[u, u]//
 {
     include "macro_ddm.idp"             // additional DDM functions
     mesh Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
-    DmeshBuild(Th);
+    buildDmesh(Th)
     mesh ThGather, ThScatter;
-    DmeshGather(Th, comm, ThGather);
-    plotDmesh(Th, cmm = "Original Dmesh");
-    plotDmesh(ThGather, cmm = "Gathered Dmesh");
-    DmeshScatter(ThGather, comm, ThScatter);
-    plotDmesh(ThScatter, cmm = "Scattered Dmesh");
+    gatherDmesh(Th, comm, ThGather)
+    plotDmesh(Th, cmm = "Original Dmesh")
+    plotDmesh(ThGather, cmm = "Gathered Dmesh")
+    scatterDmesh(ThGather, comm, ThScatter)
+    plotDmesh(ThScatter, cmm = "Scattered Dmesh")
     fespace Vh(Th, Pk);
     fespace VhGather(ThGather, Pk);
     fespace VhScatter(ThScatter, Pk);
@@ -32,13 +32,13 @@ macro init(u)[u, u]//
     VhScatter<PetscScalar> def(uScatter);
     VhScatter<PetscScalar> def(uTransfer);
     def(u) = [cos(2*pi*x)*sin(pi*y), sin(2*pi*y)];
-    plotD(Th, u, cmm = "Original solution");
-    VecGather(Th, comm, ThGather, Pk, u, uGather);
-    plotD(ThGather, uGather, cmm = "Gathered solution");
-    VecScatter(ThGather, comm, ThScatter, Pk, uGather, uScatter);
-    plotD(ThScatter, uScatter, cmm = "Scattered solution");
-    VecInterpolate(Th, Pk, u, ThScatter, Pk, uTransfer);
-    plotD(ThScatter, uTransfer, cmm = "Transferred solution");
+    plotD(Th, u, cmm = "Original solution")
+    gatherSolution(Th, comm, ThGather, Pk, u, uGather)
+    plotD(ThGather, uGather, cmm = "Gathered solution")
+    scatterSolution(ThGather, comm, ThScatter, Pk, uGather, uScatter)
+    plotD(ThScatter, uScatter, cmm = "Scattered solution")
+    transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
+    plotD(ThScatter, uTransfer, cmm = "Transferred solution")
     uTransfer[] -= uScatter[];
     real max, tmp = uTransfer[].linfty;
     mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);
@@ -48,13 +48,13 @@ macro init(u)[u, u]//
     macro dimension()3// EOM            // 2D or 3D
     include "macro_ddm.idp"             // additional DDM functions
     mesh3 Th = cube(getARGV("-global_3d", 10), getARGV("-global_3d", 10), getARGV("-global_3d", 10)); // global mesh
-    DmeshBuild(Th);
+    buildDmesh(Th)
     mesh3 ThGather, ThScatter;
-    DmeshGather(Th, comm, ThGather);
-    plotDmesh(Th, cmm = "Original Dmesh");
-    plotDmesh(ThGather, cmm = "Gathered Dmesh");
-    DmeshScatter(ThGather, comm, ThScatter);
-    plotDmesh(ThScatter, cmm = "Scattered Dmesh");
+    gatherDmesh(Th, comm, ThGather)
+    plotDmesh(Th, cmm = "Original Dmesh")
+    plotDmesh(ThGather, cmm = "Gathered Dmesh")
+    scatterDmesh(ThGather, comm, ThScatter)
+    plotDmesh(ThScatter, cmm = "Scattered Dmesh")
     fespace Vh(Th, Pk);
     fespace VhGather(ThGather, Pk);
     fespace VhScatter(ThScatter, Pk);
@@ -63,13 +63,13 @@ macro init(u)[u, u]//
     VhScatter<PetscScalar> def(uScatter);
     VhScatter<PetscScalar> def(uTransfer);
     def(u) = [cos(2*pi*x)*sin(2*pi*y), sin(2*pi*y)*cos(2*pi*z)];
-    plotD(Th, u, cmm = "Original solution");
-    VecGather(Th, comm, ThGather, Pk, u, uGather);
-    plotD(ThGather, uGather, cmm = "Gathered solution");
-    VecScatter(ThGather, comm, ThScatter, Pk, uGather, uScatter);
-    plotD(ThScatter, uScatter, cmm = "Scattered solution");
-    VecInterpolate(Th, Pk, u, ThScatter, Pk, uTransfer);
-    plotD(ThScatter, uTransfer, cmm = "Transferred solution");
+    plotD(Th, u, cmm = "Original solution")
+    gatherSolution(Th, comm, ThGather, Pk, u, uGather)
+    plotD(ThGather, uGather, cmm = "Gathered solution")
+    scatterSolution(ThGather, comm, ThScatter, Pk, uGather, uScatter)
+    plotD(ThScatter, uScatter, cmm = "Scattered solution")
+    transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
+    plotD(ThScatter, uTransfer, cmm = "Transferred solution")
     uTransfer[] -= uScatter[];
     real max, tmp = uTransfer[].linfty;
     mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);

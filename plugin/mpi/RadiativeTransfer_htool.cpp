@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: mpi pthread htool
+//ff-c++-LIBRARY-dep: cxx11 mpi pthread htool
 #include <htool/htool.hpp>
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>

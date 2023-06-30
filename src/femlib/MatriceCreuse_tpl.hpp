@@ -198,7 +198,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
 
           int iie=ie,kk=Th.ElementAdj(k,iie);
           if(kk==k|| kk<0) kk=-1;
-          if ( &this->Vh.Th  == &this->Uh.Th )
+          if ( &this->Vh == &this->Uh)
           {
               FElement Kv(this->Vh[k]);
               FElement Ku(this->Uh[k]);
@@ -208,7 +208,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
                   this->m=BuildMEK_KK<FElement>(this->lnkj,this->nj,this->njk,this->njkk,&Ku,0);
                   int n2 =this->m*this->n;
                   for (int i=0;i<n2;i++) this->a[i]=0;
-                  faceelement(*this,Ku,Ku,Kv,Kv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
+                  faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
               }
               else
               {
@@ -217,16 +217,12 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
                   this->n=BuildMEK_KK<FElement>(this->lnki,this->ni,this->nik,this->nikk,&Kv,&KKv);
                   this->m=BuildMEK_KK<FElement>(this->lnkj,this->nj,this->njk,this->njkk,&Ku,&KKu);
 
-                  faceelement(*this,Ku,KKu,Kv,KKv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));//  correct may 2023 FH
-                  
+                  faceelement(*this,Ku,KKu,Kv,KKv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
 
               }
           }
-          else
-          {
-              ERREUR(" No DG on diff meshes : ???? /Impossible  TO DO  (see F. hecht) ", 0);
-              ffassert(0); // a faire F. Hecht desole
-          }
+          ERREUR("BUG ???? A FAIRE/ TO DO  (see F. hecht) ", 0);
+        ffassert(0); // a faire F. Hecht desole
 
       }
    }

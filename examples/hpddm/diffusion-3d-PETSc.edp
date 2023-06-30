@@ -11,8 +11,7 @@ func Pk = P1;                       // finite element space
 int[int] LL = [1,2, 1,2, 1,1];
 mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
 Mat A;
-macro ThRefinementFactor()getARGV("-split", 1)//
-MatCreate(Th, A, Pk);
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = int3d(Th)(grad(u)' * grad(v)) + int3d(Th)(v) + on(1, u = 0.0);
@@ -30,13 +29,13 @@ exchange(A, rhs, scaled = true);
 err -= rhs;
 
 macro def(u)u//
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 u[] = err;
-plotMPI(Th, u, Pk, def, real, cmm = "Global residual");
+plotMPI(Th, u, Pk, def, real, cmm = "Global residual")
 
 Wh<real> Rb[1];
 Rb[0] = 1;
 set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
 u[] = 0.0;
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

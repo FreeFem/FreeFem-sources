@@ -258,28 +258,17 @@ if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_reuse_preconditioner 1", prefix=Stringification(pr)+"_");
 ENDIFMACRO
 
-IFMACRO((pr#withpetsc)|(pr#CSwithpetsc))
-IFMACRO(preffe#K,real)
-load "PETSc"
-ENDIFMACRO
-IFMACRO(preffe#K,complex)
-load "PETSc-complex"
-ENDIFMACRO
-ENDIFMACRO
-
 IFMACRO(pr#withpetsc)
 pr#aRd[mpiRank(preffe#prmesh#commddm)].resize(preffe#Dk[mpiRank(preffe#prmesh#commddm)].n, preffe#Dk[mpiRank(preffe#prmesh#commddm)].n);
 IFMACRO(preffe#K,real)
+load "PETSc"
 real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)];
 ENDIFMACRO
 IFMACRO(preffe#K,complex)
+load "PETSc-complex"
 real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
 ENDIFMACRO
 Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
-ENDIFMACRO
-
-IFMACRO(pr#CSwithpetsc)
-Mat<preffe#K> pr#petscE(0,communicator = preffe#prmesh#commCS);
 ENDIFMACRO
 
 NewMacro pr#localmacrominoverlap() preffe#prmesh#mminoverlap EndMacro

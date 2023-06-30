@@ -30,6 +30,11 @@ extern long verbosity ;
 extern long searchMethod; //pichon
 extern bool lockOrientation;
 
+//  FOR M_PI
+#ifdef __STRICT_ANSI__
+#undef __STRICT_ANSI__
+#endif
+
 #include <cmath>
 #include  <cfloat>
 #include <cstdlib>
@@ -1011,12 +1016,10 @@ int Walk(const Mesh & Th,int& it, R *l,
                 gp  << "\n\n";
             }
         }
-        const double pi=3.141592653589793238463;//M_PI;
-
         for(int i=0; i<P.N(); ++i)
         {
             int N=100;
-            double dt = pi*2./N, r = delta[i];
+            double dt = M_PI*2./N, r = delta[i];
             for(int j=0;j<=N; ++j)
             {
                 double x = P[i].x+r*cos(dt*j);
@@ -1816,7 +1819,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
             cerr << " The generatated 2d mesh is to fine :  hmin = " << hm << " to to small < "<< 1./quadtree->coef  << endl;
             ffassert(0); 
         }
-        if( verbosity>5 && ! iseuil )
+        if(verbosity>5 || ! iseuil )
          cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil << " coef quadtree " <<  quadtree->coef << endl;
 
        //      ffassert(iseuil); //  zero => too smal

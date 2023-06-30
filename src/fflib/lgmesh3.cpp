@@ -1386,7 +1386,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
         cout << " box volume :=" << longmini_box << endl;
     }
     
-    if (precis_mesh <= 0)
+    if (precis_mesh < 0)
         precis_mesh = longmini_box * 1e-7;
     else
         precis_mesh = precis_mesh;
@@ -1395,7 +1395,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
     double hmin =longmini_box;
    
     if (verbosity > 5)
-        cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << " hmin " << hmin << endl;
+        cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
     
     // assertion pour la taille de l octree
     assert(hmin > Norme2(bmin - bmax) / 1e9);
@@ -1464,7 +1464,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
                ffassert(index==0);
            double delta = (b-a)/n;
            t=a+delta/2;
-           for (int nn=0;nn<n;nn++, t += delta)
+           for (int nn=0;nn<n;nn++,i++, t += delta)
             {
                long lab=0;
                if(nn==0) lab = 2*nbo+1;
@@ -1475,13 +1475,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
                int iv[2];
                iv[0]=old2new[nnn];
                iv[1]=old2new[++nnn];
-               if(iv[0] == iv[1])
-               {
-                   if(verbosity) cout << " BuildMeshCurve3 : strange empty element "<< i << " vertex: "<<iv[0]<< " skip !!! "
-                                      <<nn << "/"<< n << " " <<  index << " in border " << nbo << endl;
-               }
-               else
-               Th->elements[i++].set(Th->vertices,iv,mp->region);
+               Th->elements[i].set(Th->vertices,iv,mp->region);
            }
            nnn++;
        }
@@ -2056,7 +2050,8 @@ public:
   E_F0 * code(const basicAC_F0 & args) const 
   { return  new CODE(args);}
   OneOperatorMakePtrFE3(aType tt):  // tt= aType<double>() or aType<E_Array>()  
-    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt){}
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt)
+  {}
 };
 
 
@@ -2954,7 +2949,7 @@ void init_lgmesh3() {
 
     //GlgElement<Mesh3>
     
- // Morice: La version 2D de la suite sont dans [[lgmesh.cpp]] chercher MakePtrFE2
+    
  // 3D volume
  TheOperators->Add("<-",
        new OneOperator2_<pf3rbase*,pf3rbase*,pfes3* >(MakePtrFE3_2),

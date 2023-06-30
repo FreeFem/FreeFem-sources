@@ -52,7 +52,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	geophysics.$(DYLIB_SUFFIX) CircumCenter.$(DYLIB_SUFFIX) MatD-VFP0.$(DYLIB_SUFFIX) \
 	meshtools.$(DYLIB_SUFFIX) Helmholtz_FD.$(DYLIB_SUFFIX)  Element_P3pnc.$(DYLIB_SUFFIX) \
 	vortextools.$(DYLIB_SUFFIX)  MatrixMarket.$(DYLIB_SUFFIX) Element_P3nc.$(DYLIB_SUFFIX) \
-	plotPDF.$(DYLIB_SUFFIX) Element_P2pnc_3d.$(DYLIB_SUFFIX) Element_P3pnc_3d.$(DYLIB_SUFFIX)
+	plotPDF.$(DYLIB_SUFFIX) Element_P2pnc_3d.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -111,7 +111,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/fflib/showverb.hpp ../../src/femlib/splitsimplex.hpp ../../src/fflib/String.hpp				\
 	../../src/fflib/strversionnumber.hpp ../../src/fflib/throwassert.hpp ../../src/femlib/ufunction.hpp			\
 	../../src/fflib/versionnumber.hpp ../../src/bamglib/write_hdf5.hpp	../../src/bamglib/write_xdmf.hpp                   \
-	../../src/fflib/P1IsoValue.hpp ../../src/fflib/compositeFESpace.hpp \
+	../../src/fflib/P1IsoValue.hpp \
 	../../src/femlib/SkyLineSolver.hpp \
 	../../src/femlib/SolverSkyLine.hpp \
 	../../src/femlib/SparseLinearSolver.hpp \

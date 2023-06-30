@@ -59,7 +59,6 @@
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-#include "compositeFESpace.hpp"
 #include "CGNL.hpp"
 #include "AddNewFE.h"
 #include "array_resize.hpp"
@@ -1325,7 +1324,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       if (periodic) delete[] periodic;
     }
     AnyType operator( )(Stack s) const {
-        aType pt_tfe = atype0< TypeOfFE ** >( );//
+        
         aType t_tfe = atype< TypeOfFE * >( );// 
         aType t_tfe2 = atype< TypeOfFE2 * >( );
 
@@ -1342,15 +1341,13 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
         {
          // verif  type atef[i]  coorection mars 2022 ..
          aType  ttfe =atef[i].left();
-         ffassert( ttfe == t_tfe ||ttfe == t_tfe2 || ttfe == pt_tfe ) ;
+         ffassert( ttfe == t_tfe || t_tfe2) ;
          if(verbosity>9) cout << "OpMake_pfes_np :: " << i << " " << (tedim[i] == dHat && d==dfe) << " " << tedim[i]
                                                                         << dHat << d << dfe
                 << " " << typeid(TypeOfFE).name() << endl;
 
         if (ttfe == t_tfe) // good  type no converstion
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
-        else  if (ttfe == pt_tfe) // good  type no converstion
-              tef[i] = *GetAny< TypeOfFE ** >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
         else if (tedim[i] == 2 && d==3 && dHat == 2)
@@ -1378,11 +1375,10 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       const int d = TypeOfFE::RdHat::d;
     GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
     aType t_tfe = atype< TypeOfFE * >( );
-    aType pt_tfe = atype0< TypeOfFE ** >( );
     aType t_tfe2 = atype< TypeOfFE2 * >( );
     ffassert(d>0 && d < 4);
     char  cdim[10];
-      snprintf(cdim,10,"%dd",d);
+      sprintf(cdim,"%dd",d);
     string sdim = cdim ;
     const E_Array *a2(dynamic_cast< const E_Array * >(args[2].LeftValue( )));
     ffassert(a2);
@@ -1391,7 +1387,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     if (!N) CompileError(sdim + " We wait an array of Type of Element ");
     KN< int > tedim(N);
     for (int i = 0; i < N; i++)
-      if ((*a2)[i].left( ) == t_tfe ||(*a2)[i].left( ) == pt_tfe )
+      if ((*a2)[i].left( ) == t_tfe)
         tedim[i] = d;
       else if ((*a2)[i].left( ) == t_tfe2)
         tedim[i] = 2;
@@ -1404,39 +1400,6 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     : OneOperator(atype< pfes * >( ), atype< pfes * >( ), atype< const Mesh ** >( ),
                   atype< E_Array >( )) {}
 };
-
-struct OpMake_pvectgenericfes : public OneOperator {
-  struct Op : public E_F0mps {
-   public:
-    Expression eppfes;
-    const E_FEarray &atef;
-    int nb;
-    
-    Op(Expression ppfes, const E_FEarray &aatef)
-      : eppfes(ppfes), atef(aatef) {}
-    ~Op(){ }
-    AnyType operator( )(Stack s) const {
-        
-      AnyType r = (*eppfes)(s);
-      pvectgenericfes *ppfes = GetAny< pvectgenericfes * >(r);
-
-      *ppfes = new vect_generic_v_fes(atef,s);
-      return r;
-    }
-  };
-
-  E_F0 *code(const basicAC_F0 &args) const {
-    
-    const E_FEarray *a2(dynamic_cast< const E_FEarray * >(args[1].LeftValue( )));
-    ffassert(a2);
-    // int N = a2->size( );
-    // cout << "N=" << N << endl;
-    return new Op(args[0], *a2 );
-  }
-  OpMake_pvectgenericfes( )
-    : OneOperator( atype< pvectgenericfes * >( ), atype< pvectgenericfes * >( ), atype< E_FEarray >( ) ) {}
-};
-
 
 inline pfes *MakePtr2(pfes *const &p, pmesh *const &a, TypeOfFE *const &tef) {
   *p = new pfes_tef(a, tef);
@@ -2233,11 +2196,10 @@ class OneOperatorMakePtrFE : public OneOperator {
     }
 
     AnyType operator( )(Stack stack) const {
-      // cout << "call operator() in OneOperatorMakePtrFE::CODE" << endl; // Morice
       R p = GetAny< R >((*fer)(stack));
       B a = GetAny< B >((*fes)(stack));
       *p = new FEbase< K, v_fes >(a);
-      (*e_set_fev)(stack);   // Morice: recuperation et initialisation de la valeur de la << FEbase >>.
+      (*e_set_fev)(stack);
       return SetAny< R >(p);
     }
     operator aType( ) const { return atype< R >( ); }
@@ -3087,6 +3049,8 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"add", &typeid(bool)},         // add to previous plot
   {"prev", &typeid(bool)},        // keep previou  view point
   {"ech", &typeid(double)},       // keep previou  view point
+  {"pdf", &typeid(string*)}, // 21, add by fujiwara
+  {"svg", &typeid(string*)}, // 22, add by fujiwara
 
   // FFCS: more options for VTK graphics (numbers are required for processing)
 
@@ -3112,11 +3076,7 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"WindowIndex", &typeid(long)},                     // #20
   {"NbColorTicks", &typeid(long)},                    // #21
   {"NbColors", &typeid(long)},                        // #22
-// after FFCS !!!!
-  {"pNormalT", &typeid(bool)} ,                        //43
-  {"pdf", &typeid(string*)}, // 44, add by fujiwara modif FH 09/01/23
-  {"svg", &typeid(string*)} // 45, add by fujiwara
-
+  {"pNormalT", &typeid(bool)}                         //43
 };
 
 template< class K >
@@ -3203,10 +3163,8 @@ LinkToInterpreter::LinkToInterpreter( ) {
 }
 
 template< class K >
-struct set_eqmatrice_creuse_fbl {
-   using first_argument_type  = Matrice_Creuse< K > *;
-   using second_argument_type = const Matrice_Creuse< K > *;
-   using result_type          = const C_args *;
+struct set_eqmatrice_creuse_fbl
+  : public binary_function< Matrice_Creuse< K > *, const Matrice_Creuse< K > *, const C_args * > {
   static Matrice_Creuse< K > *f(Matrice_Creuse< K > *const &a, const C_args *const &b) {
     // 1  verif the FESpace
 
@@ -3218,10 +3176,7 @@ struct set_eqmatrice_creuse_fbl {
 };
 
 template< class K >
-struct set_eqvect_fl {
-   using first_argument_type  = KN< K > *;
-   using second_argument_type = const FormLinear *;
-   using result_type          = KN< K > *;
+struct set_eqvect_fl : public binary_function< KN< K > *, const FormLinear *, KN< K > * > {
   static KN< K > *f(KN< K > *const &a, const FormLinear *const &b) {
     ffassert(0);
     return a;
@@ -4364,7 +4319,7 @@ AnyType Plot::operator( )(Stack s) const {
       // [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the parameter value from the
       // pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
 
-#define VTK_START 20 // modified by fujiwara
+#define VTK_START 22 // modified by fujiwara
 #define SEND_VTK_PARAM(index, type) \
   if (nargs[VTK_START + index])     \
     (theplot << (long)(VTK_START + index)) <= GetAny< type >((*nargs[VTK_START + index])(s));
@@ -4392,10 +4347,6 @@ AnyType Plot::operator( )(Stack s) const {
     SEND_VTK_PARAM(21, long);             // NbColorTicks
     SEND_VTK_PARAM(22, long);             // NbColors
     SEND_VTK_PARAM(23, bool);             // pNormalT
-      //  pdffile and svgfile !!!!
-    if (nargs[44]) (theplot << 44L) <= GetAny< string * >((*nargs[44])(s));
-    if (nargs[45]) (theplot << 45L) <= GetAny< string * >((*nargs[45])(s));
-
     theplot.SendEndArgPlot( );
     map< const Mesh *, long > mapth;
     map< const Mesh3 *, long > mapth3;
@@ -4422,16 +4373,13 @@ AnyType Plot::operator( )(Stack s) const {
       // Prepare for the sending 2d iso values for ffglut
       else if (what == 1 || what == 2 || what == 11 || what == 12) {
         ll[ii].eval(fe, cmp);
-        if (fe[0]->x( ) && !th) th = &fe[0]->Vh->Th;
-        if (fe[1] && fe[1]->x( ) && !th) th = &fe[1]->Vh->Th;
+        if (fe[0]->x( )) th = &fe[0]->Vh->Th;
         if (fe[1] && fe[1]->x( )) ffassert(th == &fe[1]->Vh->Th);
       }
       // Prepare for the sending 3D volume iso values for ffglut
       else if (what == 6 || what == 7 || what == 16 || what == 17) {
         ll[ii].eval(fe3, cmp);
-        if (fe3[0]->x( ) &&!th3) th3 = &fe3[0]->Vh->Th;
-        if (fe[1] && fe3[1]->x( ) &&!th3) th3 = &fe3[1]->Vh->Th;
-        if (fe[2] && fe3[2]->x( ) &&!th3) th3 = &fe3[1]->Vh->Th;
+        if (fe3[0]->x( )) th3 = &fe3[0]->Vh->Th;
         if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
         if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
 
@@ -4440,7 +4388,6 @@ AnyType Plot::operator( )(Stack s) const {
       else if (what == 8 || what == 9 || what == 18 || what == 19) {
         ll[ii].eval(feS, cmp);
         if (feS[0]->x( )) thS = &feS[0]->Vh->Th;
-        if (feS[1] && feS[1]->x( )  &&!thS) thS = &feS[1]->Vh->Th;
         if (feS[1] && feS[1]->x( )) ffassert(thS == &feS[1]->Vh->Th);
         if (feS[2] && feS[2]->x( )) ffassert(thS == &feS[2]->Vh->Th);
       }
@@ -4448,7 +4395,6 @@ AnyType Plot::operator( )(Stack s) const {
       else if (what == 14 || what == 15 || what == 20 || what == 21) {
         ll[ii].eval(feL, cmp);
         if (feL[0]->x( )) thL = &feL[0]->Vh->Th;
-        if (feL[1] && feL[1]->x( ) &&!thL) thL = &feL[1]->Vh->Th;
         if (feL[1] && feL[1]->x( )) ffassert(thL == &feL[1]->Vh->Th);
         if (feL[2] && feL[2]->x( )) ffassert(thL == &feL[2]->Vh->Th);
       }
@@ -4628,6 +4574,8 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[0]) coeff = GetAny< double >((*nargs[0])(s));
   if (nargs[1]) cm = GetAny< string * >((*nargs[1])(s));
   if (nargs[2]) psfile = GetAny< string * >((*nargs[2])(s));
+  if (nargs[21]) pdffile= GetAny<string*>((*nargs[21])(s)); // add by fujiwara
+  if (nargs[22]) svgfile= GetAny<string*>((*nargs[22])(s)); // add by fujiwara
   if (nargs[3]) wait = GetAny< bool >((*nargs[3])(s));
   if (nargs[4]) fill = GetAny< bool >((*nargs[4])(s));
   if (nargs[5]) value = GetAny< bool >((*nargs[5])(s));
@@ -4672,9 +4620,6 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[19]) keepPV = GetAny< bool >((*nargs[19])(s));
   if (nargs[VTK_START + 23]) pNormalT = GetAny< bool >((*nargs[VTK_START + 23])(s));
   if (nargs[VTK_START + 8]) ArrowSize = GetAny< double >((*nargs[VTK_START + 8])(s));
-  if (nargs[44]) pdffile= GetAny<string*>((*nargs[44])(s)); // add by fujiwara move by FH
-  if (nargs[45]) svgfile= GetAny<string*>((*nargs[45])(s)); // add by fujiwara move by FH
-
   //  for the gestion of the PTR.
   WhereStackOfPtr2Free(s) = new StackOfPtr2Free(s);    // FH aout 2007
 
@@ -5793,28 +5738,19 @@ template<  class A >
             OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
         };
 template <class R,class A, class B> 
-struct OppR3dot {
-   using first_argument_type  = A;
-   using second_argument_type = B;
-   using result_type          = R;
+struct OppR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (*pu,*b);} };
 
 template <class R,class A, class B>
-struct OppqR3dot {
-   using first_argument_type  = A;
-   using second_argument_type = B;
-   using result_type          = R;
+struct OppqR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B* pu = a;
       return (*pu,b);} };
 
 template <class R,class A, class B>
-struct OpR3dot {
-   using first_argument_type  = A;
-   using second_argument_type = B;
-   using result_type          = R;
+struct OpR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (pu,b);} };
@@ -5895,18 +5831,6 @@ void init_lgfem( ) {
 
   map_type[typeid(pfes).name( )] = new ForEachType< pfes >( );
   map_type[typeid(pfes *).name( )] = new ForEachTypePtrfspace< pfes, 2 >( );
-  // Morice : le 2 correspond aux parametre de retour de la fonction <<FindType>> (TYPEOFID) dans AFunction2.cpp
-  // c'est cette valeur qui permet de faire la distinction entre FESPACE, FESPACES, FESPACDE3, FESPACEL 
-  // lorsque l'on initialise un FE (c-à-d par exemple Uh u;)
-  // Elle correpond à la valeur <<dim>>  dans la fonction <<NewFEvariable>>
-  // Elle correpond à la valeur <<fespacedim>> dans [[lg.ypp]] voir <<fespace123>>.
-
-  // Added june 2022 Morice : Il faut peut etre le mettre ailleurs ???
-  map_type[typeid(pgenericfes).name( )] = new ForEachType< pgenericfes >( ); // Morice
-  map_type[typeid(pgenericfes *).name( )] = new ForEachTypePtrfspace< pgenericfes, 7 >( ); // Morice
-
-  map_type[typeid(pvectgenericfes).name( )] = new ForEachType< pvectgenericfes >( ); // Morice
-  map_type[typeid(pvectgenericfes *).name( )] = new ForEachTypePtrfspace< pvectgenericfes, 6 >( ); // Morice 
 
   // Dcl type for 3D volume FE
   Dcl_TypeandPtr< pf3rbase >( );         // il faut le 2 pour pourvoir initialiser
@@ -5932,7 +5856,7 @@ void init_lgfem( ) {
   Dcl_Type< pfSc >( );
   Dcl_Type< pfScarray >( );
 
-  // Dcl type for 3D curve FE real v 4.5
+  // Dcl type for 3D curve FE v 4.5
   Dcl_TypeandPtr< pfLrbase >( );         // il faut le 2 pour pourvoir initialiser
   Dcl_TypeandPtr< pfLrbasearray >( );    // il faut le 2 pour pourvoir initialiser
   Dcl_Type< pfLr >( );
@@ -5947,22 +5871,21 @@ void init_lgfem( ) {
   //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn< double > *).name( )]->AddCast
   (
-    // 2D
     new E_F1_funcT< FEbaseArrayKn< double > *, pferbasearray >
      ( Cast< FEbaseArrayKn< double > *, pferbasearray >),
     new E_F1_funcT< FEbaseArrayKn< double > *, pferarray >
      ( First< FEbaseArrayKn< double > *, pferarray >),
-    // 3D Curve
+   
    new E_F1_funcT< FEbaseArrayKn< double > *, pfSrbasearray >
    ( Cast< FEbaseArrayKn< double > *, pfSrbasearray >),
    new E_F1_funcT< FEbaseArrayKn< double > *, pfSrarray >
    ( First< FEbaseArrayKn< double > *, pfSrarray >),
-    // 3D surface
+
    new E_F1_funcT< FEbaseArrayKn< double > *, pfLrbasearray >
    ( Cast< FEbaseArrayKn< double > *, pfLrbasearray >),
    new E_F1_funcT< FEbaseArrayKn< double > *, pfLrarray >
    ( First< FEbaseArrayKn< double > *, pfLrarray >),
-    // 3D 
+
     new E_F1_funcT< FEbaseArrayKn< double > *, pf3rbasearray >
      ( Cast< FEbaseArrayKn< double > *, pf3rbasearray >),
     new E_F1_funcT< FEbaseArrayKn< double > *, pf3rarray >
@@ -5990,7 +5913,6 @@ void init_lgfem( ) {
       (Cast< FEbaseArrayKn< Complex > *, pf3cbasearray >),
     new E_F1_funcT< FEbaseArrayKn< Complex > *, pf3carray >
       (First< FEbaseArrayKn< Complex > *, pf3carray >));
-
 
   map_type[typeid(pfes3).name( )] = new ForEachType< pfes3 >( );                  // 3D volume
   map_type[typeid(pfes3 *).name( )] = new ForEachTypePtrfspace< pfes3, 3 >( );    // // 3D volume
@@ -6068,11 +5990,6 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormBilinear<v_fesL, v_fesS> * >( );   // 3D curve / 3D Surf on meshL
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fesL> * >( );   // 3D Surf / 3D curve on meshL and bem
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fes> * >( );
-
-  // Morice: composite FESpace / vect FESpace 
-  Dcl_Type< const Call_FormLinear< vect_generic_v_fes > * >( );      //   to set Vector 3D curve
-  Dcl_Type< const Call_FormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
-  Dcl_Type< const Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
         
   Dcl_Type< interpolate_f_X_1< double >::type >( );      // to make  interpolation x=f o X^1 ;
 
@@ -6173,8 +6090,6 @@ void init_lgfem( ) {
   //  init FESpace
   TheOperators->Add(
     "<-", new OneOperator2_< pfes *, pfes *, pmesh * >(&MakePtr2),
-    //new OneOperatorCode< OP_MakePtrGeneric >, // Morice
-    new OpMake_pvectgenericfes,
     new OneOperatorCode< OP_MakePtr2 >, new OneOperatorCode< OP_MakePtr3 >,
     new OneOperatorCode< OP_MakePtrS >, new OneOperatorCode< OP_MakePtrL >,
     new OpMake_pfes< pfes, Mesh, TypeOfFE, pfes_tefk >,
@@ -6612,27 +6527,7 @@ void init_lgfem( ) {
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fesS >(1));    // 3D curve / 3D Surf on meshL
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >(1));     // 3D Surf / 3D curve on meshL
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshL, v_fesS, v_fesL >(1));    // 3D Surf / 3D curve on meshL
-
-
-  // constructions d'une matrice à partir d'une forme bilinéaire dans le cas composite FESpace.
-  TheOperators->Add("<-", new OpMatrixtoBilinearFormVG< double >(1));     // 
-  TheOperators->Add("<-", new OpMatrixtoBilinearFormVG< Complex >(1));    // 
-
-  // construction of an array with an linear form in composite FESpace.
-  TheOperators->Add("<-", 
-    new OpArraytoLinearFormVG< double >(atype< KN< double > * >( ), true, true),
-    new OpArraytoLinearFormVG< Complex >(atype< KN< Complex > * >( ), true, true) );
-
-  TheOperators->Add("=",
-    new OpArraytoLinearFormVG< double >(atype< KN_< double >  >( ), false, false),
-    new OpArraytoLinearFormVG< Complex >(atype< KN_< Complex >  >( ), false, false)   
-  );
-
-  TheOperators->Add("+=",
-    new OpArraytoLinearFormVG< double >(atype< KN_< double > >( ), false, false, false),        // real
-    new OpArraytoLinearFormVG< Complex >(atype< KN_< Complex > >( ), false, false, false)       // complex
-  );
-
+        
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fes >);
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fes, v_fes >);
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fes >);
@@ -6672,15 +6567,7 @@ void init_lgfem( ) {
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fes3, v_fesS >); // 3D volume / 3D Surf on meshS
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesL, v_fesS >); // 3D curve / 3D Surf on meshL
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesS, v_fesL >); // 3D Surf / 3D curve on meshL
-
-  // Morice: composite FESpace / composite FESpace 
-  Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, vect_generic_v_fes >);    
-  Add< const FormBilinear * >("(", "", new OpCall_CompositeFormBilinear< FormBilinear, vect_generic_v_fes , vect_generic_v_fes >);    
-  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, vect_generic_v_fes  >);    
-  Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, vect_generic_v_fes  >);      
-  Add< const C_args * >("(", "", new OpCall_CompositeFormBilinear< C_args, vect_generic_v_fes, vect_generic_v_fes >);   
-
-
+        
   //  correction du bug morale
   //  Attention il y a moralement un bug
   //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
@@ -6690,24 +6577,19 @@ void init_lgfem( ) {
   // on passe toujours par x(y) maintenant.
   //   -------
 
-  // Morice: Les versions de la suite autre que 2D sont dans [[lgmesh3.cpp]] chercher MakePtrFE3_2
-  // Morice: Creation de l'objet FEbase en 2D
-  TheOperators->Add("<-", 
-                    new OneOperator2_< pferbase *, pferbase *, pfes * >(MakePtrFE2),                  // Example::  Uh u;  Uh [u,v]; 
-                    new OneOperator3_< pferbasearray *, pferbasearray *, pfes *, long >(MakePtrFE3),  // Example:: Uh u[2];  Uh [u,v][2];
+  TheOperators->Add("<-", new OneOperator2_< pferbase *, pferbase *, pfes * >(MakePtrFE2),
+                    new OneOperator3_< pferbasearray *, pferbasearray *, pfes *, long >(MakePtrFE3),
 
-                    new OneOperator2_< pfecbase *, pfecbase *, pfes * >(MakePtrFE2),                  // Example::  Uh<complex> u;  Uh<complex> [u,v]; 
-                    new OneOperator3_< pfecbasearray *, pfecbasearray *, pfes *, long >(MakePtrFE3)   // Example:: Uh<complex> u[2];  Uh<complex> [u,v][2];
+                    new OneOperator2_< pfecbase *, pfecbase *, pfes * >(MakePtrFE2),
+                    new OneOperator3_< pfecbasearray *, pfecbasearray *, pfes *, long >(MakePtrFE3)
 
   );
-
-  // Morice: Creation de l'objet FEbase + Initialisation FEbase en 2D
   TheOperators->Add(
     "<-",
-    new OneOperatorMakePtrFE< double >(atype< double >( )),      //  scalar case  ; Example:: Uh<real> u = f(x,y);
-    new OneOperatorMakePtrFE< double >(atype< E_Array >( )),     //  vect case    ; Example:: Uh<real> [u,v] =[f1(x,y),f2(x,y)];
-    new OneOperatorMakePtrFE< Complex >(atype< Complex >( )),    //  scalar complex case; Example:: Uh<complex> u = f(x,y);
-    new OneOperatorMakePtrFE< Complex >(atype< E_Array >( ))     //  vect complex case;   Example:: Uh<complex> u = f(x,y);
+    new OneOperatorMakePtrFE< double >(atype< double >( )),      //  scalar case
+    new OneOperatorMakePtrFE< double >(atype< E_Array >( )),     //  vect case
+    new OneOperatorMakePtrFE< Complex >(atype< Complex >( )),    //  scalar complex  case
+    new OneOperatorMakePtrFE< Complex >(atype< E_Array >( ))     //  vect complex case
   );
   //  interpolation   operator
   TheOperators->Add(
@@ -6741,7 +6623,7 @@ void init_lgfem( ) {
   Global.Add("int1d", "(", new OneOperatorCode< CDomainOfIntegrationBorder >);
   Global.Add("intalledges", "(", new OneOperatorCode< CDomainOfIntegrationAllEdges >);
   Global.Add("intallBE", "(", new OneOperatorCode< CDomainOfIntegrationAllEdges >);
-  Global.Add("intallVFedges", "(", new OneOperatorCode< CDomainOfIntegrationVFEdges >);
+    Global.Add("intallVFedges", "(", new OneOperatorCode< CDomainOfIntegrationVFEdges >);
   Global.Add("jump", "(", new OneUnaryOperator< JumpOp< R >, JumpOp< R > >);
   Global.Add("mean", "(", new OneUnaryOperator< MeanOp< R >, MeanOp< R > >);
   Global.Add("average", "(", new OneUnaryOperator< MeanOp< R >, MeanOp< R > >);
@@ -7223,10 +7105,6 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
                                                          basicAC_F0_wa(fespacetype, init))
           : currentblock->Block::NewVar< LocalVariable >(name, dcltype, basicAC_F0_wa(fespacetype));
   C_F0 base = currentblock->Find(name);
-
-  // Morice : Ajout dans la table du block un NewId 
-  //          NewId = "une nouvelle variable", PAC: [u,v,w] ajout de 3 variables et non 1 variable. 
-  //          E_FEcomp est l'expression qui contient la FEbase
   if (cplx)
     for (int i = 0; i < n; i++)
       currentblock->NewID(cf0type, ids[i].id, C_F0(new CFEi(base, i, n), rtype));
@@ -7248,128 +7126,42 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
     return NewFEvariableT< v_fesS, 4 >(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 5)
     return NewFEvariableT< v_fesL, 5 >(pids, currentblock, fespacetype, init, cplx, dim);
-  //else if (dim == 6)
-  //  return NewVecFEvariableT(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non testee
-  //else if (dim == 7)
-  //  return NewFEvariableT< generic_v_fes, 7 >(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non testee
-  else {
-    cerr << "value dim=" << dim << endl;
+  else
     CompileError("Invalid fespace on Rd  ( d != 2 or 3) ");
-  }
   return C_F0( );
 }
-
-
 C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
                    int dim) {
   ListOfId *lid = new ListOfId;
   lid->push_back(UnId(id));
   return NewFEvariable(lid, currentblock, fespacetype, init, cplx, dim);
 }
-
-KN<size_t> dimFESpaceImage(const basicAC_F0 &args) {
-  // return the dimension of all the component of the FESpace and the result is of size 1.
-  //
-  // For a compositeFESpace Wh=<Uh1,....Uhn> , return the different dimension of each FESpace Uhi and the result is of size n;
-  // 
+      
+size_t dimFESpaceImage(const basicAC_F0 &args) {
   aType t_tfe = atype< TypeOfFE * >( );
   aType t_tfe3 = atype< TypeOfFE3 * >( );
   aType t_tfeS = atype< TypeOfFES * >( );
   aType t_tfeL = atype< TypeOfFEL * >( );
-  aType pt_tfe = atype0< TypeOfFE ** >( );// no verif because def in plugin !!!!
-  aType pt_tfe3 = atype0< TypeOfFE3 ** >( );
-  aType pt_tfeS = atype0< TypeOfFES ** >( );
-  aType pt_tfeL = atype0< TypeOfFEL ** >( );
   aType t_a = atype< E_Array >( );
-  aType t_fea = atype< E_FEarray >( );
+  size_t dim23 = 0;
 
-  aType atfs[] = {atype< pfes * >( ), atype< pfes3 * >( ), atype< pfesS * >( ),
-                  atype< pfesL * >( )};
-  
-  // J. Morice : actuellement, on fait cette hypothèse car je ne veux pas gérér pour l'instant les paramétres 
-  //             en même temps les fespace et les autres (Th,P1,[P1,P1],nb_periodic)
-  //             
-  ///            Dans cette fonction, on peut le faire sans problème (cf la boucle qui suit). 
-  //             Mais garder par coherence vis à vis de la fonction << aType typeFESpace(const basicAC_F0 &args) >>.
-  // 
-  // ffassert( numberOfpfes == args.size( ) ||  numberOfpfes == 0); 
-
-  // determination of the size of vector 
-  bool compositeFESpace=false;
-  vector< size_t> dimComposite;
-  size_t dim23=0;
-
-  // create the good size for a compositeFESpace
-  for (int i = 0; i < args.size( ); i++){
-    // case E_FEarray of FEspace
-    if(args[i].left( ) == t_fea){
-      compositeFESpace= true;
-      const E_FEarray &efea = *dynamic_cast< const E_FEarray * >(args[i].LeftValue( ));
-      ffassert(&efea);
-      dimComposite.resize(efea.size());
-    }
-  }
-
-
-  for (int i = !compositeFESpace; i < args.size( ); i++) { // on saute le maillage si pas de composite !!
-    if (   args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS || args[i].left( ) == t_tfeL
-        || args[i].left( ) == pt_tfe || args[i].left( ) == pt_tfe3 || args[i].left( ) == pt_tfeS || args[i].left( ) == pt_tfeL) { // A febr 2023 FH et PH-T
-      dim23+= args[i].LeftValue( )->nbitem( );
-    }
-      // if(verbosity >99) cout << " args[i].LeftValue( )->nbitem( ) ="<< args[i].LeftValue( )->nbitem( ) << " "<< dim23 << endl;
-    // case E_array of TypeOfFE
+  for (int i = 0; i < args.size( ); i++)
+    if (args[i].left( ) == t_tfe || args[i].left( ) == t_tfe3 || args[i].left( ) == t_tfeS ||
+        args[i].left( ) == t_tfeL)
+      dim23 += args[i].LeftValue( )->nbitem( );
     else if (args[i].left( ) == t_a) {
       const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
       ffassert(&ea);
       for (int i = 0; i < ea.size( ); i++)
-        if   ( ea[i].left( ) == t_tfe || ea[i].left( ) == t_tfe3 || ea[i].left( ) == t_tfeS || ea[i].left( ) == t_tfeL
-            || ea[i].left( ) == pt_tfe || ea[i].left( ) == pt_tfe3 || ea[i].left( ) == pt_tfeS || ea[i].left( ) == pt_tfeL)
+        if (ea[i].left( ) == t_tfe || ea[i].left( ) == t_tfe3 || ea[i].left( ) == t_tfeS ||
+            ea[i].left( ) == t_tfeL)
           dim23 += ea[i].nbitem( );
         else
-        {
-            cout<< " tpye .. " << *ea[i].left() << " " << *ea[i].right() <<endl;
-            ffassert(0);    // bug
-        }
-    }
-    // case E_FEarray of FEspace
-    else if(args[i].left( ) == t_fea){
-      const E_FEarray &efea = *dynamic_cast< const E_FEarray * >(args[i].LeftValue( ));
-      ffassert(&efea);
-      for (int ii = 0; ii < efea.size( ); ii++){
-        if( atfs[0] == efea[ii].left( )  || atfs[1] == efea[ii].left( ) || atfs[2] == efea[ii].left( ) || atfs[3] == efea[ii].left( ) ){
-          dimComposite[ii] = efea[ii].nbitem();
-          dim23 += efea[ii].nbitem();
-        }
-        else
           ffassert(0);    // bug
-      }
     }
-  }
-
-  if(compositeFESpace){
-    KN<size_t> result(dimComposite.size()); 
-    result[0] = dim23;
-    for (int ii = 0; ii < dimComposite.size( ); ii++){
-      if(dimComposite[ii] == 0){
-        cerr << "Error you have a FESpace with 0 componenent" << endl;
-        cerr << "nbitem in the "<< ii << "-th FEspace =" << dimComposite[ii] << endl;
-        ffassert(0);
-      }
-
-      // if(verbosity >99) cout << "nbitem in the "<< ii << "-th FEspace =" << dimComposite[ii] << endl;
-      result[ii] = dimComposite[ii];
-    }
-    return result;
-  }
-  else{
-    dim23 = dim23 ? dim23 : 1;
-    // if(verbosity >99) cout << "nbitem in the FEspace =" << dim23 << endl;
-
-    KN<size_t> result(1); result[0] = dim23;
-    return result;
-  }
+  dim23 = dim23 ? dim23 : 1;
+  return dim23;
 }
-
 
 aType typeFESpace(const basicAC_F0 &args) {
   aType t_m2 = atype< pmesh * >( );
@@ -7386,102 +7178,54 @@ aType typeFESpace(const basicAC_F0 &args) {
   aType atfs[] = {atype< pfes * >( ), atype< pfes3 * >( ), atype< pfesS * >( ),
                   atype< pfesL * >( )};
   aType t_a = atype< E_Array >( );
-  aType t_fea = atype< E_FEarray >( );
-
   aType ret = 0, tl = 0;
   aType tMesh = 0;
   int dm = -1, id = -2;
 
-  // Test if one args correpond to 
-  int numberOfpfes = 0; // number of type of pfes, pfes3, pfesS, pfesL in the parameter list 
-  int size_efea = 0;
-  for (int i = 0; i < args.size( ); i++){
+  for (int i = 0; i < args.size( ); i++) {
     tl = args[i].left( );
-    // Test is the args correspond to [Uh,Vh,...]
-    if(tl == t_fea){ 
-      const E_FEarray &efea = *dynamic_cast< const E_FEarray * >(args[i].LeftValue( ));
-      ffassert(&efea);
-      size_efea = efea.size();
-      for (int ii = 0; ii < efea.size( ); ii++) {
-        if( atfs[0] == efea[ii].left( )  || atfs[1] == efea[ii].left( ) || atfs[2] == efea[ii].left( ) || atfs[3] == efea[ii].left( ) ){
-          numberOfpfes++;
-        }
-        else{
-          ffassert(0);    // bug
-        }
-      }
-
+    if (tl == t_m2) {
+      ffassert(dm == 2 || dm < 0);
+      dm = 2;
+    } else if (tl == t_m3) {
+      ffassert(dm == 3 || dm < 0);
+      dm = 3;
+    } else if (tl == t_mS) {
+      ffassert(dm == 4 || dm < 0);
+      dm = 4;
+    } else if (tl == t_mL) {
+      ffassert(dm == 5 || dm < 0);
+      dm = 5;
     }
- 
-  }
-  if(verbosity > 4){
-    cout << "number of pfes in a composite FESpace=" << numberOfpfes << endl;
-    cout << "args.size()=" << args.size() << endl;
-  }
-  
-  // J. Morice : actuellement, on fait cette hypothèse car je ne veux pas gérér pour l'instant les paramétres Uh
-  //             en même temps avec les fespace et les autres (Th,P1,[P1,P1],nb_periodic)
-  if( !(  ( numberOfpfes == size_efea  && size_efea > 0 && args.size() == 1 ) ||  numberOfpfes == 0 ) ){
-    cerr << "you try to define a compositeFESpace with " << endl;
-    cerr << " fespace  Wh(<U1h,...,Unh>, Th,[P1],...) or Wh(Th,[P1],..., <U1h,...,Unh>) is not allowed." << endl;
-    cerr << " fespace  Wh(<U1h,...,Unh>, <X1h,...,Xnh>) is not allowed." << endl;
-    cerr << " Only possiblity is : " << endl;
-    cerr << " fespace  Wh(<U1h,...,Uhn>) where Uhi is a FESpace." << endl;
-  }
-  ffassert( ( numberOfpfes == size_efea  && size_efea > 0 && args.size() == 1 ) ||  numberOfpfes == 0); 
-
-  if( numberOfpfes == 0){
-    // case without fespace in the arguments
-    for (int i = 0; i < args.size( ); i++) {
-      tl = args[i].left( );
-      if (tl == t_m2) {
-        ffassert(dm == 2 || dm < 0);
-        dm = 2;
-      } else if (tl == t_m3) {
-        ffassert(dm == 3 || dm < 0);
-        dm = 3;
-      } else if (tl == t_mS) {
-        ffassert(dm == 4 || dm < 0);
-        dm = 4;
-      } else if (tl == t_mL) {
-        ffassert(dm == 5 || dm < 0);
-        dm = 5;
-      }
-      // array
-      else if (tl == t_a) {
-        const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
-        ffassert(&ea);
-        for (int ii = 0; ii < ea.size( ); ii++) {
-          tl = ea[ii].left( );
-          for (int it = 0; it < 4; ++it)
-            if (atfe[it]->CastingFrom(tl))    // Warning  P1 can be cast in 2d or 3d FE ...
-              id = it;
-        }
-      } else
+    // array
+    else if (tl == t_a) {
+      const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
+      ffassert(&ea);
+      for (int i = 0; i < ea.size( ); i++) {
+        tl = ea[i].left( );
         for (int it = 0; it < 4; ++it)
-          if (atfe[it]->CastingFrom(tl)) id = it;
-    }
+          if (atfe[it]->CastingFrom(tl))    // Warning  P1 can be cast in 2d or 3d FE ...
+            id = it;
+      }
+    } else
+      for (int it = 0; it < 4; ++it)
+        if (atfe[it]->CastingFrom(tl)) id = it;
+  }
 
-    if (dm == 2)
-      ret = atfs[0];    // 2D fespace
-    else if (dm == 3)
-      ret = atfs[1];    // 3D fespace (Volume)
-    else if (dm == 4)
-      ret = atfs[2];    // 3D fespace (surface)
-    else if (dm == 5)
-      ret = atfs[3];    // 3D fespace (curve)
-    else {
-      cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :" << dm << " type FE " << id + 2 << endl;
-      ffassert(0);
-    }
-    if (verbosity > 99) cout << " typeFESpace " << id << " " << ret->name( ) << endl;
-    return ret;
+  if (dm == 2)
+    ret = atfs[0];    // 2D fespace
+  else if (dm == 3)
+    ret = atfs[1];    // 3D fespace (Volume)
+  else if (dm == 4)
+    ret = atfs[2];    // 3D fespace (surface)
+  else if (dm == 5)
+    ret = atfs[3];    // 3D fespace (curve)
+  else {
+    cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :" << dm << " type FE " << id + 2 << endl;
+    ffassert(0);
   }
-  else{
-    // case with fespace as parameter
-    ret = atype< pvectgenericfes * >();
-    return ret; 
-  }
+  if (verbosity > 99) cout << " typeFESpace " << id << " " << ret->name( ) << endl;
+  return ret;
 }
 
 template< class v_fes, int DIM >

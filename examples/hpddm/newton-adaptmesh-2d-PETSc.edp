@@ -10,8 +10,7 @@ func Pkdc = P2dc;                   // finite element space
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
 mesh ThBackup = Th;
 Mat A;
-macro ThRefinementFactor()getARGV("-split", 1)//
-MatCreate(Th, A, Pk);
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
@@ -70,16 +69,16 @@ plot(uG, cmm = "Global solution", wait = 1, fill = 1, dim = 3);
 {
     Th = ThBackup;
     Mat Adapt;
-    MatCreate(Th, Adapt, Pk);
+    buildMat(Th, getARGV("-split", 1), Adapt, Pk, mpiCommWorld)
     A = Adapt;
 }
 u = uG;
 macro def(u)u//
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 xPETSc.resize(0);
 ChangeNumbering(A, u[], xPETSc);
 u[] = vC(0, Vh);
 ChangeNumbering(A, u[], bPETSc);
 SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_max_it 40 -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

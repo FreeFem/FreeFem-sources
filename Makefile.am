@@ -122,7 +122,6 @@ idp/MPIGMRESmacro.idp \
 idp/MPIplot.idp \
 idp/MeshSurface.idp \
 idp/ball-buildlayer.idp \
-idp/buildmeshS.idp \
 idp/cobrameshcavity.idp \
 idp/cube.idp \
 idp/ffddm.idp \
@@ -230,8 +229,7 @@ WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	sed -i 's;/mingw64/ff-petsc;/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
-	-DHOSTOS='$(host_os)' -DFFPETSC='$(FF_prefix_petsc)' \
-	 etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
+	-DHOSTOS='$(host_os)'  etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
 	echo loadpath += '"!\."'  >freefem++.pref
 	echo includepath += '"!\idp"'  >>freefem++.pref
 
@@ -261,22 +259,6 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
-bin/movefortranlib:etc/config/movefortranlib.in ./config.status
-	./config.status --file=$@:etc/config/movefortranlib.in
-	chmod a+x $@
-bin/init-var.sh:Makefile
-	echo "# buid form Makefile" >$@
-	echo "bindir=$(bindir)" >>$@
-	echo "ff_prefix=$(ff_prefix)" >>$@
-	echo "version=$(VERSION)" >>$@
-	echo "ffsrc=$(abs_top_srcdir)" >>$@
-	echo "ff_prefix_dir_lib=$(ff_prefix_dir_lib)" >>$@
-	echo "ff_prefix_dir_lib_mpi=$(ff_prefix_dir_lib_mpi)" >>$@
-	echo "ff_data=$(pkgdatadir)/$(VERSION)" >>$@
-	chmod a+x $@
-	
-	
-	
 install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
@@ -290,7 +272,6 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
 	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
-	test `uname` != Darwin || ( $(MAKE) bin/movefortranlib )
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
 	cd idp; for i in *.idp; do \
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
@@ -436,7 +417,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/tutorial/Makefile.in \
     examples/misc/Makefile.in \
     examples/mpi/Makefile.in \
-    examples/bem/Makefile.in \
     examples/hpddm/Makefile.in \
     examples/ffddm/Makefile.in \
     examples/eigen/Makefile.in \
@@ -477,7 +457,6 @@ LIST_GENERATE_FILE_AM= \
     examples/tutorial/Makefile.am \
     examples/misc/Makefile.am \
     examples/mpi/Makefile.am \
-    examples/bem/Makefile.am \
     examples/hpddm/Makefile.am \
     examples/ffddm/Makefile.am \
     examples/eigen/Makefile.am \

@@ -926,8 +926,6 @@ double interpol(KN_<double> const &  so,KN_<double> const &  xo,KN_<double> cons
     for(int i=0; i<N;++i)
     {
         si = i*dl;
-        // warning roundoff error s_(N-1) > l
-        if( i== N-1) si=l; 
         // find i0  such that  [so[i],so[i+1] [
         while (i0+2<M)
         { // cout << i0<<" " << si << " " << so[i0+1] << " " << (si < so[i0+1] ) <<endl;
@@ -937,8 +935,7 @@ double interpol(KN_<double> const &  so,KN_<double> const &  xo,KN_<double> cons
         
         double si0 = so[i0];
         double si1 = so[i0+1];
-        if(verbosity>19)  cout << " iinterpole :" <<i0 << " " << M << ": " << si  << ":  " << si0 << " " << " " << si1 << " " << si0-si << " " << si-si1 << endl;
-        ffassert(si0 <= si &&  si <= si1);
+        ffassert(si0 <= si && si <= si1);
         double l = (si-si0)/(si1-si0);
         xn[i] = xo[i0]*(1-l)+xo[i0+1]*(l);
     }

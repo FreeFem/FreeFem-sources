@@ -1,23 +1,15 @@
 load "metis"
-load "msh3"
-mesh Th=square(30,30);
-meshS ThS=square3(30,30);
+mesh Th=square(100,100);
 fespace Ph(Th,P0);
-fespace Vh(Th,P0edge);
 int[int] nupart(Th.nt);
 Ph  part;
-Vh  p1;
-metisdual(p1,10); // new interface .. 
-plot(p1,wait=1,fill=1);
-metisnodal(p1,10); // new interface .. 
-plot(p1,wait=1,fill=1);
-metisnodal(nupart,Th,30);
 
+metisnodal(nupart,Th,100);
 for(int i=0;i<nupart.n;++i)
   part[][i]=nupart[i];
 plot(part,fill=1,cmm="nodal",wait=1);
 
-metisdual(nupart,Th,30);
+metisdual(nupart,Th,100);
 for(int i=0;i<nupart.n;++i)
   part[][i]=nupart[i];
 plot(part,fill=1,cmm="dual",wait=1);

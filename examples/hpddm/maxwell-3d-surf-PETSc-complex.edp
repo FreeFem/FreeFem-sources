@@ -34,11 +34,11 @@ Mat<complex> A;
 int[int] n2o;
 macro ThSN2O()n2o//
 ThG = ThS;
-DmeshBuild(ThS);
+buildDmesh(ThS);
 {
     Mat<complex> H, T;
-    MatCreate(ThS, H, P1);
-    MatCreate(ThS, T, P0);
+    createMat(ThS, H, P1);
+    createMat(ThS, T, P0);
     CoherentGlobalMesh(T, H, ThS, ThG);
 }
 {
@@ -47,12 +47,11 @@ DmeshBuild(ThS);
     macro ThSPkPart()Edge0S//
     macro defPart(u)def(u)//
     macro initPart(u)init(u)//
-    MatCreate(ThS, A, Pk);
+    createMat(ThS, A, Pk);
 }
 fespace UhG(ThG, Pk);
 fespace UhS(ThS, Pk);
-// Maxwell is defined on a vector of size three
-varf vk( [u1,u2,u3], [v1,v2,v3] ) = int2dx2d(ThG)(ThG)(BEM(BemKernel("MA_SL", k=k), [u1,u2,u3], [v1,v2,v3]));
+varf vk(u, v) = int2dx2d(ThG)(ThG)(BEM(BemKernel("SL", k=k), u, v));
 A = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
 varf vRHS([ux, uy, uz], [vx, vy, vz]) = int2d(ThG)([vx, vy, vz]' * [-fincx, -fincy, -fincz]);
 UhG<complex> [bx, by, bz], [ux, uy, uz];
@@ -85,23 +84,22 @@ if(!NoGraphicWindow) {
     meshS ThOutS = ThOutG;
     int[int] n2o;//
     macro ThOutSN2O()n2o//
-    DmeshBuild(ThOutS);
+    buildDmesh(ThOutS);
     {
         Mat<complex> B, T;
-        MatCreate(ThOutS, B, P1);
-        MatCreate(ThOutS, T, P0);
+        createMat(ThOutS, B, P1)
+        createMat(ThOutS, T, P0);
         CoherentGlobalMesh(T, B, ThOutS, ThOutG);
     }
     Mat<complex> B;
     {
         macro def(u)[u, u#2, u#3]//
         macro init(u)[u, u, u]//
-        MatCreate(ThOutS, B, Qk);
+        createMat(ThOutS, B, Qk);
     }
     fespace UhOutG(ThOutG, Qk);
     fespace UhOutS(ThOutS, Qk);
-    // Maxwell is defined on a vector of size three
-    varf vP([u1,u2,u3], [v1,v2,v3] ) = int2d(ThG)(POT(BemPotential("MA_SL", k=k), [u1,u2,u3], [v1,v2,v3] )) ;
+    varf vP(u, v) = int2d(ThG)(POT(BemPotential("SL", k=k), u, v)) ;
     Mat<complex> P(B, A);
     P = vP(UhG, UhOutG, sparams = "-mat_htool_epsilon 1.0e-3 -mat_htool_eta 10");
     ObjectView(P, format = "info");
@@ -118,7 +116,7 @@ if(!NoGraphicWindow) {
     fespace Uh(ThOutS, P1);
     Uh Er = sqrt(real(Ex+fincx)^2 + real(Ey+fincy)^2 + real(Ez+fincz)^2);
     macro def1(u)u//
-    plotMPI(ThOutS, Er, P1, def1, real, cmm = "Global solution");
+    plotMPI(ThOutS, Er, P1, def1, real, cmm = "Global solution")
 }
 if(0) {
     UhS<complex> [blx, bly, blz];

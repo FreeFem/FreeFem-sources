@@ -31,8 +31,8 @@ IFMACRO(CartesianPartitioning)
 macro ThCartesianPartitioning()// EOM
 ENDIFMACRO
 
-DmeshBuild(Th);
-MatCreate(Th, A, Pk);
+buildDmesh(Th)
+createMat(Th, A, Pk)
 
 fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
@@ -53,4 +53,4 @@ Mat[int] Z(1);
 }
 set(Q, Z, parent = A, sparams = "-custom_sub_" + mpirank + "_pc_type mg -custom_sub_0_ksp_converged_reason", prefix = "custom_sub_" + mpirank + "_");
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

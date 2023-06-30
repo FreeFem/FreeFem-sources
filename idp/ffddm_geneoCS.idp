@@ -463,15 +463,7 @@ else {
     }
 
     pr#E = pr#E0;
-    IFMACRO(pr#CSwithpetsc)
-    Mat pr#petsctmp(pr#E.n,communicator = pr#prfe#prmesh#commCS);
-    pr#petsctmp = pr#E;
-    pr#petscE = pr#petsctmp;
-    MatDestroy(pr#petsctmp);
-    pr#E.resize(1,1);
-    ENDIFMACRO
     pr#E0.resize(1,1);
-    IFMACRO(!pr#CSwithpetsc)
     int[int] Rl(offsetl[locnpart-1] + pr#sizelg[rkrdd(locnpart-1)]);
     for (int i = 0; i < locnpart; i++)
     for (int jj=0; jj< pr#sizelg[rkrdd(i)]; jj++)
@@ -483,15 +475,12 @@ else {
     mRl.resize(Rl.n, pr#ncoarsespace);
     pr#E.resize(Rl.n, pr#ncoarsespace);
     pr#E = mRl'*pr#E;
-    ENDIFMACRO
   }
 
-  IFMACRO(!pr#CSwithpetsc)
   if (!pr#prfe#prmesh#binexactCS)
   if (Stringification(prT) == Stringification(pr))
   if (mpiRank(pr#prfe#prmesh#mpicomm) < pr#prfe#prmesh#pCS)
     set(pr#E,solver="MUMPS",sym=vsym,commworld=pr#prfe#prmesh#commCS,master=-1,factorize=3);
-  ENDIFMACRO
   }
   else {
       
@@ -791,7 +780,6 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   ENDIFMACRO
 
   if (ffddminertia) {
-    nev = ffddmnu;
     matrix<pr#prfe#K> NA = pr#matN-ffddmtau*weighted;
     int[int] info(40);
     set(NA,solver = sparsesolver,sym=1,commworld=pr#prfe#prmesh#commself,factorize=3,info=info);

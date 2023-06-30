@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <list>
-#include <limits>
+
 #include <tuple>
 using std::tuple;
 #include <iostream>
@@ -79,27 +79,12 @@ public:
     int lock;
     int fortran; // index start a one ..
     mutable int re_do_numerics,re_do_symbolic;
-    mutable I mindiffij,maxdiffij;// add jan. 2023
-
     static const  size_t empty= (I) -1;
      // for  Dirichlet BC
     double tgv;
     I ntgv;
 
     I NbCoef() const {return  (I) nnz;}
-    
-    void Setdiffij(int force=0) const {
-        if(force || (mindiffij> maxdiffij))
-        {
-            mindiffij= std::numeric_limits<I>::max();
-            maxdiffij= std::numeric_limits<I>::min();
-            for(int k=0; k< nnz; ++k) {
-                mindiffij = min(mindiffij,i[k]-j[k]);
-                maxdiffij = max(maxdiffij,i[k]-j[k]);
-            }}
-    }
-    bool isL() const { Setdiffij(0); return maxdiffij >=0 ;}// j <= i => diffij >=0
-    bool isU() const { Setdiffij(0); return mindiffij <=0 ;}// j >= i => diffij <=0
     void setcoef(const KN_<R> & x){KN_<R>c(this->aij,nnz); ffassert(x.SameShape(c));
         if( x.constant())  c=x[0];   else c = x;}
     void getcoef( KN_<R> & x) const {ffassert(x.N()==(I) nnz);x =KN_<R>(this->aij,nnz);}
@@ -107,7 +92,7 @@ public:
     void setdiag(const KN_<R> & d);
     void getdiag( KN_<R> & d) const;
     R pscal(R *x,R *y,I sx=1,I sy=1);
-    R pscal(const KN_<R> & x,const KN_<R> & y) {ffassert(x.N()==this->N && y.N()==this->N && this->N ==this->M ); return pscal(x,y,(I) x.step,(I) y.step);}
+    R pscal(const KN_<R> & x,const KN_<R> & y) { return pscal(x,y,(I) x.step,(I) y.step);}
     void SetMorse();
     void UnSetMorse();
     uniquecodeInt CodeIJ() const ;

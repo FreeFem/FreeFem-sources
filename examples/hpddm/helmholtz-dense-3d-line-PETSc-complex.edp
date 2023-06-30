@@ -25,9 +25,9 @@ macro ThLN2O()n2o//
 Mat<complex> A;
 {
     macro dimension()3L// EOM
-    MatCreate(ThL, A, P1);
+    createMat(ThL, A, P1);
     Mat<complex> T;
-    MatCreate(ThL, T, P0);
+    createMat(ThL, T, P0);
     CoherentGlobalMesh(T, A, ThL, ThG);
 }
 
@@ -66,8 +66,8 @@ if(!NoGraphicWindow) {
     macro ThOutLN2O()n2o//
     Mat<complex> B, T;
     ThOutG = ThOutL;
-    MatCreate(ThOutL, B, P1);
-    MatCreate(ThOutL, T, P0);
+    createMat(ThOutL, B, P1)
+    createMat(ThOutL, T, P0);
     CoherentGlobalMesh(T, B, ThOutL, ThOutG);
     MatDestroy(T);
     varf vp(u, v) = int1d(ThL)(POT(BemPotential("SL", k=k), u, v));
@@ -79,5 +79,5 @@ if(!NoGraphicWindow) {
     v[] = HPot*u[];
     v[] += vinc[];
     UhOut vr = abs(v);
-    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution");
+    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution")
 }

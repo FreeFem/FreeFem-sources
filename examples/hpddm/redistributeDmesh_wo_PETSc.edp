@@ -2,4 +2,4 @@
 // NBPROC 4
 // PARAM -sizeComm 2 -Dpartitioner=scotch
 
-include "DmeshRedistribute.idp"
+include "redistributeDmesh.idp"

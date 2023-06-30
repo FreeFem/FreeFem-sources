@@ -12,23 +12,23 @@ load "hpddm"
 ENDIFMACRO
 
 real[int] D;
-PartitionCreate(Th, D, P0);
+createPartition(Th, D, P0)
 fespace Ph(Th, P0);
 fespace Vh(Th, P1);
 fespace Wh(Th, P2);
 Ph p;
 p[] = D;
-PartitionCreate(Th, D, P1);
+createPartition(Th, D, P1);
 Vh v;
 v[] = D;
-PartitionCreate(Th, D, P2);
+createPartition(Th, D, P2)
 Wh w;
 w[] = D;
 macro def(u)u// EOM
-plotMPI(Th, p, P0, def, real, cmm = "P_0 partition of unity");
-plotMPI(Th, v, P1, def, real, cmm = "P_1 partition of unity");
-plotMPI(Th, w, P2, def, real, cmm = "P_2 partition of unity");
+plotMPI(Th, p, P0, def, real, cmm = "P_0 partition of unity")
+plotMPI(Th, v, P1, def, real, cmm = "P_1 partition of unity")
+plotMPI(Th, w, P2, def, real, cmm = "P_2 partition of unity")
 IFMACRO(paraview)
 int[int] fforder = [0, 1, 1];
-savevtk("PartitionCreate.vtu", Th, p, v, w, dataname = "p v w", order = fforder);
+savevtk("createPartition.vtu", Th, p, v, w, dataname = "p v w", order = fforder);
 ENDIFMACRO

@@ -3094,7 +3094,7 @@ namespace bamg {
       strftime(buf, 70, ", Date: %y/%m/%d %H:%M %Ss", localtime(&timer));
       counter++;
       char countbuf[30];
-        snprintf(countbuf,30, "%d", counter);
+      sprintf(countbuf, "%d", counter);
       int lg = 0;
       if (&BTh != this && BTh.name) lg = strlen(BTh.name) + 4;
       identity = new char[lg + strlen(buf) + strlen(countbuf) + 2 + 10 +

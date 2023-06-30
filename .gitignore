@@ -318,7 +318,6 @@ src/mpi/ffapi.cpp
 src/mpi/lg.tab.cpp
 src/mpi/mymain.cpp
 src/mpi/sansrgraph.cpp
-src/mpi/compositeFESpace.cpp
 *stamp-h
 *stamp-h1
 *test-driver

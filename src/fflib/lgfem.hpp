@@ -33,28 +33,20 @@
 
 #ifndef lgfem_hpp_
 #define lgfem_hpp_
-#include "array_resize.hpp"
+#include <array_resize.hpp>
 
 extern Block *currentblock;
 
 void init_lgmat( );    // initialisation for sparse mat functionnallity
 
-class generic_v_fes;       // J. Morice : Added in 06/22
-class vect_generic_v_fes;  // J. Morice : Added in 06/22
 class v_fes;
 class v_fes3;
 class v_fesS;
 class v_fesL;
-
-typedef generic_v_fes *pgenericfes;           // J. Morice : Added in 06/22
-typedef vect_generic_v_fes *pvectgenericfes;  // J. Morice : Added in 06/22
-
 typedef v_fes *pfes;
 typedef v_fes3 *pfes3;
 typedef v_fesS *pfesS;
 typedef v_fesL *pfesL;
-
-//typedef v_fesVect *pfesVect; // J. Morice
 
 namespace Fem2D {
   class Mesh3;
@@ -242,25 +234,8 @@ bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack
 
 // <<v_fes>> uses [[file:~/ff/src/femlib/RefCounter.hpp::RefCounter]]
 
-// virtual class for generic v_fes
-// Morice :: 06/2022
-class generic_v_fes : public RefCounter {
-  typedef void* pfes;
-  typedef void* FESpace;
-
-  public:
-  virtual bool differentMesh(){ ffassert(0); return true; }; 
-  
-  // declaration avec les virtuelles pure
-  // function for vect_generic_v_fes
-  virtual void *getpVh()=0;         // get the pointer of FESpace
-  virtual void *getpVh()const=0;         // get the pointer of FESpace
-  virtual const void *getppTh()=0;  // get the pointer on the pointer of the mesh
-  virtual int getN()=0;             // get the number of item of the FESpace
-};
-
 // 2d
-class v_fes : public generic_v_fes{
+class v_fes : public RefCounter {
  public:
   typedef ::pfes pfes;
   typedef ::FESpace FESpace;
@@ -296,16 +271,10 @@ class v_fes : public generic_v_fes{
   bool buildperiodic(Stack stack, int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe);
   virtual FESpace *buildupdate(int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) = 0;
   virtual FESpace *buildupdate( ) = 0;
-  
-  // Added to return the pointer to FESpace 
-  const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void *getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
 // 3D volume
-class v_fes3 : public generic_v_fes {
+class v_fes3 : public RefCounter {
  public:
   typedef pfes3 pfes;
   typedef FESpace3 FESpace;
@@ -337,15 +306,10 @@ class v_fes3 : public generic_v_fes {
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpace3 *buildupdate(KN< int > &ndfe) { return 0; }
   virtual FESpace3 *buildupdate( ) { return 0; };
-
-  const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
 // 3D surface
-class v_fesS : public generic_v_fes {
+class v_fesS : public RefCounter {
  public:
   typedef pfesS pfes;
   typedef FESpaceS FESpace;
@@ -379,15 +343,10 @@ class v_fesS : public generic_v_fes {
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpaceS *buildupdate(KN< int > &ndfe) { return 0; }
   virtual FESpaceS *buildupdate( ) { return 0; };
-
-  const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
 // 3D curve
-class v_fesL : public generic_v_fes {
+class v_fesL : public RefCounter {
  public:
   typedef pfesL pfes;
   typedef FESpaceL FESpace;
@@ -421,11 +380,6 @@ class v_fesL : public generic_v_fes {
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpaceL *buildupdate(KN< int > &ndfe) { return 0; }
   virtual FESpaceL *buildupdate( ) { return 0; };
-
-  const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
 // 2d
@@ -449,6 +403,7 @@ class pfes_tefk : public v_fes {
   pfes_tefk(const pmesh *t, const TypeOfFE **tt, int kk, Stack s = NullStack, int n = 0,
             Expression *p = 0)
     : v_fes(sum(tt, &Fem2D::TypeOfFE::N, kk), t, s, n, p), tef(tt), k(kk) {
+    // cout << "pfes_tefk const" << tef << " " << this << endl;
     operator FESpace *( );
   }
   FESpace *buildupdate( ) {
@@ -603,229 +558,6 @@ class pfesL_tefk : public v_fesL {
     return *ppTh ? new FESpaceL(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : 0;
   }
 };
-/*
-struct infoBlockCompositeFESpace{
-
-  // struct useful for composite FESpace
-  KN<int> beginBlock;
-  KN<int> indexBlock;  
-  KN<int> localIndexInTheBlock;
-
-  infoBlockCompositeFESpace( const KN<int> & b, const KN<int> & i, const KN<int> & li ): beginBlock(b), indexBlock(i), localIndexInTheBlock(li) {};
-
-};
-*/
-
-class vect_generic_v_fes {  //: public RefCounter{
-  public:
-
-  typedef pgenericfes A;
-
-  public:
-  int N;            // size of the vector ( the number of FESpace )
-  A *vect;          // the vector containing the adress of generic_v_fes 
-  KN<int> typeFE;   // ===== type of FE ====
-                 // The value of a type correspond to the second parameter of << forEachTypePtrfspace >>
-                 // in for pfes, pfes3, pfesS, pfesL in [[ fflib/lgfem.cpp ]].
-
-  //CountPointer< FESpace > pVh;  // A voir avec Frederic pour savoir si il faut rajouter un 
-                                  // un CountPointer
-
-  
-  Stack stack; // the stack is use whith periodique expression
-
-  
-  // constructor
-  vect_generic_v_fes(const E_FEarray &args, Stack s): N( args.size() ), typeFE( args.size() ), stack(s){ 
-
-    // constructor
-    //vect_generic_v_fes(const E_FEarray &args, Stack s=NullStack): N( args.size() ), typeFE( args.size() ){
-    // == PAC(e) == //
-    // Morice :: attention <<pfes>> est redéfini pour cette classe.
-    //           Il faut faire appel au type de <<pfes>> associé à v_fes:
-    //                 ::pfes == typedef v_fes *pfes;
-    //
-    typedef ::pfes pfesTrue; 
-
-    aType atfs[] = {atype< ::pfes * >( ), atype< pfes3 * >( ), atype< pfesS * >( ), atype< pfesL * >( )};
-    vect = new A[N];
-    
-    if(verbosity>3){
-      for(int i=0; i<args.size(); i++){
-        cout << "info FESpace["<<i<<"] === " << endl;
-        cout << "nbitem= " << args[i].nbitem() << endl;
-      }
-    }
-    
-    for( int i=0; i<args.size(); i++ ){
-        //cout << "i=" << i << endl;
-        if( atype< ::pfes * >() == args[i].left( ) ){
-          //a = to< atfs[iii] >(args[i]);
-          pfesTrue * tmp = GetAny< pfesTrue *> ( args[i].eval(stack)) ;
-          vect[i] = *tmp;
-          //vect[i] = args[i].f;
-          typeFE[i] = args[i].TYPEOFID();
-        }
-        else if( atype< pfes3 * >() == args[i].left( ) ){
-          //a = to< atfs[iii] >(args[i]);
-          pfes3 * tmp = GetAny< pfes3*> ( args[i].eval(stack)) ;
-          vect[i] = *tmp;
-          //vect[i] = args[i].RightValue();
-          typeFE[i] = args[i].TYPEOFID();
-        }
-        else if( atype< pfesS * >() == args[i].left( ) ){
-          //a = to< atfs[iii] >(args[i]);
-          pfesS * tmp = GetAny< pfesS*> ( args[i].eval(stack)) ;
-          vect[i] = *tmp;
-          //vect[i] = args[i].RightValue();
-          typeFE[i] = args[i].TYPEOFID();
-        }
-        else if( atype< pfesL * >() == args[i].left( ) ){
-          //a = to< atfs[iii] >(args[i]);
-          pfesL *tmp = GetAny< pfesL* > ( args[i].eval(stack)) ;
-          vect[i] = *tmp;
-          //vect[i] = args[i].RightValue();
-          typeFE[i] = args[i].TYPEOFID();
-        }
-        else{
-          cerr << "Error in the constructor of <<vect_generic_v_fes>> " << endl;
-          cerr << "The aType of the FESpace " << args[i].left( ) << " is not considered." << endl;
-          cerr << "The aType considered for FESpace is " << atfs[0]  << "." << endl;
-          cerr << "The aType considered for FESpace is " << atfs[1]  << "." << endl;
-          cerr << "The aType considered for FESpace is " << atfs[2]  << "." << endl;
-          cerr << "The aType considered for FESpace is " << atfs[3]  << "." << endl;
-          cerr << "type pgenericfes= " << atype< pgenericfes *>() << endl;
-          ffassert(0);
-        }
-    }
-    update();
-  }
-
-  // destructor
-  void destroy( ) {
-    delete [] vect;
-    delete this;
-  }
-
-  ~vect_generic_v_fes(){
-  }
-  /**
-    * @brief update the composant of the composite FESpace if a mesh have changed
-    * 
-    */
-  void update( ){
-    // loop over the FESpace
-    for(int i=0; i<N; i++){
-      int tt = typeFE[i];
-      if(tt == 2){
-        pfes pFES = dynamic_cast<pfes>( vect[i] );
-        ffassert(pFES);
-        pmesh* ppTh = (pmesh *) vect[i]->getppTh();
-        FESpace * pVh = (FESpace *) vect[i]->getpVh(); 
-        // pfes pFES = dynamic_cast<pfes>( vect[i] );
-        // cout << &pVh->Th << " "<< &mac->pVh->Th << endl;
-        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpace >(pFES->update( ), true);
-      }
-      else if(tt == 3){
-        pmesh3* ppTh = (pmesh3 *) vect[i]->getppTh();
-        const pfes3 pFES = dynamic_cast<const pfes3>( vect[i] );
-        ffassert(pFES); 
-        FESpace3 * pVh =  (FESpace3*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpace3 >(pFES->update( ), true);
-  
-      }
-      else if(tt == 4){
-        pmeshS* ppTh = (pmeshS *) vect[i]->getppTh();
-        const pfesS pFES = dynamic_cast<const pfesS>( vect[i] );
-        ffassert(pFES); 
-        FESpaceS * pVh =  (FESpaceS*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpaceS >(pFES->update( ), true);
-        
-      }
-      else if(tt == 5){
-        pmeshL* ppTh = (pmeshL *) vect[i]->getppTh();
-        const pfesL pFES = dynamic_cast<const pfesL>( vect[i] );
-        ffassert(pFES);
-        FESpaceL * pVh =  (FESpaceL*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpaceL >(pFES->update( ), true);
-      }
-      /*else{
-        cerr << "== error in the type of FESpace ===" << endl;
-        ffassert(0);
-      }
-      */
-    }
-  }
-
-
-  // acces to the different pgenericfes
-  A &operator[](int i){ return vect[i];}
-
-  //=== Morice :: ATTENTION : PEUT ETRE A METTRE AILLEURS ===//
-
-  void printPointer(){
-    cout <<" %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% " <<endl;
-    cout <<" %%%%        pointer FESpace       %%%%%%%% " <<endl;
-    for(int i=0; i< N; i++){
-      cout << "pointer epace i =" << vect[i]->getpVh() << endl;
-    }
-    cout <<" %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% " <<endl;
-  }
-
-  KN<int> vectOfNbOfDF(){
-    KN<int> result(N);
-    for(int i=0; i< N; i++){
-      int tt = typeFE[i];
-      if(tt == 2){
-        const FESpace * PUh =  (FESpace*) vect[i]->getpVh();
-        result[i] = PUh->NbOfDF;
-      }
-      else if(tt == 3){
-        const FESpace3 * PUh =  (FESpace3*) vect[i]->getpVh();
-        result[i] =  PUh->NbOfDF;
-      }
-      else if(tt == 4){
-        const FESpaceS * PUh =  (FESpaceS*) vect[i]->getpVh();
-        result[i] = PUh->NbOfDF;
-      }
-      else if(tt == 5){
-        const FESpaceL * PUh =  (FESpaceL*) vect[i]->getpVh();
-        result[i] = PUh->NbOfDF;
-      }
-    }
-    //cout << "vectOfNbOfDF=" << result << endl;
-    return result;    
-  }
-
-  int totalNbOfDF(){
-    KN<int> arrayNbOfDF = vectOfNbOfDF();
-    int tNbOfDF=0;
-    for(int i=0; i< N; i++){
-        tNbOfDF += arrayNbOfDF[i];
-    }
-    //cout << "total NbOfDF=" << tNbOfDF << endl;
-    return tNbOfDF;
-  }
-
-  KN<int> vectOfNbitem(){
-    KN<int> result(N);
-    for(int i=0; i< N; i++){
-      // get the number of item of i-th component of the composite vector of FESpace
-      result[i] = vect[i]->getN(); 
-    }
-    //cout << "vectOfNbitem=" << result << endl;
-    return result;
-  }
-
-  int totalNbitem(){
-    KN<int> arrayNbItem = vectOfNbitem();
-    int tNbItem=0;
-    for(int i=0; i< N; i++){
-        tNbItem += arrayNbItem[i];
-    }
-    return tNbItem;
-  }
-};
 
 class pfes_fes : public v_fes {
  public:
@@ -902,6 +634,7 @@ class FEbase {
   FESpace *newVh( ) {
     throwassert(pVh);
     const pfes pp = *pVh;
+    // cout << pVh << " " << *pVh << endl;
     return *pp;
   }
 
@@ -1004,7 +737,7 @@ inline C_F0 NewFEvariable(ListOfId *ids, Block *currentblock, C_F0 &fespacetype,
   return NewFEvariable(ids, currentblock, fespacetype, init, cplx, dim);
 }
 
-KN<size_t> dimFESpaceImage(const basicAC_F0 &args);
+size_t dimFESpaceImage(const basicAC_F0 &args);
 aType typeFESpace(const basicAC_F0 &args);
 
 template< class K, class vv_fes, class FE = FEbase< K, vv_fes > >

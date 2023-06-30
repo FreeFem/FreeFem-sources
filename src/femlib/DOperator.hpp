@@ -324,29 +324,7 @@ inline  int maxop(int op,const MDroit & v)
     { return Max(op,(int) v.second);}
 inline  int maxop(int op,const pair<MGauche,MDroit> & b) 
     { return Max(op,(int) b.first.second,(int) b.second.second );}
-
-// Add J. Morice :: 07/22
-inline void changeIndexFunctionInconnue( BilinearOperator &Op, const KN<size_t> &index_operator, const KN<int> &new_index_funct){
-  // function to change the index of inconnue function in a BilinearOperator
-  // first.first ==> the inconnue function
-  ffassert( index_operator.size() == new_index_funct.size() ); // check the size of the vector
-  int N = index_operator.size();
-  for( int j=0; j<N; j++){
-    Op.v[index_operator[j]].first.first.first = new_index_funct[j];
-  }
-}
-
-// Add J. Morice :: 07/22
-inline void changeIndexFunctionTest( BilinearOperator &Op, const KN<size_t> &index_operator, const KN<int> &new_index_funct){
-  // function to change the index of test function in a BilinearOperator 
-  // first.second ==> the test function
-  ffassert( index_operator.size() == new_index_funct.size() ); // check the size of the vector
-  int N = index_operator.size();
-  for( int j=0; j<N; j++){
-    Op.v[index_operator[j]].first.second.first = new_index_funct[j];
-  }
-}
-
+ 
 inline BilinearOperator operator*(const LinearOperatorG & a,const LinearOperatorD & b) 
  {
    BilinearOperator r;

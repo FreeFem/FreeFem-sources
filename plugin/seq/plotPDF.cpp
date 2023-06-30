@@ -2497,9 +2497,8 @@ void trackHyperbola( std::vector< std::vector<double> > &Cx, std::vector< std::v
 	trackHyperbolaCore( Cx, Cy, -1, a, b, Zx_minus, Vx, Vy );
 
     } else {
-        static int count = 0; 
-	if (!( lambda2*F > 0 ) && verbosity && count++ <3 )
-            cout << " plotPDF: bizarre bug "<<lambda2 << " "<< F << endl;
+
+	assert( lambda2*F > 0 );
 
 	// lambda1*(X')^2 + lambda2*(Y')^2 + F = 0 <=> X' = \pm sqrt( (-lambda2*(Y')^2 - F) / lambda1 )
 	const double a = -lambda2/lambda1; // X' = \pm sqtt( a(Y')^2 + b )

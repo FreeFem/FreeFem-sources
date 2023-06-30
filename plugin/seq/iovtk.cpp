@@ -1847,7 +1847,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
 
     void writesolutionP0_float_binary(FILE *fp, const Mesh &Th, Stack stack, bool surface,
                                       bool bigEndian) const {
-      MeshPoint *mp3(MeshPointStack(stack)),mps=*mp3;
+      MeshPoint *mp3(MeshPointStack(stack));
       R2 Cdg_hat = R2(1. / 3., 1. / 3.);
 
       for (int it = 0; it < Th.nt; it++) {
@@ -1886,7 +1886,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
       }
 
       fprintf(fp, "\n");
-      *mp3 = mps;}
+    }
 
     void writesolutionP0_float(FILE *fp, const Mesh &Th, Stack stack, bool surface) const {
       MeshPoint *mp3(MeshPointStack(stack));
@@ -2345,7 +2345,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
         l[jj][0] = to< double >(args[i]);
 
         char number[16];
-        snprintf(number,16, "%li", jj + 1);
+        sprintf(number, "%li", jj + 1);
         l[jj].name = scas;
         l[jj].name += number;
         sca++;
@@ -2367,7 +2367,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = vecs;
           l[jj].name += number;
           vec++;
@@ -2381,7 +2381,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = tens;
           l[jj].name += number;
           ten++;
@@ -2752,8 +2752,8 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
         tab[3] = 255;
 
         for (int itab = 0; itab < 4; itab++) {
-          char newvalue[sizeof(int)+1];
-          int bid0 = snprintf(newvalue,sizeof(int)+1, "%s", (char *)&tab[itab]);
+          char newvalue[sizeof(int)];
+          int bid0 = sprintf(newvalue, "%s", (char *)&tab[itab]);
           fwrite(&newvalue, sizeof(unsigned char), 1, fp);
         }
       } else {
@@ -2770,8 +2770,6 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
 }
 
 AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
-   MeshPoint *mps = MeshPointStack(stack), mp = *mps;
-
   string *pffname = GetAny< string * >((*filename)(stack));
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
 
@@ -3110,7 +3108,6 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
   }
 
   delete[] pch;
-  *mps=mp;// retore state
   return (Mesh *)NULL;
 }
 
@@ -4289,7 +4286,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
         l[jj][0] = to< double >(args[i]);
 
         char number[16];
-        snprintf(number,16, "%li", jj + 1);
+        sprintf(number, "%li", jj + 1);
         l[jj].name = scas;
         l[jj].name += number;
         sca++;
@@ -4311,7 +4308,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = vecs;
           l[jj].name += number;
           vec++;
@@ -4325,7 +4322,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = tens;
           l[jj].name += number;
           ten++;
@@ -4694,8 +4691,8 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
         tab[3] = 255;
 
         for (int itab = 0; itab < 4; itab++) {
-          char newvalue[sizeof(int)+1];
-          int bid0 = snprintf(newvalue,sizeof(int)+1, "%s", (char *)&tab[itab]);
+          char newvalue[sizeof(int)];
+          int bid0 = sprintf(newvalue, "%s", (char *)&tab[itab]);
           fwrite(&newvalue, sizeof(unsigned char), 1, fp);
         }
       } else {
@@ -4715,7 +4712,6 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
 AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
   string *pffname = GetAny< string * >((*filename)(stack));
   Mesh3 *pTh = GetAny< Mesh3 * >((*eTh)(stack));
-  MeshPoint *mp3(MeshPointStack(stack)),mps=*mp3;
 
   ffassert(pTh);
   Mesh3 &Th = *pTh;
@@ -5009,7 +5005,6 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
   }
 
   delete[] pch;
-  *mp3=mps;
   return (Mesh3 *)NULL;
 }
 
@@ -5606,7 +5601,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
         l[jj][0] = to< double >(args[i]);
 
         char number[16];
-        snprintf(number,16, "%li", jj + 1);
+        sprintf(number, "%li", jj + 1);
         l[jj].name = scas;
         l[jj].name += number;
         sca++;
@@ -5628,7 +5623,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = vecs;
           l[jj].name += number;
           vec++;
@@ -5642,7 +5637,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
           }
 
           char number[16];
-          snprintf(number,16, "%li", jj + 1);
+          sprintf(number, "%li", jj + 1);
           l[jj].name = tens;
           l[jj].name += number;
           ten++;
@@ -5948,8 +5943,8 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
         tab[3] = 255;
 
         for (int itab = 0; itab < 4; itab++) {
-          char newvalue[sizeof(int)+1];
-            int bid0 = snprintf(newvalue,sizeof(int)+1,"%s", (char *)&tab[itab]);
+          char newvalue[sizeof(int)];
+          int bid0 = sprintf(newvalue, "%s", (char *)&tab[itab]);
           fwrite(&newvalue, sizeof(unsigned char), 1, fp);
         }
       } else {

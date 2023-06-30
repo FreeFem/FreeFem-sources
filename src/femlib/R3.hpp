@@ -71,7 +71,7 @@ public:
   R  &  operator[](int i){ return (&x)[i];}
   const R  &  operator[](int i) const { return (&x)[i];}
   friend R3 operator*(R c,const R3 &P) {return P*c;}
- // friend R3 operator/(R c,const R3 &P) {return P/c;}  debile !!! FH....
+  friend R3 operator/(R c,const R3 &P) {return P/c;}
   R norme() const { return std::sqrt(x*x+y*y+z*z);}
   R norme2() const { return (x*x+y*y+z*z);}
   R sum() const { return x+y+z;}

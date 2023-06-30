@@ -15,8 +15,7 @@ int iMax = getARGV("-iMax", 10);                                // number of ite
 int[int] l = [1, 1, 1, 1];
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l); // global mesh
 Mat A;
-macro ThRefinementFactor()getARGV("-split", 1)//
-MatCreate(Th, A, Pk);
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
 real[int] rhs(Wh.ndof);             // local right-hand side
@@ -42,5 +41,5 @@ for(int i = 0; i < iMax; ++i) {
     u[] = A^-1 * newRhs;
 
     macro def(u)u//
-    plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 }

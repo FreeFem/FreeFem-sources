@@ -1981,18 +1981,12 @@ Mesh3 *GluMesh3(listMesh3 const &lst) {
 }
 
 template< class RR, class AA = RR, class BB = AA >
-struct Op3_addmesh {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_addmesh : public binary_function< AA, BB, RR > {
   static RR f(Stack s, const AA &a, const BB &b) { return RR(s, a, b); }
 };
 
 template< bool INIT, class RR, class AA = RR, class BB = AA >
-struct Op3_setmesh {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_setmesh : public binary_function< AA, BB, RR > {
   static RR f(Stack stack, const AA &a, const BB &b) {
     ffassert(a);
     const pmesh3 p = GluMesh3(b);
@@ -2368,18 +2362,12 @@ MeshL *GluMesh(listMeshT<MeshL> const &lst) {
 
 
 template< class RR, class AA = RR, class BB = AA >
-struct Op3_addmeshS {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_addmeshS : public binary_function< AA, BB, RR > {
   static RR f(Stack s, const AA &a, const BB &b) { return RR(s, a, b); }
 };
 
 template< bool INIT, class RR, class AA = RR, class BB = AA >
-struct Op3_setmeshS {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_setmeshS : public binary_function< AA, BB, RR > {
   static RR f(Stack stack, const AA &a, const BB &b) {
     ffassert(a);
     const pmeshS p = GluMesh(b);
@@ -2393,18 +2381,12 @@ struct Op3_setmeshS {
 
 
 template< class RR, class AA = RR, class BB = AA >
-struct Op3_addmeshL {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_addmeshL : public binary_function< AA, BB, RR > {
     static RR f(Stack s, const AA &a, const BB &b) { return RR(s, a, b); }
 };
 
 template< bool INIT, class RR, class AA = RR, class BB = AA >
-struct Op3_setmeshL {
-   using first_argument_type  = AA;
-   using second_argument_type = BB;
-   using result_type          = RR;
+struct Op3_setmeshL : public binary_function< AA, BB, RR > {
     static RR f(Stack stack, const AA &a, const BB &b) {
         ffassert(a);
         const pmeshL p = GluMesh(b);

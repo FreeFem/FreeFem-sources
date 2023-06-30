@@ -31,7 +31,7 @@ typedef FEbaseArray<double,v_fesL> * pfLrbasearray ;
 typedef pair<pfLrbase,int> pfLr ;
 typedef pair<pfLrbasearray,int> pfLrarray ;
 
-// Curve complex (2d equivalent at [[file:problem.hpp::pfecbase]])
+// Surf complex (2d equivalent at [[file:problem.hpp::pfecbase]])
 typedef FEbase<Complex,v_fesL> * pfLcbase ;
 typedef FEbaseArray<Complex,v_fesL> * pfLcbasearray ;
 typedef pair<pfLcbase,int> pfLc ;

@@ -83,8 +83,8 @@ func ind = region == -1 ? 1 : 2./(1+((x-nsx[region-1])^2+(y-nsy[region-1])^2)); 
 plot(ThG);
 Mat<complex> A, T;
 if(usedARGV("-user_partitioning") == -1) {
-    MatCreate(Th, A, P1);
-    MatCreate(Th, T, P0);
+    createMat(Th, A, P1);
+    createMat(Th, T, P0);
 }
 else {
     int[int] n2o;
@@ -98,8 +98,8 @@ else {
     part[](n2o) = partWithBEM[]; // no need for restrict since using P0
     plot(part);
     macro ThUserPartitioning()part[]//
-    MatCreate(Th, A, P1);
-    MatCreate(Th, T, P0);
+    createMat(Th, A, P1);
+    createMat(Th, T, P0);
 }
 meshL ThL;
 {
@@ -173,4 +173,4 @@ complex[int] x = N^-1 * rhs;
 Vh<complex> plt;
 plt[] = x(0:Vh.ndof-1);
 macro def(u)u//
-plotMPI(Th, real(plt), P1, def, real, cmm = "FEM solution");
+plotMPI(Th, real(plt), P1, def, real, cmm = "FEM solution")

@@ -1124,82 +1124,7 @@ namespace Fem2D {
     }
   }
 
-class TypeOfFE_RTdc : public  TypeOfFE { public:
-  static int Data[];
-   TypeOfFE_RTdc(): TypeOfFE(0,0,3,2,Data,1,1,6,3)
-     {const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
-      for (int p=0,kk=0;p<3;p++)
-       { P_Pi_h[p]=Pt[p];
-        for (int j=0;j<2;j++)
-        pij_alpha[kk++]= IPJ(p,p,j);
-       }}
-    void FB(const bool * watdd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const ;
-} ;
-//                     on what     nu df on node node of df
-  int TypeOfFE_RTdc::Data[]={6,6,6,  0,1,2,   0,0,0,      0,0,0,        0,1,2,   0,0, 0,0,3,3};
-
- void TypeOfFE_RTdc::FB(const bool *whatd,const Mesh & Th,const Triangle & K,const R2 & PHat,RNMK_ & val) const
-{ //
-//  const Triangle & K(FE.T);
-  R2 P(K(PHat));
-  R2 A(K[0]), B(K[1]),C(K[2]);
-   if (val.N() <3)
-   throwassert(val.N() >=3);
-  throwassert(val.M()==2 );
-  val=0;
-  R a=1./(2*K.area);
-  R a0=    a ;
-  R a1=   a  ;
-  R a2=   a ;
- // if (Th(K)< 2) cout << Th(K) << " " <<  A << " "  << B << " " << C << "; " <<  a0 << " " << a1 << " "<< a2 << endl;;
-
-  //  ------------
-  if (whatd[op_id])
-   {
-   assert(val.K()>op_id);
-  RN_ f0(val('.',0,0));
-  RN_ f1(val('.',1,0));
-  f0[0] = (P.x-A.x)*a0;
-  f1[0] = (P.y-A.y)*a0;
-  
-  f0[1] = (P.x-B.x)*a1;
-  f1[1] = (P.y-B.y)*a1;
-  
-  f0[2] = (P.x-C.x)*a2;
-  f1[2] = (P.y-C.y)*a2;
-  }
-    if (whatd[op_dx])
-   {
-   assert(val.K()>op_dx);
-   val(0,0,op_dx) =  a0;
-   val(1,0,op_dx) =  a1;
-   val(2,0,op_dx) =  a2;
-  }
-    if (whatd[op_dy])
-   {
-    assert(val.K()>op_dy);
-    val(0,1,op_dy) =  a0;
-    val(1,1,op_dy) =  a1;
-    val(2,1,op_dy) =  a2;
-  }
-}
-
-void TypeOfFE_RTdc::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
-{
-  const Triangle & T(K.T);
-
-   for (int i=0,k=0;i<3;i++)
-     {
-        R2 E(T.Edge(i));
-        R signe = 1;
-        v[k++]= signe*E.y;
-        v[k++]=-signe*E.x;
-     }
-}
   // a static variable to add the finite element to freefem++
- static TypeOfFE_RTdc Elm_TypeOfFE_RT0dc_2d;          // RT0dc
-
   static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d(false);          // RT1
   static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);      // RT1ortho
   static TypeOfFE_RT2_2d Elm_TypeOfFE_RT2_2d(false);          // RT1
@@ -1211,7 +1136,6 @@ void TypeOfFE_RTdc::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
   static AddNewFE FE__TD_NNS("TDNNS0", &Elm_TD_NNS);
   static AddNewFE FE__TD_NNS1("TDNNS1", &Elm_TD_NNS1);
   static AddNewFE Elm__TypeOfFE_RT1_2d("RT1", &Elm_TypeOfFE_RT1_2d);
-  static AddNewFE Elm__TypeOfFE_RT0dc_2d("RT0dc", &Elm_TypeOfFE_RT0dc_2d);
   static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho", &Elm_TypeOfFE_RT1_2dOrtho);
   static AddNewFE Elm__TypeOfFE_RT2_2d("RT2", &Elm_TypeOfFE_RT2_2d);
   static AddNewFE Elm__TypeOfFE_RT2_2dOrtho("RT2Ortho", &Elm_TypeOfFE_RT2_2dOrtho);

@@ -27,11 +27,11 @@ for(int i = 0; i < 2; ++i) {
     buildMesh(Th, 1)
     buildMesh(Th, 2)
     if(i == 0) { // naive partitioning
-        MatCreate(Th0, A[0], Pk);
-        MatCreate(Th1, A[1], Pk);
-        MatCreate(Th2, A[2], Pk);
-        MatInterpolate(Th1, Pk, A[1], Th0, Pk, A[0], P[0]);
-        MatInterpolate(Th2, Pk, A[2], Th1, Pk, A[1], P[1]);
+        createMat(Th0, A[0], Pk)
+        createMat(Th1, A[1], Pk)
+        createMat(Th2, A[2], Pk)
+        transferMat(Th1, Pk, A[1], Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, A[2], Th1, Pk, A[1], P[1])
     }
     else { // efficient (nested) partitioning
         mesh[int] ThGlobal(3);
@@ -51,13 +51,13 @@ for(int i = 0; i < 2; ++i) {
         macro Th2UserPartitioning()part2[]// EOM
         macro Th1UserPartitioning()part1[]// EOM
         macro Th0UserPartitioning()part0[]// EOM
-        MatCreate(Th2, A[2], Pk);
-        MatCreate(Th1, A[1], Pk);
-        MatCreate(Th0, A[0], Pk);
+        createMat(Th2, A[2], Pk)
+        createMat(Th1, A[1], Pk)
+        createMat(Th0, A[0], Pk)
         macro Th1NestedInTh0()//
         macro Th2NestedInTh1()//
-        MatInterpolate(Th1, Pk, A[1], Th0, Pk, A[0], P[0]);
-        MatInterpolate(Th2, Pk, A[2], Th1, Pk, A[1], P[1]);
+        transferMat(Th1, Pk, A[1], Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, A[2], Th1, Pk, A[1], P[1])
     }
 
     real[int] rhs;
@@ -78,11 +78,11 @@ for(int i = 0; i < 2; ++i) {
     fespace Wh(Th0, Pk);
     Wh u;
     u[] = A[0]^-1 * rhs;
-    plotDmesh(Th0, cmm = "Mesh #0 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
-    plotDmesh(Th1, cmm = "Mesh #1 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
-    plotDmesh(Th2, cmm = "Mesh #2 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
+    plotDmesh(Th0, cmm = "Mesh #0 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th1, cmm = "Mesh #1 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th2, cmm = "Mesh #2 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
     macro def(u)u//
-    plotMPI(Th0, u, Pk, def, real, cmm = "Global solution with " + (i == 0 ? "naive" : "efficient") + " partitioning");
+    plotMPI(Th0, u, Pk, def, real, cmm = "Global solution with " + (i == 0 ? "naive" : "efficient") + " partitioning")
 }
 for(int i = 0; i < 2; ++i) {
     Mat[int] A(1), P(2);
@@ -90,12 +90,12 @@ for(int i = 0; i < 2; ++i) {
     buildMesh(Th, 1)
     buildMesh(Th, 2)
     if(i == 0) { // naive partitioning
-        MatCreate(Th0, A[0], Pk);
+        createMat(Th0, A[0], Pk)
         Mat B, C;
-        MatCreate(Th1, B, Pk);
-        MatCreate(Th2, C, Pk);
-        MatInterpolate(Th1, Pk, B, Th0, Pk, A[0], P[0]);
-        MatInterpolate(Th2, Pk, C, Th1, Pk, B, P[1]);
+        createMat(Th1, B, Pk)
+        createMat(Th2, C, Pk)
+        transferMat(Th1, Pk, B, Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, C, Th1, Pk, B, P[1])
     }
     else { // efficient (nested) partitioning
         mesh[int] ThGlobal(3);
@@ -116,11 +116,11 @@ for(int i = 0; i < 2; ++i) {
         macro Th1UserPartitioning()part1[]// EOM
         macro Th0UserPartitioning()part0[]// EOM
         Mat B, C;
-        MatCreate(Th2, C, Pk);
-        MatCreate(Th1, B, Pk);
-        MatCreate(Th0, A[0], Pk);
-        MatInterpolate(Th1, Pk, B, Th0, Pk, A[0], P[0]);
-        MatInterpolate(Th2, Pk, C, Th1, Pk, B, P[1]);
+        createMat(Th2, C, Pk)
+        createMat(Th1, B, Pk)
+        createMat(Th0, A[0], Pk)
+        transferMat(Th1, Pk, B, Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, C, Th1, Pk, B, P[1])
     }
 
     real[int] rhs;
@@ -132,9 +132,9 @@ for(int i = 0; i < 2; ++i) {
     set(A, P, sparams = "-pc_type mg");
     Wh u;
     u[] = A[0]^-1 * rhs;
-    plotDmesh(Th0, cmm = "Mesh #0 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
-    plotDmesh(Th1, cmm = "Mesh #1 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
-    plotDmesh(Th2, cmm = "Mesh #2 with " + (i == 0 ? "naive" : "efficient") + " partitioning");
+    plotDmesh(Th0, cmm = "Mesh #0 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th1, cmm = "Mesh #1 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th2, cmm = "Mesh #2 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
     macro def(u)u//
-    plotMPI(Th0, u, Pk, def, real, cmm = "Global solution with " + (i == 0 ? "naive" : "efficient") + " partitioning");
+    plotMPI(Th0, u, Pk, def, real, cmm = "Global solution with " + (i == 0 ? "naive" : "efficient") + " partitioning")
 }

@@ -23,7 +23,7 @@ int[int][int] intersection;
         fespace Vh(ThTab[i], Pk);
         Vh u;
         u[] = DTab[i];
-        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1));
+        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1))
     }
 }
 {
@@ -42,6 +42,6 @@ int[int][int] intersection;
         fespace Vh(ThTab[i], Pk);
         Vh u;
         u[] = DTab[i];
-        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1));
+        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1))
     }
 }

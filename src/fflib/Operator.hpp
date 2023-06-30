@@ -35,74 +35,47 @@ inline double pow(double x,long l) { return pow(x,(double)l);}
 
 
 template<class R,class A=R> 
-struct Op1_neg {
-  using argument_type  = A;
-  using result_type    = R;
+struct Op1_neg: public unary_function<A,R> { 
   static R f(const A & a)  { return - (R)a;} }; 
   
 template<class R,class A=R> 
-struct Op1_plus{
-  using argument_type  = A;
-  using result_type    = R;
+struct Op1_plus: public unary_function<A,R> { 
   static R f(const A & a)  { return + (R)a;} }; 
   
 template<class A> 
-struct Op1_not{
-  using argument_type  = A;
-  using result_type    = bool;
+struct Op1_not: public unary_function<A,bool> { 
   static bool f(const A & a)  { return ! (bool)a;} }; 
   
 template<class R,class A=R,class B=A> 
-struct Op2_add {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_add: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return ((R)a + (R)b);} }; 
 
 template<class R,class A=R,class B=A> 
-struct Op2_sub {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_sub: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return ((R)a - (R)b);} }; 
 
 template<class R,class A=R,class B=A>
-struct Op2_DotDiv {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_DotDiv: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return DotDiv((R)a, (R)b);} };
 
 template<class R,class A=R,class B=A>
-struct Op2_DotStar {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_DotStar: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return DotStar((R)a, (R)b);} };
 
 
 template<class R,class A=R,class B=A>
-struct Op2_mul {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mul: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
   // cout << a << " * " << b <<" => "  << ((R)a * (R)b) << endl;
   return ((R)a * (R)b);} }; 
 template<class R,class A,class B>
-struct Op2_mull {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mull: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
   // cout << a << " * " << b <<" => "  << ((R)a * (R)b) << endl;
   return (a * b);} };
 
 template<class R,class A=R,class B=A>
-struct Op2_div {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_div: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
      if (b == B())
        {cerr <<  a << "/" << b << " : " <<  typeid(A).name()  << " " << typeid(B).name() 
@@ -110,10 +83,7 @@ struct Op2_div {
      return ((R)a / (R)b);} };
 
 template<class R,class A,class B >
-struct Op2_divv {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_divv: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
      if (b == B())
        {cerr <<  a << "/" << b << " : " <<  typeid(A).name()  << " " << typeid(B).name()
@@ -121,85 +91,52 @@ struct Op2_divv {
      return (a / b);} };
 
 template<class R>
-struct Op2_pipe {
-  using first_argument_type  = R;
-  using second_argument_type = R;
-  using result_type          = R;
+struct Op2_pipe: public binary_function<R,R,R> {
     static R f(const R & a,const R & b)  {   return (a | b);} };
 
 template<class R,class A=R,class B=A> 
-struct Op2_mod {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mod: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return ((R)a % (R)b);} }; 
 
 template<class A,class B=A> 
-struct Op2_lt {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_lt: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { 
 //    cout << a << " < " << b << " = " << ( a<b) << endl;
     return a  < b;} }; 
 
 template<class A,class B=A> 
-struct Op2_le {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_le: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { return a  <= b;} }; 
 
 
 template<class A,class B=A> 
-struct Op2_gt {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_gt: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { return a  > b;} }; 
 
 
 template<class A,class B=A> 
-struct Op2_ge {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_ge: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { return a  >= b;} }; 
 
 template<class A,class B=A> 
-struct Op2_eq {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_eq: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b) 
    { //cout << a << " == " << b << " => " <<( a  == b) << endl;
    return a  == b;} }; 
 
 template<class A,class B=A> 
-struct Op2_ne {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_ne: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { return a  != b;} }; 
 
-struct Op2_and {
-  using first_argument_type  = bool;
-  using second_argument_type = bool;
-  using result_type          = bool;
+struct Op2_and: public binary_function<bool,bool,bool> { 
   static bool f(const bool & a,const bool & b)  { return a  && b;} }; 
   
-struct Op2_or {
-  using first_argument_type  = bool;
-  using second_argument_type = bool;
-  using result_type          = bool;
+struct Op2_or: public binary_function<bool,bool,bool> { 
   static bool f(const bool & a,const bool & b)  { return a  || b;} }; 
 
 
 template<class R,class A,class B> 
-struct Op2_padd {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_padd: public binary_function<A,B,R*> { 
   static R * f(Stack s,const A & a,const B & b)  { 
    R* r= Add2StackOfPtr2Free(s, a || b ? new R ((a ? *a : nullptr) + (b ? *b : nullptr)) : nullptr);
   // delete a,delete b;
@@ -207,76 +144,52 @@ struct Op2_padd {
 
 
 template<class A,class B=A> 
-struct Op2_plt {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_plt: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { bool r= *a  < *b;
   //delete a,delete b;
   return r;} }; 
 
 template<class A,class B=A> 
-struct Op2_ple {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_ple: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { bool r= *a  <= *b;
   // delete a,delete b;
   return r;} }; 
 
 
 template<class A,class B=A> 
-struct Op2_pgt {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_pgt: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { bool r= *a  > *b;
  // delete a,delete b;
   return r;} }; 
 
 
 template<class A,class B=A> 
-struct Op2_pge {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_pge: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { bool r= *a  >= *b;
   // delete a,delete b;
   return r;} }; 
 
 template<class A,class B=A> 
-struct Op2_peq {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_peq: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  { bool r= *a  == *b;
  //  delete a,delete b;
   return r;} }; 
 
 template<class A,class B=A> 
-struct Op2_pne {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = bool;
+struct Op2_pne: public binary_function<A,B,bool> { 
   static bool f(const A & a,const B & b)  {  bool r=*a  != *b;
   // delete a,delete b;
   return r;} }; 
 
 
 template<class R,class A=R,class B=A>
-struct Op2_pow {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_pow: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return R(pow(a,b));}};
   
 
 
 template<class A>
-struct Op_Read {
-  using first_argument_type  = istream*;
-  using second_argument_type = A*;
-  using result_type          = istream*;
+struct Op_Read : public binary_function<istream*,A*,istream*> {
   static istream *  f(istream  * const  & f,A  * const  &  a)  
    {
        if( !f || !*f) ExecError("Fatal Error: file not open in read value (Op_Read)");
@@ -287,10 +200,7 @@ struct Op_Read {
 };
 
 template<class A>
-struct Op_ReadP {
-  using first_argument_type  = istream*;
-  using second_argument_type = A**;
-  using result_type          = istream*;
+struct Op_ReadP : public binary_function<istream*,A**,istream*> {
   static istream *  f(istream  * const  & f,A  ** const  &  a)  
    {
      assert(a);
@@ -303,10 +213,7 @@ struct Op_ReadP {
 };
 
 template<class A>
-struct Op_ReadKN {
-  using first_argument_type  = istream*;
-  using second_argument_type = KN<A>*;
-  using result_type          = istream*;
+struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
   static istream *  f(istream  * const  & f,KN<A>* const  &  a)  
    { 
      if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKN)");
@@ -334,10 +241,7 @@ struct Op_ReadKN {
    }
 };
 template<class A>
-struct Op_ReadKNM {
-  using first_argument_type  = istream*;
-  using second_argument_type = KNM<A>*;
-  using result_type          = istream*;
+struct Op_ReadKNM : public binary_function<istream*,KNM<A>*,istream*> {
     static istream *  f(istream  * const  & f,KNM<A>* const  &  a)
     {
         if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKNM)");
@@ -368,10 +272,7 @@ struct Op_ReadKNM {
 
 
 template<class A>
-struct Op_WriteKNM {
-  using first_argument_type  = ostream*;
-  using second_argument_type = KNM<A>*;
-  using result_type          = ostream*;
+struct Op_WriteKNM : public binary_function<ostream*,KNM<A>*,ostream*> {
     static ostream *  f(ostream  * const  & f,KNM<A>* const  &  a) {
         *f << *a;
         return f;
@@ -380,10 +281,7 @@ struct Op_WriteKNM {
 
 
 template<class A>
-struct Op_WriteKN {
-  using first_argument_type  = ostream*;
-  using second_argument_type = KN<A>*;
-  using result_type          = ostream*;
+struct Op_WriteKN : public binary_function<ostream*,KN<A>*,ostream*> {
     static ostream *  f(ostream  * const  & f,KN<A>* const  &  a) {
          *f << *a;
         return f;
@@ -420,75 +318,48 @@ struct Op_WriteKN<double> : public binary_function<ostream*,KN<double>*,ostream*
 };
 */
 template<class A>
-struct Print {
-  using first_argument_type  = ostream*;
-  using second_argument_type = A;
-  using result_type          = ostream*;
+struct Print: public binary_function<ostream*,A,ostream*> {
   static ostream* f(ostream* const  & a,const A & b)  { *a << b;  return a;}
 };
 
 //  ---------------------------------------------
 template<class A>
-struct set_eq {
-  using first_argument_type  = A*;
-  using second_argument_type = A;
-  using result_type          = A*;
+struct set_eq: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a = b; return a;}
 };
 
 template<class A,class B>
-struct set_eqq {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eqq: public binary_function<A,B,A> {
   static A f(const A & a,const B & b)  {A aa(a); aa = b; return aa;}
 };
 
 template<class A,class B>
-struct set_eqq_add {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eqq_add: public binary_function<A,B,A> {
   static A f(const A & a,const B & b)  {A aa(a); aa += b; return aa;}
 };
 
 template<class A>
-struct set_eq_add {
-  using first_argument_type  = A*;
-  using second_argument_type = A;
-  using result_type          = A*;
+struct set_eq_add: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a += b; return a;}
 };
 
 template<class A>
-struct set_eq_sub {
-  using first_argument_type  = A*;
-  using second_argument_type = A;
-  using result_type          = A*;
+struct set_eq_sub: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a -= b; return a;}
 };
 
 template<class A,class B=A>
-struct set_eq_mul {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eq_mul: public binary_function<A*,B,A*> {
   static A* f(A* const  & a,const B & b)  { *a *= b; return a;}
 };
 
 template<class A,class B=A>
-struct set_eq_div {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eq_div: public binary_function<A*,B,A*> {
   static A* f(A* const  & a,const B & b)  { *a /= b; return a;}
 };
 
 
-struct set_peqstring {
-  using first_argument_type  = string**;
-  using second_argument_type = string*;
-  using result_type          = string**;
+struct set_peqstring: public binary_function<string**,string*,string**> {
   static string** f(string** const  & a, string * const & b)  {
     if(*a != b )
     { 
@@ -503,52 +374,34 @@ struct set_peqstring {
 
 //  ---------------------------------------------
 template<class A,class B>
-struct set_eqarrayp {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarrayp: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {  *a = *b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarrayp_add {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarrayp_add: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  { assert(SameShape(*a,*b)); *a += *b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarrayp_sub {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarrayp_sub: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  { assert(SameShape(*a,*b)); *a -= *b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarrayp_mul {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarrayp_mul: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  { assert(SameShape(*a,*b)); *a *= *b; return a;}
 };
 
 
 template<class A,class B>
-struct set_eqarrayp_div {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarrayp_div: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  { assert(SameShape(*a,*b)); *a /= *b; return a;}
 };
 
 //  ---------------------------------------------
 template<class A,class B>
-struct set_eqarraypd {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarraypd: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a = *b;
    delete b;
    return a;}
@@ -556,40 +409,28 @@ struct set_eqarraypd {
 
 
 template<class A,class B>
-struct set_eqarraypd_add {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarraypd_add: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a += *b; 
   delete b;
   return a;}
 };
 
 template<class A,class B>
-struct set_eqarraypd_sub {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarraypd_sub: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a -= *b; 
   delete b;
   return a;}
 };
 
 template<class A,class B>
-struct set_eqarraypd_mul {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarraypd_mul: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a *= *b;
    delete b;
    return a;}
 };
 
 template<class A,class B>
-struct set_eqarraypd_div {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarraypd_div: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a /= *b;
    delete b;
    return a;}
@@ -597,10 +438,7 @@ struct set_eqarraypd_div {
 
 //  ---------------------------------------------
 template<class A,class B>
-struct set_eqarray {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarray: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  
   {  *a = b;
      return a;}
@@ -608,17 +446,14 @@ struct set_eqarray {
 
 //  --------------------------------------------- august 2007 FH 
 template<class A,class B>
-struct init_eqarray {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct init_eqarray: public binary_function<A*,B,A*> {
     static A* f(A* const  & a, B const & b)  
     {  a->init(); *a = b;
 	return a;}
 };
 /*
 template<class A,class B>
-struct init_eqarray_call {
+struct init_eqarray_call: public binary_function<A*,B,A*> {
     static A* f(A* const  & a, B const & b)
     {  a->init();
        b.call(*a);
@@ -626,10 +461,7 @@ struct init_eqarray_call {
 };*/
 //  ---------------------------------------------
 template<class A,class B>
-struct init_eqarraypd {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct init_eqarraypd: public binary_function<A*,B,A*> {
     static A* f(A* const  & a, B const & b)  {a->init();  *a = *b;
     delete b;
     return a;}
@@ -637,52 +469,34 @@ struct init_eqarraypd {
 
 //  ---------------------------------------------
 template<class A,class B>
-struct init_eqarrayp {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct init_eqarrayp: public binary_function<A*,B,A*> {
     static A* f(A* const  & a, B const & b)  {  a->init(); *a = *b; return a;}
 };
 
 // ----------------------------------------  fin modif august 2007
 
 template<class A,class B>
-struct set_eqarray_add {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarray_add: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,b));  *a += b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarray_sub {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarray_sub: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,b));  *a -= b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarray_mul {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarray_mul: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,b));  *a *= b; return a;}
 };
 
 template<class A,class B>
-struct set_eqarray_div {
-  using first_argument_type  = A*;
-  using second_argument_type = B;
-  using result_type          = A*;
+struct set_eqarray_div: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,b));  *a /= b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_array{
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_array: public binary_function<A,B,A> {
   static A f(const A & a, B const & b)  
   {  A aa=a;aa = b;
      return a;}
@@ -698,139 +512,91 @@ struct set_eq_array_call: public binary_function<A,B,A> {
 };
  */
 template<class A,class B>
-struct set_eq_array_add  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_array_add: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,b));  A aa(a);  aa += b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_array_sub  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_array_sub: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,b));  A aa(a);  aa -= b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_array_mul  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_array_mul: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,b));  A aa(a);  aa *= b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_array_div  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_array_div: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,b));  A aa(a);  aa /= b; return a;}
 };
 template<class A,class B>
-struct set_eq_arrayp  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arrayp: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {  A aa(a);  aa = *b; return a;}
 };
 //  ---------------------------------------------
 template<class A,class B>
-struct set_eq_arraypd  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arraypd: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,*b));A aa(a);  aa = *b;
   delete b;
   return a;}
 };
 
 template<class A,class B>
-struct set_eq_arrayp_sub  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arrayp_sub: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  { assert(SameShape(a,*b));  A aa(a);  aa -= *b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_arrayp_mul  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arrayp_mul: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  { assert(SameShape(a,*b));  A aa(a);  aa *= *b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_arrayp_div  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arrayp_div: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  { assert(SameShape(a,*b));  A aa(a);  aa /= *b; return a;}
 };
 
 template<class A,class B>
-struct set_eq_arrayp_add  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arrayp_add: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  { assert(SameShape(a,*b));  A aa(a);  aa += *b; return a;}
 };
 template<class A,class B>
-struct set_eq_arraypd_add  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arraypd_add: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa += *b;
    delete b;
    return a;}
 };
 template<class A,class B>
-struct set_eq_arraypd_sub  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arraypd_sub: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa -= *b;
    delete b;
    return a;}
 };
 
 template<class A,class B>
-struct set_eq_arraypd_mul  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arraypd_mul: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa *= *b;
    delete b;
    return a;}
 };
 
 template<class A,class B>
-struct set_eq_arraypd_div  {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = A;
+struct set_eq_arraypd_div: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa /= *b;
    delete b;
    return a;}
 };
 
 template<class A>
-struct PrintP {
-  using first_argument_type  = ostream*;
-  using second_argument_type = A;
-  using result_type          = ostream*;
+struct PrintP: public binary_function<ostream*,A,ostream*> {
     static ostream* f(ostream* const  & a,const A & b)  {  if(b) *a << *b; 
 	// a->flush();// ADD FH MAi 2010 to empty the buffer  baf idea  add flush of ostream 
   //delete b; mars 2006 FH 
    return a;}
 };
 template<class A>
-struct PrintPnd {
-  using first_argument_type  = ostream*;
-  using second_argument_type = A;
-  using result_type          = ostream*;
+struct PrintPnd: public binary_function<ostream*,A,ostream*> {
   static ostream* f(ostream* const  & a,const A & b)  
     { if(verbosity>9999) cout << "PrintPnd:  " << b << endl;  *a << *b; return a;}
 };
@@ -898,124 +664,72 @@ template<class R,class A>  R * set_initp( R* const & a,const A & b){
     a->init(*b); return a;}
 
 template<class R,class A=R,class B=A> 
-struct Op2_add0 {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_add0: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (a + b);} };  
 
 template<class R,class A=R,class B=A> 
-struct Op2_build {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_build: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return R(a,b);} };  
 template<class R,class A=R,class B=A> 
 
-struct Op2_pbuild {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_pbuild: public binary_function<A,B,R*> { 
   static R *f(const A & a,const B & b)  { return new R(a,b);} };  
   
 template<class R,class A=R,class B=A> 
-struct Op2_add__n {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_add__n: public binary_function<A,B,R*> { 
   static R * f(const A & a,const B & b)  { return new R(a + b);} };    
 template<class R,class A=R,class B=A> 
-struct Op2_addp_n {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_addp_n: public binary_function<A,B,R*> { 
   static R* f(const A & a,const B & b)  { return new R(*a + b);} };   
 template<class R,class A=R,class B=A> 
-struct Op2_add_pn {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_add_pn: public binary_function<A,B,R*> { 
   static R* f(const A & a,const B & b)  { return new R(a + *b);} };   
 
 
 template<class R,class A=R,class B=A> 
-struct Op2_sub0 {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_sub0: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (a - b);} }; 
   
 template<class R,class A=R> 
-struct Op1_subp{
-  using argument_type  = A;
-  using result_type    = R;
+struct Op1_subp: public unary_function<A,R> { 
   static R f(const A & a)  { return (- *a );} };   
 template<class R,class A=R> 
-struct Op1_sub{
-  using argument_type  = A;
-  using result_type    = R;
+struct Op1_sub: public unary_function<A,R> { 
 static R f(const A & a)  { return (- a );} };   
 
 template<class R,class A=R,class B=A> 
-struct Op2_mulcp {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mulcp: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (a * *b);} }; 
 
 template<class R,class A=R,class B=A> 
-struct Op2_mulc {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mulc: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (a * b);} };
 
 template<class R,class A=R,class B=A>
-struct Op2_divc {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_divc: public binary_function<A,B,R> {
     static R f(const A & a,const B & b)  { return (a / b);} };
 
 template<class R,class A=R,class B=A> 
-struct Op2_mulpc {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mulpc: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (b * *a);} }; 
 
 template<class R,class A=R,class B=A> 
-struct Op2_mulpcp {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_mulpcp: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return (*a * *b);} };
 
 template<class R,class A=R,class B=A>
-struct Op2_2p_ {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R;
+struct Op2_2p_: public binary_function<A,B,R> {
     static R f(const A & a,const B & b)  { return R(*a,*b);} };
 
 
 template<class R,class A=R,class B=A> 
-struct Op2_sub__n {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_sub__n: public binary_function<A,B,R*> { 
   static R * f(const A & a,const B & b)  { return new R(a - b);} };    
 template<class R,class A=R,class B=A> 
-struct Op2_subp_n {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_subp_n: public binary_function<A,B,R*> { 
   static R* f(const A & a,const B & b)  { return new R(*a - b);} };   
 template<class R,class A=R,class B=A> 
-struct Op2_sub_pn {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_sub_pn: public binary_function<A,B,R*> { 
   static R* f(const A & a,const B & b)  { return new R(a - *b);} };   
 
 
@@ -1024,10 +738,7 @@ struct Op3_p: public ternary_function<A,B,C,R*> {
   static R* f(Stack s,const A & a,const B & b,const  C & c )  { return new R(a,b,c);} };   
 
 template<class R,class A=R,class B=A> 
-struct Op2_p {
-  using first_argument_type  = A;
-  using second_argument_type = B;
-  using result_type          = R*;
+struct Op2_p: public binary_function<A,B,R*> { 
   static R* f(const A & a,const B & b)  { return new R(a,b);} };   
 
 

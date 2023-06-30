@@ -76,10 +76,7 @@ string **get_replace(string **pp, long i, long j, string *rr) {
 }
 // a( : ) = "sqsd";
 
-struct set_substring {
-   using first_argument_type  = SubString;
-   using second_argument_type = string *;
-   using result_type          = SubString;
+struct set_substring : public binary_function<SubString, string *, SubString> {
 
   static SubString f(SubString const &a, string *const &b) {
     string s = *a.s;

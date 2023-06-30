@@ -313,7 +313,7 @@ check_plugin=0; // no pluging to check ..
     cout << "\t-fglut: [filename]  redirect graphics in file" << endl;
     cout << "\t-glut:  [command]   use custom glut" << endl;
     cout << "\t-gff:   [command]   use custom glut (with space quoting)" << endl;
-    cout << "\t-check_plugin [plugin1,plugin2,...]        just try if this plugins are correct" <<endl;
+    cout << "\t-check_plugin [filename]        just try if the plugin is correct" <<endl;
     cout << "\t-?:                 show help" << endl << endl;
 
     if (noffglut) cout << "without default ffglut: " << ffglut << endl;

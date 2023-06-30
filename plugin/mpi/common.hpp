@@ -5,10 +5,7 @@ template<class R, class A, class B> R Build(A a, B b) {
     return R(a, b);
 }
 template<class RR, class AA = RR, class BB = AA>
-struct BinaryOp {
-    using first_argument_type  = AA;
-    using second_argument_type = BB;
-    using result_type          = RR;
+struct BinaryOp : public binary_function<AA, BB, RR> {
     static RR f(Stack s, const AA& a, const BB& b) { return RR(s, a, b); }
 };
 template<class Op, char trans = 'N'>
@@ -23,10 +20,7 @@ class pwr {
         operator Op* () const { return A; }
 };
 template<class RR, class AA = RR, class BB = AA>
-struct assign {
-using first_argument_type  = AA;
-using second_argument_type = BB;
-using result_type          = RR;
+struct assign : public binary_function<AA, BB, RR> {
 template<class V, class T>
 static T check(T* t, typename std::enable_if<T::tr == 'H'>::type* = 0) {
     t->conjugate = true;

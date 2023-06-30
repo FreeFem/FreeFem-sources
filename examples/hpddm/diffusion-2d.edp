@@ -82,6 +82,6 @@ else
 real[int] err = A * u[]; // global matrix-vector product
 err -= rhs;
 
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 u[] = err;
-plotMPI(Th, u, Pk, def, real, cmm = "Global residual");
+plotMPI(Th, u, Pk, def, real, cmm = "Global residual")

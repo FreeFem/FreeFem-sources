@@ -378,23 +378,7 @@ string     ffprefsuffix ="pref";
 const char *check_plugin=0;
 void EnvironmentLoad() {
     if(check_plugin) {
-        bool ok=true;
-        std::string s =check_plugin;
-        s+= ',';
-        std::string delimiter = ",";
-        size_t pos = 0;
-        std::string token;
-        while ((pos = s.find(delimiter)) != std::string::npos) {
-            if(pos) {
-                token = s.substr(0, pos);
-                if(verbosity) cout <<" check_plugin:try load "<< token << endl;
-                ok = load(token.c_str());
-                if(!ok) break;
-            }
-            s.erase(0, pos + delimiter.length());
-            if(verbosity>4) cout << " ok " << ok << " s ="<< s << endl;
-
-        }
+        bool ok=load(check_plugin);
         if(ok) exit(0);
         else exit(1); }
     EnvironmentData::iterator toload=ffenvironment.find("load");

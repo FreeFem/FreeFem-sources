@@ -14,7 +14,7 @@
 #include <bemtool/fem/dof.hpp>
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
-#include "common_bem.hpp"
+#include "bem.hpp"
 #endif
 
 #if defined(WITH_mkl) && !defined(HTOOL_HTOOL_HPP)
@@ -54,33 +54,6 @@
 
 #include <HPDDM.hpp>
 
-#ifdef HPDDM_HPP_
-#define HPDDM_n n_
-#define HPDDM_m m_
-#define HPDDM_sym sym_
-#define HPDDM_ia ia_
-#define HPDDM_ja ja_
-#define HPDDM_a a_
-#define HPDDM_cc cc_
-#define HPDDM_nnz nnz_
-#define HPDDM_dof dof_
-#define HPDDM_numbering numbering_
-#else
-#ifndef _HPDDM_
-#error "This should never happen"
-#endif
-#define HPDDM_n _n
-#define HPDDM_m _m
-#define HPDDM_sym _sym
-#define HPDDM_ia _ia
-#define HPDDM_ja _ja
-#define HPDDM_a _a
-#define HPDDM_cc _cc
-#define HPDDM_nnz _nnz
-#define HPDDM_dof _dof
-#define HPDDM_numbering _numbering
-#endif
-
 #include "common.hpp"
 
 template<class T>
@@ -100,9 +73,9 @@ struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
     ff_HPDDM_MatrixCSR(MatriceMorse<upscaled_type<K>>* mA) :
     HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, nullptr, mA->p, mA->j, mA->half > 0) {
         mA->CSR();
-        HPDDM::MatrixCSR<K>::HPDDM_ia=mA->p;
+        HPDDM::MatrixCSR<K>::_ia=mA->p;
         K* a = reinterpret_cast<K*>(mA->aij);
-        HPDDM::MatrixCSR<K>::HPDDM_a=a;
+        HPDDM::MatrixCSR<K>::_a=a;
         if(!std::is_same<upscaled_type<K>, K>::value) {
             for(int i = 0; i < mA->nnz; ++i)
                 a[i] = mA->aij[i];
@@ -153,7 +126,7 @@ void set_ff_matrix(MatriceMorse<upscaled_type<K>>* mA,const HPDDM::MatrixCSR<K> 
     mA->p=0;
     mA->aij=0;
     
-    mA->set(dA.HPDDM_n,dA.HPDDM_m,dA.HPDDM_sym,dA.HPDDM_nnz,dA.HPDDM_ia,dA.HPDDM_ja,reinterpret_cast<upscaled_type<K>*>(dA.HPDDM_a),0,1);
+    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,reinterpret_cast<upscaled_type<K>*>(dA._a),0,1);
 }
 
 template<typename T>

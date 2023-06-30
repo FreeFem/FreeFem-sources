@@ -5,4 +5,4 @@
 IFMACRO(!with)
 macro with()PETSc//
 ENDIFMACRO
-include "DmeshRedistribute.idp"
+include "redistributeDmesh.idp"

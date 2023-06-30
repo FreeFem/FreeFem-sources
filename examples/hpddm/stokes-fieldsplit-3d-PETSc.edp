@@ -28,8 +28,7 @@ mesh3 Th;
     Th = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
 }
 Mat A;
-macro ThRefinementFactor()getARGV("-split", 1)//
-MatCreate(Th, A, Pk);
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
 varf vPb([u, uB, uC, p], [v, vB, vC, q]) = int3d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) + grad(uC)' * grad(vC) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(0, 1, 3, 5, u = 0, uB = 0, uC = 0) + on(2, u = 1000*y*(0.5-y)*z*(0.4-z), uB = 0, uC = 0);
@@ -44,4 +43,4 @@ set(A, sparams = "-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur
 u[] = 0.0;
 u[] = A^-1 * rhs;
 macro def1(u)u//
-plotMPI(Th, u, P2, def1, real, cmm = "Global solution");
+plotMPI(Th, u, P2, def1, real, cmm = "Global solution")

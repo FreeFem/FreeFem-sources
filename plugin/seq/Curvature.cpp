@@ -71,9 +71,6 @@ static int debug = 0;
 R3 *courbe(Stack stack, const KNM_< double > &b, const long &li0, const long &li1, const double &ss,
            long *const &pi) {
   assert(b.N( ) >= 3);
-  const int d = b.N( )==3 ? 2 : 3;
-  auto z = [&b,d](int i)->double { return (d==3) ? b(2,i) : 0.;};
-
   int i0 = li0, i1 = li1;
   if (i0 < 0) {
     i0 = 0;
@@ -83,35 +80,35 @@ R3 *courbe(Stack stack, const KNM_< double > &b, const long &li0, const long &li
     i1 = b.M( ) - 1;
   }
 
-  double lg = b(d, i1);
+  double lg = b(2, i1);
   R3 Q;
-  ffassert(lg > 0 && b(d, i0) == 0.);
+  ffassert(lg > 0 && b(2, i0) == 0.);
   double s = ss * lg;
   int k = 0, k1 = i1;
 
   while (i0 < i1 - 1) {
     int im;
 
-    ffassert(k++ < k1 && (b(d,i0) < b(d,i1-1)));
+    ffassert(k++ < k1 && (b(2,i0) < b(2,i1-1)));
     im = (i0 + i1) / 2;
-    if (s < b(d, im)) {
+    if (s < b(2, im)) {
       i1 = im;
-    } else if (s > b(d, im)) {
+    } else if (s > b(2, im)) {
       i0 = im;
     } else {
-      Q = R3(b(0, im), b(1, im), z(im));
+      Q = R3(b(0, im), b(1, im), 0);
       i0 = i1 = im;
       break;
     }
   }
 
   if (i0 < i1) {
-    ffassert(b(d, i0) <= s);
-    ffassert(b(d, i1) >= s);
-    R3 A(b(0, i0), b(1, i0),z(i0));
-    R3 B(b(0, i1), b(1, i1),z(i0));
-    double l1 = (b(d, i1) - s);
-    double l0 = s - b(d, i0);
+    ffassert(b(2, i0) <= s);
+    ffassert(b(2, i1) >= s);
+    R2 A(b(0, i0), b(1, i0));
+    R2 B(b(0, i1), b(1, i1));
+    double l1 = (b(2, i1) - s);
+    double l0 = s - b(2, i0);
     Q = (l1 * A + l0 * B) / (l1 + l0);
   }
 
@@ -271,18 +268,15 @@ KN< double > *courbureaxi(Stack stack, pmesh const &pTh, const long &lab) {
 double reparametrage(Stack stack, const KNM_< double > &bb,const long &l0,const long &l1) {
   int i0=l0, i1=l1; 
   KNM_< double > b = bb;
-  
-  const int d = b.N( )==3 ? 2 : 3;
-  auto z = [&b,d](int i)->double { return (d==3) ? b(2,i) : 0.;};
   ffassert(b.N( ) >= 3);
-  R3 P(b(0, i0), b(1, i0),z(i0));
+  R2 P(b(0, i0), b(1, i0));
   double s = 0;
-  b(d, 0) = s;
+  b(2, 0) = s;
 
   for (int i = i0+1; i <= i1 ; ++i) {
-    R3 Q(b(0, i), b(1, i),z(i));
-    s += R3(P, Q).norme( );
-    b(d, i) = s;
+    R2 Q(b(0, i), b(1, i));
+    s += R2(P, Q).norme( );
+    b(2, i) = s;
     P = Q;
   }
 
@@ -294,19 +288,16 @@ double reparametrage(Stack stack, const KNM_< double > &bb) {
 
 KNM< double > *equiparametre(Stack stack, const KNM_< double > &bb, const long &n) {
   double lg = reparametrage(stack, bb);
-  
-  KNM_< double > b = bb;
-  const int d = b.N( )==3 ? 2 : 3;
-  KNM< double > *pc = new KNM< double >(d+1, n);
 
-    auto z = [&b,d](int i)->double { return (d==3) ? b(2,i) : 0.;};
+  KNM_< double > b = bb;
+  KNM< double > *pc = new KNM< double >(3, n);
 
   KNM< double > &c = *pc;
   int m = b.M( );
   int n1 = n - 1, m1 = m - 1;
   double delta = 1. / n1;
   ffassert(b.N( ) == 3);
-  R3 P(b(0, 0), b(1, 0),z(0));
+  R2 P(b(0, 0), b(1, 0));
   // double s = 0;
   c(':', 0) = b(':', 0);
   c(':', n1) = b(':', m1);
@@ -316,8 +307,7 @@ KNM< double > *equiparametre(Stack stack, const KNM_< double > &bb, const long &
     R3 P = *courbe(stack, bb, s);
     c(0, i) = P.x;
     c(1, i) = P.y;
-    if(d==3) c(2, i) = P.z;
-    c(d, i) = s * lg;
+    c(2, i) = s * lg;
     if (debug) {
       cout << i << " " << P << " " << s << endl;
     }

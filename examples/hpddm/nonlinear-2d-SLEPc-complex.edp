@@ -13,7 +13,7 @@ fespace Vh(Th, Pk);
 complex lambda;
 varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v) + lambda^0.5 * u * v);
 Mat<complex> A, B;
-MatCreate(Th, A, Pk);
+createMat(Th, A, Pk);
 func int FormFunction(complex mu) {
     lambda = mu;
     A = vPb(Vh, Vh);
@@ -33,5 +33,5 @@ NEPSolve(A, FormFunction, B, FormJacobian, vectors = vec, sparams = "-nep_type n
 vec.resize(5);
 for(int i = 0; i < vec.n; ++i) {
     macro def(u)u//
-    plotMPI(Th, vec[i], Pk, def, complex, cmm = "Eigenvector #" + i);
+    plotMPI(Th, vec[i], Pk, def, complex, cmm = "Eigenvector #" + i)
 }

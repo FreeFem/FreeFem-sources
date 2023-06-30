@@ -21,8 +21,8 @@ Mat A;
 int[int] n2o;
 macro ThPeriodicity()labPeriodic//
 macro ThN2O()n2o//
-DmeshBuild(Th);
-MatCreate(Th, A, Pk);
+buildDmesh(Th)
+createMat(Th, A, Pk)
 
 fespace Wh(Th, Pk);                 // local finite element space
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
@@ -40,14 +40,14 @@ exchange(A, rhs, scaled = true);
 err -= rhs;
 
 macro def(u)u//
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 u[] = err;
-plotMPI(Th, u, Pk, def, real, cmm = "Global residual");
+plotMPI(Th, u, Pk, def, real, cmm = "Global residual")
 
 set(A, sparams = "-pc_type gamg -ksp_type gmres -pc_gamg_threshold -1.0 -ksp_max_it 200");
 u[] = 0.0;
 u[] = A^-1 * rhs;
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 if(!NoGraphicWindow) {
     real[int] sol;
     ChangeNumbering(A, u[], sol);

@@ -40,8 +40,6 @@ TESTS_OTHER = BlackScholes2D.edp \
 	potential.edp \
 	schwarz.edp \
 	stokes.edp \
-	stokes_composite.edp \
-	stokes_periodic_composite.edp \
 	test1.edp \
 	thermal.edp \
 	thermic.edp \
