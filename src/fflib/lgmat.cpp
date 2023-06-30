@@ -90,8 +90,11 @@ AnyType tM2L3 (Stack , const AnyType & pp)
 
 
 template<class R>
-struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCM
  {
+   using first_argument_type  = R;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -130,8 +133,11 @@ template<class R> void PrintL(const char* cc, list<tuple<R,VirtualMatrix<int,R>*
     cout << ") "<< endl;
 }
 template<class R>
-struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMC
  {
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = R;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -148,8 +154,11 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,Mat
 //  ADD FH 16/02/2007
 
 template<class R>
-struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCMt
 {
+   using first_argument_type  = R;
+   using second_argument_type = Matrice_Creuse_Transpose<R> ;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -165,8 +174,11 @@ struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<t
 };
 
 template<class R>
-struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMtC
 {
+   using first_argument_type  = Matrice_Creuse_Transpose<R> ;
+   using second_argument_type = R;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -185,9 +197,10 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
 
 
 template<class R,int c=-1>
-struct Op1_LCMd: public unary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op1_LCMd
 {  //  - ...
+  using argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+  using result_type    = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -204,10 +217,11 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 };
 
 template<class R>
-struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMadd
 {  //  ... + ...
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
@@ -222,10 +236,11 @@ struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,b
 
 };
 template<class R>
-struct Op2_ListCMCMsub: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *,
-list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMsub
 {  //  ... + ...
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
@@ -245,10 +260,11 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 };
 
 template<class R,int cc=1>
-struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
-                                              list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListMCMadd
 {  //  M + ....
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -268,10 +284,11 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
 };
 
 template<class R,int cc=1>
-struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,bool> > *,
-                                               Matrice_Creuse<R> * ,
-                                               list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListCMMadd
 {  //   .... + M
+   using first_argument_type  = list<tuple<R,MatriceCreuse<R> *,bool> > *;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -288,10 +305,11 @@ struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,b
 };
 
 template<class R,int cc=1>
-struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
-                                              Matrice_Creuse<R> * ,
-                                              list<tuple<R,MatriceCreuse<R> *,bool> > *>
+struct Op2_ListMMadd
 {  //  M + M
+   using first_argument_type  = Matrice_Creuse<R> *;
+   using second_argument_type = Matrice_Creuse<R> *;
+   using result_type          = list<tuple<R,MatriceCreuse<R> *,bool> > *;
    typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
@@ -1794,7 +1812,10 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
 }
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_pair: public binary_function<AA,BB,RR> {
+struct Op2_pair {
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return RR( a, b);}
 };
@@ -1898,13 +1919,19 @@ R  get_element2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c)
     return  r;}
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_mulAv: public binary_function<AA,BB,RR> {
+struct Op2_mulAv{
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return (*a->A * *b );}
 };
 
 template<class RR,class AA=RR,class BB=AA>
-struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
+struct Op2_mulvirtAv{
+   using first_argument_type  = AA;
+   using second_argument_type = BB;
+   using result_type          = RR;
   static RR f(const AA & a,const BB & b)
   { return RR( (*a).A, b );}
 };
@@ -1958,7 +1985,7 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)
          { char buf[100];
-           sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
+           snprintf(buf,100," A^%ld, The pow must be  == -1, sorry",pv);
            CompileError(buf);}
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0]));
     }
@@ -1976,7 +2003,7 @@ class OneBinaryOperatorAt_inv : public OneOperator { public:
         long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)
         { char buf[100];
-            sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
+            snprintf(buf,100," A^%ld, The pow must be  == -1, sorry",pv);
             CompileError(buf);}
         return  new E_F_F0<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >(Build<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >,t[0]->CastTo(args[0]));
     }
@@ -3114,6 +3141,54 @@ template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const
 template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const & bc)
 { return Set_BC(pA,bc,ff_tgv);
 }
+
+template <class K>
+class SparseMat_Add { public:
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm;
+    SparseMat_Add(Matrice_Creuse<K> * ff) :phm(ff?ff->pHM():0) {ffassert(phm);}
+// void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
+    SparseMat_Add(const SparseMat_Add<K> & s): phm(s.phm) {}
+};
+/*
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,Matrice_Creuse<K>* const &pA)
+{
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm= sm.phm;
+    HMat *phA= pA->pHM();
+    ffassert(phm && phA);
+    phm->Add(phA);
+    return sm;
+}*/
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,K const & coef,Matrice_Creuse<K>*const  & pA,const long & i0,const long & j0)
+{
+    typedef  typename Matrice_Creuse<K>::HMat HMat;
+    HMat *phm= sm.phm;
+    HMat *phA= pA->pHM();
+    ffassert(phm && phA);
+    phm->Add(phA,coef,false,i0,j0);
+    return sm;
+}
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,K const & coef,Matrice_Creuse<K>*const  & pA)
+{ return addMat(sm,coef,pA,0,0);}
+
+template <class K>
+SparseMat_Add<K> addMat(SparseMat_Add<K> const &sm,Matrice_Creuse<K>*const  & pA)
+{ return addMat(sm,K(1.),pA,0,0);}
+
+template <class R>
+SparseMat_Add<R> to_add(Matrice_Creuse<R> * ff){return SparseMat_Add<R>(ff);}
+template <class R>
+R ffpscal(Matrice_Creuse<R> * const & pM,  KN_<R>  const & a,  KN_<R>  const & b)
+{     typedef  typename Matrice_Creuse<R>::HMat HMat;
+    HMat *phm= pM->pHM();
+    R s=0;
+    if( phm) s = phm->pscal(a,b);
+    return s;
+}
 template <class R>
 void AddSparseMat()
 {
@@ -3122,7 +3197,7 @@ void AddSparseMat()
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
  Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005
  Dcl_Type<  minusMat<R>  >(); // Add FJH mars 2007
-
+ Dcl_Type<  SparseMat_Add<R>  >(); // FH jan 2023
  basicForEachType * t_MC=atype<  Matrice_Creuse<R>* >();
 
  t_MC->SetTypeLoop(atype<  R* >(),atype<  long* >(),atype<  long* >());
@@ -3287,7 +3362,14 @@ TheOperators->Add("+",
     Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
     Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
     Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<R> *>(symmetrizeCSR<R> ));
-//  --- end
+    Global.Add("pscal","(",new OneOperator3_<R,Matrice_Creuse<R> *,KN_<R> ,KN_<R>> (ffpscal));
+     Add<MR *>("add", ".", new OneOperator1<SparseMat_Add<R>, MR *>(to_add));
+    Add<SparseMat_Add<R>>("(","", new OneOperator2_<SparseMat_Add<R>,SparseMat_Add<R>,MR*>(addMat<R>)
+                                , new OneOperator3_<SparseMat_Add<R>,SparseMat_Add<R>,R,MR*>(addMat)
+                                , new OneOperator5_<SparseMat_Add<R>,SparseMat_Add<R>,R,MR*,long,long>(addMat));
+
+//  --- end ADD
+    
 }
 
 extern int lineno();

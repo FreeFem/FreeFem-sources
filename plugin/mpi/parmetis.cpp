@@ -66,7 +66,11 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
     idx_t nparts = GetAny<long>((*lparts)(stack));
     Type* pt = *ptKN;
     long n = ptKN->n;
+#ifdef __clang__
+    idx_t* ptInt = new idx_t[n];
+#else
     idx_t* ptInt = sizeof(idx_t) <= sizeof(Type) ? reinterpret_cast<idx_t*>(pt) : new idx_t[n];
+#endif
     std::fill_n(ptInt, n, 0);
     MPI_Comm comm = nargs[0] ? *((MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack))) : MPI_COMM_WORLD;
     int worker = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 0;
@@ -147,7 +151,9 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
     MPI_Allreduce(MPI_IN_PLACE, ptInt, n, IDX_T, MPI_SUM, comm);
     for(int i = n; i-- > 0; )
         pt[i] = ptInt[i];
+#if !defined(__clang__)
     if(sizeof(idx_t) > sizeof(Type))
+#endif
         delete [] ptInt;
     if(nargs[1] && workComm != MPI_COMM_NULL)
         MPI_Comm_free(&workComm);

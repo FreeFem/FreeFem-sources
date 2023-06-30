@@ -56,4 +56,4 @@ fespace Wh(ThTab[0], Pk);
 Wh<complex> u;
 u[] = MG[0]^-1 * rhs;
 macro def(u)u//
-plotMPI(ThTab[0], real(u), Pk, def, real, cmm = "Global solution")
+plotMPI(ThTab[0], real(u), Pk, def, real, cmm = "Global solution");

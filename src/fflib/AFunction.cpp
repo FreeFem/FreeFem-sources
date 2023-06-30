@@ -28,12 +28,6 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
-//  for bessel function
-// c++11   => __STRICT_ANSI__ => error FH..
-#ifdef __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
-
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE
 #include <config.h>
@@ -148,7 +142,10 @@ template<class T> inline T Max (const T &a,const T & b,const T & c,const T & d){
 
 template<class T> inline T Square (const T &a){return a*a;}
 
-struct SubArray2: public binary_function<long,long,SubArray> {
+struct SubArray2 {
+  using first_argument_type  = long;
+  using second_argument_type = long;
+  using result_type          = SubArray;
   static SubArray f(const long & a,const long & b)  {
     return SubArray(b-a+1,a);} };
 struct SubArray3: public ternary_function<long,long,long,SubArray> {
@@ -194,6 +191,14 @@ class  OneOperator_array : public OneOperator {public:
      { return  new E_Array(a);}
     OneOperator_array(): OneOperator(atype<E_Array>(),true) {}
 };
+
+class  OneOperator_FEarray : public OneOperator {public:
+    E_F0 * code(const basicAC_F0 & a) const
+     { /*cout << "call OneOperator_FEarray=" << endl;*/ return  new E_FEarray(a);}
+    OneOperator_FEarray(): OneOperator(atype<E_FEarray>(),true) {}
+};
+
+
 class  OneOperator_border : public OneOperator {public:
     E_F0 * code(const basicAC_F0 & a) const {
         if (a.size()==1 && a[0].left()==atype<E_Array>() )
@@ -236,12 +241,17 @@ R *MakePtrWithDel( A  const & a)
   return r;}
 
 template<class R,class RR>
-struct Op1_new_pstring: public unary_function<string*,R> {
+struct Op1_new_pstring{
+  using argument_type  = string*;
+  using result_type    = R;
   static R f(string * const & a)  {R r =  new RR(a->c_str());
     return r;} };
 
 template<class R,class RR>
-struct Op2_set_pstring: public binary_function<R,string*,R> {
+struct Op2_set_pstring {
+  using first_argument_type  = R;
+  using second_argument_type = string*;
+  using result_type          = R;
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
    if ( !*p || !**p) {
        cerr << " Error opening file " << *a << endl;
@@ -1056,6 +1066,7 @@ void Init_map_type()
 
     basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
+    Dcl_Type<E_FEarray>();
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
@@ -1505,6 +1516,7 @@ void Init_map_type()
     // add 3.20
     Global.Add("Cofactor","(",new opFormal(atype<E_Array>(),formalMatCofactor ));
 
+    TheOperators->Add("<>",new OneOperator_FEarray );
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
 

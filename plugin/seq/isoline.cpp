@@ -54,6 +54,7 @@ using namespace Fem2D;
 
 // fonction determinant les points d'intersection
 static int debug = 0;
+
 class FINDLOCALMIN_P1_Op : public E_F0mps {
  public:
   Expression eTh, eu, er;
@@ -91,7 +92,7 @@ class FINDLOCALMIN_P1_Op : public E_F0mps {
 
 basicAC_F0::name_and_type FINDLOCALMIN_P1_Op::name_param[] = {{"eps", &typeid(double)},
                                                               {"convex", &typeid(long)}};
-
+template<class Mesh>
 class ISOLINE_P1_Op : public E_F0mps {
  public:
   Expression eTh, eff, emat, exx, eyy, exy, iso;
@@ -129,13 +130,18 @@ class ISOLINE_P1_Op : public E_F0mps {
 
   AnyType operator( )(Stack stack) const;
 };
-
-basicAC_F0::name_and_type ISOLINE_P1_Op::name_param[] = {
+template<class Mesh>
+basicAC_F0::name_and_type ISOLINE_P1_Op<Mesh>::name_param[] = {
   {"iso", &typeid(double)},   {"close", &typeid(long)}, {"smoothing", &typeid(double)},
   {"ratio", &typeid(double)}, {"eps", &typeid(double)}, {"beginend", &typeid(KN< long > *)},
   {"file", &typeid(string *)}};
 
-int IsoLineK(R2 *P, double *f, R2 *Q, int *i0, int *i1, double eps) {
+
+
+double twoArea(const R2 &A,const R2 &B,const R2 &C){return det(A,B,C);}
+double twoArea(const R3 &A,const R3 &B,const R3 &C){return ((A-B)^(A-C)).norme();}
+template<class Rd=R2>
+int IsoLineK(Rd *P, double *f, Rd *Q, int *i0, int *i1, double eps) {
   int kv = 0, ke = 0, e = 3;
   int tv[3], te[3], vk[3];
 
@@ -218,19 +224,19 @@ int IsoLineK(R2 *P, double *f, R2 *Q, int *i0, int *i1, double eps) {
     }
 
     if (debug) {
-      cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]], Q[0], Q[1]) << endl;
-      cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]], Q[1], Q[0]) << endl;
+      cout << "i0 " << i0[0] << " " << i0[1] << " " << twoArea(P[i1[0]], Q[0], Q[1]) << endl;
+      cout << "i1 " << i1[0] << " " << i1[1] << " " << twoArea(P[i0[1]], Q[1], Q[0]) << endl;
       cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
       cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
       cout << "Q " << Q[0] << ", " << Q[1] << endl;
     }
 
     if (!vk[i1[0]]) {
-      assert(det(P[i1[0]], Q[0], Q[1]) > 0);
+      ffassert(twoArea(P[i1[0]], Q[0], Q[1]) > 0);
     }
 
     if (!vk[i0[1]]) {
-      assert(det(P[i0[1]], Q[1], Q[0]) > 0);
+      ffassert(twoArea(P[i0[1]], Q[1], Q[0]) > 0);
     }
 
     return 2;
@@ -239,8 +245,8 @@ int IsoLineK(R2 *P, double *f, R2 *Q, int *i0, int *i1, double eps) {
   // remark, the left of the line is upper .
   return 0;
 }
-
-int LineBorder(R2 *P, double *f, long close, R2 *Q, int *i1, int *i2, double eps) {
+template<class Rd=R2>
+int LineBorder(Rd *P, double *f, long close, Rd *Q, int *i1, int *i2, double eps) {
   int np = 0;
 
   if (close) {
@@ -263,10 +269,11 @@ int LineBorder(R2 *P, double *f, long close, R2 *Q, int *i1, int *i2, double eps
   return np;
 }
 
+template<class Rd=R2>
 struct R2_I2 {
-  R2 P;
+  Rd P;
   int nx;
-  R2_I2(R2 A, int nxx = -1) : P(A), nx(nxx) {}
+  R2_I2(Rd A, int nxx = -1) : P(A), nx(nxx) {}
 
   bool add(int k0, int k1, multimap< int, int > &L) {
     if (nx == -1) {
@@ -329,10 +336,13 @@ int Th_Grid(const KNM_< double > *g, int k, int ii) {
   return J * (N + 1) + I;
 }
 
-R2 V_Grid(const KNM_< double > *g, int k) {
+
+
+
+R3 V_Grid(const KNM_< double > *g, int k) {
   int i = k % g->N( ), j = k / g->N( );
 
-  return R2(i, j);
+  return R3(i, j,0);
 }
 
 int EA_Grid(const KNM_< double > *g, int k, int &e) {
@@ -348,23 +358,28 @@ int EA_Grid(const KNM_< double > *g, int k, int &e) {
   ffassert(0);
   return 0;
 }
-
+template<class Mesh>
 struct SMesh {
+    typedef typename Mesh::Rd Rd;
+    static Rd Proj(R3 A){return Rd(&A.x);}
   const Mesh *pTh;
   const KNM_< double > *g;
-  int nv, nt, neb;
+    int nv, nt;//, neb;
   int operator( )(int k, int i) const { return pTh ? (*pTh)(k, i) : Th_Grid(g, k, i); }
 
-  R2 operator( )(int i) const { return pTh ? (*pTh)(i) : V_Grid(g, i); }
+  Rd operator( )(int i) const { return pTh ? (Rd) (*pTh)(i) : Proj( V_Grid(g, i)); }
 
   int ElementAdj(int k, int &e) { return pTh ? pTh->ElementAdj(k, e) : EA_Grid(g, k, e); }
 
-  SMesh(const Mesh *PTh) : pTh(PTh), g(0), nv(pTh->nv), nt(pTh->nt), neb(pTh->neb) {}
+  SMesh(const Mesh *PTh) : pTh(PTh), g(0), nv(pTh->nv), nt(pTh->nt)/*, neb(pTh->neb)*/ {}
 
   SMesh(KNM_< double > *gg)
-    : pTh(0), g(gg), nv(gg->N( ) * gg->M( )), nt((gg->N( ) - 1) * (gg->M( ) - 1) * 2),
-      neb((gg->N( ) + gg->M( ) - 2) * 2) {}
+    : pTh(0), g(gg), nv(gg->N( ) * gg->M( )), nt((gg->N( ) - 1) * (gg->M( ) - 1) * 2)
+    //,neb((gg->N( ) + gg->M( ) - 2) * 2)
+    {}
 };
+
+
 ::AnyType FINDLOCALMIN_P1_Op::operator( )(Stack stack) const {
   typedef std::pair< double, int > KEY;
   typedef std::priority_queue< KEY, std::vector< KEY >, std::greater< KEY > > myPQ;
@@ -524,10 +539,10 @@ struct SMesh {
   KN< long > *ppr = new KN< long >(sm);
   return Add2StackOfPtr2Free(stack, ppr);
 }
-
-AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
+template<class Mesh>
+AnyType ISOLINE_P1_Op<Mesh>::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-
+  typedef typename Mesh::Rd Rd;
   KNM< double > *pxy = 0;
   KN< double > *pxx = 0;
   KN< double > *pyy = 0;
@@ -542,11 +557,12 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
   if (eyy) {
     pyy = GetAny< KN< double > * >((*eyy)(stack));
   }
-
+  const int d = Rd::d;
   ffassert((pxx || pyy) == !pxy);
+  //if(pxy)  cout << " PXY ???? " << pxy->N() << " "<< pxy->M() << " " << pxy << "  "<< pxx << " " << pyy <<endl;
   const Mesh *pTh = GetAny< const Mesh * >((*eTh)(stack));
   ffassert(pTh);
-  SMesh Th(pTh);
+  SMesh<Mesh> Th(pTh);
   int nbv = Th.nv;    // nombre de sommet
   int nbt = Th.nt;    // nombre de triangles
   // int nbe=Th.neb; // nombre d'aretes fontiere
@@ -559,7 +575,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
   double epsr = arg(4, stack, 1e-10);
   KN< long > *pbeginend = arg(5, stack, (KN< long > *)0);
   string *file = arg(6, stack, (string *)0);
-  vector< R2_I2 > P;
+  vector< R2_I2<Rd> > P;
   multimap< int, int > L;
   if (verbosity >= 1000) {
     debug = verbosity / 1000;
@@ -596,7 +612,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
   double tffmax = tff.max( ), tffmin = tff.min( );
   if (verbosity) {
     cout << " -- isoline close=" << close << " iso= " << isovalue << " " << epsr << endl
-         << "    bound  isovalue :" << tffmin << " " << tffmax << endl;
+         << "    bound  isovalue :" << tffmin << " " << tffmax << " dim " << d << endl;
   }
 
   double eps = (tffmax - tffmin) * epsr;
@@ -615,9 +631,9 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
 
   for (int k = 0; k < Th.nt; ++k) {
     int iK[3] = {Th(k, 0), Th(k, 1), Th(k, 2)};
-    R2 Pk[3] = {Th(iK[0]), Th(iK[1]), Th(iK[2])};
+    Rd Pk[3] = {Th(iK[0]), Th(iK[1]), Th(iK[2])};
     R fk[3] = {tff[iK[0]], tff[iK[1]], tff[iK[2]]};
-    R2 Qk[6];
+    Rd Qk[6];
     int i1[6], i2[6];
     int np = IsoLineK(Pk, fk, Qk, i1, i2, eps);
     if (np == 2) {
@@ -636,7 +652,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
         pair< int, int > e(i1[i], i2[i]);
         ii = FP.insert(make_pair(e, P.size( )));
         if (ii.second) {
-          P.push_back(R2_I2(Qk[i]));
+          P.push_back(R2_I2<Rd>(Qk[i]));
         }
 
         if (debug) {
@@ -652,11 +668,12 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
         cout << " +++ " << Qk[0] << " ->  " << Qk[1] << " :: " << p[0] << " -> " << p[1] << endl;
       }
 
-      if (fff) {
+  /* PB perp en sur meshS
+   if (fff) {
         *fff << Qk[0] << "\n"
              << Qk[1] << "\n"
-             << ((Qk[0] * 0.4 + Qk[1] * .6) + R2(Qk[0], Qk[1]).perp( ) * .4) << "\n\n";
-      }
+             << ((Qk[0] * 0.4 + Qk[1] * .6) + Rd(Qk[0], Qk[1]).perp( ) * .4) << "\n\n";
+      }*/
     }
   }
 
@@ -675,9 +692,9 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
         int ee, kk = Th.ElementAdj(k, ee = e);
         if (kk == k || kk < 0) {    // true border element edge
           int iK[2] = {Th(k, (e + 1) % 3), Th(k, (e + 2) % 3)};
-          R2 Pk[2] = {Th(iK[0]), Th(iK[1])};
+          Rd Pk[2] = {Th(iK[0]), Th(iK[1])};
           R fk[2] = {tff[iK[0]], tff[iK[1]]};
-          R2 Qk[2];
+          Rd Qk[2];
           int i1[2], i2[2];
           if (debug) {
             cout << " LB : " << Pk[0] << ", " << fk[0] << " ->  " << Pk[1] << ", " << fk[1] << " : "
@@ -708,7 +725,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
               pair< int, int > ee(i1[i], i2[i]);
               ii = FP.insert(make_pair(ee, P.size( )));
               if (ii.second) {
-                P.push_back(R2_I2(Qk[i]));
+                P.push_back(R2_I2<Rd>(Qk[i]));
               }
 
               if (debug) {
@@ -874,7 +891,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
   }
 
   if (smoothing > 0) {
-    KN< R2 > P1(QQ.size( )), P2(QQ.size( ));
+    KN< Rd > P1(QQ.size( )), P2(QQ.size( ));
 
     for (int i = 0; i < QQ.size( ); ++i) {
       P1[i] = P[QQ[i]].P;
@@ -923,30 +940,32 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
       (*pbeginend)[i] = iQ[i];
     }
   }
-
+  //  cout << " !!!!"<< pxy << endl;
   if (pxx && pyy) {
     pxx->resize(QQ.size( ));
     pyy->resize(QQ.size( ));
 
     for (int i = 0; i < QQ.size( ); ++i) {
       int j = QQ[i];
+      
       (*pxx)[i] = P[j].P.x;
       (*pyy)[i] = P[j].P.y;
     }
   } else if (pxy) {
-    pxy->resize(3, QQ.size( ));
-
+      
+    pxy->resize(d+1, QQ.size( ));
+    if(verbosity>9)   cout << " resize " << " xy " << d+1 << " " << QQ.size() << endl;
     for (int k = 0; k < iQ.size( ); k += 2) {
       int i0 = iQ[k], i1 = iQ[k + 1];
       double lg = 0;
-      R2 Po = P[QQ[i0]].P;
+      Rd Po = P[QQ[i0]].P;
 
       for (int i = i0; i < i1; ++i) {
         int j = QQ[i];
-        (*pxy)(0, i) = P[j].P.x;
-        (*pxy)(1, i) = P[j].P.y;
-        lg += R2(P[j].P, Po).norme( );
-        (*pxy)(2, i) = lg;
+          for(int k=0; k<d; ++k)
+          (*pxy)(k,i) = P[j].P[k];
+        lg += Rd(P[j].P, Po).norme( );
+        (*pxy)(d, i) = lg;
         Po = P[j].P;
       }
     }
@@ -997,7 +1016,7 @@ AnyType ISOLINE_P1_Op::operator( )(Stack stack) const {
 
   return nbc;
 }
-
+template<class Mesh>
 class ISOLINE_P1 : public OneOperator {
  public:
   typedef const Mesh *pmesh;
@@ -1015,10 +1034,10 @@ class ISOLINE_P1 : public OneOperator {
 
   E_F0 *code(const basicAC_F0 &args) const {
     if (cas == 4) {
-      return new ISOLINE_P1_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]),
+      return new ISOLINE_P1_Op<Mesh>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]),
                                t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
     } else if (cas == 3) {
-      return new ISOLINE_P1_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]),
+      return new ISOLINE_P1_Op<Mesh>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]),
                                t[2]->CastTo(args[2]));
     } else {
       ffassert(0);    // bug
@@ -1100,6 +1119,7 @@ R3 *Curve(Stack stack, const KNM_< double > &b, const long &li0, const long &li1
           long *const &pi) {
   if(b.N( )==2) return Curve2(stack,b,li0,li1,ss,pi);
   assert(b.N( ) >= 3);
+  int d = b.N() == 3 ? 2 : 3;
   int i0 = li0, i1 = li1, im;
   if (i0 < 0) {
     i0 = 0;
@@ -1109,33 +1129,36 @@ R3 *Curve(Stack stack, const KNM_< double > &b, const long &li0, const long &li1
     i1 = b.M( ) - 1;
   }
 
-  double lg = b(2, i1);
+  double lg = b(d, i1);
   R3 Q;
-  ffassert(lg > 0 && b(2, 0) == 0.);
+  ffassert(lg > 0 && b(d, 0) == 0.);
   double s = ss * lg;
   int k = 0, k1 = i1;
 
   while (i0 < i1 - 1) {
     ffassert(k++ < k1);
     im = (i0 + i1) / 2;
-    if (s < b(2, im)) {
+    if (s < b(d, im)) {
       i1 = im;
-    } else if (s > b(2, im)) {
+    } else if (s > b(d, im)) {
       i0 = im;
     } else {
-      Q = R3(b(0, im), b(1, im), 0);
+      
+      Q = d==2 ? R3(b(0, im), b(1, im), 0) : R3(b(0, im), b(1, im), b(2, im));
       i0 = i1 = im;
       break;
     }
   }
 
   if (i0 < i1) {
-    ffassert(b(2, i0) <= s);
-    ffassert(b(2, i1) >= s);
-    R2 A(b(0, i0), b(1, i0));
-    R2 B(b(0, i1), b(1, i1));
-    double l1 = (b(2, i1) - s);
-    double l0 = s - b(2, i0);
+    ffassert(b(d, i0) <= s);
+    ffassert(b(d, i1) >= s);
+    double b20=0,b21=0;
+      if( d==3) {b20=b(2, i0);b21=b(2, i1);}
+    R3 A(b(0, i0), b(1, i0),b20);
+    R3 B(b(0, i1), b(1, i1),b21);
+    double l1 = (b(d, i1) - s);
+    double l0 = s - b(d, i0);
     Q = (l1 * A + l0 * B) / (l1 + l0);
   }
 
@@ -1236,8 +1259,10 @@ class OneOperator5s_ : public OneOperator {
 static void finit( ) {
   typedef const Mesh *pmesh;
 
-  Global.Add("isoline", "(", new ISOLINE_P1);
-  Global.Add("isoline", "(", new ISOLINE_P1(1));
+    Global.Add("isoline", "(", new ISOLINE_P1<MeshS>);
+    Global.Add("isoline", "(", new ISOLINE_P1<MeshS>(1));
+    Global.Add("isoline", "(", new ISOLINE_P1<Mesh>);
+  Global.Add("isoline", "(", new ISOLINE_P1<Mesh>(1));
 
   Global.Add("Curve", "(", new OneOperator2s_< R3 *, KNM_< double >, double >(Curve));
   Global.Add("Curve", "(", new OneOperator4s_< R3 *, KNM_< double >, long, long, double >(Curve));

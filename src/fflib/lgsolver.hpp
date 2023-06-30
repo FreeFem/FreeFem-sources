@@ -608,9 +608,10 @@ const int NB_NAME_PARM_MAT =  24 +6+4  ;
     {  "maxblocksize", &typeid(long)}, \
     {  "mintargetdepth", &typeid(long)}, \
     {  "minsourcedepth", &typeid(long)}, \
-    {  "compressor",&typeid(string*)}
+    {  "compressor",&typeid(string*)}, \
+    {  "initialclustering",&typeid(string*)}
 
-const int NB_NAME_PARM_HMAT = 6;
+const int NB_NAME_PARM_HMAT = 7;
 
 
 template<class R>

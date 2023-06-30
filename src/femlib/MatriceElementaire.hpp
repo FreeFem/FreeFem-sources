@@ -170,7 +170,7 @@ public:
     
     :
     MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,lkj,nni,lki,t,optim)
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nni,lki,nnj,lkj,t,optim)// correct swap i,j may 2023 
     {}
     
   ~MatriceElementaireFES() {}

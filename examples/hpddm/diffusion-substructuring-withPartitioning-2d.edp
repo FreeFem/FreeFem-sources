@@ -35,7 +35,7 @@ int[int] labDirichlet = [1, 3];
     fespace Ph(Th, P0);
     Ph part;
     part = (x > 0.5 && y > 0.5 ? 3 : (x > 0.5 ? 2 : (y < 0.5 ? 1 : 0)));
-    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, intersection, Pk, BC, comm, excluded)
+    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, intersection, Pk, BC, comm, excluded);
 }
 
 func f = 10;
@@ -81,6 +81,6 @@ else
 
 if(!excluded)
     OriginalNumbering(A, u[], interfaceNb);
-plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
 
 statistics(A);

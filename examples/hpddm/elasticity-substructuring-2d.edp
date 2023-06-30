@@ -92,4 +92,4 @@ else
 
 if(!excluded)
     OriginalNumbering(A, u[], interfaceNb);
-plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
+plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution");

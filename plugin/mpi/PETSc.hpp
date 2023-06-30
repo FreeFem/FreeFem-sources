@@ -9,6 +9,10 @@
 #define MATHERMITIANTRANSPOSEVIRTUAL MATTRANSPOSEMAT
 #endif
 
+#if PETSC_VERSION_LT(3, 19, 0)
+#define PETSC_SUCCESS 0
+#endif
+
 namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {
@@ -26,7 +30,8 @@ class DistributedCSR {
         PetscInt*                           _cnum;
         PetscInt                          _cfirst;
         PetscInt                           _clast;
-        DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { }
+        PetscBool                          _vector_global; // In case of the rhs and solution of freefem are not distributed
+        DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast(), _vector_global() { }
         ~DistributedCSR() {
             dtor();
         }

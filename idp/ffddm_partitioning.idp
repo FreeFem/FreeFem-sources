@@ -347,6 +347,10 @@ if (prmesh#isincomm)
         prmesh#partAug.resize(prmesh#PhAugP0.ndof);
         prmesh#partAug = phaug[];
         ENDIFMACRO
+        IFMACRO(prmesh#mminoverlap,0)
+        cout << "["+Stringification(prmesh)+"] ffddmbuildDmesh PB: you need to define macro \""+Stringification(prmesh)+"mminoverlap\" to 1 when using overlap=0, e.g. by adding \"-D"+Stringification(prmesh)+"mminoverlap=1\" to the command line" << endl;
+        assert(0);
+        ENDIFMACRO
         ;
       }
 
@@ -950,7 +954,10 @@ if (prmsh#isincomm && !prmsh#excluded)
               R.resize(0, prfe#AugVhi.ndof);
             }
             ENDIFMACRO
-            ;
+            IFMACRO(prmsh#mminoverlap,0)
+            cout << "["+Stringification(prfe)+"] ffddmbuildDfespace PB: you need to define macro \""+Stringification(prmsh)+"mminoverlap\" to 1 when using overlap=0, e.g. by adding \"-D"+Stringification(prmsh)+"mminoverlap=1\" to the command line" << endl;
+            assert(0);
+            ENDIFMACRO
           }
 
         /*cout << mpirank << " " << prmsh#arrayIntersection[i] << " " << R.n << " " << R.m << endl;*/

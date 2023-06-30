@@ -421,7 +421,9 @@ public:
         PHat.toBary(l);
         // l = 0 en i/k , 1 en ii/k  => monome : ( k*l - i )/( ii-i) ok..
         RN_ f0(val('.',0,op_id));
-        if (whatd & Fop_D0)
+        for(int i=0; i<this->NbDoF;++i)
+          f0[i] =0.;
+        if (whatd & Fop_D0) {
             if(k==1) // edge
             {   // close edge ie = arg min_e l[e2]+l[e1]
                 int ie = 0;
@@ -436,13 +438,20 @@ public:
             else if(k==2) // face
             {
                 // close face ie = arg min_i l[i]
-                int ie = 0;
+                int ie = -1;
                 double lm = 2;
                 for(int i=0;i<Element::nv; ++i)
                 {
                     double li = l[i];
                     if(li < lm){ ie= i;lm =li;}
                 }
+                if(ie<0)
+                {
+                    cout << Element::nv << " " << l[0] << " "<< l[1] << " "<< l[2] << " "<< l[3]<< " bug ???"<< endl;
+                    ffassert(ie>=0);
+                }
+                if(verbosity>=10000)
+                  cout << "TypeOfFE_ConstDC:  " << ie << " l:  "  << l[0] << " "<< l[1] << " "<< l[2] << " "<< l[3]<< " " << this->NbDoF <<  endl;
                 f0[ie]=1;
                 
             }
@@ -461,6 +470,7 @@ public:
             }
             else
                 ffassert(0);
+        }
     }
                             
     

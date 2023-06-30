@@ -303,7 +303,7 @@ debut:
         else if (real)
             plglval->dnum = atof(buf),ret=DNUM;
         else
-            plglval->lnum = atoi(buf),ret=LNUM;
+            plglval->lnum = atol(buf),ret=LNUM;//  FH 12/2022 
 
         if(lexdebug) cout << " NUM : " << buf  << " "<<endl;
     }
@@ -501,9 +501,11 @@ int mylex::scan(int lvl)
             int ft = FindType(buf);
 
             // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
-            int feid3[6]  = { ID,FESPACE1,FESPACE,FESPACE3,FESPACES,FESPACEL};
+            // Morice (june :: 2022)- Added VGFESPACE : Vector generic FESpace             -->  pvectgenericfes
+            //                      - Added GFESPACE  : generic FESpace  ( A enlever ???)  -->  pgenericfes
+            int feid3[8]  = { ID,FESPACE1,FESPACE,FESPACE3,FESPACES,FESPACEL,VGFESPACE,GFESPACE};
 
-            ffassert ( ft >= 0 && ft <= 5 )  ;
+            ffassert ( ft >= 0 && ft <= 7 );
             ret =  feid3[ft];
             plglval->str = newcopy(buf);
         }

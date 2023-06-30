@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT([FreeFEM],[4.12],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
+AC_INIT([FreeFEM],[4.13],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -683,6 +683,7 @@ FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFEM build date)
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
 AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
+AC_SUBST(ff_prefix,${prefix})
 
 ff_prefix_dir_lib="$ff_prefix_dir/lib"
 ff_prefix_dir_data="$datadir/$PACKAGE_NAME"
@@ -742,19 +743,25 @@ m4_include(etc/config/m4/ax_lib_gsl.m4)
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
 ##  for  bem.cpp  need c++14 for intel compiler 
-CHECK_COMPILE_FLAG(C++,[-std=c++14],CXXFLAGS,ff_cxx11)
+CHECK_COMPILE_FLAG(C++,[-std=gnu++14],CXXFLAGS,ff_cxx11)
 if test "$ff_cxx11" = yes ; then
-   CXX11FLAGS="-std=c++14";
+   CXX11FLAGS="-std=gnu++14";
    AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
 else
-   CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+   CHECK_COMPILE_FLAG(C++,[-std=c++14],CXXFLAGS,ff_cxx11)
    if test "$ff_cxx11" = yes ; then
-      CXX11FLAGS="-std=c++11";
+      CXX11FLAGS="-std=c++14";
       AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
    else
-     AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
-     AC_MSG_ERROR([ Sorry no c++ compiler !])
-     AC_MSG_ERROR([ Fatal error no  c++11 or  c++14  ],1);
+      CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+      if test "$ff_cxx11" = yes ; then
+         CXX11FLAGS="-std=c++11";
+         AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+      else
+        AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+        AC_MSG_ERROR([ Sorry no c++ compiler !])
+        AC_MSG_ERROR([ Fatal error no  c++11 or  c++14  ],1);
+      fi
    fi
 fi
 ##CXXFLAGS="$ff_cxx_save"
@@ -1040,7 +1047,13 @@ esac
                           AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
                           AC_SUBST([TOOL_COMPILE_scotch],"")
                         fi
-		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+                        if test -n "$ff_MUMPS_LIB"; then
+                            sed -E 's/mumps LD(.*)-lzmumps /mumps LD\1/g;s/mumps LD(.*)ldmumps/mumps LD\1ldmumps -lzmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                            mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                            sed -E 's/mumps LD(.*)-lcmumps /mumps LD\1/g;s/mumps LD(.*)lsmumps/mumps LD\1lsmumps -lcmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                            mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                        fi
                         AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
@@ -1139,6 +1152,12 @@ esac
                 AC_SUBST([TOOL_COMPILE_scotch],"")
             fi
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
+            if test -n "$ff_MUMPS_LIB"; then
+                sed -E 's/mumps LD(.*)-lzmumps /mumps LD\1/g;s/mumps LD(.*)ldmumps/mumps LD\1ldmumps -lzmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+                sed -E 's/mumps LD(.*)-lcmumps /mumps LD\1/g;s/mumps LD(.*)lsmumps/mumps LD\1lsmumps -lcmumps/g' $ff_where_lib_conf > plugin/seq/WHERE_LIBRARY-download
+                mv plugin/seq/WHERE_LIBRARY-download $ff_where_lib_conf
+            fi
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(htool,HTOOL_LIB,HTOOL_INCLUDE,$ffconfpetscc)
@@ -2434,9 +2453,19 @@ TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX RadiativeTransfer_htool.$DYLIB_SUFFIX"])
 if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
 fi
+ff_inc_htool=$ff_HTOOL_INCLUDE
+if test -n "$TOOL_COMPILE_htool"; then
+	# install htool
+	ff_inc_htool='-I$(abs_top_builddir)/3rdparty/include/htool/include'
+fi
+if test -n "$ff_inc_htool"; then
+    ff_inc_htool="$ff_inc_htool -DWITH_bemtool -DWITH_htool"
+fi
 if test -z "$TOOL_COMPILE_bem"; then
     enable_bemtool=no
+    ff_inc_htool=""
 fi
+AC_SUBST(HTOOL_INCLUDE_DIR,$ff_inc_htool)
 
 ##
 if test "$ff_mkl_ok" = yes ; then
@@ -2532,6 +2561,7 @@ AC_CONFIG_FILES([Makefile
     examples/tutorial/Makefile
     examples/misc/Makefile
     examples/mpi/Makefile
+    examples/bem/Makefile
     examples/hpddm/Makefile
     examples/ffddm/Makefile
     examples/eigen/Makefile

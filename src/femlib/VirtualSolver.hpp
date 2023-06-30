@@ -221,7 +221,7 @@ public:
         if(cn) codenumnew=ci;
         if(codeininew != codeini) state=0; // redo init
         else if(codesymnew != codesym) state=1; // redo init
-        else if(codenumnew != codenumnew) state=2; // redo init
+        else if(codenumnew != codenum) state=2; // redo init
     };
     void factorize(int st)
     {

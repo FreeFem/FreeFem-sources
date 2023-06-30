@@ -20,6 +20,70 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.13]
+
+### Added
+
+- Composite FE spaces and variational forms for coupled problems:
+  - can now define composite FE spaces with different meshes/mesh types as
+    ```
+    fespace Uh(Th1,[P2,P2]);
+    fespace Ph(Th2,P1);
+    fespace Vh=Uh*Ph;
+    ```
+  - can define coupled problems using composite FE spaces, or directly with `<` `>` syntax:
+    ```
+    fespace Uh(Th1,[P2,P2]);
+    fespace Ph(Th2,P1);
+    Uh [u1,u2],[v1,v2];
+    Ph p,q;
+
+    solve Pb (<[u1,u2],[p]>, <[v1,v2],[q]>) = ...
+    ```
+    see `examples/examples/stokes_composite.edp` and `examples/examples/stokes_periodic_composite.edp`
+  - this new type of composite problem can be used for FEM-BEM coupling and also benefits from automatic parallel assembly (in test) and can be easily solved using the distributed solver MUMPS, see `examples/bem/Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp`
+  - composite problems can also be solved using PETSc (in test), see `examples/hpddm/Helmholtz-2d-FEM-BEM-coupling-PETSc-composite.edp`
+
+- remove spurious cout in Curve/Line DG definition.
+
+- add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
+      	see example plugin/RT0dc.edp 
+  and P1nc (Crouziex-Raviat) + bulle : name P1bnc in plugin Element_P1ncdc
+  and P1nc totaly discontinous + bulle  ; name P1bdcnc in plugin Element_P1ncdc
+      	see example plugin/example testp1dcnc.edp
+	for akram.beni-hamad@inria.fr 
+- add New finite element:  P4S P^4 on meshS , P3pnc3d in Element_P3pnc_3d (Couziex-Raviart with P3 )
+   see loic.balaziatchynillama@cea.fr for more information. 
+- add new interface for metis (see examples/plugin/metis.edp)
+- Correct jump, mean, otherside of finite element function on mesh3, meshS, meshL 
+   (add missing code in method: MeshPoint::SetAdj()  thanks to zuqi.tang@univ-lille.fr)  
+-  try to build dmg install mac version 
+-  add  file script to build meshS from boundary meshL TL if the boundary is
+    the graph of function from  mean plane. see example in examples/3dSurf/buildmeshS.edp
+    meshS Ts=buildmeshSminsurf(TL,1);// minimal surface
+    meshS Tsl=buildmeshSLap(TL,1);//  Laplace Surface ..
+    meshS Tsl=buildmesh(TL,1,op);// op = 0 Lap and op =1 => minsurf. 
+- add sparse block to sparse  matrix 
+  matrix A = va(Vh,Vh);
+  matrix B(A.n*5,A.n*5);
+  int i=2;
+  B.add(1.+10*i,A,i*ndof,i*ndof); 
+### Changed
+-  change  isoline to do the job for meshS, see example plugin/isoline.edp
+-  change  Curve function to be with 3 components to use the isoline data.
+-  change  Curvature plugin to compatible with new isoline data for 3 d case.
+-  change some sprintf in snprint to remove warning 
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL  and also discontinous  version (missing  initialisation)
+- bug in  plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
+- genere a bug if zero size element in read MeshL from file. 
+- remove  mistake when the border is badly defined , remove empty element in buildmeshL function. 
+- bug in array quadrature FE.
 ## [4.12]
 ### Added
 - add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
@@ -39,7 +103,7 @@ All notable changes to this project will be documented in this file.
 
 - New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3` 
 	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
-	see exemple end of exemple plugin/testFE-P3
+	see example end of example plugin/testFE-P3
 - missing new 1d finite element P4 in plugin `Elemnt_P4`
 - plugin `plugin/seq/MatrixMarket.cpp`  to read and save matrix in MatrixMarket and add also a binary form 
      (see examples/plugin/MatrixMarket.edp test)
@@ -71,7 +135,7 @@ All notable changes to this project will be documented in this file.
 - add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
 - add R3 Th.be(k).measure to  get the measure of the boundary elment 
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
-- see new example dist-projection.edp example in exemples 
+- see new example dist-projection.edp example in examples 
 - add dxx, dyy, dzz, dxy,  .. on P2L finite element 
 - add tools to compute solid angle :  let R3 O; a given point, Th3 a mesh3 and ThS a meshS. 
      solidangle(O,Th3.be(ke)) // triangular face is the boundary face 
@@ -541,6 +605,7 @@ All notable changes to this project will be documented in this file.
 - The main distribution is now on Github
 
 [Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..develop
+[4.13]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..v4.13
 [4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12
 [4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10

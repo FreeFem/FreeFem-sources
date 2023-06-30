@@ -28,6 +28,12 @@
      along with Freefem++; if not, write to the Free Software
      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
      */
+/*
+  bug of clang if optimisation !!!!!
+*/
+#ifdef   __clang__
+#pragma clang optimize off
+#endif
 
 #include <config.h>
 #include <iostream>
@@ -164,7 +170,7 @@ void signalCPUHandler( int signum ) {
  double dnum;
 
  /* <<YYSTYPE_lnum>> */
- long lnum;
+ long   lnum;// to read long long number !!!! FH dec 2022
 
  /* <<YYSTYPE_str>> */
  char * str;
@@ -220,6 +226,7 @@ void signalCPUHandler( int signum ) {
 %type <args>  parameters
 %type <args>  parameterstype
 %type <args>  array
+%type <args>  FEarray
 %type <args>  parameters_list
 %type  <cexp> begin
 %type  <endb> end
@@ -297,6 +304,8 @@ void signalCPUHandler( int signum ) {
 %token <str> FESPACE3
 %token <str> FESPACES
 %token <str> FESPACEL
+%token <str> VGFESPACE
+%token <str> GFESPACE /* A supprimer*/
 
 %token DOTSTAR
 %token DOTSLASH
@@ -421,8 +430,13 @@ list_of_id_args: /* returns [[YYSTYPE_clist_id]] */
   | type_of_dcl id                             { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right()));}
   | type_of_dcl '&' id                         { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true));}
   | '[' list_of_id_args ']'                    { $$ = new ListOfId(); $$->push_back(UnId($2));}
+  | '<' '[' list_of_id_args ']' '>'            { $$ = new ListOfId(); $$->push_back(UnId($3,true,true));} /* chevron problem */
+  | '<' '[' list_of_id_args ']'                { $$ = new ListOfId(); $$->push_back(UnId($3,true,false));} /* chevron problem */
   | list_of_id_args ',' id                     { $$ = $1; $$->push_back(UnId($3));}
-  | list_of_id_args ',''[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4));}
+  | list_of_id_args ',' '[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4));}
+  | list_of_id_args ',' '[' list_of_id_args ']' '>' { $$ = $1; $$->push_back(UnId($4,false,true));} /* chevron problem */
+  | list_of_id_args ',' '<' '[' list_of_id_args ']' '>' { $$ = $1; $$->push_back(UnId($5,true,true));} /* chevron problem */
+  | list_of_id_args ',' '<' '[' list_of_id_args ']'  { $$ = $1; $$->push_back(UnId($5,true,false));} /* chevron problem */
   | list_of_id_args ',' id '=' no_comma_expr   { $$ = $1; $$->push_back(UnId($3,$5));}
   | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,2> **>()));}
   | list_of_id_args ',' FESPACE '&' id         { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,2> **>(),true));}
@@ -458,17 +472,18 @@ parameters_list:
 	| FESPACE  ID                            { $$=Find($1);}
 	| FESPACE1  ID                           { $$=Find($1);}
 	| FESPACE3  ID                           { $$=Find($1);}
-        | FESPACES  ID                           { $$=Find($1);}
-        | FESPACEL  ID                           { $$=Find($1);}
-	| FESPACE                              { $$=Find($1);}
-	| FESPACE1                            { $$=Find($1);}
-	| FESPACE3                            { $$=Find($1);}
-        | FESPACES                            { $$=Find($1);}
-        | FESPACEL                             { $$=Find($1);}
-	| id '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
-	| parameters_list ',' parameters_list        { $$ = ($1 += $3);}
-/*	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>((const char *) $3,(C_F0) $5));}*/
+  | FESPACES  ID                           { $$=Find($1);}
+  | FESPACEL  ID                           { $$=Find($1);}
+  | FESPACE                                { $$=Find($1);}
+  | FESPACE1                               { $$=Find($1);}
+  | FESPACE3                               { $$=Find($1);}
+  | FESPACES                               { $$=Find($1);}
+  | FESPACEL                               { $$=Find($1);}
+	| ID '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
+	| parameters_list ',' parameters_list    { $$ = ($1 += $3);}
+	/* | parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>((const char *) $3,(C_F0) $5));} */
     ;
+
 
 type_of_dcl:   TYPE
     | TYPE '[' TYPE ']'                       {$$=TypeArray($1,$3);}
@@ -501,6 +516,8 @@ fespace123:
     | FESPACE3 { fespacedim=3;}
     | FESPACES { fespacedim=4;}
     | FESPACEL { fespacedim=5;}
+    | VGFESPACE { fespacedim=6;}
+    | GFESPACE { fespacedim=7;} /* A enlever */
     ;
 
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -516,15 +533,18 @@ spaceIDb  :      ID_space {  $$ = $1;}
             |    spaceIDb ',' ID_space { $$=C_F0($1,$3);} ;
 
 spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2;}
-           |  fespace '[' TYPE ']'  spaceIDa    { $$=0;  $$ = $5;}
-;
+           |  fespace '[' TYPE ']'  spaceIDa    { $$=0;  $$ = $5;}; 
 
 fespace_def:
-   ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
-     $3.destroy(); };
+   ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,KN<size_t>>($1,typeFESpace($3),$3,dimFESpaceImage($3));
+     $3.destroy(); }
+    ;
+  | ID '=' parameters_list  {$$=currentblock->NewVar<LocalVariableFES,KN<size_t>>($1,typeFESpace($3),$3,dimFESpaceImage($3));
+     $3.destroy(); }
+    ;
 
 fespace_def_list:  fespace_def
-                 | fespace_def_list ',' fespace_def {$$=C_F0($1,$3);}
+                 | fespace_def_list ',' fespace_def {$$=C_F0($1,$3);} /* plusieurs fespace Uh(), Vh(), ...; */
 ;
 
 declaration:   type_of_dcl {dcltype=$1;} list_of_dcls ';' {$$=$3;} /* [[type_of_dcl:]] [[list_of_dcls:]] */
@@ -721,6 +741,7 @@ parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_pa
   | FESPACE3                                                {$$ = Find($1);}
   | FESPACES                                                {$$ = Find($1);}
   | FESPACEL                                                {$$ = Find($1);}
+  | VGFESPACE                                               {$$ = Find($1);} // Add Morice
   | id /*[[id]]*/ '=' no_set_expr /*[[no_set_expr:]]*/      {$$ = make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
   | sub_script_expr /*[[sub_script_expr:]]*/                {$$ = $1;}
   | parameters ',' FESPACE                                  {$$ = ($1 += Find($3));}
@@ -728,6 +749,7 @@ parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_pa
   | parameters ',' FESPACE3                                 {$$ = ($1 += Find($3));}
   | parameters ',' FESPACES                                 {$$ = ($1 += Find($3));}
   | parameters ',' FESPACEL                                 {$$ = ($1 += Find($3));}
+  | parameters ',' VGFESPACE                                {$$ = ($1 += Find($3));}
   | parameters ',' sub_script_expr /*[[sub_script_expr:]]*/ {$$ = ($1 += $3);}
 
     /* <<named_function_parameters>> */
@@ -736,6 +758,23 @@ parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_pa
 
 array:   no_comma_expr           {$$=$1;}
        | array ',' no_comma_expr {$$ = ($1 += $3);}
+  ;
+
+FEarray: FESPACE                   { $$=Find($1)}        
+      | FESPACE1                   { $$=Find($1);}
+      | FESPACE3                   { $$=Find($1);}
+      | FESPACES                   { $$=Find($1);}
+      | FESPACEL                   { $$=Find($1);}
+      | FEarray ',' FESPACE        { $$ = ($1 += Find($3));}
+      | FEarray ',' FESPACE1       { $$ = ($1 += Find($3));}
+      | FEarray ',' FESPACE3       { $$ = ($1 += Find($3));}
+      | FEarray ',' FESPACES       { $$ = ($1 += Find($3));}
+      | FEarray ',' FESPACEL       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE        { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE1       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACE3       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACES       { $$ = ($1 += Find($3));}
+      | FEarray '*' FESPACEL       { $$ = ($1 += Find($3));}
   ;
 
 unary_expr:                                                 /* returns a [[YYSTYPE_cexp]] */
@@ -808,7 +847,8 @@ primary: /* returns a [[YYSTYPE_cexp]] */
 
   |        '(' Expr ')' {$$=$2;}
   |        '[' array  ']' { $$=C_F0(TheOperators,"[]",$2);}
-
+  |        '<' FEarray '>' { $$=C_F0(TheOperators,"<>",$2);} /* chevron definition FE space */
+  |        FEarray { $$=C_F0(TheOperators,"<>",$1);} /*  Xh=Uh*Vh  */
 ;
 
 

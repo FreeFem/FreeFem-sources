@@ -7,6 +7,7 @@
 ;; define(IFMPI,ifelse(len(MPIPROG),0,; ,))
 ;; define(IFMGW32,ifelse(SIZEOFPTR,32,,;))
 ;; define(IFMGW64,ifelse(SIZEOFPTR,64,,;))
+;; define(IFPETSC,ifelse(len(FFPETSC),0,; ,))
 
 
 ;; -- end def m4
@@ -44,7 +45,7 @@ IFMPI Name: "{app}\examples\mpi"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
 
 ; PETSc
-IFMPI Name: "{app}\ff-petsc"; Permissions: everyone-full
+IFPETSC Name: "{app}\ff-petsc"; Permissions: everyone-full
 
 [Files]
 ; README
@@ -148,7 +149,7 @@ IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
 ;PETSc
-Source: "C:\msys64\mingw64\ff-petsc\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
@@ -199,12 +200,13 @@ Name: modifypath; Description: &Add application directory to your system path (i
 ; unchecked
 
 [Code]
+const
+	ModPathName = 'modifypath';
+	ModPathType = 'user';
+
 function ModPathDir(): TArrayOfString;
-var
-			Dir:	TArrayOfString;
-		begin
-			setArrayLength(Dir, 1)
-			Dir[0] := ExpandConstant('{app}');
-			Result := Dir;
-		end;
+begin
+	setArrayLength(Result, 1)
+	Result[0] := ExpandConstant('{app}');
+end;
 #include "bin\modpath.iss"

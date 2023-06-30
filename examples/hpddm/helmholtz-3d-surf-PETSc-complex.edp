@@ -56,9 +56,9 @@ Mat<complex> H;
     ThG = ThS;
     int[int] n2o;
     macro ThSN2O()n2o//
-    createMat(ThS, H, P1);
+    MatCreate(ThS, H, P1);
     Mat<complex> T;
-    createMat(ThS, T, P0);
+    MatCreate(ThS, T, P0);
     CoherentGlobalMesh(T, H, ThS, ThG);
 }
 H = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-4");
@@ -94,8 +94,8 @@ if(!NoGraphicWindow) {
     int[int] n2o;//
     macro ThOutSN2O()n2o//
     Mat<complex> B, T;
-    createMat(ThOutS, B, P1)
-    createMat(ThOutS, T, P0);
+    MatCreate(ThOutS, B, P1);
+    MatCreate(ThOutS, T, P0);
     CoherentGlobalMesh(T, B, ThOutS, ThOutG);
     MatDestroy(T);
     fespace UhOutG(ThOutG, P1);
@@ -109,5 +109,5 @@ if(!NoGraphicWindow) {
     v[] = HPot*u;
     v[] += vinc[];
     UhOutS vr = real(v);
-    plotMPI(ThOutS, vr, P1, def, real, cmm = "Global first kind solution")
+    plotMPI(ThOutS, vr, P1, def, real, cmm = "Global first kind solution");
 }

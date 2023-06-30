@@ -729,7 +729,7 @@ void openSVG(const char *filename )
     bool notfound;
     do {
       struct stat buf;
-      sprintf(ffff,"rgraph_%.3d.svg",count++);
+      snprintf(ffff,32,"rgraph_%.3d.svg",count++);
       volatile int r = stat(ffff,&buf) ;
       notfound = (r != 0);
       if( count > 1000 ) break;
@@ -830,7 +830,7 @@ void openPS(const char *filename )
   if( !filename) 
    do {
       struct stat buf;
-      sprintf(ffff,"rgraph_%.3d.ps",count++);
+      snprintf(ffff,32,"rgraph_%.3d.ps",count++);
       volatile int r= stat(ffff,&buf) ;
       notfound = r !=0;
       if(count>1000) break;
@@ -959,7 +959,7 @@ int PutLevel(int lineno, float xf, int col)
   FillRect(xleft+ydelta/8.,ytop+ydelta/8.,xleft+ydelta*7./8.,ytop+ydelta*7./8.);
   rmoveto(xleft+ydelta*1.4,ytop+ydelta/4);
   char buf[30];
-  sprintf(buf,"%g",xf);
+  snprintf(buf,30,"%g",xf);
   couleur(1);
   plotstring(buf);
 

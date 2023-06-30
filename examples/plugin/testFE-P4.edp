@@ -1,61 +1,211 @@
 load "Element_P4"
-macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
-macro DD2(f,hx,hy) ( (-2*f(x1,y1)+f(x1+hx,y1+hy)+f(x1-hx,y1-hy))/(square(hx+hy))) //
+load "msh3"
+{
+macro DD(f,hx,hy,hz) ( (f(x1+hx,y1+hy,z1+hz)-f(x1-hx,y1-hy,z1-hz))/(2*(hx+hy+hz))) //
+macro DD2(f,hx,hy,hz) ( (-2*f(x1,y1,z1)+f(x1+hx,y1+hy,z1+hz)+f(x1-hx,y1-hy,z1-hz))/(square(hx+hy+hz))) //
 macro dn(f) ( N.x*dx(f)+N.y*dy(f)) //
 macro dnn(f) ( N.x*f#2+N.y*f#3) //
-mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
-
-real x1=0.7,y1=0.9, h=1e-4;
-int it1=Th(x1,y1).nuTriangle; 
-
+//mesh3 Th("/Users/Hecht/Desktop/bug-ff/Th2.mesh"); //
+mesh3 Th=cube(2,2,2); //,[10*(x+y/3),10*(y-x/3),z]);
+//Th=trunc(Th, nuTriangle==0);
+real x1=0.7,y1=0.9,z1=0.1, h=1e-4;
+int it1=Th(x1,y1,z1).nuTriangle; 
 fespace Vh(Th,P4);
-fespace Eh(Th,P0edge);
-
+fespace Eh(Th,P0face3d);
+cout << " ndof = "<< Vh.ndof << " /K "<< Vh.ndofK<< endl; 
 Eh  edges;
 
 Vh a1,b1,c1;
- 
-varf vFlux([a],[e]) = intalledges(Th)( dn(a1)*e*(jump(real(nuTriangle))<= 0));
-varf vMean([a],[e]) = intalledges(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/lenEdge);
+func bool pvi(real[int] & v)
+{
+	for(int i=0; i< v.n; ++i)
+	if( abs(v[i])>1e-10) cout << i << " ";
+	return true;
+} 
+varf vFlux([a],[e]) = intallfaces(Th)( dn(a1)*e*(jump(real(nuTriangle))<= 0));
+varf vMean([a],[e]) = intallfaces(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/area);
 
 
 for (int i=0;i<Vh.ndofK;++i)
 	cout << i << " -> " << Vh(0,i) << endl;
+int err=0;
 for (int i=0;i<Vh.ndofK;++i)
 {
-  cout << " ***  node " << i << " of Traingle " << it1 << endl;
+  cout << " ***  node " << i << " of Tet " << it1 << endl;
   a1[]=0;	
   int j=Vh(it1,i);
   a1[][j]=1;
   edges[]=vFlux(0,Eh);
-  cout << "Flux  edges = " << edges[] << endl; 
+//  cout << "Flux  edges = " << edges[] << endl; 
   edges[]=vMean(0,Eh);
-  cout << " Mean   edges = " << edges[] << endl; 
-
-  plot(a1, wait=1,cmm="w_"+i); 
+//  cout << " Mean   edges = " << edges[] << endl; 
+  real je= intallfaces(Th)(square(jump(a1)));
+  if( je > 1e-10) err++;
+  //plot(a1, wait=1,cmm="w_"+i); 
   b1=a1;
 
-  plot(a1,b1,cmm="w"+i, wait=1); 
+ // plot(a1,b1,cmm="w"+i, wait=1); 
 
   c1[] = a1[] - b1[];
 
-  cout << " ---------" << i << " " << c1[].max << " " << c1[].min << endl;	
-  cout << " a = " << a1[] <<endl;
-  cout << " b = " << b1[] <<endl;
+  cout << " ---------" << i << " " << c1[].max << " " << c1[].min ;	
+  if( c1[].linfty> 1e-10)
+  {
+	  err++;
+    cout <<i << " " ;
+    pvi(a1[]);
+    cout << " --> " ;
+    pvi(b1[]);
+    cout <<"   err = "<< err  <<endl;
+  }
+  cout<< endl;
+ // assert(c1[].max < 1e-5 && c1[].min > -1e-9);
+  /*
+  cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1,z1) << " == " << DD(a1,h,0,0) << endl; 
+  cout << " dy(a1)(x1,y1) = " << dy(a1)(x1,y1,z1) << " == " << DD(a1,0,h,0)  << endl; 
+  cout << " dxx(a1)(x1,y1) = " << dxx(a1)(x1,y1,z1) << " == " << DD2(a1,h,0,0) << endl; 
+  cout << " dyy(a1)(x1,y1) = " << dyy(a1)(x1,y1,z1) << " == " << DD2(a1,0,h,0)  << endl; 
 
-  assert(c1[].max < 1e-5 && c1[].min > -1e-9);
-
-  cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << endl; 
-  cout << " dy(a1)(x1,y1) = " << dy(a1)(x1,y1) << " == " << DD(a1,0,h)  << endl; 
-  cout << " dxx(a1)(x1,y1) = " << dxx(a1)(x1,y1) << " == " << DD2(a1,h,0) << endl; 
-  cout << " dyy(a1)(x1,y1) = " << dyy(a1)(x1,y1) << " == " << DD2(a1,0,h)  << endl; 
-
-  assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-4);
-  assert( abs(dxx(a1)(x1,y1)-DD2(a1,h,0) ) < 1e-4);
-  assert( abs(dy(a1)(x1,y1)-DD(a1,0,h) ) < 1e-4);
-  assert( abs(dyy(a1)(x1,y1)-DD2(a1,0,h) ) < 1e-4);
-
+  assert( abs(dx(a1)(x1,y1,z1)-DD(a1,h,0,0) ) < 1e-4);
+  assert( abs(dxx(a1)(x1,y1,z1)-DD2(a1,h,0,0) ) < 1e-4);
+  assert( abs(dy(a1)(x1,y1,z1)-DD(a1,0,h,0) ) < 1e-4);
+  assert( abs(dyy(a1)(x1,y1,z1)-DD2(a1,0,h,0) ) < 1e-4);
+*/
 
 
 } 
+assert(err==0); 
+}
 
+/*
+{
+	meshL Th=segment(1);
+	fespace Vh(Th,P4L);
+	fespace Wh(Th,P4dcL);
+	func f = 1; //3*x^3+2*x^2+x + 1;
+	Vh u = f;
+	Wh fd = f;
+	Vh v=0;
+	v[][0] = 1.; 
+	real err = sqrt(int1d(Th)( sqr(f-u)));
+	cout << "err L " << err << endl;
+	for(int i=0; i<= 9;++i)
+	{
+		x = i/9.;
+		cout << x << " "<< u << " " << f << " " << fd << " " << v << endl; 
+	}
+	
+	
+ assert(err < 1e-6);	
+	
+}
+*/
+{
+	mesh Th2=square(10,10,flags=3);
+	//Th2 = trunc(Th2,x<0.5);
+	meshS Th=movemesh23(Th2,transfo=[x,y,0]);
+	plot(Th,wait=1);
+	fespace Vh(Th,P4S);
+	fespace Vh2(Th2,P4);
+	int[int] P(Vh2.ndof);
+	for(int k=0;k<Th.nt;++k)
+	for (int i=0;i<15;++i)
+	P[Vh(k,i)]=Vh2(k,i);
+	//Vh2 f;f[]=0;f[][1]=3;
+	func f =3*x^3+2*x^2+x + 1+x*y+y^3+x^4;
+	Vh u = f;
+	Vh2 u2 =f;
+	Vh v=0;
+	v[]=u2[](P); 
+	v[] -= u[];
+	for(int i=0; i< Vh.ndofK;++i)
+	cout << Vh(0,i) << " ";
+	cout << endl; 
+       // cout << " u = " << u[] << endl;
+       // cout << " 0 == v = " << v[] << endl;
+	cout << endl;
+        v[]=u2[](P); 
+	//cout << P << endl;
+	real err = sqrt(int1d(Th)( sqr(f-u)));
+	real err1 = sqrt(int1d(Th)( sqr(f-v)));
+	real err2= sqrt(int1d(Th)( sqr(f-u2)));
+	cout << "err S " << err << endl;
+	cout << "err 1 " << err1 << endl;
+	cout << "err 2 " << err2 << endl;
+	u2[](P) -=u[];
+	cout << u2[].linfty << endl;
+	err+= u2[].linfty;
+ assert(err < 1e-6);	
+	
+}
+
+/*
+
+{ // P4HL
+       real L = 1;
+	meshL Th=segment(1,[x*L,0,0]);
+	fespace Vh(Th,P4HL);
+	fespace Wh(Th,P4L);
+	fespace Whdc(Th,P4dcL);
+	func f = 3*(x^3) +2*(x^2)+x + 1;
+	func fxx = 18*x+4. ;//+ 4.;
+	Wh fh = f;
+	cout << " 0 = "<< f(0,0) << " " << dx(fh)(0,0) << " "<< dxx(fh)(0,0) <<" "<< fxx(0,0) << endl; 
+	cout << " L = "<< f(L,0) << " " << dx(fh)(L,0) << " " << dxx(fh)(L,0) <<" "<< fxx(L,0) << endl; 
+	
+	Vh [u,ux] = [f,dx(fh)];
+	cout << " u[]"<< u[] << endl; 
+	Vh [v,vx]; v[]=0;
+	// function de base OK ...
+	// interpolation ok ...
+	real err = 0; 
+	for(int i=0; i<4;++i)
+	{ 
+	v[]=0;
+	v[][Vh(0,i)] = 1.; 
+	Wh vv=v,dvv=dx(vv);
+	cout << i << " " << Vh(0,i) << " " << dxx(vv)(0,0,0) << " " <<  dxx(vv)(L,0,0) << " " << dxx(dvv)(L/2,0,0)  <<endl;
+	cout << "    v 0: "<< v(0,0,0) << " " << vx(0,0,0) << endl; 
+	cout << "    v 1: "<< v(L,0,0) << " " << vx(L,0,0) << endl; 
+	cout << "    dx(v) 0: "<< dx(v)(0,0,0) << " " << dx(vx)(0,0,0) << endl; 
+	cout << "    dx(v) 1: "<< dx(v)(L,0,0) << " " << dx(vx)(L,0,0) << endl; 
+	cout << "    dxx(v) 0: "<< dxx(v)(0,0,0) << " " << dxx(vx)(0,0,0) << endl; 
+	cout << "    dxx(v) 1: "<< dxx(v)(L,0,0) << " " << dxx(vx)(L,0,0) << endl; 
+
+	Vh [w,wx]=[v,vx]; 
+	v[] -= w[]; 
+	err += v[].linfty ;
+	cout << " w[]"<< w[] <<" err " << err <<  endl; 
+        }
+        err+= sqrt(int1d(Th)( sqr(f-u)));
+	 cout << "err L " << err << endl;	
+        err+= sqrt(int1d(Th)( sqr(dx(fh)-dx(u))));
+	 cout << "err L " << err << endl;	
+         err+= sqrt(int1d(Th)( sqr(dx(fh)-ux)));
+ 	 cout << "err L " << err << endl;	
+        err+= sqrt(int1d(Th)( sqr(fxx-dxx(u))));
+	//Whdc d=dxx(fh)-dxx(u);
+	//cout << d[] << endl;
+        cout << "err L " << err << endl;	
+	
+	
+      {  // BiLap 1d ..
+	      real cc = 16.;
+	      func ue = cc*(1-x)*(1-x)*x*x;
+	      func fe = cc*24.0;
+	      int nn=50;
+	      Th = segment(nn);
+	      meshL Thg=segment(nn*40);
+	      fespace Ph(Thg,P1);
+	      Vh  [u,ux] ,  [v,vx] ;
+	      solve BiLap([u,ux],[v,vx]) = int1d(Th)(dx(ux)*dx(vx))- int1d(Th)(fe*v)+on(1,2,u=0,ux=0);
+	      Ph U=u, X=x,Ux=ux, F=ue;
+	      //cout << U[] << endl;
+	      plot([X[],U[]],[X[],F[]],wait=1);
+	      err += sqrt(int1d(Th)(sqr(ue-u)));;
+	      cout << " err = " << err << endl; 
+      }	
+ assert(err < 1e-6);	
+	
+}
+*/
