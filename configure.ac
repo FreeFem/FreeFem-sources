@@ -2449,8 +2449,8 @@ fi
 
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
-TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX RadiativeTransfer_htool.$DYLIB_SUFFIX"])
-if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
+TOOL_DISABLE(bemtool,["bem.$DYLIB_SUFFIX RadiativeTransfer_htool.$DYLIB_SUFFIX"])
+if test -n "$TOOL_COMPILE_bemtool" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
 fi
 ff_inc_htool=$ff_HTOOL_INCLUDE
@@ -2461,7 +2461,7 @@ fi
 if test -n "$ff_inc_htool"; then
     ff_inc_htool="$ff_inc_htool -DWITH_bemtool -DWITH_htool"
 fi
-if test -z "$TOOL_COMPILE_bem"; then
+if test -z "$TOOL_COMPILE_bemtool"; then
     enable_bemtool=no
     ff_inc_htool=""
 fi
