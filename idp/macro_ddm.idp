@@ -409,7 +409,19 @@ IFMACRO(!privateCreateMat)
             }
             real[int] tmpRemove(meshName[0].nt);
             int[int] n2oRemove;
+IFMACRO(!privateDmesh#N2O)
             meshName[0] = trunc(meshName[0], khi > 1.0e-6, label = 9999, new2old = n2oRemove);
+ENDIFMACRO
+IFMACRO(privateDmesh#N2O)
+            {
+                int[int] n2oFilter;
+                meshName[0] = trunc(meshName[0], khi > 1.0e-6, label = 9999, new2old = n2oRemove);
+                n2oFilter.resize(n2oRemove.n);
+                n2oFilter = privateDmesh#N2O(n2oRemove);
+                privateDmesh#N2O.resize(n2oFilter.n);
+                privateDmesh#N2O = n2oFilter;
+            }
+ENDIFMACRO
             khi = khi;
             fespace PhLocalPrivate(meshName[0], P0);
             for(int k = 0; k < 2 * numberIntersection; ++k) {
@@ -669,12 +681,6 @@ IFMACRO(ThName#N2O)
 NewMacro privateDmesh#N2O()ThName#N2O EndMacro
 IFMACRO(ThName#RefinementFactor)
 exit(10); /* not currently implemented */
-ENDIFMACRO
-IFMACRO(removeZeros,true)
-exit(100); /* not currently implemented */
-ENDIFMACRO
-IFMACRO(trueRestrict,true)
-exit(100); /* not currently implemented */
 ENDIFMACRO
 ENDIFMACRO
 IFMACRO(ThName#UserPartitioning)
