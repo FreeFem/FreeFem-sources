@@ -723,12 +723,6 @@ int privateS = 1;
 ENDIFMACRO
 IFMACRO(ThName#RefinementFactor)
 int privateS = ThName#RefinementFactor;
-IFMACRO(removeZeros,true)
-exit(104); /* not currently implemented */
-ENDIFMACRO
-IFMACRO(trueRestrict,true)
-exit(104); /* not currently implemented */
-ENDIFMACRO
 ENDIFMACRO
 build(ThName, privateS, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
