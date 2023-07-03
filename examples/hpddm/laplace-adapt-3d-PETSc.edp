@@ -22,7 +22,7 @@ mesh3 ThBackup = Th3;
 Mat A;
 int[int] n2o;
 NewMacro Th3N2O() n2o EndMacro
-DmeshBuild(Th3);
+DmeshCreate(Th3);
 MatCreate(Th3, A, P1);
 fespace Vh(Th3, P1);
 Vh u;

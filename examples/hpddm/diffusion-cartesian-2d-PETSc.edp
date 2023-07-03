@@ -31,7 +31,7 @@ IFMACRO(CartesianPartitioning)
 macro ThCartesianPartitioning()// EOM
 ENDIFMACRO
 
-DmeshBuild(Th);
+DmeshCreate(Th);
 MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);                 // local finite element space

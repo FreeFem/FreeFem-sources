@@ -34,7 +34,7 @@ Mat<complex> A;
 int[int] n2o;
 macro ThSN2O()n2o//
 ThG = ThS;
-DmeshBuild(ThS);
+DmeshCreate(ThS);
 {
     Mat<complex> H, T;
     MatCreate(ThS, H, P1);
@@ -85,7 +85,7 @@ if(!NoGraphicWindow) {
     meshS ThOutS = ThOutG;
     int[int] n2o;//
     macro ThOutSN2O()n2o//
-    DmeshBuild(ThOutS);
+    DmeshCreate(ThOutS);
     {
         Mat<complex> B, T;
         MatCreate(ThOutS, B, P1);

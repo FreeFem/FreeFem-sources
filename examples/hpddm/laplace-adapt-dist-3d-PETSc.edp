@@ -40,7 +40,7 @@ metParMmg = met(rest);
 varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2,3, u=0);
 
 Mat<PetscScalar> A;
-DmeshBuild(Th3);
+DmeshCreate(Th3);
 MatCreate(Th3, A, P1);
 fespace Vh(Th3, P1);
 Vh<PetscScalar> u;

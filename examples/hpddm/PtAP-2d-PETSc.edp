@@ -15,8 +15,8 @@ mesh ThNew, Th = square(getARGV("-global", 20), getARGV("-global", 20));
 }
 macro ThRefinementFactor()getARGV("-first_split", 1)//
 macro ThNewRefinementFactor()getARGV("-second_split", 1)//
-DmeshBuild(Th);
-DmeshBuild(ThNew);
+DmeshCreate(Th);
+DmeshCreate(ThNew);
 plotDmesh(Th, cmm = "First mesh");
 plotDmesh(ThNew, cmm = "Second mesh");
 func Pk = P2;

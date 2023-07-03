@@ -8,7 +8,7 @@ macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 mesh3 Th = cube(getARGV("-global", 30), getARGV("-global", 30), getARGV("-global", 30));
-DmeshBuild(Th);
+DmeshCreate(Th);
 fespace Vh(Th, P1);
 {
     mesh3 ThParMmg;

@@ -24,7 +24,7 @@ fespace Wh(Th, Pk);
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o// EOM
-DmeshBuild(Th);
+DmeshCreate(Th);
 {
     macro ThPkPart()Edge03ds0// EOM special FE for the domain partitioning
     MatCreate(Th, A, Pk);

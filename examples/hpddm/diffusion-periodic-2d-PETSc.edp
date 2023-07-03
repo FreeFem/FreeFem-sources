@@ -21,7 +21,7 @@ Mat A;
 int[int] n2o;
 macro ThPeriodicity()labPeriodic//
 macro ThN2O()n2o//
-DmeshBuild(Th);
+DmeshCreate(Th);
 MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);                 // local finite element space

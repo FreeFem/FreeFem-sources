@@ -17,7 +17,7 @@ macro init(u)[u, u]//
 {
     include "macro_ddm.idp"             // additional DDM functions
     mesh Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     mesh ThGather, ThScatter;
     DmeshGather(Th, comm, ThGather);
     plotDmesh(Th, cmm = "Original Dmesh");
@@ -48,7 +48,7 @@ macro init(u)[u, u]//
     macro dimension()3// EOM            // 2D or 3D
     include "macro_ddm.idp"             // additional DDM functions
     mesh3 Th = cube(getARGV("-global_3d", 10), getARGV("-global_3d", 10), getARGV("-global_3d", 10)); // global mesh
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     mesh3 ThGather, ThScatter;
     DmeshGather(Th, comm, ThGather);
     plotDmesh(Th, cmm = "Original Dmesh");

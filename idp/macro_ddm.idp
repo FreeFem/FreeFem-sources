@@ -845,7 +845,7 @@ NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
 IFMACRO(!privateCreateMatCheckDmesh)
 if(ThName.nv != privateDmesh#ThName#khi[0].n || (privateDmesh#ThName#khi[1].n && ThName.nt != privateDmesh#ThName#khi[1].n)) {
-    DmeshBuild(ThName)
+    DmeshCreate(ThName)
 }
 ENDIFMACRO
 NewMacro privateCreateMat()1 EndMacro
@@ -910,7 +910,7 @@ ENDIFMACRO
 }
 ENDIFMACRO
 IFMACRO(!privateDmesh#ThName)
-DmeshBuild(ThName)
+DmeshCreate(ThName)
 {
 IFMACRO(!meshN)
 IFMACRO(dimension,3)
@@ -938,7 +938,7 @@ EndMacro
 
 macro createPartition(ThName, PartName, PkName)
 IFMACRO(!privateDmesh#ThName)
-DmeshBuild(ThName)
+DmeshCreate(ThName)
 ENDIFMACRO
 {
     NewMacro privateCreateMatCheckDmesh()1 EndMacro
@@ -2215,7 +2215,7 @@ ENDIFMACRO
 
 macro DmeshSave(ThName, name)saveDmesh(ThName, name)// EOM
 macro DmeshLoad(ThName, name)loadDmesh(ThName, name)// EOM
-macro DmeshBuild(ThName)buildDmesh(ThName)// EOM
+macro DmeshCreate(ThName)buildDmesh(ThName)// EOM
 macro DmeshReconstruct(ThName)reconstructDmesh(ThName)// EOM
 macro DmeshReconstructWithNeighbors(ThName, neighborsName)reconstructDmeshWithNeighbors(ThName, neighborsName)// EOM
 macro DmeshInitialize(NewName)initializeDmesh(NewName)// EOM

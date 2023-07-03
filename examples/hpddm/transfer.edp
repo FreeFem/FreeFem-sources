@@ -23,8 +23,8 @@ int[int] fforder = [1];
         border d(t=0,1) { x=0;   y=1-t; };
         ThNew = buildmesh(a(N)+b(N)+c(N)+d(N));
     }
-    DmeshBuild(Th);
-    DmeshBuild(ThNew);
+    DmeshCreate(Th);
+    DmeshCreate(ThNew);
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
     Vh u = cos(8*pi*x) * sin(8*pi*y);
@@ -49,8 +49,8 @@ int[int] fforder = [1];
     if(mpirank == 0)
         ThNew = mmg3d(Th, hmax = 8.0e-2);
     broadcast(processor(0), ThNew);
-    DmeshBuild(Th);
-    DmeshBuild(ThNew);
+    DmeshCreate(Th);
+    DmeshCreate(ThNew);
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
     Vh def(u) = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
