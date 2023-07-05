@@ -6238,7 +6238,7 @@ namespace PETSc {
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
                   MatCreate(comm, &Abemblocki->_petsc);
                   MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
-                  varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, bi, ds, Abemblock);
+                  varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else{
                   cerr << " BEM bilinear form " << endl;
