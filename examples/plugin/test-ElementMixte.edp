@@ -165,7 +165,7 @@ for( int j=0;j<Wh1.ndofK;++j)
   Ph2 U1=u1,U2=u2;
   U1=u1;
   U2=u2;
-  cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) <<  endl;
+  cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) << " .. " << err1 <<  endl;
   V(w)=V(u);
   varf veeee(uu,E) = intalledges(Th)( (nTonEdge==2) *E*( jump(dxxx(u))));
   real ddcc=intalledges(Th)( (nTonEdge==2) *square( jump(dxxx(u))));
@@ -177,17 +177,17 @@ for( int j=0;j<Wh1.ndofK;++j)
   WWh  gu1=u1,gu2=u2;
    plot([gu1,gu2],wait=1,cmm=" dof "+j+" K=0 ");}
   w1[][i]-=1;
-  if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << endl;}
+  if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << " " << err1 << endl;}
   cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
   assert( w1[].linfty < 1e-10);
   NewMacro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) EndMacro 
-  assert( diff2( 0+ )) ;
+  assert( diff2(  )) ;
   assert( diff2(dx)) ;
   assert( diff2(dy)) ;
 
 
 }
-assert(err1==0);
+assert(abs(err1)<1e-10);
 
 Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
 V(u)=[0,0];
@@ -235,5 +235,8 @@ CheckRT(RT2,"RT2",x,y,pxy2,ccn,V,1)
 CheckRT(RT2Ortho,"RT2Ortho",-y,x,pxy2,cctau,V,1)
 CheckRT(BDM1,"BDM1",x,y,pxy0,ccn,V,1)
 CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,pxy0,cctau,V,1)
+CheckRT(BDM2,"BDM2",x,y,pxy1,ccn,V,1)
+//  buggus FH  version 4.13 ??? in test !!!!  
+CheckRT(BDM2Ortho,"BDM2Ortho",-y,x,pxy1,cctau,V,1)
 	
 }

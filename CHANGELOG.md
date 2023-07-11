@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
+- Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho
 
 ### Changed
 -
