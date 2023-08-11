@@ -2037,7 +2037,7 @@ namespace PETSc {
     {"schurPreconditioner", &typeid(KN< Matrice_Creuse< upscaled_type<PetscScalar> > >*)},        // 5
     {"schurList", &typeid(KN< double >*)},                                                        // 6
     {"parent", &typeid(Type*)},                                                                   // 7
-    {"nullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                                // 8
+    {"nullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                                   // 8
     {"fieldsplit", &typeid(long)},                                                                // 9
     {"schurComplement", &typeid(KNM< upscaled_type<PetscScalar> >*)},                             // 10
     {"schur", &typeid(KN< Dmat >*)},                                                              // 11
@@ -2390,12 +2390,24 @@ namespace PETSc {
         PetscInt M, N;
         MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
         ffassert(M == N);
+        PCCompositeType type;
+        PCFieldSplitGetType(pc, &type);
+        bool keep = false;
+#if PETSC_VERSION_GE(3, 20, 0)
+        if (type == PC_COMPOSITE_SCHUR) {
+          PCFieldSplitSchurPreType type;
+          PCFieldSplitGetSchurPre(pc, &type, NULL);
+          if (type == PC_FIELDSPLIT_SCHUR_PRE_SELF)
+            keep = true;
+        }
+#endif
         for (int i = 0; i < M; ++i) {
           if (mat[i][i] == ptA->_petsc) {
             KSPDestroy(&ptA->_ksp);
             ptA->_ksp = subksp[i];
             PetscObjectReference((PetscObject)subksp[i]);
-            KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
+            if (!keep)
+              KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
             break;
           }
         }
