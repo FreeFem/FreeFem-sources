@@ -2835,9 +2835,16 @@ namespace PETSc {
   };
   template< class Type, unsigned short O, typename std::enable_if<!std::is_same<Type, KNM<PetscScalar>>::value>::type* = nullptr >
   AnyType view_dispatched(Type* const& ptA, std::string const& o, std::string* const& type, std::string* const& name, MPI_Comm const& comm) {
+    bool pop = false;
+    PetscViewer viewer = NULL;
+    if(type && type->compare("info_detail") == 0) {
+      ffassert(!O && (ptA->_petsc || ptA->_ksp));
+      if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm(ptA->_petsc ? (PetscObject)ptA->_petsc : (PetscObject)ptA->_ksp) : comm, name->c_str(), &viewer);
+      else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)viewer));
+      PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_INFO_DETAIL);
+      pop = true;
+    }
     if (o.size() == 0 || o.compare("MAT") == 0) {
-      bool pop = false;
-      PetscViewer viewer = NULL;
       if(type) {
           if(type->compare("matlab") == 0) {
               if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), &viewer);
@@ -2873,10 +2880,6 @@ namespace PETSc {
           MatCreate(comm, &ptA->_petsc);
           MatLoad(ptA->_petsc, viewer);
       }
-      if(pop)
-          PetscViewerPopFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
-      if(name)
-          PetscViewerDestroy(&viewer);
     }
     else {
       ffassert(!O);
@@ -2886,10 +2889,14 @@ namespace PETSc {
         else if (o.compare("PC") == 0) {
           PC pc;
           KSPGetPC(ptA->_ksp, &pc);
-          PCView(pc, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
+          PCView(pc, viewer ? viewer : PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
         }
       }
     }
+    if(pop)
+      PetscViewerPopFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
+    if(name)
+      PetscViewerDestroy(&viewer);
     return 0L;
   }
   template< class Type, unsigned short O, typename std::enable_if<std::is_same<Type, KNM<PetscScalar>>::value>::type* = nullptr >
