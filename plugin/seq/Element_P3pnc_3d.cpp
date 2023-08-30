@@ -211,7 +211,7 @@ void TypeOfFE_P3pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
     double ll[4]; // dans Khat
 
     for (int q = 0; q < QFt.n; ++q, ++ip)
-    {   int ipt=ip;
+    {   int ipt = nump ? nump[ip] : ip;// Correct aug 2023 FH.
         double ll[4]; // dans Khat
         M.P[ipt].toBary(ll);//
         M.coef[i++] = QFt[q].a*ll[0];
@@ -221,6 +221,7 @@ void TypeOfFE_P3pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
     }
 
   //  ffassert(i==  ncoef+ocoef);
+  //if(verbosity>1000)  cout << " M = @@@@ \n"<< M << endl;
 
 }
 void TypeOfFE_P3pnc_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K,
