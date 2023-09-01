@@ -26,7 +26,7 @@ int ffmesh_to_MMG5_pMesh<Mesh3>(const Mesh3 &Th, MMG5_pMesh& mesh) {
 
     for (int k = 0; k < Th.nv; k++) {
       if ( MMG3D_Set_vertex(mesh,Th.vertices[k].x,Th.vertices[k].y,
-                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) { 
+                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) {
         exit(EXIT_FAILURE);
       }
     }
@@ -65,7 +65,7 @@ int ffmesh_to_MMG5_pMesh<MeshS>(const MeshS &Th, MMG5_pMesh& mesh) {
 
     for (int k = 0; k < Th.nv; k++) {
       if ( MMGS_Set_vertex(mesh,Th.vertices[k].x,Th.vertices[k].y,
-                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) { 
+                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) {
         exit(EXIT_FAILURE);
       }
     }
@@ -80,7 +80,7 @@ int ffmesh_to_MMG5_pMesh<MeshS>(const MeshS &Th, MMG5_pMesh& mesh) {
 
     for (int k = 0; k < Th.nbe; k++) {
       const BoundaryEdgeS &K(Th.be(k));
-      if ( MMG3D_Set_edge(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,
+      if ( MMGS_Set_edge(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,
                              K.lab,k+1) != 1 ) {
         exit(EXIT_FAILURE);
       }
@@ -101,7 +101,7 @@ int MMG5_pMesh_to_ffmesh<Mesh3>(const MMG5_pMesh& mesh, Mesh3 *&T_TH3) {
     int nEdges      = 0;
 
     if ( MMG3D_Get_meshSize(mesh,&nVertices,&nTetrahedra,NULL,&nTriangles,NULL,
-                       &nEdges) !=1 ) { 
+                       &nEdges) !=1 ) {
       ier = MMG5_STRONGFAILURE;
     }
 
@@ -170,7 +170,7 @@ int MMG5_pMesh_to_ffmesh<MeshS>(const MMG5_pMesh& mesh, MeshS *&T_TH3) {
     int nTriangles  = 0;
     int nEdges      = 0;
 
-    if ( MMGS_Get_meshSize(mesh,&nVertices,&nTriangles,&nEdges) !=1 ) { 
+    if ( MMGS_Get_meshSize(mesh,&nVertices,&nTriangles,&nEdges) !=1 ) {
       ier = MMG5_STRONGFAILURE;
     }
 
@@ -305,8 +305,8 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 {"localParameter"    , &typeid(KNM<double>*)}/*!< [val], Local parameters on given surfaces */
 };
 
-template<>
-basicAC_F0::name_and_type mmg_Op<MeshS>::name_param[] = {
+template<class Mesh>
+basicAC_F0::name_and_type mmg_Op<Mesh>::name_param[] = {
 {"metric"            , &typeid(KN< double > *)},
 {"verbose"           , &typeid(long)},/*!< [-1..10], Tune level of verbosity */
 {"mem"               , &typeid(long)},/*!< [n/-1], Set memory size to n Mbytes or keep the default value */
@@ -383,28 +383,28 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
                   MMG5_ARG_end);
 
   ffmesh_to_MMG5_pMesh(Th, mesh);
-  
+
     if (pmetric && pmetric->N( ) > 0) {
       const KN< double > &metric = *pmetric;
       if (metric.N( ) == Th.nv) {
-        if ( MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) { 
+        if ( MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
-        if ( MMG3D_Set_scalarSols(sol,metric) != 1 ) { 
+        if ( MMG3D_Set_scalarSols(sol,metric) != 1 ) {
           printf("Unable to set metric.\n");
           exit(EXIT_FAILURE);
         }
       }
       else {
-        if ( MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) { 
+        if ( MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
         static const int perm[6] = {0, 1, 3, 2, 4, 5};
         for (int k=0; k<Th.nv; k++) {
-          if ( MMG3D_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]], 
-                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) { 
+          if ( MMG3D_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]],
+                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) {
             printf("Unable to set metric.\n");
             exit(EXIT_FAILURE);
           }
@@ -487,9 +487,9 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
     ier = MMG3D_mmg3dlib(mesh,sol);
   else
     ier = MMG3D_mmg3dls(mesh,sol,met);
-  
+
   Mesh3 *Th_T = nullptr;
-  
+
   MMG5_pMesh_to_ffmesh(mesh,Th_T);
 
   MMG3D_Free_all(MMG5_ARG_start,
@@ -497,7 +497,7 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
                  MMG5_ARG_end);
 
   Th_T->BuildGTree();
-  
+
   Add2StackOfPtr2FreeRC(stack, Th_T);
   return Th_T;
 }
@@ -539,28 +539,28 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
                   MMG5_ARG_end);
 
   ffmesh_to_MMG5_pMesh(Th, mesh);
-  
+
     if (pmetric && pmetric->N( ) > 0) {
       const KN< double > &metric = *pmetric;
       if (metric.N( ) == Th.nv) {
-        if ( MMGS_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) { 
+        if ( MMGS_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
-        if ( MMGS_Set_scalarSols(sol,metric) != 1 ) { 
+        if ( MMGS_Set_scalarSols(sol,metric) != 1 ) {
           printf("Unable to set metric.\n");
           exit(EXIT_FAILURE);
         }
       }
       else {
-        if ( MMGS_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) { 
+        if ( MMGS_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
         static const int perm[6] = {0, 1, 3, 2, 4, 5};
         for (int k=0; k<Th.nv; k++) {
-          if ( MMGS_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]], 
-                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) { 
+          if ( MMGS_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]],
+                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) {
             printf("Unable to set metric.\n");
             exit(EXIT_FAILURE);
           }
@@ -581,7 +581,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
           exit(EXIT_FAILURE);
         }
         if (std::binary_search(requiredEdge + 0, requiredEdge + requiredEdge.N(), ref)) {
-          if ( MMG3D_Set_requiredEdge(mesh,k) != 1 ) {
+          if ( MMGS_Set_requiredEdge(mesh,k) != 1 ) {
             exit(EXIT_FAILURE);
           }
         }
@@ -626,7 +626,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
     ier = MMGS_mmgsls(mesh,sol,NULL);
 
   MeshS *Th_T = nullptr;
-  
+
   MMG5_pMesh_to_ffmesh(mesh,Th_T);
 
   MMGS_Free_all(MMG5_ARG_start,
@@ -634,7 +634,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
                  MMG5_ARG_end);
 
   Th_T->BuildGTree();
-  
+
   Add2StackOfPtr2FreeRC(stack, Th_T);
   return Th_T;
 }
