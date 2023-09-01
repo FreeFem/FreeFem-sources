@@ -11,6 +11,44 @@ using namespace Fem2D;
 template<class ffmesh> int ffmesh_to_MMG5_pMesh(const ffmesh &, MMG5_pMesh&);
 
 template<>
+int ffmesh_to_MMG5_pMesh<Mesh>(const Mesh &Th, MMG5_pMesh& mesh) {
+  int nVertices       = Th.nv;
+  int nTriangles      = Th.nt;
+  int nQuadrilaterals = 0;
+  int nEdges          = Th.neb;
+
+    if ( MMG2D_Set_meshSize(mesh,nVertices,nTriangles,
+                           nQuadrilaterals,nEdges) != 1 ) {
+      exit(EXIT_FAILURE);
+    }
+
+    for (int k = 0; k < Th.nv; k++) {
+      if ( MMG2D_Set_vertex(mesh,Th.vertices[k].x,Th.vertices[k].y,
+                           Th.vertices[k].lab, k+1) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    for (int k = 0; k < Th.nt; k++) {
+      const Triangle &K(Th[k]);
+      if ( MMG2D_Set_triangle(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,
+                                Th.operator()(K[2])+1,K.lab,k+1) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    for (int k = 0; k < Th.neb; k++) {
+      const Mesh::BorderElement &K(Th.be(k));
+      if ( MMG2D_Set_edge(mesh,Th.operator()(K[0])+1,Th.operator()(K[1])+1,
+                             K.lab,k+1) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+    }
+
+  return 0;
+}
+
+template<>
 int ffmesh_to_MMG5_pMesh<Mesh3>(const Mesh3 &Th, MMG5_pMesh& mesh) {
   int nVertices       = Th.nv;
   int nTetrahedra     = Th.nt;
@@ -90,6 +128,76 @@ int ffmesh_to_MMG5_pMesh<MeshS>(const MeshS &Th, MMG5_pMesh& mesh) {
 }
 
 template<class ffmesh> int MMG5_pMesh_to_ffmesh(const MMG5_pMesh&, ffmesh *&);
+
+template<>
+int MMG5_pMesh_to_ffmesh<Mesh>(const MMG5_pMesh& mesh, Mesh *&T_TH) {
+    int ier;
+
+    int nVertices   = 0;
+    int nTriangles  = 0;
+    int nEdges      = 0;
+
+    if ( MMG2D_Get_meshSize(mesh,&nVertices,&nTriangles,NULL,
+                       &nEdges) !=1 ) {
+      ier = MMG5_STRONGFAILURE;
+    }
+
+    Vertex *v = new Vertex[nVertices];
+    Triangle *t = new Triangle[nTriangles];
+    Triangle *tt = t;
+    Mesh::BorderElement *b = new Mesh::BorderElement[nEdges];
+    Mesh::BorderElement *bb = b;
+    int k;
+
+    int corner, required;
+
+    for (k = 0; k < nVertices; k++) {
+      if ( MMG2D_Get_vertex(mesh,&(v[k].x),&(v[k].y),
+                                   &(v[k].lab),&(corner),&(required)) != 1 ) {
+        cout << "Unable to get mesh vertex " << k << endl;
+        ier = MMG5_STRONGFAILURE;
+      }
+    }
+
+    for ( k=0; k<nTriangles; k++ ) {
+      int iv[3], lab;
+      if ( MMG2D_Get_triangle(mesh,
+                              &(iv[0]),&(iv[1]),
+                              &(iv[2]),
+                              &(lab),&(required)) != 1 ) {
+        cout << "Unable to get mesh triangle " << k << endl;
+        ier = MMG5_STRONGFAILURE;
+      }
+      for (int i=0; i<3; i++)
+        iv[i]--;
+      tt++->set(v, iv[0], iv[1], iv[2], lab);
+    }
+
+    for ( k=0; k<nEdges; k++ ) {
+      int iv[2], lab, ridge;
+      if ( MMG2D_Get_edge(mesh,
+                          &(iv[0]),&(iv[1]),
+                          &(lab),&(ridge),&(required)) != 1 ) {
+        cout << "Unable to get mesh edge " << k << endl;
+        ier = MMG5_STRONGFAILURE;
+      }
+      for (int i=0; i<2; i++)
+        iv[i]--;
+      bb++->set(v, iv[0], iv[1], lab);
+    }
+
+    T_TH = new Mesh(nVertices, nTriangles, nEdges, v, t, b);
+
+    if (verbosity > 1) {
+      cout << "transformation maillage --> mesh " << endl;
+      cout << "vertices =" << nVertices << endl;
+      cout << "triangles =" << nTriangles << endl;
+      cout << "edges =" << nEdges << endl;
+      cout << "T_TH" << T_TH->nv << " " << T_TH->nt << " " << T_TH->neb << endl;
+    }
+
+  return 0;
+}
 
 template<>
 int MMG5_pMesh_to_ffmesh<Mesh3>(const MMG5_pMesh& mesh, Mesh3 *&T_TH3) {
@@ -339,6 +447,145 @@ class mmg_ff : public OneOperator {
 
   E_F0 *code(const basicAC_F0 &args) const { return new mmg_Op<ffmesh>(args, t[0]->CastTo(args[0])); }
 };
+
+template<>
+AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
+  // initialisation
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
+
+  ffassert(pTh);
+  Mesh &Th = *pTh;
+  int nv = Th.nv;
+  int nt = Th.nt;
+  int nbe = Th.neb;
+
+  KN< double > *pmetric = 0;
+  KN< long > *prequiredEdge = 0;
+  KN< long > *prequiredVertex = 0;
+
+  if (nargs[0]) {
+    pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
+  }
+  if (nargs[19]) {
+    prequiredEdge = GetAny< KN< long > * >((*nargs[19])(stack));
+  }
+  if (nargs[20]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[20])(stack));
+  }
+
+  MMG5_pMesh mesh;
+  MMG5_pSol sol;
+
+  mesh = nullptr;
+  sol = nullptr;
+
+  MMG2D_Init_mesh(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
+                  MMG5_ARG_end);
+
+  ffmesh_to_MMG5_pMesh(Th, mesh);
+
+    if (pmetric && pmetric->N( ) > 0) {
+      const KN< double > &metric = *pmetric;
+      if (metric.N( ) == Th.nv) {
+        if ( MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) {
+          printf("Unable to allocate the metric array.\n");
+          exit(EXIT_FAILURE);
+        }
+        if ( MMG2D_Set_scalarSols(sol,metric) != 1 ) {
+          printf("Unable to set metric.\n");
+          exit(EXIT_FAILURE);
+        }
+      }
+      else {
+        if ( MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) {
+          printf("Unable to allocate the metric array.\n");
+          exit(EXIT_FAILURE);
+        }
+        static const int perm[3] = {0, 1, 2};
+        for (int k=0; k<Th.nv; k++) {
+          if ( MMG2D_Set_tensorSol(sol, metric[3*k+perm[0]], metric[3*k+perm[1]], metric[3*k+perm[2]],
+                                  k+1) != 1 ) {
+            printf("Unable to set metric.\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+    }
+    if (prequiredEdge && prequiredEdge->N( ) > 0) {
+      const KN< long > &requiredEdge = *prequiredEdge;
+      std::sort(requiredEdge + 0, requiredEdge + requiredEdge.N());
+      int na;
+      if ( MMG2D_Get_meshSize(mesh,NULL,NULL,NULL,&na) !=1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for (int k=1; k<=na; k++) {
+        int ref, dummy;
+        if ( MMG2D_Get_edge(mesh, &dummy, &dummy, &ref,
+                                  &dummy, &dummy) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+        if (std::binary_search(requiredEdge + 0, requiredEdge + requiredEdge.N(), ref)) {
+          if ( MMG2D_Set_requiredEdge(mesh,k) != 1 ) {
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+    }
+    if (prequiredVertex && prequiredVertex->N( ) > 0) {
+      const KN< long > &requiredVertex = *prequiredVertex;
+      for (int k=0; k<requiredVertex.N( ); k++) {
+        if ( MMG2D_Set_requiredVertex(mesh,requiredVertex[k]+1) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
+
+  long iso=0L;
+
+  int i=1;
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_verbose,       arg(i,stack,0L));    i++;   /*!< [-1..10], Tune level of verbosity */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_mem,           arg(i,stack,0L));    i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_debug,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
+  if (nargs[i]) {iso = arg(i,stack,false); MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_iso,iso);} i++; /*!< [1/0], Level-set meshing */
+                                                                                               i++;   /*!< [1/0], Preserve the initial domain references in level-set mode */
+  //if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_optim,       arg(i,stack,false));   i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Disabled/enabled normal regularization */
+                                                                                               i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
+
+  int ier;
+  if (!iso)
+    ier = MMG2D_mmg2dlib(mesh,sol);
+  else
+    ier = MMG2D_mmg2dls(mesh,sol,NULL);
+
+  Mesh *Th_T = nullptr;
+
+  MMG5_pMesh_to_ffmesh(mesh,Th_T);
+
+  MMG2D_Free_all(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
+                 MMG5_ARG_end);
+
+  R2 Pn, Px;
+  Th_T->BoundingBox(Pn, Px);
+  Th_T->quadtree = new Fem2D::FQuadTree(Th_T, Pn, Px, Th_T->nv);
+
+  Add2StackOfPtr2FreeRC(stack, Th_T);
+  return Th_T;
+}
 
 template<>
 AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
@@ -645,6 +892,7 @@ static void Load_Init( ) {
   }
 
   Global.Add("mmg3d", "(", new mmg_ff<Mesh3>);
+  Global.Add("mmg2d", "(", new mmg_ff<Mesh>);
   Global.Add("mmgs", "(", new mmg_ff<MeshS>);
 }
 
