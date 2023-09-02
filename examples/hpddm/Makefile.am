@@ -98,6 +98,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	function-PETSc.edp \
 	bilaplace-2d-PETSc.edp \
 	toy-Tao-PETSc.edp \
+	elasticity-block-hpddm-2d-PETSc.edp \
+	stokes-block-hpddm-2d-PETSc.edp \
 	stokes-fieldsplit-3d-PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
