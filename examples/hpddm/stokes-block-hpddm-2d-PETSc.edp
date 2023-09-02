@@ -1,0 +1,98 @@
+load "PETSc"
+include "macro_ddm.idp"
+
+macro def2(i)[i, i#B]//
+macro init2(i)[i, i]//
+macro grad(u)[dx(u), dy(u)]//
+macro div(u)(dx(u) + dy(u#B))//
+
+int global = getARGV("-global", 50);
+bool sym = usedARGV("-sym") != -1;
+int[int] l = [2, 2, 1, 2];
+mesh Th = square(global, global, [x, y], label = l, flags = 1); // global mesh
+func Vk = P2;
+func Pk = P1;
+
+macro ThRefinementFactor()getARGV("-split", 1)//
+DmeshCreate(Th);
+Mat A, C;
+{
+    macro def(i)def2(i)//
+    macro init(i)init2(i)//
+    MatCreate(Th, A, [Vk, Vk]);
+}
+{
+    MatCreate(Th, C, Pk);
+}
+fespace Wh(Th, [Vk, Vk]);
+fespace Ph(Th, Pk);
+
+varf vPbA(def2(u), def2(v)) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, u = 1.0, uB = 0.0) + on(2, u = 0.0, uB = 0.0);
+varf vPbB(def2(u), [q]) = int2d(Th)(-div(u) * q);
+
+tgv = -2.0;
+matrix NA;
+matrix NB = vPbB(Wh, Ph);
+NB.thresholding(1.0E-16);
+
+real[int] rhs(Wh.ndof + Ph.ndof);
+rhs(0:Wh.ndof - 1)                 = vPbA(0, Wh);
+rhs(Wh.ndof:Wh.ndof + Ph.ndof - 1) = 0.0;
+if(tgv < 0.0) {
+    assert(abs(tgv + 2.0) < 1.0E-6);
+    NA = vPbA(Wh, Wh, tgv = -10.0);
+    if (!sym)
+        NA.thresholding(1.0E-16);
+    varf vPbRHS(def2(u), def2(v)) =                                                  on(1, u = 1.0, uB = 0.0) + on(2, u = 0.0, uB = 0.0);
+    real[int] tmp = vPbRHS(0, Wh);
+    real[int] rhsA = NA * tmp;
+    real[int] rhsB = NB * tmp;
+    rhs(0:Wh.ndof - 1) -= rhsA;
+    rhs(Wh.ndof:rhs.n - 1) -= rhsB;
+    varf vPbG(def2(u), def2(v)) = on(1, 2, u = 1.0, uB = 1.0);
+    rhsA = vPbG(0, Wh);
+    setBC(NA, rhsA, -2.0);
+    if(sym)
+        symmetrizeCSR(NA);
+    for [i, j, v : NB] if(abs(rhsA(j) - 1.0) < 1.0E-2) v = 0.0;
+}
+else {
+    NA.thresholding(1.0E-16);
+    NA = vPbA(Wh, Wh);
+}
+
+A = NA;
+Mat B(C, A, NB);
+Mat Stokes = [[A, B'],
+              [B, 0 ]];
+
+if(HasType("PC", "hpddm")) {
+    string common = " -ksp_converged_reason -ksp_view_final_residual -ksp_monitor_true_residual -ksp_type fgmres";
+    set(Stokes, sparams = common + " -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_precondition self "
+        + "-prefix_push fieldsplit_1_ "
+        + " -ksp_type fgmres -pc_type hpddm -pc_hpddm_has_neumann -ksp_monitor -pc_hpddm_ksp_rtol 1.0E-2 -pc_hpddm_schur_precondition geneo "
+        + " -prefix_push pc_hpddm_levels_1_ "
+            + " -eps_nev 20 -eps_threshold 0.5 -st_share_sub_ksp -eps_gen_non_hermitian -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky -eps_tol 1.0E-2 "
+        + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
+            + " -correction balanced -pc_type cholesky -pc_factor_mat_solver_type mumps "
+        + " -prefix_pop"
+       + " -prefix_pop", setup = 1);
+    set(A, parent = Stokes, bs = sym ? 1 : 2, sparams =
+          "-prefix_push fieldsplit_0_ -pc_type hpddm -ksp_pc_side right -pc_hpddm_has_neumann -pc_hpddm_define_subdomains"
+        + " -prefix_push pc_hpddm_levels_1_ "
+            + " -eps_nev 40 -eps_threshold 0.3 -st_share_sub_ksp -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky "
+        + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
+            + " -pc_type cholesky -pc_factor_mat_solver_type mumps "
+        + " -prefix_pop"
+       + " -prefix_pop");
+    set(C, parent = Stokes);
+
+    real[int] sol(Wh.ndof + Ph.ndof);
+    sol = Stokes^-1 * rhs;
+    Wh def2(u);
+    u[] = sol(0:Wh.ndof - 1);
+    Ph p;
+    p[] = sol(Wh.ndof:sol.n - 1);
+    plotMPI(Th, def2(u), [Vk, Vk], def2, real, cmm = "Global velocity (overlap = 1)");
+    plotD(Th, p, cmm = "Global pressure (overlap = 1)");
+}

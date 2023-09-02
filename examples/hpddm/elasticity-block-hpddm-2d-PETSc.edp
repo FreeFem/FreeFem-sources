@@ -1,0 +1,139 @@
+load "PETSc"
+include "macro_ddm.idp"
+
+macro def2(i)[i, i#B]//
+macro init2(i)[i, i]//
+real Sqrt = sqrt(2.0);
+macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]//
+macro div(u)(dx(u) + dy(u#B))//
+
+int global = getARGV("-global", 10);
+int n = getARGV("-n", global);
+bool sym = usedARGV("-sym") != -1;
+mesh ThPressure = square(5 * global, global, [5 * x, y]); // global mesh
+func Vk = P2;
+func Pk = P0;
+
+macro ThPressureRefinementFactor()getARGV("-split", 1)//
+macro ThPressureOverlap()2// need two layers of overlap in each direction for the pressure
+DmeshCreate(ThPressure);
+Mat AUnneeded, C;
+{
+    macro def(i)def2(i)//
+    macro init(i)init2(i)//
+    MatCreate(ThPressure, AUnneeded, [Vk, Vk]); // this Mat won't be needed, we will only consider a restriction
+                                                // with a single layer of overlap in each direction for the velocity
+}
+{
+    MatCreate(ThPressure, C, Pk);
+}
+matrix two2one; // two layers of overlap to one layer of overlap
+mesh ThVelocity; // build this mesh using ThPressure and by removing the extra layer of overlap (label = -111111)
+fespace Wh(ThVelocity, [Vk, Vk]);
+fespace Ph(ThPressure, Pk);
+{
+    fespace Qh(ThPressure, P1);
+    varf vGamma(u, v) = on(-111111, u = 1.0);
+    Qh gamma;
+    gamma[] = vGamma(0, Qh, tgv = -1.0);
+    int[int] n2o;
+    if(gamma[].linfty > 1.0E-6)
+        ThVelocity = trunc(ThPressure, abs(gamma) < 1.0E-2, label = -111111, new2old = n2o);
+    else {
+        ThVelocity = ThPressure;
+        n2o.resize(ThVelocity.nt);
+        n2o = 0:ThVelocity.nt - 1;
+    }
+    fespace WhUnneeded(ThPressure, [Vk, Vk]); // again, unneeded velocity space since this has two layers of overlap
+    int[int] restriction = restrict(Wh, WhUnneeded, n2o);
+    int[int] I = 0:restriction.n - 1;
+    real[int] C(I.n);
+    C = 1;
+    two2one = [I, restriction, C];
+    two2one.resize(Wh.ndof, WhUnneeded.ndof);
+}
+Mat A(AUnneeded, restriction = two2one); // proper Mat for the velocity with a single layer of overlap
+
+real f = -100.0;
+func nu = int(y * n) % 2 == 0 ? 0.4999 : 0.35;
+func E = int(y * n) % 2 == 0 ? 1.0E+7 : 200.0E+9;
+func mu = E / (2.0*(1.0 + nu));
+func lambda = E*nu / ((1.0 + nu)*(1.0 - 2.0*nu));
+varf vPbA(def2(u), def2(v)) = int2d(ThVelocity)(2.0 * mu * (epsilon(u)' * epsilon(v))) + int2d(ThVelocity)(f * vB) + on(4, u = 0.0, uB = 0.0);
+varf vPbC([p], [q]) = int2d(ThPressure)(-1.0/lambda * p * q);
+varf vPbB(def2(u), [q]) = int2d(ThPressure)(div(u) * q);
+
+tgv = -2.0;
+matrix NA;
+matrix NB = vPbB(Wh, Ph);
+NB.thresholding(1.0E-16);
+matrix NC = vPbC(Ph, Ph);
+NC.thresholding(1.0E-16);
+
+real[int] rhs(Wh.ndof + Ph.ndof);
+rhs(0:Wh.ndof - 1)                 = vPbA(0, Wh);
+rhs(Wh.ndof:Wh.ndof + Ph.ndof - 1) = 0.0;
+if(tgv < 0.0) {
+    assert(abs(tgv + 2.0) < 1.0E-6);
+    NA = vPbA(Wh, Wh, tgv = -10.0);
+    NA.thresholding(1.0E-16);
+    varf vPbRHS(def2(u), def2(v)) =                                                                                  on(4, u = 0.0, uB = 0.0);
+    real[int] tmp = vPbRHS(0, Wh);
+    real[int] rhsA = NA * tmp;
+    real[int] rhsB = NB * tmp;
+    rhs(0:Wh.ndof - 1) -= rhsA;
+    rhs(Wh.ndof:rhs.n - 1) -= rhsB;
+    varf vPbG(def2(u), def2(v)) = on(4, u = 1.0, uB = 1.0);
+    rhsA = vPbG(0, Wh);
+    setBC(NA, rhsA, -2.0);
+    if(sym)
+        symmetrizeCSR(NA);
+    for [i, j, v : NB] if(abs(rhsA(j) - 1.0) < 1.0E-2) v = 0.0;
+}
+else {
+    NA.thresholding(1.0E-16);
+    NA = vPbA(Wh, Wh);
+}
+
+A = NA;
+Mat B(C, A, NB);
+C = NC;
+Mat Elas = [[A, B'],
+            [B, C ]];
+
+if(HasType("PC", "hpddm")) {
+    string common = " -ksp_converged_reason -ksp_view_final_residual -ksp_monitor_true_residual -ksp_type fgmres";
+    set(Elas, sparams = common + " -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_precondition self "
+        + "-prefix_push fieldsplit_1_ "
+        + " -ksp_type fgmres -ksp_rtol 1.0E-1 -pc_type hpddm -pc_hpddm_has_neumann -ksp_monitor -pc_hpddm_ksp_pc_side right -pc_hpddm_ksp_rtol 1.0E-1 -pc_hpddm_schur_precondition geneo "
+        + " -prefix_push pc_hpddm_levels_1_ "
+            + " -eps_nev 20 -eps_threshold 0.5 -st_share_sub_ksp -eps_gen_non_hermitian -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky -eps_tol 1.0E-2 "
+        + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
+            + " -correction balanced -pc_type cholesky -pc_factor_mat_solver_type mumps "
+        + " -prefix_pop"
+       + " -prefix_pop", setup = 1);
+    set(A, parent = Elas, bs = sym ? 1 : 2, sparams =
+          "-prefix_push fieldsplit_0_ -pc_type hpddm -ksp_pc_side right -pc_hpddm_has_neumann -pc_hpddm_define_subdomains"
+        + " -prefix_push pc_hpddm_levels_1_ "
+            + " -eps_nev 40 -eps_threshold 0.3 -st_share_sub_ksp -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky "
+        + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
+            + " -pc_type cholesky -pc_factor_mat_solver_type mumps "
+        + " -prefix_pop"
+       + " -prefix_pop");
+    set(C, parent = Elas);
+
+    real[int] sol(Wh.ndof + Ph.ndof);
+    sol = Elas^-1 * rhs;
+    Wh def2(u);
+    u[] = sol(0:Wh.ndof - 1);
+    Ph p;
+    p[] = sol(Wh.ndof:sol.n - 1);
+    plotMPI(ThVelocity, def2(u), [Vk, Vk], def2, real, cmm = "Global velocity (overlap = 1)");
+    real alpha = 1.0E4;
+    mesh ThMoved = movemesh(ThVelocity, [x + alpha * u, y + alpha * uB]);
+    u[] = mpirank;
+    plotMPI(ThMoved, u, P2, unneeded, real, cmm = "Global moved solution");
+    plotD(ThPressure, p, cmm = "Global pressure (overlap = 2)");
+    p = nu;
+    plotMPI(ThPressure, p, P0, unneeded, real, cmm = "Material coefficient");
+}
