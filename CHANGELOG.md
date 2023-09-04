@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
-- Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho
+- Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
 - add conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
     see tutorial/sparse-matrix.edp example at end
     ```
@@ -39,8 +39,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
-
+-  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
 ## [4.13]
 
 ### Added

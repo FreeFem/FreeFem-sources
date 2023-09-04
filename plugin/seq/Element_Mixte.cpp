@@ -1293,7 +1293,7 @@ public:
                     R a = QFT[p].a;
                     R2 P= (Q-(R2) T[e]).perp()/2;
                     if(Ortho)
-                      P=-P.perp( );
+                      P=P.perp( );// correction 4 sep 2023 FH.. 
                     v[k++] = a * P.x ;
                     v[k++] = a * P.y ;
                 }

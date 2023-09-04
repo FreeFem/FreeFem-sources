@@ -178,7 +178,7 @@ for( int j=0;j<Wh1.ndofK;++j)
    plot([gu1,gu2],wait=1,cmm=" dof "+j+" K=0 ");}
   w1[][i]-=1;
   if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << " " << err1 << endl;}
-  cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
+  cout << j << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
   assert( w1[].linfty < 1e-10);
   NewMacro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) EndMacro 
   assert( diff2(  )) ;
