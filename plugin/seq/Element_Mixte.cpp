@@ -1244,9 +1244,11 @@ public:
             
             P_Pi_h[i++] = QFT[p];   // X=0 => A  X=1 => B;
         }
-        cout << "\n kkk     " << kkk << " " << this->pij_alpha.N( ) << " /"<< QFE.n << " " << QFT.n <<endl;
-        cout << " i     " << i << " " << this->P_Pi_h.N( ) << endl;
-        
+        if(verbosity>99)
+        {
+            cout << "\n kkk     " << kkk << " " << this->pij_alpha.N( ) << " /"<< QFE.n << " " << QFT.n <<endl;
+            cout << " i     " << i << " " << this->P_Pi_h.N( ) << endl;
+        }
         ffassert(kkk == this->pij_alpha.N( ));
         ffassert(i == this->P_Pi_h.N( ));
     }
