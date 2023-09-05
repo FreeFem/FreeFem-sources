@@ -342,7 +342,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 28 : 21;
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 28 : 22;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -422,7 +422,7 @@ basicAC_F0::name_and_type mmg_Op<Mesh>::name_param[] = {
 {"angle"             , &typeid(bool)},/*!< [1/0], Turn on/off angle detection */
 {"iso"               , &typeid(bool)},/*!< [1/0], Level-set meshing */
 {"keepRef"           , &typeid(bool)},/*!< [1/0], Preserve the initial domain references in level-set mode */
-//{"optim"             , &typeid(bool)},/*!< [1/0], Optimize mesh keeping its initial edge sizes */
+{"localParameter"    , &typeid(KNM<double>*)},/*!< [val], Local parameters on given surfaces */
 {"noinsert"          , &typeid(bool)},/*!< [1/0], Avoid/allow point insertion */
 {"noswap"            , &typeid(bool)},/*!< [1/0], Avoid/allow edge or face flipping */
 {"nomove"            , &typeid(bool)},/*!< [1/0], Avoid/allow point relocation */
@@ -463,15 +463,19 @@ AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
   KN< double > *pmetric = 0;
   KN< long > *prequiredEdge = 0;
   KN< long > *prequiredVertex = 0;
+  KNM< double > *plocalParameter = 0;
 
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  if (nargs[19]) {
-    prequiredEdge = GetAny< KN< long > * >((*nargs[19])(stack));
-  }
   if (nargs[20]) {
-    prequiredVertex = GetAny< KN< long > * >((*nargs[20])(stack));
+    prequiredEdge = GetAny< KN< long > * >((*nargs[20])(stack));
+  }
+  if (nargs[21]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[21])(stack));
+  }
+  if (nargs[7]) {
+    plocalParameter = GetAny< KNM< double > * >((*nargs[7])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -541,6 +545,18 @@ AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
         }
       }
     }
+    if (plocalParameter && plocalParameter->M( ) > 0) {
+      const KNM< double > &localParameter = *plocalParameter;
+      ffassert(localParameter.N() == 4);
+      if ( MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_numberOfLocalParam,localParameter.M()) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for(int j = 0; j < localParameter.M(); ++j) {
+        if ( MMG2D_Set_localParameter(mesh,sol,MMG5_Edg,localParameter(0,j),localParameter(1,j),localParameter(2,j),localParameter(3,j)) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
 
   long iso=0L;
 
@@ -551,7 +567,7 @@ AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
   if (nargs[i]) {iso = arg(i,stack,false); MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_iso,iso);} i++; /*!< [1/0], Level-set meshing */
                                                                                                i++;   /*!< [1/0], Preserve the initial domain references in level-set mode */
-  //if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_optim,       arg(i,stack,false));   i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+                                                                                               i++;   /*!< [val], Local parameters on given surfaces */
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
@@ -852,7 +868,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
   if (nargs[i]) {iso = arg(i,stack,false); MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_iso,iso);} i++; /*!< [1/0], Level-set meshing */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_keepRef,       arg(i,stack,false)); i++;   /*!< [1/0], Preserve the initial domain references in level-set mode */
-  //if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_optim,       arg(i,stack,false));   i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+                                                                                             i++;   /*!< [val], Local parameters on given surfaces */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noinsert,      arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point insertion */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_noswap,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow edge or face flipping */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
