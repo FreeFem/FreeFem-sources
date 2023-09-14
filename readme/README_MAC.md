@@ -19,6 +19,18 @@
 
 # How to compile FreeFem++ on MacOSX
 
+##  Sep 2023
+
+the mac version is compile wit the script 
+ bin/compile-version-MacOS  gitbranch  path-where-to-compile configure-parameter
+ 
+ configure-parameter compilation:
+ generic for --enable-genenic
+ debug for --enable-debug
+ optim for --enable-optim
+ 
+ and exact :
+  bin/compile-version-MacOS master $HOME/tmp generic 
 ## Feb 2022
 
 The Version 4.10 is compiled Under Monteray (Apple M1: arm64e) and on (Apple : x86 )
@@ -26,11 +38,11 @@ The Version 4.10 is compiled Under Monteray (Apple M1: arm64e) and on (Apple : x
 ### for Apple M1 (arm64e)
 
 Add with home brew 
-1) install brew  see
+1. install brew  see
 [install Homebrew]{https://brew.sh/index_fr}
 
     
-2) install this brew package to compile FreeFEM++
+2. install this brew package to compile FreeFEM++
 
 ```bash
 brew install \
@@ -52,7 +64,7 @@ gd				isl				libunistring	openssl@1.1		zip \
 gdbm			jansson			libvmaf			p11-kit			zstd 
 ```
 
-3) download the sources of  FreeFEM++ with git 
+3. download the sources of  FreeFEM++ with git 
 
 	```bash
 	git clone git@github.com:FreeFem/FreeFem-sources.git ff++
@@ -62,7 +74,7 @@ or the develop version
 	```bash
 	git clone -b develop   git@github.com:FreeFem/FreeFem-sources.git ff++
 	```
-4) Compile FreeFem++ without petsc and MPI
+4. Compile FreeFem++ without petsc and MPI
 
 	```bash
 	cd ff++ 
@@ -72,7 +84,7 @@ or the develop version
 	sudo make install
     ```
 	
-4) Compile FreeFem++ with PETSc and MPI
+4. Compile FreeFem++ with PETSc and MPI
 
 ```bash
 	cd ff++ 

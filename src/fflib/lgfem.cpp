@@ -5828,7 +5828,37 @@ R3 toR3(const  R& a,const  R& b,const  R &c){return R3(a,b,c);}
 R3 toR3(const  R3& a,const  R3& b){return R3(a,b);}
 
 R3 NElement(lgBoundaryEdge const & a) {  return R3(a.NBoundaryElement()); }//  add Jan 2022
+template<class vfes>
+void Add_u_init_array(int ii=0)
+{
+    typedef Complex C;
+    typedef double R;
 
+    TheOperators->Add(
+      "<-",
+      new init_FE_eqarray< FFset3< R, vfes, RNM_VirtualMatrix< R >::plusAx > >(10),
+      new init_FE_eqarray< FFset3< R, vfes, RNM_VirtualMatrix< R >::solveAxeqb > >(10),
+      new init_FE_eqarray< FFset3< R, vfes, RNM_VirtualMatrix< R >::solveAtxeqb > >(10),
+      new init_FE_eqarray< FFset3< R, vfes, RNM_VirtualMatrix< R >::plusAtx > >(10),
+      new init_FE_eqarray< FF_L_args< R, vfes, Call_FormLinear< v_fes > > >(10)
+
+    );
+    TheOperators->Add(
+      "<-",
+      new init_FE_eqarray< FFset3< C, vfes, RNM_VirtualMatrix< C >::plusAx > >(10),
+      new init_FE_eqarray< FFset3< C, vfes, RNM_VirtualMatrix< C >::solveAxeqb > >(10),
+      new init_FE_eqarray< FFset3< C, vfes, RNM_VirtualMatrix< C >::solveAtxeqb > >(10),
+      new init_FE_eqarray< FFset3< C, vfes, RNM_VirtualMatrix< C >::plusAtx > >(10)
+ 
+    );
+
+    if( ii)
+     TheOperators->Add(
+                    "<-",
+                      new init_FE_eqarray< FFset3< R, v_fes, KN_< R > > >(10),
+                      new init_FE_eqarray< FFset3< C, v_fes, KN_< C > > >(10));
+
+}
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -6551,7 +6581,8 @@ void init_lgfem( ) {
     new init_FE_eqarray< FF_L_args< Complex, v_fes3, Call_FormLinear< v_fes3 > > >(
       10)    // 3D volume
   );
-
+    Add_u_init_array<v_fesS>(1);
+    Add_u_init_array<v_fesL>(1);
   // Fin
   // Fin
   TheOperators->Add(

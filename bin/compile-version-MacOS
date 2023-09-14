@@ -1,0 +1,192 @@
+exec 3>&1    #  save  stdout stream 
+gitbranch=$1
+dircompilation=$2
+optionconf=
+nameopt=
+export dirdmgpkg=
+case $3 in
+*generic*) optionconf+=--enable-generic;;
+*debug*) optionconf+=--enable-debug;nameopt+=-g;;
+*optim*) optionconf+=--enable-optim;nameopt+=-O;;
+esac
+
+echo " option de configuration" $optionconf
+echo ==========================================================
+
+## stop on error ....
+
+set -e 
+#-x 
+dirscript=`dirname $0`
+case $dirscript in
+".")  dirscript=$PWD;;
+[^/]*)  dirscript=$PWD/"$dirscript";;
+esac
+# compute the number of jobs possible ...
+njob=$(( $(sysctl -n hw.ncpu)*2 ))
+# echo $dirscript
+mvdylib=$dirscript/move-dylib
+changedylibgfortran=$dirscript/change-dylib-gfortran
+#myver=`git describe --tags`
+arch=`arch`
+case $arch in
+*x86*) ARCH=Intel;;
+*arm64*) ARCH=Apple-Silicon;;
+*) echo "unknow arch, stop" ; exit 1;; 
+esac;
+echo ARCH = $ARCH ...
+tmp=/tmp
+cd $dircompilation
+
+test  -d $gitbranch-ff++  || git clone -b $gitbranch https://github.com/FreeFem/FreeFem-sources.git $gitbranch-ff++
+cd $gitbranch-ff++
+ffscr=$dircompilation/$gitbranch-ff++
+echo 
+ver=`git describe --tags`
+verb=`git describe --tags| sed s/v// | sed 's/-.*$//'`	
+dirpkg=$dircompilation/pkg-ff-$gitbranch-$ver
+dirdmgpkg=FreeFEM-$ver-$ARCH$nameopt
+LOG=$dircompilation/log-ff-$ver-$ARCH$nameopt.log
+echo the LOG file $LOG
+exec 1>$LOG  2>&1  # save log is $LOG
+
+echo compilation FreeFEM  version ${ver} on Mac ${arch} in $(pwd)
+echo ==========================================================
+prefix=/Applications/FreeFem++.app/Contents/ff-$verb
+echo prefix = $prefix 
+test -d $prefix || mkdir $prefix 
+##  check gfortran 
+gfortran --version
+test -d $prefix/gnu/ || mkdir $prefix/gnu/
+echo  copy lib fortran in $prefix/gnu/
+## copy lib fortran in $prefix/gnu/
+echo ==========================================================
+(
+fftmp=/tmp/ff++-tmp-$$
+test -d fftmp ||mkdir $fftmp
+cd $ffsrc 
+printf  "      program sizeofint\n       integer  i\n       end\n" >$fftmp/ffff.f
+gfortran $fftmp/ffff.f -o $fftmp/ffff
+(export DYLD_PRINT_LIBRARIES=1;$fftmp/ffff ) 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib|$fftmp/ffff|grep .dylib' >$prefix/gnu/list-dylib-gfortran 
+rm -rf $fftmp
+)
+brewlibgfortran=`grep gfortran $prefix/gnu/list-dylib-gfortran` 
+brewlibquadmath=`grep libquadmath $prefix/gnu/list-dylib-gfortran` 
+( 
+cd  $(dirname $brewlibgfortran)
+cp -f libgfortran.5.dylib libquadmath.0.dylib libgcc_s.1.1.dylib $prefix/gnu/
+cd $prefix/gnu/
+ln -sf libgfortran.?.dylib libgfortran.dylib
+ln -sf libquadmath.?.dylib  libquadmath.dylib
+libemutls_w=`find /opt/homebrew -name libemutls_w.a`
+if [ -f  "$libemutls_w" ] ; then
+  cp $libemutls_w .
+fi
+$mvdylib $prefix/gnu  $prefix/gnu/*.dylib
+)
+dirlibgfortranold=$(dirname $brewlibgfortran)
+dirlibgfortrannew=$prefix/gnu
+libgfortrandylib=$(basename $brewlibgfortran)
+libquadmathdylib=$(basename $brewlibquadmath)
+cd - 
+test -d pkg || mkdir -v pkg 
+(
+cd pkg
+test -f mpich-4.1.2.tar.gz || wget https://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
+##  compile mpi https://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
+
+## compile gsl https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz
+test -f gsl-2.7.1.tar.gz || wget https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz
+## compile hdf5  https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.2/src/hdf5-1.14.2.tar.bz2
+test -f hdf5-1.14.2.tar.bz2 || wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.2/src/hdf5-1.14.2.tar.bz2
+
+tar zxf gsl-2.7.1.tar.gz	
+tar zxf  hdf5-1.14.2.tar.bz2	
+tar zxf  mpich-4.1.2.tar.gz
+test -f $prefix/lib/pkgconfig/gsl.pc || (
+cd gsl-2.7.1
+./configure --prefix=$prefix
+make -j $njob
+make install 
+)
+test -f $prefix/bin/h5c++ || (
+cd hdf5-1.14.2
+./configure '--enable-cxx' 'CC=clang' 'CXX=clang++' --prefix=$prefix
+make -j $njob
+make install 
+)
+
+test -f $prefix/lib/pkgconfig/mpich.pc || (
+cd mpich-4.1.2
+./configure  --prefix=$prefix 'FFLAGS=-fallow-argument-mismatch -L/Applications/FreeFem++.app/Contents/ff-4.13/gnu -lgfortran -lquadmath' 'CC=clang' 'CXX=clang++' 
+make -j $njob
+make install 
+)
+)
+## configuration of Freefem++ et compilation of ff++
+cd $gitbranch-ff++ 
+test -x src/nw/FreeFem++ || ( 
+echo ================================
+echo configuration  de freefem++ 
+echo ================================
+echo compilation de freefem++
+echo ================================
+export PATH=$prefix/bin:$PATH
+autoreconf -i
+./configure "--prefix=$prefix" '--enable-download' $optionconf '--enable-m64' 'CXXFLAGS=-Wno-undefined-var-template' 'FLIBS=-L/Applications/FreeFem++.app/Contents/ff-4.13/gnu -lgfortran -lquadmath'
+echo ================================
+echo compilation de petc 
+echo ================================
+
+test -f 3rdparty/ff-petsc/done  || (cd 3rdparty/ff-petsc && make
+	 mkdir /Applications/FreeFem++.app/Contents/ff-4.13/ff-petsc
+	 chown -R $USER /Applications/FreeFem++.app/Contents/ff-4.13/ff-petsc
+	make petsc-slepc 
+touch done )
+echo ================================
+echo compilation de freefem++
+echo ================================
+
+./reconfigure 
+make -j $njob 
+)
+
+echo ================================
+echo instalation de freefem++  in $dirpkg
+echo ================================
+
+make install DESTDIR=$dirpkg
+# remove ref on fg
+echo ================================
+echo fix gfortran lib  distribution $dirpkg/$prefix
+echo ================================
+tmpdylib=/tmp/dylib-ff-$$.txt
+tmplst=/tmp/otool-ff-$$.txt
+
+find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
+ $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib `cat $tmpdylib`
+ ## verification 
+ echo dylib to brew in installation for debug !!!! 
+ cat $tmpdylib| xargs otool -L | grep -i brew ||echo OK 
+  
+echo ================================
+##   build of PACKAGE directory 
+echo  build of PACKAGE/DMG  directory /tmp/$dirdmgpkg
+echo ================================
+
+
+test -d /tmp/$dirdmgpkg || ( 
+mkdir /tmp/$dirdmgpkg
+cd /tmp/$dirdmgpkg
+mv $dirpkg/Applications/FreeFem++.app  /tmp/$dirdmgpkg
+cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
+fftestedp=`find . -name Laplace.edp`
+sed -e "s/@VV@/$ver/" -e "s%@APPFF@%$dirdmgpkg%" -e s%@FFTEST@%$fftestedp% <$dirscript/script/README.md.in  > README.md
+
+)
+exec 1>&3 # save log is closo $LOG
+cat  $LOG  >> /tmp/$dirdmgpkg/build-log.log
+
+# build dmg file $HOME/desktop/$dirdmgpkg.dmg
+echo hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
+hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
