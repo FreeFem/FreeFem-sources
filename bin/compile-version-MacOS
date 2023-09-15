@@ -80,7 +80,8 @@ cp -f libgfortran.5.dylib libquadmath.0.dylib libgcc_s.1.1.dylib $prefix/gnu/
 cd $prefix/gnu/
 ln -sf libgfortran.?.dylib libgfortran.dylib
 ln -sf libquadmath.?.dylib  libquadmath.dylib
-libemutls_w=`find /opt/homebrew -name libemutls_w.a`
+## inutile ???? je ne retouve plus cette lib ???? FH..
+test -d /opt/homebrew && libemutls_w=`find /opt/homebrew -name libemutls_w.a`
 if [ -f  "$libemutls_w" ] ; then
   cp $libemutls_w .
 fi

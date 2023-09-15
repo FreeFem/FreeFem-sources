@@ -1,8 +1,10 @@
 #!/bin/bash 
 # Apple
 # hdiutil create -srcfolder /Users/hecht/Desktop/FF-dmg/FreeFEM-4.12-Apple-M1 -fs HFS+  FreeFEM-4.12-Apple-M1.dmg
-scriptpath=`realpath $0`
-ppwd=`dirname $scriptpath`
+
+scriptpath=$0
+cd `dirname $scriptpath`
+ppwd=`pwd`
 vffapp=$ppwd/FreeFem++.app
 vffver=$ppwd/FreeFem++.app/Contents/ff-*
 ffver=`basename $vffver`
