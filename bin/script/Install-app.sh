@@ -6,16 +6,19 @@ ppwd=`dirname $scriptpath`
 vffapp=$ppwd/FreeFem++.app
 vffver=$ppwd/FreeFem++.app/Contents/ff-*
 ffver=`basename $vffver`
+ver=`expr "//$ffver" : '//ff-\(.*\)'`
 vffexe=$vffver/bin/FreeFem++	
 tyexe=`file -b $vffexe`
 case $tyexe-`arch`	 in
- *arm64*-*arm64*) echo  same arch arm64 arm64  ok;;
- *x86*-*x86*)  echo  same arch x86 x85  ok;;
- *) echo bad arch ; exit 1;;
+ *arm64*-*arm64*) ARCH=Apple-Silicon ;echo  same arch arm64 arm64  ok;;
+ *x86*-*x86*)  ARCH=Intel; echo  same arch x86 x85  ok;;
+ *) echo bad arch : sorry, abort!; exit 1;;
  esac
 #sudo cp -rf FreeFem++.app /Applications
 #sudo xattr -rc /Applications/FreeFem++.app
 # echo verif arch 
+echo Install FreeFEM version $ver in /Applications/FreeFem++.app/Contents/$ffver/bin ARCH $ARCH
+
 cd 
 filerc=".profile"
 case "$SHELL" in
@@ -29,11 +32,11 @@ dirff=/Applications/FreeFem++.app/Contents/$ffver/bin
 ffexec=/Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++
 ff=$(which FreeFem++)
 dd=$(dirname "$ff")
-exit 0
-if [ ! -d   /Applications/FreeFem++.app/Contents/$ffver/ ] ; then
+
+if [ ! -x  $ffexec ] ; then
 	echo " No FreeFem++.app  $ffver so copy FreeFem++.app in /Application (with sudo do be sure)"
 	echo =============================
-	sudo cp -rf $vffapp/FreeFem++.app /Applications
+	sudo cp -rf $vffapp /Applications
 	sudo cp /Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++-CoCoa  /usr/local/bin
 fi
 
@@ -55,11 +58,11 @@ if [ -d  $dirff  ] ; then
 else 
 	echo " OK : No quarantine "
 fi
-# echo test FreeFem++ 
-/Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++  /Applications/FreeFem++.app/Contents/$ffver/share/FreeFEM/$ver/examples/tutorial/Laplace.edp 
+# echo test FreeFem++ with no graphics 
+/Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++  /Applications/FreeFem++.app/Contents/$ffver/share/FreeFEM/$ver/examples/tutorial/Laplace.edp -nw
 
 if [ $dd != $dirff ] ; then 
-	echo update $filerc 
+	echo Update $filerc 
 	echo =============================
 	
 	test -e $filerc || touch $filerc 
