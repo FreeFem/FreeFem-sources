@@ -32,6 +32,7 @@ changedylibgfortran=$dirscript/change-dylib-gfortran
 arch=`arch`
 case $arch in
 *x86*) ARCH=Intel;;
+*i386*) ARCH=Intel;;
 *arm64*) ARCH=Apple-Silicon;;
 *) echo2 "unknow arch, stop" ; exit 1;; 
 esac;

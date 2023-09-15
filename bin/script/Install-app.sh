@@ -11,7 +11,8 @@ vffexe=$vffver/bin/FreeFem++
 tyexe=`file -b $vffexe`
 case $tyexe-`arch`	 in
  *arm64*-*arm64*) ARCH=Apple-Silicon ;echo  same arch arm64 arm64  ok;;
- *x86*-*x86*)  ARCH=Intel; echo  same arch x86 x85  ok;;
+ *x86*-*x86*)  ARCH=Intel; echo  same arch x86 x86  ok;;
+ *x86*-*i386*)  ARCH=Intel; echo  same arch x86 i386  ok;;
  *) echo bad arch : sorry, abort!; exit 1;;
  esac
 #sudo cp -rf FreeFem++.app /Applications
