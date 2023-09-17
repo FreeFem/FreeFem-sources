@@ -76,7 +76,6 @@ ipopt/patch-IpBlas \
 ff-petsc/Makefile \
 ff-petsc/Makefile-PETSc.inc \
 ff-petsc/Makefile.complex \
-ff-petsc/petsc-3.11.2.patch \
 getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
