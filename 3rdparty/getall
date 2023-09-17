@@ -187,10 +187,10 @@ download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f
 	'hpddm.zip',
 	'6910b7b974f0b60d9c247c666e7f3862');
 
-download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/435b9d8ea86228b9ec4b526fc915aa35a7a8bec6.zip',
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/629c44513698405b58c50650cba69419474062ad.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'3f9c95580efeb4d2b8f1fa977f7fd395');
+	'd41d8cd98f00b204e9800998ecf8427e');
 
 download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',

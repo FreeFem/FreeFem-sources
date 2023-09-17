@@ -843,7 +843,8 @@ ENDIFMACRO
             part(m:m + ThTab[i + 1].nt - 1) = neighborsName[i];
             m += ThTab[i + 1].nt;
         }
-        part(m:ThName.nt - 1) = rank;
+        if(m != ThName.nt)
+            part(m:ThName.nt - 1) = rank;
         mpiWaitAll(rqSend);
         if(verbosity > 0) {
             mpiBarrier(ThName#Comm);
