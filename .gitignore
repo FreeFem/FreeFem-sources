@@ -135,7 +135,10 @@ AppDir/
 3rdparty/mmg3d/mmg3d4/
 3rdparty/mmg3d/tag-tar-158547
 3rdparty/mshmet/ff-flags
-3rdparty/mshmet/mshmet.2012.04.25/
+3rdparty/mshmet/src/FAIRE
+3rdparty/mshmet/src/FAIT
+3rdparty/mshmet/src/sourceslib/compil.date
+3rdparty/mshmet/src/tag-tar
 3rdparty/mumps-seq/FAIRE-4.10.0
 3rdparty/mumps-seq/Makefile.inc
 3rdparty/mumps/FAIRE-4.10.0
@@ -270,6 +273,7 @@ plugin/seq/ff-c++
 plugin/seq/ff-get-dep
 plugin/seq/ff-pkg-download
 plugin/seq/ffmaster
+plugin/seq/ffmaster.dSYM
 plugin/seq/include/
 plugin/seq/load.link
 *speedtest.out

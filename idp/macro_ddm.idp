@@ -718,7 +718,13 @@ ENDIFMACRO
 IFMACRO(ThName#RefinementFactor)
 int privateS = ThName#RefinementFactor;
 ENDIFMACRO
+IFMACRO(ThName#Overlap)
+meshN privateBorder;
+buildOverlap(ThName, privateBorder, -111111, privateS, ThName#Overlap, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, false);
+ENDIFMACRO
+IFMACRO(!ThName#Overlap)
 build(ThName, privateS, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
 }
@@ -818,11 +824,23 @@ ENDIFMACRO
         mpiRequest[int] rqRecv(neighborsName.n);
         for[i, value : neighborsName]
             Irecv(processor(value, ThName#Comm, rqRecv[i]), ThTab[i + (i >= between)]);
+IFMACRO(!ThName#Overlap)
         ThTab[between] = trunc(ThName, gamma > 0.01, label = -111112);
+ENDIFMACRO
+IFMACRO(ThName#Overlap)
+        ThTab[between] = ThName;
+ENDIFMACRO
         mpiRequest[int] rqSend(neighborsName.n);
         for[i, value : neighborsName]
+IFMACRO(!ThName#Overlap)
             Isend(processor(value, ThName#Comm, rqSend[i]), ThTab[between]);
+ENDIFMACRO
+IFMACRO(ThName#Overlap)
+            Isend(processor(value, ThName#Comm, rqSend[i]), ThName);
+ENDIFMACRO
+IFMACRO(!ThName#Overlap)
         ThTab[neighborsName.n + 1] = trunc(ThName, gamma < 0.01, label = -111112);
+ENDIFMACRO
         mpiWaitAll(rqRecv);
 IFMACRO(dimension,3)
         ThName = gluemesh(ThTab);
@@ -843,7 +861,8 @@ ENDIFMACRO
             part(m:m + ThTab[i + 1].nt - 1) = neighborsName[i];
             m += ThTab[i + 1].nt;
         }
-        part(m:ThName.nt - 1) = rank;
+        if(m != ThName.nt)
+            part(m:ThName.nt - 1) = rank;
         mpiWaitAll(rqSend);
         if(verbosity > 0) {
             mpiBarrier(ThName#Comm);
@@ -860,7 +879,13 @@ ENDIFMACRO
 IFMACRO(ThName#N2O)
     NewMacro privateDmesh#N2O()ThName#N2O EndMacro
 ENDIFMACRO
-    buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm)
+IFMACRO(ThName#Overlap)
+    meshN ThBorder;
+    buildOverlapWithPartitioning(ThName, ThBorder, part, -111111, 1, ThName#Overlap, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, false);
+ENDIFMACRO
+IFMACRO(!ThName#Overlap)
+    buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
 }
 EndMacro
 macro initializeDmesh(NewName)
