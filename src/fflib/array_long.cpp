@@ -197,6 +197,13 @@ void initArrayOperatorlong()
   TheOperators->Add("<-", new InitMapfromArray<MyMap<String,String>*, string *, string*, true> );
 
   TheOperators->Add("<<", new OneBinaryOperator<PrintPnd<KN<String> * > >); // add may 2018 FH
+    
+    // sep 2023 FH for G. Sadaka .
+     Dcl_Type< Resize<KN<String> > >  ();
+     Add<KN<String> *>("resize",".",new OneOperator1< Resize<KN<String> >,KN<String> *>(to_Resize));
+     Add<Resize<KN<String> > >("(","",new OneOperator2_<KN<String> *,Resize<KN<String> > , long   >(resize1));
+  
+
 }
 
 // void xxxx() {
