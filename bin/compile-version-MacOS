@@ -173,12 +173,13 @@ echo2 fix gfortran lib  distribution $dirpkg/$prefix
 echo2 ================================
 tmpdylib=/tmp/dylib-ff-$$.txt
 tmplst=/tmp/otool-ff-$$.txt
-
+echo2 find $dirpkg/$prefix -name '*.dylib' 
+echo2 .. $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib 
 find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
  $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib `cat $tmpdylib`
  ## verification 
  echo2 dylib to brew in installation for debug !!!! 
- cat $tmpdylib| xargs otool -L | grep -i brew ||echo2 OK 
+ cat $tmpdylib| xargs otool -L | egrep -i 'brew|/opt/' ||echo2 OK 
   
 echo2 ================================
 ##   build of PACKAGE directory 
@@ -202,5 +203,6 @@ cat  $LOG  >> /tmp/$dirdmgpkg/build-log.log
 
 # build dmg file $HOME/desktop/$dirdmgpkg.dmg
 echo hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
+test -f $HOME/desktop/$dirdmgpkg.dmg && rm $HOME/desktop/$dirdmgpkg.dmg
 hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
 echo  /tmp/$dirdmgpkg

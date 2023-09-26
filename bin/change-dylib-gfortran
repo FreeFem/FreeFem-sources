@@ -11,10 +11,15 @@ lib1=$1
 shift
 lib2=$1
 shift
-if test -f "$olddir/$lib1" -a  -f "$olddir/$lib2"  -a  -f "$newdir/$lib1" -a  -f "$newdir/$lib2" ; then 
+lib3=$1
+shift
+fi
+
+if test -f "$olddir/$lib1" -a  -f "$olddir/$lib2" -a  -f "$olddir/$lib3" \
+    -a  -f "$newdir/$lib1" -a  -f "$newdir/$lib2" -a  -f "$newdir/$lib3" ; then 
 for ff in $@; do
 ch=0
-for lib in $lib1 $lib2; do 
+for lib in $lib1 $lib2 $lib3; do 
   old=$olddir/$lib	
   new=$newdir/$lib	
   nnl=`otool -L $ff|grep $lib|awk '{print $1}'`
@@ -39,6 +44,6 @@ for lib in $lib1 $lib2; do
   fi
   done 
 else
-	echo "$olddir/$lib1"  "$olddir/$lib2"  do not exist!
-	echo "$newdir/$lib1"  "$newdir/$lib2"  do not exist!
+	echo "$olddir/$lib1"  "$olddir/$lib2"  "$olddir/$lib3"  do some not exist!
+	echo "$newdir/$lib1"  "$newdir/$lib2"  "$newdir/$lib3" do not exist!
 fi
