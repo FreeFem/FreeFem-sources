@@ -1,4 +1,4 @@
-ff-tags: mesh-generation square adaptmesh movemesh tetg tetgreconstruction
+//ff-tags: mesh-generation square adaptmesh movemesh tetg tetgreconstruction
 // file adaptsphere.edp
 load "msh3"
 load "tetgen"
