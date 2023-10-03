@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation gslspline square adaptmesh movemesh tetg
 load "msh3"
 load "medit"
 load "gsl"

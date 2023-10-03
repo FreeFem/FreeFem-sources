@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation movemesh tetg mmg3d
 // test of mmg3d for move objets in a mesh ...
 load "msh3" 
 load "tetgen" 

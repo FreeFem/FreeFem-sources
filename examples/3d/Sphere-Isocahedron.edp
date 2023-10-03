@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation tetg
 // Sphere from a  partir d'un icosahedron
 // Guillaume Vergez. 
 load "msh3"

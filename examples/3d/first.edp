@@ -1,3 +1,4 @@
+//ff-tags: IO-mesh buildmesh mesh-datastructure savemesh diffusion ofstream
 verbosity=2;
 mesh3 Th("dodecaedre01");
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}

@@ -1,3 +1,4 @@
+//ff-tags: diffusion periodic square cube buildlayers savemesh mesh-datastructure
 load "msh3"
 int nn=10;;
 mesh Th2=square(nn,nn,region=0);

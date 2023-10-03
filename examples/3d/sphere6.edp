@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation square adaptmesh movemesh
 load "msh3"
 load "medit" 
 real sqrt2=sqrt(2.);

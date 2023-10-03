@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation square adaptmesh movemesh tetg IO-mesh
 // file tetgenholeregion.edp
 load "msh3"
 load "tetgen"

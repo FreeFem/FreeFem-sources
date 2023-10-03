@@ -1,3 +1,4 @@
+//ff-tags: cube levelset
 load "medit"
 include "cube.idp"
 real surfS1 = 4*pi;

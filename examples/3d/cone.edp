@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation buildmesh
 //  example to build a mesh a cone 
 include "ball-buildlayer.idp"
 load "medit"

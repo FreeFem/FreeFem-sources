@@ -1,3 +1,4 @@
+//ff-tags: IO-mesh fe-array
 mesh3 Th("dodecaedre01.mesh");
 fespace Vh(Th,P23d);
 Vh[int] u(10);

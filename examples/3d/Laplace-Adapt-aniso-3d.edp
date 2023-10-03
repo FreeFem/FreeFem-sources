@@ -1,4 +1,4 @@
-
+//ff-tags: cube trunc diffusion mshmet anisotropy
 {
 load "msh3"
 load "tetgen"

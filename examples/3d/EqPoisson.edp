@@ -1,3 +1,4 @@
+// diffusion mesh-generation buildmesh buildlayers
 load "msh3" load "medit"
 func f=2*((0.1+(((x/3))*(x-1)*(x-1)/1+x/100))^(1/3.)-(0.1)^(1/3.));
 real yf=f(1.2,0); 

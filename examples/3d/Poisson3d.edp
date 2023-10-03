@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation square tetgtransfo adaptmesh buildmesh diffusion
 // build de mesh of a Sphere
 // -------------------------- 
 load "tetgen"

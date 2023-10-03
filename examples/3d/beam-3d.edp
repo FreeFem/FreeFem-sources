@@ -1,3 +1,4 @@
+//ff-tags: elasticity movemesh
 load "medit"
 include "cube.idp"
 int[int]  Nxyz=[20,5,5];

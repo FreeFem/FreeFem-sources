@@ -1,3 +1,4 @@
+//ff-tags: cube diffusion mixed-FE
 /*
    $ - \Delta p = f $   on $\Omega$, 
    $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{1}$ 

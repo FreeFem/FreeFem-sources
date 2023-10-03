@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation square movemesh adaptmesh savemesh tetg diffusion 
 verbosity=1;
 load "msh3"
 load "tetgen"

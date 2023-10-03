@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation buildmesh buildlayers trunc
 load "msh3"
 load "medit"
 int nn=10;

@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation buildmesh
 include "ball-buildlayer.idp"
 
 load "medit"

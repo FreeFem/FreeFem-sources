@@ -1,3 +1,4 @@
+//ff-tags: diffusion IO-mesh buildmesh diffusion
 verbosity=2;
 
 mesh3 Th("dodecaedre01");

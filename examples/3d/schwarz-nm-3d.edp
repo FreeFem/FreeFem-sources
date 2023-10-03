@@ -1,3 +1,4 @@
+//ff-tags: diffusion domain-decomposition
 bool withmetis=1;
 bool RAS=0;
 int sizeoverlaps=2; // size off overlap 

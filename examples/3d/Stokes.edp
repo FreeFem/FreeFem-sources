@@ -1,3 +1,4 @@
+//ff-tags: Stokes square buildlayers
 load "msh3" load "medit"
 int nn=3;
 mesh Th2=square(nn,nn);

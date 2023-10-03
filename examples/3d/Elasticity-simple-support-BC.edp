@@ -1,3 +1,4 @@
+//ff-tags: elasticity boundary-conditions cube movemesh
 /*
   Exemple of homogenious Dirichket Boundary condition on some Edge in 3d ..
  in linear elasticity.

@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation movemesh square buildmesh IO-mesh
 load "msh3"
 load "tetgen"
 load "medit"

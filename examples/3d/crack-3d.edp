@@ -1,3 +1,4 @@
+//ff-tags: trunc buildmesh buildlayers
 // F. HECHT example to check eps in trunc check mesh
 
 load "msh3"

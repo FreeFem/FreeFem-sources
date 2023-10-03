@@ -1,3 +1,4 @@
+//ff-tags: IO-mesh potential-flow
 load "msh3"
 load "medit"
 int nn=10;

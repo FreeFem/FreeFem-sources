@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation buildmesh buildlayers
 load "msh3"// buildlayer
 load "medit"// buildlayer
 

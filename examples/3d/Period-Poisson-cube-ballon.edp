@@ -1,3 +1,4 @@
+//ff-tags: IO-mesh mesh-generation tetg savemesh diffusion periodic
 verbosity=1;
 load "msh3"
 load "tetgen"

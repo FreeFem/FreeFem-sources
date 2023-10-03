@@ -1,3 +1,4 @@
+//ff-tags: cube extract
 load "msh3"
 load "medit"
 int n= 10;

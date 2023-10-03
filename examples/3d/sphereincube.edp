@@ -1,3 +1,4 @@
+//ff-tags: mesh-generation tetg trunc IO-mesh
 verbosity=1;
 load "msh3"
 load "tetgen"
