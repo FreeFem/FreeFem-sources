@@ -4828,6 +4828,8 @@ AnyType Plot::operator( )(Stack s) const {
       cadre(xx0, xx1, yy0, yy1);
   }
   getcadre(xx0, xx1, yy0, yy1);
+  if (verbosity > 2)
+      cout << " getcadre bb=  xmin =" << xx0 << ", max =" << xx1 << ", ymin = " << yy0 << ", ymax = " << yy1  << endl;
   const R ccoeff = coeff;
   bool plotting = true;
   //  drawing part  ------------------------------
@@ -5855,8 +5857,8 @@ void Add_u_init_array(int ii=0)
     if( ii)
      TheOperators->Add(
                     "<-",
-                      new init_FE_eqarray< FFset3< R, v_fes, KN_< R > > >(10),
-                      new init_FE_eqarray< FFset3< C, v_fes, KN_< C > > >(10));
+                      new init_FE_eqarray< FFset3< R, vfes, KN_< R > > >(10),
+                      new init_FE_eqarray< FFset3< C, vfes, KN_< C > > >(10));
 
 }
 void init_lgfem( ) {

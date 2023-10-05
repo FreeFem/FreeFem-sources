@@ -2494,6 +2494,50 @@ class Op4_pfL2K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { pu
       
     };
 };
+template<class K,class v_fes>
+class Op3_pfL2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { public:
+    
+    
+    class Op : public E_F0mps { public:
+    Expression a,b,c;
+      Op(Expression aa,Expression bb,Expression cc)
+    : a(aa),b(bb),c(cc){}
+      AnyType operator()(Stack s)  const
+      {
+    
+    R xx(GetAny<R>((*b)(s)));
+    R yy(GetAny<R>((*c)(s)));
+    R zz=R();
+    MeshPoint & mp = *MeshPointStack(s),mps=mp;
+    mp.set(xx,yy,zz);
+    AnyType ret = pfLr2R<K,0,v_fes>(s,(*a)(s));
+    mp=mps;
+    return  ret;}
+      
+    };
+};
+template<class K,class v_fes>
+class Op2_pfL2K : public binary_function<pair<FEbase<K,v_fes> *,int>,R,K> { public:
+    
+    
+    class Op : public E_F0mps { public:
+    Expression a,b;
+      Op(Expression aa,Expression bb)
+    : a(aa),b(bb){}
+      AnyType operator()(Stack s)  const
+      {
+
+    R xx(GetAny<R>((*b)(s)));
+    R yy=R();
+    R zz=R();
+    MeshPoint & mp = *MeshPointStack(s),mps=mp;
+    mp.set(xx,yy,zz);
+    AnyType ret = pfLr2R<K,0,v_fes>(s,(*a)(s));
+    mp=mps;
+    return  ret;}
+      
+    };
+};
 
 
 template<class K,class v_fes>    
@@ -2894,7 +2938,11 @@ void init_lgmesh3() {
   Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfLc>(pf3r2vect<Complex,v_fesL>));
   Add<pfLr>("(","",new OneQuadOperator<Op4_pfL2K<R,v_fesL>,Op4_pfL2K<R,v_fesL>::Op> );
   Add<pfLc>("(","",new OneQuadOperator<Op4_pfL2K<Complex,v_fesL>,Op4_pfL2K<Complex,v_fesL>::Op> );
-    
+    Add<pfLr>("(","",new OneTernaryOperator<Op3_pfL2K<R,v_fesL>,Op3_pfL2K<R,v_fesL>::Op> );
+    Add<pfLc>("(","",new OneTernaryOperator<Op3_pfL2K<Complex,v_fesL>,Op3_pfL2K<Complex,v_fesL>::Op> );
+    Add<pfLr>("(","",new OneBinaryOperatorCode<Op2_pfL2K<R,v_fesL>,Op2_pfL2K<R,v_fesL>::Op> );
+    Add<pfLc>("(","",new OneBinaryOperatorCode<Op2_pfL2K<Complex,v_fesL>,Op2_pfL2K<Complex,v_fesL>::Op> );
+
   Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
   // Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide
   Add<Complex>("(","",new OneQuadOperator<Op4_K2R<Complex>,Op4_K2R<Complex>::Op> );

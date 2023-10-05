@@ -1558,7 +1558,6 @@ void ArrayOperator()
     Add<Resize<KN<KN<K> > > >("(","",new OneOperator2_<KN<KN<K> >  *,Resize<KN<KN<K> > > , long   >(resize1));
     Add<Resize<KN<KNM<K> > > >("(","",new OneOperator2_<KN<KNM<K> >  *,Resize<KN<KNM<K> > > , long   >(resize1));
     Dcl_Type<Mul_KNMh_KN_<K> >();
-
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
      TheOperators->Add("=", new InitArrayfromArray<K,KN<K>*,false>(10));

@@ -23,12 +23,21 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
-- add conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
+- Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
     see tutorial/sparse-matrix.edp example at end
     ```
     matrix A = va(Ph,Vh); 
     int[int] a = A, at= A'; 
     ````
+ - a meshL finite function can be see as real function with 1, or 2 parameters
+    ```
+     meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
+     cout << u(0.5)   << endl; 
+     cout << u(0.5,0) << endl; 
+    ```
+-  Exemple to code convolution of 2 function with one with a small support 
+       too be not to expanxive
+      see tutorial/Convolution-Sample.edp example
 ### Changed
 -
 
