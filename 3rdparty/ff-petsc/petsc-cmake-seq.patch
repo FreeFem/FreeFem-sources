@@ -66,9 +66,9 @@ diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/PTScotch.p
 @@ -9,6 +9,8 @@
      self.download         = ['git://https://gitlab.inria.fr/scotch/scotch.git',
                               'https://gitlab.inria.fr/scotch/scotch/-/archive/'+self.gitcommit+'/scotch-'+self.gitcommit+'.tar.gz',
-                              'http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-'+self.gitcommit+'.tar.gz']
+                              'https://web.cels.anl.gov/projects/petsc/download/externalpackages/scotch-'+self.gitcommit+'.tar.gz']
 +    self.download_macos   = ['https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.2/scotch-v6.1.2.tar.gz',
-+                             'http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-v6.1.2.tar.gz']
++                             'http://web.cels.anl.gov/projects/petsc/download/externalpackages/scotch-v6.1.2.tar.gz']
      self.downloaddirnames = ['scotch','petsc-pkg-scotch']
      self.liblist          = [['libptesmumps.a','libptscotchparmetisv3.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a'],['libptesmumps.a','libptscotchparmetis.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a'],
                               ['libptesmumps.a','libptscotchparmetis.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a']]
