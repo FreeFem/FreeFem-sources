@@ -65,7 +65,7 @@ A = NA;
 Mat B(C, A, NB);
 Mat Stokes = [[A, B'],
               [B, 0 ]];
-
+set(Stokes, sparams = "-pc_type none");
 if(HasType("PC", "hpddm")) {
     string common = " -ksp_converged_reason -ksp_view_final_residual -ksp_monitor_true_residual -ksp_type fgmres";
     set(Stokes, sparams = common + " -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_precondition self "

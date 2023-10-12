@@ -100,14 +100,14 @@ Mat B(C, A, NB);
 C = NC;
 Mat Elas = [[A, B'],
             [B, C ]];
-
+set(Elas, sparams = "-pc_type none");
 if(HasType("PC", "hpddm")) {
     string common = " -ksp_converged_reason -ksp_view_final_residual -ksp_monitor_true_residual -ksp_type fgmres";
     set(Elas, sparams = common + " -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_precondition self "
         + "-prefix_push fieldsplit_1_ "
         + " -ksp_type fgmres -ksp_rtol 1.0E-1 -pc_type hpddm -pc_hpddm_has_neumann -ksp_monitor -pc_hpddm_ksp_pc_side right -pc_hpddm_ksp_rtol 1.0E-1 -pc_hpddm_schur_precondition geneo "
         + " -prefix_push pc_hpddm_levels_1_ "
-            + " -eps_nev 20 -eps_threshold 0.5 -st_share_sub_ksp -eps_gen_non_hermitian -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky -eps_tol 1.0E-2 "
+            + " -eps_nev 10 -eps_threshold 0.5 -st_share_sub_ksp -eps_gen_non_hermitian -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky -eps_tol 1.0E-2 "
         + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
             + " -correction balanced -pc_type cholesky -pc_factor_mat_solver_type mumps "
         + " -prefix_pop"
@@ -115,7 +115,7 @@ if(HasType("PC", "hpddm")) {
     set(A, parent = Elas, bs = sym ? 1 : 2, sparams =
           "-prefix_push fieldsplit_0_ -pc_type hpddm -ksp_pc_side right -pc_hpddm_has_neumann -pc_hpddm_define_subdomains"
         + " -prefix_push pc_hpddm_levels_1_ "
-            + " -eps_nev 40 -eps_threshold 0.3 -st_share_sub_ksp -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky "
+            + " -eps_nev 20 -eps_threshold 0.3 -st_share_sub_ksp -sub_pc_factor_mat_solver_type mumps -sub_pc_type cholesky "
         + " -prefix_pop -prefix_push pc_hpddm_coarse_ "
             + " -pc_type cholesky -pc_factor_mat_solver_type mumps "
         + " -prefix_pop"
