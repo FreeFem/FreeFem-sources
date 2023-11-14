@@ -26,7 +26,7 @@ for(int ii=0; ii<5; ii++)
   // FFCS: add 3D view parameters
   plot(u,wait=1,fill=0,boundary=0,CutPlane=0,ShowMeshes=1,LabelColors=0);
   errm*= 0.8;// change the level of error
-  cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
+  cout << " Th3.nv=" << Th3.nv << ", Th3.nt=" << Th3.nt << endl;
   Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);
   medit("U-adap-iso-"+ii,Th3,u,wait=1);
 }

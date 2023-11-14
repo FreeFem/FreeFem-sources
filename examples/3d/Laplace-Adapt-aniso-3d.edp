@@ -42,7 +42,7 @@ for(int ii=0; ii<4; ii++) //  BUG trap  in interation 3
   Th3=mmg3d(Th3,metric=m11[],hgrad=2.3);//("oo/Th3.o.mesh");
   
   lerr *= 0.6;// change the level of error
-  cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
+  cout << " Th3.nv=" << Th3.nv << ", Th3.nt=" << Th3.nt << endl;
    u=u;
   if(ii>3) medit("U-adap-iso-"+ii,Th3,u,wait=1);
 
