@@ -302,7 +302,7 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
             typename Mesh2::RdHat pbt(1./(Mesh2::RdHat::d+1),1./(Mesh2::RdHat::d+1));
             p2.reserve(3*m);
 
-            int mDofScalar = m/nnn; // computation of the dof of one component 
+            int mDofScalar = m/nnn; // computation of the dof of one component
 
             for (int i=0; i<mDofScalar; i++) {
                 Fem2D::R3 p;
@@ -350,7 +350,7 @@ namespace PETSc {
       Op(Expression x, Expression y) : b(new Call_FormBilinear<fes1, fes2>(*dynamic_cast<const Call_FormBilinear<fes1, fes2>*>(y))), a(x) {
           assert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<upscaled_type<K>>::value) == IsComplexType<upscaled_type<K>>::value);
-          
+
           #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
           // Check the nbitem of inconnu and test in BemFormBilinear
           checkNbItemFEspacesInconnuAndTest(b->largs,b->N,b->M);
@@ -5177,7 +5177,7 @@ namespace PETSc {
                     u->operator[](i) = p[i];
             }
           }
-          } 
+          }
           VecRestoreArray(y, &ptr);
           VecDestroy(&y);
         }
@@ -5866,17 +5866,16 @@ namespace PETSc {
   {
     typedef typename Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>::const_iterator const_iterator;
     int init;
-    
+
     class Op : public E_F0mps {
       public:
         Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *b;
         Expression a;
         int init;
         //AnyType operator()(Stack s)  const;
-        
         Op(Expression aa,Expression  bb,int initt)
           : b(new Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>(* dynamic_cast<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *>(bb))),a(aa),init(initt)
-      { 
+      {
         assert(b && b->nargs);
         int NN = (int) b->euh->componentNbitem().size();
         int MM = (int) b->evh->componentNbitem().size();
@@ -5912,36 +5911,36 @@ namespace PETSc {
       std::set<PetscInt> jcols;
 
       ff_mat.CSR(); // transform the matrix to CSR format
-      
+
       std::vector<PetscInt> perm_row(ff_mat.n,-1);
       std::vector<PetscInt> perm_col(ff_mat.m,-1);
-        
+
       for (int ii=0; ii < ff_mat.n; ii++) {
         for (int la = ff_mat.p[ii]; la < ff_mat.p[ii+1]; la++) {
-          perm_row[ii] = 1; 
+          perm_row[ii] = 1;
           perm_col[ff_mat.j[la]] = 1;
           if( la > ff_mat.p[ii]){
             //
             if( !( ff_mat.j[la] > ff_mat.j[ff_mat.p[ii]]) ){
               cerr << " The column index must be croissant :: Error " << ff_mat.j[la] << " " << ff_mat.j[ff_mat.p[ii]]  <<endl;
             }
-            ffassert( ff_mat.j[la] > ff_mat.j[ff_mat.p[ii]] ); 
+            ffassert( ff_mat.j[la] > ff_mat.j[ff_mat.p[ii]] );
           }
         }
       }
-    
+
     if(verbosity> 2)
       for(int ii=0; ii<10; ii++)
         cout << "perm_row["<<ii<<"]=" << perm_row[ii] << endl;
 
     // construction of irows
-    for (int ii=0; ii < ff_mat.n; ii++) 
+    for (int ii=0; ii < ff_mat.n; ii++)
       if (perm_row[ii] == 1) {
         auto it = irows.insert(ii);
         perm_row[ii] = std::distance(irows.begin(),it.first);
       }
     // construction of jcols
-    for (int ii=0; ii < ff_mat.m; ii++) 
+    for (int ii=0; ii < ff_mat.m; ii++)
       if (perm_col[ii] == 1) {
         auto it = jcols.insert(ii);
         perm_col[ii] = std::distance(jcols.begin(),it.first);
@@ -5959,7 +5958,7 @@ namespace PETSc {
         ffassert( perm_row[ii] == cpt);
         cpt++;
       }
-    IA[ cpt ] = ff_mat.nnz; 
+    IA[ cpt ] = ff_mat.nnz;
     ffassert( IA[cpt] == ff_mat.nnz);
     ffassert(cpt==irows.size());
 
@@ -6027,7 +6026,7 @@ namespace PETSc {
     pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*b->euh)(stack));
     pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*b->evh)(stack));
 
-    ffassert( *pUh && *pVh ); 
+    ffassert( *pUh && *pVh );
     // Update is necessary when we get "pvectgenericfes" to take account a new mesh.
     (*pUh)->update();
     (*pVh)->update();
@@ -6046,20 +6045,20 @@ namespace PETSc {
     KN<int> VhNbItem = (*pVh)->vectOfNbitem();
 
     //
-    const KNM<list<C_F0>> & block_largs=b->block_largs; 
+    const KNM<list<C_F0>> & block_largs=b->block_largs;
 
     // check if we have a square matrix
     bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
 
-    // === simple check if A is symetrical === // 
+    // === simple check if A is symetrical === //
     // voir avec les autres.
-    bool A_is_maybe_sym = (void*)pUh == (void*)pVh; 
+    bool A_is_maybe_sym = (void*)pUh == (void*)pVh;
 
     // VF == true => VF type of Matrix
     //bool VF=isVF(b->block_largs);    //=== used to set the solver ??? block matrix ??? ===/
     bool VF = 0;
 
-    // set parameteer of the matrix :: 
+    // set parameteer of the matrix :
     Data_Sparse_Solver ds;
     ds.factorize=0;
     ds.initmat=true;
@@ -6068,14 +6067,14 @@ namespace PETSc {
 
     MPI_Comm comm = ds.commworld ? *static_cast< MPI_Comm* >(ds.commworld) : PETSC_COMM_WORLD;
 
-    // J'ai repris ce qu'il y avait. 
+    // J'ai repris ce qu'il y avait.
     // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
     // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
-    // set ds.sym = 0 
+    // set ds.sym = 0
 
     ds.sym = 0;
     if(verbosity>3)
-      cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl; 
+      cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl;
 
     if (! A_is_square )
     {
@@ -6084,7 +6083,7 @@ namespace PETSc {
 
     // A quoi cela correspond?? Gestion du stack + autre
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
-    
+
     PETSc::DistributedCSR< HpddmType > * Ares( GetAny<PETSc::DistributedCSR< HpddmType >*>((*a)(stack)));
 
     // test function (Vh) are the line
@@ -6109,22 +6108,22 @@ namespace PETSc {
         cout << "                          " << endl;
         }
         // construction du block (i,j)
-        const list<C_F0> & b_largs=block_largs(i,j); 
+        const list<C_F0> & b_largs=block_largs(i,j);
 
         // size of the block
         int N_block = UhNbOfDf[i];
         int M_block = VhNbOfDf[j];
 
-        // initialise the bem block and fem block 
+        // initialise the bem block and fem block
         Matrice_Creuse<R> Afem;
         Afem.init();
         Afem.resize(M_block,N_block);
         int nsparseblocks = 0;
         Mat Abem = nullptr;
 
-        if(verbosity>2) cout << "size_block =" << b_largs.size() << endl; 
+        if(verbosity>2) cout << "size_block =" << b_largs.size() << endl;
         if( b_largs.size()> 0){
-          
+
           // compute largs due BEM and FEM part
           list<C_F0> largs_FEM;
           list<C_F0> largs_BEM;
@@ -6212,7 +6211,7 @@ namespace PETSc {
             else{
 
               bool samemesh = (void*) (*pUh)->vect[i]->getppTh() == (void*) (*pVh)->vect[j]->getppTh();  // same Fem2D::Mesh     +++ pot or kernel
-              
+
               PETSc::DistributedCSR< HpddmType > *Abemblocki = nullptr, *Abemblock = nullptr;
 
               // block non diagonal matrix
@@ -6263,30 +6262,30 @@ namespace PETSc {
                   delete Abemblocki;
                 }
               }
-              // creation de la matrice dense 
-              
+              // creation de la matrice dense
+
               // BEM matrix is constructed with different FESpace
               ffassert( (*pUh)->vect[i]->getpVh() != (*pVh)->vect[j]->getpVh() ) ;
-              
+
               if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
-                // case Uh[i] == MeshL et Vh[j] = Mesh2 
+                // case Uh[i] == MeshL et Vh[j] = Mesh2
                 const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
                 const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
                 // construction of the matrix of interpolation
-                
+
                 // The transpose is in the build matrix now
                 bool transpose_MI = false;
                 Matrice_Creuse<double> *  MI_BBB = PETSC_buildMatrixInterpolationForCompositeFESpace<double,FESpaceL,FESpace>( PUh, PVh, transpose_MI );
                 MatriceMorse<double> * mr =MI_BBB->pHM();
-                
-                // Transform Real Matrix in Complex Matrix 
+
+                // Transform Real Matrix in Complex Matrix
                 MatriceMorse<R> * mA = new MatriceMorse<R>(mr->n,mr->m,0,0);
                 // we divide by mpisize because the interpolation matrix is computed in sequential
                 int size;
                 MPI_Comm_size(comm, &size);
                 *mr *= 1.0/size;
                 *mA = *mr;
-                
+
                 // transform intrerpolation matrix to matrix IS
                 Mat matIS_MI;
                 ff_createMatIS( *mA, matIS_MI, comm);
@@ -6296,8 +6295,8 @@ namespace PETSc {
                 if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(matIS_MI, &mAAT);
                 else MatCreateHermitianTranspose(matIS_MI, &mAAT);
                 MatDestroy(&matIS_MI);
-                
-                //  create composite 
+
+                //  create composite
                 Mat mats[2] = { Abemblock->_petsc , mAAT};
                 Mat C;
                 MatCreateComposite(PetscObjectComm((PetscObject)Abemblock->_petsc), 2, mats, &C);
@@ -6348,19 +6347,19 @@ namespace PETSc {
                 ffassert(0);
               }
 
-              
+
             }
   #endif
           }
           if( largs_FEM.size() >0){
             const list<C_F0> & b_largs_zz = largs_FEM;
 
-            varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, (*pUh)->typeFE[i], (*pVh)->typeFE[j], 
+            varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, (*pUh)->typeFE[i], (*pVh)->typeFE[j],
                                                           0, 0, (*pUh)->vect[i], (*pVh)->vect[j],
                                                           true, false, ds.sym, ds.tgv, ds.commworld,
-                                                          b_largs_zz, stack, 
+                                                          b_largs_zz, stack,
                                                           0, 0, Afem.pHM());
-          
+
             nsparseblocks++;
           }
         }
@@ -6368,13 +6367,13 @@ namespace PETSc {
 
       if(b_largs.size()> 0){
         Afem.pHM()->half = ds.sym;
-    
+
         Mat matIS;
         if(nsparseblocks){
           ff_createMatIS( *(Afem.pHM()), matIS, comm);
           Afem.destroy();
         }
-      
+
         if (Abem != nullptr) {
           if (!nsparseblocks) {
             a[j * maxJVh + i] = Abem;
@@ -6388,17 +6387,15 @@ namespace PETSc {
           }
         }
         else {
-          a[j * maxJVh + i] = matIS; 
+          a[j * maxJVh + i] = matIS;
         }
         destroy.emplace_back(j, i);
       }
-        
+
       } // end loop j
       offsetMatrixUh += UhNbOfDf[i];
     } // end loop i
-    
-    // 
-    if(verbosity>3) cout << "Ares->_vector_global=" << Ares->_vector_global << endl; 
+    if(verbosity>3) cout << "Ares->_vector_global=" << Ares->_vector_global << endl;
 
     if( NpUh==1 && maxJVh==1 ){
       Ares->_petsc = a[0];
