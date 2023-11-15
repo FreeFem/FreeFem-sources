@@ -342,7 +342,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 28 : 22;
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 30 : 24;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -399,6 +399,7 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 //{"nreg"              , &typeid(bool)},/*!< [0/1], Enable normal regularization */
 {"renum"             , &typeid(bool)},/*!< [1/0], Turn on/off point relocation with Scotch */
 {"anisosize"         , &typeid(bool)},/*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+{"nosizreq"          , &typeid(bool)},/*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
 {"octree"            , &typeid(long)},/*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
 {"angleDetection"    , &typeid(double)},/*!< [val], Value for angle detection */
 {"hmin"              , &typeid(double)},/*!< [val], Minimal mesh size */
@@ -406,6 +407,7 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
+{"hgradreq"          , &typeid(double)},/*!< [val], Control required gradation */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 //{"rmc"               , &typeid(double)},/*!< [-1/val], Remove small connex componants in level-set mode */
 {"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], References of surfaces with required triangles */
@@ -428,12 +430,14 @@ basicAC_F0::name_and_type mmg_Op<Mesh>::name_param[] = {
 {"nomove"            , &typeid(bool)},/*!< [1/0], Avoid/allow point relocation */
 {"nreg"              , &typeid(bool)},/*!< [0/1], Disabled/enabled normal regularization */
 {"renum"             , &typeid(bool)},/*!< [1/0], Turn on/off point relocation with Scotch */
+{"nosizreq"          , &typeid(bool)},/*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
 {"angleDetection"    , &typeid(double)},/*!< [val], Value for angle detection */
 {"hmin"              , &typeid(double)},/*!< [val], Minimal mesh size */
 {"hmax"              , &typeid(double)},/*!< [val], Maximal mesh size */
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
+{"hgradreq"          , &typeid(double)},/*!< [val], Control required gradation */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 {"requiredEdge"      , &typeid(KN<long>*)},/*!< [val], References of boundaries with required edges */
 {"requiredVertex"    , &typeid(KN<long>*)}/*!< [val], Indices of required vertices */
@@ -468,11 +472,11 @@ AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  if (nargs[20]) {
-    prequiredEdge = GetAny< KN< long > * >((*nargs[20])(stack));
+  if (nargs[22]) {
+    prequiredEdge = GetAny< KN< long > * >((*nargs[22])(stack));
   }
-  if (nargs[21]) {
-    prequiredVertex = GetAny< KN< long > * >((*nargs[21])(stack));
+  if (nargs[23]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[23])(stack));
   }
   if (nargs[7]) {
     plocalParameter = GetAny< KNM< double > * >((*nargs[7])(stack));
@@ -573,12 +577,14 @@ AnyType mmg_Op<Mesh>::operator( )(Stack stack) const {
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
   if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Disabled/enabled normal regularization */
                                                                                                i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
+  if (nargs[i]) MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_nosizreq,      arg(i,stack,false)); i++;   /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_hgradreq,      arg(i,stack,0.));    i++;   /*!< [val], Control required gradation */
   if (nargs[i]) MMG2D_Set_dparameter(mesh,sol,MMG2D_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
 
   int ier;
@@ -623,14 +629,14 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  if (nargs[25]) {
-    prequiredTriangle = GetAny< KN< long > * >((*nargs[25])(stack));
-  }
-  if (nargs[26]) {
-    prequiredVertex = GetAny< KN< long > * >((*nargs[26])(stack));
-  }
   if (nargs[27]) {
-    plocalParameter = GetAny< KNM< double > * >((*nargs[27])(stack));
+    prequiredTriangle = GetAny< KN< long > * >((*nargs[27])(stack));
+  }
+  if (nargs[28]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[28])(stack));
+  }
+  if (nargs[29]) {
+    plocalParameter = GetAny< KNM< double > * >((*nargs[29])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -733,6 +739,7 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   //if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Enable normal regularization */
   if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_renum,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
   if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_anisosize,     arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+  if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_nosizreq,      arg(i,stack,false)); i++;   /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   if (nargs[i]) MMG3D_Set_iparameter(mesh,sol,MMG3D_IPARAM_octree,        arg(i,stack,0L));    i++;   /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
@@ -740,6 +747,7 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_hgradreq,      arg(i,stack,0.));    i++;   /*!< [val], Control required gradation */
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
   //if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_rmc,           arg(i,stack,0.));    i++;   /*!< [-1/val], Remove small connex componants in level-set mode */
 
@@ -784,11 +792,11 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  if (nargs[19]) {
-    prequiredEdge = GetAny< KN< long > * >((*nargs[19])(stack));
+  if (nargs[21]) {
+    prequiredEdge = GetAny< KN< long > * >((*nargs[21])(stack));
   }
-  if (nargs[20]) {
-    prequiredVertex = GetAny< KN< long > * >((*nargs[20])(stack));
+  if (nargs[22]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[22])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -874,12 +882,14 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nomove,        arg(i,stack,false)); i++;   /*!< [1/0], Avoid/allow point relocation */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nreg,          arg(i,stack,false)); i++;   /*!< [0/1], Disabled/enabled normal regularization */
   if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_renum,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off point relocation with Scotch */
+  if (nargs[i]) MMGS_Set_iparameter(mesh,sol,MMGS_IPARAM_nosizreq,      arg(i,stack,false)); i++;   /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_angleDetection,arg(i,stack,0.));    i++;   /*!< [val], Value for angle detection */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmin,          arg(i,stack,0.));    i++;   /*!< [val], Minimal mesh size */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hmax,          arg(i,stack,0.));    i++;   /*!< [val], Maximal mesh size */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hsiz,          arg(i,stack,0.));    i++;   /*!< [val], Constant mesh size */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hausd,         arg(i,stack,0.));    i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hgrad,         arg(i,stack,0.));    i++;   /*!< [val], Control gradation */
+  if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_hgradreq,      arg(i,stack,0.));    i++;   /*!< [val], Control required gradation */
   if (nargs[i]) MMGS_Set_dparameter(mesh,sol,MMGS_DPARAM_ls,            arg(i,stack,0.));    i++;   /*!< [val], Value of level-set */
 
   int ier;
