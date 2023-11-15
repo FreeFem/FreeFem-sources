@@ -111,7 +111,8 @@ TESTS_PETSC_SCOTCH = DmeshRedistribute_w_PETSc.edp
 
 TESTS_PETSC_MMG = transfer.edp
 
-TESTS_PETSC_MMG_MSHMET = laplace-adapt-3d-PETSc.edp
+TESTS_PETSC_MMG_MSHMET = laplace-adapt-3d-PETSc.edp \
+	stokes-adapt-3d-PETSc.edp
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp
 

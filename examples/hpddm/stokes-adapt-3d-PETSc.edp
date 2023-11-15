@@ -1,0 +1,114 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "msh3"
+load "mshmet"
+load "mmg"
+load "aniso"
+load "PETSc"
+macro dimension()3// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)[i, i#B, i#C, i#D]// EOM
+macro init(i)[i, i, i, i]// EOM
+func Pk = [P2, P2, P2, P1];
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+macro div(u)(dx(u) + dy(u#B) + dz(u#C))// EOM
+
+real anisomax = getARGV("-anisomax", 4.0);
+bool aniso = bool(anisomax > 1.0);
+mesh3 Th;
+{
+    mesh ThGlobal2d = square(getARGV("-global", 12), getARGV("-global", 12), [x, y]);    // global mesh
+    ThGlobal2d = trunc(ThGlobal2d, (x <= 0.5) || (y <= 0.5), label = 5);
+    ThGlobal2d = trunc(ThGlobal2d, (y >= 0.25) || (x >= 0.25), label = 5);
+    //mesh Th2d = movemesh(ThGlobal2d, [-x, y]);
+    //ThGlobal2d = ThGlobal2d + Th2d;
+    Th = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
+}
+mesh3 ThG = Th; // need to backup the original global mesh
+
+Mat A;
+int[int] n2o;       // need to know how to go from the local to the global mesh
+if(mpirank==0) cout << "it = 0, Th.nv = " << ThG.nv << endl;
+macro ThN2O()n2o//
+MatCreate(Th, A, Pk);
+
+fespace Wh(Th, Pk); // complete space [u, v, w, p]
+fespace Zh(Th, P2); // velocity space
+fespace Qh(Th, P1); // pressure space
+Qh onlyP;
+Zh onlyU;
+
+varf vPb(def(u), def(v)) = int3d(Th)(
+    grad(u)' * grad(v)
+    + grad(uB)' * grad(vB)
+    + grad(uC)' * grad(vC)
+    - div(u) * vD - div(v) * uD
+    )
+    + on(0, 1, 3, 5, u = 0, uB = 0, uC = 0)
+    + on(2, u = 1000*y*(0.5-y)*z*(0.4-z), uB = 0, uC = 0);
+
+Wh def(u);
+
+for(int i = 0; i < 5; ++i) {
+    real[int] rhs = vPb(0, Wh, tgv = -1);
+    A = vPb(Wh, Wh, tgv = -1);
+    set(A, sparams = "-pc_type lu"); // add "-pc_factor_mat_solver_type mumps" to run on 1 proc
+    u[] = A^-1*rhs;
+    if(!NoGraphicWindow) {
+        onlyP = uD;
+        macro def1(i)i//
+        plotMPI(Th, onlyP, P1, def1, real, cmm = "Pressure for it = " + (i+1));
+        onlyU = u;
+        plotMPI(Th, onlyU, P2, def1, real, cmm = "x-velocity for it = " + (i+1));
+    }
+    {
+        fespace WhG(ThG, Pk);
+        fespace ZhG(ThG, P2);
+        fespace QhG(ThG, P1);
+        WhG def(uG), def(uReduce);
+        u[] .*= A.D;
+        int[int] rest = restrict(Wh, WhG, n2o);
+        uReduce[](rest) = u[];
+        mpiAllReduce(uReduce[], uG[], mpiCommWorld, mpiSUM);
+        if(mpirank == 0) {
+            // Since mshmet cannot regularize FE functions like adaptmesh,
+            // first regularize solutions on [0,1];
+            ZhG uMag = sqrt(uG^2+uGB^2+uGC^2);
+            real unorm = uMag[].max-uMag[].min;
+            QhG p = uGD;
+            real pnorm = p[].max-p[].min;
+            // Define normalized sol'n 
+            def(uReduce) = [uG/unorm, uGB/unorm, uGC/unorm, uGD/pnorm];
+            // create metric
+            real[int] met = mshmet(ThG, [uReduce, uReduceB, uReduceC], uReduceD, normalization = bool(getARGV("-normalization",0)), aniso = aniso, hmin = 1.0e-3, hmax = 0.2, err = 1.0e-2, verbosity = verbosity);
+            if(aniso) boundaniso(6, met, anisomax); // restrict anisotropy
+            fespace METhG(ThG,[P1,P1,P1,P1,P1,P1]);
+            METhG [m11,m21,m22,m31,m32,m33];
+            QhG mm;
+            if(!aniso) mm[] = met;
+            else {
+                m11[] = met;
+                mm = m11+m22+m33; // trace of anisotropic metric tensor
+            }
+            plot(mm);
+            ThG = mmg3d(ThG, metric = met, hmin = 1.0e-3, hmax = 0.2, hgrad = -1, verbose=verbosity-(verbosity==0));
+            cout << "it = " << (i+1) << ", Th.nv = " << ThG.nv << endl;
+            plot(ThG);
+        }
+        broadcast(processor(0), ThG);
+        def(uG) = def(uG);
+        Th = ThG;
+        Mat Adapt;
+        MatCreate(Th, Adapt, Pk) // decompose the adapted mesh
+        A = Adapt; // replace the old Jacobian
+        def(u) = init(0.0); // just to trigger a resize
+        rest.resize(u[].n);
+        rest = restrict(Wh, WhG, n2o);
+        u[] = uG[](rest);
+    }
+}
+DmeshSave(Th, "stokes-adapt-3d");
+ofstream sol("stokes-adapt-3d_" + mpirank + "_" + mpisize + ".sol");
+sol << u[];
