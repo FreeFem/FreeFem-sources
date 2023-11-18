@@ -1810,6 +1810,12 @@ namespace PETSc {
           } else if (r == atype< OpTrans< DistributedCSR< HpddmType > > >( )) {
             e_M[i][j] = e;
             t_M[i][j] = 2;
+          } else if (atype< KNM< PetscScalar >* >( )->CastingFrom(r)) {
+            e_M[i][j] = to< KNM< PetscScalar >* >(c_M);
+            t_M[i][j] = 9;
+          } else if (atype< Transpose< KNM< PetscScalar >* > >( )->CastingFrom(r)) {
+            e_M[i][j] = to< Transpose< KNM< PetscScalar >* > >(c_M);
+            t_M[i][j] = 10;
           } else if (atype< KN_< PetscScalar > >( )->CastingFrom(r)) {
             e_M[i][j] = to< KN_< PetscScalar > >(c_M);
             t_M[i][j] = 3;
@@ -1882,6 +1888,23 @@ namespace PETSc {
                 MatDenseGetArray(a[i * M + j], &array);
                 if (array) array[0] = r;
                 MatDenseRestoreArray(a[i * M + j], &array);
+              }
+            } else if (t == 9 || t == 10) {
+              KNM< PetscScalar >* x;
+              if (t == 9) x = GetAny< KNM< PetscScalar >* >(e_ij);
+              else x = GetAny< Transpose< KNM< PetscScalar >* > >(e_ij);
+              PetscMPIInt rank;
+              MPI_Comm_rank(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, &rank);
+              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x->N(), rank == 0 ? x->M() : 0, PETSC_DECIDE, x->M(), NULL, a + i * M + j);
+              PetscScalar* array;
+              MatDenseGetArray(a[i * M + j], &array);
+              if (array) std::copy_n(static_cast< PetscScalar* >(*x), x->N() * x->M(), array);
+              MatDenseRestoreArray(a[i * M + j], &array);
+              if (t == 10) {
+                Mat C;
+                MatCreateHermitianTranspose(a[i * M + j], &C);
+                MatDestroy(a + i * M + j);
+                a[i * M + j] = C;
               }
             } else if (t == 3 || t == 4) {
               KN< PetscScalar > x;
@@ -4674,12 +4697,16 @@ namespace PETSc {
                               type = MATHERMITIANTRANSPOSEVIRTUAL;
                           }
                       } else MatGetSize(mat[i][j], &n, &m);
-                      if(isType && (m > 1 || n == 1)) {
-                          if(mpirank == 0) {
-                              if(U)
-                                  *ptr++ = *out++;
-                              else
-                                  *out++ = *ptr++;
+                      if(isType && m >= n) {
+                          PetscMPIInt rank;
+                          MPI_Comm_rank(PetscObjectComm((PetscObject)mat[i][j]), &rank);
+                          if(rank == 0) {
+                              for(int m = 0; m < n; ++m) {
+                                  if(U)
+                                      *ptr++ = *out++;
+                                  else
+                                      *out++ = *ptr++;
+                              }
                           }
                           break;
                       }
