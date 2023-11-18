@@ -1843,11 +1843,7 @@ namespace PETSc {
     static E_F0* f(const basicAC_F0& args) { return new initCSRfromBlockMatrix(args, 0); }
     AnyType operator( )(Stack s) const {
       Dmat** exchange = new Dmat*[N * M]();
-      Mat* a = new Mat[N * M]( );
-      std::vector< int > zeros;
-      zeros.reserve(std::min(N, M));
-      std::vector<std::pair<int, int>> destroy;
-      destroy.reserve(N * M);
+      Mat* a = new Mat[N * M]();
       MPI_Comm comm1 = MPI_COMM_NULL, comm2 = MPI_COMM_NULL;
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < M; ++j) {
@@ -1866,12 +1862,10 @@ namespace PETSc {
               }
               comm1 = comm2;
               exchange[i * M + j] = pt;
+              PetscObjectReference((PetscObject)a[i * M + j]);
             } else if (t == 2) {
               DistributedCSR< HpddmType >* pt = GetAny< DistributedCSR< HpddmType >* >(e_ij);
-              Mat B;
-              MatCreateHermitianTranspose(pt->_petsc, &B);
-              a[i * M + j] = B;
-              destroy.emplace_back(i, j);
+              MatCreateHermitianTranspose(pt->_petsc, a + i * M + j);
               exchange[i * M + j] = pt;
               PetscObjectGetComm((PetscObject)pt->_petsc, &comm2);
               if (comm1 != MPI_COMM_NULL) {
@@ -1883,95 +1877,48 @@ namespace PETSc {
             } else if (t == 7) {
               PetscScalar r = GetAny< PetscScalar >(e_ij);
               if (std::abs(r) > 1.0e-16) {
-                Mat B;
-                MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, &B);
+                MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, a + i * M + j);
                 PetscScalar* array;
-                MatDenseGetArray(B, &array);
+                MatDenseGetArray(a[i * M + j], &array);
                 if (array) array[0] = r;
-                MatDenseRestoreArray(B, &array);
-                a[i * M + j] = B;
-                destroy.emplace_back(i, j);
-              } else if (i == j)
-                zeros.emplace_back(i);
+                MatDenseRestoreArray(a[i * M + j], &array);
+              }
             } else if (t == 3 || t == 4) {
               KN< PetscScalar > x;
-              Mat B;
               if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
               else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, &B);
+              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, a + i * M + j);
               PetscScalar* array;
-              MatDenseGetArray(B, &array);
+              MatDenseGetArray(a[i * M + j], &array);
               if (array) std::copy_n(static_cast< PetscScalar* >(x), x.n, array);
-              MatDenseRestoreArray(B, &array);
-              if (t == 3) {
-                a[i * M + j] = B;
-              }
-              else {
+              MatDenseRestoreArray(a[i * M + j], &array);
+              if (t == 4) {
                 Mat C;
-                MatCreateHermitianTranspose(B, &C);
-                MatDestroy(&B);
+                MatCreateHermitianTranspose(a[i * M + j], &C);
+                MatDestroy(a + i * M + j);
                 a[i * M + j] = C;
               }
-              destroy.emplace_back(i, j);
             } else if (t == 8) {
               std::pair<Dmat*, Dmat*>* p = GetAny<std::pair<Dmat*, Dmat*>*>(e_ij);
               ffassert(p && p->first->_petsc && p->second->_petsc);
               Mat mats[2] = { p->second->_petsc, p->first->_petsc };
-              Mat C;
-              MatCreateComposite(PetscObjectComm((PetscObject)p->first->_petsc), 2, mats, &C);
-              MatCompositeSetType(C, MAT_COMPOSITE_MULTIPLICATIVE);
-              a[i * M + j] = C;
+              MatCreateComposite(PetscObjectComm((PetscObject)p->first->_petsc), 2, mats, a + i * M + j);
+              MatCompositeSetType(a[i * M + j], MAT_COMPOSITE_MULTIPLICATIVE);
               delete p;
-              destroy.emplace_back(i, j);
             } else {
               ExecError("Unknown type in submatrix");
             }
-          } else if (i == j)
-            zeros.emplace_back(i);
-        }
-      }
-      for (int i = 0; i < zeros.size( ); ++i) {
-        int posX = -1, posY = -1;
-        for (int j = 0; j < M && posX == -1; ++j) {
-          if (j != zeros[i] && a[zeros[i] * M + j]) posX = j;
-        }
-        for (int j = 0; j < N && posY == -1; ++j) {
-          if (j != zeros[i] && a[zeros[i] + j * M]) posY = j;
-        }
-        if (posX == -1 && posY == -1)
-          ExecError("Zero row and zero column");
-        else {
-          PetscInt x, X, y, Y;
-          if (posX != -1) {
-            MatGetSize(a[zeros[i] * M + posX], &X, &Y);
-            MatGetLocalSize(a[zeros[i] * M + posX], &x, &y);
           }
-          if (posY != -1) {
-            MatGetSize(a[zeros[i] + posY * M], posX == -1 ? &X : NULL, &Y);
-            MatGetLocalSize(a[zeros[i] + posY * M], posX == -1 ? &x : NULL, &y);
-            if (posX == -1) {
-              x = y;
-              X = Y;
-            }
-          } else {
-            y = x;
-            Y = X;
-          }
-          MatCreate(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
-          MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
-          MatSetType(a[zeros[i] * M + zeros[i]], MATAIJ);
-          MatSeqAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL);
-          MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
-          MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
-          MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
-          destroy.emplace_back(zeros[i], zeros[i]);
         }
       }
       Result sparse_mat = GetAny< Result >((*emat)(s));
       if (sparse_mat->_petsc) sparse_mat->dtor( );
       MatCreateNest(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
-      for(std::pair<int, int> p : destroy)
-          MatDestroy(a + p.first * M + p.second);
+      for (int i = 0; i < N; ++i)
+        for (int j = 0; j < M; ++j) {
+          if (a[i * M + j])
+            PetscObjectDereference((PetscObject)a[i * M + j]);
+        }
       sparse_mat->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
       delete[] a;
       return sparse_mat;
