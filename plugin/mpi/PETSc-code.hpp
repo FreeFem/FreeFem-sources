@@ -1890,36 +1890,79 @@ namespace PETSc {
                 MatDenseRestoreArray(a[i * M + j], &array);
               }
             } else if (t == 9 || t == 10) {
-              KNM< PetscScalar >* x;
-              if (t == 9) x = GetAny< KNM< PetscScalar >* >(e_ij);
-              else x = GetAny< Transpose< KNM< PetscScalar >* > >(e_ij);
-              PetscMPIInt rank;
-              MPI_Comm_rank(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, &rank);
-              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x->N(), rank == 0 ? x->M() : 0, PETSC_DECIDE, x->M(), NULL, a + i * M + j);
-              PetscScalar* array;
-              MatDenseGetArray(a[i * M + j], &array);
-              if (array) std::copy_n(static_cast< PetscScalar* >(*x), x->N() * x->M(), array);
-              MatDenseRestoreArray(a[i * M + j], &array);
-              if (t == 10) {
-                Mat C;
-                MatCreateHermitianTranspose(a[i * M + j], &C);
-                MatDestroy(a + i * M + j);
-                a[i * M + j] = C;
+              if (!a[i * M + j]) {
+                KNM< PetscScalar >* x;
+                if (t == 9) x = GetAny< KNM< PetscScalar >* >(e_ij);
+                else x = GetAny< Transpose< KNM< PetscScalar >* > >(e_ij);
+                PetscMPIInt rank;
+                MPI_Comm_rank(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, &rank);
+                MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x->N(), rank == 0 ? x->M() : 0, PETSC_DECIDE, x->M(), NULL, a + i * M + j);
+                PetscScalar* array;
+                MatDenseGetArray(a[i * M + j], &array);
+                if (array) std::copy_n(static_cast< PetscScalar* >(*x), x->N() * x->M(), array);
+                MatDenseRestoreArray(a[i * M + j], &array);
+                if (t == 10) {
+                  Mat C;
+                  MatCreateHermitianTranspose(a[i * M + j], &C);
+                  MatDestroy(a + i * M + j);
+                  a[i * M + j] = C;
+                }
+                if (i < M && j < N) {
+                  Expression e = e_M[j][i];
+                  int u = t_M[j][i];
+                  if (e && ((t == 9 && u == 10) || (t == 10 && u == 9))) {
+                    AnyType e_ji = (*e)(s);
+                    KNM< PetscScalar >* y;
+                    if (u == 9) y = GetAny< KNM< PetscScalar >* >(e_ji);
+                    else y = GetAny< Transpose< KNM< PetscScalar >* > >(e_ji);
+                    if (y == x) {
+                      if (u == 9) {
+                        MatHermitianTransposeGetMat(a[i * M + j], a + j * N + i);
+                        PetscObjectReference((PetscObject)a[j * N + i]);
+                      }
+                      else
+                        MatCreateHermitianTranspose(a[i * M + j], a + j * N + i);
+                    }
+                  }
+                }
               }
             } else if (t == 3 || t == 4) {
-              KN< PetscScalar > x;
-              if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
-              else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, a + i * M + j);
-              PetscScalar* array;
-              MatDenseGetArray(a[i * M + j], &array);
-              if (array) std::copy_n(static_cast< PetscScalar* >(x), x.n, array);
-              MatDenseRestoreArray(a[i * M + j], &array);
-              if (t == 4) {
-                Mat C;
-                MatCreateHermitianTranspose(a[i * M + j], &C);
-                MatDestroy(a + i * M + j);
-                a[i * M + j] = C;
+              if (!a[i * M + j]) {
+                KN< PetscScalar > x;
+                if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
+                else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
+                MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, a + i * M + j);
+                PetscScalar* array;
+                MatDenseGetArray(a[i * M + j], &array);
+                if (array) std::copy_n(static_cast< PetscScalar* >(x), x.n, array);
+                MatDenseRestoreArray(a[i * M + j], &array);
+                if (t == 4) {
+                  Mat C;
+                  MatCreateHermitianTranspose(a[i * M + j], &C);
+                  MatDestroy(a + i * M + j);
+                  a[i * M + j] = C;
+                }
+                if (i < M && j < N) {
+                  Expression e = e_M[j][i];
+                  int u = t_M[j][i];
+                  if (e && ((t == 3 && u == 4) || (t == 4 && u == 3))) {
+                    AnyType e_ji = (*e)(s);
+                    KN< PetscScalar > y;
+                    if (u == 3) y = GetAny< KN_< PetscScalar > >(e_ji);
+                    else y = GetAny< Transpose< KN_< PetscScalar > > >(e_ji);
+                    y -= x;
+                    double norm = y.linfty();
+                    MPI_Allreduce(MPI_IN_PLACE, &norm, 1, MPI_DOUBLE, MPI_MAX, comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD);
+                    if (norm < 1.0E-14) {
+                      if (u == 3) {
+                        MatHermitianTransposeGetMat(a[i * M + j], a + j * N + i);
+                        PetscObjectReference((PetscObject)a[j * N + i]);
+                      }
+                      else
+                        MatCreateHermitianTranspose(a[i * M + j], a + j * N + i);
+                    }
+                  }
+                }
               }
             } else if (t == 8) {
               std::pair<Dmat*, Dmat*>* p = GetAny<std::pair<Dmat*, Dmat*>*>(e_ij);
