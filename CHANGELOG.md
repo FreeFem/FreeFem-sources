@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
     matrix A = va(Ph,Vh); 
     int[int] a = A, at= A'; 
     ````
- - a meshL finite function can be see as real function with 1, or 2 parameters
+- a meshL finite function can be see as real function with 1, or 2 parameters
     ```
      meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
      cout << u(0.5)   << endl; 
@@ -38,8 +38,14 @@ All notable changes to this project will be documented in this file.
 -  Exemple to code convolution of 2 function with one with a small support 
        too be not to expanxive
       see tutorial/Convolution-Sample.edp example
+- Support for dense blocks in PETSc matrices
+- GenEO for saddle-point examples with PCHPDDM in PETSc
+- Distributed ParaView output on `meshS`
+- Interface to `mmg2d` for two-dimensional `mesh`
+- Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
+
 ### Changed
--
+- PETSc 3.20.1
 
 ### Deprecated
 -
@@ -49,6 +55,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 -  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
+
 ## [4.13]
 
 ### Added
