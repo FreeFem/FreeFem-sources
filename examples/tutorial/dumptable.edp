@@ -1,3 +1,4 @@
+/*
 load "BEC" 
 load "BernardiRaugel" 
 load "BinaryIO" 
@@ -92,7 +93,7 @@ load "splitmesh4"
 load "splitmesh6" 
 load "tetgen" 
 load "vortextools" 
-
+*/
 ofstream table("theTables");
 dumptable(table);
 
