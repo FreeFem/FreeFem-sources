@@ -834,6 +834,14 @@ struct PrintPnd {
   static ostream* f(ostream* const  & a,const A & b)  
     { if(verbosity>9999) cout << "PrintPnd:  " << b << endl;  *a << *b; return a;}
 };
+template<class A>
+struct PrintPn {
+  using first_argument_type  = ostream*;
+  using second_argument_type = A;
+  using result_type          = ostream*;
+  static ostream* f(ostream* const  & a,const A & b)
+    { if(verbosity>9999) cout << "PrintPn:  " << b << endl;  *a << b; return a;}
+};
 
 
 

@@ -5623,6 +5623,7 @@ AnyType ClearReturn(Stack stack, const AnyType &a) {
   return m;
 }
 template<class K> long get_n(KN<K> * p){ return p->N();}//
+template<class K> long get__n(KN_<K> p){ return p.N();}//
 
 template< class R >
 void DclTypeMatrix( ) {

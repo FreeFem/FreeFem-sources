@@ -164,13 +164,23 @@ void initArrayOperatorlong()
 
   // ArrayDCL<long>();
   Dcl_TypeandPtr_<KN_<String>, KN<String> *>(0, 0, 0, ::Destroy<KN<String> >, ::ClearReturnKK_<K,KN<String>, KN_<String> >, ::ClearReturnpKK<String, KN<String> >);
+    map_type[typeid(KN_<String>).name()]->AddCast(
+                                                  new E_F1_funcT<KN_<String>,KN<String>*>(UnRefpKN<KN<String>,KN_<String> > ) );
+ 
   atype<KN<String>* >()->Add("[", "", new OneOperator2_<string**, KN<String>*, long >(get_elements));
   TheOperators->Add("<-", new OneOperator2_<KN<String> *, KN<String> *, long>(&set_init_init), new InitArrayfromArray<string*, KN<String>*, true>);
+    TheOperators->Add("<-",  new OneBinaryOperator<init_eqarray<KN<String> ,KN_<String> > > );//,
+                  //  new OneOperator2_<KN<String> *,KN<String> *,KN<String> *>(&set_initp)); // Add FH nov 2023
+    TheOperators->Add("=",  new OneBinaryOperator<set_eqarray<KN<String> ,KN_<String> > > ); //,
+                //    new OneBinaryOperator<set_eqarrayp<KN<String> ,KN<String>* > > ); // Add FH nov 2023
+
   map_type_of_map[make_pair(atype<long>(), atype<string*>())] = atype<KN<String>*>(); // vector [string] 
   Add<KN<String> *>("n", ".", new OneOperator1<long, KN<String> *>(get_n));
+  Add<KN_<String> >("n", ".", new OneOperator1<long, KN_<String> >(get__n));
   extern KN<String> *pkarg;
   Global.New("ARGV", CPValue<KN<String> >(*pkarg));// add FH mars 2010
   Global.Add("toZarray", "(", new OneOperator_2KN_<long>);
+  Global.Add("toSarray", "(", new OneOperator_2KN_<String,string*>);
   TheOperators->Add("=", new OneBinaryOperator<set_Inv_KN_long<KN_<long>, Inv_KN_long> >);
   TheOperators->Add("<-", new OneBinaryOperator<set_Inv_pKN_longI<KN<long>*, Inv_KN_long> >);
 
@@ -196,8 +206,9 @@ void initArrayOperatorlong()
 
   TheOperators->Add("<-", new InitMapfromArray<MyMap<String,String>*, string *, string*, true> );
 
-  TheOperators->Add("<<", new OneBinaryOperator<PrintPnd<KN<String> * > >); // add may 2018 FH
-    
+  TheOperators->Add("<<", new OneBinaryOperator<PrintPnd<KN<String> * > >(50)); // add may 2018 FH, coor
+  TheOperators->Add("<<", new OneBinaryOperator<PrintPn<KN_<String>  > >); // add now 2023 FH and change priorite to remove ambiguity
+
     // sep 2023 FH for G. Sadaka .
      Dcl_Type< Resize<KN<String> > >  ();
      Add<KN<String> *>("resize",".",new OneOperator1< Resize<KN<String> >,KN<String> *>(to_Resize));

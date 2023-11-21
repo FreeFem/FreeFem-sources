@@ -2644,11 +2644,11 @@ public:
 	CompileError( " They are used Named parameter ");
  
     return  new Op(t0->CastTo(args[0]),t1->CastTo(args[1]));} 
-  OneBinaryOperator(): 
+  OneBinaryOperator(int ppref=0):
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]), 
     t0(t[0]),
     t1(t[1]) 
-  {pref = SameType<A,B>::OK ;}
+  {pref = ppref+SameType<A,B>::OK ;}
   
   OneBinaryOperator(aType tt0,aType tt1):  
     OneOperator(map_type[typeid(R).name()],

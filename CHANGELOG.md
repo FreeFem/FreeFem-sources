@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 -  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
+-  in segment(10,region=1,label=ll);  region is now used.. 
 ## [4.13]
 
 ### Added
@@ -77,7 +78,7 @@ All notable changes to this project will be documented in this file.
 
 - add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
       	see example plugin/RT0dc.edp 
-  and P1nc (Crouziex-Raviat) + bulle : name P1bnc in plugin Element_P1ncdc
+  and P1nc (Crouziex-Raviart) + bulle : name P1bnc in plugin Element_P1ncdc
   and P1nc totaly discontinous + bulle  ; name P1bdcnc in plugin Element_P1ncdc
       	see example plugin/example testp1dcnc.edp
 	for akram.beni-hamad@inria.fr 

@@ -44,7 +44,7 @@ func real  conv(real a,real b) {  return int2d(Sh)( fh(a-x,b-y)* phih); }
 
 
    fh =f;
-   Vh  fhc = conv(x,y); // do the interpolation od the convolution fonction (expencive)
+   Vh  fhc = conv(x,y); // do the interpolation of the convolution fonction (expencive)
    plot(Th,fhc,wait=1);
 
 
