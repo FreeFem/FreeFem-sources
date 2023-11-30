@@ -40,7 +40,8 @@ if [ ! -x  $ffexec ] ; then
 	echo " No FreeFem++.app  $ffver so copy FreeFem++.app in /Application (with sudo do be sure)"
 	echo =============================
 	sudo cp -rf $vffapp /Applications
-	sudo cp /Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++-CoCoa  /usr/local/bin
+	test -L /usr/local/bin/FreeFem++-CoCoa && sudo rm /usr/local/bin/FreeFem++-CoCoa 
+	sudo cp -f /Applications/FreeFem++.app/Contents/$ffver/bin/FreeFem++-CoCoa  /usr/local/bin
 fi
 
 if test ! -d "$dd"  ; then
