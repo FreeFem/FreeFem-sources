@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
 - Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
 ### Changed
-- PETSc 3.20.1
+- PETSc 3.20.2
 
 ### Deprecated
 -
