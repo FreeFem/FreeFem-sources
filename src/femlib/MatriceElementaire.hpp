@@ -46,7 +46,7 @@ public:
         {}
        
 
- //  for discontinuous Galerkine method
+ //  for discontinuous Galerkin method
   MatriceElementaire(int datasize,int llga,int *nni,
                      int lk,
                      TypeOfMatriceElementaire t=Symmetric, int ooptim=1
@@ -63,7 +63,7 @@ public:
         optim(ooptim)
        { ffassert(lk>=0);}
 
-    //  for discontinuous Galerkine method
+    //  for discontinuous Galerkin method
     MatriceElementaire(int datasize,int llga,int *nni,int lki,int *nnj,int lkj,
                        TypeOfMatriceElementaire t=Full,int ooptim=1
                        )
@@ -152,7 +152,7 @@ public:
     MatriceElementaire<R>(UUh.esize(),llga,nni,nni,t,optim)
   {}
 
-  //  for discontinuous Galerkine method
+  //  for discontinuous Galerkin method
   MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
 			int lk,
 			TypeOfMatriceElementaire t=Symmetric,
