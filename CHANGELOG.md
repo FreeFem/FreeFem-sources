@@ -1,10 +1,27 @@
+<!--USE THIS TEMPLATE TO COMPLETE THE CHANGELOG-->
+<!--
+## [Version number]
+### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+-->
 
 # Changelog
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
-
 - Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
 - Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
     see tutorial/sparse-matrix.edp example at end
@@ -89,7 +106,6 @@ All notable changes to this project will be documented in this file.
   int i=2;
   B.add(1.+10*i,A,i*ndof,i*ndof); 
 ### Changed
-
 -  change  isoline to do the job for meshS, see example plugin/isoline.edp
 -  change  Curve function to be with 3 components to use the isoline data.
 -  change  Curvature plugin to compatible with new isoline data for 3 d case.
