@@ -1200,7 +1200,8 @@ class  OneOperator_2KN_ : public OneOperator {public:
     {  const  E_Array * b = dynamic_cast<const E_Array *>(a[0].LeftValue());
 	ffassert(b);
         return new Op(*b);}
-    OneOperator_2KN_<K>(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
+    
+    OneOperator_2KN_(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
 };
 template<class K, class L>
 class Unique_Op : public E_F0mps {
