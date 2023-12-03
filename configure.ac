@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT([FreeFEM],[4.13],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
+AC_INIT([FreeFEM],[4.14],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
