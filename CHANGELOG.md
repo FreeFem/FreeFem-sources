@@ -1,13 +1,11 @@
-
-
-# Changelog
-All notable changes to this project will be documented in this file.
-
-## [Unreleased]
+<!--USE THIS TEMPLATE TO COMPLETE THE CHANGELOG-->
+<!--
+## [Version number]
 ### Added
+-
 
 ### Changed
-- PETSc 3.20.1
+-
 
 ### Deprecated
 -
@@ -16,8 +14,13 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
-## [4.13]
+-
+-->
 
+# Changelog
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
 ### Added
 - Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
 - Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
@@ -41,8 +44,6 @@ All notable changes to this project will be documented in this file.
 - Interface to `mmg2d` for two-dimensional `mesh`
 - Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
-<<<<<<< HEAD
-=======
 ### Changed
 - PETSc 3.20.2
 
@@ -54,12 +55,12 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 -  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
+-  in segment(10,region=1,label=ll);  region is now used.. 
 
 ## [4.13]
 
 ### Added
 
->>>>>>> dbc7713c2a45df10ad9d72c70bfcff826c72a629
 - Composite FE spaces and variational forms for coupled problems:
   - can now define composite FE spaces with different meshes/mesh types as
     ```
@@ -115,8 +116,6 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 ### Fixed
--  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
--  in segment(10,region=1,label=ll);  region is now used.. 
 - bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL  and also discontinous  version (missing  initialisation)
 - bug in  plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
 - genere a bug if zero size element in read MeshL from file. 

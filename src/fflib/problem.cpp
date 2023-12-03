@@ -223,7 +223,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        ffassert(mat.onFace); //   Finite Volume or discontinuous Galerkine
+        ffassert(mat.onFace); //   Finite Volume or discontinuous Galerkin
         ffassert(ie>=0 && ie < 4); //  int on Face
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -445,7 +445,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        assert(mat.onFace); //   Finite Volume or discontinuous Galerkine
+        assert(mat.onFace); //   Finite Volume or discontinuous Galerkin
         assert(ie>=0 && ie < 3); //  int on edge
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -12010,7 +12010,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                 break;
             }
             if(!same)
-            InternalError("Methode de Galerkine (a faire)");
+            InternalError("Methode de Galerkin (a faire)");
             else
             {
                 // check if we have only one FESpace
@@ -12384,7 +12384,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                 break;
             }
         if(!same)
-            InternalError("Methode de Galerkine (a faire)");
+            InternalError("Methode de Galerkin (a faire)");
         sameCompositeFESpace=same;
     }
     
