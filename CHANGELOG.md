@@ -1,21 +1,4 @@
-<!--USE THIS TEMPLATE TO COMPLETE THE CHANGELOG-->
-<!--
-## [Version number]
-### Added
--
 
-### Changed
--
-
-### Deprecated
--
-
-### Removed
--
-
-### Fixed
--
--->
 
 # Changelog
 All notable changes to this project will be documented in this file.
@@ -58,6 +41,25 @@ All notable changes to this project will be documented in this file.
 - Interface to `mmg2d` for two-dimensional `mesh`
 - Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
+<<<<<<< HEAD
+=======
+### Changed
+- PETSc 3.20.2
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
+
+## [4.13]
+
+### Added
+
+>>>>>>> dbc7713c2a45df10ad9d72c70bfcff826c72a629
 - Composite FE spaces and variational forms for coupled problems:
   - can now define composite FE spaces with different meshes/mesh types as
     ```
