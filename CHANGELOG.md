@@ -7,18 +7,18 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
-- PETSc 3.20.1
 
 ### Deprecated
 -
 
 ### Removed
 -
-
 ### Fixed
+
 ## [4.13]
 
 ### Added
+
 - Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
 - Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
     see tutorial/sparse-matrix.edp example at end
@@ -41,25 +41,7 @@ All notable changes to this project will be documented in this file.
 - Interface to `mmg2d` for two-dimensional `mesh`
 - Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
-<<<<<<< HEAD
-=======
-### Changed
-- PETSc 3.20.2
 
-### Deprecated
--
-
-### Removed
--
-
-### Fixed
--  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
-
-## [4.13]
-
-### Added
-
->>>>>>> dbc7713c2a45df10ad9d72c70bfcff826c72a629
 - Composite FE spaces and variational forms for coupled problems:
   - can now define composite FE spaces with different meshes/mesh types as
     ```
@@ -105,6 +87,7 @@ All notable changes to this project will be documented in this file.
   int i=2;
   B.add(1.+10*i,A,i*ndof,i*ndof); 
 ### Changed
+- PETSc 3.20.2
 -  change  isoline to do the job for meshS, see example plugin/isoline.edp
 -  change  Curve function to be with 3 components to use the isoline data.
 -  change  Curvature plugin to compatible with new isoline data for 3 d case.
