@@ -1,0 +1,53 @@
+//  -----  
+// the convolution of fonction:  int(Sh) ( fh(x-y) * phih(y) dy ),
+// for regularisation 
+load "msh3"
+load "Element_P3"
+real eps =  0.02;// support of the  function phih ...
+func f = x >0 ; //y*x*x+y*y*y+h*tanh(val*(sin(5.0*y)-2.0*x));
+
+meshL S1= segment(1);
+meshL S10= segment(100);
+fespace V1H(S1,P3HL);// P3 hermite .. function C1.. ???
+V1H [rho,drho]=[1-x,0];//  fonction axi sur [0,1] 
+meshL Lh=segment(100);
+fespace VLh(Lh,P1);
+VLh xh=x,rhoh=rho;
+// a trick to plot 1d function as arry .. 
+plot([xh[],rhoh[]],wait=1,cmm=" the rho function ");
+
+func r=dist(x,y);
+
+border csupport(t=0,2*pi){ x=eps*cos(t);y=eps*sin(t);}
+mesh Sh=buildmesh(csupport(20));
+fespace Wh(Sh,P1);
+Wh rr=min(r/eps,1.);// 
+real beta2h=1; 
+Wh phih= beta2h*rho(rr);// Ok version 5/10/2023. 
+cout << " int int2d(Sh)(phih) "<<int2d(Sh)(phih)<< " == " << 1 << endl;
+beta2h= 1./ int2d(Sh)(phih) ; // to a mass == 1 
+phih[] *= beta2h; 
+cout << " int int2d(Sh)(phih) "<<int2d(Sh)(phih)<< " == " << 1 << endl;
+plot(Sh,phih,wait=1,value=1,cmm="phih");
+
+cout << " int phih =  " << int2d(Sh)(phih) << " ----------- " << endl; 
+mesh Th=square(50,50,[x-0.5,y-0.5]);//buildmesh(cercle(20));
+
+fespace Ph(Th,P0);
+fespace Vh(Th,P1);
+Ph fh=f;
+plot(fh,fill=1,wait=0); //
+
+// the convolution fonction // int fh(x-y) * phih(y) dy 
+
+func real  conv(real a,real b) {  return int2d(Sh)( fh(a-x,b-y)* phih); }
+
+
+   fh =f;
+   Vh  fhc = conv(x,y); // do the interpolation of the convolution fonction (expencive)
+   plot(Th,fhc,wait=1);
+
+
+
+
+

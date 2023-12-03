@@ -3692,6 +3692,43 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
 
     return r;
 }
+ 
+template<class R,int init>
+  KN<KN<long> > *Matrix2KKN(KN<KN<long> > *pij,Matrice_Creuse<R> * pA,bool trans)
+  {
+      ffassert(pij);
+      if(init) pij->init();
+      MatriceCreuse<R> * pa=pA->A;
+      MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+      if( pma ) {
+          long  n = trans? pma->n:pma->m;
+          pij->resize(n);
+          KN<KN<long> > & ij=*pij;
+          int * pp, *pj;
+          R * pc;
+          if( trans)
+            pma->CSC(pp,pj,pc);
+          else
+            pma->CSR(pp,pj,pc);
+
+          for( int i=0; i<n;++i)
+          {
+              long li = pp[i+1]-pp[i];
+              ij[i].resize(li);
+              long kk=0;
+              for(long k=pp[i];k<pp[i+1];++k)
+                  ij[i][kk++]= pj[k];
+              
+          }
+      }
+      return pij;
+  }
+template<class R,int init>
+  KN<KN<long> > *Matrix2KKN(KN<KN<long> > *pij,Matrice_Creuse<R> * pA)
+{ return Matrix2KKN<R,init> (pij,pA,false);}
+template<class R,int init>
+KN<KN<long> > *Matrix2KKN(KN<KN<long> > *pij,Matrice_Creuse_Transpose<R> pAt)
+{ return Matrix2KKN<R,init>(pij,pAt,true);}
 
 template<class R>
 newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half,const double & tol)
@@ -3990,6 +4027,15 @@ void  init_lgmat()
     Global.Add("removeHalf", "(", new OneOperator2s_<newpMatrice_Creuse<Complex> ,Matrice_Creuse<Complex> * ,long>(removeHalf));
     Global.Add("removeHalf", "(", new OneOperator3s_<newpMatrice_Creuse<Complex> ,Matrice_Creuse<Complex> * ,long,double>(removeHalf));
     Global.Add("removeHalf", "(", new OneOperator4s_<bool,Matrice_Creuse<Complex> * ,Matrice_Creuse<Complex> * ,long,double>(removeHalf));
+
+    TheOperators->Add("<-",
+                      new OneOperator2<KN<KN<long> >*,KN<KN<long> >*,Matrice_Creuse<double> *  >(Matrix2KKN<double,1> ));
+    TheOperators->Add("<-",
+                      new OneOperator2<KN<KN<long> >*,KN<KN<long> >*,Matrice_Creuse_Transpose<double>   >(Matrix2KKN<double,1> ));
+    TheOperators->Add("=",
+                      new OneOperator2<KN<KN<long> >*,KN<KN<long> >*,Matrice_Creuse<double> *  >(Matrix2KKN<double,0> ));
+    TheOperators->Add("=",
+                      new OneOperator2<KN<KN<long> >*,KN<KN<long> >*,Matrice_Creuse_Transpose<double>   >(Matrix2KKN<double,0> ));
 
 }
 

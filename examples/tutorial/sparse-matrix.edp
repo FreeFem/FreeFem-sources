@@ -299,3 +299,18 @@ ml[]/=2.;
   A=eye(5);
   cout << A << endl; 
 }
+{  // version 4.13  sep. 2023 FH..
+	// get structure of sparse matrix int [int][int] array ..
+	// usefull to find some cnnectity
+	// here:  for each vertex i, gives the list of  vertex in a same element. 
+	mesh Th=square(3,3);
+	fespace Vh(Th,P1);
+	varf va(u,v)= int2d(Th)(u*v);
+	matrix A = va(Vh,Vh);
+	int [int][int] a=A;// array of array : Warning sort in  CSR  on A 
+	int [int][int] at=A';// array of array:   Warning sort in  CSC  on A 
+
+	for (int i=0; i< a.n; ++i)
+	  cout << i << " " << a[i]  << endl;
+        // here array at and array a are equal !
+}

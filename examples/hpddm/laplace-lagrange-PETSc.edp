@@ -58,11 +58,7 @@ if(mpirank == 0) {
     plotMPI(Th, sol, Pk, def, real, params);
 }
 {
-    real[int] split(pF.n);
-    split = 1;
-    if(mpirank == 0)
-        split(pF.n - 1) = 2;
-    set(N, sparams = "-ksp_view_pre -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_mat_mumps_cntl_3 1e-12 -fieldsplit_0_mat_mumps_icntl_24 1 -pc_fieldsplit_detect_saddle_point", fields = split);
+    set(N, sparams = "-ksp_view_pre -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_mat_mumps_cntl_3 1e-12 -fieldsplit_0_mat_mumps_icntl_24 1 -pc_fieldsplit_detect_saddle_point");
     KSPSolve(N, pF, pSol);
     if(mpirank == 0)
         pSol.resize(pSol.n - 1);

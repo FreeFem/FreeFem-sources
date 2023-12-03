@@ -9442,7 +9442,7 @@ AnyType Line_Op::operator( )(Stack stack) const {
     int iv[2];
     iv[0] = i, iv[1] = i + 1;
     int lab = 0;
-    (tt++)->set(v, iv, lab);
+    (tt++)->set(v, iv, reg);// correct 6 oct 2023 FH..
   }
   B *bb = b;
   int ibeg[1], iend[1];

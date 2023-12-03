@@ -21,7 +21,7 @@ int s = getARGV("-split", 1); // refinement factor
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);
 fespace VhV(Th, PkV);         // local finite element space for the velocities
 fespace VhP(Th, PkP);         // local finite element space for the pressure
-DmeshBuild(Th);
+DmeshCreate(Th);
 Mat A, M;
 {
     macro def(u)def2(u)//

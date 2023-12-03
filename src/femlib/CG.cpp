@@ -228,7 +228,7 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
     assert( !(gCg != gCg) ); //  verif if NaN => bad Matrix..
     if(gCg < 1e-30)
     {   if(niveauimpression)
-        std::cout << " GC: on a converge on 0 iteration ||g||_C^2" << gCg  << std::endl;
+        std::cout << " GC: converge after 0 iteration ||g||_C^2" << gCg  << std::endl;
         nret = 2;
         nbitermax=0;
     }
@@ -247,7 +247,7 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
             if(gCg < eps2) // We have converged ...
             {
                 if(niveauimpression)
-                    std::cout << " GC:  converge in  " <<iter
+                    std::cout << " GC:  converge after " <<iter
                     << " g=" << gCg << " rho= " << rho << " gamma= " <<gamma<<std::endl;;
                 nret= 1;
                 nbitermax= iter;

@@ -1197,6 +1197,265 @@ void TypeOfFE_RTdc::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
         v[k++]=-signe*E.x;
      }
 }
+
+// Add jun 2023 FH... in test
+class TypeOfFE_BDM2_2d : public TypeOfFE {
+public:
+    static int Data[];
+    static double Pi_h_coef[];
+    bool Ortho;
+    const QuadratureFormular1d &QFE;
+    const QuadratureFormular &QFT;
+    TypeOfFE_BDM2_2d(bool ortho)
+    : TypeOfFE(12, 2, Data, 1, 1,
+               6*(3*3+7)
+               ,    // nb coef mat interpole
+               3*3+7,    // nb P interpolation
+               0),
+    QFE(QF_GaussLegendre3),QFT(QuadratureFormular_T_5), Ortho(ortho) {
+        int kkk = 0, i = 0;
+        // point on edge
+        for (int e = 0; e < 3; ++e) {
+            for (int p = 0; p < QFE.n; ++p) {
+                R2 A(TriangleHat[VerticesOfTriangularEdge[e][0]]);
+                R2 B(TriangleHat[VerticesOfTriangularEdge[e][1]]);
+                // 3 dof per edge and 2 componante
+                pij_alpha[kkk++] = IPJ(3 * e, i, 0);
+                pij_alpha[kkk++] = IPJ(3 * e, i, 1);
+                pij_alpha[kkk++] = IPJ(3 * e + 1, i, 0);
+                pij_alpha[kkk++] = IPJ(3 * e + 1, i, 1);
+                pij_alpha[kkk++] = IPJ(3 * e + 2, i, 0);
+                pij_alpha[kkk++] = IPJ(3 * e + 2, i, 1);
+                
+                P_Pi_h[i++] = B * (QFE[p].x) + A * (1. - QFE[p].x);    // X=0 => A  X=1 => B;
+            }
+        }
+        // kkk = 3*QFE.n*6 (QFE.n == 5)
+        // point on triangle (QFT.n == 7)
+        // kkk += QFT.n * 6
+        for (int p = 0; p < QFT.n; ++p) {
+            // 3 dof per edge and 2 componante
+            pij_alpha[kkk++] = IPJ(9, i, 0);
+            pij_alpha[kkk++] = IPJ(9, i, 1);
+            pij_alpha[kkk++] = IPJ(9 + 1, i, 0);
+            pij_alpha[kkk++] = IPJ(9 + 1, i, 1);
+            pij_alpha[kkk++] = IPJ(9 + 2, i, 0);
+            pij_alpha[kkk++] = IPJ(9 + 2, i, 1);
+            
+            P_Pi_h[i++] = QFT[p];   // X=0 => A  X=1 => B;
+        }
+        if(verbosity>99)
+        {
+            cout << "\n kkk     " << kkk << " " << this->pij_alpha.N( ) << " /"<< QFE.n << " " << QFT.n <<endl;
+            cout << " i     " << i << " " << this->P_Pi_h.N( ) << endl;
+        }
+        ffassert(kkk == this->pij_alpha.N( ));
+        ffassert(i == this->P_Pi_h.N( ));
+    }
+    
+    void Pi_h_alpha(const baseFElement &K,
+                    KN_< double > &v) const
+    {    // compute the coef of interpolation ...
+        const Triangle &T(K.T);
+        int k = 0;
+        double c1[][3] = {{9, -18, 3} /* 0 */, {-18, 84, -18} /* 1 */, {3, -18, 9} /* 2 */};
+  //      QuadratureFormular1d QFe=QF_GaussLegendre3;
+        for (int i = 0; i < 3; i++) {
+            R2 E(Ortho ? T.Edge(i) : -T.Edge(i).perp( ));
+            R s = T.EdgeOrientation(i);
+            
+            for (int p = 0; p < QFE.n; ++p) {
+                R l1 = QFE[p].x, l2 = 1 - QFE[p].x;
+                
+                R p0 = l1 ;
+                R p1 = l1 * l2;
+                R p2 = l2 ;
+                R sa =  QFE[p].a*s;
+                R cc2 = sa * p0;    //
+                R cc1 = sa * p1;    //
+                R cc0 = sa * p2;    //
+                if (s < 0) {
+                    swap(cc0, cc2);
+                }
+                
+                v[k++] = cc0 * E.x;
+                v[k++] = cc0 * E.y;
+                v[k++] = cc1 * E.x;
+                v[k++] = cc1 * E.y;
+                v[k++] = cc2 * E.x;
+                v[k++] = cc2 * E.y;
+            }
+        }
+       // cout << " " << k << " == " << this->pij_alpha.N( ) << " " << QFE.n << endl;
+            //  maintenant les 3 dof interne ...
+            for (int p = 0; p < QFT.n; ++p) {
+                R2 Q=T(QFT[p]);
+                for(int e=0; e<3;++e)
+                {
+                    R a = QFT[p].a;
+                    R2 P= (Q-(R2) T[e]).perp()/2;
+                    if(Ortho)
+                      P=P.perp( );// correction 4 sep 2023 FH.. 
+                    v[k++] = a * P.x ;
+                    v[k++] = a * P.y ;
+                }
+            }
+           // cout << " " << k << " == " << this->pij_alpha.N( ) << " " << QFT.n <<endl;
+            assert(k == this->pij_alpha.N( ));
+        
+    }
+    void FB(const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat,
+                RNMK_ &val) const;
+    
+};
+
+// ENDOFCLASS TypeOfFE_PkEdge
+int TypeOfFE_BDM2_2d::Data[] = {3, 3, 3, 4,4,4,  5,5,5, 6,6,6,    // support on what
+                                0, 1, 2, 0,1,2, 0,1,2, 0,1,2,     // df on node
+                                0, 0, 0, 1,1,1, 2,2,2, 3,3,3,    // th node of df
+                                0, 0, 0, 0,0,0, 0,0,0, 0,0,0,    // df previou FE
+                                0, 1, 2, 3,4,5, 6,7,8, 9,10,11 ,   // which df on prev
+                                0,0,0,0, 12, 12};
+void TypeOfFE_BDM2_2d::FB(const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat,
+                          RNMK_ &val) const {
+  R2 X = K(PHat);
+  R2 Q[] = {R2(K[0]), R2(K[1]), R2(K[2])};
+  R det = K.area*2;
+    
+  R2 AB(Q[0],Q[1]),AC(Q[0],Q[2]),Piola[2]={R2(AB.x,AC.x)/det,R2(AB.y,AC.y)/det};
+  //  cout << " Piola : " << Piola[0] << " , " << Piola[1] << " " << det << endl;
+  R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
+  R L[6] = {l0, l1, l2, l1*l2, l2*l0, l0*l1};
+  R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
+  R2 DL[6] = {Dl[0],Dl[1],Dl[2],l2*Dl[1]+l1*Dl[2],  l2*Dl[0]+l0*Dl[2],l0*Dl[1]+l1*Dl[0] };
+    R2 O;
+  R2 DDLx[6] = {O,O,O,Dl[2].x*Dl[1]+Dl[1].x*Dl[2],  Dl[2].x*Dl[0]+Dl[0].x*Dl[2],Dl[1].x*Dl[2]+Dl[2].x*Dl[1] };
+  R2 DDLy[6] = {O,O,O,Dl[2].y*Dl[1]+Dl[1].y*Dl[2],  Dl[2].y*Dl[0]+Dl[0].y*Dl[2],Dl[1].y*Dl[2]+Dl[2].y*Dl[1] };
+
+    double C1[12][12] = {
+      {0, 0, 9, 0, 0, 3, -18, -12, 0, 0, -18, 0},
+       {0, 0, -30, 0, 0, -30, 90, 90, 0, 30, 30, 0},
+       {0, 0, 3, 0, 0, 9, -12, -18, 0, -18, 0, 0},
+  
+      {9, 0, 0, 0, 3, -3, 0, 0, -30, 12, -18, 0},
+       {-30, 0, 0, 0, -30, 30, 30, -30, 180, -90, 30, 0},
+       {3, 0, 0, 0, 9, -9, -18, 18, -30, 18, 0, 0},
+  
+      {0, -9, 3, -3, 0, 0, 0, 0, 0, 18, -12, 30},
+       {0, 30, -30, 30, 0, 0, 30, -30, 0, -30, 90, -180},
+       {0, -3, 9, -9, 0, 0, -18, 18, 0, 0, -18, 30},
+  
+      {0, 0, 0, 0, 0, 0, -36, 36, 0, -12, 12, 0},
+       {0, 0, 0, 0, 0, 0, -12, 12, 0, -36, 12, 0},
+       {0, 0, 0, 0, 0, 0, -12, 12, 0, -12, 36, 0}};
+
+
+  assert(val.N( ) >= 12);
+  assert(val.M( ) == 2);
+  
+  val = 0;
+    int  p[12]={0,1,2,3,4,5,6,7,8,9,10,11};
+    double oe[4]={K.EdgeOrientation(0),-K.EdgeOrientation(1),K.EdgeOrientation(2),1.};
+    if (oe[0] < 0) swap(p[0],p[2]);
+    if (oe[1] < 0) swap(p[3],p[5]);
+    if (oe[2] < 0) swap(p[6],p[8]);
+
+  if (whatd[op_id]) {
+      R2 fb[12];
+      for( int df =0; df <12; ++df)
+      {
+          R2 f;
+          for( int i =0; i <6; ++i)//
+          {
+              R2 fC(C1[df][2*i] , C1[df][2*i+1]);
+              f += L[i]*fC;
+          }
+          f*=oe[df/3];// signe du dof * fb[df]
+          fb[df]= R2((Piola[0],f),(Piola[1],f));
+          if(Ortho)
+              fb[df]= fb[df].perp();
+      }
+     
+      for( int df =0; df <12; ++df)
+      {
+        val(df, 0, op_id) = fb[p[df]].x;
+        val(df, 1, op_id) = fb[p[df]].y;
+    }
+  }
+
+    if (whatd[op_dx] || whatd[op_dy]) {
+        R2 fbx[12],fby[12];// Dx, Dy of f
+        for( int df =0; df <12; ++df)
+        {
+            R2 fx,fy;
+            for( int i =0; i <6; ++i)//
+            {
+                R2 fC(C1[df][2*i] , C1[df][2*i+1]);
+                // cout << df << " "<< i <<" " <<  R2(ci,cii)<< endl;
+                fx +=  DL[i].x * fC;
+                fy +=  DL[i].y * fC;
+            }
+            fx*=oe[df/3];// signe ;du dof * fb[df]
+            fy*=oe[df/3];// signe du dof * fb[df]
+            R2 gx= R2((Piola[0],fx),(Piola[1],fx));
+            R2 gy= R2((Piola[0],fy),(Piola[1],fy));
+            if(Ortho) gx=gx.perp(),gy=gy.perp();
+            fbx[df]= gx;
+            fby[df]= gy;
+          //  cout << df << " -- gx : " << gx << " gy :" << gy << endl;
+            //  for(int k=9; k<12;++k)  cout<< k << " " << fb[k] << endl;
+        }
+        if (whatd[op_dx]) {
+            for( int df =0; df <12; ++df)
+            {
+                val(df, 0, op_dx) = fbx[p[df]].x;
+                val(df, 1, op_dx) = fbx[p[df]].y;
+            }
+            
+        }
+        if (whatd[op_dy]) {
+            for( int df =0; df <12; ++df)
+            {
+                val(df, 0, op_dy) = fby[p[df]].x;
+                val(df, 1, op_dy) = fby[p[df]].y;
+            }
+            
+        }
+    }
+    if ( whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {
+          R2 fbxx[12],fbyy[12],fbxy[12];// Dx, Dy of f
+          ffassert(0); // To Do
+          if (whatd[op_dyy]) {
+              for( int df =0; df <12; ++df)
+              {
+                  val(df, 0, op_dyy) = fbyy[p[df]].x;
+                  val(df, 1, op_dyy) = fbyy[p[df]].y;
+              }
+              
+          }
+          if (whatd[op_dxx]) {
+              for( int df =0; df <12; ++df)
+              {
+                  val(df, 0, op_dxx) = fbxx[p[df]].x;
+                  val(df, 1, op_dxx) = fbxx[p[df]].y;
+              }
+              
+          }
+          if (whatd[op_dxy]) {
+              for( int df =0; df <12; ++df)
+              {
+                  val(df, 0, op_dxy) = fbxy[p[df]].x;
+                  val(df, 1, op_dxy) = fbxy[p[df]].y;
+              }
+              
+          }
+      }
+
+ 
+  }
+ 
+
+
   // a static variable to add the finite element to freefem++
  static TypeOfFE_RTdc Elm_TypeOfFE_RT0dc_2d;          // RT0dc
 
@@ -1217,5 +1476,10 @@ void TypeOfFE_RTdc::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
   static AddNewFE Elm__TypeOfFE_RT2_2dOrtho("RT2Ortho", &Elm_TypeOfFE_RT2_2dOrtho);
   static AddNewFE Elm__TypeOfFE_BDM1_2d("BDM1", &Elm_TypeOfFE_BDM1_2d);
   static AddNewFE Elm__TypeOfFE_BDM1_2dOrtho("BDM1Ortho", &Elm_TypeOfFE_BDM1_2dOrtho);
+static TypeOfFE_BDM2_2d Elm_TypeOfFE_BDM2_2d(false);        // BDM1
+static TypeOfFE_BDM2_2d Elm_TypeOfFE_BDM2_2dOrtho(true);    // BDM1ortho
+static AddNewFE Elm__TypeOfFE_BDM2_2d("BDM2", &Elm_TypeOfFE_BDM2_2d);
+static AddNewFE Elm__TypeOfFE_BDM2_2dOrtho("BDM2Ortho", &Elm_TypeOfFE_BDM2_2dOrtho);
+
 }    // namespace Fem2D
 // --- fin --

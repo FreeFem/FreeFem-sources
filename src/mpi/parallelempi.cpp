@@ -114,6 +114,13 @@ class DoOnWaitMPI_Request;
 map<MPI_Request*, DoOnWaitMPI_Request *> ToDoOnWaitMPI_Request;
 
 void GetPendingWait() ;
+// change the priority to remove ambiguity between KN * and KN_ 
+template<>  struct SameType<MPIrank,KN<double> *> { static const int OK=100;};//
+template<>  struct SameType<MPIrank,KN<long> *> { static const int OK=100;};//
+template<>  struct SameType<MPIrank,KN<Complex> *> { static const int OK=100;};//
+template<>  struct SameType<MPIrank,KNM<double> *> { static const int OK=100;};//
+template<>  struct SameType<MPIrank,KNM<long> *> { static const int OK=100;};//
+template<>  struct SameType<MPIrank,KNM<Complex> *> { static const int OK=100;};//
 
 template<class T> struct MPI_TYPE { static MPI_Datatype TYPE(){ return MPI_BYTE; } };
 template<> struct MPI_TYPE<long> { static MPI_Datatype TYPE(){ return MPI_LONG; } };
@@ -323,6 +330,18 @@ struct MPIrank {
     return WSend((R *)a, n, who, MPI_TAG<KN<R>* >::TAG, comm, rq);
   }
 
+    template<class R>
+    long Send (const KN_<R> &aa) const {
+      const KN_<R> & a = aa;
+      ffassert(&a);
+      int n = a.N();
+      CheckContigueKN(aa);
+      if (verbosity > 99)
+        cout << " .... _ " << who << " >> " << &a << " " << a.N() << " " << a.step << " " << MPI_TAG<KN<R>* >::TAG
+             << " from " << mpirank << " " << (R *)a << endl;
+      return WSend((R *)a, n, who, MPI_TAG<KN<R>* >::TAG, comm, rq);
+    }
+
   template<class R>
   const MPIrank & Bcast (const KN<R> &a) const {
     assert(&a);
@@ -340,12 +359,12 @@ struct MPIrank {
     assert(&a);
     CheckContigueKNM(a);
 
-    if (verbosity > 99)
+    if (verbosity > 399)
       cout << " ---- " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << MPI_TAG<KNM<R>* >::TAG
            << " from " << mpirank << " " << (R *)a << endl;
     int n = a.N()*a.M();
     long ll = WRecv((R *)a, n, who, MPI_TAG<KNM<R>* >::TAG, comm, rq);
-    if (verbosity > 99)
+    if (verbosity > 399)
       cout << " ++++ " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << MPI_TAG<KNM<R>* >::TAG
            << " from " << mpirank << " " << (R *)a << endl;
     ffassert(a.N()*a.M() == n);
@@ -358,11 +377,22 @@ struct MPIrank {
     ffassert(&a);
     int n = a.N()*a.M();
     CheckContigueKNM(*aa);
-    if (verbosity > 99)
+    if (verbosity > 399)
       cout << " .... " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << a.step << " " << MPI_TAG<KNM<R>* >::TAG
            << " from " << mpirank << " " << (R *)a << endl;
     return WSend((R *)a, n, who, MPI_TAG<KNM<R>* >::TAG, comm, rq);
   }
+  template<class R>
+    long Send (const KNM_<R> &aa) const {
+      const KNM_<R> & a = aa;
+      ffassert(&a);
+      int n = a.N()*a.M();
+      CheckContigueKNM(aa);
+      if (verbosity > 399)
+        cout << " .... _ " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << a.step << " " << MPI_TAG<KNM<R>* >::TAG
+             << " from " << mpirank << " " << (R *)a << endl;
+      return WSend((R *)a, n, who, MPI_TAG<KNM<R>* >::TAG, comm, rq);
+    }
 
   template<class R>
   const MPIrank & Bcast (const KNM<R> &a) const {
@@ -2754,6 +2784,12 @@ void f_init_lgparallele()
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<double> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<long> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<Complex> *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN_<double>> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN_<long> > >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN_<Complex> > >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM_<double> > >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM_<long> > >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM_<Complex> > >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh3 *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const MeshS *> >);
@@ -2765,11 +2801,17 @@ void f_init_lgparallele()
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<long> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Complex> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<double> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN_<double> > >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<long> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN_<long>> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<Complex> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN_<Complex>> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<double> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<long> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<Complex> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM_<double>> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM_<long>> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM_<Complex>> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh3 *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const MeshS *> >);

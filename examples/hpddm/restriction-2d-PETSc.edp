@@ -41,7 +41,7 @@ func Pk = P2;
 
     }
     macro ThUserPartitioning()part// EOM
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     MatCreate(Th, A, Pk);
 }
 

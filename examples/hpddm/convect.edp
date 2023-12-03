@@ -17,7 +17,7 @@ macro ThN2O()n2o//
     fespace PhG(ThG, P1);
     PhG w;
     w[] = u[];
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     u = (x-0.5)^2 + (y-0.5)^2 - 0.1;
     convectParallel(Th, [vx, vy], dt, u, 20)
     plotD(Th, u, cmm = "Global 2D solution");
@@ -47,7 +47,7 @@ macro ThN2O()n2o//
     fespace PhG(ThG, P1);
     PhG w;
     w[] = u[];
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     u = (x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2 - 0.1;
     [vx, vy, vz] = [0.5, 0.5, z/2.0];
     convectParallel(Th, [vx, vy, vz], -dt, u, 20)

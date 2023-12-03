@@ -20,6 +20,43 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.14]
+### Added
+- Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
+- Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
+    see tutorial/sparse-matrix.edp example at end
+    ```
+    matrix A = va(Ph,Vh); 
+    int[int] a = A, at= A'; 
+    ````
+- a meshL finite function can be see as real function with 1, or 2 parameters
+    ```
+     meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
+     cout << u(0.5)   << endl; 
+     cout << u(0.5,0) << endl; 
+    ```
+-  Exemple to code convolution of 2 function with one with a small support 
+       too be not to expanxive
+      see tutorial/Convolution-Sample.edp example
+- Support for dense blocks in PETSc matrices
+- GenEO for saddle-point examples with PCHPDDM in PETSc
+- Distributed ParaView output on `meshS`
+- Interface to `mmg2d` for two-dimensional `mesh`
+- Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
+
+### Changed
+- PETSc 3.20.2
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
+-  in segment(10,region=1,label=ll);  region is now used.. 
+
 ## [4.13]
 
 ### Added
@@ -48,7 +85,7 @@ All notable changes to this project will be documented in this file.
 
 - add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
       	see example plugin/RT0dc.edp 
-  and P1nc (Crouziex-Raviat) + bulle : name P1bnc in plugin Element_P1ncdc
+  and P1nc (Crouziex-Raviart) + bulle : name P1bnc in plugin Element_P1ncdc
   and P1nc totaly discontinous + bulle  ; name P1bdcnc in plugin Element_P1ncdc
       	see example plugin/example testp1dcnc.edp
 	for akram.beni-hamad@inria.fr 
@@ -604,7 +641,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..develop
+[4.14]: https://github.com/FreeFem/FreeFem-sources/compare/v4.13..v4.14
 [4.13]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..v4.13
 [4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12
 [4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11

@@ -873,6 +873,7 @@ GTypeOfFE< MeshS > &Elm_P4_S(P4_S);
 
 
 static void init( ) {
+    if(verbosity && mpirank ==0 )
     cout << " load : P4 ";
   AddNewFE("P4", &P4LagrangeP4);
   static ListOfTFE FE_P4("P4", &P4LagrangeP4); // to add P4 in list of Common FE

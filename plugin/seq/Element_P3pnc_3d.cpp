@@ -65,7 +65,6 @@ TypeOfFE_P3pnc_3d::TypeOfFE_P3pnc_3d( )
    static  R3 Pt[] = {R3(0., 0., 0.), R3(1., 0., 0.), R3(0., 1., 0.),
                R3(0., 0., 1.)};    // 4 ref tetrahedron vertices
    static const int  nvfo[4][3]  ={{1,2,3}, {0,2,3},{0,1,3},{ 0,1,2}};
-    cout << "TypeOfFE_P3pnc_3d QFf exact:"<< QFf.exact << ", QFt exact " <<QFt.exact<< endl;
     int ipt=0;
     int doft0 = 4*6; // nb dof on face
 
@@ -100,8 +99,6 @@ TypeOfFE_P3pnc_3d::TypeOfFE_P3pnc_3d( )
               {
                   int kfK = nvfo[f][kf];// vertex dans K ..
                   int dof = 6*f+kf;
-                  if(qq==0)
-                  cout << " dof " << dof << " " << f << " "<< kfK << endl;
                   {
                       this->pInterpolation[i] = ipt;          // pk in (13.1)
                       this->cInterpolation[i] = 0;          // jk in (13.1)
@@ -115,8 +112,6 @@ TypeOfFE_P3pnc_3d::TypeOfFE_P3pnc_3d( )
                   int kfK = nvfo[f][(kf+2)%3];// vertex dans K opose a kf
                   int kfK1 = nvfo[f][(kf+1)%3];// vertex dans K ..
                   int dof = 6*f+kf+3;
-                  if(qq==0)
-                  cout << " dof " << dof << " " << f << " "<< kfK << endl;
                   {
                       this->pInterpolation[i] = ipt;          // pk in (13.1)
                       this->cInterpolation[i] = 0;          // jk in (13.1)
@@ -126,7 +121,6 @@ TypeOfFE_P3pnc_3d::TypeOfFE_P3pnc_3d( )
               }
 
           } // end loop on face
-        cout << " i =" << i << " " <<QFf.n*6*4 <<  endl;
         for (int q = 0; q < QFt.n; ++q,ipt++) //loop on quadrature point on element
         {  double ll[4]; // dans Khat
             this->PtInterpolation[ipt].toBary(ll);
@@ -138,7 +132,6 @@ TypeOfFE_P3pnc_3d::TypeOfFE_P3pnc_3d( )
             this->coefInterpolation[i] = QFt[q].a*ll[kt];      // alfak: we will fill them with 'set' (below)
           }
         }
-        cout << i << "== " << this->NbcoefforInterpolation << " " << QFt.n*4 + QFf.n*6*4 << endl;;
     ffassert(i==this->NbcoefforInterpolation);
 
 }
@@ -211,7 +204,7 @@ void TypeOfFE_P3pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
     double ll[4]; // dans Khat
 
     for (int q = 0; q < QFt.n; ++q, ++ip)
-    {   int ipt=ip;
+    {   int ipt = nump ? nump[ip] : ip;// Correct aug 2023 FH.
         double ll[4]; // dans Khat
         M.P[ipt].toBary(ll);//
         M.coef[i++] = QFt[q].a*ll[0];
@@ -221,6 +214,7 @@ void TypeOfFE_P3pnc_3d::set(const Mesh &Th, const Element &K, InterpolationMatri
     }
 
   //  ffassert(i==  ncoef+ocoef);
+  //if(verbosity>1000)  cout << " M = @@@@ \n"<< M << endl;
 
 }
 void TypeOfFE_P3pnc_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K,

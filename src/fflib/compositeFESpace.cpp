@@ -1270,10 +1270,6 @@ void separateFEMpartBemPart(const list<C_F0> & largs, list<C_F0> &largs_FEM, lis
       // largs_BEM.push_back(*ii); 
     }
   }
-  if(nbBEM >1){
-    cerr << "Two BEM operator in a sub-matrix defined by a time product of the same two FESpace is not allowed" << endl;
-    ffassert(0);
-  }
 #endif
 #endif
 
@@ -1671,33 +1667,39 @@ template< class R>
 HashMatrix<int,R> * varfBemToBlockDenseMatrix(const int& iUh, const int &jVh, const int &typeUh, const int &typeVh, const generic_v_fes * LLUh, const generic_v_fes * LLVh,
       const list<C_F0> & b_largs_zz, Stack stack, Data_Bem_Solver &dsbem){
 
-  // creation of the H-matrix
-  HMatrixVirt<R> ** Hmat = new HMatrixVirt<R> *();
+  HashMatrix<int,R> * hm_A_block = nullptr;
+  for (list<C_F0>::const_iterator i=b_largs_zz.begin(); i!=b_largs_zz.end(); i++) {
+    list<C_F0> bi;
+    bi.clear();
+    bi.push_back(*i);
 
-  // construction of the H-matrix
+    // creation of the H-matrix
+    HMatrixVirt<R> ** Hmat = new HMatrixVirt<R> *();
 
-  // IF LLVh is FESpace(Mesh2) ==> LLVh == LLUh (by hypothesis) 
-  // Remove this comment in the future.
+    // construction of the H-matrix
+    varfBemToCompositeBlockLinearSystem_hmat( iUh, jVh, typeUh, typeVh,
+                  LLUh, LLVh, bi, stack, dsbem,Hmat);
 
-  //cout << "iUh=" << iUh << " , " << "jVh=" << jVh << endl;
-  //cout << LLUh << " " <<  LLVh << endl;
+    // creation of dense matrix
+    KNM<R>* M= HMatrixVirtToDense< KNM<R>, R >(Hmat);
 
-  varfBemToCompositeBlockLinearSystem_hmat( iUh, jVh, typeUh, typeVh,
-                LLUh, LLVh, b_largs_zz, stack, dsbem,Hmat);
+    HashMatrix<int,R> * hm_i = new HashMatrix<int,R>(*M);
+    if (!hm_A_block)
+      hm_A_block = hm_i;
+    else {
+      hm_A_block->Add(hm_i, R(1.0), false, 0, 0);
+      delete hm_i;
+    }
 
-  // creation of dense matrix
-  KNM<R>* M= HMatrixVirtToDense< KNM<R>, R >(Hmat);
-  HashMatrix<int,R> * hm_A_block = new HashMatrix<int,R>(*M);
+    // delete dense matrix
+    M->destroy();
+    delete M;
 
-  // delete dense matrix
-  M->destroy();
-  delete M; 
-
-  // delete Hmat
-  if( *Hmat)
-    delete *Hmat;
-  delete Hmat;
-
+    // delete Hmat
+    if( *Hmat)
+      delete *Hmat;
+    delete Hmat;
+  }
   return hm_A_block;
 }
 

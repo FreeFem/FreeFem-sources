@@ -59,7 +59,7 @@ inline void CheckUmfpackStatus(int status)
                     break;
 
                 default:
-                    cout << status<< " UMFPACK WARNING unknow" <<endl;
+                    cout << status<< " UMFPACK WARNING unknown" <<endl;
                     break;
             }
         
@@ -97,7 +97,7 @@ inline void CheckUmfpackStatus(int status)
                 break;
 
             default:
-                ferr << status<< "  unknow error (SEE umfpack) file" <<endl;
+                ferr << status<< "  unknown error (SEE umfpack) file" <<endl;
                 break;
         }
         ferr << ends;

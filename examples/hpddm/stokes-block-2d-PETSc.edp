@@ -27,7 +27,7 @@ Mat dA, dC;
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    DmeshBuild(Th);
+    DmeshCreate(Th);
     {
         macro def(u)def2(u)//
         macro init(u)init2(u)//

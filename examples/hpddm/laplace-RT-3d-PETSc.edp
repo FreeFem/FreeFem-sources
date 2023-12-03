@@ -14,7 +14,7 @@ mesh3 ThGlobal = Th;
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o//
-DmeshBuild(Th);
+DmeshCreate(Th);
 func Pk = [RT03d, P0];
 fespace Wh(Th, Pk);
 {

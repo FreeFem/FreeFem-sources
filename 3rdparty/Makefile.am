@@ -76,7 +76,6 @@ ipopt/patch-IpBlas \
 ff-petsc/Makefile \
 ff-petsc/Makefile-PETSc.inc \
 ff-petsc/Makefile.complex \
-ff-petsc/petsc-3.11.2.patch \
 getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
@@ -118,7 +117,7 @@ install-other: tag-install-other
 tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)"; then $(MAKE) install-hpddm; else true; fi
 	if test -n "$(TOOL_COMPILE_htool)"; then $(MAKE) install-htool; else true; fi
-	if test -n "$(TOOL_COMPILE_bem)"; then $(MAKE) install-boost install-bemtool; else true; fi
+	if test -n "$(TOOL_COMPILE_bemtool)"; then $(MAKE) install-boost install-bemtool; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool lib/WHERE.bemtool lib/WHERE.boost
@@ -169,12 +168,12 @@ lib/WHERE.htool: ./getall
 
 # begin BEMTOOL
 install-bemtool: ./getall
-	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o bemtool -a;  $(MAKE) include/BemTool/done.tag  lib/WHERE.bemtool; else true;fi
+	 if test -n "$(TOOL_COMPILE_bemtool)"; then   ./getall -o bemtool -a;  $(MAKE) include/BemTool/done.tag  lib/WHERE.bemtool; else true;fi
 reinstall-bemtool:./getall
 	-rm lib/WHERE.bemtool
 	-rm ./pkg/bemtool.zip
 	-rm -rf include/BemTool
-	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-bemtool || true
+	-test -n "$(TOOL_COMPILE_bemtool)" && $(MAKE) install-bemtool || true
 include/BemTool/done.tag: ./pkg/bemtool.zip
 	-if test -f ./pkg/bemtool.zip; then \
 		cd include; rm -rf BemTool BemTool-*; unzip -q ../pkg/bemtool.zip; mv BemTool-* BemTool; touch BemTool/done.tag; \
@@ -188,12 +187,12 @@ lib/WHERE.bemtool: ./getall
 
 # begin BOOST
 install-boost: ./getall
-	 if test -n "$(TOOL_COMPILE_bem)"; then ./getall -o Boost -a; $(MAKE) boost/done.tag lib/WHERE.boost; else true; fi
+	 if test -n "$(TOOL_COMPILE_bemtool)"; then ./getall -o Boost -a; $(MAKE) boost/done.tag lib/WHERE.boost; else true; fi
 reinstall-boost: ./getall
 	-rm lib/WHERE.boost
 	-rm ./pkg/boost_for_bemtool.tar.gz
 	-rm -rf boost
-	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-boost || true
+	-test -n "$(TOOL_COMPILE_bemtool)" && $(MAKE) install-boost || true
 boost/done.tag: ./pkg/boost_for_bemtool.tar.gz
 	if test -f ./pkg/boost_for_bemtool.tar.gz; then \
 	rm -rf boost boost_*; tar xzf pkg/boost_for_bemtool.tar.gz; mv boost_for_bemtool boost; \

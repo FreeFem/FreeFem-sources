@@ -14,7 +14,10 @@ func Pk = P1;                       // finite element space
 
 
 mesh Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
-DmeshBuild(Th);
+mesh ThBackup = Th;
+int[int] n2o;
+macro ThN2O()n2o//
+DmeshCreate(Th);
 fespace Wh(Th, Pk);           // local finite element space
 
 varf vPb(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
@@ -40,3 +43,13 @@ real local = u[].linfty;
 real norm;
 mpiAllReduce(local, norm, mpiCommWorld, mpiMAX);
 plotMPI(Th, v, Pk, def, real, cmm = "Global solution transposed problem (linfty of error = " + norm + ")");
+if(!NoGraphicWindow) {
+    fespace WhBackup(ThBackup, Pk);
+    int[int] rest = restrict(Wh, WhBackup, n2o);
+    u[] = v[];
+    u[] .*= A.D;
+    WhBackup sol, solReduced;
+    for[i, v : rest] sol[][v] = u[][i];
+    mpiReduce(sol[], solReduced[], processor(0), mpiSUM);
+    plot(solReduced, wait = 1);
+}

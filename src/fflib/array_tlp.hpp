@@ -705,8 +705,13 @@ public:
 
 template<class K> long get_MyMap_n(MyMap<String,K> *p) {return p ? (p->m ? p->m->size():0):0 ;} 
 template<class K> long get_n(KN<K> * p){ return p->N();}//
+template<class K> long get__n(KN_<K>  p){ return p.N();}//
+
 template<class K> long get_n(KNM<K> * p){ return p->N();}//
 template<class K> long get_m(KNM<K> * p){ return p->M();}//
+template<class K> long get__n(KNM_<K> p){ return p.N();}//
+template<class K> long get__m(KNM_<K> p){ return p.M();}//
+
 template<class K> K get_max(KN<K> * p){ return p->max();}//
 template<class K> K get_min(KN<K> * p){ return p->min();}//
 
@@ -1172,7 +1177,7 @@ template<class K>  KNM<K> * set_mat(KNM<K> * a,KNM<K> *  b ){
     *a=*b;
     return a;}
 
-template<class K>
+template<class K,class KK=K>
 class  OneOperator_2KN_ : public OneOperator {public:
     class Op : public E_F0 {
        public:
@@ -1182,13 +1187,13 @@ class  OneOperator_2KN_ : public OneOperator {public:
 	Op( const  E_Array &bb) : N(bb.size()), tab(new Expression[N])
 	{
 	  for(int i=0;i<N;++i)
-	    tab[i]=atype<K>()->CastTo( bb[i]);
+	    tab[i]=atype<KK>()->CastTo( bb[i]);
 	}
 	AnyType operator()(Stack s)  const {
 	    K * p = Add2StackOfPtr2FreeA<K>(s,new K[N]); //   mark to be delete ..
             KN_<K> A(p,N); // FH:  Correct jan 2019  bug is: stupide A what delete if KN  type
 	    for(int i=0;i<N;++i)
-		A[i]= GetAny<K>( (*tab[i])(s));
+		A[i]= GetAny<KK>( (*tab[i])(s));
 	    return SetAny<KN_<K> >(A);}
     };
     E_F0 * code(const basicAC_F0 & a) const
@@ -1544,8 +1549,11 @@ void ArrayOperator()
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,KN<K>*,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
+     Add<KN_<K> >("n",".",new OneOperator1<Z,KN_<K> >(get__n));
      Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
      Add<KNM<K> *>("m",".",new OneOperator1<Z,KNM<K> *>(get_m));
+    Add<KNM_<K> >("n",".",new OneOperator1<Z,KNM_<K> >(get__n));
+    Add<KNM_<K> >("m",".",new OneOperator1<Z,KNM_<K> >(get__m));
  //ajout ars 2012 FH
      Add<KN<KN<K> > *>("n",".",new OneOperator1<long,KN<KN<K> > *>(get_n));
      Add<KN<KNM<K> > *>("n",".",new OneOperator1<long,KN<KNM<K> > *>(get_n));
@@ -1558,7 +1566,6 @@ void ArrayOperator()
     Add<Resize<KN<KN<K> > > >("(","",new OneOperator2_<KN<KN<K> >  *,Resize<KN<KN<K> > > , long   >(resize1));
     Add<Resize<KN<KNM<K> > > >("(","",new OneOperator2_<KN<KNM<K> >  *,Resize<KN<KNM<K> > > , long   >(resize1));
     Dcl_Type<Mul_KNMh_KN_<K> >();
-
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
      TheOperators->Add("=", new InitArrayfromArray<K,KN<K>*,false>(10));

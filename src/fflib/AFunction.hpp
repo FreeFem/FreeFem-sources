@@ -2341,14 +2341,42 @@ struct quad_function
 };
 
 template<typename T,class CODE >
+class  OneBinaryOperatorCode : public OneOperator{
+  typedef typename T::result_type R;
+  typedef typename T::first_argument_type A;
+  typedef typename T::second_argument_type B;
+/*
+    class Op : public E_F0 {
+      typedef  typename T::result_type Result;
+         Expression a,b;
+       public:
+       AnyType operator()(Stack s)  const
+        {return  SetAny<R>(static_cast<R>(::f( GetAny<A>((*a)(s)) ,
+                                                GetAny<B>((*b)(s))
+                                               );}
+       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
+       bool MeshIndependent() const {
+       return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent();}
+    };
+*/
+   public:
+    E_F0 * code(const basicAC_F0 & args) const
+     { return  new CODE(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));}
+    OneBinaryOperatorCode():
+      OneOperator(map_type[typeid(R).name()],
+                  map_type[typeid(A).name()],
+                  map_type[typeid(B).name()]
+                  ) {}
+};
+template<typename T,class CODE >
 class  OneTernaryOperator : public OneOperator{
   typedef typename T::result_type R;
   typedef typename T::first_argument_type A;
   typedef typename T::second_argument_type B;
   typedef typename T::third_argument_type C;
-
+/*
     class Op : public E_F0 {
-      typedef  typename C::result_type Result;
+      typedef  typename T::result_type Result;
          Expression a,b,c;
        public:
        AnyType operator()(Stack s)  const 
@@ -2359,7 +2387,7 @@ class  OneTernaryOperator : public OneOperator{
        bool MeshIndependent() const {
        return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent();}
     };
-
+*/
    public: 
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new CODE(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));} 
@@ -2377,9 +2405,9 @@ class  OneQuadOperator : public OneOperator{
   typedef typename T::second_argument_type B;
   typedef typename T::third_argument_type C;
   typedef typename T::fourth_argument_type D;
-
+/*
   class Op : public E_F0 {
-    typedef  typename C::result_type Result;
+    typedef  typename T::result_type Result;
     Expression a,b,c,d;
   public:
     AnyType operator()(Stack s)  const 
@@ -2392,7 +2420,7 @@ class  OneQuadOperator : public OneOperator{
     bool MeshIndependent() const {
       return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent()  && d->MeshIndependent();}
   };
-  
+  */
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
   { return  new CODE(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));} 
@@ -2616,11 +2644,11 @@ public:
 	CompileError( " They are used Named parameter ");
  
     return  new Op(t0->CastTo(args[0]),t1->CastTo(args[1]));} 
-  OneBinaryOperator(): 
+  OneBinaryOperator(int ppref=0):
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]), 
     t0(t[0]),
     t1(t[1]) 
-  {pref = SameType<A,B>::OK ;}
+  {pref = ppref+SameType<A,B>::OK ;}
   
   OneBinaryOperator(aType tt0,aType tt1):  
     OneOperator(map_type[typeid(R).name()],

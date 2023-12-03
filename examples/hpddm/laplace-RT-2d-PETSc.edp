@@ -23,7 +23,7 @@ fespace Wh(Th, Pk);           // local finite element space
 Mat A;
 int[int] n2o;
 macro ThN2O()n2o//
-DmeshBuild(Th);
+DmeshCreate(Th);
 {
 macro ThPostProcessD(D) {
     Wh def(u), def(v);

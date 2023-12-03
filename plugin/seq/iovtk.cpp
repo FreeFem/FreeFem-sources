@@ -5558,7 +5558,11 @@ class VTK_WriteMeshT_Op : public E_F0mps {
   };
 
   vector< Expression2 > l;
-  static const int n_name_param = 7;
+#ifndef COMMON_HPDDM_PARALLEL_IO
+  static const int n_name_param = 8;
+#else
+  static const int n_name_param = 9;
+#endif
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   long arg(int i, Stack stack, long a) const {
@@ -5672,7 +5676,11 @@ basicAC_F0::name_and_type VTK_WriteMeshT_Op< MeshS >::name_param[] = {
   {"floatmesh", &typeid(bool)},
   {"floatsol", &typeid(bool)},
   {"bin", &typeid(bool)},
-  {"swap", &typeid(bool)}};
+  {"swap", &typeid(bool)},
+#ifdef COMMON_HPDDM_PARALLEL_IO
+  {"communicator", &typeid(pcommworld)},
+#endif
+  {"append", &typeid(bool)}};
 
 template<>
 basicAC_F0::name_and_type VTK_WriteMeshT_Op< MeshL >::name_param[] = {
@@ -5683,7 +5691,10 @@ basicAC_F0::name_and_type VTK_WriteMeshT_Op< MeshL >::name_param[] = {
   {"floatmesh", &typeid(bool)},
   {"floatsol", &typeid(bool)},
   {"bin", &typeid(bool)},
-  {"swap", &typeid(bool)}};
+#ifdef COMMON_HPDDM_PARALLEL_IO
+  {"communicator", &typeid(pcommworld)},
+#endif
+  {"append", &typeid(bool)}};
 
 template< class MMesh >
 void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool binary, int datasize,
@@ -5993,6 +6004,15 @@ AnyType VTK_WriteMeshT_Op< MMesh >::operator( )(Stack stack) const {
   int datasize = floatmesh ? sizeof(float) : sizeof(double);
   int datasizeSol = floatsol ? sizeof(float) : sizeof(double);
 
+#ifdef COMMON_HPDDM_PARALLEL_IO
+  int time, size;
+  std::string base_filename;
+  std::string CellDataArrayForPvtu  = "";
+  std::string PointDataArrayForPvtu = "";
+  parallelIO(pffname, nargs[7] ? (MPI_Comm *)GetAny< pcommworld >((*nargs[7])(stack)) : 0,
+             nargs[8] && GetAny< bool >((*nargs[8])(stack)), time, size, base_filename);
+#endif
+
   int iii = 0;
   if (nargs[0]) {
     // char *data = newcopy(dataname->c_str());
@@ -6151,9 +6171,15 @@ AnyType VTK_WriteMeshT_Op< MMesh >::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 1) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_float(fp, Th, stack, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_double(fp, Th, stack, binary, swap, 1);
           }
@@ -6172,9 +6198,15 @@ AnyType VTK_WriteMeshT_Op< MMesh >::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 0) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
           }
@@ -6189,6 +6221,10 @@ AnyType VTK_WriteMeshT_Op< MMesh >::operator( )(Stack stack) const {
     fprintf(fp, "</Piece>\n");
     fprintf(fp, "</UnstructuredGrid>\n");
     fprintf(fp, "</VTKFile>\n");
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    PvtuWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+    PvdWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+#endif
   } else {
     cout << " iovtk extension file is not correct (" << VTK_FILE << " != 1 or 2 ) " << endl;
     ExecError(" iovtk : extension file");
@@ -6872,8 +6908,8 @@ static void Load_Init( ) {
   if (!Global.Find("savevtk").NotNull( )) {
     Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMesh_Op >);
     Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMesh3_Op >);
+    Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMeshT_Op< MeshS > >);
   }
-  Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMeshT_Op< MeshS > >);
   Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMeshT_Op< MeshL > >);
   Global.Add("vtkload", "(", new VTK_LoadMesh);
   Global.Add("vtkload3", "(", new VTK_LoadMesh3);

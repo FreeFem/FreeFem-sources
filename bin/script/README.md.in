@@ -1,0 +1,41 @@
+Version @VV@ of FreeFEM
+=======================
+
+Be carefull  the Macos security (com.apple.quarantine)
+
+To install FreeFEM
+
+- remove (into dustbin) by hand your old FreeFem++ from the application folder
+- mount the dmg file by a double click
+- Launch a new terminal windows (in folder Utility) 
+- type
+    cd /Volumes/@APPFF@
+
+- then type
+    bash ./Install-app.sh
+
+- try by typing 
+	FreeFem++-Cocoa
+
+You should receive a message beginning with a few lines and then 
+Usage: /Applications/FreeFem++.app/Contents/ff-@VV@/bin/FreeFem++ [FreeFEM arguments] filename [script arguments]
+FreeFEM arguments:
+
+A test to see if FreeFem++  works without graphic
+/Applications/FreeFem++.app/Contents/ff-@VV@/bin/FreeFem++  /Applications/FreeFem++.app/@FFTEST@ -nw 
+
+
+- If it does not work it is most likely due to the security system of Apple. See https://support.apple.com/en-us/HT202491
+or
+https://support.apple.com/fr-fr/HT202491
+
+if you have a message saying that  FreeFem++.app is corrupted and it should be sent to the dustbin then cancel the message box and  type in the terminal
+    sudo xattr -rc /Applications/FreeFem++.app
+
+and retry and recheck the Autorisation (see https://support.apple.com/en-us/HT202491 )
+
+You can also go to the system settings (under the apple at the top left in the menu) and select the confidentiality and security item and then down at the end you should see something like "open anyway".  Sorry! This is because some libraries are in Fortran and there is no Apple Fortran so Freefem can't be signed with Apple.
+
+ 
+
+

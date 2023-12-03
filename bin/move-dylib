@@ -5,8 +5,9 @@ shift
 echo move to = $to
 for ff in $@; do
 file=`greadlink -f $ff`
-echo move-dylib: change dylib in $file :: $ff
+echo move-dylib: change dylib in $file :: $ff version 1
 chmod a+w $file
+#codesign  --remove-signature $file
 install_name_tool -id $file $file
 for dylib in `otool -L $file | awk '/compatibility/ {print $1}' `; do
   echo "# $dylib "

@@ -1291,7 +1291,7 @@ void openSVG(const char *filename )
   }
   else
   {
-    cerr << " Err openning SVG file " << fsvg << endl;
+    cerr << " Err opening SVG file " << fsvg << endl;
   }
   return;
 }

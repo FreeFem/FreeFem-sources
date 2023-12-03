@@ -29,7 +29,7 @@ func b2 = -2 * (2*x - 1) * (1 - (2*y - 1)^2);
 //   mesh
 //--------------------
 mesh Th = square(n, n);
-DmeshBuild(Th);
+DmeshCreate(Th);
 fespace Ph(Th, P0);
 Ph part;
 PartitionCreate(Th, part[], P0);

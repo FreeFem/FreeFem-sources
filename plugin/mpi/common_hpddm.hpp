@@ -592,6 +592,7 @@ static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
+        Global.Add("savevtk", "(", new OneOperatorCode< VTK_WriteMeshT_Op< MeshS > >);
     }
     if(!Global.Find("periodicity").NotNull()) {
         Global.Add("periodicity", "(", new OneOperator3_<long, Matrice_Creuse<double>*, KN< KN< long > >*, KN< double >*>(periodicity));

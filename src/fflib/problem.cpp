@@ -223,7 +223,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        ffassert(mat.onFace); //   Finite Volume or discontinuous Galerkine
+        ffassert(mat.onFace); //   Finite Volume or discontinuous Galerkin
         ffassert(ie>=0 && ie < 4); //  int on Face
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -445,7 +445,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        assert(mat.onFace); //   Finite Volume or discontinuous Galerkine
+        assert(mat.onFace); //   Finite Volume or discontinuous Galerkin
         assert(ie>=0 && ie < 3); //  int on edge
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -612,7 +612,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        assert(mat.onFace); //   Finite Volume or discontinous Galerkine
+        assert(mat.onFace); //   Finite Volume or discontinuous Galerkin
         assert(ie>=0 && ie < 3); //  int on edge
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -9450,6 +9450,19 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
         ffassert(0);
     }
 
+// creating an instance of Element_rhs
+// case 3D
+
+template<class R>
+void  Element_rhs3(Expression const * const mapt,const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
+                  const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
+                  const GQuadratureFormular<R3> & FI = QuadratureFormular_Tet_5,bool alledges=false,bool intmortar=false,
+                  R3 *Q=0,int optim=1)
+{
+    //  add mapt case  in 3d here !!!!!!!! FH 
+    ffassert(0);
+}
+
 // generic template for AssembleVarForm
 template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
 bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
@@ -10635,7 +10648,9 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
             else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
         }
-        if( di.withmap()) { ExecError(" no map  in the case (5)??");}
+        Expression  const * const mapt=*di.mapt?di.mapt:0 ;
+
+       // if( di.withmap()) { ExecError(" no map  in the case (5)??");}
 
         //  if(di.islevelset()) InternalError("So no levelset integration type on this case (3)");
         if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
@@ -10713,6 +10728,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             if(VF) InternalError(" no jump or average in int1d of RHS");
             if(di.islevelset()) // init on level set (of RHS)
             {
+                ffassert(mapt==0);
                 double uset = HUGE_VAL;
                 R3 Q[4];
                 KN<double> phi(ThI.nv);phi=uset;
@@ -10780,8 +10796,11 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                     int ie,i =ThI.BoundaryElement(e,ie);
                     if ( sameMesh)
                     Element_rhs<R>(Vh[i],ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false,useopt);
+                    else if(!mapt)
+                        Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false,useopt);
                     else
-                    Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false,useopt);
+                        ffassert(0); // DO do FH...
+ 
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                 }
             }
@@ -10834,8 +10853,11 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                         {
                             if ( sameMesh )
                             Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIV,useopt);
-                            else
+                            else if(!mapt)
                             Element_rhs<R>(ThI,ThI[t],Vh,*l->l,buf,stack,*B,FIV,useopt);
+                            else ffassert(0);
+                        //        Element_rhs3<R>(mapt,ThI,ThI[t],Vh,*l->l,buf,stack,*B,FIV,useopt);
+
                             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
                         }
@@ -10851,13 +10873,17 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 {
                     if ( sameMesh )
                     Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIV,useopt);
-                    else
+                    else if(!mapt)
                     Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV,useopt);
+                    else
+                    Element_rhs3<R>(mapt,ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV,useopt);// to do !!!!!
+                           // Element_rhs<R>(mapt,ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV,useopt);
+
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                 }}
         }
         else  if(kind==CDomainOfIntegration::intallfaces    ) {
-
+            assert(mapt==0);
             if(VF)
             {
                 if ( !sameMesh) InternalError(" no jump or average in intallfaces for RHS in not samemesh");
@@ -10894,9 +10920,12 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                 // if face on bord get the lab ???
                 if ( sameMesh)
                 Element_rhs<R>(Vh[i],ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
-                else
+                else if(!mapt)
                 Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
-                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                else
+                    ffassert(mapt==0);//
+                //Element_rhs<R>(mapt,ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
+               if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
                }
             }
@@ -11981,7 +12010,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                 break;
             }
             if(!same)
-            InternalError("Methode de Galerkine (a faire)");
+            InternalError("Methode de Galerkin (a faire)");
             else
             {
                 // check if we have only one FESpace
@@ -12355,7 +12384,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
                 break;
             }
         if(!same)
-            InternalError("Methode de Galerkine (a faire)");
+            InternalError("Methode de Galerkin (a faire)");
         sameCompositeFESpace=same;
     }
     

@@ -342,11 +342,16 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
             if (pr#prfe#prmesh#issuper) {
               if (!pr#prfe#prmesh#excluded)
                 tmp = vaux(pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]:pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]+pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]-1);
-              mpiRequest[int] rq(pr#prfe#insuperinterior.n-!pr#prfe#prmesh#excluded);
-              for (int i=!pr#prfe#prmesh#excluded; i < pr#prfe#insuperinterior.n; i++) {
-                Isend(processor(pr#prfe#insuperinterior[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[i-!pr#prfe#prmesh#excluded]),vaux(pr#offseti[pr#prfe#insuperinterior[i]]:pr#offseti[pr#prfe#insuperinterior[i]]+pr#sizelg[pr#prfe#insuperinterior[i]]-1));
+              mpiRequest[int] rq(pr#prfe#prmesh#insuperinterior.n-!pr#prfe#prmesh#excluded);
+              pr#prfe#K[int][int] tres(pr#prfe#prmesh#insuperinterior.n);
+              for (int i=!pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#insuperinterior.n; i++) {
+                tres[i].resize(pr#sizelg[pr#prfe#prmesh#insuperinterior[i]]);
+                tres[i] = vaux(pr#offseti[pr#prfe#prmesh#insuperinterior[i]]:pr#offseti[pr#prfe#prmesh#insuperinterior[i]]+pr#sizelg[pr#prfe#prmesh#insuperinterior[i]]-1);
               }
-              for (int i=0;i < pr#prfe#insuperinterior.n-!pr#prfe#prmesh#excluded;i++)
+              for (int i=!pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#insuperinterior.n; i++) {
+                Isend(processor(pr#prfe#prmesh#insuperinterior[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[i-!pr#prfe#prmesh#excluded]),tres[i]);
+              }
+              for (int i=0;i < pr#prfe#prmesh#insuperinterior.n-!pr#prfe#prmesh#excluded;i++)
                 int k = mpiWaitAny(rq);
             }
             else {
