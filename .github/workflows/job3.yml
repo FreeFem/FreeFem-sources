@@ -1,0 +1,71 @@
+name: Job3
+on: [push]
+
+jobs:
+  linux:
+    name: Job3 - Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: |
+          sudo apt install gcc g++ gfortran m4 patch \
+            git libblas-dev liblapack-dev libsuitesparse-dev \
+            libhdf5-dev libgsl-dev flex bison wget cmake autoconf \
+            automake autotools-dev
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --without-mpi --prefix="$WORKSPACE/install"
+          ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        run: make check | true
+
+      - name: Install
+        run: make install
+
+  macos:
+    name: Job3 - MacOS
+    runs-on: macos-latest
+
+    env:
+      CC: clang
+      CXX: clang++
+      FC: gfortran
+      F77: gfortran
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --without-mpi --prefix="$WORKSPACE/install"
+          ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        run: make check | true
+
+      - name: Install
+        run: make install
+
+  windows:
+    name: Job3 - Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: TODO
+        run: echo TODO
