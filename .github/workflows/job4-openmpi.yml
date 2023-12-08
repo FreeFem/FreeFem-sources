@@ -1,4 +1,4 @@
-name: Job4 OpenMPI - Full version of FreeFEM compiled in release mode
+name: Job4 OpenMPI - Full FreeFEM version [release mode]
 on: [push]
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
 
       - name: PETSc
         run: |
-          cd 3rparty/ff-petsc
+          cd 3rdparty/ff-petsc
           make petsc-slepc
           cd -
           ./reconfigure
@@ -85,7 +85,7 @@ jobs:
 
       - name: PETSc
         run: |
-          cd 3rparty/ff-petsc
+          cd 3rdparty/ff-petsc
           make petsc-slepc
           cd -
           ./reconfigure

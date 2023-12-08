@@ -3,8 +3,6 @@ on: [push]
 
 jobs:
   linux:
-    if: ${{ false }} # disable for now
-
     strategy:
       fail-fast: false
       matrix:
@@ -37,8 +35,6 @@ jobs:
         run: make install
 
   macos:
-    if: ${{ false }} # disable for now
-
     strategy:
       fail-fast: false
       matrix:

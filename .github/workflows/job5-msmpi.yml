@@ -1,4 +1,4 @@
-name: Job4 MSMPI - Full FreeFEM version [release mode]
+name: Job4 MSMPI - Full FreeFEM version [debug mode]
 on: [push]
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --prefix="${HOME}/freefem"
+          ./configure --enable-download --enable-debug --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
