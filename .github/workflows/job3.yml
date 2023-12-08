@@ -6,6 +6,9 @@ jobs:
     name: Job3 - Linux
     runs-on: ubuntu-latest
 
+    env:
+      HOME: /home/runner
+
     steps:
       - uses: actions/checkout@main
 
@@ -19,14 +22,14 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --without-mpi --prefix="$WORKSPACE/install"
+          ./configure --enable-download --without-mpi --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
 
       - name: Build
         run: make -j2
 
       - name: Check
-        run: make check | true
+        run: make check || true
 
       - name: Install
         run: make install
@@ -36,10 +39,11 @@ jobs:
     runs-on: macos-latest
 
     env:
+      HOME: /home/runner
       CC: clang
       CXX: clang++
-      FC: gfortran
-      F77: gfortran
+      FC: gfortran12
+      F77: gfortran12 #TODO find a way to define gfortran only
 
     steps:
       - uses: actions/checkout@main
@@ -47,20 +51,17 @@ jobs:
       - name: Install
         run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 
-      - name: Ensure gfortran
-        run: ln -s /usr/local/bin/gfortran-12 /usr/local/bin/gfortran
-
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --without-mpi --prefix="$WORKSPACE/install"
+          ./configure --enable-download --without-mpi --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
 
       - name: Build
         run: make -j2
 
       - name: Check
-        run: make check | true
+        run: make check || true
 
       - name: Install
         run: make install

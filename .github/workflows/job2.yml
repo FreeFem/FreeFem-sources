@@ -6,6 +6,9 @@ jobs:
     name: Job2 - Linux
     runs-on: ubuntu-latest
 
+    env:
+      HOME: /home/runner
+
     steps:
       - uses: actions/checkout@main
 
@@ -24,7 +27,7 @@ jobs:
         run: make -j2
 
       - name: Check
-        run: make check | true
+        run: make check || true
 
       - name: Install
         run: make install
@@ -34,19 +37,17 @@ jobs:
     runs-on: macos-latest
 
     env:
+      HOME: /home/runner
       CC: clang
       CXX: clang++
-      FC: gfortran
-      F77: gfortran
+      FC: gfortran12
+      F77: gfortran12 #TODO find a way to define gfortran only
 
     steps:
       - uses: actions/checkout@main
 
       - name: Install
         run: brew install gcc m4 git flex bison suitesparse hdf5
-
-      - name: Ensure gfortran
-        run: ln -s /usr/local/bin/gfortran-12 /usr/local/bin/gfortran
 
       - name: Configure
         run: |
@@ -57,7 +58,7 @@ jobs:
         run: make -j2
 
       - name: Check
-        run: make check | true
+        run: make check || true
 
       - name: Install
         run: make install
