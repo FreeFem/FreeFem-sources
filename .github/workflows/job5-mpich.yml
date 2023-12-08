@@ -97,4 +97,4 @@ jobs:
         run: make check
 
       - name: Install
-        run: sudo make check #TODO should work without sudo
+        run: sudo make install #TODO should work without sudo

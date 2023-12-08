@@ -75,10 +75,10 @@ jobs:
 
       - name: Check
         continue-on-error: true
-        run: sudo make check #TODO should work without sudo
+        run: make check
 
       - name: Install
-        run: make install
+        run: sudo make install #TODO should work without sudo
 
   windows:
     name: Job1 - Windows
