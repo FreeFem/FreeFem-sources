@@ -7,7 +7,7 @@
 
 if [ "$(uname)" = "Darwin" ]; then
   ff_desktop="$HOME/Desktop/FreeFem++-""FF__FVER"
-  mkdir -p -m 0755 "FF_DESTDIR"/etc/paths.d
+  mkdir -p -m 0755 "FF__DESTDIR"/etc/paths.d
   ln -sf "FF__DATADIR"/"FreeFEM-documentation.pdf" "$HOME/Desktop"
   test -e "$ff_desktop" || ln -sf "FF__DATADIR"/"FF__FVER" "$ff_desktop"
   echo Install "FF__DESTDIR"/etc/paths.d/FreeFem++ file:  "FF_BINDIR"
