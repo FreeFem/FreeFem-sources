@@ -4,10 +4,10 @@ on: [push]
 jobs:
   linux:
     strategy:
+      fail-fast: false
       matrix:
         version: [20.04, 22.04]
 
-    continue-on-error: true
     name: Job4 MPICH - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
@@ -47,10 +47,10 @@ jobs:
 
   macos:
     strategy:
+      fail-fast: false
       matrix:
         version: [11, 12]
 
-    continue-on-error: true
     name: Job4 MPICH - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
@@ -98,11 +98,3 @@ jobs:
 
       - name: Install
         run: make install
-
-  windows:
-    name: Job4 MPICH - Windows
-    runs-on: windows-latest
-
-    steps:
-      - name: TODO
-        run: echo TODO

@@ -1,0 +1,62 @@
+name: Job4 MSMPI - Full version of FreeFEM compiled in release mode
+on: [push]
+
+jobs:
+  windows:
+    name: Job4 MSMPI - Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: download MS-MPI setup (SDK is from MSYS2)
+        run: curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
+
+      - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
+        run: .\msmpisetup.exe -unattend -force
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-hdf5
+            mingw-w64-x86_64-gsl
+            autoconf
+            automake-wrapper
+            pkg-config
+            pkgfile
+            tar
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-msmpi
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --without-mpi --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+
+      - name: PETSc
+        run: |
+          cd 3rparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: make install

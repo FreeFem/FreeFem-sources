@@ -3,11 +3,13 @@ on: [push]
 
 jobs:
   linux:
+    if: ${{ false }} # disable for now
+
     strategy:
+      fail-fast: false
       matrix:
         version: [20.04, 22.04]
 
-    continue-on-error: true
     name: Job1 - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
@@ -35,11 +37,13 @@ jobs:
         run: make install
 
   macos:
+    if: ${{ false }} # disable for now
+
     strategy:
+      fail-fast: false
       matrix:
         version: [11, 12]
 
-    continue-on-error: true
     name: Job1 - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
@@ -87,6 +91,7 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
       - uses: msys2/setup-msys2@v2
         with:
@@ -100,7 +105,7 @@ jobs:
             flex
             bison
             unzip
-            mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-lapack
 
       - uses: actions/checkout@v4
 

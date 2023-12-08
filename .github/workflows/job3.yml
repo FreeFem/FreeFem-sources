@@ -4,10 +4,10 @@ on: [push]
 jobs:
   linux:
     strategy:
+      fail-fast: false
       matrix:
         version: [20.04, 22.04]
 
-    continue-on-error: true
     name: Job3 - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
@@ -40,10 +40,10 @@ jobs:
 
   macos:
     strategy:
+      fail-fast: false
       matrix:
         version: [11, 12]
 
-    continue-on-error: true
     name: Job3 - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
@@ -89,6 +89,47 @@ jobs:
     name: Job3 - Windows
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     steps:
-      - name: TODO
-        run: echo TODO
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-hdf5
+            mingw-w64-x86_64-gsl
+            autoconf
+            automake-wrapper
+            pkg-config
+            pkgfile
+            tar
+            mingw-w64-x86_64-cmake
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --without-mpi --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: make install

@@ -296,7 +296,7 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
 
 bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
-	m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" bin/script/PostInstall.m4 > bin/script/PostInstall.sh
+	m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" "-DFF__DESTDIR=$(DESTDIR)" bin/script/PostInstall.m4 > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
 
 FreeFEM-documentation.pdf:Makefile
