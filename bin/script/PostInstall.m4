@@ -2,17 +2,18 @@
 # "-DFF__FVER=$(PACKAGE_VERSION)" 
 # "-DFF_BINDIR=$(bindir)" 
 # "-DFF__DATADIR=$(pkgdatadir)
+# "-DFF__DESTDIR=$(DESTDIR)"
 #  "FFBIN="@prefix@"/bin
 
 if [ "$(uname)" = "Darwin" ]; then
   ff_desktop="$HOME/Desktop/FreeFem++-""FF__FVER"
-  mkdir -p -m 0755 /etc/paths.d
+  mkdir -p -m 0755 "FF_DESTDIR"/etc/paths.d
   ln -sf "FF__DATADIR"/"FreeFEM-documentation.pdf" "$HOME/Desktop"
   test -e "$ff_desktop" || ln -sf "FF__DATADIR"/"FF__FVER" "$ff_desktop"
-  echo Install /etc/paths.d/FreeFem++ file:  "FF_BINDIR"
+  echo Install "FF__DESTDIR"/etc/paths.d/FreeFem++ file:  "FF_BINDIR"
 
-  echo "FF_BINDIR" > /etc/paths.d/FreeFem++
-  chmod a+r /etc/paths.d/FreeFem++
+  echo "FF_BINDIR" > "FF__DESTDIR"/etc/paths.d/FreeFem++
+  chmod a+r "FF__DESTDIR"/etc/paths.d/FreeFem++
 fi
 
 echo " Try to Clean old file version "
