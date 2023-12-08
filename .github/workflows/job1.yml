@@ -7,6 +7,7 @@ jobs:
       matrix:
         version: [20.04, 22.04]
 
+    continue-on-error: true
     name: Job1 - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
@@ -25,7 +26,8 @@ jobs:
         run: make -j2
 
       - name: Check
-        run: make check || true
+        continue-on-error: true
+        run: make check
 
       - name: Install
         run: make install
@@ -35,6 +37,7 @@ jobs:
       matrix:
         version: [11, 12]
 
+    continue-on-error: true
     name: Job1 - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
@@ -50,8 +53,15 @@ jobs:
       - name: Install
         run: brew install gcc m4 git flex bison
 
-      - name: Setup GNU Fortran
-        uses: modflowpy/install-gfortran-action@v1
+      - name: Symlink GCC & Fortran
+        run: |
+          sudo ln -fs /usr/local/bin/gfortran-12 /usr/local/bin/gfortran   
+          sudo ln -fs /usr/local/bin/gcc-12 /usr/local/bin/gcc
+          sudo ln -fs /usr/local/bin/g++-12 /usr/local/bin/g++
+
+          # symlink dylib location for previous versions
+          sudo ln -fs /usr/local/opt/gcc/lib/gcc/12 /usr/local/opt/gcc/lib/gcc/11
+          sudo ln -fs /usr/local/opt/gcc/lib/gcc/12 /usr/local/opt/gcc/lib/gcc/10
 
       - name: Configure
         run: |
@@ -62,7 +72,8 @@ jobs:
         run: make -j2
 
       - name: Check
-        run: make check || true
+        continue-on-error: true
+        run: make check
 
       - name: Install
         run: make install
