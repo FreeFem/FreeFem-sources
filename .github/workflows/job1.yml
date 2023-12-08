@@ -93,6 +93,7 @@ jobs:
           update: true
           install: >-
             mingw-w64-x86_64-toolchain
+            make
             m4
             patch
             git
