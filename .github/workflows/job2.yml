@@ -3,11 +3,12 @@ on: [push]
 
 jobs:
   linux:
-    name: Job2 - Linux
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [20.04, 22.04]
 
-    env:
-      HOME: /home/runner
+    name: Job1 - Ubuntu ${{ matrix.version }}
+    runs-on: ubuntu-${{ matrix.version }}
 
     steps:
       - uses: actions/checkout@main
@@ -33,21 +34,27 @@ jobs:
         run: make install
 
   macos:
-    name: Job2 - MacOS
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        version: [11, 12]
+
+    name: Job1 - MacOS ${{ matrix.version }}
+    runs-on: macos-${{ matrix.version }}
 
     env:
-      HOME: /home/runner
       CC: clang
       CXX: clang++
-      FC: gfortran12
-      F77: gfortran12 #TODO find a way to define gfortran only
+      FC: gfortran
+      F77: gfortran
 
     steps:
       - uses: actions/checkout@main
 
       - name: Install
         run: brew install gcc m4 git flex bison suitesparse hdf5
+
+      - name: Setup GNU Fortran
+        uses: modflowpy/install-gfortran-action@v1
 
       - name: Configure
         run: |

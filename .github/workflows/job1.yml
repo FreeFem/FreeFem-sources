@@ -10,9 +10,6 @@ jobs:
     name: Job1 - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
-    env:
-      HOME: /home/runner
-
     steps:
       - uses: actions/checkout@main
 
@@ -44,17 +41,17 @@ jobs:
     env:
       CC: gcc
       CXX: g++
-      FC: gfortran12
-      F77: gfortran12 #TODO find a way to define gfortran only
+      FC: gfortran
+      F77: gfortran
 
     steps:
-      - name: Check
-        run: echo ${HOME}
-
       - uses: actions/checkout@main
 
       - name: Install
         run: brew install gcc m4 git flex bison
+
+      - name: Setup GNU Fortran
+        uses: modflowpy/install-gfortran-action@v1
 
       - name: Configure
         run: |
