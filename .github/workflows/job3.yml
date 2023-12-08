@@ -16,6 +16,7 @@ jobs:
 
       - name: Install
         run: |
+          sudo apt update
           sudo apt install gcc g++ gfortran m4 patch \
             git libblas-dev liblapack-dev libsuitesparse-dev \
             libhdf5-dev libgsl-dev flex bison wget cmake autoconf \

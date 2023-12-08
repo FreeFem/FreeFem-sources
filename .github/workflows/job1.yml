@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 
       - name: Configure
         run: |
