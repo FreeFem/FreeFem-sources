@@ -1,4 +1,4 @@
-name: Job2
+name: Job2 - Minimal version
 on: [push]
 
 jobs:
@@ -8,7 +8,7 @@ jobs:
         version: [20.04, 22.04]
 
     continue-on-error: true
-    name: Job1 - Ubuntu ${{ matrix.version }}
+    name: Job2 - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
@@ -42,7 +42,7 @@ jobs:
         version: [11, 12]
 
     continue-on-error: true
-    name: Job1 - MacOS ${{ matrix.version }}
+    name: Job2 - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
     env:
