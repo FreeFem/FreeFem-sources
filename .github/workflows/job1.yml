@@ -3,8 +3,12 @@ on: [push]
 
 jobs:
   linux:
-    name: Job1 - Linux
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [20.04, 22.04]
+
+    name: Job1 - Ubuntu ${{ matrix.version }}
+    runs-on: ubuntu-${{ matrix.version }}
 
     env:
       HOME: /home/runner
@@ -30,17 +34,23 @@ jobs:
         run: make install
 
   macos:
-    name: Job1 - MacOS
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        version: [11, 12]
+
+    name: Job1 - MacOS ${{ matrix.version }}
+    runs-on: macos-${{ matrix.version }}
 
     env:
-      HOME: /home/runner
       CC: gcc
       CXX: g++
       FC: gfortran12
       F77: gfortran12 #TODO find a way to define gfortran only
 
     steps:
+      - name: Check
+        run: echo ${HOME}
+
       - uses: actions/checkout@main
 
       - name: Install
