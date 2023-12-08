@@ -100,7 +100,7 @@ jobs:
             flex
             bison
             unzip
-            mingw-w64-lapack
+            mingw-w64-x86_64-openblas
 
       - uses: actions/checkout@v4
 
