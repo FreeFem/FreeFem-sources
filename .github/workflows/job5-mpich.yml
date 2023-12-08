@@ -1,4 +1,4 @@
-name: Job4 MPICH - Full FreeFEM version [debug mode]
+name: Job5 MPICH - Full FreeFEM version [debug mode]
 on: [push]
 
 jobs:
@@ -8,7 +8,7 @@ jobs:
       matrix:
         version: [20.04, 22.04]
 
-    name: Job4 MPICH - Ubuntu ${{ matrix.version }}
+    name: Job5 MPICH - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
@@ -51,7 +51,7 @@ jobs:
       matrix:
         version: [11, 12]
 
-    name: Job4 MPICH - MacOS ${{ matrix.version }}
+    name: Job5 MPICH - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
     env:

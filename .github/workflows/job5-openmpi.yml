@@ -1,4 +1,4 @@
-name: Job4 OpenMPI - Full FreeFEM version [debug mode]
+name: Job5 OpenMPI - Full FreeFEM version [debug mode]
 on: [push]
 
 jobs:
@@ -8,7 +8,7 @@ jobs:
       matrix:
         version: [20.04, 22.04]
 
-    name: Job4 OpenMPI - Ubuntu ${{ matrix.version }}
+    name: Job5 OpenMPI - Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
@@ -52,7 +52,7 @@ jobs:
       matrix:
         version: [11, 12]
 
-    name: Job4 OpenMPI - MacOS ${{ matrix.version }}
+    name: Job5 OpenMPI - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
     env:

@@ -1,9 +1,9 @@
-name: Job4 MSMPI - Full FreeFEM version [debug mode]
+name: Job5 MSMPI - Full FreeFEM version [debug mode]
 on: [push]
 
 jobs:
   windows:
-    name: Job4 MSMPI - Windows
+    name: Job5 MSMPI - Windows
     runs-on: windows-latest
 
     defaults:
@@ -12,9 +12,11 @@ jobs:
 
     steps:
       - name: download MS-MPI setup (SDK is from MSYS2)
+        shell: pwsh
         run: curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
 
       - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
+        shell: pwsh
         run: .\msmpisetup.exe -unattend -force
 
       - uses: msys2/setup-msys2@v2
