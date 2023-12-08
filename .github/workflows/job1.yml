@@ -75,7 +75,7 @@ jobs:
 
       - name: Check
         continue-on-error: true
-        run: make check
+        run: sudo make check #TODO should work without sudo
 
       - name: Install
         run: make install
