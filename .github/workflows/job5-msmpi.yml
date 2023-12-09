@@ -6,6 +6,12 @@ jobs:
     name: Job5 MSMPI - Windows
     runs-on: windows-latest
 
+    env:
+      MPIRUN: /mingw64/bin/mpirun
+      MPICXX: /mingw64/bin/mpicxx
+      MPIFC: /mingw64/bin/mpif90
+      MPICC: /mingw64/bin/mpicc
+
     defaults:
       run:
         shell: msys2 {0}

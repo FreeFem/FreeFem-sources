@@ -60,6 +60,10 @@ jobs:
       CXX: g++
       FC: gfortran
       F77: gfortran
+      MPIRUN: /usr/local/bin/mpirun
+      MPICXX: /usr/local/bin/mpicxx
+      MPIFC: /usr/local/bin/mpif90
+      MPICC: /usr/local/bin/mpicc
 
     steps:
       - uses: actions/checkout@main
