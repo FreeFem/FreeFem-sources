@@ -11,11 +11,11 @@ jobs:
         shell: msys2 {0}
 
     steps:
-      - name: download MS-MPI setup (SDK is from MSYS2)
+      - name: download MS-MPI setup
         shell: pwsh
         run: curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
 
-      - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
+      - name: Install mpiexec.exe
         shell: pwsh
         run: .\msmpisetup.exe -unattend -force
 
