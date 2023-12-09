@@ -43,7 +43,6 @@ jobs:
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-msmpi
             python
-            mingw-w64-x86_64-python
 
       - uses: actions/checkout@v4
 

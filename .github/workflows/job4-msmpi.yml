@@ -45,7 +45,7 @@ jobs:
             python
 
       - name: Remove packages
-        run: pacman -R mingw-w64-x86_64-python
+        run: pacman -R mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
 
       - uses: actions/checkout@v4
 
