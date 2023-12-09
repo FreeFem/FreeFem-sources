@@ -43,12 +43,12 @@ jobs:
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-msmpi
             python
-            mingw-w64-x86_64-python
 
       - uses: actions/checkout@v4
 
       - name: Configure
         run: |
+          echo $PATH
           autoreconf -i
           ./configure --enable-download --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
