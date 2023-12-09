@@ -238,7 +238,7 @@ LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 
 XFAIL_TESTS = $(TESTS)
 
-EXTRA_DIST = *.edp cube.msh rectangle.msh
+EXTRA_DIST = *.edp circle.msh sphere.msh
 
 freefem++.pref: Makefile
 	echo loadpath = \"../../plugin/mpi/\" > freefem++.pref
