@@ -6,12 +6,6 @@ jobs:
     name: Job5 MSMPI - Windows
     runs-on: windows-latest
 
-    env:
-      MPIRUN: /mingw64/bin/mpirun
-      MPICXX: /mingw64/bin/mpicxx
-      MPIFC: /mingw64/bin/mpif90
-      MPICC: /mingw64/bin/mpicc
-
     defaults:
       run:
         shell: msys2 {0}
@@ -58,7 +52,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic --enable-generic --enable-download --enable-debug --prefix="${HOME}/freefem"
+          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode --enable-debug --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
