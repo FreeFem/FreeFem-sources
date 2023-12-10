@@ -58,7 +58,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --prefix="${HOME}/freefem"
+          ./configure CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic --enable-generic --enable-download --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
