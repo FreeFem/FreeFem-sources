@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Install MS-MPI
-        shell: pwsh
+        shell: cmd
         run: |
           curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          Invoke-Command msmpisetup.exe
+          .\msmpisetup.exe
 
       - uses: msys2/setup-msys2@v2
         with:
