@@ -32,7 +32,6 @@ jobs:
             pkgfile
             tar
             mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
             mingw-w64-x86_64-msmpi
             python
 
@@ -42,11 +41,8 @@ jobs:
       - name: Install MS-MPI
         shell: pwsh
         run: |
-          echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          .\msmpisetup.exe -unattend -force
-          Test-Path "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -PathType leaf
-          echo "C:\Program Files\Microsoft MPI\Bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Invoke-Command msmpisetup.exe -unattend -force
 
       - uses: actions/checkout@v4
 
