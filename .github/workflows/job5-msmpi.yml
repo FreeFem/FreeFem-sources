@@ -52,7 +52,9 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode --enable-debug --prefix="${HOME}/freefem" MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode --enable-debug \
+            --prefix="${HOME}/freefem" \
+            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
