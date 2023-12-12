@@ -213,7 +213,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) && $(PYTHON) ./configure --prefix=$(DIR_INSTALL_REAL) \
-		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
+		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr || cat configure.log;
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	mkdir -p $(SRCDIR)/fc/externalpackages || true
 	cp -r $(SRCDIR)/fr/externalpackages/git.slepc $(SRCDIR)/fr/externalpackages/git.hpddm $(SRCDIR)/fc/externalpackages || true
