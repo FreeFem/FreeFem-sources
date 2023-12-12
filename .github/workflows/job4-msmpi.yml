@@ -11,6 +11,12 @@ jobs:
         shell: msys2 {0}
 
     steps:
+      - name: Install MS-MPI
+        shell: pwsh
+        run: |
+          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
+          Invoke-Command msmpisetup.exe -unattend -force
+
       - uses: msys2/setup-msys2@v2
         with:
           update: true
@@ -37,12 +43,6 @@ jobs:
 
       - name: Remove packages
         run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
-
-      - name: Install MS-MPI
-        shell: pwsh
-        run: |
-          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          Invoke-Command msmpisetup.exe -unattend -force
 
       - uses: actions/checkout@v4
 
