@@ -7,7 +7,7 @@ on:
 
 jobs:
   debian:
-    name: Debian release
+    name: DEB release
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --prefix="/usr/local"
+          ./configure --enable-optim --enable-generic --enable-download
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
@@ -96,4 +96,4 @@ jobs:
         with:
           files: ${{ steps.deb.outputs.file }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: v${{ steps.deb.outputs.number }}
+          release-tag: v${{ steps.deb.outputs.version }}-testActions

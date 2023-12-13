@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - feature-github-actions
 
 jobs:
   create:
@@ -24,8 +25,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: FreeFEM v${{ steps.version.outputs.number }}
-          tag_name: v${{ steps.version.outputs.number }}
+          name: FreeFEM v${{ steps.version.outputs.number }}-testActions
+          tag_name: v${{ steps.version.outputs.number }}-testActions
           body: '**Warning**: this is an automatic release. If you encounter some trouble with packages, post a message in the [forum](https://community.freefem.org)'
           draft: false
-          prerelease: false
+          prerelease: true
