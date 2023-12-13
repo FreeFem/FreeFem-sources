@@ -346,6 +346,24 @@ struct Op_setBemKernel {
     static RR f(Stack stack, const AA & a,const BB & b)
     {
         ffassert(a);
+        const pBemKernel p=new BemKernel(*b);
+
+        if (!INIT && *a)
+            (**a).destroy( );
+        *a = p;
+        return a;
+    }
+};
+
+
+template<bool INIT,class RR,class AA=RR,class BB=AA>
+struct Op_setCombBemKernel {
+    using first_argument_type  = AA;
+    using second_argument_type = BB;
+    using result_type          = RR;
+    static RR f(Stack stack, const AA & a,const BB & b)
+    {
+        ffassert(a);
         const pBemKernel p=combKernel(b);
         
         if (!INIT && *a)
