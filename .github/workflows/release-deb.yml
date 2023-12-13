@@ -1,10 +1,9 @@
 name: Debian Release
 on:
-  workflow_dispatch
-  # workflow_run:
-  #   workflows: ['Release']
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   debian:
@@ -97,4 +96,4 @@ jobs:
         with:
           files: ${{ steps.deb.outputs.file }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: v${{ steps.deb.outputs.version }}-testActions
+          release-tag: v${{ steps.deb.outputs.version }}
