@@ -36,4 +36,4 @@ jobs:
           tag_name: v${{ steps.version.outputs.number }}
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: false
-          prerelease: true
+          prerelease: false
