@@ -1,9 +1,10 @@
 name: Debian Release
 on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  workflow_dispatch
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   debian:
