@@ -44,6 +44,7 @@ jobs:
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-msmpi
             python
+            mingw-w64-x86_64-freeglut
 
       - name: Remove packages
         run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
