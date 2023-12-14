@@ -1,4 +1,4 @@
-name: Windows Release
+name: Release Windows
 on: ['push']
 #   workflow_run:
 #     workflows: ['Release']
