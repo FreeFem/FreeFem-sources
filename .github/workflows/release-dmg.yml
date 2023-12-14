@@ -1,0 +1,123 @@
+name: Release MacOS
+on: ['push']
+#   workflow_run:
+#     workflows: ['Release']
+#     types:
+#       - completed
+
+jobs:
+  macos:
+    name: DMG release
+    runs-on: macos-latest
+
+    env:
+      CC: gcc
+      CXX: g++
+      FC: gfortran
+      F77: gfortran
+      PACKAGE_DIR: $HOME/pkg
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
+
+      - name: Symlink GCC & Fortran
+        run: |
+          sudo ln -fs /usr/local/bin/gfortran-12 /usr/local/bin/gfortran   
+          sudo ln -fs /usr/local/bin/gcc-12 /usr/local/bin/gcc
+          sudo ln -fs /usr/local/bin/g++-12 /usr/local/bin/g++
+
+          # symlink dylib location for previous versions
+          sudo ln -fs /usr/local/opt/gcc/lib/gcc/12 /usr/local/opt/gcc/lib/gcc/11
+          sudo ln -fs /usr/local/opt/gcc/lib/gcc/12 /usr/local/opt/gcc/lib/gcc/10
+
+      - name: Version
+        id: version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
+          echo "dmg_dir=FreeFEM-$VERSION-Intel" >> $GITHUB_OUTPUT
+
+      - name: Fortran copy
+        run: |
+          PREFIX=${{ steps.version.outputs.prefix }}
+          sudo mkdir -p "$PREFIX/gnu"
+
+          FORTRAN_CHECK="$HOME/fortran-check"
+          mkdir "$FORTRAN_CHECK"
+          printf "program sizeofint\n  integer i\nend" > "FORTRAN_CHECK/check.f"
+          gfortran "$FORTRAN_CHECK/check.f" -o "$FORTRAN_CHECK/check"
+          (export DYLD_PRINT_LIBRARIES=1; "$FORTRAN_CHECK/check") 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib|"$FORTRAN_CHECK/check"|grep .dylib' >$PREFIX/gnu/list-dylib-gfortran
+          rm -rf "$FORTRAN_CHECK"
+
+          BREW_LIB_GFORTRAN=$(grep gfortran "$PREFIX/gnu/list-dylib-gfortran")
+          BREW_LIB_QUADMATH=$(grep libquadmath "$PREFIX/gnu/list-dylib-gfortran")
+
+          cd $(dirname "$BREW_LIB_GFORTRAN")
+          cp -f libgfortran.*.dylib libquadmath.*.dylib libgcc_s.*.dylib "$PREFIX/gnu/"
+
+          cd "$PREFIX/gnu"
+          ln -sf libgfortran.?.dylib libgfortran.dylib
+          ln -sf libquadmath.?.dylib  libquadmath.dylib
+
+      - name: Configure
+        run: |
+          PREFIX=${{ steps.version.outputs.prefix }}
+          autoreconf -i
+          ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
+            --prefix="$PREFIX" \
+            CXXFLAGS=-Wno-undefined-var-template \
+            FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath
+          ./3rdparty/getall -a -o PETSc
+
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc SUDO=sudo
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: |
+          PREFIX=${{ steps.version.outputs.prefix }}
+          mkdir -p "$PACKAGE_DIR/$PREFIX"
+          rsync -a "$PREFIX/." "$PACKAGE_DIR/$PREFIX/."
+          sudo make install DESTDIR="$PACKAGE_DIR"
+
+      - name: Fix gfotran lib
+        run: |
+          PREFIX=${{ steps.version.outputs.prefix }}
+          FORTRAN_FIX="$HOME/fortran-fix"
+
+          mkdir "$FORTRAN_FIX"
+          find "$PACKAGE_DIR/$PREFIX" -name '*.dylib' > "$FORTRAN_FIX/dylib-ff.txt"
+          ./bin/change-dylib-gfortran "$PREFIX/gnu" $(cat "$FORTRAN_FIX/dylib-ff.txt")
+
+      - name: Create DMG
+        id: dmg
+        run: |
+          DMG_DIR=${{ steps.version.outputs.dmg_dir }}
+
+          mkdir "$HOME/$DMG_DIR"
+          mv "$PACKAGE_DIR/Applications/FreeFem++.app" "$HOME/$DMG_DIR"
+          cp ./bin/script/Install-app.sh "$HOME/$DMG_DIR"
+
+          hdiutil create -srcfolder "$HOME/$DMG_DIR" -fs HFS+ "$HOME/desktop/$DMG_DIR.dmg"
+          echo "file=$HOME/desktop/$DMG_DIR.dmg" >> $GITHUB_OUTPUT
+
+      - name: Upload release
+        uses: AButler/upload-release-assets@v2.0.x
+        with:
+          files: ${{ steps.dmg.outputs.file }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: v${{ steps.version.outputs.version }}-testActions
