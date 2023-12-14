@@ -30,7 +30,7 @@ jobs:
       - name: PETSc
         run: |
           cd 3rdparty/ff-petsc
-          make petsc-slepc
+          make petsc-slepc SUDO=sudo
           cd -
           ./reconfigure
 
