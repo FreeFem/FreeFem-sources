@@ -1,9 +1,9 @@
 name: Windows Release
-on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+on: ['push']
+#   workflow_run:
+#     workflows: ['Release']
+#     types:
+#       - completed
 
 jobs:
   debian:
@@ -85,4 +85,4 @@ jobs:
         with:
           files: ${{ steps.exe.outputs.file }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: v${{ steps.exe.outputs.version }}
+          release-tag: v${{ steps.exe.outputs.version }}-testActions

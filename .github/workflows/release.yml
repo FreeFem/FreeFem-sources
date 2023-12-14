@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - feature-github-actions
 
 jobs:
   create:
@@ -33,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: FreeFEM v${{ steps.version.outputs.number }}
-          tag_name: v${{ steps.version.outputs.number }}
+          tag_name: v${{ steps.version.outputs.number }}-testActions
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: false
-          prerelease: false
+          prerelease: true
