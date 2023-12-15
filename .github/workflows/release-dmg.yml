@@ -16,7 +16,6 @@ jobs:
       FC: gfortran
       F77: gfortran
       ARCH: Intel
-      PACKAGE_DIR: $HOME/pkg
 
     steps:
       - uses: actions/checkout@main
@@ -83,22 +82,22 @@ jobs:
       - name: Install
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
-          mkdir -p "$PACKAGE_DIR/$PREFIX"
-          rsync -a "$PREFIX/." "$PACKAGE_DIR/$PREFIX/."
-          sudo make install DESTDIR="$PACKAGE_DIR"
+          mkdir -p "$HOME/pkg/$PREFIX"
+          rsync -a "$PREFIX/." "$HOME/pkg/$PREFIX/."
+          sudo make install DESTDIR="$HOME/pkg"
 
       - name: Fix gfotran lib
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
 
-          sudo ./etc/actions/release/macos/fix_fortran.sh "$PACKAGE_DIR" "$PREFIX"
+          sudo ./etc/actions/release/macos/fix_fortran.sh "$HOME/pkg" "$PREFIX"
 
       - name: Create DMG
         id: dmg
         run: |
           DMG_DIR=${{ steps.version.outputs.dmg_dir }}
 
-          sudo ./etc/actions/release/macos/create_dmg.sh "$PACKAGE_DIR" "$DMG_DIR"
+          sudo ./etc/actions/release/macos/create_dmg.sh "$HOME/pkg" "$DMG_DIR"
 
           echo "file=$DMG_DIR.dmg" >>$GITHUB_OUTPUT
 
