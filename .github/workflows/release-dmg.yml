@@ -56,12 +56,12 @@ jobs:
             "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
           ./3rdparty/getall -a -o PETSc
 
-      - name: PETSc
-        run: |
-          cd 3rdparty/ff-petsc
-          make petsc-slepc SUDO=sudo
-          cd -
-          ./reconfigure
+      # - name: PETSc
+      #   run: |
+      #     cd 3rdparty/ff-petsc
+      #     make petsc-slepc SUDO=sudo
+      #     cd -
+      #     ./reconfigure
 
       - name: Build
         run: make -j2
