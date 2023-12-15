@@ -15,6 +15,7 @@ jobs:
       CXX: g++
       FC: gfortran
       F77: gfortran
+      ARCH: Intel
       PACKAGE_DIR: $HOME/pkg
 
     steps:
@@ -32,7 +33,7 @@ jobs:
           VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
-          echo "dmg_dir=FreeFEM-$VERSION-Intel" >> $GITHUB_OUTPUT
+          echo "dmg_dir=FreeFEM-$VERSION-$ARCH" >> $GITHUB_OUTPUT
 
       - name: Create paths
         run: |
@@ -46,15 +47,24 @@ jobs:
 
           sudo ./etc/actions/release/macos/copy_fortran.sh "$PREFIX"
 
+      # - name: Configure
+      #   run: |
+      #     PREFIX=${{ steps.version.outputs.prefix }}
+      #     autoreconf -i
+      #     ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
+      #       --prefix="$PREFIX" \
+      #       "CXXFLAGS=-Wno-undefined-var-template" \
+      #       "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
+      #     ./3rdparty/getall -a -o PETSc
+
       - name: Configure
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
           autoreconf -i
-          ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
+          ./configure --enable-m64 \
             --prefix="$PREFIX" \
             "CXXFLAGS=-Wno-undefined-var-template" \
             "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
-          ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
       #   run: |
@@ -80,23 +90,17 @@ jobs:
       - name: Fix gfotran lib
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
-          FORTRAN_FIX="$HOME/fortran-fix"
 
-          mkdir "$FORTRAN_FIX"
-          find "$PACKAGE_DIR/$PREFIX" -name '*.dylib' > "$FORTRAN_FIX/dylib-ff.txt"
-          ./bin/change-dylib-gfortran "$PREFIX/gnu" $(cat "$FORTRAN_FIX/dylib-ff.txt")
+          sudo ./etc/actions/release/macos/fix_fortran.sh "$PACKAGE_DIR" "$PREFIX"
 
       - name: Create DMG
         id: dmg
         run: |
           DMG_DIR=${{ steps.version.outputs.dmg_dir }}
 
-          mkdir "$HOME/$DMG_DIR"
-          mv "$PACKAGE_DIR/Applications/FreeFem++.app" "$HOME/$DMG_DIR"
-          cp ./bin/script/Install-app.sh "$HOME/$DMG_DIR"
+          sudo ./etc/actions/release/macos/create_dmg.sh "$PACKAGE_DIR" "$DMG_DIR"
 
-          hdiutil create -srcfolder "$HOME/$DMG_DIR" -fs HFS+ "$HOME/desktop/$DMG_DIR.dmg"
-          echo "file=$HOME/desktop/$DMG_DIR.dmg" >> $GITHUB_OUTPUT
+          echo "file=$DMG_DIR.dmg" >>$GITHUB_OUTPUT
 
       - name: Upload release
         uses: AButler/upload-release-assets@v2.0.x
