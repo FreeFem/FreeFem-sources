@@ -13,7 +13,7 @@ FORTRAN_CHECK="$HOME/fortran-check"
 mkdir "$FORTRAN_CHECK"
 printf "program sizeofint\n  integer i\nend" >"$FORTRAN_CHECK/check.f90"
 gfortran "$FORTRAN_CHECK/check.f90" -o "$FORTRAN_CHECK/check"
-(ldd "$FORTRAN_CHECK/check") 2>&1 | awk '{print $NF}' | egrep -v '/usr/lib | "$FORTRAN_CHECK/check" | grep .dylib' >$PREFIX/gnu/list-dylib-gfortran
+DYLD_PRINT_LIBRARIES=1 "$FORTRAN_CHECK/check" 2>&1 | awk '{print $NF}' | egrep -v '/usr/lib | "$FORTRAN_CHECK/check" | grep .dylib' >$PREFIX/gnu/list-dylib-gfortran
 rm -rf "$FORTRAN_CHECK"
 
 # Copy librairies
