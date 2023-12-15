@@ -10,6 +10,5 @@ FORTRAN_FIX="$HOME/fortran-fix"
 
 mkdir "$FORTRAN_FIX"
 find "$PACKAGE_DIR/$PREFIX" -name '*.dylib' >"$FORTRAN_FIX/dylib-ff.txt"
-rm -rf "$FORTRAN_FIX"
 
 ./bin/change-dylib-gfortran "$PREFIX/gnu" "$(cat "$FORTRAN_FIX/dylib-ff.txt")"
