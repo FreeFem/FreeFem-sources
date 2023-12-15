@@ -50,18 +50,18 @@ jobs:
           mkdir "$FORTRAN_CHECK"
           printf "program sizeofint\n  integer i\nend" > "$FORTRAN_CHECK/check.f"
           gfortran "$FORTRAN_CHECK/check.f" -o "$FORTRAN_CHECK/check"
-          (export DYLD_PRINT_LIBRARIES=1; "$FORTRAN_CHECK/check") 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib|"$FORTRAN_CHECK/check"|grep .dylib' >$PREFIX/gnu/list-dylib-gfortran
+          sudo (export DYLD_PRINT_LIBRARIES=1; "$FORTRAN_CHECK/check") 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib | "$FORTRAN_CHECK/check" | grep .dylib' >$PREFIX/gnu/list-dylib-gfortran
           rm -rf "$FORTRAN_CHECK"
 
           BREW_LIB_GFORTRAN=$(grep gfortran "$PREFIX/gnu/list-dylib-gfortran")
           BREW_LIB_QUADMATH=$(grep libquadmath "$PREFIX/gnu/list-dylib-gfortran")
 
           cd $(dirname "$BREW_LIB_GFORTRAN")
-          cp -f libgfortran.*.dylib libquadmath.*.dylib libgcc_s.*.dylib "$PREFIX/gnu/"
+          sudo cp -f libgfortran.*.dylib libquadmath.*.dylib libgcc_s.*.dylib "$PREFIX/gnu/"
 
           cd "$PREFIX/gnu"
-          ln -sf libgfortran.?.dylib libgfortran.dylib
-          ln -sf libquadmath.?.dylib  libquadmath.dylib
+          sudo ln -sf libgfortran.?.dylib libgfortran.dylib
+          sudo ln -sf libquadmath.?.dylib  libquadmath.dylib
 
       - name: Configure
         run: |
