@@ -86,11 +86,11 @@ jobs:
           rsync -a "$PREFIX/." "$HOME/pkg/$PREFIX/."
           sudo make install DESTDIR="$HOME/pkg"
 
-      - name: Fix gfotran lib
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
+      # - name: Fix gfotran lib
+      #   run: |
+      #     PREFIX=${{ steps.version.outputs.prefix }}
 
-          sudo ./etc/actions/release/macos/fix_fortran.sh "$HOME/pkg" "$PREFIX"
+      #     sudo ./etc/actions/release/macos/fix_fortran.sh "$HOME/pkg" "$PREFIX"
 
       - name: Create DMG
         id: dmg
