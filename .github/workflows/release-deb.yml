@@ -5,6 +5,8 @@ on: ['push']
 #     types:
 #       - completed
 
+# TODO remove ['push'] and uncomment workflow_run
+
 jobs:
   debian:
     name: DEB release
