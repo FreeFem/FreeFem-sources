@@ -46,31 +46,22 @@ jobs:
 
           sudo ./etc/actions/release/macos/copy_fortran.sh "$PREFIX"
 
-      # - name: Configure
-      #   run: |
-      #     PREFIX=${{ steps.version.outputs.prefix }}
-      #     autoreconf -i
-      #     ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
-      #       --prefix="$PREFIX" \
-      #       "CXXFLAGS=-Wno-undefined-var-template" \
-      #       "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
-      #     ./3rdparty/getall -a -o PETSc
-
       - name: Configure
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
           autoreconf -i
-          ./configure --enable-m64 \
+          ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
             --prefix="$PREFIX" \
             "CXXFLAGS=-Wno-undefined-var-template" \
             "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
+          ./3rdparty/getall -a -o PETSc
 
-      # - name: PETSc
-      #   run: |
-      #     cd 3rdparty/ff-petsc
-      #     make petsc-slepc SUDO=sudo
-      #     cd -
-      #     ./reconfigure
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc SUDO=sudo
+          cd -
+          ./reconfigure
 
       - name: Build
         run: make -j2
