@@ -719,6 +719,7 @@ IFMACRO(ThName#RefinementFactor)
 int privateS = ThName#RefinementFactor;
 ENDIFMACRO
 IFMACRO(ThName#Overlap)
+assert(ThName#Overlap > 0);
 meshN privateBorder;
 buildOverlap(ThName, privateBorder, -111111, privateS, ThName#Overlap, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, false);
 ENDIFMACRO

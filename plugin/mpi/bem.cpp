@@ -987,11 +987,13 @@ static void Init_Bem() {
     Dcl_Type<listBemKernel> ();
     TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
     //TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >); // no need is the combinaison is only with 2 kernels
-    TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
-    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
 
-    TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,pBemKernel >(&set_copy_incr));
-    TheOperators->Add("=", new OneOperator2<pBemKernel*,pBemKernel*,pBemKernel >(&set_eqdestroy_incr));
+    TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,pBemKernel> >);
+    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,pBemKernel> >);
+
+    TheOperators->Add("=",new OneBinaryOperator_st< Op_setCombBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
+    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setCombBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
+
     TheOperators->Add("*",new OneBinaryOperator_st< Op_coeffBemKernel1<pBemKernel,Complex,pBemKernel> >);
     
     Dcl_Type< const CBemDomainOfIntegration * >( );

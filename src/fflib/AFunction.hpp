@@ -706,7 +706,7 @@ public:
   bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
   bool operator!=(const C_F0 & a) const {return f!=a.f || r != a.r;}
   //          Type_Expr SetParam(const ListOfId * l,size_t & top) const ;
-  bool MeshIndependent() const { return f ==0 ? f->MeshIndependent() : false;}
+  bool MeshIndependent() const { return f ? f->MeshIndependent() : false;}
   C_F0 OnReturn() {	 f=r->OnReturn(f); return *this;  } // Add mai 2009 (for return statment.
 private:
   friend class Block;	 
