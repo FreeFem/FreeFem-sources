@@ -78,7 +78,7 @@ jobs:
         run: make check
 
       - name: Install
-        run: make install
+        run: sudo make install #TODO should work without sudo
 
   windows:
     name: Job1 - Windows
