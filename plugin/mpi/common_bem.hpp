@@ -39,7 +39,7 @@ public:
         for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=Bk.coeffcombi[i]; } } ;
     // alpha * ker
     BemKernel(Stack s,const BemKernel &Bk, Complex alpha) {
-           typeKernel[0]=Bk.typeKernel[0]; wavenum[0]=Bk.wavenum[0]; coeffcombi[0]=alpha; } ;
+        for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=alpha*Bk.coeffcombi[i]; } } ;
        
     
 private:
