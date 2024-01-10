@@ -284,6 +284,7 @@ struct MPIrank {
 
   MPIrank(int i=0, MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0)
     : who(i), comm(com), rq(rqq) {
+        ffassert(who >=0 || who == MPI_ANY_SOURCE ); // check jan 2024 PHT , FH 
     int n;
     MPI_Comm_size(comm, &n);
     MPI_Comm_rank(comm, &lmpirank);
