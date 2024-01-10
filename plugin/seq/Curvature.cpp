@@ -277,7 +277,7 @@ double reparametrage(Stack stack, const KNM_< double > &bb,const long &l0,const 
   ffassert(b.N( ) >= 3);
   R3 P(b(0, i0), b(1, i0),z(i0));
   double s = 0;
-  b(d, 0) = s;
+  b(d, i0) = s;// Bug 6/12/23 FH..
 
   for (int i = i0+1; i <= i1 ; ++i) {
     R3 Q(b(0, i), b(1, i),z(i));

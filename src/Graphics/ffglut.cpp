@@ -416,6 +416,8 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
         else ;
 
     kk++;
+    glEnable(GL_DEPTH_TEST);
+
     if(cc[kk])
     {
         if(lok[kk])   glCallList(gllists+kk);
@@ -443,6 +445,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
     kk++;
     if(cc[kk])
     {
+        glEnable(GL_DEPTH_TEST);
         if(lok[kk])   glCallList(gllists+kk);
         else
         {
@@ -575,7 +578,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & plot,GLint gllists,int * lok, OneWindow *win)
 {
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
 
     ShowGlerror("begin MeshS plot");
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
