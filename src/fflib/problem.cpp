@@ -2213,25 +2213,48 @@ template<class R>
     }
 
 
+template<class Mesh>  using QFMesh= GQuadratureFormular<typename Mesh::RdHat>     ;
+template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderElement::RdHat>     ;
 
-    template<class R>
-    void  AddMatElem(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
-                     const FESpace & Uh,const FESpace & Vh,
-                     const QuadratureFormular & FI,
-                     const QuadratureFormular1d & FIb,
-                     double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
+    
+    template<class R,class Mesh,class FESpaceU,class FESpaceV>
+    void  AddMatElem2(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                     const FESpaceU & Uh,const FESpaceV & Vh,
+                     const QFMesh<Mesh> & FI,
+                     const QFMeshB<Mesh> & FIb,
+                     double *p,   void *vstack, bool intmortar=false,typename Mesh::Rd *Q=0)
     {
+        typedef typename FESpaceU::Mesh MeshU;
+        typedef typename FESpaceV::Mesh MeshV;
+        typedef typename FESpaceU::FElement  FElmU;
+        typedef typename FESpaceV::FElement  FElmV;
+
+        typedef typename Mesh::Element Elm;
+        typedef typename MeshU::Element ElmU;
+        typedef typename MeshV::Element ElmV;
+        typedef typename  Mesh::Rd Rd;
+        typedef typename  Mesh::RdHat RdHat;
+        typedef typename  Mesh::BorderElement::RdHat RdHatB;
+
+        typedef typename  MeshU::Rd RdU;
+        typedef typename  MeshU::RdHat RdHatU;
+        typedef typename  MeshU::BorderElement::RdHat RdHatBU;
+
+        typedef typename  MeshV::Rd RdV;
+        typedef typename  MeshV::RdHat RdHatV;
+        typedef typename  MeshV::BorderElement::RdHat RdHatBV;
+
         //cout << "AddMatElem" << Q << " "  << ie << endl;
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-        const Mesh & Thu(Uh.Th);
-        const Mesh & Thv(Vh.Th);
-
-        bool same = (&Uh == & Vh) && !mapu && !mapt;
-        bool sameu =  &Th == & Thu && !mapu ;
-        bool samev =  &Th == & Thv && !mapt ;
-        const Triangle & T  = Th[it];
+        const MeshU & Thu(Uh.Th);
+        const MeshV & Thv(Vh.Th);
+        
+        bool same = ((const void*) &Uh == (const void*)& Vh) && !mapu && !mapt;
+        bool sameu =  (const void*)&Th == (const void*)& Thu && !mapu ;
+        bool samev =  (const void*)&Th == (const void*)& Thv && !mapt ;
+        const Elm & T  = Th[it];
         long npi;
         long i,j;
         bool classoptm = copt && Op.optiexpK;
@@ -2248,33 +2271,59 @@ template<class R>
         {
             for (npi=0;npi<FI.n;npi++) // loop on the integration point
             {
-                QuadraturePoint pi(FI[npi]);
-                double coef = T.area*pi.a;
-                R2 Pt(pi),Ptu,Ptv;
-                R2 P(T(Pt)),Pu(P),Pv(P);
+                auto pi(FI[npi]);
+                double coef = T.mes()*pi.a;
+                RdHat Pt(pi);
+                RdHatU Ptu;
+                RdHatV Ptv;
+                Rd P(T(Pt));
+                RdU Pu(P);
+                RdV Pv(P);
                 MeshPointStack(stack)->set(Th,P,Pt,T,label);
 
                 if(mapu)
-                Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+                Pu = RdU( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
                 if(mapt)
-                Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+                Pv = RdV( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
                 if(verbosity>9999 && (mapu || mapt) )
                 cout << " mapinng: " << P << " AddMatElem + map  -> (u) " << Pu << "  (t) ->"<< Pv << endl;
                 bool outsideu,outsidev;
                 // ici trouve le T
                 int iut=0,ivt=0;
-                const Triangle * tu,*tv;
-                if(sameu )
-                {
-                    tu =&T;
-                    Ptu=Pt;
-                }
-                else
-                {
-                    tu= Thu.Find(Pu,Ptu,outsideu);
-                    if( !tu ||  outsideu) {
-                        if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
-                        continue;}}
+                const ElmU * tu;
+                const ElmV *tv;
+                
+                bool optfind2=[sameu,Pt](const Elm &K, const ElmU *&Ku,RdHatU & Ptu,bool & outsideu){
+                    if( ! sameu)
+                    {
+                        Ku= Thu.Find(Pu,Ptu,outsideu);
+                        if( !Ku ||  outsideu) {
+                            if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                            return false;}}// continue
+                    return true;};
+
+                bool optfinduv=[same,outsideu,Ptu](const ElmU &Ku, const ElmU *Kv,RdHatU & Ptv,bool & outsidev){
+                      if(same )
+                      {
+                          Kv=Ku;
+                          outsidev=outsideu;
+                          Ptv=Ptu;
+                          return true;
+                      }
+                      else return false;
+                };
+                bool optfindu=[sameu,Pt](const Elm &K, const Elm *&Ku,RdHatU &Ptu,bool &outsideu){
+                    if(sameu )
+                    {
+                        Ku =&K;
+                        Ptu=Pt;
+                        return true;
+                    }
+                };
+ 
+                if( ! optfindu(T,tu,Ptu,outsideu) )  continue;
+                if(   optfinduv(tu,tv,outsideu,Ptv) && ! optfindu(T,tv,Ptv,outsidev,Ptv) )  continue;
+/*
                 if(same )
                 {
                     tv=tu;
@@ -2295,11 +2344,12 @@ template<class R>
                         continue;
                     }
                 }
+ */
                 iut = Thu(tu);
                 ivt = Thv(tv);
                 if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
-                FElement Ku(Uh[iut]);
-                FElement Kv(Vh[ivt]);
+                FElmU Ku(Uh[iut]);
+                FElmV Kv(Vh[ivt]);
                 long n= Kv.NbDoF() ,m=Ku.NbDoF();
                 long N= Kv.N;
                 long M= Ku.N;
@@ -2360,19 +2410,24 @@ template<class R>
 
             for (npi=0;npi<FIb.n;npi++) // loop on the integration point
             {
-                QuadratureFormular1dPoint pi( FIb[npi]);
-                double sa=pi.x,sb=1-sa;
-                double coef = le*pi.a;
+                 //QuadratureFormular1dPoint pi( FIb[npi]);
+                GQuadraturePoint<RdHatB> pi( FIb[npi]);
+                R3 NN= T.N(ie);
+                // calcul de la mes du bord !!!!
+                double mes = T.mesBord(ie);
+                double coef = mes*pi.a;
+                RdHat Pt(T.PBord(ie,pi));
 
-                R2 Pt(PA*sa+PB*sb ); //
 
-                R2 Ptu,Ptv;
-                R2 P(T(Pt)),Pu(P),Pv(P);
+               // R2 Pt(PA*sa+PB*sb ); //
+
+                RdHatU Ptu; RdHatV Ptv;
+                Rd P(T(Pt));RdU Pu; RdV Pv;
                 MeshPointStack(stack)->set(Th,P,Pt,T,label,R2(E.y,-E.x)/le,ie);
                 if(mapu)
-                Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+                Pu = RdU( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
                 if(mapt)
-                Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+                Pv = RdV( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
 
                 bool outsideu,outsidev;
                 // ici trouve le T
@@ -2459,6 +2514,22 @@ template<class R>
         *MeshPointStack(stack) = mp;
     }
 
+template<>
+void  AddMatElem2<R,MeshS,FESpaceS,FESpaceS>(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                 const FESpaceS & Uh,const FESpaceS & Vh,
+                 const QFMesh<MeshS> & FI,
+                 const QFMeshB<MeshS> & FIb,
+                                          double *p,   void *vstack, bool intmortar,MeshS::Rd *Q);
+
+    template<class R>
+    void  AddMatElem(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                     const FESpace & Uh,const FESpace & Vh,
+                     const QuadratureFormular & FI,
+                     const QuadratureFormular1d & FIb,
+                     double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
+{
+        ffassert(0);
+}
 
     //3D volume
     template<class R>

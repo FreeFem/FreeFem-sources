@@ -375,7 +375,14 @@ public:
       r+=  Phat[i-1]*(*(Rd*) vertices[i]);
     return r;
   }
-
+ double mesBord(int i) // mesure hyperface !!!! 01/2024
+    {
+        const Vertex * vb[nva];
+        for(int i=0; i< nva;++i)
+            vb[i]=&at(nvadj[i][i]);
+        
+        return mesurebord(nva,vb);
+     }
  int faceOrient(int i) const
     {// def the permutatution of orient the face
 	int fo =1;

@@ -22,8 +22,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
-
+- interface with functional interface with fgmres (Linear and affine) in real and complex case 
+   see tutorial/algo.edp 
 ### Changed
 -
 
@@ -34,7 +34,11 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+   - correct hidden faces on surface mesh  (ffglut)
+   - remove optimisation flag ppm2rnm.cpp in macos (load trap)
+   - correct abcisse  curviline on reparametrage function (setcurveabcisse) in load "Curvature"
+   - correct compilation on ARM sonoma xcode 15.2
+   - correct mpi essai.edp MPI_ANY_SOURCE Pb.
 
 ## [4.14]
 ### Added
