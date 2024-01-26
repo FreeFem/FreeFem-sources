@@ -292,7 +292,7 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
 #    need sudo ...	
-#	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
+#winDssSSs	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
 #	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
 #	test `uname` != Darwin || ( $(MAKE) bin/movefortranlib )
 

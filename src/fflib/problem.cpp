@@ -2293,12 +2293,12 @@ template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderEl
                 const ElmU * tu;
                 const ElmV *tv;
                 
-                bool optfind2=[sameu,Pt](const Elm &K, const ElmU *&Ku,RdHatU & Ptu,bool & outsideu){
+                bool optfind2=[sameu,Pt](const Elm &K, const auto *&Ku,auto & Pu,auto & Ptu,bool & outsideu){
                     if( ! sameu)
                     {
                         Ku= Thu.Find(Pu,Ptu,outsideu);
                         if( !Ku ||  outsideu) {
-                            if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                            if(verbosity>100) cout << " On a pas trouver (u) " << Pu << " " << endl;
                             return false;}}// continue
                     return true;};
 

@@ -43,6 +43,7 @@ Name: "{app}\examples\eigen"; Permissions: everyone-full
 Name: "{app}\idp"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\mpi"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
+IFMPI Name: "{app}\examples\ffddm"; Permissions: everyone-full
 
 ; PETSc
 IFPETSC Name: "{app}\ff-petsc"; Permissions: everyone-full
