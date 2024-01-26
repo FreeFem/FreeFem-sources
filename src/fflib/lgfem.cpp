@@ -2064,7 +2064,7 @@ AnyType pfer2R(Stack s, const AnyType &a) {
     mp.other.set(Th, mp.P.p2( ), PHat, *K, 0, outside);
   }
   const FElement KK(Vh[Th(K)]);
-  if (outside && !KK.tfe->NbDfOnVertex && !KK.tfe->NbDfOnEdge) return SetAny< R >(0.0);
+  if (outside && !KK.tfe->ndfonVertex && !KK.tfe->ndfonEdge) return SetAny< R >(0.0);
 
   const R rr = KK(PHat, *fe.x( ), componante, dd);
   return SetAny< R >(rr);

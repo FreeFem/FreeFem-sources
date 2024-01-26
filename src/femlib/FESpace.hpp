@@ -129,14 +129,14 @@ class ConstructDataFElement {
   int NbOfDF;
   int NbOfNode;
   int Nproduit;
-  ConstructDataFElement(const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,*/
+  ConstructDataFElement(const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace,*/
   const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
   int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);
   ConstructDataFElement(const ConstructDataFElement *,int k);
   ConstructDataFElement(const FESpace ** l,int k,const  KN<const TypeOfFE *> & TFEs) ;
   void renum(const long *r,int l)  ; 
   ~ConstructDataFElement();
- void Make(const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
+ void Make(const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace*/const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
    int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);
 private:
     static int *NewCounter() { int * p=new int; *p=0;return p;}// add the build thecounter. 
@@ -174,7 +174,7 @@ class TypeOfFE { public:
   friend class FEProduitConstruct;
   const int NbDoF;
   const int NbNodeOnVertex, NbNodeOnEdge, NbNodeOnElement;
-  const int NbDfOnVertex, NbDfOnEdge, NbDfOnElement, N,nb_sub_fem;
+  const int ndfonVertex, ndfonEdge, ndfonFace, N,nb_sub_fem;
   const  int NbNode;
   //  remark 
  // virtual void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const =0;
@@ -229,7 +229,7 @@ class TypeOfFE { public:
     : 
       NbDoF(t.NbDoF*k),
       NbNodeOnVertex(t.NbNodeOnVertex),NbNodeOnEdge(t.NbNodeOnEdge),NbNodeOnElement(t.NbNodeOnElement),
-      NbDfOnVertex(t.NbDfOnVertex*k),NbDfOnEdge(t.NbDfOnEdge*k),NbDfOnElement(t.NbDfOnElement*k),
+      ndfonVertex(t.ndfonVertex*k),ndfonEdge(t.ndfonEdge*k),ndfonFace(t.ndfonFace*k),
       N(t.N*k),nb_sub_fem(t.nb_sub_fem*k),
       NbNode(t.NbNode), 
      nbsubdivision(t.nbsubdivision),
@@ -270,11 +270,11 @@ class TypeOfFE { public:
       NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
       NbNodeOnEdge(NbNodebyWhat(data,NbDoF,3)),
       NbNodeOnElement(NbNodebyWhat(data,NbDoF,6)),
-      NbDfOnVertex(sum(t,&TypeOfFE::NbDfOnVertex,k)),
-      NbDfOnEdge(sum(t,&TypeOfFE::NbDfOnEdge,k)),
-      NbDfOnElement(sum(t,&TypeOfFE::NbDfOnElement,k)),
+      ndfonVertex(sum(t,&TypeOfFE::ndfonVertex,k)),
+      ndfonEdge(sum(t,&TypeOfFE::ndfonEdge,k)),
+      ndfonFace(sum(t,&TypeOfFE::ndfonFace,k)),
       N(sum(t,&TypeOfFE::N,k)),nb_sub_fem(sum(t,&TypeOfFE::nb_sub_fem,k)),
-      NbNode( (NbDfOnVertex ? 3 :0) + (NbDfOnEdge ? 3 :0 ) +(NbDfOnElement? 1 :0) ),      
+      NbNode( (ndfonVertex ? 3 :0) + (ndfonEdge ? 3 :0 ) +(ndfonFace? 1 :0) ),      
       nbsubdivision(max(t,&TypeOfFE::nbsubdivision,k)),
       
     DFOnWhat(data),
@@ -306,12 +306,12 @@ class TypeOfFE { public:
      NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
      NbNodeOnEdge(NbNodebyWhat(data,NbDoF,3)),
      NbNodeOnElement(NbNodebyWhat(data,NbDoF,6)),     
-/*     NbDfOnVertex(Count(data,NbDoF,0)),
-     NbDfOnEdge(Count(data,NbDoF,3)),
-     NbDfOnElement(Count(data,NbDoF,6)),
+/*     ndfonVertex(Count(data,NbDoF,0)),
+     ndfonEdge(Count(data,NbDoF,3)),
+     ndfonFace(Count(data,NbDoF,6)),
  */  
-     NbDfOnVertex(i),NbDfOnEdge(j),NbDfOnElement(k),N(NN),nb_sub_fem(nbsubfem),
-     NbNode( (NbDfOnVertex ? 3 :0) + (NbDfOnEdge ? 3 :0 ) +(NbDfOnElement? 1 :0) ),
+     ndfonVertex(i),ndfonEdge(j),ndfonFace(k),N(NN),nb_sub_fem(nbsubfem),
+     NbNode( (ndfonVertex ? 3 :0) + (ndfonEdge ? 3 :0 ) +(ndfonFace? 1 :0) ),
     nbsubdivision(nsub),
     DFOnWhat(data),
     DFOfNode(data+NbDoF),
@@ -329,15 +329,15 @@ class TypeOfFE { public:
      { 
       Sub_ToFE= this;
       assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
-     // cout << "TypeOfFE " <<NbDoF << " : " << NbDfOnVertex << " " << NbDfOnEdge << " " << NbDfOnElement << 
+     // cout << "TypeOfFE " <<NbDoF << " : " << ndfonVertex << " " << ndfonEdge << " " << ndfonFace << 
      // " : " << NbNodeOnVertex << " " << NbNodeOnEdge << " " << NbNodeOnElement << endl;
-      assert(NbDfOnVertex==Count(data,NbDoF,0));
-      assert(NbDfOnVertex==Count(data,NbDoF,1));
-      assert(NbDfOnVertex==Count(data,NbDoF,2));
-      assert(NbDfOnEdge==Count(data,NbDoF,3));
-      assert(NbDfOnEdge==Count(data,NbDoF,4));
-      assert(NbDfOnEdge==Count(data,NbDoF,5));
-      assert(NbDfOnElement==Count(data,NbDoF,6));
+      assert(ndfonVertex==Count(data,NbDoF,0));
+      assert(ndfonVertex==Count(data,NbDoF,1));
+      assert(ndfonVertex==Count(data,NbDoF,2));
+      assert(ndfonEdge==Count(data,NbDoF,3));
+      assert(ndfonEdge==Count(data,NbDoF,4));
+      assert(ndfonEdge==Count(data,NbDoF,5));
+      assert(ndfonFace==Count(data,NbDoF,6));
       
       throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
       
@@ -348,12 +348,12 @@ class TypeOfFE { public:
      NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
      NbNodeOnEdge(NbNodebyWhat(data,NbDoF,3)),
      NbNodeOnElement(NbNodebyWhat(data,NbDoF,6)),     
-     NbDfOnVertex(Count(data,NbDoF,0)),
-     NbDfOnEdge(Count(data,NbDoF,3)),
-     NbDfOnElement(Count(data,NbDoF,6)),
+     ndfonVertex(Count(data,NbDoF,0)),
+     ndfonEdge(Count(data,NbDoF,3)),
+     ndfonFace(Count(data,NbDoF,6)),
      N(NN),
      nb_sub_fem(nbsubfem),
-     NbNode( (NbDfOnVertex ? 3 :0) + (NbDfOnEdge ? 3 :0 ) +(NbDfOnElement? 1 :0) ),
+     NbNode( (ndfonVertex ? 3 :0) + (ndfonEdge ? 3 :0 ) +(ndfonFace? 1 :0) ),
     nbsubdivision(nsub),
     DFOnWhat(data),
     DFOfNode(data+NbDoF),
@@ -372,13 +372,13 @@ class TypeOfFE { public:
      { 
       Sub_ToFE= this;
       assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
-      assert(NbDfOnVertex==Count(data,NbDoF,0));
-      assert(NbDfOnVertex==Count(data,NbDoF,1));
-      assert(NbDfOnVertex==Count(data,NbDoF,2));
-      assert(NbDfOnEdge==Count(data,NbDoF,3));
-      assert(NbDfOnEdge==Count(data,NbDoF,4));
-      assert(NbDfOnEdge==Count(data,NbDoF,5));
-      assert(NbDfOnElement==Count(data,NbDoF,6));
+      assert(ndfonVertex==Count(data,NbDoF,0));
+      assert(ndfonVertex==Count(data,NbDoF,1));
+      assert(ndfonVertex==Count(data,NbDoF,2));
+      assert(ndfonEdge==Count(data,NbDoF,3));
+      assert(ndfonEdge==Count(data,NbDoF,4));
+      assert(ndfonEdge==Count(data,NbDoF,5));
+      assert(ndfonFace==Count(data,NbDoF,6));
       
       throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
 
@@ -440,9 +440,9 @@ class TypeOfMortar {
   virtual void ConstructionOfNode(const Mesh &Th,int im,int * NodesOfElement,int *FirstNodeOfElement,int &lastnodenumber) const=0; 
   virtual void ConsTheSubMortar(FMortar &) const =0; 
   protected:
-  const int NbDfOnVertex, NbDfOnEdge , N;
+  const int ndfonVertex, ndfonEdge , N;
   public: 
-    TypeOfMortar (int i,int j): NbDfOnVertex(i),NbDfOnEdge(j),N(1){};
+    TypeOfMortar (int i,int j): ndfonVertex(i),ndfonEdge(j),N(1){};
    
   virtual  ~TypeOfMortar(){}
      
@@ -717,14 +717,14 @@ extern TypeOfFE & P1ncLagrange;
       
     FESpace(const FESpace &,int k );
     FESpace(const FESpace **,int k ); 
-    FESpace(const Mesh & TTh,const TypeOfFE **,int k,int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0 );//int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,int NN=1); 
+    FESpace(const Mesh & TTh,const TypeOfFE **,int k,int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0 );//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
  
     FESpace(const Mesh & TTh,const TypeOfFE & ,
-    int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);//int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,int NN=1); 
+    int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
     
-    FESpace(const Mesh & TTh,const TypeOfFE &,const TypeOfMortar & );//int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,int NN=1); 
+    FESpace(const Mesh & TTh,const TypeOfFE &,const TypeOfMortar & );//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
   ~FESpace();    
- // FESpace(Mesh & TTh,int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,int NN=1); 
+ // FESpace(Mesh & TTh,int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
   int  renum();
       
   FElement operator[](int k) const { return FElement(this,k);} 

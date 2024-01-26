@@ -451,41 +451,41 @@ ConstructDataFElement::~ConstructDataFElement()
    *counter++;
  }
 
-ConstructDataFElement::ConstructDataFElement (const Mesh &Th,int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,const TypeOfMortar *tm,
+ConstructDataFElement::ConstructDataFElement (const Mesh &Th,int NbDfOnSommet,int ndfonEdge,int ndfonFace,const TypeOfMortar *tm,
 int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
 : counter(&thecounter),thecounter(0) 
 { 
- Make(Th,NbDfOnSommet,NbDfOnEdge,NbDfOnElement, tm,nbdfv,ndfv,nbdfe,ndfe);
+ Make(Th,NbDfOnSommet,ndfonEdge,ndfonFace, tm,nbdfv,ndfv,nbdfe,ndfe);
 }
 
 ConstructDataFElement::ConstructDataFElement(const FESpace ** l,int k) 
 : thecounter(0),counter(&thecounter) 
 {
  int NbDfOnSommet=0;
- int NbDfOnEdge=0;
- int NbDfOnElement=0;
+ int ndfonEdge=0;
+ int ndfonFace=0;
  const Mesh & Th(l[0]->Th);
  for  (int i=0;i<k;i++)
    {
-     NbDfOnSommet += l[i]->TFE[0]->NbDfOnVertex;
-     NbDfOnEdge += l[i]->TFE[0]->NbDfOnEdge;
-     NbDfOnElement += l[i]->TFE[0]->NbDfOnElement;
+     NbDfOnSommet += l[i]->TFE[0]->ndfonVertex;
+     ndfonEdge += l[i]->TFE[0]->ndfonEdge;
+     ndfonFace += l[i]->TFE[0]->ndfonFace;
      throwassert( &Th== &l[i]->Th); 
      throwassert( l[i]->TFE.constant());
    }
    
- Make(Th,NbDfOnSommet,NbDfOnEdge,NbDfOnElement,0);   
+ Make(Th,NbDfOnSommet,ndfonEdge,ndfonFace,0);   
 }
  
 
-void ConstructDataFElement::Make(const Mesh &Th,int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,const TypeOfMortar *tm,
+void ConstructDataFElement::Make(const Mesh &Th,int NbDfOnSommet,int ndfonEdge,int ndfonFace,const TypeOfMortar *tm,
 int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)   
 {
   *counter=0;
   Nproduit =1;
   int ndf=0,samendf=1;
   
-  int nbdfe=3*NbDfOnSommet+3*NbDfOnEdge+NbDfOnElement;
+  int nbdfe=3*NbDfOnSommet+3*ndfonEdge+ndfonFace;
   int nbne = 0;
   int nn=0;  
   int firstmul=0;
@@ -497,29 +497,29 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
   NbOfElements += Th.NbMortars;  
   FirstDfOfNode =0;
   FirstNodeOfElement=0;
-  MaxNbDFPerElement=3*NbDfOnSommet+3*NbDfOnEdge+NbDfOnElement;
+  MaxNbDFPerElement=3*NbDfOnSommet+3*ndfonEdge+ndfonFace;
 
   int ks=0,ke=0,kt=0;
   if(NbDfOnSommet) { nbne+=3;
      ks=1;
      ndf=NbDfOnSommet;}
 
-  if(NbDfOnEdge) {  nbne+=3;
+  if(ndfonEdge) {  nbne+=3;
      ke=1;
-     samendf &= !ndf || ndf == NbDfOnEdge;
-     ndf=NbDfOnEdge;}
+     samendf &= !ndf || ndf == ndfonEdge;
+     ndf=ndfonEdge;}
      
-  if(NbDfOnElement) {  nbne+=1;
+  if(ndfonFace) {  nbne+=1;
      kt=1;
-     samendf &= !ndf || ndf == NbDfOnElement;
-     ndf=NbDfOnElement;}
+     samendf &= !ndf || ndf == ndfonFace;
+     ndf=ndfonFace;}
 
   int NbDFonNode[7],NodeIsOn[7];
    {
      int j=0,k=0;
      if(ks) { NbDFonNode[j++]=NbDfOnSommet; NbDFonNode[j++]=NbDfOnSommet; NbDFonNode[j++]=NbDfOnSommet;}
-     if(ke) { NbDFonNode[j++]=NbDfOnEdge; NbDFonNode[j++]=NbDfOnEdge; NbDFonNode[j++]=NbDfOnEdge;}
-     if(kt) { NbDFonNode[j++]=NbDfOnElement;}
+     if(ke) { NbDFonNode[j++]=ndfonEdge; NbDFonNode[j++]=ndfonEdge; NbDFonNode[j++]=ndfonEdge;}
+     if(kt) { NbDFonNode[j++]=ndfonFace;}
 
      if (ks) {NodeIsOn[k++]=0;NodeIsOn[k++]=1;NodeIsOn[k++]=2;}
      if (ke) {NodeIsOn[k++]=3;NodeIsOn[k++]=4;NodeIsOn[k++]=5;}
@@ -761,9 +761,9 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      ptrTFE(new TypeOfFESum(tef,k)),
      TFE(1,0,ptrTFE),
      cmesh(TTh),
-     cdef(new ConstructDataFElement(TTh,sum(tef,&TypeOfFE::NbDfOnVertex,k),
-                                        sum(tef,&TypeOfFE::NbDfOnEdge,k),
-                                        sum(tef,&TypeOfFE::NbDfOnElement,k),
+     cdef(new ConstructDataFElement(TTh,sum(tef,&TypeOfFE::ndfonVertex,k),
+                                        sum(tef,&TypeOfFE::ndfonEdge,k),
+                                        sum(tef,&TypeOfFE::ndfonFace,k),
                                         0,nbdfv,ndfv,nbdfe,ndfe)),
      N(sum(tef,&TypeOfFE::N,k)),
      Nproduit(cdef->Nproduit),     
@@ -788,7 +788,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      ptrTFE(0),
      TFE(1,0,&tef),
      cmesh(TTh),
-     cdef(new ConstructDataFElement(TTh,tef.NbDfOnVertex,tef.NbDfOnEdge,tef.NbDfOnElement,0,nbdfv,ndfv,nbdfe,ndfe)),
+     cdef(new ConstructDataFElement(TTh,tef.ndfonVertex,tef.ndfonEdge,tef.ndfonFace,0,nbdfv,ndfv,nbdfe,ndfe)),
      N(tef.N),
      Nproduit(cdef->Nproduit),
      nb_sub_fem(TFE[0]->nb_sub_fem),
@@ -803,7 +803,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      FirstDfOfNodeData(cdef->FirstDfOfNode),
      FirstNodeOfElement(cdef->FirstNodeOfElement),
      tom(0) {
-     if(tef.NbDfOnVertex || tef.NbDfOnEdge) renum();
+     if(tef.ndfonVertex || tef.ndfonEdge) renum();
      }
      
  FESpace::~FESpace()
@@ -819,7 +819,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      ptrTFE(0),
      TFE(1,0,&tef),
      cmesh(TTh),
-     cdef(new ConstructDataFElement(TTh,tef.NbDfOnVertex,tef.NbDfOnEdge,tef.NbDfOnElement,&tm)),
+     cdef(new ConstructDataFElement(TTh,tef.ndfonVertex,tef.ndfonEdge,tef.ndfonFace,&tm)),
      N(tef.N),
      Nproduit(1),
      nb_sub_fem(TFE[0]->nb_sub_fem),
@@ -1393,7 +1393,7 @@ class TypeOfMortarCas1: public TypeOfMortar {
      { int l(M.NbLeft()),r(M.NbRight());
        int n =Max(l,r);
        int mn=Min(l,r);
-       return (l+r)*(NbDfOnVertex + NbDfOnEdge) + (n+1)*NbDfOnVertex + n*NbDfOnEdge -mn-1; 
+       return (l+r)*(ndfonVertex + ndfonEdge) + (n+1)*ndfonVertex + n*ndfonEdge -mn-1; 
       }
   int NbOfNodes(const Mesh &,const Mortar &M) const // call one time  
      {int l(M.NbLeft()),r(M.NbRight()); return (l+r)*(vertex_is_node+edge_is_node)+1;}
@@ -1401,7 +1401,7 @@ class TypeOfMortarCas1: public TypeOfMortar {
      { int l(M.NbLeft()),r(M.NbRight());
        int n =Max(l,r);
        int mn=Min(l,r);
-       return (l+r)*(NbDfOnVertex + NbDfOnEdge) + (n+1)*NbDfOnVertex + n*NbDfOnEdge -mn-1; 
+       return (l+r)*(ndfonVertex + ndfonEdge) + (n+1)*ndfonVertex + n*ndfonEdge -mn-1; 
       }
   
    int NodeOfDF(const FESpace &Vh,const Mortar &M,int i) const 
