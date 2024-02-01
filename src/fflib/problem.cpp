@@ -9379,7 +9379,7 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( abs(c-cc) <=   abs(c)*1e-10) {
+                            if ( abs(c-cc) >   abs(c)*1e-10) {
                                 cerr << c << " =! " << cc << " diff " << c -cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
                                 cerr << " PI = " << PI << " in K v " << Vh.Th(K) << " " << " K in Th " <<ThI.number(KI) <<  " "<< PIt << endl;
@@ -9484,7 +9484,7 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( abs(c-cc) <=   abs(c)*1e-10) {
+                            if ( abs(c-cc) >   abs(c)*1e-10) {
                                 cerr << c << " =! " << cc << " diff = " << c-cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
                                 cerr << " Pt = " << Pt << " in Kv " << Vh.Th(K) << "K in Th " << ThI.number(KI) << " "<< PIt << endl;
