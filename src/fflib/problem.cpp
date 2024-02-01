@@ -2216,7 +2216,13 @@ template<class R>
 template<class Mesh>  using QFMesh= GQuadratureFormular<typename Mesh::RdHat>     ;
 template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderElement::RdHat>     ;
 
-    
+template<class Rd> void  getmap(void *vstack,Rd & P,Expression const * const map)
+{
+    if(map)
+     for(int i=0; i< Rd::d;++i)
+     P[i] = GetAny<double>((*map[i])(vstack));
+};
+
     template<class R,class Mesh,class FESpaceU,class FESpaceV>
     void  AddMatElem2(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
                      const FESpaceU & Uh,const FESpaceV & Vh,
@@ -2261,7 +2267,6 @@ template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderEl
         assert(Op.MaxOp() <last_operatortype);
         //
 
-
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
         int lastop=1+Dop.last([](bool x){return x;});
@@ -2277,14 +2282,12 @@ template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderEl
                 RdHatU Ptu;
                 RdHatV Ptv;
                 Rd P(T(Pt));
-                RdU Pu(P);
-                RdV Pv(P);
+                RdU Pu((R *) P); // bof bof if Rd == R2 et RdU == R3
+                RdV Pv((R *) P);
                 MeshPointStack(stack)->set(Th,P,Pt,T,label);
-
-                if(mapu)
-                Pu = RdU( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
-                if(mapt)
-                Pv = RdV( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+                getmap(Pu,mapu);
+                getmap(Pv,mapt);
+               // Pv = RdV( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
                 if(verbosity>9999 && (mapu || mapt) )
                 cout << " mapinng: " << P << " AddMatElem + map  -> (u) " << Pu << "  (t) ->"<< Pv << endl;
                 bool outsideu,outsidev;
@@ -2321,8 +2324,8 @@ template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderEl
                     }
                 };
  
-                if( ! optfindu(T,tu,Ptu,outsideu) )  continue;
-                if(   optfinduv(tu,tv,outsideu,Ptv) && ! optfindu(T,tv,Ptv,outsidev,Ptv) )  continue;
+                if( ! optfindu(T,tu,Ptu,outsideu) )  continue;// out side !!!
+                if(   optfinduv(tu,tv,outsideu,Ptv) && ! optfindu(T,tv,Ptv,outsidev,Ptv) )  continue;// out side !!!
 /*
                 if(same )
                 {
@@ -9376,9 +9379,10 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( c != cc) {
-                                cerr << c << " =! " << cc << endl;
+                            if ( abs(c-cc) <=   abs(c)*1e-10) {
+                                cerr << c << " =! " << cc << " diff " << c -cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
+                                cerr << " PI = " << PI << " in K v " << Vh.Th(K) << " " << " K in Th " <<ThI.number(KI) <<  " "<< PIt << endl;
                                 ExecError("In Optimized version "); }
                         }
 
@@ -9480,9 +9484,11 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( c != cc) {
-                                cerr << c << " =! " << cc << endl;
+                            if ( abs(c-cc) <=   abs(c)*1e-10) {
+                                cerr << c << " =! " << cc << " diff = " << c-cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
+                                cerr << " Pt = " << Pt << " in Kv " << Vh.Th(K) << "K in Th " << ThI.number(KI) << " "<< PIt << endl;
+
                                 ExecError("In Optimized version "); }
                         }
 
