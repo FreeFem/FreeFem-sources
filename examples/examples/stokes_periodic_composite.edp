@@ -18,6 +18,8 @@ fespace Ph(Th,P1);
 
 fespace Vh=UhPerio*Uh*Ph; // definition of the composite FE space
 
+cout << "ndof = " << Vh.ndof << endl;
+
 UhPerio u1;
 Uh u2;
 Ph p;

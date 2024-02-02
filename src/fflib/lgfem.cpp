@@ -1981,6 +1981,28 @@ long pVh_ndofK(pfes *p) {
   return (*fes)[0].NbDoF( );
 }
 
+long pVhcomp_ndof(vect_generic_v_fes ** pp) {
+  throwassert(pp && *pp);
+  vect_generic_v_fes & p = **pp;
+  long ndof = 0;
+  for(int i=0; i<p.typeFE.size(); i++){
+    int tt = p.typeFE[i];
+    if (tt == 2)
+      ndof += ((FESpace *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 3)
+      ndof += ((FESpace3 *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 4)
+      ndof += ((FESpaceS *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 5)
+      ndof += ((FESpaceL *) p.vect[i]->getpVh())->NbOfDF;
+    else {
+      cerr << "error in the Type of FESpace" << endl;
+      ffassert(0);
+    }
+  }
+  return ndof;
+}
+
 long mp_nuTriangle(MeshPoint *p) {
   throwassert(p && p->Th && p->T);
   long nu = -1;
@@ -6030,6 +6052,7 @@ void Add_u_init_array(int ii=0)
                       new init_FE_eqarray< FFset3< C, vfes, KN_< C > > >(10));
 
 }
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -6271,10 +6294,13 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fes> * >( );
 
   // Morice: composite FESpace / vect FESpace 
+  Dcl_Type< vect_generic_v_fes ** >( );
+  Add<vect_generic_v_fes **>("ndof",".",new OneOperator1<long,vect_generic_v_fes **>(pVhcomp_ndof));
+
   Dcl_Type< const Call_FormLinear< vect_generic_v_fes > * >( );      //   to set Vector 3D curve
   Dcl_Type< const Call_FormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
   Dcl_Type< const Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
-        
+
   Dcl_Type< interpolate_f_X_1< double >::type >( );      // to make  interpolation x=f o X^1 ;
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
