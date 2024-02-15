@@ -53,7 +53,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- PETSc 3.20.2
+- PETSc 3.20.4
 
 ### Deprecated
 
