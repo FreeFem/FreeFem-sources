@@ -1,21 +1,23 @@
-name: Release MacOS
+name: Release MacOS ARM
 on:
   workflow_run:
     workflows: ['Release']
     types:
       - completed
 
+# TODO remove ['push'] and uncomment workflow_run
+
 jobs:
   macos:
-    name: DMG release
-    runs-on: macos-latest
+    name: DMG release ARM
+    runs-on: self-hosted
 
     env:
       CC: gcc
       CXX: g++
       FC: gfortran
       F77: gfortran
-      ARCH: Intel
+      ARCH: ARM
 
     steps:
       - uses: actions/checkout@main

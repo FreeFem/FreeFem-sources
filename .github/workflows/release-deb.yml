@@ -1,11 +1,9 @@
 name: Release Debian
-on: ['push']
-#   workflow_run:
-#     workflows: ['Release']
-#     types:
-#       - completed
-
-# TODO remove ['push'] and uncomment workflow_run
+on:
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   debian:
