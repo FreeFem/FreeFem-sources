@@ -29,10 +29,31 @@ All notable changes to this project will be documented in this file.
 
 - interface with functional interface with fgmres (Linear and affine) in real and complex case
   see tutorial/algo.edp
+- Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2014 in version: v4.13-130-g1af52457
+- Conversion of matrix or transpose of matrix in `int[int][int]` array to get the structure of sparse matrix.
+  see tutorial/sparse-matrix.edp example at end
+  ```
+  matrix A = va(Ph,Vh);
+  int[int] a = A, at= A';
+  ```
+- a meshL finite function can be see as real function with 1, or 2 parameters
+  ```
+   meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
+   cout << u(0.5)   << endl;
+   cout << u(0.5,0) << endl;
+  ```
+- Exemple to code convolution of 2 function with one with a small support
+  too be not to expanxive
+  see tutorial/Convolution-Sample.edp example
+- Support for dense blocks in PETSc matrices
+- GenEO for saddle-point examples with PCHPDDM in PETSc
+- Distributed ParaView output on `meshS`
+- Interface to `mmg2d` for two-dimensional `mesh`
+- Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
 ### Changed
 
--
+- PETSc 3.20.2
 
 ### Deprecated
 
@@ -49,6 +70,10 @@ All notable changes to this project will be documented in this file.
 - correct abcisse curviline on reparametrage function (setcurveabcisse) in load "Curvature"
 - correct compilation on ARM sonoma xcode 15.2
 - correct mpi essai.edp MPI_ANY_SOURCE Pb.
+- bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
+- in segment(10,region=1,label=ll); region is now used..
+
+---
 
 ## [4.14]
 
