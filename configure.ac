@@ -194,9 +194,11 @@ AM_MAINTAINER_MODE
 echo >config_LIB_INFO
 
 # Necessary compilers
-
+#  remove the flag -sdt=gnu++11 in the compileur CXX (FH jan 2024)
+ac_cv_prog_cxx_cxx11=no
 AC_PROG_CC
 AC_PROG_CXX
+#  echo " #### $CXX"
 AC_LANG(C++)
 if test `uname` != Darwin; then
  ff_ldeg="-Wl,--end-group"

@@ -936,6 +936,174 @@ basicAC_F0::name_and_type LinearGMRES< R >::E_LGMRES::name_param[] = {
   {"veps", &typeid(double *)},     {"dimKrylov", &typeid(long)}, {"verbosity", &typeid(long)},
   {"stop", &typeid(Polymorphic *)}};
 
+// Add Jan 2024  interface with fgmres real and complex ...
+
+
+template< class R>
+class LinearFGMRES : public OneOperator {
+ public:
+  typedef KN< R > Kn;
+  typedef KN_< R > Kn_;
+  const int cas;
+
+  class MatF_O : public CGMatVirt< int,R > {
+   public:
+    Stack stack;
+    int n;
+    mutable KN< R > x;
+    C_F0 c_x;
+    KN< R > *b;
+    Expression mat1, mat;
+
+   // typedef typename RNM_VirtualMatrix< R >::plusAx plusAx;
+    MatF_O(int nn, Stack stk, const OneOperator *op, KN< R > *bb)
+      : CGMatVirt<int,R >(nn),n(nn), stack(stk), x(nn), c_x(CPValue(x)), b(bb),
+        mat1(op->code(basicAC_F0_wa(c_x))),
+        mat(CastTo< Kn_ >(C_F0(mat1, (aType)*op)) /*op->code(basicAC_F0_wa(c_x))*/) {}
+
+    ~MatF_O( ) {
+      if (mat1 != mat) delete mat;
+      delete mat1;
+      delete c_x.LeftValue( );
+    }
+      R *addmatmul(R *xx, R *Ax) const  {
+   // void addMatMul(const KN_< R > &xx, KN_< R > &Ax) const {
+      //ffassert(xx.N( ) == Ax.N( ));
+      x = xx;
+      KN_< R >(Ax,n)  += GetAny< KN_< R > >((*mat)(stack));
+      if (b && Ax != (R*) *b) KN_< R >(Ax,n) += *b;    // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
+      WhereStackOfPtr2Free(stack)->clean( );
+    return Ax;
+    }
+
+   // plusAx operator*(const Kn &x) const { return plusAx(this, x); }
+    virtual bool ChecknbLine(int n) const { return true; }
+    virtual bool ChecknbColumn(int m) const { return true; }
+  };
+
+  class E_LGMRES : public E_F0mps {
+   public:
+    const int cas;    // < 0 => Nolinear
+    static basicAC_F0::name_and_type name_param[];
+    static const int n_name_param = 6;
+    Expression nargs[n_name_param];
+    const OneOperator *A, *C;
+    Expression X, B;
+
+    E_LGMRES(const basicAC_F0 &args, int cc) : cas(cc) {
+      args.SetNameParam(n_name_param, name_param, nargs);
+      {
+        const Polymorphic *op = dynamic_cast< const Polymorphic * >(args[0].LeftValue( ));
+        ffassert(op);
+        A = op->Find("(", ArrayOfaType(atype< Kn * >( ), false));
+        ffassert(A);
+      }
+      if (nargs[2]) {
+        const Polymorphic *op = dynamic_cast< const Polymorphic * >(nargs[2]);
+        ffassert(op);
+        C = op->Find("(", ArrayOfaType(atype< Kn * >( ), false));
+        ffassert(C);
+      } else
+        C = 0;
+      X = to< Kn * >(args[1]);
+      if (args.size( ) > 2)
+        B = to< Kn * >(args[2]);
+      else
+        B = 0;
+    }
+
+    virtual AnyType operator( )(Stack stack) const {
+      Kn &x = *GetAny< Kn * >((*X)(stack));
+      Kn b(x.n);
+      if (B)
+        b = *GetAny< Kn * >((*B)(stack));
+      else
+        b = R( );
+      int n = x.N( );
+      int dKrylov = 50;
+      double eps = 1.0e-6;
+      int nbitermax = 100;
+      long verb = verbosity;
+      if (nargs[0]) eps = GetAny< double >((*nargs[0])(stack));
+      if (nargs[1]) nbitermax = GetAny< long >((*nargs[1])(stack));
+      if (nargs[3]) eps = *GetAny< double * >((*nargs[3])(stack));
+      if (nargs[4]) dKrylov = GetAny< long >((*nargs[4])(stack));
+      if (nargs[5]) verb = Abs(GetAny< long >((*nargs[5])(stack)));
+  //    if (nargs[6])
+  //      stop = new E_StopGC< R >(stack, n, dynamic_cast< const Polymorphic * >(nargs[6]));
+
+      long gcverb = 51L - Min(Abs(verb), 50L);
+
+      int ret = -1;
+      if (verbosity > 4)
+        cout << "  ..FGMRES: eps= " << eps << " max iter " << nbitermax << " dim of Krylov space "
+             << dKrylov << endl;
+
+     // KNM< R > H(dKrylov + 1, dKrylov + 1);
+      int k = dKrylov;    //,nn=n;
+      double epsr = eps;
+      KN< R > bzero(B ? 1 : n);    // const array zero
+      bzero = R( );
+      KN< R > *bb = &bzero;
+      if (B) {
+        Kn &b = *GetAny< Kn * >((*B)(stack));
+        R p = (b, b);
+        // if (p)
+        // {
+        //   // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right
+        //   hand in the function");
+        // }
+        bb = &b;
+      }
+      KN< R > *bbgmres = 0;
+      if (!B) bbgmres = bb;    // none zero if gmres without B
+      MatF_O AA(n, stack, A, bbgmres);
+      CGMatVirt<int,R>&  AV =AA;
+      if (bbgmres) {
+        AA.addmatmul(*bbgmres, *bbgmres);    // Ok Ax == b -> not translation of b .
+        *bbgmres = -(*bbgmres);
+        if (verbosity > 1)
+          cout << "  ** FGMRES set b =  -A(0);  : max = " << bbgmres->max( )
+               << " min = " << bbgmres->min( ) << endl;
+      }
+      CGMatVirtId<int,R> Id(n);
+      if (cas < 0) {
+        ErrorExec("NL FGMRES:  to do! sorry ", 1);
+      } else {
+        if (C) {
+          MatF_O CC(n, stack, C, 0);
+          ret=fgmres<R,int>(AV,CC,1,(R*)*bb,x,epsr,nbitermax,k,verb,CC.pwcl());
+          //ret = GMRES(AA, (KN< R > &)x, *bb, CC, H, k, nbitermax, epsr, verb, stop);
+        } else
+            ret=fgmres<R,int>(AV,Id,1,(R*)*bb,x,epsr,nbitermax,k,verb);
+         // ret = GMRES(AA, (KN< R > &)x, *bb, MatriceIdentite< R >(n), H, k, nbitermax, epsr, verb,
+         //             stop);
+      }
+      if (verbosity > 99) cout << " Sol GMRES :" << x << " ret " << ret << endl;
+      //if (stop) delete stop;
+      return SetAny< long >(ret);
+    }
+
+    operator aType( ) const { return atype< long >( ); }
+  };
+
+  E_F0 *code(const basicAC_F0 &args) const { return new E_LGMRES(args, cas); }
+
+  LinearFGMRES( )
+    : OneOperator(atype< long >( ), atype< Polymorphic * >( ), atype< KN< R > * >( ),
+                  atype< KN< R > * >( )),
+      cas(2) {}
+
+  LinearFGMRES(int cc)
+    : OneOperator(atype< long >( ), atype< Polymorphic * >( ), atype< KN< R > * >( )), cas(cc) {}
+};
+
+template< class R >
+basicAC_F0::name_and_type LinearFGMRES< R >::E_LGMRES::name_param[] = {
+  {"eps", &typeid(double)},        {"nbiter", &typeid(long)},    {"precon", &typeid(Polymorphic *)},
+  {"veps", &typeid(double *)},     {"dimKrylov", &typeid(long)}, {"verbosity", &typeid(long)}
+  };
+
 template< typename int2 >
 typename map< int, int2 >::iterator closeto(map< int, int2 > &m, int k) {
   typename map< int, int2 >::iterator i = m.find(k);
@@ -1813,6 +1981,28 @@ long pVh_ndofK(pfes *p) {
   return (*fes)[0].NbDoF( );
 }
 
+long pVhcomp_ndof(vect_generic_v_fes ** pp) {
+  throwassert(pp && *pp);
+  vect_generic_v_fes & p = **pp;
+  long ndof = 0;
+  for(int i=0; i<p.typeFE.size(); i++){
+    int tt = p.typeFE[i];
+    if (tt == 2)
+      ndof += ((FESpace *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 3)
+      ndof += ((FESpace3 *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 4)
+      ndof += ((FESpaceS *) p.vect[i]->getpVh())->NbOfDF;
+    else if (tt == 5)
+      ndof += ((FESpaceL *) p.vect[i]->getpVh())->NbOfDF;
+    else {
+      cerr << "error in the Type of FESpace" << endl;
+      ffassert(0);
+    }
+  }
+  return ndof;
+}
+
 long mp_nuTriangle(MeshPoint *p) {
   throwassert(p && p->Th && p->T);
   long nu = -1;
@@ -1896,7 +2086,7 @@ AnyType pfer2R(Stack s, const AnyType &a) {
     mp.other.set(Th, mp.P.p2( ), PHat, *K, 0, outside);
   }
   const FElement KK(Vh[Th(K)]);
-  if (outside && !KK.tfe->NbDfOnVertex && !KK.tfe->NbDfOnEdge) return SetAny< R >(0.0);
+  if (outside && !KK.tfe->ndfonVertex && !KK.tfe->ndfonEdge) return SetAny< R >(0.0);
 
   const R rr = KK(PHat, *fe.x( ), componante, dd);
   return SetAny< R >(rr);
@@ -5862,6 +6052,7 @@ void Add_u_init_array(int ii=0)
                       new init_FE_eqarray< FFset3< C, vfes, KN_< C > > >(10));
 
 }
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -6103,10 +6294,13 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fes> * >( );
 
   // Morice: composite FESpace / vect FESpace 
+  Dcl_Type< vect_generic_v_fes ** >( );
+  Add<vect_generic_v_fes **>("ndof",".",new OneOperator1<long,vect_generic_v_fes **>(pVhcomp_ndof));
+
   Dcl_Type< const Call_FormLinear< vect_generic_v_fes > * >( );      //   to set Vector 3D curve
   Dcl_Type< const Call_FormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
   Dcl_Type< const Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
-        
+
   Dcl_Type< interpolate_f_X_1< double >::type >( );      // to make  interpolation x=f o X^1 ;
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
@@ -6335,7 +6529,13 @@ void init_lgfem( ) {
   Global.Add("LinearGMRES", "(", new LinearGMRES< R >( ));    // old form
   Global.Add("LinearGMRES", "(", new LinearGMRES< R >(1));    // old form  without rhs
   Global.Add("AffineGMRES", "(", new LinearGMRES< R >(1));    // New  better
-  Global.Add("LinearCG", "(", new LinearCG< R >(1));          //  without right handsize
+    // add FH 25/01/22
+    Global.Add("AffineFGMRES", "(", new LinearFGMRES<double>(1));    // New  better
+    Global.Add("AffineFGMRES", "(", new LinearFGMRES<Complex>(1));    // New  better
+    Global.Add("LinearFGMRES", "(", new LinearFGMRES<double>());    // New  better
+    Global.Add("LinearFGMRES", "(", new LinearFGMRES<Complex>());    // New  better
+    //  end add 
+    Global.Add("LinearCG", "(", new LinearCG< R >(1));          //  without right handsize
   Global.Add("AffineCG", "(", new LinearCG< R >(1));          //  without right handsize
   Global.Add("NLCG", "(", new LinearCG< R >(-1));             //  without right handsize
 

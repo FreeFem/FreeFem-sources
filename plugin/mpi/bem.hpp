@@ -355,8 +355,8 @@ std::shared_ptr<htool::VirtualCluster> build_clustering(int n, const FESPACE * U
 
 template <class R>
 void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,
-                std::shared_ptr<htool::VirtualCluster> s, std::shared_ptr<htool::VirtualCluster> t,
-                vector<double> &p1,vector<double> &p2,MPI_Comm comm) {
+                std::shared_ptr<htool::VirtualCluster> t, std::shared_ptr<htool::VirtualCluster> s,
+                vector<double> &pt,vector<double> &ps,MPI_Comm comm) {
 
     *Hmat = new HMatrixImpl<R>(t,s,data.epsilon,data.eta,data.sym?'S':'N',data.sym?'U':'N',-1,comm);
     std::shared_ptr<htool::VirtualLowRankGenerator<R>> LowRankGenerator = nullptr;
@@ -377,9 +377,9 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
     (*Hmat)->set_minsourcedepth(data.minsourcedepth);
     // TODO set options
     if (s == t)
-        (*Hmat)->build(*generatorP,p1.data());
+        (*Hmat)->build(*generatorP,pt.data());
     else
-        (*Hmat)->build(*generatorP,p1.data(),p2.data());
+        (*Hmat)->build(*generatorP,pt.data(),ps.data());
 }
 
 template<class R, class MMesh, class FESpace1, class FESpace2> 
@@ -398,8 +398,8 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     typedef typename std::conditional<SMesh::RdHat::d==1,bemtool::P2_1D,bemtool::P2_2D>::type P2;
 
     // size of the matrix
-    int n=Uh->NbOfDF;
-    int m=Vh->NbOfDF;
+    int m=Uh->NbOfDF;
+    int n=Vh->NbOfDF;
 
     /*
     int VFBEM = typeVFBEM(largs,stack);
@@ -420,8 +420,8 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     Mesh2Bemtool(ThU, node, mesh);
 
 
-    vector<double> p1(3*n);
-    vector<double> p2(3*m);
+    vector<double> pt(3*n);
+    vector<double> ps(3*m);
     Fem2D::R3 pp;
     bemtool::R3 p;
     SRdHat pbs;
@@ -443,26 +443,26 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
 
     if (SP2) {
         bemtool::Dof<P2> dof(mesh,true);
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<m; i++) {
             const std::vector<bemtool::N2>& jj = dof.ToElt(i);
             p = dof(jj[0][0])[jj[0][1]];
-            p1[3*i+0] = p[0];
-            p1[3*i+1] = p[1];
-            p1[3*i+2] = p[2];
+            ps[3*i+0] = p[0];
+            ps[3*i+1] = p[1];
+            ps[3*i+2] = p[2];
         }
     }
     else if (SRT0) {
         bemtool::Dof<bemtool::RT0_2D> dof(mesh);
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<m; i++) {
             const std::vector<bemtool::N2>& jj = dof.ToElt(i);
             p = dof(jj[0][0])[jj[0][1]];
-            p1[3*i+0] = p[0];
-            p1[3*i+1] = p[1];
-            p1[3*i+2] = p[2];
+            ps[3*i+0] = p[0];
+            ps[3*i+1] = p[1];
+            ps[3*i+2] = p[2];
         }
     }
     else
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<m; i++) {
         if (SP1)
             pp = ThU.vertices[i];
         else if (SP0)
@@ -471,18 +471,18 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             if (mpirank == 0) std::cerr << "ff-BemTool error: only P0, P1 and P2 discretizations are available for now." << std::endl;
             ffassert(0);
         }
-        p1[3*i+0] = pp.x;
-        p1[3*i+1] = pp.y;
-        p1[3*i+2] = pp.z;
+        ps[3*i+0] = pp.x;
+        ps[3*i+1] = pp.y;
+        ps[3*i+2] = pp.z;
     }
 
     std::shared_ptr<htool::VirtualCluster> t, s;
-    t = build_clustering(n, Uh, p1, ds, comm);
+    s = build_clustering(m, Uh, ps, ds, comm);
 
     if(!samemesh) {
         if( Vh->TFE[0]->N == 1){
             // case the target FE is scalar
-            for (int i=0; i<m; i++) {
+            for (int i=0; i<n; i++) {
                 if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
                     pp = ThV.vertices[i];
                 else if (Vh->MaxNbNodePerElement == 1)
@@ -491,25 +491,25 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
                     if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
                     ffassert(0);
                 }
-                p2[3*i+0] = pp.x;
-                p2[3*i+1] = pp.y;
-                p2[3*i+2] = pp.z;
+                pt[3*i+0] = pp.x;
+                pt[3*i+1] = pp.y;
+                pt[3*i+2] = pp.z;
             }
         }
         else{
             // hack for Maxwell case to have one Hmatrix to avoid one Hmatrix by direction
             ffassert(SRT0 && SRdHat::d == 2 && VFBEM==2);
 
-            // Dans un espace verctoriel, [P1,P1,P1] pour les targets, on a:
-            //        m correspond au nombre de dof du FEM space
-            // Or dans ce cas, on veut que m = mesh_Target.nv 
+            // Dans un espace vectoriel, [P1,P1,P1] pour les targets, on a:
+            //        n correspond au nombre de dof du FEM space
+            // Or dans ce cas, on veut que n = mesh_Target.nv
             // 
             // ==> on n'a pas besoin de resize les points p2
             int nnn= Vh->TFE[0]->N; // the size of the vector FESpace. For [P1,P1,P1], nnn=3;
 
-            int mDofScalar = m/nnn; // computation of the dof of one component 
+            int nDofScalar = n/nnn; // computation of the dof of one component
 
-            for (int i=0; i<mDofScalar; i++) {
+            for (int i=0; i<nDofScalar; i++) {
                 if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
                     pp = ThV.vertices[i];
                 else if (Vh->MaxNbNodePerElement == 1)
@@ -520,18 +520,18 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
                 }
 
                 for(int iii=0; iii<nnn; iii++){
-                    ffassert( nnn*3*i+3*iii+2 < nnn*3*m );
-                    p2[nnn*3*i+3*iii+0] = pp.x;
-                    p2[nnn*3*i+3*iii+1] = pp.y;
-                    p2[nnn*3*i+3*iii+2] = pp.z;
+                    ffassert( nnn*3*i+3*iii+2 < nnn*3*n );
+                    pt[nnn*3*i+3*iii+0] = pp.x;
+                    pt[nnn*3*i+3*iii+1] = pp.y;
+                    pt[nnn*3*i+3*iii+2] = pp.z;
                 }
             }
         }
-        s = build_clustering(m, Vh, p2, ds, comm);
+        t = build_clustering(n, Vh, pt, ds, comm);
     }
     else{
-        p2=p1;
-        s=t;
+        pt=ps;
+        t=s;
     }
 
     // creation of the generator for htool and creation the matrix
@@ -583,7 +583,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             ffassert(0);
 
         // build the Hmat
-        buildHmat(Hmat, generator, ds, t, s, p1, p2, comm);
+        buildHmat(Hmat, generator, ds, t, s, pt, ps, comm);
 
         delete generator;
     }
@@ -599,7 +599,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
             Mesh2Bemtool(ThV,node_output);
         else if (Vh->MaxNbNodePerElement == 1) {
-            for (int i=0; i<m; i++) {
+            for (int i=0; i<n; i++) {
                 pp = ThV[i](pbt);
                 p[0]=pp.x; p[1]=pp.y; p[2]=pp.z;
                 node_output.setnodes(p);
@@ -628,7 +628,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         else
             ffassert(0);
 
-        buildHmat(Hmat, generator, ds, t, s, p1, p2, comm);
+        buildHmat(Hmat, generator, ds, t, s, pt, ps, comm);
 
         delete generator;
     }

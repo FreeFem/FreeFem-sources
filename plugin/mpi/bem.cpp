@@ -795,8 +795,8 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     ffassert(Vh);
     ffassert(Uh);
 
-    int n=Uh->NbOfDF;
-    int m=Vh->NbOfDF;
+    int m=Uh->NbOfDF;
+    int n=Vh->NbOfDF;
 
     HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*emat)(stack));
 
@@ -826,8 +826,8 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
 
     *Hmat =0;
 
-    vector<double> p1(3*n);
-    vector<double> p2(3*m);
+    vector<double> pt(3*n);
+    vector<double> ps(3*m);
     Fem2D::R3 pp;
     bemtool::R3 p;
     SRdHat pbs;
@@ -851,7 +851,7 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     bool TP0 = TRdHat::d == 1 ? (Tnbv == 0) && (Tnbe == 1) && (Tnbt == 0) : (Tnbv == 0) && (Tnbe == 0) && (Tnbt == 1);
     bool TP1 = (Tnbv == 1) && (Tnbe == 0) && (Tnbt == 0);
 
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<m; i++) {
         if (SP1)
             pp = ThU.vertices[i];
         else if (SP0)
@@ -860,13 +860,13 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
             if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
             ffassert(0);
         }
-        p1[3*i+0] = pp.x;
-        p1[3*i+1] = pp.y;
-        p1[3*i+2] = pp.z;
+        ps[3*i+0] = pp.x;
+        ps[3*i+1] = pp.y;
+        ps[3*i+2] = pp.z;
     }
 
     if(!samemesh) {
-        for (int i=0; i<m; i++) {
+        for (int i=0; i<n; i++) {
             if (TP1)
                 pp = ThV.vertices[i];
             else if (TP0)
@@ -875,22 +875,22 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
                 if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
                 ffassert(0);
             }
-            p2[3*i+0] = pp.x;
-            p2[3*i+1] = pp.y;
-            p2[3*i+2] = pp.z;
+            pt[3*i+0] = pp.x;
+            pt[3*i+1] = pp.y;
+            pt[3*i+2] = pp.z;
         }
     }
     else{
-        p2=p1;
+        pt=ps;
     }
 
     VirtualGenerator<R>** generator = GetAny<VirtualGenerator<R>**>((*op->g)(stack));
 
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
     std::shared_ptr<VirtualCluster> t, s;
-    t = build_clustering(n, Uh, p1, ds, comm);
-    s = build_clustering(m, Vh, p2, ds, comm);
-    buildHmat(Hmat, *generator, ds, t, s, p1, p2, comm);
+    s = build_clustering(m, Uh, ps, ds, comm);
+    t = build_clustering(n, Vh, pt, ds, comm);
+    buildHmat(Hmat, *generator, ds, t, s, pt, ps, comm);
 
     return Hmat;
 }

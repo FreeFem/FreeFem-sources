@@ -7,7 +7,11 @@ nameopt=
 export dirdmgpkg=
 case $3 in
 *generic*) optionconf+=--enable-generic;;
+esac
+case $3 in
 *debug*) optionconf+=--enable-debug;nameopt+=-g;;
+esac
+case $3 in
 *optim*) optionconf+=--enable-optim;nameopt+=-O;;
 esac
 
@@ -74,6 +78,7 @@ rm -rf $fftmp
 )
 brewlibgfortran=`grep gfortran $prefix/gnu/list-dylib-gfortran` 
 brewlibquadmath=`grep libquadmath $prefix/gnu/list-dylib-gfortran` 
+brewlibgcc_s=`grep libgcc_s $prefix/gnu/list-dylib-gfortran` 
 ( 
 cd  $(dirname $brewlibgfortran)
 cp -f libgfortran.5.dylib libquadmath.0.dylib libgcc_s.1.1.dylib $prefix/gnu/
@@ -91,6 +96,8 @@ dirlibgfortranold=$(dirname $brewlibgfortran)
 dirlibgfortrannew=$prefix/gnu
 libgfortrandylib=$(basename $brewlibgfortran)
 libquadmathdylib=$(basename $brewlibquadmath)
+libgccsdylib=$(basename $brewlibgcc_s)
+echo2 dylibfort : $libgfortrandylib $libquadmathdylib $libgccsdylib
 cd - 
 test -d pkg || mkdir -v pkg 
 (
@@ -174,9 +181,10 @@ echo2 ================================
 tmpdylib=/tmp/dylib-ff-$$.txt
 tmplst=/tmp/otool-ff-$$.txt
 echo2 find $dirpkg/$prefix -name '*.dylib' 
-echo2 .. $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib 
+echo2 ... $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib $libgccsdylib
+echo2 ... $libgccsdylib
 find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
- $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib `cat $tmpdylib`
+ $changedylibgfortran $dirlibgfortranold $dirlibgfortrannew $libgfortrandylib $libquadmathdylib $libgccsdylib `cat $tmpdylib`
  ## verification 
  echo2 dylib to brew in installation for debug !!!! 
  cat $tmpdylib| xargs otool -L | egrep -i 'brew|/opt/' ||echo2 OK 
@@ -188,14 +196,13 @@ echo2 ================================
 
 
 test -d /tmp/$dirdmgpkg || ( 
-mkdir /tmp/$dirdmgpkg
+mkdir /tmp/$dirdmgpkg )
 cd /tmp/$dirdmgpkg
-mv $dirpkg/Applications/FreeFem++.app  /tmp/$dirdmgpkg
+rsync -av $dirpkg/Applications/FreeFem++.app  /tmp/$dirdmgpkg
 cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
 fftestedp=`find . -name Laplace.edp`
 sed -e "s/@VV@/$ver/" -e "s%@APPFF@%$dirdmgpkg%" -e s%@FFTEST@%$fftestedp% <$dirscript/script/README.md.in  > README.md
 
-)
 cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
 
 exec 1>&3 # save log is closo $LOG

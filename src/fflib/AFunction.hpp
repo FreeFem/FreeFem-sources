@@ -2321,6 +2321,14 @@ template<>  struct SameType<Complex,Complex> { static const int OK=40;};
 //template<>  struct SameType<Complex,bool> { static const int OK=41;};
 template<>  struct SameType<string*,string*> { static const int OK=50;};
 
+template <typename Arg1, typename Arg2, class Result>
+struct mybinary_function
+{
+    typedef Arg1   first_argument_type;
+    typedef Arg2   second_argument_type;
+    typedef Result result_type;
+};
+
 template <typename Arg1, typename Arg2,typename Arg3, class Result>
 struct ternary_function
 {

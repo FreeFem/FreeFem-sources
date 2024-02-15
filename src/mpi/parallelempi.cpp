@@ -284,6 +284,7 @@ struct MPIrank {
 
   MPIrank(int i=0, MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0)
     : who(i), comm(com), rq(rqq) {
+        ffassert(who >=0 || who == MPI_ANY_SOURCE ); // check jan 2024 PHT , FH 
     int n;
     MPI_Comm_size(comm, &n);
     MPI_Comm_rank(comm, &lmpirank);
@@ -292,6 +293,10 @@ struct MPIrank {
   long Send(double a) const { return WSend(&a, 1, who, MPI_TAG< double >::TAG, comm, rq); }
   long Send(long a) const { return WSend(&a, 1, who, MPI_TAG< long >::TAG, comm, rq); }
   long Send(Complex a) const { return WSend(&a, 1, who, MPI_TAG< Complex >::TAG, comm, rq); }
+
+  long Send(double * a) const { return WSend(a, 1, who, MPI_TAG< double >::TAG, comm, rq); }
+  long Send(long * a) const { return WSend(a, 1, who, MPI_TAG< long >::TAG, comm, rq); }
+  long Send(Complex * a) const { return WSend(a, 1, who, MPI_TAG< Complex >::TAG, comm, rq); }
 
   long Recv(double & a) const { return WRecv(&a, 1, who, MPI_TAG< double >::TAG ,comm, rq); }
   long Recv(long & a) const { return WRecv(&a, 1, who, MPI_TAG< long >::TAG ,comm, rq); }
@@ -2800,6 +2805,9 @@ void f_init_lgparallele()
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<double> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<long> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Complex> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<double *> >(1)); // takes priority
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<long *> >(1)); // takes priority
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Complex *> >(1)); // takes priority
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<double> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN_<double> > >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<long> *> >);

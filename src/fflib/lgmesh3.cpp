@@ -2517,7 +2517,7 @@ class Op3_pfL2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
     };
 };
 template<class K,class v_fes>
-class Op2_pfL2K : public binary_function<pair<FEbase<K,v_fes> *,int>,R,K> { public:
+class Op2_pfL2K : public mybinary_function<pair<FEbase<K,v_fes> *,int>,R,K> { public:
     
     
     class Op : public E_F0mps { public:

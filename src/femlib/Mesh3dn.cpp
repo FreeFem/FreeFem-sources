@@ -2271,7 +2271,14 @@ namespace Fem2D
     }
     
    
-    
+double mesurebord(long nva,Vertex3 * vb)
+{
+    if( nva<= 1 ) return 1.;
+    else if( nva == 2) return R3(vb[0],vb[1]).norme();
+    else if( nva == 3) return (R3(vb[0],vb[1])^R3(vb[0],vb[2])).norme();
+    else ffassert(0);
+    return 0;
+}
     
     
     
