@@ -1959,21 +1959,18 @@ double pmesh_hmin(pmesh *p) {
 long pVh_ndof(pfes *p) {
   throwassert(p && *p);
   FESpace *fes = **p;
-  ;
-  return fes->NbOfDF;
+  return fes ? fes->NbOfDF : 0L;
 }
 pmesh pVh_Th(pfes *p) {
   throwassert(p && *p);
   FESpace *fes = **p;
-  ;
   return &fes->Th;
 }
 
 long pVh_nt(pfes *p) {
   throwassert(p && *p);
   FESpace *fes = **p;
-  ;
-  return fes->NbOfElements;
+  return fes ? fes->NbOfElements : 0L;
 }
 long pVh_ndofK(pfes *p) {
   throwassert(p && *p);
