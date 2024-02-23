@@ -42,9 +42,20 @@ namespace EF23 {
   typedef  int  IntQuad;
   typedef  long long Int8;
   static const IntQuad MaxISize = ( 1L << MaxDeep);
-  static const IntQuad MaxISize1 =   MaxISize-1;  
-  class Z1 { public:
-      static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
+  static const IntQuad MaxISize1 =   MaxISize-1; 
+class Z0 {
+public:
+  //  static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
+    static bool INTER_SEG1dn(int a,int b,int x0,int d) {
+        int x= x0-d, y = x0+d;
+        if(verbosity>999 && y < x0  ) cout << "overflow ?? inter_1dn" << " ] "<< a << "," << b << "[ inter ] " << x << "," << y << "[\n";
+        if(y<0) y = std::numeric_limits<int>::max();// overflow in ..
+
+        return (((y) > (a)) && ((x) <(b)));}
+
+};
+  class Z1 : public Z0 { public:
+    //  static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
     int x;
     Z1():x(0){}
     Z1(R1 P) : x((int)P.x) {}
@@ -60,16 +71,16 @@ namespace EF23 {
     
     bool less(Z1 h) const  { return abs(x) <h.x ;}
     bool interseg(Z1 pp,int hb,int h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) ;}
-    bool interseg(const Z1 &pp,int hb,const Z1 &h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) ;}
-    operator R1 () const { return R1(x);} 
+      return INTER_SEG1dn(x,x+hb,pp.x,h) ;}
+    bool interseg(const Z1 &pp,int hb,const Z1 &h) const {
+      return INTER_SEG1dn(x,x+hb,pp.x,h.x) ;}
+    operator R1 () const { return R1(x);}
   };
   
  
   
-  class Z2 { public:
-      static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
+  class Z2 : public Z0 { public:
+ 
     int x,y;
     Z2():x(0),y(0) {}
     Z2(R2 P) : x((int)P.x),y((int)P.y) {}
@@ -87,14 +98,15 @@ namespace EF23 {
     
     bool less(Z2 h) const  { return abs(x) <h.x && abs(y) <h.y;}
     bool interseg(Z2 pp,int hb,int h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h);}
-    bool interseg(const Z2 &pp,int hb,const Z2 &h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) && INTER_SEG1d(y,y+hb,pp.y-h.y,pp.y+h.y);}
-    operator R2 () const { return R2(x,y);} 
+      return INTER_SEG1dn(x,x+hb,pp.x,h) && INTER_SEG1dn(y,y+hb,pp.y,h);}
+    bool interseg(const Z2 &pp,int hb,const Z2 &h) const {
+      return INTER_SEG1dn(x,x+hb,pp.x,h.x)
+          && INTER_SEG1dn(y,y+hb,pp.y,h.y);}
+    operator R2 () const { return R2(x,y);}
   };
   
-  class Z3 { public:
-      static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
+  class Z3 : public Z0{ public:
+  
     int x,y,z;
     Z3():x(0),y(0),z(0) {}
     
@@ -114,10 +126,12 @@ namespace EF23 {
     Int8 norm2() const { return (Int8) x*(Int8) x + (Int8) y*(Int8)y + (Int8) z*(Int8)z; }
     bool less(Z3 h) const  { return abs(x) <h.x && abs(y) <h.y && abs(z) < h.z ;}
     bool interseg(Z3 pp,int hb,int h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h) && INTER_SEG1d(z,z+hb,pp.z-h,pp.z+h) ;
+      return INTER_SEG1dn(x,x+hb,pp.x,h) && INTER_SEG1dn(y,y+hb,pp.y,h) && INTER_SEG1dn(z,z+hb,pp.z,h) ;
       }
     bool interseg(const Z3 &pp,int hb,const Z3 &h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) && INTER_SEG1d(y,y+hb,pp.y-h.y,pp.y+h.y) && INTER_SEG1d(z,z+hb,pp.z-h.z,pp.z+h.z);
+      return INTER_SEG1dn(x,x+hb,pp.x,h.x) 
+          && INTER_SEG1dn(y,y+hb,pp.y,h.y)
+          && INTER_SEG1dn(z,z+hb,pp.z,h.z);
       }
     operator R3 () const { return R3(x,y,z);} 
     

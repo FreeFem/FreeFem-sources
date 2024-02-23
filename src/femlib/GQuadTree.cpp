@@ -175,6 +175,7 @@ template<class Vertex>
   template<class Vertex>    
   Vertex *  GTree<Vertex>::NearestVertex(Zd xyi,bool trueNearest)//long xi,long yj)
   {
+      typedef typename Vertex::Rd  Rd;
     // warning this function return the NearestVertex in the first
     // none empty box contening the point xyi.
     //   They do not return the true nearest point in classical norm.
@@ -264,7 +265,7 @@ if(verbosity>2000)
                 h =Zd(i2,plus).norm()*c2infty;// norm infty -> norm 2 big enought
 		vn = b->v[k];
                   if(verbosity>2000)
-                      cout << "        NV: find   " << vn << " " << h0 << " " << h2 << " " << h << endl;
+                      cout << "        NV: find   " << vn << " " << h0/coef << " " << h2/coef << " " << h/coef  << " k " << k << " P= " << (const Rd  &) *b->v[k] << endl;
 
 	      }
 	  }
@@ -276,9 +277,21 @@ if(verbosity>2000)
 	      {
 		hb >>=1 ; // div by 2
 		Zd ppp(pp[l],k,hb);
-		
-		if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
+                  if(verbosity>99999)
+                  {
+                      {
+                          Rd rpp=ppp, rP = plus;
+                          cout << " box " << b->n << " " << rpp/coef << "  ..  " << rP/coef   << " h= " <<   h/coef << " hb " << hb/coef << " l " <<  l << " " << k << endl;
+                      }
+                  }
+		if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
 		  {
+                       
+                      if(verbosity>99999)
+                      {
+                          Rd rpp=ppp;
+                          cout << " box inter " << rpp/coef << " size "<< hb/coef << " l " <<  l << " " << k << endl;
+                      }
 		    pb[++l]=  b;
 		    pi[l]= b->n>0 ?(int)  b->n : N  ;
 		    pp[l]=ppp;
@@ -1335,6 +1348,7 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
     outside = 0;
     Vertex *p0= &P[0];
     Vertex *p =tree->TrueNearestVertex(PP);
+    ffassert(p);
     int ip = p-P;
     Rd Q[dHat+1];
     R ll[dHat+1],lpj[dHat+1];
@@ -1551,7 +1565,8 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
                 delta[nv]=l;
                 P[nv].lab= Element::ne*k;//  element and edge
                 (Rd &) P[nv++]=G;
-                
+                if(verbosity>9999)
+                  cout << k << " P " << G << endl;
                 
             }
         }

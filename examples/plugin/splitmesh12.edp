@@ -6,6 +6,8 @@ int[int] CC = [4, 4, 4];
 load "splitmesh12"
 mesh3 Th3=Cube(CC, BB, LL);
 mesh3 Th12=splitmesh12(Th3);
+mesh3 Th12WF=splitmesh12WorseyFarin(Th3);
+medit("Th12WF",Th12WF);
 assert(Th12.nt == Th3.nt * 12);
 cout << Th12.nt << " == 12 x " << Th3.nt << endl;
 assert(Th12.nbe == Th3.nbe * 3);
