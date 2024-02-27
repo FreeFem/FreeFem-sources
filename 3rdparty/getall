@@ -163,18 +163,18 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-download('mmg','https://github.com/prj-/mmg/archive/1e26c551fdb969b38da46389bb0d95a35eb70d9d.zip',
-        'https://github.com/prj-',
+download('mmg','https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
+        'https://github.com/MmgTools',
         'mmg.zip',
-        'dc4c1e2afc3570f2d6aca106c9ea2829');
-download('parmmg','https://github.com/prj-/ParMmg/archive/9cb2f7a22ef590d196d028970f462889bf610c53.zip',
-        'https://github.com/prj-',
+        'd824d08dac0544caff20a915194da0fe');
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
+        'https://github.com/MmgTools',
         'parmmg.zip',
-        '32035de70272121137c0869e8c49e4bd');
-download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.4.tar.gz',
+        '9a76fef6be1ab66af3a813409a0388c9');
+download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.5.tar.gz',
 	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/',
-	'petsc-3.20.4.tar.gz',
-	'c97f44525bf7cbc3516b26538aa0c895');
+	'petsc-3.20.5.tar.gz',
+	'ee6c51b6882d7278a38c5bb5e0c94ed9');
 
 download('htool','https://github.com/htool-ddm/htool/archive/946875d79d0036afb4dc2c0c13c165a607d830df.zip',
 		'https://github.com/htool-ddm/',
