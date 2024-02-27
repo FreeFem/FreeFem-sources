@@ -2255,7 +2255,7 @@ struct DataQPElm {
         outside = false;
     }
     template<class M> bool same(DataQPElm<M> & from) {return false;}
-    template<> bool same(DataQPElm<Mesh> & from) {return & Th == & from.Th;}
+    bool same(DataQPElm<Mesh> & from) {return & Th == & from.Th;}
 
     template<class M>
     bool copy(DataQPElm<M> & from)
