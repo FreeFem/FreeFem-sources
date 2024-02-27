@@ -20,7 +20,7 @@ esac
 echo " arch = $arch"
 
 name=FreeFEM-$version-Apple-$arch-$gittag
-echo name of dit for  dmg: FreeFEM-$version-Apple-$arch-$gittag
+echo name of git for  dmg: FreeFEM-$version-Apple-$arch-$gittag
 
 sudo make install
 make bin/movefortranlib

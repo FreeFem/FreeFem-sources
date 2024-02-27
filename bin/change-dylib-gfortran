@@ -13,7 +13,7 @@ lib2=$1
 shift
 lib3=$1
 shift
-fi
+
 
 if test -f "$olddir/$lib1" -a  -f "$olddir/$lib2" -a  -f "$olddir/$lib3" \
     -a  -f "$newdir/$lib1" -a  -f "$newdir/$lib2" -a  -f "$newdir/$lib3" ; then 
