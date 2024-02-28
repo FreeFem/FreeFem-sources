@@ -16,7 +16,7 @@ case $3 in
 esac
 
 echo " option de configuration" $optionconf
-echo ==========================================================dx(f1copy[n])
+echo ==========================================================
 
 ## stop on error ....
 
