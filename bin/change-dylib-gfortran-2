@@ -1,0 +1,34 @@
+#!/bin/bash 
+##  change path gfortran lib in freefem install 
+## usage : change-dylibgfortran oldlibdir newlibdir  libnam1 libnam2   list of dylyb file pathname to change ...
+## F. hecht sep. 2023 on MoOS Ventura , Monterey 
+## remark the file $oldlibdir/$libnam1 , ... must exist ... 
+
+newdir=$1
+shift
+listlib=`cd $newdir ; ls *dylib`
+echo listlib : $listlib
+for ff in $@; do
+ch=0
+for lib in $listlib ; do 
+  new=$newdir/$lib	
+  nnl=`otool -L $ff|grep $lib  |awk '{print $1}'`
+  old="wrong"
+  case $nnl in
+	  /* ) old=$nnl
+  esac
+  nn=`otool -L $ff|grep "$old" |wc -l`
+#  otool -L $ff| grep brew
+#  echo $ff $lib $nn "$old"  "$new"	  
+  if test $nn -ne 0  -a "$old" !=  "$new"  ; then
+#    echo ..change $old to $new in $ff
+    ch=1
+    echo change  $old to  $new in $ff
+    install_name_tool -change $old $new $ff
+  fi
+  done
+  if test $ch -eq 1  ; then
+    codesign  --remove-signature $ff
+    codesign -s -  $ff
+  fi
+  done 
