@@ -2271,7 +2271,7 @@ struct DataQPElm {
     
         return true;
     }
-    template<>
+    //template<>
     bool copy(DataQPElm<Mesh> & from)
     {
         if( & Th == &from.Th && mapp ==0 ) // same mesh and no map
