@@ -26,6 +26,7 @@ jobs:
       - name: Test global script
         id: dmg
         run: |
+          mkdir $HOME/tmp
           ./bin/compile-version-MacOS develop $HOME/tmp > DMG_NAME
           echo $DMG_NAME
           echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
