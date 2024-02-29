@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc coreutil m4 git flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
+        run: brew install gcc coreutils m4 git gsl flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh
