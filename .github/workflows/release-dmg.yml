@@ -27,7 +27,7 @@ jobs:
         id: dmg
         run: |
           mkdir $HOME/tmp
-          ./bin/compile-version-MacOS develop $HOME/tmp
+          sudo ./bin/compile-version-MacOS develop $HOME/tmp
           echo $DMG_NAME
           echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
 
