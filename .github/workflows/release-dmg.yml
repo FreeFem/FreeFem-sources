@@ -1,9 +1,9 @@
 name: Release MacOS
-on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+on: push
+#   workflow_run:
+#     workflows: ['Release']
+#     types:
+#       - completed
 
 jobs:
   macos:
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
+        run: brew install gcc coreutil m4 git flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh
