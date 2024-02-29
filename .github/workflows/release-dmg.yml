@@ -23,16 +23,8 @@ jobs:
       - name: Install
         run: brew install gcc coreutils m4 git flex bison suitesparse cmake wget autoconf automake freeglut
 
-      - name: Test global script
-        id: dmg
-        run: |
-          mkdir $HOME/tmp
-          sudo ./bin/compile-version-MacOS develop $HOME/tmp
-          echo $DMG_NAME
-          echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
-
-      #   - name: Symlink GCC & Fortran
-      #     run: ./etc/actions/macos/link_fortran.sh
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh
 
       - name: Version
         id: version
@@ -41,6 +33,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
           echo "dmg_dir=FreeFEM-$VERSION-$ARCH" >> $GITHUB_OUTPUT
+
+      - name: Test global script
+        id: dmg
+        run: |
+          mkdir $HOME/tmp
+          sudo ./bin/compile-version-MacOS develop $HOME/tmp
+          echo $DMG_NAME
+          echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
 
       #   - name: Create paths
       #     run: |
