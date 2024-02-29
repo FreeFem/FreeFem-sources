@@ -38,7 +38,7 @@ jobs:
         id: dmg
         run: |
           mkdir $HOME/tmp
-          sudo ./bin/compile-version-MacOS develop $HOME/tmp
+          sudo ./bin/compile-version-MacOS develop $HOME/tmp generic-optim
           echo $DMG_NAME
           echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
 
