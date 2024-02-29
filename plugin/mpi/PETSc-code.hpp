@@ -2632,11 +2632,22 @@ namespace PETSc {
                 if (!A->HPDDM_ia) {
                   Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
                     nargs[15] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+                  Mat aux = nullptr;
+                  HPDDM::MatrixCSR< PetscScalar >* B = nullptr;
                   if (ptK && ptK->A) {
                     MatriceMorse< upscaled_type<PetscScalar> >* mA =
                       static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                    Mat aux = ff_to_PETSc(B);
+                    B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    aux = ff_to_PETSc(B);
+                  }
+                  else {
+                      MatCreate(PETSC_COMM_SELF, &aux);
+                      MatSetSizes(aux, 0, 0, 0, 0);
+                      MatSetType(aux, MATSEQAIJ);
+                      MatAssemblyBegin(aux, MAT_FINAL_ASSEMBLY);
+                      MatAssemblyEnd(aux, MAT_FINAL_ASSEMBLY);
+                  }
+                  if (aux) {
                     Mat N;
                     PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
                     if (!A->HPDDM_sym && ptA->_petsc) {

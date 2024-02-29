@@ -1,4 +1,5 @@
 /****************************************************************************/
+/****************************************************************************/
 /* This file is part of FreeFEM.                                            */
 /*                                                                          */
 /* FreeFEM is free software: you can redistribute it and/or modify          */
@@ -40,7 +41,32 @@ using namespace std;
 #include <cmath>
 
 using namespace Fem2D;
+R3 Intersection(const R3 &A,const R3 &B,const R3 &C,const R3 &AA,const R3 &BB)
+{
+    double aa = -det(A,B,C,AA);
+    double bb = det(A,B,C,BB);
+    double s = aa + bb;
+    assert( aa/s > 0 && bb/s >=0 );
+    R3 P =  BB * aa / s + AA* aa / s;
+    return P;
 
+}
+R3 inSphereCenter(const R3& A,const R3& B,const R3& C,const R3& D)
+{
+    // see https://people.sc.fsu.edu/~jburkardt/presentations/cg_lab_tetrahedrons.pdf
+    R3 AB(A,B),AC(A,C),AD(A,D),BC(B,C),BD(B,D);
+    R3 Nabc = (AB^AC);
+    R3 Nabd = (AB^AD);
+    R3 Nacd = (AC^AD);
+    R3 Nbcd = (BC^BD);
+    R nabc = Nabc.norme();
+    R nabd = Nabd.norme();
+    R nacd = Nacd.norme();
+    R nbcd = Nbcd.norme();
+ 
+    R3 G = (nabc*D + nabd*C + nacd*B + nbcd*A) / (nabc + nabd + nacd + nbcd) ;
+    return G;
+ }
 static void findPerm(int *ivt, int *pivt, Vertex3 *v) {
   std::copy(ivt, ivt + 4, pivt);
   R3 AB(v[ivt[0]], v[ivt[1]]);
@@ -57,7 +83,7 @@ static void findPerm(int *ivt, int *pivt, Vertex3 *v) {
   }
 }
 
-Mesh3 const *SplitMesh12(Stack stack, Fem2D::Mesh3 const *const &pTh) {
+Mesh3 const *SplitMesh12cas(Stack stack, Fem2D::Mesh3 const *const &pTh,int cas) {
   assert(pTh);
   const Mesh3 &Th(*pTh);    // le maillage d'origne a decoupe
   using Fem2D::BoundaryEdge;
@@ -100,7 +126,11 @@ Mesh3 const *SplitMesh12(Stack stack, Fem2D::Mesh3 const *const &pTh) {
   // generation des points barycentre de trianngles
   for (int k = 0; k < nbt; k++) {
     const Tet &K = Th[k];
-    R3 G = ((R3)K[0] + K[1] + K[2] + K[3]) / 4.;
+      R3 G;
+      if(cas ==0)
+         G = ((R3)K[0] + K[1] + K[2] + K[3]) / 4.;
+      else
+          G = inSphereCenter(K[0], K[1], K[2], K[3]);
     vv->x = G.x;
     vv->y = G.y;
     vv->z = G.z;
@@ -110,10 +140,10 @@ Mesh3 const *SplitMesh12(Stack stack, Fem2D::Mesh3 const *const &pTh) {
 
   for (int i = 0; i < nbe; i++) {
     const Triangle3 &K(Th.be(i));
-    R3 G = ((R3)K[0] + K[1] + K[2]) / 3.;
-    vv->x = G.x;
-    vv->y = G.y;
-    vv->z = G.z;
+    R3 M = ((R3)K[0] + K[1] + K[2]) / 3.;
+    vv->x = M.x;
+    vv->y = M.y;
+    vv->z = M.z;
     vv->lab = Th.be(i).lab;
     vv++;
   }
@@ -221,6 +251,10 @@ Mesh3 const *SplitMesh12(Stack stack, Fem2D::Mesh3 const *const &pTh) {
     return m;
   }
 }
+Mesh3 const *SplitMesh12(Stack stack, Fem2D::Mesh3 const *const &pTh) {
+    return SplitMesh12cas(stack,pTh,0);}
+Mesh3 const *SplitMesh12WorseyFarin(Stack stack, Fem2D::Mesh3 const *const &pTh) {
+    return SplitMesh12cas(stack,pTh,1);}
 
 // truc pour que la fonction
 // static void Load_Init() soit appele a moment du chargement dynamique
@@ -233,6 +267,7 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
   }
 
   Global.Add("splitmesh12", "(", new OneOperator1s_< Mesh3 const *, Mesh3 const * >(SplitMesh12));
+    Global.Add("splitmesh12WorseyFarin", "(", new OneOperator1s_< Mesh3 const *, Mesh3 const * >(SplitMesh12WorseyFarin));
 }
 
 LOADFUNC(Load_Init)

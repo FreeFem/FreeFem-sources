@@ -47,11 +47,11 @@ using namespace Fem2D;
 // seg intersection in 2d
 R2 Intersection(R2 B,R2 BB,R2 A,R2 AA)
 {
-    double ab = -det(A, AA, B);
-    double abb = det(A, AA, BB);
-    double s = ab + abb;
-    assert( ab/s > 0 && abb/s >=0 );
-    R2 P = BB * ab / s + B* abb / s;
+    double b = -det(A, AA, B);
+    double bb = det(A, AA, BB);
+    double s = b + bb;
+    assert( b/s > 0 && bb/s >=0 );
+    R2 P = BB * b / s + B* bb / s;
     return P;
 
 }

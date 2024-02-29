@@ -21,10 +21,17 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc coreutils m4 git gsl flex bison suitesparse hdf5 cmake wget autoconf automake freeglut
+        run: brew install gcc coreutils m4 git flex bison suitesparse cmake wget autoconf automake freeglut
 
-      - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh
+      - name: Test global script
+        id: dmg
+        run: |
+          DMG_NAME=$(./bin/compile-version-MacOS)
+          echo $DMG_NAME
+          echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
+
+      #   - name: Symlink GCC & Fortran
+      #     run: ./etc/actions/macos/link_fortran.sh
 
       - name: Version
         id: version
@@ -34,63 +41,63 @@ jobs:
           echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
           echo "dmg_dir=FreeFEM-$VERSION-$ARCH" >> $GITHUB_OUTPUT
 
-      - name: Create paths
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
+      #   - name: Create paths
+      #     run: |
+      #       PREFIX=${{ steps.version.outputs.prefix }}
 
-          sudo mkdir -p "$PREFIX"
+      #       sudo mkdir -p "$PREFIX"
 
-      - name: Fortran copy
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
+      #   - name: Fortran copy
+      #     run: |
+      #       PREFIX=${{ steps.version.outputs.prefix }}
 
-          sudo ./etc/actions/release/macos/copy_fortran.sh "$PREFIX"
+      #       sudo ./etc/actions/release/macos/copy_fortran.sh "$PREFIX"
 
-      - name: Configure
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
-          autoreconf -i
-          ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
-            --prefix="$PREFIX" \
-            "CXXFLAGS=-Wno-undefined-var-template" \
-            "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
-          ./3rdparty/getall -a -o PETSc
+      #   - name: Configure
+      #     run: |
+      #       PREFIX=${{ steps.version.outputs.prefix }}
+      #       autoreconf -i
+      #       ./configure --enable-optim --enable-generic --enable-download --enable-m64 \
+      #         --prefix="$PREFIX" \
+      #         "CXXFLAGS=-Wno-undefined-var-template" \
+      #         "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
+      #       ./3rdparty/getall -a -o PETSc
 
-      - name: PETSc
-        run: |
-          cd 3rdparty/ff-petsc
-          make petsc-slepc SUDO=sudo
-          cd -
-          ./reconfigure
+      #   - name: PETSc
+      #     run: |
+      #       cd 3rdparty/ff-petsc
+      #       make petsc-slepc SUDO=sudo
+      #       cd -
+      #       ./reconfigure
 
-      - name: Build
-        run: make -j2
+      #   - name: Build
+      #     run: make -j2
 
-      - name: Check
-        continue-on-error: true
-        run: make check
+      #   - name: Check
+      #     continue-on-error: true
+      #     run: make check
 
-      - name: Install
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
-          mkdir -p "$HOME/pkg/$PREFIX"
-          rsync -a "$PREFIX/." "$HOME/pkg/$PREFIX/."
-          sudo make install DESTDIR="$HOME/pkg"
+      #   - name: Install
+      #     run: |
+      #       PREFIX=${{ steps.version.outputs.prefix }}
+      #       mkdir -p "$HOME/pkg/$PREFIX"
+      #       rsync -a "$PREFIX/." "$HOME/pkg/$PREFIX/."
+      #       sudo make install DESTDIR="$HOME/pkg"
 
-      - name: Fix gfotran lib
-        run: |
-          PREFIX=${{ steps.version.outputs.prefix }}
+      #   - name: Fix gfotran lib
+      #     run: |
+      #       PREFIX=${{ steps.version.outputs.prefix }}
 
-          sudo ./etc/actions/release/macos/fix_fortran.sh "$HOME/pkg" "$PREFIX"
+      #       sudo ./etc/actions/release/macos/fix_fortran.sh "$HOME/pkg" "$PREFIX"
 
-      - name: Create DMG
-        id: dmg
-        run: |
-          DMG_DIR=${{ steps.version.outputs.dmg_dir }}
+      #   - name: Create DMG
+      #     id: dmg
+      #     run: |
+      #       DMG_DIR=${{ steps.version.outputs.dmg_dir }}
 
-          sudo ./etc/actions/release/macos/create_dmg.sh "$HOME/pkg" "$DMG_DIR"
+      #       sudo ./etc/actions/release/macos/create_dmg.sh "$HOME/pkg" "$DMG_DIR"
 
-          echo "file=$DMG_DIR.dmg" >>$GITHUB_OUTPUT
+      #       echo "file=$DMG_DIR.dmg" >>$GITHUB_OUTPUT
 
       - name: Upload release
         uses: AButler/upload-release-assets@v2.0.x

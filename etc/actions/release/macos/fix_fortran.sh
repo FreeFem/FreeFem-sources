@@ -17,4 +17,4 @@ LIB_FORTRAN_OLD_DIR=$(dirname "$LIB_FORTRAN")
 LIB_FORTRAN_DYLIB=$(basename "$LIB_FORTRAN")
 LIB_QUADMATH_DYLIB=$(basename "$LIB_QUADMATH")
 
-./bin/change-dylib-gfortran "$LIB_FORTRAN_OLD_DIR" "$PREFIX/gnu" "$LIB_FORTRAN_DYLIB" "$LIB_QUADMATH_DYLIB" "$(cat "$FORTRAN_FIX/dylib-ff.txt")"
+./bin/change-dylib-gfortran-2 "$LIB_FORTRAN_OLD_DIR" "$PREFIX/gnu" "$LIB_FORTRAN_DYLIB" "$LIB_QUADMATH_DYLIB" "$(cat "$FORTRAN_FIX/dylib-ff.txt")"

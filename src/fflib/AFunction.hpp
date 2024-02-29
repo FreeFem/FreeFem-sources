@@ -3070,7 +3070,8 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 template<typename T>
 void CheckDclTypeEmpty() {
     if(map_type.find(typeid(T).name())!=map_type.end())
-        cout << " Erreur  fftype dcl twist "<< typeid(T).name() << endl; 
+        cout << " (Erreur  fftype dcl twice "<< typeid(T).name() <<  " " <<
+        *map_type[typeid(T).name()] << ")" ;
 }
 
 // Morice 06/2022

@@ -27,6 +27,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Powell Sabin splitmesh6PowellSabin(Th)  spliting for Scott–Vogelius lowest Stokes Element in 2D
+  in plugin/seq/splitmesh6.cpp
+
+- Worsey Farin splitmesh12WorseyFarin(Th3) pliting for Scott–Vogelius lowest Stokes Element in 3D
+  in  plugin/seq/splitmesh12.cpp
+
 - interface with functional interface with fgmres (Linear and affine) in real and complex case
   see tutorial/algo.edp
 - Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2014 in version: v4.13-130-g1af52457
@@ -53,7 +59,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- PETSc 3.20.2
+- PETSc 3.20.4
 
 ### Deprecated
 
@@ -65,6 +71,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
+     thank to G. Sadaka to find the bug.
 - correct hidden faces on surface mesh (ffglut)
 - remove optimisation flag ppm2rnm.cpp in macos (load trap)
 - correct abcisse curviline on reparametrage function (setcurveabcisse) in load "Curvature"
