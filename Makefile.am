@@ -230,7 +230,7 @@ WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	sed -i 's;/mingw64/ff-petsc;/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
-	-DHOSTOS='$(host_os)' -DFFPETSC='$(FF_prefix_petsc)' \
+	-DHOSTOS='$(host_os)' -DFFPETSC=`cygpath -w '$(FF_prefix_petsc)'` \
 	 etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
 	echo loadpath += '"!\."'  >freefem++.pref
 	echo includepath += '"!\idp"'  >>freefem++.pref

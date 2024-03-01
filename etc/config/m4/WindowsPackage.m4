@@ -53,7 +53,7 @@ IFPETSC Name: "{app}\ff-petsc"; Permissions: everyone-full
 Source: "README.md"; DestDir: "{app}"
 Source: "readme\README_WINDOWS.md"; DestDir: "{app}"
 Source: "readme\INNOVATION"; DestDir: "{app}"
-Source: "readme\AUTHORS"; DestDir: "{app}"
+;Source: "readme\AUTHORS"; DestDir: "{app}" ; the file disapear !!!! FH 
 Source: "readme\BUGS"; DestDir: "{app}"
 Source: "readme\COPYRIGHT"; DestDir: "{app}"
 Source: "readme\COPYING"; DestDir: "{app}"
