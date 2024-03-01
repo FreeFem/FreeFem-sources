@@ -326,7 +326,7 @@ Mesh *GMSH_Load(const string &filename) {
               }
 
               if (type == 4) {
-                if (verbosity > 1) cout << "We are loading a two dimensional mesh " << endl;
+                if (verbosity > 1) cerr << "We are loading a two dimensional mesh " << endl;
                 exit(1);
               }
             }
