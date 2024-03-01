@@ -11,8 +11,8 @@ jobs:
     runs-on: macos-latest
 
     env:
-      CC: clang
-      CXX: clang++
+      CC: gcc
+      CXX: g++
       FC: gfortran
       F77: gfortran
       ARCH: Intel
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc coreutils m4 git flex bison suitesparse cmake wget autoconf automake freeglut
+        run: brew install gcc coreutils
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh
