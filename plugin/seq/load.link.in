@@ -246,7 +246,7 @@ case "$WIN32$uu" in
 	;;
     FreeBSD|NetBSD)
 	SHARED="-shared"
-	FLAGS='-fPIC';;
+	FLAGS="-fPIC $LDFLAGS";;
 	# 64 bit Linux needs -fPIC (ALH)
     SunOS)
         SHARED="-shared"
