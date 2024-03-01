@@ -3069,7 +3069,7 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 // check if <<T> in the map_type/
 template<typename T>
 void CheckDclTypeEmpty() {
-    if(map_type.find(typeid(T).name())!=map_type.end())
+    if((verbosity > 9) && (map_type.find(typeid(T).name())!=map_type.end()))
         cout << " (Erreur  fftype dcl twice "<< typeid(T).name() <<  " " <<
         *map_type[typeid(T).name()] << ")" ;
 }
