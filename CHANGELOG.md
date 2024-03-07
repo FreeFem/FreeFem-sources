@@ -27,6 +27,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+-add `real[int,int] at=A';`
+
 - Powell Sabin splitmesh6PowellSabin(Th)  spliting for Scott–Vogelius lowest Stokes Element in 2D
   in plugin/seq/splitmesh6.cpp
 
@@ -71,6 +73,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- fixe `(A'+A)` where func  `A =[[0,1],[0,0]] ;
 - correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
      thank to G. Sadaka to find the bug.
 - correct hidden faces on surface mesh (ffglut)
