@@ -136,17 +136,17 @@ test -d pkg || mkdir -v pkg
 	)
 	test -f $prefix/bin/h5c++ || (
 		cd hdf5-1.14.2
-		./configure '--enable-cxx' 'CC=clang' 'CXX=clang++' --prefix=$prefix
+		./configure '--enable-cxx' --prefix=$prefix
 		make -j $njob
 		make install
 	)
 
-	# test -f $prefix/lib/pkgconfig/mpich.pc || (
-	# 	cd mpich-4.1.2
-	# 	./configure --prefix=$prefix "FFLAGS=-fallow-argument-mismatch -L$prefix/gnu -lgfortran -lquadmath" 'CC=clang' 'CXX=clang++'
-	# 	make -j $njob
-	# 	make install
-	# )
+	test -f $prefix/lib/pkgconfig/mpich.pc || (
+		cd mpich-4.1.2
+		./configure --prefix=$prefix "FFLAGS=-fallow-argument-mismatch -L$prefix/gnu -lgfortran -lquadmath"
+		make -j $njob
+		make install
+	)
 )
 ## configuration of Freefem++ et compilation of ff++
 cd $gitbranch-ff++

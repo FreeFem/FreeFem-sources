@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc coreutils mpich
+        run: brew install gcc coreutils
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh
