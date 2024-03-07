@@ -255,7 +255,7 @@ set -e
 cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
 
 exec 1>&3 # save log is close $LOG
-cat $LOG >>/tmp/$dirdmgpkg/build-log.log
+# cat $LOG >>/tmp/$dirdmgpkg/build-log.log
 
 # build dmg file $HOME/desktop/$dirdmgpkg.dmg
 echo hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+ $HOME/desktop/$dirdmgpkg.dmg
