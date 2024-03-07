@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc
+        run: brew install gcc coreutils m4 git flex bison
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh
