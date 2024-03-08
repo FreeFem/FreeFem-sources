@@ -1,10 +1,9 @@
 name: Release MacOS ARM64
 on:
-  push
-  # workflow_run:
-  #   workflows: ['Release']
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   macos:
