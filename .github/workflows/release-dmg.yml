@@ -1,9 +1,9 @@
 name: Release MacOS Intel
-on: push
-#   workflow_run:
-#     workflows: ['Release']
-#     types:
-#       - completed
+on:
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   macos:
@@ -16,7 +16,6 @@ jobs:
       FC: gfortran
       F77: gfortran
       ARCH: Intel
-      COMPILATIONDIR: $HOME/tmp
 
     steps:
       - uses: actions/checkout@main
