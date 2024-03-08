@@ -5,7 +5,7 @@ set -x
 
 PREFIX=$1
 CC=$2
-CXX=3
+CXX=$3
 
 sudo mkdir -p "$PREFIX/pkg"
 cd "$PREFIX/pkg"

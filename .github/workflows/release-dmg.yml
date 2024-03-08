@@ -44,8 +44,8 @@ jobs:
       - name: Dependencies
         run: |
           PREFIX=${{ steps.version.outputs.prefix }}
-          sudo ./etc/actions/release/macos/compile_gsl.sh "$PREFIX" CC CXX
-          sudo ./etc/actions/release/macos/compile_hdf5.sh "$PREFIX" CC CXX
+          sudo ./etc/actions/release/macos/compile_gsl.sh "$PREFIX" $CC $CXX
+          sudo ./etc/actions/release/macos/compile_hdf5.sh "$PREFIX" $CC $CXX
 
       # - name: Test global script
       #   id: dmg
