@@ -80,7 +80,7 @@ jobs:
 
           mkdir -p "$HOME/pkg/$PREFIX"
           rsync -a "$PREFIX/." "$HOME/pkg/$PREFIX/."
-          sudo make install DESTDIR="$HOME/pkg"
+          make install DESTDIR="$HOME/pkg"
 
       - name: Fix gfotran lib
         run: |
@@ -94,7 +94,7 @@ jobs:
           DMG_DIR=${{ steps.version.outputs.dmg_dir }}
           VERSION=${{ steps.version.outputs.version }}
 
-          sudo ./etc/actions/release/macos/create_dmg.sh "$HOME/pkg" "$DMG_DIR" "$VERSION"
+          ./etc/actions/release/macos/create_dmg.sh "$HOME/pkg" "$DMG_DIR" "$VERSION"
 
           echo "file=$DMG_DIR.dmg" >>$GITHUB_OUTPUT
 
