@@ -1,4 +1,4 @@
-name: Release MacOS
+name: Release MacOS Intel
 on: push
 #   workflow_run:
 #     workflows: ['Release']
@@ -34,14 +34,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
           echo "dmg_dir=FreeFEM-$VERSION-$ARCH" >> $GITHUB_OUTPUT
-
-        # - name: Test global script
-        #   id: dmg
-        #   run: |
-        #     mkdir $HOME/tmp
-        #     sudo ./bin/compile-version-MacOS develop $HOME/tmp generic-optim
-        #     echo $DMG_NAME
-        #     echo "file=$DMG_NAME" >>$GITHUB_OUTPUT
 
       - name: Prepare
         run: |

@@ -50,8 +50,8 @@ jobs:
           OS_RELEASE=$(lsb_release -r | awk '{print $2}')
           VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          DEB_FOLDER=freefem-${VERSION}-amd64-${OS_RELEASE}
-          DEB_NAME=FreeFEM-${VERSION}-amd64-${OS_RELEASE}.deb
+          DEB_FOLDER=freefem-${VERSION}-amd64-ubuntu${OS_RELEASE}
+          DEB_NAME=FreeFEM-${VERSION}-amd64-ubuntu${OS_RELEASE}.deb
           echo "file=$DEB_NAME" >> $GITHUB_OUTPUT
 
           ./etc/actions/release/linux/create_deb.sh "$VERSION" "$DEB_FOLDER" "$DEB_NAME"
