@@ -1,16 +1,15 @@
 name: Release Windows
 on:
-  push
-  # workflow_run:
-  #   workflows: ['Release']
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
+      # TODO re-activate petsc copy in WindowPackage.m4, line 172
 jobs:
   windows:
     name: EXE release
     runs-on: windows-latest
-
     defaults:
       run:
         shell: msys2 {0}
