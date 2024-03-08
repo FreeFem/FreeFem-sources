@@ -69,7 +69,7 @@ FLAGS_MTUNE := -mtune=native
 endif
 unexport MAKEFLAGS
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 --with-tau-perfstubs=0 \
-		--download-slepc --download-hpddm
+		--download-slepc --download-slepc-commit=91d610c5c24db59eb69b9c9f4385582415a0957d --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)
 COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
