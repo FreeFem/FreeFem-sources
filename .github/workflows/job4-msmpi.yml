@@ -49,6 +49,7 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
+            MPICC=/mingw64/bin/mpicc.exe MPICXX=/mingw64/bin/mpic++.exe
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
