@@ -14,7 +14,7 @@ jobs:
       - name: Setup MPI
         uses: mpi4py/setup-mpi@v1
         with:
-          mpi: intelmpi
+          mpi: msmpi
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -38,6 +38,7 @@ jobs:
             pkgfile
             tar
             mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-msmpi
             python
 
       - name: Remove packages
@@ -47,9 +48,11 @@ jobs:
 
       - name: Configure
         run: |
+          which mpicc
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
+            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
