@@ -1,11 +1,12 @@
 name: Release Windows
 on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
-      # TODO re-activate petsc copy in WindowPackage.m4, line 172
+  # TODO re-activate petsc copy in WindowPackage.m4, line 172
 jobs:
   windows:
     name: EXE release
@@ -77,7 +78,7 @@ jobs:
         run: |
           VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          TMP_EXE_NAME=FreeFem++-${VERSION}-win64.exe
+          TMP_EXE_NAME=Output/FreeFem++-${VERSION}-win64.exe
           EXE_NAME=FreeFEM-${VERSION}-win64.exe
           echo "file=$EXE_NAME" >> $GITHUB_OUTPUT
 

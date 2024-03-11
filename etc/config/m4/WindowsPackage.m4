@@ -20,7 +20,7 @@
 [Setup]
 AppName=FreeFem++-win`'SIZEOFPTR-VERSION
 AppVerName=FreeFem++ version VERSION (win SIZEOFPTR bits)
-DefaultDirName={pf}\FreeFem++`'SUFF64
+DefaultDirName={commonpf}\FreeFem++`'SUFF64
 DefaultGroupName=FreeFem++`'SUFF64
 
 Compression=lzma
