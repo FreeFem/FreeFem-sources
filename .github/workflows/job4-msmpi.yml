@@ -38,7 +38,7 @@ jobs:
             pkgfile
             tar
             mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-msmpi
+            # mingw-w64-x86_64-msmpi
             python
 
       - name: Remove packages
