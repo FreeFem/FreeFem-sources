@@ -48,10 +48,10 @@ jobs:
 
       - name: Configure
         run: |
-          export PATH=/c/Program\ Files/Microsoft\ MPI/Bin:$PATH
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
+            --with-mpipath="C:\Program Files\Microsoft MPI\Bin\"
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
