@@ -14,7 +14,7 @@ jobs:
       - name: Install MS-MPI
         shell: cmd
         run: |
-          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.2/msmpisetup.exe
+          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
           .\msmpisetup.exe -unattend -force
 
       - uses: msys2/setup-msys2@v2
