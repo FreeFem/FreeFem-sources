@@ -1,10 +1,10 @@
 name: Release Windows
 on:
-  push
-  # workflow_run:
-  #   workflows: ['Release']
-  #   types:
-  #     - completed
+  # push
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
   # TODO re-activate petsc copy in WindowPackage.m4, line 172
 jobs:
@@ -57,7 +57,7 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
           MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
-          ./3rdparty/getall -a -o PETSc
+          ./3rdparty/getall -a
 
       - name: PETSc
         run: |

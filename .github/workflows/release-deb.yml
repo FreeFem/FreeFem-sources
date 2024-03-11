@@ -25,7 +25,7 @@ jobs:
         run: |
           autoreconf -i
           ./configure --enable-optim --enable-generic --enable-download
-          ./3rdparty/getall -a -o PETSc
+          ./3rdparty/getall -a
 
       - name: PETSc
         run: |
