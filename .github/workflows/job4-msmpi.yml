@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Setup MPI
         uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: intelmpi
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -41,9 +43,6 @@ jobs:
       - name: Remove packages
         run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
 
-      - name: CHECK
-        run: which mpicc
-
       - uses: actions/checkout@v4
 
       - name: Configure
@@ -51,8 +50,6 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
-            --with-mpipath="/c/Program Files/Microsoft MPI/Bin"
-            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
