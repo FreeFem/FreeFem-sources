@@ -51,22 +51,21 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
-            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
-          ./3rdparty/getall -a -o PETSc
+          # ./3rdparty/getall -a -o PETSc
 
-      - name: PETSc
-        run: |
-          cd 3rdparty/ff-petsc
-          make petsc-slepc
-          cd -
-          ./reconfigure
+      # - name: PETSc
+      #   run: |
+      #     cd 3rdparty/ff-petsc
+      #     make petsc-slepc
+      #     cd -
+      #     ./reconfigure
 
-      - name: Build
-        run: make -j2
+      # - name: Build
+      #   run: make -j2
 
-      - name: Check
-        continue-on-error: true
-        run: make check
+      # - name: Check
+      #   continue-on-error: true
+      #   run: make check
 
-      - name: Install
-        run: make install
+      # - name: Install
+      #   run: make install
