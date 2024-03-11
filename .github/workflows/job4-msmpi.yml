@@ -6,19 +6,18 @@ jobs:
     name: Job4 MSMPI - Windows
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     steps:
-      - name: Install MS-MPI
-        shell: pwsh
-        run: |
-          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          .\msmpisetup.exe -unattend -force
+      - uses: mpi4py/setup-mpi@v1
 
       - uses: msys2/setup-msys2@v2
         with:
           update: true
           install: >-
             mingw-w64-x86_64-toolchain
-            bash
             make
             m4
             patch
@@ -40,16 +39,12 @@ jobs:
             python
 
       - name: Remove packages
-        shell: msys2 {0}
         run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
 
       - uses: actions/checkout@v4
 
       - name: Configure
-        shell: C:\msys64\usr\bin\bash.exe --login {0}
         run: |
-          source shell mingw64
-
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
