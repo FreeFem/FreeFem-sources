@@ -18,6 +18,7 @@ jobs:
           update: true
           install: >-
             mingw-w64-x86_64-toolchain
+            bash
             make
             m4
             patch
@@ -45,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        shell: msys2 {0}
+        shell: C:\msys64\usr\bin\bash.exe --login {0}
         run: |
           source shell mingw64
 
