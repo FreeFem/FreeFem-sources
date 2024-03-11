@@ -35,6 +35,7 @@ jobs:
             pkg-config
             pkgfile
             tar
+            mingw-w64-x86_64-msmpi
             mingw-w64-x86_64-cmake
             python
 
@@ -48,7 +49,6 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
-            --with-mpipath="/c/Program Files/Microsoft MPI/Bin"
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
