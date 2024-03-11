@@ -1,10 +1,10 @@
 name: Release MacOS ARM64
 on:
-  # push
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   macos:
@@ -34,6 +34,12 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "prefix=/Applications/FreeFem++.app/Contents/ff-$VERSION" >> $GITHUB_OUTPUT
           echo "dmg_dir=FreeFEM-$VERSION-$ARCH" >> $GITHUB_OUTPUT
+
+      - name: Cleanup
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          sudo rm -rf /Applications/FreeFem++.app/Contents/ff-$VERSION"
 
       - name: Prepare
         run: |
