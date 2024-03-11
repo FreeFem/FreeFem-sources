@@ -6,10 +6,6 @@ jobs:
     name: Job4 MSMPI - Windows
     runs-on: windows-latest
 
-    defaults:
-      run:
-        shell: C:\msys64\usr\bin\bash.exe --login {0}
-
     steps:
       - name: Install MS-MPI
         shell: pwsh
@@ -49,7 +45,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
+        shell: C:\msys64\usr\bin\bash.exe --login {0}
         run: |
+          source shell mingw64
+
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
