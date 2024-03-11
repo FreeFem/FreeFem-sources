@@ -51,7 +51,7 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
-            --with-mpipath="C:\Program Files\Microsoft MPI\Bin\"
+            --with-mpipath="/c/Program\ Files/Microsoft\ MPI/Bin"
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
