@@ -35,18 +35,16 @@ jobs:
             pkg-config
             pkgfile
             tar
-            mingw-w64-x86_64-msmpi
             mingw-w64-x86_64-cmake
             python
 
       - name: Remove packages
         run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
 
-      - uses: actions/checkout@v4
-
       - name: CHECK
-        run: |
-          ls "/c/Program Files/Microsoft MPI/Bin"
+        run: which mpicc
+
+      - uses: actions/checkout@v4
 
       - name: Configure
         run: |
@@ -54,9 +52,7 @@ jobs:
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
             --prefix="${HOME}/freefem" \
             --with-mpipath="/c/Program Files/Microsoft MPI/Bin"
-            MPICC="/c/Program Files/Microsoft MPI/Bin/mpicc.exe"
-            MPICXX="/c/Program Files/Microsoft MPI/Bin/mpic++.exe"
-            MPIFC="/c/Program Files/Microsoft MPI/Bin/mpif90.exe"
+            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           # ./3rdparty/getall -a -o PETSc
 
       # - name: PETSc
