@@ -1,10 +1,10 @@
 name: Release MacOS ARM64
 on:
-  # push
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   macos:
@@ -58,7 +58,7 @@ jobs:
             --prefix="$PREFIX" \
             "CXXFLAGS=-Wno-undefined-var-template" \
             "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
-          ./3rdparty/getall -a -o PETSc
+          ./3rdparty/getall -a
 
       - name: PETSc
         run: |
