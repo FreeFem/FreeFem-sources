@@ -39,7 +39,7 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.version }}
 
-          sudo rm -rf /Applications/FreeFem++.app/Contents/ff-$VERSION"
+          sudo rm -rf "/Applications/FreeFem++.app/Contents/ff-$VERSION"
 
       - name: Prepare
         run: |
