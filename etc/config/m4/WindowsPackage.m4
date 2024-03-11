@@ -169,7 +169,7 @@ IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
 ;PETSc
-;IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.

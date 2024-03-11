@@ -8,11 +8,11 @@ jobs:
 
     defaults:
       run:
-        shell: msys2 {0}
+        shell: C:\msys64\usr\bin\bash.exe --login
 
     steps:
       - name: Install MS-MPI
-        shell: cmd
+        shell: pwsh
         run: |
           curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
           .\msmpisetup.exe -unattend -force
@@ -39,6 +39,7 @@ jobs:
             pkgfile
             tar
             mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-msmpi
             python
 
       - name: Remove packages
