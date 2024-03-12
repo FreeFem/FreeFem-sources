@@ -552,6 +552,9 @@ public:
     }
 
 };
+// correct compile PB 12/03/24 FH
+template<bool t> struct InitMatfromAArray_Barray{ typedef E_Array Btype; };
+template<> struct InitMatfromAArray_Barray<true>{ typedef TransE_Array Btype; };
 
 template<class RR,bool isinit,bool Trans=false>
 class  InitMatfromAArray : public OneOperator {
@@ -559,10 +562,8 @@ public:
     typedef KNM<RR> * A;
     typedef KNM<RR> * R;
     
-    template<bool t> struct Barray{ typedef E_Array Btype; };
-    template<> struct Barray<true>{ typedef TransE_Array Btype; };
 
-    typedef typename Barray<Trans>::Btype B;
+    typedef typename InitMatfromAArray_Barray<Trans>::Btype B;
 
     class CODE : public  E_F0 { public:
        Expression a0;
