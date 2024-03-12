@@ -11,11 +11,10 @@ jobs:
         shell: msys2 {0}
 
     steps:
-      - name: Install MS-MPI
-        shell: cmd
-        run: |
-          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          .\msmpisetup.exe -unattend -force
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: msmpi
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -53,6 +52,7 @@ jobs:
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode --enable-debug \
             --prefix="${HOME}/freefem" \
+            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin" \
             MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           ./3rdparty/getall -a -o PETSc
 

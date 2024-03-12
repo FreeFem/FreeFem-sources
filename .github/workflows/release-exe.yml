@@ -1,12 +1,11 @@
 name: Release Windows
 on:
-  # push
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
-  # TODO re-activate petsc copy in WindowPackage.m4, line 172
 jobs:
   windows:
     name: EXE release
@@ -16,11 +15,10 @@ jobs:
         shell: msys2 {0}
 
     steps:
-      - name: Install MS-MPI
-        shell: cmd
-        run: |
-          curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-          .\msmpisetup.exe -unattend -force
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: msmpi
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -56,7 +54,8 @@ jobs:
         run: |
           autoreconf -i
           ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin" \
+              MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           ./3rdparty/getall -a
 
       - name: PETSc
