@@ -54,8 +54,9 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"    
+          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"
+            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           ./3rdparty/getall -a
 
       - name: PETSc
