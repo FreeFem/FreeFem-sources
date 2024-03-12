@@ -1,10 +1,10 @@
 name: Release Windows
 on:
-  # push
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   windows:
@@ -32,6 +32,7 @@ jobs:
             flex
             bison
             unzip
+            mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-openblas
             mingw-w64-x86_64-hdf5
             mingw-w64-x86_64-gsl
@@ -53,9 +54,8 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin" \
-              MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"    
           ./3rdparty/getall -a
 
       - name: PETSc
