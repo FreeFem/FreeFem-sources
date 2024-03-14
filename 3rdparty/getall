@@ -198,10 +198,10 @@ download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.
 	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
-download('libpthread-google','http://pkgs.freefem.org/libpthread-google.tar.gz',
+download('libpthread-google','https://github.com/FreeFem/FreeFEM-3rdparties/raw/main/libpthread-google.tar.gz',
 		'http://pkgs.freefem.org/',
 		'libpthread-google.tar.gz',
-		'945c006d898983d1a710aabf52a32d9c');
+		'eb3abfdce1b3ffe1d53941ec4caed2a3');
 
 
 # run all downloads concurrently
@@ -274,7 +274,6 @@ sub downloadone{
 				$errors.="ERROR: $cmd FAILED\n"
 			}
 		}
-		
 	}
 	# check if resulting package contents are valid
 	my $md5check=md5_hex(`cat pkg/$pkg`);
