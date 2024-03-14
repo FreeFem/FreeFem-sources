@@ -260,7 +260,7 @@ sub downloadone{
 	system $cmd;
 	if($?){
 		print "Download failed from $url of $pkg\n";
-		my $url="http://pkgs.freefem.org/$pkg";
+		my $url="https://github.com/FreeFem/FreeFEM-3rdparties/raw/main/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
@@ -280,7 +280,7 @@ sub downloadone{
 	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){
 		print "Download failed (MD5 check) from $url of $pkg\n";
-		my $url="http://pkgs.freefem.org/$pkg";
+		my $url="https://github.com/FreeFem/FreeFEM-3rdparties/raw/main/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
