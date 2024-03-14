@@ -225,7 +225,6 @@ win32: WindowsPackage.iss FreeFEM-documentation.pdf
 	rm -rf plugin/include-tmp
 	cd plugin; mkdir include-tmp; cp -Lr seq/include/* */*.h include-tmp
 	cp -r 3rdparty/include/. plugin/include-tmp/.
-	cat plugin/seq/WHERE_LIBRARY-config #TODO remove this line
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 6/ISCC.exe "`cygpath.exe WindowsPackage.iss`"
 WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	sed -i 's;/mingw64/ff-petsc;/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
