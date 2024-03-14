@@ -276,7 +276,7 @@ download(
 'https://github.com/FreeFem/FreeFEM-3rdparties/raw/main/libpthread-google.tar.gz',
     'http://pkgs.freefem.org/',
     'libpthread-google.tar.gz',
-    'eb3abfdce1b3ffe1d53941ec4caed2a3'
+    '751874eb5d14d4f445a94df1aa0c56b6'
 );
 
 # run all downloads concurrently
