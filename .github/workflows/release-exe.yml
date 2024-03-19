@@ -73,6 +73,10 @@ jobs:
         continue-on-error: true
         run: make check
 
+      - name: check
+        shell: cmd
+        run: dir ff-petsc /AD /s
+
       - name: Create EXE
         id: exe
         run: |
