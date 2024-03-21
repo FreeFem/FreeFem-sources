@@ -74,10 +74,10 @@ jobs:
         run: make check
 
       - name: check ff-petsc
-        shell: cmd
+        shell: pwsh
         run: |
-          cd C:\
-          dir ff-petsc /AD /s
+          Get-Childitem -Path C:\ -Include *ff-petsc* -File -Recurse -ErrorAction SilentlyContinue
+          Get-Childitem -Path D:\ -Include *ff-petsc* -File -Recurse -ErrorAction SilentlyContinue
 
       - name: Create EXE
         id: exe
