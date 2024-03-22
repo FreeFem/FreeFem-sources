@@ -169,8 +169,12 @@ IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
 ;PETSc
-;IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
-IFPETSC Source: "C:\msys64\mingw64\ff-petsc\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+#if DirExists("FFPETSC")
+IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+#endif
+#if DirExists("D:\a\_temp\msys64\mingw64\ff-petsc\")
+IFPETSC Source: "D:\a\_temp\msys64\mingw64\ff-petsc\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+#endif
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
