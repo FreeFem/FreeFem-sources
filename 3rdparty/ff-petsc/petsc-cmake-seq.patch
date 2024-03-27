@@ -1,6 +1,6 @@
-diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/SuperLU.py petsc-3.19.0/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.19.0-p1/config/BuildSystem/config/packages/SuperLU.py	2023-04-02 13:47:03
-+++ petsc-3.19.0/config/BuildSystem/config/packages/SuperLU.py	2023-04-02 13:46:38
+diff --color -Naur petsc-3.21.0-p1/config/BuildSystem/config/packages/SuperLU.py petsc-3.21.0/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.21.0-p1/config/BuildSystem/config/packages/SuperLU.py	2023-04-02 13:47:03
++++ petsc-3.21.0/config/BuildSystem/config/packages/SuperLU.py	2023-04-02 13:46:38
 @@ -52,5 +52,11 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
@@ -13,9 +13,9 @@ diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/SuperLU.py
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
  
-diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/metis.py petsc-3.19.0/config/BuildSystem/config/packages/metis.py
---- petsc-3.19.0-p1/config/BuildSystem/config/packages/metis.py	2023-04-02 13:47:03
-+++ petsc-3.19.0/config/BuildSystem/config/packages/metis.py	2023-04-02 13:46:38
+diff --color -Naur petsc-3.21.0-p1/config/BuildSystem/config/packages/metis.py petsc-3.21.0/config/BuildSystem/config/packages/metis.py
+--- petsc-3.21.0-p1/config/BuildSystem/config/packages/metis.py	2023-04-02 13:47:03
++++ petsc-3.21.0/config/BuildSystem/config/packages/metis.py	2023-04-02 13:46:38
 @@ -44,6 +44,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
@@ -29,9 +29,9 @@ diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/metis.py p
      return args
  
    def configureLibrary(self):
-diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/mmg.py petsc-3.19.0/config/BuildSystem/config/packages/mmg.py
---- petsc-3.19.0-p1/config/BuildSystem/config/packages/mmg.py	2023-04-02 13:47:03
-+++ petsc-3.19.0/config/BuildSystem/config/packages/mmg.py	2023-04-02 13:46:38
+diff --color -Naur petsc-3.21.0-p1/config/BuildSystem/config/packages/mmg.py petsc-3.21.0/config/BuildSystem/config/packages/mmg.py
+--- petsc-3.21.0-p1/config/BuildSystem/config/packages/mmg.py	2023-04-02 13:47:03
++++ petsc-3.21.0/config/BuildSystem/config/packages/mmg.py	2023-04-02 13:46:38
 @@ -28,6 +28,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
@@ -45,24 +45,9 @@ diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/mmg.py pet
      if self.getDefaultIndexSize() == 64:
        int64_t = '''
  #if !(defined(PETSC_HAVE_STDINT_H) && defined(PETSC_HAVE_INTTYPES_H) && defined(PETSC_HAVE_MPI_INT64_T))
-diff --color -Naur petsc-3.19.0-p1/src/mat/impls/aij/mpi/mumps/mumps.c petsc-3.19.0/src/mat/impls/aij/mpi/mumps/mumps.c
---- petsc-3.19.0-p1/src/mat/impls/aij/mpi/mumps/mumps.c	2023-04-02 13:46:55
-+++ petsc-3.19.0/src/mat/impls/aij/mpi/mumps/mumps.c	2023-04-02 13:46:45
-@@ -1889,11 +1889,7 @@
-      see https://github.com/pmodels/mpich/issues/5589. This bug was fixed by https://github.com/pmodels/mpich/pull/5590.
-      In short, we could not use distributed RHS with MPICH until v4.0b1.
-    */
--#if PETSC_PKG_MUMPS_VERSION_LT(5, 3, 0) || (defined(PETSC_HAVE_MPICH_NUMVERSION) && (PETSC_HAVE_MPICH_NUMVERSION < 40000101))
-   mumps->ICNTL20 = 0; /* Centralized dense RHS*/
--#else
--  mumps->ICNTL20     = 10; /* Distributed dense RHS*/
--#endif
-   PetscCall(PetscOptionsMUMPSInt("-mat_mumps_icntl_20", "ICNTL(20): give mumps centralized (0) or distributed (10) dense right-hand sides", "None", mumps->ICNTL20, &mumps->ICNTL20, &flg));
-   PetscCheck(!flg || mumps->ICNTL20 == 10 || mumps->ICNTL20 == 0, PETSC_COMM_SELF, PETSC_ERR_SUP, "ICNTL(20)=%d is not supported by the PETSc/MUMPS interface. Allowed values are 0, 10", (int)mumps->ICNTL20);
- #if PETSC_PKG_MUMPS_VERSION_LT(5, 3, 0)
-diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/PTScotch.py petsc-3.19.0/config/BuildSystem/config/packages/PTScotch.py
---- petsc-3.19.0-p1/config/BuildSystem/config/packages/PTScotch.py	2023-04-02 13:47:03
-+++ petsc-3.19.0/config/BuildSystem/config/packages/PTScotch.py	2023-04-02 13:46:38
+diff --color -Naur petsc-3.21.0-p1/config/BuildSystem/config/packages/PTScotch.py petsc-3.21.0/config/BuildSystem/config/packages/PTScotch.py
+--- petsc-3.21.0-p1/config/BuildSystem/config/packages/PTScotch.py	2023-04-02 13:47:03
++++ petsc-3.21.0/config/BuildSystem/config/packages/PTScotch.py	2023-04-02 13:46:38
 @@ -9,6 +9,8 @@
      self.download         = ['git://https://gitlab.inria.fr/scotch/scotch.git',
                               'https://gitlab.inria.fr/scotch/scotch/-/archive/'+self.gitcommit+'/scotch-'+self.gitcommit+'.tar.gz',
@@ -107,3 +92,17 @@ diff --color -Naur petsc-3.19.0-p1/config/BuildSystem/config/packages/PTScotch.p
      g.close()
  
      self.popLanguage()
+diff --color -Naur petsc-3.21.0-p1/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.21.0/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.21.0-p1/config/BuildSystem/config/packages/SuiteSparse.py	2024-02-25 16:59:32
++++ petsc-3.21.0/config/BuildSystem/config/packages/SuiteSparse.py	2024-02-25 17:00:32
+@@ -56,4 +56,10 @@
+     args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
+     args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
+ 
++    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
++    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
++    if mpicc and mpicxx:
++        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
++        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
++        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
+     return args

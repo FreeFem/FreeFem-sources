@@ -171,10 +171,10 @@ download('parmmg','https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787
         'https://github.com/MmgTools',
         'parmmg.zip',
         '9a76fef6be1ab66af3a813409a0388c9');
-download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.5.tar.gz',
-	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/',
-	'petsc-3.20.5.tar.gz',
-	'ee6c51b6882d7278a38c5bb5e0c94ed9');
+download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.21.0.tar.gz',
+	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
+	'petsc-3.21.0.tar.gz',
+	'a0636e98522a04fb5b3c76c3862575aa');
 
 download('htool','https://github.com/htool-ddm/htool/archive/946875d79d0036afb4dc2c0c13c165a607d830df.zip',
 		'https://github.com/htool-ddm/',
