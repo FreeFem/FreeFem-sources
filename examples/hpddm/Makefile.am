@@ -78,6 +78,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	MatLoad-PETSc.edp \
 	stokes-3d-PETSc.edp \
 	transpose-solve-PETSc.edp \
+	diffusion-hpddm-2d-PETSc.edp \
+	diffusion-hpddm-3d-PETSc.edp \
 	bratu-hpddm-2d-PETSc.edp \
 	vi-2d-PETSc.edp \
 	orego-TS-PETSc.edp \

@@ -1,0 +1,69 @@
+//  run with MPI:  ff-mpirun -np 4 diffusion-hpddm-3d-PETSc.edp -ns -pc_type lu -wg
+// Options for -pc_type: lu (direct solver), gamg (algebraic multigrid), hpddm (multilevel domain decomposition method with the GenEO coarse problem)
+// Options for hpddm via PETSc are given in: https://petsc.org/release/manualpages/PC/PCHPDDM/
+// As far as PCHPDDM is concerned, this script implements the GenEO method with a fixed number of eigenvectors per subdomain for the construction of the coarse problem
+// NBPROC 4
+// Authors: P. Jolivet, F. Nataf
+
+load "PETSc"
+macro dimension()3// EOM
+include "macro_ddm.idp"
+
+tgv = -1;
+
+macro grad(u)[dx(u), dy(u) , dz(u)]// EOM
+func Pk = P1;
+
+mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10)); // global mesh
+Mat A;
+macro ThRefinementFactor()getARGV("-split", 1)//
+
+// decompose and distribute the mesh Th, and allocates data structures for the communication of the distributed matrix A
+// after this line, Th refers to a local mesh: the one of the subdomain
+MatCreate(Th, A, Pk);
+
+fespace Wh(Th, Pk); // local finite element space on the local mesh Th
+varf vPb(u, v) = int3d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
+
+Wh u, rhs, residual; // local solution, right-hand side, and final residual
+
+// local component of the global right-hand side
+rhs[] = vPb(0, Wh);
+
+if(1) {
+    // R_i sum R_j^T D_j rhs_j
+    exchange(A, rhs[] , scaled = true);
+    plotD(Th, rhs, cmm = "Global right-hand side")
+}
+
+matrix Neumann = vPb(Wh, Wh); // local matrix with Neumann boundary condition on the interface of the subdomain
+// recall that A is a distributed matrix and Neumann is a local one
+// the following equal sign '=' means in fact that the entries of the distributed matrix A are filled with the entries of the local Neumann matrix, then A is ready for use
+A = Neumann;
+
+// near kernel of the operator (used only by PCGAMG)
+Wh Rb[1];
+Rb[0] = 1;
+// all in one; see at the end of the script the meaning of the parameters
+set(A, sparams = " -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_sub_pc_factor_mat_solver_type mumps -pc_hpddm_has_neumann -pc_hpddm_define_subdomains " +
+                 " -pc_hpddm_levels_1_sub_mat_mumps_cntl_4 0.1 -pc_hpddm_levels_1_eps_use_inertia -pc_hpddm_levels_1_eps_threshold 0.5 -pc_hpddm_levels_1_st_share_sub_ksp " +
+                 " -ksp_type gmres -ksp_pc_side right -ksp_monitor", nearnullspace = Rb);
+u[] = A^-1 * rhs[];
+
+residual[] = A * u[];
+residual[] -= rhs[];
+
+plotD(Th, residual, cmm = "Global Residual");
+plotD(Th, u, cmm = "Global Solution");
+
+// meaning of some flags in sparams when using PCHPDDM (-pc_type hpddm on the command line)
+//  -pc_hpddm_levels_1_sub_pc_type lu                      - subdomain solver is an exact LU factorization
+//  -pc_hpddm_levels_1_sub_pc_factor_mat_solver_type mumps - MUMPS is used for computing local exact factorizations
+//  -pc_hpddm_has_neumann                                  - local matrices passed to PCHPDDM are the Neumann matrices, see https://petsc.org/release/manualpages/PC/PCHPDDMHasNeumannMat/
+//  -pc_hpddm_define_subdomains                            - use the FreeFEM overlap to define the preconditioner on the first level
+//  -pc_hpddm_levels_1_sub_mat_mumps_cntl_4 0.1            - static pivoting to get a reliable estimate of the inertia, see CNTL(4) in https://mumps-solver.org/index.php?page=doc
+//  -pc_hpddm_levels_1_eps_use_inertia                     - needed when using a threshold for defining the GenEO coarse problem
+//  -pc_hpddm_levels_1_st_share_sub_ksp                    - https://petsc.org/release/manualpages/PC/PCHPDDMSetSTShareSubKSP/
+//  -ksp_type gmres                                        - GMRES as the Krylov solver, see https://petsc.org/release/manualpages/KSP/KSPType/
+//  -ksp_pc_side right                                     - the preconditioner is to be applied on the right, see https://petsc.org/release/manualpages/PC/PCSide/
+//  -ksp_monitor                                           - https://petsc.org/release/manualpages/KSP/KSPMonitor/
