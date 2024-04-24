@@ -1,7 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-
 verbosity=2;
 cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
 cout << " rank = " << mpiRank(mpiCommWorld) << " " << " size " << mpiSize(mpiCommWorld) << endl;

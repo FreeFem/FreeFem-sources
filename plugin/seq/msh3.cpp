@@ -4353,7 +4353,7 @@ class cubeMesh : public OneOperator {
 };
 
 extern Mesh *Carre_(int nx, int ny, Expression fx, Expression fy, Stack stack, int flags,
-                    KN_< long > lab, long reg);
+                    KN_< long > lab, long reg,bool rmdup=false);
 
 AnyType cubeMesh_Op::operator( )(Stack stack) const {
   int n1 = (int)GetAny< long >((*nx)(stack));

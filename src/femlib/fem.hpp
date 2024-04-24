@@ -514,7 +514,7 @@ namespace Fem2D {
       R bordermesure() const { return lenbord; }
 
       Serialize serialize() const;
-      Mesh(int nbv, int nbt, int nbeb, Vertex *v, Triangle *t, BoundaryEdge *b);
+      Mesh(int nbv, int nbt, int nbeb, Vertex *v, Triangle *t, BoundaryEdge *b,bool rmdup=false); //rmdup  Add FH 23/04/24
       Mesh(const Mesh &Thold, int *split, bool WithMortar=true, int label=1);
       ~Mesh();
       int number(const Triangle &tt) const { return &tt - triangles; }

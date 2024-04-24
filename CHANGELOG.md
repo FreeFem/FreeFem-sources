@@ -37,12 +37,12 @@ All notable changes to this project will be documented in this file.
 
 - interface with functional interface with fgmres (Linear and affine) in real and complex case
   see tutorial/algo.edp
-- Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2014 in version: v4.13-130-g1af52457
+- Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2023 in version: v4.13-130-g1af52457
 - Conversion of matrix or transpose of matrix in `int[int][int]` array to get the structure of sparse matrix.
   see tutorial/sparse-matrix.edp example at end
   ```
   matrix A = va(Ph,Vh);
-  int[int] a = A, at= A';
+  int[int][int] a = A, at= A';//  only the sparsity pattern of  matrix
   ```
 - a meshL finite function can be see as real function with 1, or 2 parameters
   ```
@@ -51,13 +51,13 @@ All notable changes to this project will be documented in this file.
    cout << u(0.5,0) << endl;
   ```
 - Exemple to code convolution of 2 function with one with a small support
-  too be not to expanxive
+  too be not to expensive
   see tutorial/Convolution-Sample.edp example
 - Support for dense blocks in PETSc matrices
 - GenEO for saddle-point examples with PCHPDDM in PETSc
 - Distributed ParaView output on `meshS`
 - Interface to `mmg2d` for two-dimensional `mesh`
-- Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
+- Support for Mmg parameters `-localParameter`, `-nosizreq`, `-hgradreq`
 
 ### Changed
 
@@ -72,7 +72,10 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
-
+ - fixe problem in mesh of ring from a square (missing option to reomve duplicate vertices)
+   exemple: mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;
+ - problem of segfalse in Write_hdf5 (problem of allocation in the stack not on the heap).
+   if the mesh2 is too large.
 - fixe `(A'+A)` where func  `A =[[0,1],[0,0]] ;
 - correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
      thank to G. Sadaka to find the bug.
