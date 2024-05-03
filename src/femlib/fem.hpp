@@ -378,6 +378,7 @@ namespace Fem2D {
   template<class Rd>
   class TBoundaryEdge: public Label {
     public:
+      typedef R1 RdHat ;// Add FH 3 may 2024
       typedef TVertex<Rd> Vertex;
       static const int NbWhat = 3; // 3+3+1
       static const int NbV = 2; // 3+3+1

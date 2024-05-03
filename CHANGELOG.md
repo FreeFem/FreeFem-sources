@@ -72,6 +72,11 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
+ - fixe problem integration of moving test or unknow function in 2d mesh:
+ varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v); 
+     matrix AB = ab(Zh,Rh);
+   we remove code a piece of code. 
+
  - fixe problem in mesh of ring from a square (missing option to reomve duplicate vertices)
    exemple: mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;
  - problem of segfalse in Write_hdf5 (problem of allocation in the stack not on the heap).
