@@ -107,8 +107,8 @@ download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.20
 	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
 	'b7c82a256a3e59beeb2b578de93a4e0b');
-download('Gmm++','http://pkgs.freefem.org/gmm-4.2.tar.gz',
-	'http://pkgs.freefem.org/',
+download('Gmm++','https://www.ljll.fr/hecht/gmm-4.2.tar.gz',
+	'https://www.ljll.fr/hecht/',
 	'gmm-4.2.tar.gz',
 	'35fe900f7459c49f4b4337dc691c8cdf');
 download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz',
@@ -198,8 +198,8 @@ download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.
 	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
-download('libpthread-google','http://pkgs.freefem.org/libpthread-google.tar.gz',
-		'http://pkgs.freefem.org/',
+download('libpthread-google','https://www.ljll.fr/hecht/libpthread-google.tar.gz',
+		'https://www.ljll.fr/hecht/',
 		'libpthread-google.tar.gz',
 		'945c006d898983d1a710aabf52a32d9c');
 
@@ -260,7 +260,7 @@ sub downloadone{
 	system $cmd;
 	if($?){
 		print "Download failed from $url of $pkg\n";
-		my $url="http://pkgs.freefem.org/$pkg";
+		my $url="https://www.ljll.fr/hecht/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
@@ -280,7 +280,7 @@ sub downloadone{
 	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){
 		print "Download failed (MD5 check) from $url of $pkg\n";
-		my $url="http://pkgs.freefem.org/$pkg";
+		my $url="https://www.ljll.fr/hecht/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
