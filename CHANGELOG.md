@@ -26,18 +26,22 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+-add tool to put FreeFEM code in Markdow file (with suffix .md)    
+      they only execute code beetwen
+      two  line  starting with ~~~  (in test),
+      to mixte in same file comment and code.
 
 -add `real[int,int] at=A';`
 
-- Powell Sabin splitmesh6PowellSabin(Th)  spliting for Scott–Vogelius lowest Stokes Element in 2D
+- Powell Sabin `splitmesh6PowellSabin(Th)`  spliting for Scott–Vogelius lowest Stokes Element in 2D
   in plugin/seq/splitmesh6.cpp
 
-- Worsey Farin splitmesh12WorseyFarin(Th3) pliting for Scott–Vogelius lowest Stokes Element in 3D
+- Worsey Farin `splitmesh12WorseyFarin(Th3)` pliting for Scott–Vogelius lowest Stokes Element in 3D
   in  plugin/seq/splitmesh12.cpp
 
-- interface with functional interface with fgmres (Linear and affine) in real and complex case
+- interface with functional interface with `fgmres` (Linear and affine) in real and complex case
   see tutorial/algo.edp
-- Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2023 in version: v4.13-130-g1af52457
+- Finite element `BDM2` and `BDM2ortho` in test, Bug in BDM2ortho corrected the 4 sept 2023 in version: v4.13-130-g1af52457
 - Conversion of matrix or transpose of matrix in `int[int][int]` array to get the structure of sparse matrix.
   see tutorial/sparse-matrix.edp example at end
   ```
@@ -73,15 +77,17 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
  - fixe problem integration of moving test or unknow function in 2d mesh:
+ ```
  varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v); 
      matrix AB = ab(Zh,Rh);
+```     
    we remove code a piece of code. 
 
  - fixe problem in mesh of ring from a square (missing option to reomve duplicate vertices)
-   exemple: mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;
+   exemple: `mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;`
  - problem of segfalse in Write_hdf5 (problem of allocation in the stack not on the heap).
    if the mesh2 is too large.
-- fixe `(A'+A)` where func  `A =[[0,1],[0,0]] ;
+- fixe `(A'+A)` where func  `A =[[0,1],[0,0]] ;`
 - correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
      thank to G. Sadaka to find the bug.
 - correct hidden faces on surface mesh (ffglut)
@@ -90,7 +96,7 @@ All notable changes to this project will be documented in this file.
 - correct compilation on ARM sonoma xcode 15.2
 - correct mpi essai.edp MPI_ANY_SOURCE Pb.
 - bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
-- in segment(10,region=1,label=ll); region is now used..
+- in `segment(10,region=1,label=ll);` region is now used..
 
 ---
 

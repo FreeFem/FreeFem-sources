@@ -2305,7 +2305,7 @@ yyreduce:
                         long stu1 =storageused()-stu0    ;
 
 
-			    if (verbosity && (NbPtr || (stu1>100000) )) { cout << " ######## We forget of deleting   " << NbPtr
+			    if (verbosity && (NbPtr || (stu1>100000) )) { cout << " ######## unfreed pointers   " << NbPtr
 			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
   return 0;;}
     break;
@@ -3901,6 +3901,7 @@ int mainff (int  argc, char **argv)
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       cout << "   file : " << cc ;
       if(verbosity>1) cout << " " << " verbosity= " << verbosity ;
+      if( typeofscript ) cout << " " << " Markdown = " << typeofscript;
       cout  << endl;
   }
 
@@ -3955,7 +3956,7 @@ int mainff (int  argc, char **argv)
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
-  zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
+  zzzfff->input(cc,typeofscript); // [[file:../fflib/lex.cpp::mylex_input_filename]]
   EnvironmentLoad(); // just before compile [[file:~/ff/src/fflib/environment.cpp::EnvironmentLoad]]
 
   retvalue= Compile(); // [[Compile]]

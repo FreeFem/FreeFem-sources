@@ -1007,6 +1007,7 @@ int mainff (int  argc, char **argv)
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       cout << "   file : " << cc ;
       if(verbosity>1) cout << " " << " verbosity= " << verbosity ;
+      if( typeofscript ) cout << " " << " Markdown = " << typeofscript;
       cout  << endl;
   }
 
@@ -1061,7 +1062,7 @@ int mainff (int  argc, char **argv)
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
-  zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
+  zzzfff->input(cc,typeofscript); // [[file:../fflib/lex.cpp::mylex_input_filename]]
   EnvironmentLoad(); // just before compile [[file:~/ff/src/fflib/environment.cpp::EnvironmentLoad]]
 
   retvalue= Compile(); // [[Compile]]

@@ -78,9 +78,10 @@ class mylex : public CodeAlloc {
     const string * filename; // <<filename>>
     int macroarg;
     istream * nf;
+      int typeofscript;
     char sep;
-      xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0),sep(':')   {}
-    void  open(mylex *lexx,const char * ff) ;
+      xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0),typeofscript(0),sep(':')   {}
+    void  open(mylex *lexx,const char * ff,int ts=0) ;
     void  readin(mylex *lexx,const string & s,const string *name=0,int macroargg=0);
     void close() ;
   };
@@ -138,7 +139,7 @@ class mylex : public CodeAlloc {
       return  pilesource[level].filename ? pilesource[level].filename->c_str() : " -- in macro -- ";
     return "-- unknown --";}
     
-  void input(const char *  filename) ;
+  void input(const char *  filename,int ts=0) ;
   void input(const string &str,const string *name=0,int lg=0);
   bool close() ;
 
