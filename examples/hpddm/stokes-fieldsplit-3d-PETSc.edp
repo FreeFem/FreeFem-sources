@@ -40,7 +40,7 @@ names[0] = "velocity";
 names[1] = "pressure";
 
 A = vPb(Wh, Wh, tgv = -1);
-set(A, sparams = "-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type lower -pc_fieldsplit_detect_saddle_point -fieldsplit_velocity_sub_pc_type lu " + " -fieldsplit_pressure_sub_pc_type lu -fieldsplit_velocity_sub_pc_factor_mat_solver_type " + solver + " -fieldsplit_pressure_sub_pc_factor_mat_solver_type " + solver + " -ksp_monitor -ksp_view " + " -fieldsplit_velocity_ksp_type gmres -fieldsplit_velocity_ksp_max_it 5 -fieldsplit_pressure_ksp_type gmres -fieldsplit_pressure_ksp_max_it 5 -ksp_rtol 1e-6", fields = u[], names = names);
+set(A, sparams = "-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type lower -pc_fieldsplit_detect_saddle_point -pc_fieldsplit_schur_precondition selfp -fieldsplit_velocity_sub_pc_type lu " + " -fieldsplit_pressure_sub_pc_type lu -fieldsplit_velocity_sub_pc_factor_mat_solver_type " + solver + " -fieldsplit_pressure_sub_pc_factor_mat_solver_type " + solver + " -ksp_monitor -ksp_view " + " -fieldsplit_velocity_ksp_type gmres -fieldsplit_velocity_ksp_max_it 5 -fieldsplit_pressure_ksp_type gmres -fieldsplit_pressure_ksp_max_it 5 -ksp_rtol 1e-6", fields = u[], names = names);
 u[] = 0.0;
 u[] = A^-1 * rhs;
 macro def1(u)u//
