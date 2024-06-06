@@ -31,6 +31,7 @@ VERSION=$(shell grep "'petsc-" ../getall | perl -pe '($$_)=/([0-9]+([.][0-9]+)+)
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
+DARWIN=$(shell uname | grep Darwin 2> /dev/null)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 ifeq ($(COMPILE_OPENBLAS),openblas)
@@ -83,8 +84,13 @@ endif
 
 ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
+PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)'
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
+ifeq ($(DARWIN),Darwin)
+PETSC_DOWNLOAD += --download-mpich=https://www.mpich.org/static/downloads/4.1.3/mpich-4.1.3.tar.gz --download-mpich-device=ch4:ofi 'LDFLAGS=-Wl,-ld_classic'
+else
+PETSC_DOWNLOAD += --download-mpich
+endif
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
 endif
@@ -148,7 +154,6 @@ all-local:
 	@echo "	make petsc-slepc "
 
 MPI_DIR:=$(shell dirname "$(MPI_INC_DIR)")
-W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
 ifeq ($(LAPACKLIBS), $(BLASLIBS))
   BLAS_LAPACK_LIBS=$(LAPACKLIBS)
