@@ -84,12 +84,10 @@ endif
 
 ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)'
+PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifeq ($(DARWIN),Darwin)
-PETSC_DOWNLOAD += --download-mpich=https://www.mpich.org/static/downloads/4.1.3/mpich-4.1.3.tar.gz --download-mpich-device=ch4:ofi 'LDFLAGS=-Wl,-ld_classic'
-else
-PETSC_DOWNLOAD += --download-mpich
+PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi 'LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs'
 endif
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
