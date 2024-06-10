@@ -14,7 +14,7 @@ To install FreeFEM
 - then type to install the FreeFem++.app in /Applications with some cleaning:
     `bash ./Install-app.sh`
 
-- try by typing in new terminal window
+- try by typing in new terminal windows 
      `FreeFem++-Cocoa`
 
 You should receive a message beginning with a few lines and then 
@@ -26,8 +26,11 @@ A test to see if FreeFem++  works without graphic
   `/Applications/FreeFem++.app/Contents/ff-@VV@/bin/FreeFem++  /Applications/FreeFem++.app/@FFTEST@ -nw 
 
 
-- If it does not work it is most likely due to the security system of Apple. See https://support.apple.com/en-us/HT202491
+- If it does not work it is most likely due to the security system of Apple.
+watch the small moving https://www.youtube.com/watch?v=SEF4PAkR51g to understand howto do 
 or
+ See https://support.apple.com/en-us/HT202491
+ or see
 https://support.apple.com/fr-fr/HT202491
 
 if you have a message saying that  FreeFem++.app is corrupted and it should be sent to the dustbin then cancel the message box and  type in the terminal

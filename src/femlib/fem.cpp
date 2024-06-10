@@ -41,6 +41,7 @@ extern bool lockOrientation;
 #include "Serialize.hpp"
 #include "fem.hpp"
 #include <set>
+#include <map>
 extern   long npichon2d, npichon3d;
 extern   long npichon2d1, npichon3d1;
 
@@ -691,7 +692,7 @@ public:
 	ConsAdjacence();
     }
 
-	    Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
+	    Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b,bool rmdup)
              :dfb(0)
 	    {
 		TriangleConteningVertex =0;
@@ -716,6 +717,108 @@ public:
 		bedges=b;
 		area=0;
 		bnormalv=0;
+                if(rmdup) //  remove duplicate points
+                {
+                    map<pair<int,int>,int> bbe;
+                    KN<int> renum(nv),rsave(nv,0);// old -> new
+                    
+                    Triangle *tt = t;
+                    BoundaryEdge *bb=b;
+                    double hmin=1e100;
+                    R2 Pn(1e100,1e100),Px(-1e100,-1e100);
+                    Mesh & Th=*this;
+                    int  nbvx =  Th.nv;
+                    int nebx = Th.neb;
+                    int ntx = Th.nt;
+                    for (int k=0;k<Th.nt;k++)
+                        for (int e=0;e<3;e++)
+                            hmin=min(hmin,Th[k].lenEdge(e));
+                    
+                    for (int i=0;i<Th.nv;i++)
+                    {
+                        R2 P(Th(i));
+                        Pn=Minc(P,Pn);
+                        Px=Maxc(P,Px);
+                    }
+                    
+                    ffassert(hmin>Norme2(Pn-Px)/1e9);
+                    double hseuil =hmin/10.;
+                    if(verbosity>2)
+                        cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn
+                        << " "<< Px << " hseuil =" << hseuil << endl;
+                    
+                    {
+                        FQuadTree *quadtree=hseuil ? new Fem2D::FQuadTree(this,Pn,Px,0):0 ;
+                        nbv=0;
+                        for (int ii=0;ii<Th.nv;ii++)
+                        {
+                            
+                            Vertex &vi(Th(ii));
+                            Vertex * pvi=0;
+                            if(quadtree) pvi = quadtree->ToClose(vi,hseuil);
+                            if(!pvi) {
+                                quadtree->Add(vi);
+                                rsave[ii]=1;
+                                renum[ii]=nbv++;
+                            }
+                            else
+                                renum[ii]=renum[pvi-v];// warning do renum on number pvi-v
+                        }
+                        // cout << " renum " << renum << endl;
+                        for (int k=0;k<Th.nt;k++)
+                        {
+                            const Triangle  &K(Th[k]);
+                            int i0,i1,i2;
+                            {
+                                i0 =  renum[Th(K[0])];
+                                i1 =  renum[Th(K[1])];
+                                i2 =  renum[Th(K[2])];
+                            }
+                            (*tt++).set(v,i0,i1,i2,K.lab,Th[k].area);
+                        }
+                        
+                        
+                        for (int k=0;k<Th.neb;k++)
+                        {
+                            const BoundaryEdge & be(Th.bedges[k]);
+                            int i0,i1;
+                            {
+                                i0=renum[Th(be[0])];
+                                i1=renum[Th(be[1])];
+                              //  if(be.lab%2==0)
+                              //      cout << i0 << " " << i1 << " " <<Th(be[0]) << " " << Th(be[1]) <<" " <<be.lab<<endl;
+                                int ii0=i0,ii1=i1;
+                                if(ii1<ii0) Exchange(ii0,ii1);
+                                pair<int,int> i01(ii0,ii1);
+                                if(bbe.find(i01) == bbe.end()) // no exist
+                                { (*bb++).set(v,i0,i1,be.lab);
+                                    bbe[i01]= k;
+                                }
+                            }
+                            nbeb = bb-b;
+                            nbt = tt-t;
+                        }
+                        ffassert( quadtree || (  Th.nv == nbv));
+                        delete quadtree;
+                    }
+                    // compression vertices
+                    for (int ii=0;ii<Th.nv;ii++)
+                        if(rsave[ii]==1)
+                        {
+                            int i = renum[ii];
+                            v[i].x=v[ii].x;
+                            v[i].y=v[ii].y;
+                            v[i].lab=v[ii].lab;
+ 
+                        }
+                    if(verbosity>1) cout << "     Mesh Compress:   vertices  " <<  Th.nv -nbv << " Triangle " <<  Th.nt - nbt << " Boundary Edge "<< Th.neb - nbeb << endl;
+                    
+                    // resize array but no copy ... Pas terrible ?? FH..
+                    nv=nbv;
+                    nt =nbt;
+                    neb=nbeb;
+              
+                } //  end rmdup
 		if (t && nt >0)
 		{
 		    for (int i=0;i<nt;i++)

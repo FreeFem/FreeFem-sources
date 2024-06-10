@@ -552,13 +552,18 @@ public:
     }
 
 };
+// correct compile PB 12/03/24 FH
+template<bool t> struct InitMatfromAArray_Barray{ typedef E_Array Btype; };
+template<> struct InitMatfromAArray_Barray<true>{ typedef TransE_Array Btype; };
 
-template<class RR,bool isinit>
+template<class RR,bool isinit,bool Trans=false>
 class  InitMatfromAArray : public OneOperator {
 public:
     typedef KNM<RR> * A;
     typedef KNM<RR> * R;
-    typedef E_Array B;
+    
+
+    typedef typename InitMatfromAArray_Barray<Trans>::Btype B;
 
     class CODE : public  E_F0 { public:
        Expression a0;
@@ -597,20 +602,25 @@ public:
 	 else  // li == 0
 	  CompileError(" we are waiting for  vector of scalar [  , , ,  ] ");
 	 }
-
+        
     }
 
     AnyType operator()(Stack stack)  const
     {
       A  a=GetAny<A>((*a0)(stack));
+        int NN=N,MM=M;
+        if(Trans) swap(NN,MM);
       if (isinit)
-        a->init(N,M);
+        a->init(NN,MM);
       else
-	a->resize(N,M);
+	a->resize(NN,MM);
 
        for (int i =0;i<N;++i)
        for (int j =0;j<M;++j)
-          (*a)(i,j)=   GetAny< RR >( (*(tab[i][j]))(stack)) ;
+           if( Trans)
+              (*a)(j,i)=  RNM::conj(GetAny< RR >( (*(tab[i][j]))(stack))) ;
+            else
+             (*a)(i,j)=   GetAny< RR >( (*(tab[i][j]))(stack)) ;
       return SetAny<R>(a);
     }
     bool MeshIndependent() const     {return  mi;} //
@@ -621,7 +631,16 @@ public:
 
     public:
     E_F0 * code(const basicAC_F0 & args) const
-     { return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));}
+     {
+         const E_Array * ea;
+         if(Trans)
+         {
+             const TransE_Array *tea =dynamic_cast<const TransE_Array*>( t[1]->CastTo(args[1]).LeftValue());
+             ea =tea->v;
+         }
+         else
+          ea =dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue());
+        return  new CODE(t[0]->CastTo(args[0]),*ea) ;}
     InitMatfromAArray():   OneOperator(atype<R>(),atype<A>(),atype<B>())  {}
 
 };
@@ -1526,7 +1545,8 @@ void ArrayOperator()
 
      TheOperators->Add("<-",
         new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2),
-        new InitMatfromAArray<K,true>
+        new InitMatfromAArray<K,true,false>,
+        new InitMatfromAArray<K,true,true>
        );
 
      Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init));
@@ -1548,7 +1568,8 @@ void ArrayOperator()
     // Add<KNM<K> *>("=","(",new OneOperator2_<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_tt));
 
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,KN<K>*,true>);
-     Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
+     Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true,false>);
+     Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true,true>);
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
      Add<KN_<K> >("n",".",new OneOperator1<Z,KN_<K> >(get__n));
      Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
@@ -1571,7 +1592,8 @@ void ArrayOperator()
 
      TheOperators->Add("=", new InitArrayfromArray<K,KN<K>*,false>(10));
      TheOperators->Add("=", new InitArrayfromArray<K,KN_<K>,false>(1));// ???????? FH nov 2015 ..
-    TheOperators->Add("=", new InitMatfromAArray<K,false>
+     TheOperators->Add("=", new InitMatfromAArray<K,false,false>,
+                            new InitMatfromAArray<K,false,true>
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
        );

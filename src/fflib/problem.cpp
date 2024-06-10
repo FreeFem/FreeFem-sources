@@ -2485,15 +2485,253 @@ void  AddMatElem2<R,MeshS,FESpaceS,FESpaceS>(Expression const *const  mapu,Expre
                  const QFMeshB<MeshS> & FIb,
                                           double *p,   void *vstack, bool intmortar,MeshS::Rd *Q);
 
+// Warning reput F Hecht 3 May 2024 from
+// commit 897a6ed0606d497b043b593e0d7db86448731889 (HEAD -> master, tag: v4.9, origin/master, origin/HEAD)
     template<class R>
     void  AddMatElem(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
                      const FESpace & Uh,const FESpace & Vh,
                      const QuadratureFormular & FI,
                      const QuadratureFormular1d & FIb,
                      double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
-{
-        ffassert(0);
-}
+ {
+     //cout << "AddMatElem" << Q << " "  << ie << endl;
+     Stack stack=pvoid2Stack(vstack);
+     MeshPoint mp= *MeshPointStack(stack);
+     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+     const Mesh & Thu(Uh.Th);
+     const Mesh & Thv(Vh.Th);
+
+     bool same = (&Uh == & Vh) && !mapu && !mapt;
+     bool sameu =  &Th == & Thu && !mapu ;
+     bool samev =  &Th == & Thv && !mapt ;
+     const Triangle & T  = Th[it];
+     long npi;
+     long i,j;
+     bool classoptm = copt && Op.optiexpK;
+     assert(Op.MaxOp() <last_operatortype);
+     //
+
+
+     KN<bool> Dop(last_operatortype);
+     Op.DiffOp(Dop);
+     int lastop=1+Dop.last([](bool x){return x;});
+     //assert(lastop<=3);
+
+     if (ie<0)
+     {
+         for (npi=0;npi<FI.n;npi++) // loop on the integration point
+         {
+             QuadraturePoint pi(FI[npi]);
+             double coef = T.area*pi.a;
+             R2 Pt(pi),Ptu,Ptv;
+             R2 P(T(Pt)),Pu(P),Pv(P);
+             MeshPointStack(stack)->set(Th,P,Pt,T,label);
+
+             if(mapu)
+             Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+             if(mapt)
+             Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+             if(verbosity>9999 && (mapu || mapt) )
+             cout << " mapinng: " << P << " AddMatElem + map  -> (u) " << Pu << "  (t) ->"<< Pv << endl;
+             bool outsideu,outsidev;
+             // ici trouve le T
+             int iut=0,ivt=0;
+             const Triangle * tu,*tv;
+             if(sameu )
+             {
+                 tu =&T;
+                 Ptu=Pt;
+             }
+             else
+             {
+                 tu= Thu.Find(Pu,Ptu,outsideu);
+                 if( !tu ||  outsideu) {
+                     if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                     continue;}}
+             if(same )
+             {
+                 tv=tu;
+                 outsidev=outsideu;
+                 Ptv=Ptu;
+             }
+             else if(samev)
+             {
+                 tv =&T;
+                 Ptv=Pt;
+
+             }
+             else
+             {
+                 tv= Thv.Find(Pv,Ptv,outsidev);
+                 if( !tv || outsidev) {
+                     if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                     continue;
+                 }
+             }
+             iut = Thu(tu);
+             ivt = Thv(tv);
+             if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+             FElement Ku(Uh[iut]);
+             FElement Kv(Vh[ivt]);
+             long n= Kv.NbDoF() ,m=Ku.NbDoF();
+             long N= Kv.N;
+             long M= Ku.N;
+             RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+             RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
+
+             Ku.BF(Dop,Ptu,fu);
+             if (classoptm) (*Op.optiexpK)(stack); // call optim version
+             if (!same) Kv.BF(Dop,Ptv,fv);
+             for ( i=0;  i<n;   i++ )
+             {
+
+                 // attention la fonction test donne la ligne
+                 //  et la fonction test est en second
+                 int ig = Kv(i);
+                 RNM_ wi(fv(i,'.','.'));
+                 for ( j=0;  j<m;   j++ )
+                 {
+                     RNM_ wj(fu(j,'.','.'));
+                     int il=0;
+                     int jg(Ku(j));
+                     if ( !sym ||  ig <= jg )
+                     for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                     {  // attention la fonction test donne la ligne
+                         //  et la fonction test est en second
+                         BilinearOperator::K ll(*l);
+                         pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                         double w_i =  wi(ii.first,ii.second);
+                         double w_j =  wj(jj.first,jj.second);
+                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack))   ;
+                         if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " on T \n"   ;
+                         double wij =  w_i*w_j;
+                         if (abs(wij)>= 1e-10)
+                         A[make_pair(ig,jg)] += coef * ccc * wij;
+                     }
+                 }
+             }
+         }
+     }
+     else // int on edge ie
+     {
+         R2 PA,PB,E;
+         if(Q)
+         {
+             PA=Q[0];
+             PB=Q[1];
+             E=T(PB)-T(PA);
+             // cout << " AddMAtElem " <<  PA <<  " " << PB << " "<< sqrt((E,E))<< endl;
+         }
+         else
+         {
+             PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
+             PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
+             E=T.Edge(ie);
+         }
+         double le = sqrt((E,E));
+
+         for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+         {
+             QuadratureFormular1dPoint pi( FIb[npi]);
+             double sa=pi.x,sb=1-sa;
+             double coef = le*pi.a;
+
+             R2 Pt(PA*sa+PB*sb ); //
+
+             R2 Ptu,Ptv;
+             R2 P(T(Pt)),Pu(P),Pv(P);
+             MeshPointStack(stack)->set(Th,P,Pt,T,label,R2(E.y,-E.x)/le,ie);
+             if(mapu)
+             Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+             if(mapt)
+             Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+
+             bool outsideu,outsidev;
+             // ici trouve le T
+             int iut=0,ivt=0;
+             const Triangle * tu, *tv;
+             if(sameu )
+             {
+                 tu =&T;
+                 Ptu=Pt;
+             }
+             else
+             {
+                 tu= Thu.Find(Pu,Ptu,outsideu);
+                 if( !tu ||  (outsideu && !intmortar) )  {
+                     //R dd=-1;
+                     //if(tu) { R2 PP((*tu)(Ptu)),PPP(P,PP) ; cout << PP << " " << sqrt( (PPP,PPP) ) <<"    "; }
+                     if(verbosity>100) cout << " On a pas trouver (u) " << P << " " <<Ptu << " " << tu <<   endl;
+                     continue;}}
+             iut = Thu(tu);
+
+
+             if(samev)
+             {
+                 tv =&T;
+                 Ptv=Pt;
+             }
+             else {
+                 tv= Thv.Find(Pv,Ptv,outsidev);
+                 if( !tv || (outsidev&& !intmortar))  {
+                     if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                     continue;}}
+             ivt = Thv(tv);
+
+             FElement Ku(Uh[iut]);
+             FElement Kv(Vh[ivt]);
+             long n= Kv.NbDoF() ,m=Ku.NbDoF();
+             long N= Kv.N;
+             long M= Ku.N;
+             //  cout << P << " " <<  Pt << " " <<  iut << " " << ivt  << "  Ptu : " << Ptu << " Ptv: " << Ptv << " n:" << n << " m:" << m << endl;
+             RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+             RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
+             Ku.BF(Dop,Ptu,fu);
+             if( !same)
+             Kv.BF(Dop,Ptv,fv);
+
+
+             // int label=-999999; // a passer en argument
+
+             if (classoptm) (*Op.optiexpK)(stack); // call optim version
+
+
+             for ( i=0;  i<n;   i++ )
+             // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
+             {
+                 RNM_ wi(fv(i,'.','.'));
+                 int ig=Kv(i);
+                 for ( j=0;  j<m;   j++ )
+                 {
+                     RNM_ wj(fu(j,'.','.'));
+                     int il=0;
+                     int jg=Ku(j);
+                     if( ! sym || ig <= jg )
+                     for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                     {
+                         BilinearOperator::K ll(*l);
+                         pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                         double w_i =  wi(ii.first,ii.second);
+                         double w_j =  wj(jj.first,jj.second);
+                         // R ccc = GetAny<R>(ll.second.eval(stack));
+
+                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                         double wij =  w_i*w_j;
+                         if (abs(wij)>= 1e-10&& (verbosity>1000))
+                         cout << " \t\t\t" << ig << " " << jg << " "  <<  ccc <<  " " <<  coef * ccc * w_i*w_j << " on edge \n" ;
+                         if (abs(wij)>= 1e-10)
+                         A[make_pair(ig,jg)] += wij*coef*ccc ;
+                     }
+                 }
+             }
+         }
+     }
+
+     *MeshPointStack(stack) = mp;
+ }
+
 
     //3D volume
     template<class R>

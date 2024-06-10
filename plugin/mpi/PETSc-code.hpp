@@ -4675,6 +4675,12 @@ namespace PETSc {
           SNESSetKSP(snes, ksp);
           KSPDestroy(&ksp);
         }
+        if(nargs[11]) {
+          TSConvergedReason reason;
+          TSGetConvergedReason(ts, &reason);
+          long* ret = GetAny< long* >((*nargs[11])(stack));
+          *ret = static_cast<long>(reason);
+        }
         TSDestroy(&ts);
         delete user->mon;
         delete user->r;

@@ -1219,14 +1219,14 @@ const Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<d
 
 /// <<Carre>> Builds a square-shaped 2D mesh. An Expression [[file:AFunction.hpp::Expression]] is a pointer to an object
 /// of class E_F0 [[file:AFunction.hpp::E_F0]].
-Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg)
+Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg,bool rmdup)
 {
-    Mesh * m=Carre_( nx, ny, fx, fy, stack, flags,lab, reg);
+    Mesh * m=Carre_( nx, ny, fx, fy, stack, flags,lab, reg,rmdup);
     Add2StackOfPtr2FreeRC(stack,m);// 07/2008 FH
     return m;
 
 }
-Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg)
+Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg,bool rmdup)
 {
   if(verbosity>99)  cout << " region = " << reg << " labels " << lab <<endl;
   const int unionjack=1;
@@ -1371,9 +1371,11 @@ Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN
     }
 
   {
-    if(verbosity) cout << "  -- Square mesh : nb vertices  =" << nbv
-		       << " ,  nb triangles = " << nbt << " ,  nb boundary edges " << neb << endl;
-    Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
+    Mesh * m = new Mesh(nbv,nbt,neb,v,t,b,rmdup);
+    if(verbosity) cout << "  -- Square mesh : nb vertices  =" << m->nv
+                 << " ,  nb triangles = " << m->nt << " ,  nb boundary edges " << m->neb << " rmdup= "<< rmdup <<
+        endl;
+   
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
@@ -1420,7 +1422,7 @@ public:
 
     /// calls [[Carre]]
 
-    return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region ));
+    return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region,false ));
   }
 
   operator aType () const { return atype<pmesh>();}
@@ -1434,10 +1436,11 @@ public:
   Expression nx,ny;
   Expression fx,fy;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =1+2;
+  static const int n_name_param =1+2+1;
   Expression nargs[n_name_param];
 
   long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+   bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 
@@ -1459,12 +1462,13 @@ public:
     return new MeshCarre2f(args);}
 
   AnyType operator()(Stack s) const {
-    long flags=arg(0,s,0);
+    long flags=arg(0,s,0L);
+    bool rmdup = arg(3,s,false);
     KN<long> zz;
     KN<long> label=arg(1,s,zz);
     long region=arg(2,s,0L);
 
-    return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags,label,region));}
+    return SetAny<pmesh>(Carre_( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags,label,region,rmdup));}
 
   operator aType () const { return atype<pmesh>();}
 };
@@ -1478,7 +1482,9 @@ basicAC_F0::name_and_type  MeshCarre2::name_param[]= {
 basicAC_F0::name_and_type  MeshCarre2f::name_param[]= {
 	{  "flags", &typeid(long) },
 	{  "label", &typeid(KN_<long> )},
-	{  "region", &typeid(long)}
+	{  "region", &typeid(long)},
+        {  "removeduplicate", &typeid(bool)}
+    
     };
 
    void  MeshErrorIO(ios& )

@@ -1,0 +1,5 @@
+Perltidy version is 20230309
+
+<stdin>: Begin Error Output Stream
+343: Use of bare << to mean <<"" is deprecated
+343: Use of bare << to mean <<"" is deprecated

@@ -6127,7 +6127,8 @@ void init_lgfem( ) {
   map_type[typeid(pgenericfes *).name( )] = new ForEachTypePtrfspace< pgenericfes, 7 >( ); // Morice
 
   map_type[typeid(pvectgenericfes).name( )] = new ForEachType< pvectgenericfes >( ); // Morice
-  map_type[typeid(pvectgenericfes *).name( )] = new ForEachTypePtrfspace< pvectgenericfes, 6 >( ); // Morice 
+    map_type[typeid(pvectgenericfes *).name( )] =//new ForEachType< pvectgenericfes >( );
+     new ForEachTypePtrfspace< pvectgenericfes, 6 >( ); // Morice
 
   // Dcl type for 3D volume FE
   Dcl_TypeandPtr< pf3rbase >( );         // il faut le 2 pour pourvoir initialiser
@@ -6291,7 +6292,7 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fes> * >( );
 
   // Morice: composite FESpace / vect FESpace 
-  Dcl_Type< vect_generic_v_fes ** >( );
+  Dcl_Type< vect_generic_v_fes ** >( ); //  declare in line 6129  in lgfem ????
   Add<vect_generic_v_fes **>("ndof",".",new OneOperator1<long,vect_generic_v_fes **>(pVhcomp_ndof));
 
   Dcl_Type< const Call_FormLinear< vect_generic_v_fes > * >( );      //   to set Vector 3D curve

@@ -42,6 +42,7 @@ typedef std::map<std::string,OneEnvironmentData > EnvironmentData;
 
 extern EnvironmentData  ffenvironment;
 extern long verbosity;
+extern int typeofscript;// 0 edp, 1 Markdown init 2 Markdown after init 
 
 bool EnvironmentInsert(std::string key,std::string item,std::string before);
 

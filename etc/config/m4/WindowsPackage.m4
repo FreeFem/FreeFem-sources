@@ -53,7 +53,7 @@ IFPETSC Name: "{app}\ff-petsc"; Permissions: everyone-full
 Source: "README.md"; DestDir: "{app}"
 Source: "readme\README_WINDOWS.md"; DestDir: "{app}"
 Source: "readme\INNOVATION"; DestDir: "{app}"
-Source: "readme\AUTHORS"; DestDir: "{app}"
+;Source: "readme\AUTHORS"; DestDir: "{app}" ; the file disapear !!!! FH 
 Source: "readme\BUGS"; DestDir: "{app}"
 Source: "readme\COPYRIGHT"; DestDir: "{app}"
 Source: "readme\COPYING"; DestDir: "{app}"
@@ -192,7 +192,7 @@ Source: "etc\logo\logo.ico"; DestDir: "{app}"
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\launchff++.exe"; IconFilename: "{app}\logo.ico"
 ;Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
-Name: "{group}\PDF manual"; Filename: "{app}\freefem++doc.pdf"
+Name: "{group}\PDF manual"; Filename: "{app}\FreeFEM-documentation.pdf"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples\tutorial"
 Name: "{group}\Examples\chapt3"; Filename: "{app}\examples\examples"
 Name: "{group}\Examples\load"; Filename: "{app}\examples\plugin"

@@ -46,6 +46,16 @@ extern YYSTYPE *plglval;
 
 static const bool debugmacro = false;
 
+int  setMarkdown(const char * fn)
+  {
+    if(fn) {
+        size_t l =  strlen(fn);
+        return strcasecmp(".md",fn+l-3) == 0  ;
+    }
+    else
+        return 0;
+  };
+
 void  mylex::Add(Key k,int i)
 {
     Check(!i,k,"mot clef");
@@ -143,12 +153,24 @@ inline bool isNLCR(istream & f,int c)
 
 int mylex::EatCommentAndSpace(string *data)
 {
+//    extern int  typeofscript ;
 // if data is !0 then add reading char in data
 // return the last read char c
 //  --------------------
-    int c,caux,sep=0;
+    int c,c1,c2,caux,sep=0,cnl=3;
+    string nnn;
+    int echomd=0;
+
     const int space=(int) ' ';
-    int incomment =0;
+    // markdown FH 22 mai 2024
+    int incomment =0, inmarkdown= pilesource[level].typeofscript==1;
+    if (firsttime)
+    {
+        firsttime=false;
+        if(echo && inmarkdown==0) cout << setw(5) <<linenumber << this->sep() ;
+        if(echo && inmarkdown) cout << "\n...MD... \n\n";
+    }
+
     do
     {
         incomment = 0;
@@ -157,9 +179,10 @@ int mylex::EatCommentAndSpace(string *data)
         // eat spaces
         while (isspace(c) || c == 0 || c == 10 || c == 13 )
         {
+            cnl++;
             sep=space;
             c = source().get();
-            if(isNLCR(source(),c)) c='\n';
+            if(isNLCR(source(),c)) cnl=1,c='\n';
             if (echo) cout << (char) c;
             if(c=='\n')
             {
@@ -170,18 +193,44 @@ int mylex::EatCommentAndSpace(string *data)
             c=source().peek();
         }
 
-        // eat comment
-        if(c=='/')
-        {
-            c = source().get();
-            caux=source().peek();
-            if(caux =='/') incomment = 1;
-            else if (caux == '*' ) incomment = 2;
-            if(!incomment) source().putback(c);
-        }
+        // eat markdown <CR>~~~ or comment
+        if(pilesource[level].typeofscript==2 &&  c=='~' && cnl==1) {
+                source().get();
+                int c1=source().get();
+                int c2=source().get();
+                if( c1=='~' && c2=='~') {
+                    getline(source(),nnn); // get end of line
+                    if(data) *data += "~~~"+nnn;
+                    if (echomd) cout << "~~~"<< nnn  ;
+                    inmarkdown = !inmarkdown;  // bof Bof ....
+                    if(inmarkdown) incomment=3; // markdown ...
+                    linenumber++;
+                    if(echo) cout << "\n\n...MD...\n\n";
+                    if (echomd) cout << "\n" << setw(5) <<linenumber << this->sep() ;
+                }
+                else {source().putback(c);source().putback(c);source().putback(c);}
+            }
+            if(c=='/')
+            {
+                c = source().get();
+                caux=source().peek();
+                if(caux =='/') {// ex:
+                    incomment=1;
+                    //source().get();
+                   // getline(source(),nnn);
+                    nnn ="";
+                    if (echo) cout << "//"<< nnn  ;
+                    if(data) *data+="/"+nnn;
+                }
+                else if (caux == '*' ) incomment = 2;
+                else source().putback(c);
+            }
+            else if(pilesource[level].typeofscript==1) incomment=3;
+        
+        if(pilesource[level].typeofscript) pilesource[level].typeofscript = 2;
 
-
-        if(incomment==1)
+        
+        if(incomment==1) // unused ....
         {
             sep=space;
             if (echo) cout << "//" ;
@@ -204,11 +253,11 @@ int mylex::EatCommentAndSpace(string *data)
         }
         else if(incomment==2)
         {
-            sep=space;
-            if (echo) cout << "/*" ;
-            if(data) *data+="/*";
-
-            source().get();
+             
+                sep=space;
+                if (echo) cout << "/*" ;
+                if(data) *data+="/*";
+            
             do
             {
                 c=source().get();
@@ -232,8 +281,51 @@ int mylex::EatCommentAndSpace(string *data)
             }
             else erreur( " Unterminated comment");
         }
+        else if( incomment == 3)
+        {
+            sep=space;
+          cnl ++;
+          //if (echo) cout << "~~~--" ;
+          if(data) *data+="~~~";
+           source().get();
+            int end =0;
+           do
+           {
+               end =0;
+               cnl++;
+               c=source().get();
+               c1=0;
+               c2=0;
+               if(isNLCR(source(),c)) cnl=1,c='\n';
+               if (echomd) cout << (char) c ;
+               if(data) *data+=char(c);
+               if(c=='\n')
+               {
+                   linenumber++;
+                   if (echomd) cout  << "~~~   " ;
+               }
+               else if (cnl ==2 && c=='~')
+               {
+                   c1=source().get();
+                   c2=source().get();
+                   if(c1=='~' && c2 =='~') {
+                       end =1;
+                       getline(source(),nnn);
+                       if (echomd) cout << "~~"<< nnn ;
+                       if(data) *data+= "~~"+nnn;
+                       linenumber++;
+                       if (echo) cout << "\n" << setw(5) <<linenumber << this->sep() ;
+
+                   }
+               }
+           }
+           while(c != EOF && end == 0 ) ;
+            incomment=0;
+
+        }
     }
     while (incomment);
+    
     return (c==EOF) ? c : sep;
 }
 
@@ -256,11 +348,6 @@ int mylex::basescan()
 debut:
     TheCurrentLine=linenumber;
     // modif FH
-    if (firsttime)
-    {
-        firsttime=false;
-        if(echo) cout << setw(5) <<linenumber << this->sep() ;
-    }
     EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
     c =source().get(); // the current char
     char nc = source().peek(); // next char
@@ -1211,11 +1298,12 @@ bool mylex::CallMacro(int &ret)
     return false;
 }
 
-void  mylex::xxxx::open(mylex *lex,const char * ff)
+void  mylex::xxxx::open(mylex *lex,const char * ff,int ts)
 {
 
     string dirname;
-
+    typeofscript=ts ? ts: setMarkdown(ff) ;
+    
     l=0;
     nf=f=0;
     sep=':';
@@ -1329,13 +1417,13 @@ void mylex::xxxx::close()
 
 // <<mylex_input_filename>>
 
-void mylex::input(const char *  filename)
+void mylex::input(const char *  filename,int ts)
 {
     ffassert(level<99 && level >= -1);
     if (level>=0)
         pilesource[level].l =linenumber;
 
-    pilesource[level+1].open(this,filename);
+    pilesource[level+1].open(this,filename,ts);
     pilesource[level+1].l =0;
     linenumber = 1;
     level++;

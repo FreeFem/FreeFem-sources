@@ -29,8 +29,8 @@
  */
 
   // <<Carre>> [[file:lgmesh.cpp::Carre]]
-  Fem2D::Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0);
-  Fem2D::Mesh* Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0);
+  Fem2D::Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0,bool rmdup=false);
+  Fem2D::Mesh* Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0,bool rmdup=false);
 
 /*!
  * Local Variables:

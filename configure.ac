@@ -996,6 +996,11 @@ AC_ARG_WITH(petsc,[ --with-petsc=/usr/local/petsc/conf/petscvariables --without-
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=directory where all PETSc/SLEPc will be installed if you download ])
 if test -z "${prefix_petsc}"; then prefix_petsc="${prefix}/ff-petsc"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
+if test "ff_win32" = yes ; then
+	prefix_petsc_win32=`cygpath -w "$prefix_petsc"`
+	AC_SUBST([FF_prefix_petsc_win32],"$prefix_petsc")
+	
+fi
 AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")
 AC_SUBST([FF_prefix_petsc_complex],"$prefix_petsc_complex")
 AC_SUBST([FF_generic_petsc],"$enable_generic")
