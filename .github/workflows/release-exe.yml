@@ -1,10 +1,9 @@
 name: Release Windows
 on:
-  push
-  # workflow_run:
-  #   workflows: ['Release']
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   windows:
@@ -72,12 +71,6 @@ jobs:
       - name: Check
         continue-on-error: true
         run: make check
-
-      - name: check ff-petsc
-        shell: pwsh
-        run: |
-          Get-Childitem -Path C:\ -Include *ff-petsc* -Recurse -ErrorAction SilentlyContinue
-          Get-Childitem -Path D:\ -Include *ff-petsc* -Recurse -ErrorAction SilentlyContinue
 
       - name: Create EXE
         id: exe

@@ -1,10 +1,10 @@
 name: Release MacOS ARM64
 on:
-  # push
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   macos:
@@ -23,9 +23,6 @@ jobs:
 
       - name: Install
         run: brew install gcc coreutils wget m4 flex bison autoconf automake
-
-      # - name: Symlink GCC & Fortran
-      #   run: ./etc/actions/macos/link_fortran.sh "$ARCH"
 
       - name: Version
         id: version
