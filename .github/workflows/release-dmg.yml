@@ -1,14 +1,15 @@
 name: Release MacOS Intel
 on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  push
+  # workflow_run:
+  #   workflows: ['Release']
+  #   types:
+  #     - completed
 
 jobs:
   macos:
     name: DMG release
-    runs-on: macos-latest
+    runs-on: macos-13
 
     env:
       CC: clang
