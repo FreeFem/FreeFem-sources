@@ -58,7 +58,7 @@ jobs:
             --prefix="$PREFIX" \
             "CXXFLAGS=-Wno-undefined-var-template" \
             "FLIBS=-L"$PREFIX/gnu" -lgfortran -lquadmath"
-          ./3rdparty/getall -a
+          ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
         run: |
