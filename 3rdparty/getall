@@ -357,13 +357,14 @@ download(
     'parmmg.zip',
     '9a76fef6be1ab66af3a813409a0388c9'
 );
-download(
-    'PETSc',
-'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.5.tar.gz',
-    'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/',
-    'petsc-3.20.5.tar.gz',
-    'ee6c51b6882d7278a38c5bb5e0c94ed9'
-);
+
+# download(
+#     'PETSc',
+# 'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.5.tar.gz',
+#     'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/',
+#     'petsc-3.20.5.tar.gz',
+#     'ee6c51b6882d7278a38c5bb5e0c94ed9'
+# );
 
 download(
     'htool',
