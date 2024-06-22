@@ -938,6 +938,10 @@ namespace PETSc {
               MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
             }
           }
+          else {
+            MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+          }
         }
         if (ptA->_ksp) {
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
