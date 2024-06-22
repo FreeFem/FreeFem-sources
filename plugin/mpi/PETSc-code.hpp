@@ -786,11 +786,15 @@ namespace PETSc {
                   if(i < std::min(N, M)) {
                       PC parent;
                       KSPGetPC(ptParent->_ksp, &parent);
-                      KSP *subksp;
-                      PetscInt nsplits;
-                      PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
-                      KSPGetPC(subksp[i], &pc);
-                      PetscFree(subksp);
+                      PetscBool isType;
+                      PetscObjectTypeCompare((PetscObject)parent, PCFIELDSPLIT, &isType);
+                      if(isType) {
+                          KSP *subksp;
+                          PetscInt nsplits;
+                          PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
+                          KSPGetPC(subksp[i], &pc);
+                          PetscFree(subksp);
+                      }
                   }
               }
               else if(ptA->_ksp) {
