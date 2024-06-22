@@ -3736,9 +3736,13 @@ namespace PETSc {
         std::copy_n(ptB->_num, dA->HPDDM_n, ptA->_num);
         ptA->_first = ptB->_first;
         ptA->_last = ptB->_last;
+        if (ptB->_A->getScaling()) {
+            ptA->_D = new KN<PetscReal>(dA->HPDDM_n);
+            for (int i = 0; i < dA->HPDDM_n; ++i) ptA->_D->operator[](i) = ptB->_A->getScaling()[i];
+        }
         initPETScStructure<false>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE,
-          static_cast< KN< double >* >(nullptr));
+          ptA->_D);
       } else {
         int n = ptB->_A->getDof();
         ffassert(dA->HPDDM_n == n);
