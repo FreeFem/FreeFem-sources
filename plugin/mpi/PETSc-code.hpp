@@ -5953,13 +5953,10 @@ namespace PETSc {
 
   // function to transform freefem matrix in matIS.
   void ff_createMatIS( MatriceMorse<PetscScalar> &ff_mat, Mat &matIS, MPI_Comm comm){
-      std::set<PetscInt> irows;
-      std::set<PetscInt> jcols;
-
       ff_mat.CSR(); // transform the matrix to CSR format
 
-      std::vector<PetscInt> perm_row(ff_mat.n,-1);
-      std::vector<PetscInt> perm_col(ff_mat.m,-1);
+      std::vector<PetscInt> indices_row(ff_mat.n), perm_row(ff_mat.n,-1);
+      std::vector<PetscInt> indices_col(ff_mat.m), perm_col(ff_mat.m,-1);
 
       for (int ii=0; ii < ff_mat.n; ii++) {
         for (int la = ff_mat.p[ii]; la < ff_mat.p[ii+1]; la++) {
@@ -5979,24 +5976,29 @@ namespace PETSc {
       for(int ii=0; ii<10; ii++)
         cout << "perm_row["<<ii<<"]=" << perm_row[ii] << endl;
 
-    // construction of irows
+    // construction of indices_row
+    int cpt = 0;
     for (int ii=0; ii < ff_mat.n; ii++)
       if (perm_row[ii] == 1) {
-        auto it = irows.insert(ii);
-        perm_row[ii] = std::distance(irows.begin(),it.first);
+        perm_row[ii] = cpt;
+        indices_row[cpt++] = ii;
       }
-    // construction of jcols
+    indices_row.resize(cpt);
+
+    // construction of indices_col
+    cpt = 0;
     for (int ii=0; ii < ff_mat.m; ii++)
       if (perm_col[ii] == 1) {
-        auto it = jcols.insert(ii);
-        perm_col[ii] = std::distance(jcols.begin(),it.first);
+        perm_col[ii] = cpt;
+        indices_col[cpt++] = ii;
       }
+    indices_col.resize(cpt);
 
-    PetscInt *IA = new PetscInt[irows.size()+1];
+    PetscInt *IA = new PetscInt[indices_row.size()+1];
     PetscInt *JA = new PetscInt[ff_mat.nnz];
     PetscScalar* aa = new PetscScalar[ff_mat.nnz];
 
-    int cpt = 0;
+    cpt = 0;
     IA[0] = 0;
     for (int ii=0; ii < ff_mat.n; ii++)
       if (ff_mat.p[ii] != ff_mat.p[ii+1]){
@@ -6004,21 +6006,16 @@ namespace PETSc {
         ffassert( perm_row[ii] == cpt);
         cpt++;
       }
+
     IA[ cpt ] = ff_mat.nnz;
     ffassert( IA[cpt] == ff_mat.nnz);
-    ffassert(cpt==irows.size());
+    ffassert(cpt==indices_row.size());
 
     for (int ii=0; ii < ff_mat.nnz; ii++) {
       JA[ii] = perm_col[ff_mat.j[ii]];
     }
 
     std::copy_n(ff_mat.aij, ff_mat.nnz, aa);
-
-    std::vector<PetscInt> indices_row; indices_row.reserve(irows.size());
-    for(const auto& p : irows) indices_row.emplace_back(p);
-
-    std::vector<PetscInt> indices_col; indices_col.reserve(jcols.size());
-    for(const auto& p : jcols) indices_col.emplace_back(p);
 
     ISLocalToGlobalMapping mapping_row;
     ISLocalToGlobalMappingCreate(comm, 1, indices_row.size(), indices_row.data(), PETSC_COPY_VALUES, &mapping_row);
@@ -6041,7 +6038,7 @@ namespace PETSc {
     // This 4 lines are equivalent to MatCreateSeqAIJ
     MatCreate(PETSC_COMM_SELF, &matISlocal);
     MatSetType(matISlocal,MATSEQAIJ);
-    MatSetSizes(matISlocal, irows.size(), jcols.size(), irows.size(), jcols.size());
+    MatSetSizes(matISlocal, indices_row.size(), indices_col.size(), indices_row.size(), indices_col.size());
     // nullptr can be replaced by the vector of nnz
     MatSeqAIJSetPreallocation(matISlocal, 0, nullptr);
 
