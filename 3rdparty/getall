@@ -36,11 +36,14 @@ getopts( 'afho:', \%opts );
 if ( $opts{h} ) {
     print <<EOF;
 getall [options]: Download third-party packages independently of the FreeFEM configuration procedure
+
 Available options:
+
 -a = accept all licences without further user interaction
 -f = force downloads even if packages are already present locally
 -h = this help
 -o name,name,... = only download packages with the given names
+
 EOF
     exit 0;
 }
@@ -243,119 +246,6 @@ download(
     'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
     'petsc-3.21.2.tar.gz',
     '0bb68b348861a796ddfc2e94e3fcd02d'
-);
-
-download(
-    'freeYams',
-    'https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
-    'https://www.ljll.math.upmc.fr/frey/software.html',
-    'freeyams.2012.02.05.tgz',
-    'b7c82a256a3e59beeb2b578de93a4e0b'
-);
-download(
-    'Gmm++',
-    'http://pkgs.freefem.org/gmm-4.2.tar.gz',
-    'http://pkgs.freefem.org/',
-    'gmm-4.2.tar.gz',
-    '35fe900f7459c49f4b4337dc691c8cdf'
-);
-download(
-    'Ipopt',
-    'http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz',
-    'https://projects.coin-or.org/Ipopt',
-    'Ipopt-3.12.4.tgz',
-    '12a8ecaff8dd90025ddea6c65b49cb03'
-);
-download(
-    'METIS',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz',
-    'http://www.netlib.org/linalg/',
-    'metis-5.1.0.tar.gz',
-    '5465e67079419a69e0116de24fce58fe'
-);
-download(
-    'ParMETIS',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/',
-    'ParMetis-4.0.3.tar.gz',
-    'f69c479586bf6bb7aff6a9bc0c739628'
-);
-download(
-    'MMG3D',
-    'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mmg3d4.0.tgz',
-    'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
-    'mmg3d4.0.tgz',
-    'bfc2b0373bc208e0512415d1aa2e76a1'
-);
-download(
-    'mshmet',
-    'https://www.ljll.math.upmc.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
-    'https://www.ljll.math.upmc.fr/frey/software.html',
-    'mshmet.2012.04.25.tgz',
-    '427f397e0602efc56aa897d38a8e9bfa'
-);
-download(
-    'MUMPS',
-    'http://mumps.enseeiht.fr/MUMPS_5.0.2.tar.gz',
-    'http://mumps.enseeiht.fr/',
-    'MUMPS_5.0.2.tar.gz',
-    '591bcb2c205dcb0283872608cdf04927'
-);
-download(
-    'NLopt',
-    'http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
-    'http://ab-initio.mit.edu/wiki/index.php/NLopt',
-    'nlopt-2.2.4.tar.gz',
-    '9c60c6380a10c6d2a06895f0e8756d4f'
-);
-download(
-    'ScaLAPACK',
-    'http://www.netlib.org/scalapack/scalapack-2.1.0.tgz',
-    'http://www.netlib.org/scalapack/',
-    'scalapack-2.1.0.tgz',
-    '3b239ef80353c67354a0a62d54946fa8'
-);
-download(
-    'Scotch',
-'https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.0/scotch-v6.1.0.tar.gz',
-    'https://gitlab.inria.fr/scotch/',
-    'scotch-v6.1.0.tar.gz',
-    '7bfad4aaa851af6815b2160da7ebe36a'
-);
-download(
-    'SuiteSparse',
-    'http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.4.4.tar.gz',
-    'http://faculty.cse.tamu.edu/davis/SuiteSparse/',
-    'SuiteSparse-4.4.4.tar.gz',
-    'e0af74476935c9ff6d971df8bb6b82fc'
-);
-download(
-    'SuperLU',
-    'https://github.com/xiaoyeli/superlu/archive/v5.2.2.zip',
-    'https://github.com/xiaoyeli/superlu',
-    'superlu-5.2.2.zip',
-    '6e24842b0aa07f457d929b162e09ca6c'
-);
-download(
-    'TetGen',
-    'http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
-    'http://www.tetgen.org/1.5/src/',
-    'tetgen1.5.1-beta1.tar.gz',
-    '3d55c197bcbfc611b7ced6f343643756'
-);
-download(
-    'mmg',
-'https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
-    'https://github.com/MmgTools',
-    'mmg.zip',
-    'd824d08dac0544caff20a915194da0fe'
-);
-download(
-    'parmmg',
-'https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
-    'https://github.com/MmgTools',
-    'parmmg.zip',
-    '9a76fef6be1ab66af3a813409a0388c9'
 );
 
 download(

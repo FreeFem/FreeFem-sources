@@ -70,7 +70,7 @@ FLAGS_MTUNE := -mtune=native
 endif
 unexport MAKEFLAGS
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 --with-tau-perfstubs=0 \
-		--download-slepc --download-slepc-commit=91d610c5c24db59eb69b9c9f4385582415a0957d --download-hpddm
+		--download-slepc --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)
 COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
@@ -216,7 +216,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) && $(PYTHON) ./configure --prefix=$(DIR_INSTALL_REAL) \
-		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr || cat configure.log;
+		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr;
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	mkdir -p $(SRCDIR)/fc/externalpackages || true
 	cp -r $(SRCDIR)/fr/externalpackages/git.slepc $(SRCDIR)/fr/externalpackages/git.hpddm $(SRCDIR)/fc/externalpackages || true
