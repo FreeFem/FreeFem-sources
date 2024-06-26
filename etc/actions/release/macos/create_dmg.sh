@@ -13,5 +13,7 @@ cp ./bin/script/Install-app.sh "$HOME/$DMG_BASENAME"
 FFTESTDIR=$(find . -name Laplace.edp)
 sed -e "s/@VV@/$VERSION/" -e "s%@APPFF@%$DMG_BASENAME%" -e s%@FFTEST@%$FFTESTDIR% <./bin/script/README.md.in >"$HOME/$DMG_BASENAME/README.md"
 
+ls -al "$HOME/$DMG_BASENAME"
+
 hdiutil create -srcfolder "$HOME/$DMG_BASENAME" -fs HFS+ "$DMG_BASENAME.dmg"
 rm -rf "$HOME/$DMG_BASENAME"
