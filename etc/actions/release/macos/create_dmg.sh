@@ -15,5 +15,5 @@ sed -e "s/@VV@/$VERSION/" -e "s%@APPFF@%$DMG_BASENAME%" -e s%@FFTEST@%$FFTESTDIR
 
 ls -al "$HOME/$DMG_BASENAME"
 
-hdiutil create -srcfolder "$HOME/$DMG_BASENAME" -fs HFS+ "$DMG_BASENAME.dmg"
+sudo hdiutil create -srcfolder "$HOME/$DMG_BASENAME" -fs HFS+ "$DMG_BASENAME.dmg"
 rm -rf "$HOME/$DMG_BASENAME"
