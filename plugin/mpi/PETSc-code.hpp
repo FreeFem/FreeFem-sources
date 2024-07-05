@@ -228,7 +228,6 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
     bemtool::Geometry *node = new bemtool::Geometry;
     MeshBemtool *mesh = new MeshBemtool;
     Mesh2Bemtool(ThU, *node, *mesh);
-    bemtool::Dof<P1> *dof = new bemtool::Dof<P1>(*mesh,true);
     vector<double> p1;
     p1.reserve(3*n);
     vector<double> p2;
@@ -905,6 +904,8 @@ namespace PETSc {
             delete[] ja;
             delete[] c;
           }
+          if (!ptA->_A)
+            delete dN;
         } else if (!assembled) {
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
@@ -3779,6 +3780,8 @@ namespace PETSc {
         initPETScStructure<false>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty);
         delete empty;
+        if (c != 0 || !ptK->A)
+            delete dA;
       }
       if (c == 1) {
         MatSetType(ptA->_petsc, MATSHELL);
