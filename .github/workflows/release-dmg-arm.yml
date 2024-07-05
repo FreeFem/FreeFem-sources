@@ -24,6 +24,9 @@ jobs:
       - name: Install
         run: brew install gcc coreutils
 
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh
+
       - name: Version
         id: version
         run: |
