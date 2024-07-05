@@ -50,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [11, 12]
+        version: [12, 13]
 
     name: Job4 OpenMPI - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
@@ -72,7 +72,7 @@ jobs:
         run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake open-mpi
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh
+        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
 
       - name: Configure
         run: |

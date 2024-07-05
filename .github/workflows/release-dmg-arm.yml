@@ -25,7 +25,7 @@ jobs:
         run: brew install gcc coreutils
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh
+        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
 
       - name: Version
         id: version
