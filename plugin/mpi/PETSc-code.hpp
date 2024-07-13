@@ -918,12 +918,12 @@ namespace PETSc {
           MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
         }
         if (ptParent) {
+          Mat** mat;
+          PetscInt M, N;
           PetscBool assembled;
+          MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
           MatAssembled(ptParent->_petsc, &assembled);
           if (!assembled) {
-            PetscInt M, N;
-            Mat** mat;
-            MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
             PetscBool assemble = PETSC_TRUE;
             for (PetscInt i = 0; i < M && assemble; ++i) {
               for (PetscInt j = 0; j < N && assemble; ++j) {
@@ -934,12 +934,51 @@ namespace PETSc {
                 }
               }
             }
-            if (assemble) {
-              MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
-              MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+            if (assemble) assembled = PETSC_TRUE;
+          }
+          if (PetscDefined(USE_COMPLEX)) {
+            for (PetscInt i = 0; i < M; ++i) {
+              for (PetscInt j = 0; j < N; ++j) {
+                if (mat[i][j]) {
+                  MatType type;
+                  PetscBool isType[2];
+                  MatGetType(mat[i][j], &type);
+                  PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, isType);
+                  if (!isType[0])
+                    PetscStrcmp(type, MATTRANSPOSEVIRTUAL, isType + 1);
+                  else
+                    isType[1] = PETSC_FALSE;
+                  if (isType[0] || isType[1]) {
+                    Mat C, D;
+                    if (isType[0])
+                      MatHermitianTransposeGetMat(mat[i][j], &C);
+                    else
+                      MatTransposeGetMat(mat[i][j], &C);
+                    if (C == ptA->_petsc) {
+                      PetscReal norm;
+                      MatDuplicate(C, MAT_COPY_VALUES, &D);
+                      MatRealPart(D);
+                      MatAXPY(D, -1.0, C, SAME_NONZERO_PATTERN);
+                      MatNorm(D, NORM_INFINITY, &norm);
+                      MatDestroy(&D);
+                      if (norm < PETSC_MACHINE_EPSILON && isType[0]) {
+                        MatCreateTranspose(C, &D);
+                        MatNestSetSubMat(ptParent->_petsc, i, j, D);
+                        MatDestroy(&D);
+                      }
+                      else if (norm > PETSC_MACHINE_EPSILON && isType[1]) {
+                        MatCreateHermitianTranspose(C, &D);
+                        MatNestSetSubMat(ptParent->_petsc, i, j, D);
+                        MatDestroy(&D);
+                      }
+                      i = M, j = N;
+                    }
+                  }
+                }
+              }
             }
           }
-          else {
+          if (assembled) {
             MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
           }
@@ -3265,7 +3304,7 @@ namespace PETSc {
   }
   void prepareConvert(Mat A, Mat* B) {
     MatType type;
-    PetscBool isType;
+    PetscBool isType[2];
     Mat** mat;
     PetscInt M, N;
     MatNestGetSubMats(A, &M, &N, &mat);
@@ -3275,13 +3314,23 @@ namespace PETSc {
       for (PetscInt j = 0; j < N; ++j) {
         if (mat[i][j]) {
           MatGetType(mat[i][j], &type);
-          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
-          if (isType) {
+          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, isType);
+          if (PetscDefined(USE_COMPLEX) && !isType[0])
+            PetscStrcmp(type, MATTRANSPOSEVIRTUAL, isType + 1);
+          else
+            isType[1] = PETSC_FALSE;
+          if (isType[0] || isType[1]) {
             b.emplace_back(std::make_pair(std::make_pair(i, j), Mat( )));
             Mat D = mat[i][j];
             Mat C;
-            MatHermitianTransposeGetMat(D, &b.back( ).second);
-            MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            if (isType[0]) {
+              MatHermitianTransposeGetMat(D, &b.back( ).second);
+              MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            }
+            else {
+              MatTransposeGetMat(D, &b.back( ).second);
+              MatTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            }
             PetscObjectReference((PetscObject)b.back().second);
             MatNestSetSubMat(A, i, j, C);
             MatDestroy(&C);
@@ -4763,10 +4812,16 @@ namespace PETSc {
                       PetscObjectTypeCompareAny((PetscObject)mat[i][j], &isType, MATMPIDENSE, MATSEQDENSE, "");
                       PetscInt n = 0, m = 0;
                       if(!isType) {
+                          Mat C = NULL;
                           PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
-                          if(isType) {
-                              Mat C;
+                          if(isType)
                               MatHermitianTransposeGetMat(mat[i][j], &C);
+                          else if(PetscDefined(USE_COMPLEX)) {
+                              PetscStrcmp(type, MATTRANSPOSEVIRTUAL, &isType);
+                              if(isType)
+                                  MatTransposeGetMat(mat[i][j], &C);
+                          }
+                          if(C) {
                               PetscObjectTypeCompareAny((PetscObject)C, &isType, MATMPIDENSE, MATSEQDENSE, "");
                               if(isType) MatGetSize(C, &m, &n);
                               type = MATHERMITIANTRANSPOSEVIRTUAL;
