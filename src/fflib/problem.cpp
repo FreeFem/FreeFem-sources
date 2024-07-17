@@ -9904,6 +9904,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         KN<R> gg(buf);
@@ -10061,6 +10063,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;
@@ -10218,6 +10222,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;
@@ -10383,6 +10389,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;

@@ -1,15 +1,17 @@
 load "msh3"
 meshL Th = segment(3);
-real [int] vtgv = [ -20,-10,-2,-1,0, tgv]; 
+real [int] vtgv = [ -30,-20,-10,-3,-2,-1,0, tgv]; 
 real [int] vsym = [ 0,1]; 
 varf va(u,v)= int1d(Th)(u*v*4*9.)+on(1,2,u=0);// mul by 12  to have integer coef ..
 // label : 1 on first DoF O 
-//         2 on last DoF  2 
-// tgv :  -20  set to zero of row and colnum  of Dof with label 1 or 2 
-// tgv :  -10  set to zero of row  of Dof with label 1 or 2 
-// tgv :  -2   set to zero of row and colnum  of Dof with label 1 or 2 and set one on diagonal term
-// tgv :  -1   set to zero of row  of Dof with label 1 or 2 and set one on diagonal term
-// tgv >=0     set to tgv  value  on diagonal term of Dof with label 1 or 2 
+//         2 on last DoF 2 
+// tgv :  -30  set column of Dof with label 1 or 2 to zero
+// tgv :  -20  set row and column of Dof with label 1 or 2 to zero
+// tgv :  -10  set row of Dof with label 1 or 2 to zero
+// tgv :  -3   set column of Dof with label 1 or 2 to zero and set diagonal term to one
+// tgv :  -2   set row and column of Dof with label 1 or 2 to zero and set diagonal term to one
+// tgv :  -1   set row of Dof with label 1 or 2 to zero and set diagonal term to one
+// tgv >=0     set diagonal term of Dof with label 1 or 2 to tgv value
 
 fespace Vh(Th,P1);
 int symj = 0; 
