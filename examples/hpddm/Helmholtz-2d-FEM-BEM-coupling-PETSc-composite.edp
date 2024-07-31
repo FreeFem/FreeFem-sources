@@ -104,7 +104,7 @@ Mat<complex> HC = vfLenses(Ch,Ch);
 complex[int] rhs = vfLenses(0,Ch);
 
 // example of fieldsplit preconditioner ; the fields are automatically deduced from the composite FE space Ch
-set(HC,sparams="-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -ksp_gmres_restart 200 -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_pc_mat_solver_type mumps "+"-fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_max_it 20");
+set(HC,sparams="-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -ksp_gmres_restart 200 -pc_type fieldsplit -fieldsplit_0_pc_type lu "+"-fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_max_it 20");
 
 complex[int] u = HC^-1*rhs;
 

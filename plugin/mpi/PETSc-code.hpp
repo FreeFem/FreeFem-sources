@@ -6271,8 +6271,7 @@ namespace PETSc {
                   const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
@@ -6283,8 +6282,7 @@ namespace PETSc {
                   const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else{
@@ -6328,8 +6326,7 @@ namespace PETSc {
                   const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
@@ -6339,8 +6336,7 @@ namespace PETSc {
                   const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else{
