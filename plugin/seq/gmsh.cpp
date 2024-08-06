@@ -433,11 +433,6 @@ Mesh *GMSH_Load(const string &filename) {
                 cout << "mes=" << tff[it].area << endl;
               }
 
-              if (tff[it].area < 1e-8) {
-                cerr << "bug : mes < 1e-8 !" << endl;
-                exit(1);
-              }
-
               it++;
             }
           }
