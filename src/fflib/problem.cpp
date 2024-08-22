@@ -6441,7 +6441,6 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             if(verbosity>999) cout << "    Ass mat pleine /"<< np << endl;
             assert( np==3 || np==4);
             // XXXXXXX
-            double epsmes3=T.mesure()*T.mesure()*1e-18;
             R3 PP[4];
             double l[3];
             for(int i=0; i< np; ++i)
@@ -6454,7 +6453,6 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                 double mes2 = (NN,NN);
                 double mes = sqrt(mes2);
 
-                if(mes2*mes <epsmes3) continue; //  too small
                 NN /= mes;
                 mes *= 0.5;
                 if(verbosity>999)
@@ -7388,7 +7386,6 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             if(verbosity>999) cout << "    Ass mat pleine /"<< np << endl;
             assert( np==3 || np==4);
             // XXXXXXX
-            double epsmes3=T.mesure()*T.mesure()*1e-18;
             R3 PP[4];
             double l[3];
             for(int i=0; i< np; ++i)
@@ -7401,7 +7398,6 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                 double mes2 = (NN,NN);
                 double mes = sqrt(mes2);
 
-                if(mes2*mes <epsmes3) continue; //  too small
                 NN /= mes;
                 mes *= 0.5;
                 if(verbosity>999)
@@ -8700,7 +8696,6 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
         const Element & K  = Kv.T;
         const Mesh3 & Th= Kv.Vh.Th;
-        double epsmes3=K.mesure()*K.mesure()*1e-18;
         long npi;
         long n=Kv.NbDoF(),N=Kv.N;
         double l[3];
@@ -8726,7 +8721,6 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
             R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
             double mes2 = (NN,NN);
             double mes = sqrt(mes2);
-            if(mes2*mes <epsmes3) continue; //  too small
             NN /= mes;
             mes *= 0.5;
             // cout << " Element_rhs::mes " << mes << " " << iii << endl;
