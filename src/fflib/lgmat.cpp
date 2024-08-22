@@ -650,7 +650,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
   KNM<R> aaa(nbp,nbdfVK);
 
 
-   const R eps = 1.0e-10;
    const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
    KN<R> kv(sfb1*nbp);
    R * v = kv;
@@ -723,15 +722,12 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
 			    KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
 			    KN_<R> fbj(fb('.',jV,op));
 
-			    for (int idfv=0;idfv<nbdfVK;idfv++)
-				if (Abs(fbj[idfv])>eps)
-				  {
+			    for (int idfv=0;idfv<nbdfVK;idfv++) {
 				      int dfv=KV(idfv);
 				      int ii=dfu, jj=dfv;
 				      if(transpose) Exchange(ii,jj);
 				      // le term dfu,dfv existe dans la matrice
 				      R c= fbj[idfv]*aipj;
-				      if(Abs(c)>eps)
                                           (*m)(ii,jj) += c;
 				  }
 			}
@@ -880,7 +876,6 @@ MatriceMorse<R> * buildInterpolationMatrixT(const FESpaceT1 & Uh,const FESpaceT2
   KNM<R> aaa(nbp,nbdfVK);
 
 
-  const R eps = 1.0e-10;
   const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
   KN<R> kv(sfb1*nbp);
   R * v = kv;
@@ -943,15 +938,12 @@ MatriceMorse<R> * buildInterpolationMatrixT(const FESpaceT1 & Uh,const FESpaceT2
           KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
           KN_<R> fbj(fb('.',jV,op));
 
-          for (int idfv=0;idfv<nbdfVK;idfv++)
-          if (Abs(fbj[idfv])>eps)
-          {
+          for (int idfv=0;idfv<nbdfVK;idfv++) {
             int dfv=KV(idfv);
             int ii=dfu, jj=dfv;
             if(transpose) Exchange(ii,jj);
             // le term dfu,dfv existe dans la matrice
             R c= fbj[idfv]*aipj;
-            if(Abs(c)>eps)
               (*m)(ii,jj) += c;
           }
         }
@@ -1047,7 +1039,6 @@ MatriceMorse<R> * funcBuildInterpolationMatrixT2(const FESpaceT & Uh,const FESpa
   KNM<R> aaa(nbp,nbdfVK);
 
 
-  const R eps = 1.0e-6;
   const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
   KN<R> kv(sfb1*nbp);
   R * v = kv;
@@ -1115,14 +1106,12 @@ MatriceMorse<R> * funcBuildInterpolationMatrixT2(const FESpaceT & Uh,const FESpa
           KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
           KN_<R> fbj(fb('.',jV,op));
 
-          for (int idfv=0;idfv<nbdfVK;idfv++)
-          if (Abs(fbj[idfv])>eps) {
+          for (int idfv=0;idfv<nbdfVK;idfv++) {
             int dfv=KV(idfv);
             int ii=dfu, jj=dfv;
             if(transpose) Exchange(ii,jj);
             // le term dfu,dfv existe dans la matrice
             R c= fbj[idfv]*aipj;
-            if(Abs(c)>eps)
               (*m)(ii,jj) += c;
           }
         }
@@ -1214,7 +1203,6 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
   KNM<R> aaa(nbp,nbdfVK);
 
 
-  const R eps = 1.0e-6;
   const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
   KN<R> kv(sfb1*nbp);
   R * v = kv;
@@ -1280,14 +1268,12 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
         KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
         KN_<R> fbj(fb('.',jV,op));
 
-        for (int idfv=0;idfv<nbdfVK;idfv++)
-          if (Abs(fbj[idfv])>eps) {
+        for (int idfv=0;idfv<nbdfVK;idfv++) {
             int dfv=KV(idfv);
             int ii=dfu, jj=dfv;
             if(transpose) Exchange(ii,jj);
             // le term dfu,dfv existe dans la matrice
             R c= fbj[idfv]*aipj;
-            if(Abs(c)>eps)
               (*m)(ii,jj) += c;
           }
       }
@@ -1374,7 +1360,6 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
    KN<R> kv(sfb1);
    R * v = kv;
-   const R eps = 1.0e-10;
 
    bool whatd[last_operatortype];
    for (int i=0;i<last_operatortype;i++)
@@ -1400,7 +1385,6 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
         int  i = KU(idfu);
         if(transpose) Exchange(i,j);
         R c = Fwi(idfu);
-	if(Abs(c)>eps)
             (*m)(i,j) += c;
       }
       }
@@ -1454,7 +1438,6 @@ MatriceMorse<R> *  buildInterpolationMatrixT1(const FESpaceT & Uh,const KN_<doub
   const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
   KN<R> kv(sfb1);
   R * v = kv;
-  const R eps = 1.0e-10;
 
   What_d whatd= 1 <<op;
   KN<bool> fait(Uh.NbOfDF);
@@ -1478,7 +1461,6 @@ MatriceMorse<R> *  buildInterpolationMatrixT1(const FESpaceT & Uh,const KN_<doub
       int  i = KU(idfu);
       if(transpose) Exchange(i,j);
       R c = Fwi(idfu);
-      if(Abs(c)>eps)
         (*m)(i,j) += c;
     }
   }
