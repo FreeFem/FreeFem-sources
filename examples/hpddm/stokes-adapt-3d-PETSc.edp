@@ -51,7 +51,7 @@ varf vPb(def(u), def(v)) = int3d(Th)(
 
 Wh def(u);
 
-for(int i = 0; i < 5; ++i) {
+for(int i = 0; i < 2; ++i) {
     real[int] rhs = vPb(0, Wh, tgv = -1);
     A = vPb(Wh, Wh, tgv = -1);
     set(A, sparams = "-pc_type lu"); // add "-pc_factor_mat_solver_type mumps" to run on 1 proc
