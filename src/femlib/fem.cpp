@@ -1915,7 +1915,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
         long iseuil =(long) (quadtree->coef*seuil);
         long iseuilhm = (long) (quadtree->coef*hm);
         if(iseuilhm == 0){
-          cerr << " The generatated 2d mesh is too fine: hmin = " << hm << " < " << 1./quadtree->coef << endl;
+          cerr << " The generated 2d mesh is too fine: hmin = " << hm << " < " << 1./quadtree->coef << endl;
           ffassert(0); 
         }
         if( verbosity>5 && ! iseuil )
