@@ -1913,11 +1913,10 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	nv =0;
 	quadtree = new FQuadTree(this,Pmin,Pmax,nv); // build empty the quadtree
         long iseuil =(long) (quadtree->coef*seuil);
-        long iseuilhm = (long) (quadtree->coef*hm*0.8);
-        if( iseuilhm ==0)
-        {
-            cerr << " The generatated 2d mesh is to fine :  hmin = " << hm << " to to small < "<< 1./quadtree->coef  << endl;
-            ffassert(0); 
+        long iseuilhm = (long) (quadtree->coef*hm);
+        if(iseuilhm == 0){
+          cerr << " The generatated 2d mesh is too fine: hmin = " << hm << " < " << 1./quadtree->coef << endl;
+          ffassert(0); 
         }
         if( verbosity>5 && ! iseuil )
          cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil << " coef quadtree " <<  quadtree->coef << endl;
