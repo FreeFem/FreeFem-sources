@@ -87,7 +87,7 @@ public:
     const int e2[10][2] = {{ 0,0},{ 0,1},{ 0,2},{ 0,3}, {1,1}, {1,2}, {1,3}, {2,2},{2,3}, {3,3}};
 
     Generator_Volume(pmesh3 pth3, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pth3->nv), Th(*pth3), kappa0(k),
+    VirtualGenerator<double>(), Th(*pth3), kappa0(k),
         edges(pth3->nt*3+pth3->nv,pth3->nv), heade(), nexte(pth3->nt*10) {
         // pour i,j -> liste de tet de sommet i,j
         // i,j -> liste des tet contenant i et j  ??
@@ -212,7 +212,7 @@ public:
     KN<int> headv, nextv;
 
     Generator_Boundary(pmesh3 pth3, pmeshS pthS, KN_<double> see, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pthS->nv), Th3(*pth3), ThS(*pthS), seeface(see),
+    VirtualGenerator<double>(), Th3(*pth3), ThS(*pthS), seeface(see),
         kappa0(k), headv(pthS->nv,-1), nextv(pthS->nt*3) {
 
         for(int k=0; k<ThS.nt; ++k)
@@ -367,4 +367,3 @@ static void Init_RT() {
 }
 
 LOADFUNC(Init_RT)
-

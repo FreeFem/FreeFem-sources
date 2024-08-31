@@ -605,13 +605,12 @@ const int NB_NAME_PARM_MAT =  24 +6+4  ;
 #define LIST_NAME_PARM_HMAT \
     {  "eta", &typeid(double)}, \
     {  "minclustersize", &typeid(long)}, \
-    {  "maxblocksize", &typeid(long)}, \
     {  "mintargetdepth", &typeid(long)}, \
     {  "minsourcedepth", &typeid(long)}, \
     {  "compressor",&typeid(string*)}, \
     {  "initialclustering",&typeid(string*)}
 
-const int NB_NAME_PARM_HMAT = 7;
+const int NB_NAME_PARM_HMAT = 6;
 
 
 template<class R>

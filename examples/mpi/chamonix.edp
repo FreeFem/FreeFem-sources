@@ -9,7 +9,7 @@
 	
 	The Generator can then be passed to Htool through the Build() function, which returns the compressed H-Matrix built by Htool from the user-defined copy_submatrix (or get_coef) routine of the Generator computing the matrix coefficients:
 
-	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000
+	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10
 
 	To launch:  ff-mpirun -np 8 chamonix.edp -ns -wg -Kmax 9
 
@@ -217,7 +217,7 @@ if (kappaInK[K]) {
 	// We use the truncated volume mesh Th3t (without the surface) for the boundary operator,
 	// as we use an analytic formula for surface-surface interactions
 	Generator GenSE(Th3t,ThS,seeface,kappag);
-	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10);
 	if (mpirank == 0) cout << HSE.infos << endl; 
 	display(HSE);
 	SEt[] = HSE*ones[]; // SE = \int_∑ ((x-x').n) exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^3
@@ -226,7 +226,7 @@ if (kappaInK[K]) {
 	for [i,bi:SE[K][]] if (onGamma[][i] > -0.5) bi = 0.25*seeface[int(onGamma[][i]+0.5)];
 
 	Generator GenVolume(Th3,kappag);
-	HVolume[K] = Build(GenVolume,Vh,Vh,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+	HVolume[K] = Build(GenVolume,Vh,Vh,eta=100,eps=1e-2,minclustersize=10);
 	if (mpirank == 0) cout << HVolume[K].infos << endl; 
 	display(HVolume[K]); // = \int_Omega kappa(nu,x') exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^2
 }
