@@ -62,8 +62,8 @@ cout << "ndof = " << Uh.ndof << endl;
 
 //BemKernel ker("SL",k=k);
 varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v)) ;  
-HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
-//HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,minclustersize=10);
+//HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10);
 
 if (mpirank == 0) cout << H.infos << endl;
 display(H);
@@ -93,9 +93,9 @@ fespace UhOut(ThOut,P1);
 
 //BemPotential Pot("SL",k=k);
 varf vp(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k),u,v)) ;  
-HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,minclustersize=10);
 
-//HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+//HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10);
 
 
 if (mpirank == 0) cout << B.infos << endl;

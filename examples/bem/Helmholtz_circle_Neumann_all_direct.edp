@@ -45,12 +45,12 @@ varf vCFIERHS(u,v)=int1dx1d(Th)(Th)(BEM(CFIERHS,u,v))-int1d(Th)(0.5*u*v) ;
 
 
 // hmat
-HMatrix<complex> HSecondKindRHS     = vSL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-HMatrix<complex> HFirstKindRHS    = vTDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-HMatrix<complex> HSecondKind  = vDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-HMatrix<complex> HFirstKind = vHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-HMatrix<complex> HCFIE = vCFIE(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-HMatrix<complex> HCFIERHS = vCFIERHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HSecondKindRHS     = vSL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
+HMatrix<complex> HFirstKindRHS    = vTDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
+HMatrix<complex> HSecondKind  = vDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
+HMatrix<complex> HFirstKind = vHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
+HMatrix<complex> HCFIE = vCFIE(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
+HMatrix<complex> HCFIERHS = vCFIERHS(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
 
 
 if (mpirank == 0) cout << HFirstKind.infos << endl;
@@ -101,7 +101,7 @@ vinc = finc;
 // HMatrix for single layer potential
 BemPotential SLPot("SL",k=k);
 varf vpSL(u,v)=int1d(Th)(POT(SLPot,u,v)) ;  
-HMatrix<complex> HSLPot = vpSL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HSLPot = vpSL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HSLPot.infos << endl;
 display(HSLPot);
@@ -109,7 +109,7 @@ display(HSLPot);
 // HMatrix for double layer potential
 BemPotential DLPot("DL",k=k);
 varf vpDL(u,v)=int1d(Th)(POT(DLPot,u,v)) ;  
-HMatrix<complex> HDLPot = vpDL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HDLPot = vpDL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HDLPot.infos << endl;
 display(HDLPot);

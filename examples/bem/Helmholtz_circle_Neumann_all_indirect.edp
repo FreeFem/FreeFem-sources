@@ -30,7 +30,7 @@ fespace Uh(Th,P1);
 // Hmatrix for formulation of first kind
 BemKernel ker1("HS",k=k);
 varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v)) ;  
-HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
@@ -38,7 +38,7 @@ display(HFirstKind);
 BemKernel ker2("TDL",k=k);
 varf vk2(u,v)=int1dx1d(Th)(Th)(BEM(ker2,u,v)) + int1d(Th)(0.5*u*v);  
 
-HMatrix<complex> HSecondKind = vk2(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HSecondKind = vk2(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
 if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
@@ -46,7 +46,7 @@ display(HSecondKind);
 BemKernel ker5=(-1i*k)*ker2+ker1;
 varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v)) +int1d(Th)((-1i*k)* 0.5*u*v); 
 
-HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
 if (mpirank == 0) cout << HCombined.infos << endl;
 display(HCombined);
 
@@ -91,7 +91,7 @@ vinc = finc;
 // HMatrix for single layer potential
 BemPotential SLPot("SL",k=k);
 varf vpSL(u,v)=int1d(Th)(POT(SLPot,u,v)) ;  
-HMatrix<complex> HSLPot = vpSL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HSLPot = vpSL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HSLPot.infos << endl;
 display(HSLPot);
@@ -99,7 +99,7 @@ display(HSLPot);
 // HMatrix for double layer potential
 BemPotential DLPot("DL",k=k);
 varf vpDL(u,v)=int1d(Th)(POT(DLPot,u,v)) ;  
-HMatrix<complex> HDLPot = vpDL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HDLPot = vpDL(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HDLPot.infos << endl;
 display(HDLPot);
