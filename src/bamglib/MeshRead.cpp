@@ -105,7 +105,7 @@ namespace bamg {
         f_in >> identity;
       } else if (!strcmp(fieldname, "hVertices")) {
         hvertices = 1;
-        Real4 h;
+        Real8 h;
         for (i = 0; i < nbv; i++) {
           f_in >> h;
           vertices[i].m = Metric(h);
@@ -234,9 +234,9 @@ namespace bamg {
         if (verbosity > 5)
           cout << "     Record Edges: Nb of Edge " << nbe << " edges " << edges << endl;
         assert(edges);
-        Real4* len = 0;
+        Real8* len = 0;
         if (!hvertices) {
-          len = new Real4[nbv];
+          len = new Real8[nbv];
           for (i = 0; i < nbv; i++) len[i] = 0;
         }
         for (i = 0; i < nbe; i++) {
@@ -265,7 +265,7 @@ namespace bamg {
         if (!hvertices) {
           for (i = 0; i < nbv; i++)
             if (vertices[i].color > 0)
-              vertices[i].m = Metric(len[i] / (Real4)vertices[i].color);
+              vertices[i].m = Metric(len[i] / (Real8)vertices[i].color);
             else
               vertices[i].m = Metric(hmin);
           delete[] len;
@@ -872,7 +872,7 @@ namespace bamg {
         if (verbosity > 5) cout << "     Geom Record hVertices nbv=" << nbv << endl;
         hvertices = 1;
         for (i = 0; i < nbv; i++) {
-          Real4 h;
+          Real8 h;
           f_in >> h;
           vertices[i].m = Metric(h);
         }
@@ -884,7 +884,7 @@ namespace bamg {
         }
         if (verbosity > 5) cout << "     Geom Record MetricVertices nbv =" << nbv << endl;
         for (i = 0; i < nbv; i++) {
-          Real4 a11, a21, a22;
+          Real8 a11, a21, a22;
           f_in >> a11 >> a21 >> a22;
           vertices[i].m = Metric(a11, a21, a22);
         }
@@ -897,7 +897,7 @@ namespace bamg {
         if (verbosity > 5) cout << "     Geom Record h1h2VpVertices nbv=" << nbv << endl;
 
         for (i = 0; i < nbv; i++) {
-          Real4 h1, h2, v1, v2;
+          Real8 h1, h2, v1, v2;
           f_in >> h1 >> h2 >> v1 >> v2;
           vertices[i].m = Metric(MatVVP2x2(1 / (h1 * h1), 1 / (h2 * h2), D2(v1, v2)));
         }
@@ -964,9 +964,9 @@ namespace bamg {
           if (verbosity > 5) cout << "     Record Edges: Nb of Edge " << nbe << endl;
           assert(edges);
           assert(nbv > 0);
-          Real4* len = 0;
+          Real8* len = 0;
           if (!hvertices) {
-            len = new Real4[nbv];
+            len = new Real8[nbv];
             for (i = 0; i < nbv; i++) len[i] = 0;
           }
 
@@ -997,7 +997,7 @@ namespace bamg {
           if (!hvertices) {
             for (i = 0; i < nbv; i++)
               if (vertices[i].color > 0)
-                vertices[i].m = Metric(len[i] / (Real4)vertices[i].color);
+                vertices[i].m = Metric(len[i] / (Real8)vertices[i].color);
               else
                 vertices[i].m = Metric(Hmin);
             delete[] len;
