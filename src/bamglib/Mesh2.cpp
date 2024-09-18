@@ -2435,7 +2435,7 @@ namespace bamg {
     quadtree->Add(*v0);
     quadtree->Add(*v1);
 
-    // on ajoute les sommets un � un
+    // on ajoute les sommets un à un
     Int4 NbSwap = 0;
 
     time1 = CPUtime( );
@@ -2594,7 +2594,7 @@ namespace bamg {
             Triangle *tc = HeapTriangle[i];    // triangle courant
             if (!tc->Locked(na))               // arete non frontiere
             {
-              Triangle *ta = tc->TriangleAdj(na);    // n� triangle adjacent
+              Triangle *ta = tc->TriangleAdj(na);    // n° triangle adjacent
               if (ta->link == 0)                     // non deja chainer => on enpile
               {
                 i++;
