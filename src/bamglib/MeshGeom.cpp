@@ -349,7 +349,7 @@ namespace bamg {
 
     edge4 = new SetOfEdges4(nbe, nbv);
 
-    Real4 *len = new Real4[Gh.nbv];
+    Real8 *len = new Real8[Gh.nbv];
     for (i = 0; i < Gh.nbv; i++) len[i] = 0;
     if (verbosity > 6) {
       int nbr = 0;
@@ -438,7 +438,7 @@ namespace bamg {
 
     for (i = 0; i < Gh.nbv; i++)
       if (Gh.vertices[i].color > 0)
-        Gh.vertices[i].m = Metric(len[i] / (Real4)Gh.vertices[i].color);
+        Gh.vertices[i].m = Metric(len[i] / (Real8)Gh.vertices[i].color);
       else
         Gh.vertices[i].m = Metric(hmin);
     delete[] len;

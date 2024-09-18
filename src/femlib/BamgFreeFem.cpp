@@ -596,10 +596,10 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
     cout <<"\t\t"  << "     Record Edges: Nb of Edge " << Gh->nbe <<endl;
   throwassert(Gh->edges);
   throwassert (Gh->nbv >0);
-  Real4 *len =0;
+  Real8 *len =0;
   if (!hvertices)
     {
-      len = new Real4[Gh->nbv];
+      len = new Real8[Gh->nbv];
       for(i=0;i<Gh->nbv;i++)
         len[i]=0;
     }
@@ -717,7 +717,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
 
         }
         else if (Gh->vertices[i].color > 0)
-          Gh->vertices[i].m=  Metric(len[i] /(Real4) Gh->vertices[i].color);
+          Gh->vertices[i].m=  Metric(len[i] /(Real8) Gh->vertices[i].color);
         else
           Gh->vertices[i].m=  Metric(Hmin);
       }
@@ -1017,10 +1017,10 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
     cout <<"\t\t"  << "     Record Edges: Nb of Edge " << Gh->nbe <<endl;
   throwassert(Gh->edges);
   throwassert (Gh->nbv >0);
-  Real4 *len =0;
+  Real8 *len =0;
   if (!hvertices)
     {
-      len = new Real4[Gh->nbv];
+      len = new Real8[Gh->nbv];
       for(i=0;i<Gh->nbv;i++)
         len[i]=0;
     }
@@ -1093,7 +1093,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 
         }
         else if (Gh->vertices[i].color > 0)
-          Gh->vertices[i].m=  Metric(len[i] /(Real4) Gh->vertices[i].color);
+          Gh->vertices[i].m=  Metric(len[i] /(Real8) Gh->vertices[i].color);
         else
           Gh->vertices[i].m=  Metric(Hmin);
       }

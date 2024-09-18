@@ -65,7 +65,6 @@ namespace bamg {
     return Min(Min(a, b), c);
   }
 
-  typedef float Real4;
   typedef double Real8;
   typedef short Int1;
   typedef short Int2;

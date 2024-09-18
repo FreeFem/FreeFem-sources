@@ -40,7 +40,7 @@ using namespace std;
 extern bool withrgraphique;
 
 namespace bamg {
-  Real4 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;
+  Real8 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;
   R2 GrafPMin, GrafPMax;
   Real8 Grafh = 0;
 
@@ -710,7 +710,7 @@ namespace bamg {
     R2 x, x50;
     int k = 0, k50 = 0;
     for (int ii = 0; ii < 100; ii++) {
-      x = F(Real4(ii) / 100.0);
+      x = F(Real8(ii) / 100.0);
       if (ii == 50) x50 = x, k50 = 1;
       if (InPtScreen(x.x, x.y)) {
         if (k)
