@@ -455,7 +455,7 @@ AnyType EigenValue::E_EV::operator () (Stack stack) const {
   //double ws, vs; // for debugging FH ++++++++++
   // pferarray evector2;
   FEbaseArrayKn<double> *evector = 0; // change may 2009
-  tol = arg<double>(0, stack, 0);
+  tol = arg<double>(0, stack, tol);// correct 26/06/24  thanks to PHT
   nbev = arg<long>(1, stack, 10);
   sym = arg<bool>(2, stack, false);
   sigma = arg<double>(3, stack, 0.0);

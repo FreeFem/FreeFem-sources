@@ -710,6 +710,7 @@ namespace bamg {
       f_in >> i1 >> i2 >> r;
       edges[i].v[0] = vertices + i1 - 1;
       edges[i].v[1] = vertices + i2 - 1;
+        if(verbosity>199) cout << " Read_msh egde: "<< i1 << " "<< i2 << " "<< r << endl; 
       edges[i].adj[0] = 0;
       edges[i].adj[1] = 0;
       edges[i].ref = r;

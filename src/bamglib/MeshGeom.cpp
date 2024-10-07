@@ -90,9 +90,11 @@ namespace bamg {
     }
     for (i = 0; i < nbt; i++)
       for (j = 0; j < 3; j++) {
+          int orienij;
         // Int4 i0,i1;
         Int4 k = edge4->addtrie(Number(triangles[i][VerticesOfTriangularEdge[j][0]]),
-                                Number(triangles[i][VerticesOfTriangularEdge[j][1]]));
+                                Number(triangles[i][VerticesOfTriangularEdge[j][1]]),&orienij);
+          if(k< nbe) orientedgeold[k]  *= orienij; // Add FH. 30/09/2024 PB orientation of internal edge !!!
         Int4 invisible = triangles[i].Hidden(j);
         if (st[k] == -1)
           st[k] = 3 * i + j;
@@ -195,12 +197,13 @@ namespace bamg {
         }
 
         if (add >= 0 && add < nbe) {
-
+        
           edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
           edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
           edges[add].on = 0;
           if (i < nbeold)    // in file edge // Modif FH 06122055
           {
+              if(orientedgeold[i]<0) std::swap(edges[add].v[0],edges[add].v[1]);// add modif F.H. 30 sep. 24 !!!!!
             edges[add].ref = edgessave[i].ref;
             edges[add].on =
               edgessave[i].on;    //  HACK pour recuperer les aretes requise midf FH avril 2006 ????
