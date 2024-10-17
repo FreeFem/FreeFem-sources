@@ -1,5 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
+// PARAM -ns -nw -v 0 -frequency 2 -Dpartitioner=parmetis -parmetis_worker 2 -ksp_view -log_view
 
 load "PETSc-complex"
 load "Element_Mixte3d"
@@ -15,31 +16,40 @@ macro defPart(i)i// EOM
 macro initPart(i)i// EOM
 
 int level = 2;
-int s = 3;
+int s = 2;
 
 Mat<complex>[int] MG(level);
 mesh3[int] Th(level);
 matrix[int] P(level - 1);
 int Robin = 2;
 int[int] LL = [Robin, Robin, Robin, Robin, Robin, Robin];
-real n = getARGV("-n", 21) / s;
+real freq = getARGV("-frequency", 1.);
+int nppwl = 10;
+int n = freq*nppwl/s;
 Th[level - 1] = cube(n, n, n, [x, y, z], label = LL);
 func Pk = Edge03d;
 func PkPart = Edge03ds0;
-buildMatEdgeRecursive(Th, s, level, P, MG, Pk, mpiCommWorld, PkPart, defPart, initPart);
 
-func k = 6 * pi;
-func f = exp(-60 * ((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2));
+real[int] timesi(4), times(4);
+
+real ttime = mpiWtime();
+buildMatEdgeRecursive(Th, s, level, P, MG, Pk, mpiCommWorld, PkPart, defPart, initPart);
+timesi[0] = mpiWtime() - ttime;
+
+func k = 2 * pi * freq;
+func f = exp(-50 * k * ((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2));
 
 complex[int] rhs;
 matrix<complex>[int] Opt(level);
+
+ttime = mpiWtime();
 for(int i = 0; i < level; ++i) {
     fespace Vh(Th[i], Pk);
     varf vPb([Ex,Ey,Ez], [vx,vy,vz]) =
-        int3d(Th[i])(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-      + int3d(Th[i])(-k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
-      + int2d(Th[i],Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
-      + int2d(Th[i],-111111)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez));
+        int3d(Th[i],qforder=2)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+      + int3d(Th[i],qforder=2)(-k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
+      + int2d(Th[i],Robin,qforder=2)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+      + int2d(Th[i],-111111,qforder=2)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez));
     Opt[i] = vPb(Vh, Vh, sym = 1);
     MG[i] = Opt[i];
     if(i == 0) {
@@ -48,15 +58,35 @@ for(int i = 0; i < level; ++i) {
         rhs = vRHS(0, Vh);
     }
 }
+timesi[1] = mpiWtime() - ttime;
+
+mpiBarrier(mpiCommWorld);
+ttime = mpiWtime();
 set(MG, P, sparams = "-pc_type mg -ksp_monitor -ksp_view_final_residual -ksp_type fgmres -ksp_gmres_restart 200 -ksp_max_it 200");
 set(MG, 0, sparams = "-mg_coarse_ksp_type gmres -mg_coarse_ksp_rtol 1e-1 -mg_coarse_ksp_pc_side right " + " -mg_coarse_ksp_max_it 50 -mg_coarse_ksp_converged_reason -mg_coarse_pc_type asm -mg_coarse_sub_pc_factor_mat_solver_type mumps -mg_coarse_sub_pc_type cholesky -mg_coarse_pc_asm_type restrict", O = Opt[level - 1]);
+
 set(MG, level - 1, sparams = "-mg_levels_ksp_type richardson -mg_levels_ksp_pc_side left -mg_levels_pc_type asm -mg_levels_sub_pc_type cholesky -mg_levels_sub_pc_factor_mat_solver_type mumps -mg_levels_pc_asm_type restrict", O = Opt[0]);
 fespace Vh(Th[0], Pk);
 Vh<complex> def(u);
 u[] = MG[0]^-1 * rhs;
+timesi[2] = mpiWtime() - ttime;
+
+ttime = mpiWtime();
 mesh3 ThFine = Th[0];
 fespace VhFine(ThFine, P1);
-VhFine plt = sqrt(real(u)^2 + real(uy)^2 + real(uz)^2);
-plotD(ThFine, plt, cmm = "Solution");
+if(!NoGraphicWindow) {
+    VhFine plt = sqrt(real(u)^2 + real(uy)^2 + real(uz)^2);
+    plotD(ThFine, plt, cmm = "Solution");
+}
 int[int] fforder = [1, 1];
 savevtk("maxwell-mg-3d.vtu", ThFine, [real(u), real(uy), real(uz)], [imag(u), imag(uy), imag(uz)], order = fforder, bin = 1);
+timesi[3] = mpiWtime() - ttime;
+
+mpiReduce(timesi, times, processor(0,mpiCommWorld), mpiMAX);
+
+if (mpirank == 0) {
+    cout << "mesh partitioning: " << times[0] << "s" << endl;
+    cout << "assembly: " << times[1] << "s" << endl;
+    cout << "solution: " << times[0] << "s" << endl;
+    cout << "vtk export: " << times[0] << "s" << endl;
+}
