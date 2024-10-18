@@ -769,6 +769,11 @@ bool mylex::SetMacro(int &ret)
                     item += char(i);
                     i = source().get();
                 }
+                if (i == 10 || i == 13)
+                {
+                    linenumber++;
+                    nl=1;
+                }
                 if( item == newmacro)  kmacro++;
                 if( item == endmacro)
                 {
@@ -1398,6 +1403,7 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
     macroarg=macroargs;
     l=0;
     nf=f= new istringstream(s.c_str());
+    //std::cout << " readin "<< s << "!!!.."<< endl;
     sep='@';
     if (!f || !*f)
     {
