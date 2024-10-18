@@ -249,6 +249,8 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
   //  Add april 2018
    	real[int] AV(A.n*A.m);
 	for [i,j,aij: A ] AV[i+A.n*j]=aij;
+	// test break .. 10/2024 !!!
+	for [i,AVi:AV] if( i< 2) cout << i << " "<< AVi << endl; else {cout << i <<" break ???\n" ;break;}
   	int i,j,ii,jj;
   	ijmax(A,ii,jj);
   	i = A.imax;	j=  A.jmax;

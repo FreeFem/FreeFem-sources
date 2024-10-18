@@ -26,6 +26,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
+-add read binary file with short number in bfstream plugin
+-add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
 -add tool to put FreeFEM code in Markdow file (with suffix .md)    
       they only execute code beetwen
       two  line  starting with ~~~  (in test),
@@ -76,18 +79,21 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
- - fixe problem integration of moving test or unknow function in 2d mesh:
+ - try to fix orientation of internal edges in 2d.
+ - fix missing break and continue in for [ i,ai:a] loop 
+ - line number in macro error (thank to P-H Tournier)
+ - fix problem integration of moving test or unknow function in 2d mesh:
  ```
  varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v); 
      matrix AB = ab(Zh,Rh);
 ```     
    we remove code a piece of code. 
 
- - fixe problem in mesh of ring from a square (missing option to reomve duplicate vertices)
-   exemple: `mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;`
+ - fix problem in mesh of ring from a square (missing option to reomve duplicate vertices)
+   example: `mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;`
  - problem of segfalse in Write_hdf5 (problem of allocation in the stack not on the heap).
    if the mesh2 is too large.
-- fixe `(A'+A)` where func  `A =[[0,1],[0,0]] ;`
+- fix `(A'+A)` where func  `A =[[0,1],[0,0]] ;`
 - correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
      thank to G. Sadaka to find the bug.
 - correct hidden faces on surface mesh (ffglut)

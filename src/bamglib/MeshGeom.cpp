@@ -201,9 +201,10 @@ namespace bamg {
           edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
           edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
           edges[add].on = 0;
-          if (i < nbeold)    // in file edge // Modif FH 06122055
+          if (add < nbeold)    // in file edge // Modif FH 06122055
           {
-              if(orientedgeold[i]<0) std::swap(edges[add].v[0],edges[add].v[1]);// add modif F.H. 30 sep. 24 !!!!!
+//  Error in periodic adapt 2d !!!! FH, je ne comprend pas 10/10/24 !!!!!!!
+           //   if(orientedgeold[add]<0) std::swap(edges[add].v[0],edges[add].v[1]);// add modif F.H. 30 sep. 24 !!!!!
             edges[add].ref = edgessave[i].ref;
             edges[add].on =
               edgessave[i].on;    //  HACK pour recuperer les aretes requise midf FH avril 2006 ????

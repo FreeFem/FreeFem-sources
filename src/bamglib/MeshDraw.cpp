@@ -510,11 +510,10 @@ namespace bamg {
     return c;
   }
 
-  void Draw(long i, long j) {
+void Draw(long i, long j) {
     if (!withrgraphique) return;
-    Draw(((float)i) / xGrafCoef + xGrafOffSet, ((float)j) / yGrafCoef + yGrafOffSet);
-  }
-
+    Draw((float) (i / xGrafCoef + xGrafOffSet), (float)(j / yGrafCoef + yGrafOffSet));
+}
   int Triangle::swapDRAW(Int2 a) {
     int NbUnSwap = 0;
     if (a / 4 != 0) {
