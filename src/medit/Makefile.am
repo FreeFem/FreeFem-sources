@@ -16,8 +16,9 @@ ffmedit_SOURCES=animat.c cube.c image.c listnum.c mouse.c persp.c stream.c zaldy
 LDADD=picking.$(OBJEXT) ../libMesh/libMesh.a $(LIBSGLUT) -lm
 AM_CPPFLAGS=-I$(srcdir)/../libMesh
 BUILT_SOURCES=compil.date
+BUILD_DATE="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 compil.date: $(ffmedit_SOURCES)
-	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
+	echo "#define COMPIL " '"' $(BUILD_DATE) '(with ff++ $(VERSION))''"' > compil.date
 #.PHONY: compil.date
 
 # ALH - during a parallel make, we should make sure that picking.o is not used before being made by a different
