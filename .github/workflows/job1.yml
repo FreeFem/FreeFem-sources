@@ -71,7 +71,7 @@ jobs:
         run: make check
 
       - name: Install
-        run: sudo make install #TODO should work without sudo
+        run: make install
 
   windows:
     name: Job1 - Windows
@@ -86,6 +86,7 @@ jobs:
         with:
           update: true
           install: >-
+            mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-toolchain
             make
             m4
