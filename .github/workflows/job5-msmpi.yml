@@ -1,5 +1,7 @@
 name: Job5 MSMPI - Full FreeFEM version [debug mode]
-on: [push]
+#on: [push]
+on:
+  workflow_dispatch:
 
 jobs:
   windows:

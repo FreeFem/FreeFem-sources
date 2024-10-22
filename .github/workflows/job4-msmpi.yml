@@ -1,6 +1,8 @@
 name: Job4 MSMPI - Full FreeFEM version [release mode]
-on: [push]
-
+#on: [push]
+on:
+  workflow_dispatch:
+  
 jobs:
   windows:
     name: Job4 MSMPI - Windows

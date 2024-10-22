@@ -1,6 +1,8 @@
 name: Job5 OpenMPI - Full FreeFEM version [debug mode]
-on: [push]
-
+#on: [push]
+on:
+  workflow_dispatch:
+  
 jobs:
   linux:
     strategy:
