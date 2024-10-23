@@ -6,15 +6,8 @@ set -x
 ARCH=$1
 
 LOCAL_PATH=/usr/local
-if [ "$ARCH" = "ARM64" ]; then
+if [ "$ARCH" = "arm" ]; then
 	LOCAL_PATH=/opt/homebrew
 fi
 
-sudo ln -fs "$LOCAL_PATH/bin/gfortran-13" "$LOCAL_PATH/bin/gfortran"
-sudo ln -fs "$LOCAL_PATH/bin/gcc-13" "$LOCAL_PATH/bin/gcc"
-sudo ln -fs "$LOCAL_PATH/bin/g++-13" "$LOCAL_PATH/bin/g++"
-
-# symlink dylib location for previous versions
-sudo ln -fs "$LOCAL_PATH/opt/gcc/lib/gcc/13" "$LOCAL_PATH/opt/gcc/lib/gcc/12"
-sudo ln -fs "$LOCAL_PATH/opt/gcc/lib/gcc/13" "$LOCAL_PATH/opt/gcc/lib/gcc/11"
-sudo ln -fs "$LOCAL_PATH/opt/gcc/lib/gcc/13" "$LOCAL_PATH/opt/gcc/lib/gcc/10"
+sudo ln -fs "$LOCAL_PATH/bin/gfortran-14" "$LOCAL_PATH/bin/gfortran"

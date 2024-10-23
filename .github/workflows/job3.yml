@@ -1,5 +1,7 @@
 name: Job3 - Sequential FreeFEM version
-on: [push]
+#on: [push]
+on:
+  workflow_dispatch
   
 jobs:
   linux:

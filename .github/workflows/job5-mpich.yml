@@ -51,14 +51,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [12, 13]
+        version: [13]
 
     name: Job5 MPICH - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
 
     env:
-      CC: gcc
-      CXX: g++
+      CC: clang
+      CXX: clang++
       FC: gfortran
       F77: gfortran
 
@@ -92,4 +92,4 @@ jobs:
         run: make check
 
       - name: Install
-        run: sudo make install #TODO should work without sudo
+        run: make install

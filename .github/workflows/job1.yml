@@ -1,7 +1,7 @@
 name: Job1 - Minimal version
 #on: [push]
 on:
-  workflow_dispatch
+  workflow_dispatch:
   
 jobs:
   linux:
