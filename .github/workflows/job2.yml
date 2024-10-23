@@ -1,7 +1,5 @@
 name: Job2 - Minimal version
-#on: [push]
-on:
-  workflow_dispatch:
+on: [push]
   
 jobs:
   linux:
@@ -90,6 +88,7 @@ jobs:
         with:
           update: true
           install: >-
+            mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-toolchain
             make
             m4
