@@ -13,7 +13,6 @@ macro dimension 3// EOM
 
 include "ffddm.idp"
 
-load "msh3"
 
 include "cobrameshcavity.idp"
 

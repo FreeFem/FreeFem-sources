@@ -1,4 +1,3 @@
-load "msh3"
 
 int bottombeam = 2;
 border a(t=2, 0){x=0; y=t ;label=1;}	// left beam

@@ -1,5 +1,4 @@
 load  "meshtools" 
-load "msh3"
 mesh Th= square(10,10)+ square(10,10,[x+1,y+1]);
 mesh3 Th3= cube(2,2,2)+ cube(3,3,3,[x+2,y+3,z+1]);
 int[int] cc;

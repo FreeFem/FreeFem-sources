@@ -3,7 +3,6 @@
 /* example of wave guiding with gradient-index lenses */
 
 load "bem"
-load "msh3"
 load "PETSc-complex"
 
 complex k = 10; // wavenumber

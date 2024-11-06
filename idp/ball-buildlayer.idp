@@ -1,5 +1,4 @@
 //  example to build a mesh a cone 
-load "msh3"
 func mesh3 BuildBall(real RR,real h,int lab)
 {
 border Taxe(t=-RR,RR){x=t;y=0;label=0;}
@@ -17,7 +16,6 @@ return Th;
 }
 func mesh3 BuildAxiOx(mesh &Th2,real h)
 {
-load "msh3"
 real[int] bb(4);
 boundingbox(Th2,bb);
 if(verbosity>4) cout << bb << endl;

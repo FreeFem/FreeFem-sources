@@ -5,7 +5,6 @@
 // PARAM
 
 load "bem"
-load "msh3"
 
 include "getARGV.idp"
 

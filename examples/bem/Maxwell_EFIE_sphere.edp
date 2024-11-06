@@ -8,7 +8,6 @@ The polarization is such that:
 mpirun -np 2 ../../src/mpi/FreeFem++-mpi Maxwell_EFIE_sphere.edp -wg -frequency 6e8
 */
 
-//load "msh3"
 load "bem"
 load "PETSc-complex"
 include "getARGV.idp"

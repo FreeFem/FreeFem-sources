@@ -12,7 +12,6 @@
 */
 
 load "bem"
-load "msh3"
 load "gsl"
 
 include "getARGV.idp"

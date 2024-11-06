@@ -23,7 +23,7 @@ if(1)
 else 
 {
 // new code 
-load "medit" load "msh3"  
+load "medit"
     meshS Th3= movemesh23(Th,transfo=[x,y,u*0.5]);
     medit("mm",Th3);// bug un color of u ... FH 
 }

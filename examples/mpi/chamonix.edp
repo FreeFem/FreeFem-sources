@@ -18,7 +18,6 @@
 	ff-mpirun -np 8 chamonix.edp -ns -wg -Kmax 9 -fullmesh -n 15
 */
 
-load "msh3"
 load "bem"
 load "RadiativeTransfer_htool"
 load "qf11to25"

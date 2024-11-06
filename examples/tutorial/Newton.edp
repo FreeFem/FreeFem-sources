@@ -64,7 +64,7 @@ int iter=0;
     regtest=u[]'*u[]; //'
    }
 
-load "medit" load "msh3"  
+load "medit"
     meshS Th3= movemesh23(Th,transfo=[x,y,u*1.5]);
     medit("N",Th3);
 }

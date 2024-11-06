@@ -19,7 +19,6 @@ macro Vd(u) [u#1,u#2]//
 macro myON1(l,u,v) on(l,u#1=0.,u#2=v)//
 ENDIFMACRO
 IFMACRO(dim,3) 
-load  "msh3"
 macro intO int3d//
 macro intG int2d//
 macro Mesh mesh3//

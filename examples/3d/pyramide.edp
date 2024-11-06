@@ -1,5 +1,4 @@
 //  example to build a mesh a cone 
-load "msh3"
 load "medit"
 // cone using buildlayers with a triangle 
 real LX=1,LY=1,LXY=sqrt(LX*LX+LY*LY),HH=1; 

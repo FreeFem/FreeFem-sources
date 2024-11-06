@@ -4,7 +4,6 @@
  The two edge are intersection of face with label 2,5 (resp.  4,5)
  
 */
-load "msh3" 
 mesh3 Th=cube(20,5,5,[x*4,y,z]);
 fespace Wh(Th,[P2,P2,P2]) ;
 // appuie simple sur les bord interfece face 5 et4 ( arete x == 0 )   et 5 et 2  et (x == 1) ( arete x == 0 ) 

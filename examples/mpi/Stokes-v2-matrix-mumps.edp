@@ -3,7 +3,6 @@
 // PARAM -n 5
 
 // other
-load "msh3"
 load "medit"
 load "MUMPS_mpi"
 include "getARGV.idp"

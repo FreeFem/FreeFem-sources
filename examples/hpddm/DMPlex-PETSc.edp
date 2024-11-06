@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"
-load "msh3"
 load "medit"
 
 int[int] out;

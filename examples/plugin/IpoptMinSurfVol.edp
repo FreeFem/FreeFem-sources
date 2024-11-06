@@ -2,7 +2,6 @@
 // strange ...  FH.  , S Auliac  (will be correct in test ???)
 // remove the test  (no loop)  
 int nadapt=0;//  3 is teh previous value..
-load "msh3";
 load "medit";
 load "ff-Ipopt";
 

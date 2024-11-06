@@ -1,5 +1,4 @@
 load "isoline"
-load "msh3"
 real[int,int] xy(3,1);
 int[int] be(1);
 {

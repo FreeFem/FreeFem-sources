@@ -1,4 +1,6 @@
-load "msh3" load "tetgen" load "mshmet" load "medit"
+load "tetgen"
+load "mshmet"
+load "medit"
 //build initial mesh
 int nn  = 6;
 int[int] l1111=[1,1,1,1],l01=[0,1],l11=[1,1];//   label numbering 

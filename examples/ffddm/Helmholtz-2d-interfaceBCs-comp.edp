@@ -8,7 +8,6 @@
 
 macro dimension 2// EOM            // 2D or 3D
 
-load "msh3"
 load "bem"
 include "ffddm.idp"
 

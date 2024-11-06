@@ -7,7 +7,6 @@
 //  find $\lamda$ such that:
 // $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
 
-load "msh3"	
 int nn=15;
 mesh Th2=square(nn,nn,[pi*x,pi*y]);
 fespace Vh2(Th2,P1);

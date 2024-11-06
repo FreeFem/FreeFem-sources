@@ -9,7 +9,6 @@ loadpath = "../../plugin/seq/"
 loadpath += "./"
 */
 
-load "msh3"
 //load "medit"
 load "MUMPS_mpi"
 include "getARGV.idp"

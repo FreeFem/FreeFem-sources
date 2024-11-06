@@ -10,7 +10,6 @@ macro dimension 3S// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
-load "msh3"
 
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization

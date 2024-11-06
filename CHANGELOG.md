@@ -69,6 +69,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - PETSc 3.20.4
+- move the plugin msh3 in kernel , so remove all `load "msh3"` in all examples and .idp file
 
 ### Deprecated
 

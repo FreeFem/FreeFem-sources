@@ -8,7 +8,6 @@
 
 include "ffddm.idp"
 load "bem"
-load "msh3"
 
 complex k = 10; // wavenumber
 

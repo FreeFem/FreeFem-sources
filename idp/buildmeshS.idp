@@ -1,4 +1,3 @@
-load "msh3"
 func meshS buildmeshS(meshL & TL,int orientation,int minsurf)
 {
 	int withp=0;

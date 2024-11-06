@@ -1,5 +1,4 @@
 // Mesh
-load "msh3"
 load "Element_P3"
 load "Element_P2pnc_3d"
 int[int] lc=[1,1,1,1,1,2];

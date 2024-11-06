@@ -1,7 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "msh3"
 load "mshmet"
 load "PETSc"
 macro with()PETSc//

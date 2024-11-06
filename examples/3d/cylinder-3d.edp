@@ -1,4 +1,3 @@
-load "msh3"// buildlayer
 load "medit"// buildlayer
 
 border C(t=0,2*pi) { x = cos(t); y=sin(t); label=1;}

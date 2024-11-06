@@ -1,4 +1,4 @@
-load "msh3" load "medit"
+load "medit"
 int nn=3;
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);  Vh2 ux,uz,p2;

@@ -1,4 +1,5 @@
-load "Element_P4" load "msh3" load "medit"
+load "Element_P4"
+load "medit"
 mesh Th=square(1,1);
 plot(Th,wait=1);
 mesh th=square(150,150);

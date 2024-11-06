@@ -1,5 +1,4 @@
 // file tetgenholeregion.edp
-load "msh3"
 load "tetgen"
 load "medit"
 //verbosity=2;

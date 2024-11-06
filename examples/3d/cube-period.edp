@@ -1,4 +1,3 @@
-load "msh3"
 int nn=10;;
 mesh Th2=square(nn,nn,region=0);
 fespace Vh2(Th2,P2);

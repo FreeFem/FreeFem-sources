@@ -1,4 +1,3 @@
-load "msh3" 
 //Validation of Laplace Equation on Torus (Thanks to I. Danaila and G. Sadaka)
 
 

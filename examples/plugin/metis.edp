@@ -1,5 +1,4 @@
 load "metis"
-load "msh3"
 mesh Th=square(30,30);
 meshS ThS=square3(30,30);
 fespace Ph(Th,P0);

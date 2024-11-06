@@ -9754,7 +9754,7 @@ class OrientNormal : public OneOperator {
 
 // <<dynamic_loading>>
 
-static void Load_Init( ) {
+static void Load_Init_msh3( ) {
  typedef listMeshT<MeshL> listMeshL;
  typedef listMeshT<MeshS> listMeshS;
 
@@ -9768,7 +9768,7 @@ static void Load_Init( ) {
 
 
   if (verbosity > 1 && mpirank == 0) {
-    cout << " load: msh3  " << endl;
+    cout << " init msh3  " << endl;
   }
 
   // operators for Mesh3
@@ -9871,9 +9871,11 @@ static void Load_Init( ) {
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
 // [[file:~/ff/src/fflib/load.cpp::static_load_msh3]]
 
-void msh3_Load_Init( ) { Load_Init( ); }
+void msh3_Load_Init( ) {
+    Load_Init_msh3( );
+}
 
 // dynamic loading: calling [[file:../src/fflib/InitFunct.hpp::LOADFUNC]] on [[Load_Init]]
-LOADFUNC(Load_Init)
+//LOADFUNC(Load_Init_msh3)
 
 #endif    // [[WITH_NO_INIT]]

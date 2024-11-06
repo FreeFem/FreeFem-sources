@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"
-load "msh3"
 load "medit"
 macro dimension()3L//
 include "macro_ddm.idp"
