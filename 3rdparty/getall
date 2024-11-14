@@ -103,8 +103,8 @@ download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
 	'http://www.fftw.org',
 	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
 # 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
-download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
-	'https://www.ljll.math.upmc.fr/frey/software.html',
+download('freeYams','https://www.ljll.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
+	'https://www.ljll.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
 	'b7c82a256a3e59beeb2b578de93a4e0b');
 download('Gmm++','https://www.ljll.fr/hecht/pkg/gmm-4.2.tar.gz',
@@ -127,12 +127,12 @@ download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mm
 	'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
 	'mmg3d4.0.tgz',
 	'bfc2b0373bc208e0512415d1aa2e76a1');
-download('mshmet','https://www.ljll.math.upmc.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
-	'https://www.ljll.math.upmc.fr/frey/software.html',
+download('mshmet','https://www.ljll.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
+	'https://www.ljll.fr/frey/software.html',
 	'mshmet.2012.04.25.tgz',
 	'427f397e0602efc56aa897d38a8e9bfa');
-download('MUMPS','http://mumps.enseeiht.fr/MUMPS_5.0.2.tar.gz',
-	'http://mumps.enseeiht.fr/',
+download('MUMPS','https://ftp.mcs.anl.gov/pub/petsc/externalpackages/MUMPS_5.0.2.tar.gz',
+	'https://ftp.mcs.anl.gov/pub/petsc/externalpackages',
 	'MUMPS_5.0.2.tar.gz',
 	'591bcb2c205dcb0283872608cdf04927');
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
@@ -192,7 +192,7 @@ download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/6e61fbf8
 	'bemtool.zip',
 	'2de5404f4a88d7c8847bd85209fd69a1');
 
-download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
+download('Boost','https://www.ljll.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
 	'boost_for_bemtool.tar.gz',
 	'bb0e3ee1ad06174c80a69bc0756034e7');
