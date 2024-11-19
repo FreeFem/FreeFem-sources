@@ -1,29 +1,22 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
-// Author: F. Hecht
-// (jul. 2014)
+---
+name: NSprojection
+category: Fluid Mechanics
+layout: example
+---
 
+## Time dependent incompressible Navier-Stokes Equations solved with Newton's method
+
+The Navier-Stokes equations are solved for a flow over a backward facing step.
+The time independent Navier-Stokes equations for an incompressible fluid are
+$$
+\frac{\partial u}{\partial t}-\nu\Delta u +u\cdot\nabla u -\nabla p =0,~~~\nabla\cdot u=0~~~in ~ \Omega
+$$
+
+The velocity is specified on the left vertical side of the pipe (inlet) and free on the vertical side on the right (outlet). There is a noslip condition on the lateral walls.
+The geometry is as follows. Note the trick $t^{1.2}$ to refine the mesh near the corner of the step.
+~~~freefem
 verbosity=0;
-
-// Parameters
 int n = 1;
-real nu = 0.0025; // Reynolds=200
-real dt = 0.2;
-real epsv = 1e-6, epsu = 1e-6, epsp = 1e-6;// Eps CG ..
 
 // Mesh
 border a0(t=1, 0){x=-2; y=t; label=1;} // inlet
@@ -40,7 +33,17 @@ plot(Th);
 fespace Vh(Th, P1);
 Vh w, u = 0, v = 0, p = 0, q = 0;
 
-// Definitions of Matrix dtMx and dtMy
+real nu = 0.0025; // Reynolds=200
+real dt = 0.2;
+real epsv = 1e-6, epsu = 1e-6, epsp = 1e-6;
+~~~
+
+| The mesh   |
+| ---------- |
+| ![][_mesh] |
+
+The matrices dtMx and dtMy are used to project $[u,v]^T$ on the space of divergence free functions
+~~~freefem
 matrix dtM1x, dtM1y;
 
 macro  BuildMat()
@@ -57,10 +60,14 @@ macro  BuildMat()
     matrix Mdy = vdy(Vh, Vh);
     dtM1x = dM1*Mdx;
     dtM1y = dM1*Mdy;
-  }//
-
+  }// end of macro
 BuildMat
-
+~~~
+In the follwing time loop, ${\bf u}=[u,v]^T$ are computed at every time steps by using the method of characteristics implemented in the operator $\texttt{convect}$:
+$$
+\partial_t{\bf u}+{\bf u}\cdot\nabla{\bf u}|_{x,t}\approx \frac1{\delta t}[{\bf u}(x,t)-{\bf u}(x-{\bf u}(x,t-\delta t)\delta t,t-\delta t)]
+$$
+~~~freefem
 real err = 1, outflux = 1;
 for(int n = 0; n < 200; n++) {
   Vh uold = u, vold = v, pold = p;
@@ -94,22 +101,43 @@ for(int n = 0; n < 200; n++) {
   epsv = -abs(epsv);
   epsu = -abs(epsu);
   epsp = -abs(epsp);
-
-  p = pold-q;
-  u[] += dtM1x*q[];
-  v[] += dtM1y*q[];
-
-  if(n%50 == 49) {
+~~~
+And then ${\bf u}$ is projected with $q$ by $M$ , i.e. ${\bf u}+M(\nabla q)\delta t$ is divergence free.
+~~~freefem
+p = pold-q;
+u[] += dtM1x*q[];
+v[] += dtM1y*q[];
+~~~
+For better precosion the mesh is adapted to the flow
+~~~freefem
+if(n%50 == 49) {
     Th = adaptmesh(Th, [u, v], q, err=0.06, nbvx=100000);
     plot(Th, wait=true);
     BuildMat // rebuild mat.
-  }
-
-  err = sqrt(int2d(Th)(square(u - uold) + square(v - vold))/Th.area);
+}
+~~~
+The stopping criteria to exit the loop:
+~~~freefem
+err = sqrt(int2d(Th)(square(u - uold) + square(v - vold))/Th.area);
   outflux = int1d(Th)([u, v]'*[N.x, N.y]) ;
   cout << " iter " << n << " Err L2 = " << err << " - Outflow = " << outflux << endl;
   if (err < 1e-3) break;
 }
 assert(abs(outflux) < 5e-3); // verification
-plot(p, wait=1, ps="NSprojP.eps");
-plot(u, wait=1, ps="NSprojU.eps");
+plot(p, wait=1, ps="NSprojP.ps");
+plot(u, wait=1, ps="NSprojU.ps");
+~~~
+
+| The u-component of the velocity |
+| ------------------------------- |
+| ![][_u]                         |
+
+| The pressure |
+| ------------ |
+| ![][_p]      |
+
+[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/mesh.png
+
+[_u]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/u.png
+
+[_p]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/p.png

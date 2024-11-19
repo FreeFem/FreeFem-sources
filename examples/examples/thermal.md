@@ -1,26 +1,17 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
+---
+name: thermal
+category: thermodynamics
+layout: example
+---
 
-// Parameters
-int C1 = 99, C2 = 98; // could be anything
-
-// Mesh
+# Heat Equation
+The domain is a disk with 2 rectangles inside. One is a hole the other one is a region with a different heat diffusion parameter.
+$$
+\kappa= 1 + 4{\bf 1}_{(x<-1)\cap(x>-2)\cap(y<3)\cap(y>-3)}.
+$$
+~~~freefem
 border C0(t=0, 2*pi){x=5*cos(t); y=5*sin(t);}
-
+int C1 = 99, C2 = 98; // could be anything
 border C11(t=0, 1){x=1+t;  y=3;      label=C1;}
 border C12(t=0, 1){x=2;    y=3-6*t;  label=C1;}
 border C13(t=0, 1){x=2-t;  y=-3;     label=C1;}
@@ -40,10 +31,28 @@ plot(Th, wait=1);
 fespace Vh(Th, P1);
 Vh u, v;
 Vh kappa = 1 + 4*(x<-1)*(x>-2)*(y<3)*(y>-3);
+~~~
 
-// Problem
+| The mesh   |
+| ---------- |
+| ![][_mesh] |
+
+The heat equation is
+$$
+-\nabla\cdot(\kappa\nabla u)=0,~~u|_{C_0}=20,~~u|_{C_1}=100.
+$$
+~~~freefem
 solve a(u, v)
   = int2d(Th)(kappa*(dx(u)*dx(v) + dy(u)*dy(v)))
   + on(C0, u=20)
   + on(C1, u=100);
 plot(u, value=true, wait=1, fill=true);
+~~~
+
+| The temperature |
+| --------------- |
+| ![][_solution]  |
+
+[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/thermal/mesh.png
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/thermal/solution.png

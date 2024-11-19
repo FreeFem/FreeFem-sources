@@ -1,31 +1,23 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
-// Author: F. Hecht
-// Stationnary imcompressible Navier Stokes Equation with Newton method (jan. 2012)
 
-verbosity=0;
+---
+name: NSNewton
+category: Fluid Mechanics
+layout: example
+---
 
-// Parameters
-func bb = [[-1, -2], [4, 2]]; // bounding box for the plot
+## Stationary incompressible Navier-Stokes Equation solved with Newton's method
+The time independent Navier-Stokes equations for an incompressible fluid are
+$$
+-\nu\Delta u +u\cdot\nabla u -\nabla p =0,~~~\nabla\cdot u=0~~~in ~ \Omega
+$$
+We are interested by the flow around a cylinder in an infinite fluid (approximated by a rectangle with a round side on the left and a circle in the center).
+Dirichlet boundary conditons are imposed on boundaries 2 (the cylinder)  and 1, the left  (inflow) and lateral sides (tangent flow)  of the rectangle.
+
+Here $\Omega$ is a cylinder.
+~~~freefem
+verbosity=0; //To minimize messages at execution
+
 real R = 5, L = 15;
-// physical parameters
-real nu = 1./50, nufinal = 1/200., cnu = 0.5;
-// stop test for Newton
-real eps = 1e-4;
 
 // Mesh
 border cc(t=0, 2*pi) {x=cos(t)/2; y=sin(t)/2; label=2;}
@@ -36,26 +28,46 @@ border beo(t=-R, R) {x=L; y=t; label=0;}
 border bei(t=-R/4, R/4) {x=L/2; y=t; label=0;}
 mesh Th = buildmesh(cc(-40) + ce(20) + beb(15) + beu(15) + beo(8) + bei(10));
 plot(Th);
+~~~
 
-// Macro
+| The mesh   |
+| ---------- |
+| ![][_mesh] |
+
+To resolve the nonlinearity we use a linearization
+$$
+\begin{align*}
+-\nu\Delta (u+du) +u\cdot\nabla(u+du)+du\cdot\nabla v-\nabla q =0,
+\\
+\nabla\cdot (u+du)=0~~~in ~ \Omega
+\end{align*}
+$$
+This, then, is the Newton method:  given $u=u^n$ compute $du,dq$ then set $u^{n+1}=u+du$
+In variational form: find $du_1,du_2,dq$,
+$$\begin{align*}
+\int_{\Omega}\left(\nu\nabla du:\nabla v + (u\cdot\nabla du + du\cdot\nabla u +\nabla dq )v+\epsilon dq\cdot r\right))=0,~~\forall v, r
+\end{align*}
+$$
+For stability the iterations are started with a large $\nu$ and then $\nu$ is decreased up to its desired value.
+~~~freefem
+real nu = 1./50, nufinal = 1/200., cnu = 0.5;
 macro Grad(u1, u2) [dx(u1), dy(u1), dx(u2), dy(u2)]//
 macro UgradV(u1, u2, v1, v2) [[u1, u2]'*[dx(v1), dy(v1)], [u1, u2]'*[dx(v2), dy(v2)] ]//
 macro div(u1, u2)  (dx(u1) + dy(u2))//
 
-//  FE Space
 fespace Xh(Th, P2);
-Xh u1, u2;
-Xh v1, v2;
-Xh du1, du2;
-Xh u1p, u2p;
-
+Xh u1, u2, v1, v2, du1, du2, u1p, u2p;
 fespace Mh(Th, P1);
-Mh p, q;
-Mh dp, pp;
+Mh p, q, dp, pp;
 
 // Intial guess with B.C.
 u1 = (x^2+y^2) > 2;
 u2 = 0;
+
+// numerical parameters
+real eps = 1e-4;
+
+func bb = [[-1, -2], [4, 2]]; // bounding box for the plot
 
 // Loop on vicosity
 while(1) {
@@ -113,3 +125,11 @@ while(1) {
 	}
 }
 cout << " CPU "<< clock()<< " s " << endl;
+~~~
+| The solution   |
+| -------------- |
+| ![][_solution] |
+
+[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSNewton/mesh.png
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSNewton/solution.png

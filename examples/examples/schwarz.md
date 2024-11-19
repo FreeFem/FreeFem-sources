@@ -1,21 +1,12 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
+---
+name: schwarz
+category: mathematics
+layout: example
+---
 
-// Parameters
+## Domain Decomposition Method: solution by Schwarz iterations
+The Laplace equation is solved in a domain which is the union of a circle and a rectangle.
+~~~freefem
 real n = 4; // Mesh quality
 
 // Mesh
@@ -36,7 +27,9 @@ Vh v, u=0;
 mesh TH = buildmesh(e(5*n) + e1(25*n));
 fespace VH(TH,P1);
 VH V, U=0;
-
+~~~
+The Schwarz algorithm solves iteratively and alternatively on the circle and the rectangle. The trace on the rectangle of the solution on the circle becomes the boundary conditon for thee problem on the rectangle and ssimilarly for the circle.
+~~~freefem
 for (int i = 0; i < 4; i++) {
   plot(U, u, wait=1, cmm="Iteration "+i);
   // Solve on Omega2
@@ -55,3 +48,16 @@ for (int i = 0; i < 4; i++) {
 }
 
 plot(U, u, wait=1, cmm="Final solution");
+~~~
+
+| The solution at iteration 1 |
+| --------------------------- |
+| ![][_solone]                |
+
+| The solution at iteration 4 |
+| --------------------------- |
+| ![][_solfour]               |
+
+[_solone]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/schwarz/solone.png
+
+[_solfour]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/schwarz/solfour.png

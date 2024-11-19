@@ -1,24 +1,26 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
+---
+name: Stokes
+category: fluid
+layout: example
+---
 
-// Parameters
+# The Stokes system for creeping flow
+The system is set in 2 dimensions:
+$$
+-\Delta u + \nabla p =\vec f, \quad
+ \nabla\cdot u = 0   \hbox{ in }\Omega ,~~
+ u _{|\Gamma}= \vec g
+ $$
+with $\Omega$ the  unit square, $\vec f=[0,0]^T$ and $\vec g={\bf 1}_{\Gamma_3}[1,0]^T$.
+
+A possible variational formulation is
+$$∀(v,q),~~∫_Ω ∇u:∇v−∫_Ωp\nabla\cdot v=0,
+−∫_Ω\nabla\cdot u q−∫_Ωϵpq=0.
+$$
+The velocity is approximated with the $P^1+bubble$ element and the pressure by $P^1$ continuous functions.
+A small penalization parameter is added to the formuation to secure uniqueness.
+~~~freefem
 int n = 3; // mesh quality
-
-// Mesh
 mesh Th = square(10*n, 10*n);
 
 // Fespace
@@ -43,3 +45,11 @@ solve stokes([u, v, p], [uu, vv, pp])
 
 // Plot
 plot([u,v],p,wait=1);
+~~~
+## Results
+
+| Isovalue lines of the pressure and vector display of the velocity |
+| --------------                                                    |
+| ![][_solution]                                                    |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/stokes/solution.png

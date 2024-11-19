@@ -1,21 +1,18 @@
-/****************************************************************************/
-/* This file is part of FreeFEM.                                            */
-/*                                                                          */
-/* FreeFEM is free software: you can redistribute it and/or modify          */
-/* it under the terms of the GNU Lesser General Public License as           */
-/* published by the Free Software Foundation, either version 3 of           */
-/* the License, or (at your option) any later version.                      */
-/*                                                                          */
-/* FreeFEM is distributed in the hope that it will be useful,               */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/* GNU Lesser General Public License for more details.                      */
-/*                                                                          */
-/* You should have received a copy of the GNU Lesser General Public License */
-/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
-/****************************************************************************/
+---
+name: heatex
+category: physics
+layout: example
+---
+# The time independent  Heat Equation
 
-// Parameters
+The heat equation  with a discontinuous thermal diffusion is integrated:
+$$
+-\nabla\cdot(\kappa\nabla u)=0, ~~u|_{\Gamma_1}=u_\Gamma.
+$$
+In this example the domain $\Omega$ is a circle minus 2 rectangles on which boundary the temperature is imposed.
+The thermal diffusion is $\kappa=1+4~{\bf 1}_{x\in(-2,-1)\times(-3,3)}$ where ${\bf 1}_x$ is the Heaviside function. Finally $u=20$ on the outer circle and 100 one the right rectangle. The left rectangle is there only to define $\kappa$. It corresponds to the following FreeFem script
+
+~~~freefem
 int C1 = 99, C2 = 98; // could be anything
 
 // Mesh
@@ -51,3 +48,10 @@ solve a(u, v)
 
 // Plot
 plot(u, value=true, wait=1, fill=true);
+~~~
+
+| The solution   |
+| -------------- |
+| ![][_solution] |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/heatex/solution.png
