@@ -154,6 +154,7 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/plugin/lg.pgm \
 	examples/mpi/regtests.sh \
 	examples/misc/speedtest.sh \
+        examples/*/*.md \
 	examples/*/*.edp \
 	examples/CheckAllEdp \
 	examples/plugin/ch.pts \
