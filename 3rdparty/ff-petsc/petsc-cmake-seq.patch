@@ -1,6 +1,6 @@
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/PTScotch.py petsc-3.21.2-p1/config/BuildSystem/config/packages/PTScotch.py
---- petsc-3.21.2/config/BuildSystem/config/packages/PTScotch.py	2024-04-26 15:24:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/packages/PTScotch.py	2024-06-06 12:00:43
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/packages/PTScotch.py petsc-3.22.1-p1/config/BuildSystem/config/packages/PTScotch.py
+--- petsc-3.22.1/config/BuildSystem/config/packages/PTScotch.py	2024-04-26 15:24:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/packages/PTScotch.py	2024-06-06 12:00:43
 @@ -9,6 +9,8 @@
      self.download         = ['git://https://gitlab.inria.fr/scotch/scotch.git',
                               'https://gitlab.inria.fr/scotch/scotch/-/archive/'+self.gitcommit+'/scotch-'+self.gitcommit+'.tar.gz',
@@ -45,10 +45,10 @@ diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/PTScotch.py p
      g.close()
  
      self.popLanguage()
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.21.2-p1/config/BuildSystem/config/packages/SuiteSparse.py
---- petsc-3.21.2/config/BuildSystem/config/packages/SuiteSparse.py	2024-03-30 01:34:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/packages/SuiteSparse.py	2024-06-06 12:00:43
-@@ -56,4 +56,10 @@
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.22.1-p1/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.22.1/config/BuildSystem/config/packages/SuiteSparse.py	2024-03-30 01:34:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/packages/SuiteSparse.py	2024-06-06 12:00:43
+@@ -56,4 +56,12 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
  
@@ -58,10 +58,12 @@ diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/SuiteSparse.p
 +        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
++        if self.setCompilers.isDarwin(self.log):
++            args.append('-DCMAKE_SHARED_LINKER_FLAGS="-Wl,-ld_classic -Wl,-commons,use_dylibs"')
      return args
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/SuperLU.py petsc-3.21.2-p1/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.21.2/config/BuildSystem/config/packages/SuperLU.py	2024-03-30 01:34:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/packages/SuperLU.py	2024-06-06 12:00:43
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/packages/SuperLU.py petsc-3.22.1-p1/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.22.1/config/BuildSystem/config/packages/SuperLU.py	2024-03-30 01:34:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/packages/SuperLU.py	2024-06-06 12:00:43
 @@ -53,5 +53,11 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
@@ -74,9 +76,9 @@ diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/SuperLU.py pe
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
  
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/metis.py petsc-3.21.2-p1/config/BuildSystem/config/packages/metis.py
---- petsc-3.21.2/config/BuildSystem/config/packages/metis.py	2024-04-26 15:24:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/packages/metis.py	2024-06-06 12:00:43
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/packages/metis.py petsc-3.22.1-p1/config/BuildSystem/config/packages/metis.py
+--- petsc-3.22.1/config/BuildSystem/config/packages/metis.py	2024-04-26 15:24:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/packages/metis.py	2024-06-06 12:00:43
 @@ -44,6 +44,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
@@ -90,9 +92,9 @@ diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/metis.py pets
      return args
  
    def configureLibrary(self):
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/mmg.py petsc-3.21.2-p1/config/BuildSystem/config/packages/mmg.py
---- petsc-3.21.2/config/BuildSystem/config/packages/mmg.py	2024-03-30 01:34:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/packages/mmg.py	2024-06-06 12:00:43
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/packages/mmg.py petsc-3.22.1-p1/config/BuildSystem/config/packages/mmg.py
+--- petsc-3.22.1/config/BuildSystem/config/packages/mmg.py	2024-03-30 01:34:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/packages/mmg.py	2024-06-06 12:00:43
 @@ -28,6 +28,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
@@ -106,9 +108,9 @@ diff --color -Naur petsc-3.21.2/config/BuildSystem/config/packages/mmg.py petsc-
      if self.getDefaultIndexSize() == 64:
        int64_t = '''
  #if !(defined(PETSC_HAVE_STDINT_H) && defined(PETSC_HAVE_INTTYPES_H) && defined(PETSC_HAVE_MPI_INT64_T))
-diff --color -Naur petsc-3.21.2/config/BuildSystem/config/setCompilers.py petsc-3.21.2-p1/config/BuildSystem/config/setCompilers.py
---- petsc-3.21.2/config/BuildSystem/config/setCompilers.py	2024-04-26 15:24:11
-+++ petsc-3.21.2-p1/config/BuildSystem/config/setCompilers.py	2024-06-06 12:00:52
+diff --color -Naur petsc-3.22.1/config/BuildSystem/config/setCompilers.py petsc-3.22.1-p1/config/BuildSystem/config/setCompilers.py
+--- petsc-3.22.1/config/BuildSystem/config/setCompilers.py	2024-04-26 15:24:11
++++ petsc-3.22.1-p1/config/BuildSystem/config/setCompilers.py	2024-06-06 12:00:52
 @@ -1991,7 +1991,6 @@
                    'not supported','is unsupported and will be skipped','illegal option',
                    'invalid option','invalid suboption',
