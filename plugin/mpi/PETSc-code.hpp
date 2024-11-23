@@ -1532,7 +1532,7 @@ namespace PETSc {
           mA->CSR( );
           if (i < mA->n) {
             int j = mA->p[i];
-            for (; j < mA->p[i + 1] && mA->p[j] < dims[ptJ ? v[k].first : k]; ++j)
+            for (; j < mA->p[i + 1] && mA->j[j] < dims[ptJ ? v[k].first : k]; ++j)
               ja[nnz + j - mA->p[i]] = mA->j[j] + offset;
             std::copy_n(mA->aij + mA->p[i], j - mA->p[i], c + nnz);
             nnz += j - mA->p[i];
