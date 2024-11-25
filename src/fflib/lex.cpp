@@ -166,6 +166,7 @@ int mylex::EatCommentAndSpace(string *data)
     int incomment =0, inmarkdown= pilesource[level].typeofscript==1;
     if (firsttime)
     {
+        if( inmarkdown) pilesource[level].typeofscript=2   ;// bof !!!
         firsttime=false;
         if(echo && inmarkdown==0) cout << setw(5) <<linenumber << this->sep() ;
         if(echo && inmarkdown) cout << "\n...MD..:"<<inmarkdown <<"\n\n";
