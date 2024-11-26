@@ -1,7 +1,15 @@
-// test of mmg3d for move objets in a mesh ...
+---
+name: fallingspheres
+category: mesh
+folder: 3d
+---
+
+## Test of mmg3d for moving objects in a mesh
+The mesh around 2 spheres in a box is built, starting with the surface mesh of the 3 shapes
+~~~freefem
 load "tetgen" 
 load "medit" 
-load "mmg3d-v4.0"                                                               
+load "mmg3d-v4.0"
 include "MeshSurface.idp"
 
 // build mesh of a box (311)  wit 2 holes  (300,310)
@@ -18,18 +26,24 @@ plot (ThH,ThSg,ThSd);
 ThSd=movemesh(ThSd,[x,4+y,z]);
 
 meshS ThHS=ThH+ThSg+ThSd;
-medit("ThHS", ThHS);
+medit("ThHS", ThHS); // strike the esc key to continue
 
+~~~
+The surface mesh ThHS is input for the TetGen  function $\texttt{tetg}$.
+
+~~~freefem
 real voltet=(hs^3)/6.;
 cout << " voltet = " << voltet << endl;
 real[int] domaine = [0,0,-4,1,voltet];
 real [int] holes=[0,0,0,0,4,0];
 mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",regionlist=domaine,holelist=holes);    
 medit("Box-With-two-Ball",Th);
-// End build mesh 
+~~~
+You may check that Th is a volumic mesh by using the option key f1 and f2 within medit window.
 
-// int[int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
-
+Now the 2 spheres will be moved vertically  with velocity vit. The rest of the mesh is moved according to uh which is solution of the Laplacian with uh=vit on the sheres and 0 on the box.
+~~~freefem
+verbosity=0;
 real[int] vit=[0,0,-0.3];
 func zero = 0.;
 func dep  = vit[2];
@@ -44,6 +58,13 @@ problem Lap(uh,vh,solver=CG) = int3d(Th)(Grad(uh)'*Grad(vh))  //') for emacs
 for(int it=0; it<29; it++){ 
   cout<<"  ITERATION       "<<it<<endl;
   Lap;
-  plot(Th,uh);
+  plot(Th,uh, wait=1); // hit return to compute the next time step
   Th=mmg3dv4(Th,opt="-O 9",displacement=[zero,zero,uh]); 
  }
+~~~
+
+| The solution           |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/fallingspheres/solution.png

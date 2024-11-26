@@ -1,3 +1,19 @@
+---
+name: Stokes
+category: fluid
+layout: 3d
+---
+
+##  Stokes problem in 3d
+
+The problem is to find velocities and pressure solution of
+$$
+-\Delta \vec u = \vec f,\quad \nabla\cdot \vec u=0,\quad \vec u|_{\partial\Omega}=\vec u_\Gamma
+$$
+For the driven cavity problem the domain $\Omega$ is a cube, $f=0$ and $u_\Gamma=(1,0,0)^T$ on the top face and zero elswhere. The boundaries define $\Gamma$.
+
+First build a mesh for the cube by using $\texttt{buildlayer}$ by extruding vertically the 2d mesh of a square
+~~~freefem
 load "medit"
 int nn=3;
 mesh Th2=square(nn,nn);
@@ -12,7 +28,13 @@ medit("c10x10x10",Th,wait=1);
 
 // FFCS: testing 3d plots
 plot(Th);
-
+~~~
+Then define the Hood-Taylor element which is $P^2$ for $u$ anf $P^1$ for $p$.  The variational formulation finds $u$ satisfying the boundary conditions and $p$ such that
+$$
+\int_\Omega[\nabla u\cdot\nabla v -q\nabla\cdot u - p\nabla\cdot v + \epsilon u\cdot v]=0
+$$
+for all $v$ zero on $\Gamma$.  The regularization parameter $\epsilon$ is necessary to avoid a singular linear system.
+~~~freefem
 fespace VVh(Th,[P2,P2,P2,P1]);
 fespace Vh(Th,P23d);
 macro Grad(u) [dx(u),dy(u),dz(u)]// EOM
@@ -42,3 +64,4 @@ plot(u1);
 plot(u2);
 plot(u3);
 plot(p);
+~~~

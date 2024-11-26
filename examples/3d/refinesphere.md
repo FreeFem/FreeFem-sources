@@ -1,4 +1,13 @@
-// file adaptsphere.edp
+---
+name: adaptsphere
+category: mesh
+layout: 3d
+---
+
+## Construct three 3d meshes of a sphere by varying one parameter in tetgen
+
+The mesh is built by mapping the mesh of a square on a sphere and then call $\texttt{tetg}$.
+~~~freefem
 load "tetgen"
 load "medit"
 
@@ -47,12 +56,12 @@ mesh3 Th3sphrefine=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel,nbofr
 int[int] newlabel2 = [145,53];
 func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
 mesh3 Th3sphrefine2=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel2,sizeofvolume=fsize);
-
- medit("sphere",Th3sph,wait=1);
- medit("sphererefinedomain",wait=1,Th3sphrefine);
-  medit("sphererefinelocal",wait=1,Th3sphrefine2);
-
-// FFCS: testing 3d plots
+/*
+medit("sphere",Th3sph,wait=1);
+medit("sphererefinedomain",wait=1,Th3sphrefine);
+medit("sphererefinelocal",wait=1,Th3sphrefine2);
+*/
 plot(Th3sph);
 plot(Th3sphrefine);
 plot(Th3sphrefine2);
+~~~

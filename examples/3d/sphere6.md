@@ -1,3 +1,16 @@
+---
+name: sphere6
+category: mesh
+layout: 3d
+---
+
+##  Build a 3d mesh for a sphere by mapping the surface mesh of a cube
+
+The mesh of the cube is built by gluing the 6 meshes of the faces and then use the mapping
+$$
+(x,y,z)\mapsto\frac{(x,y,z)}{\sqrt{x^2+y^2+z^2}}.
+$$
+~~~freefem
 load "medit" 
 real sqrt2=sqrt(2.);
 real onesqrt2=sqrt2/2.;
@@ -19,14 +32,20 @@ meshS Thz1 = movemesh23(TS,transfo=[x,y,+f],orientation=+orientation,label=ref);
 meshS Tcube= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
 //savemesh(Tcube,"T.mesh");
 //exec("ffmedit T.mesh");
-medit("Tcube",Tcube);
+//medit("Tcube",Tcube);
 plot(Tcube,wait=1);
 func R = sqrt(x*x+y*y+z*z); 
 meshS Th = movemesh(Tcube,[x/R,y/R,z/R]);
 plot(Th,wait=1);
 //savemesh(Th,"T.mesh");
 //exec("ffmedit T.mesh");
-medit("Th",Th);
+//medit("Th",Th);
 
-// FFCS: testing 3d plots
 plot(Th);
+~~~
+
+|The 3d mesh             |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/sphere6/SOLUTION.png

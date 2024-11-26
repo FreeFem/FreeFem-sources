@@ -1,4 +1,13 @@
-//  example to build a mesh a cone 
+---
+name: pyraamid
+category: mesh
+layout: 3d
+---
+
+## Construct the 3d mesh of a pyramid with internal boundaries
+
+The surface mesh of the base is built and then extruded with $\texttt{buildlayers}$
+~~~freefem
 load "medit"
 // cone using buildlayers with a triangle 
 real LX=1,LY=1,LXY=sqrt(LX*LX+LY*LY),HH=1; 
@@ -23,6 +32,13 @@ int[int] r4T=[0,2];
 mesh3 Th3=buildlayers(Th2,coef= max(fpyramide/HH,0.01), nn,zbound=[0,fpyramide],
  region=r1T, labelup=r2up, labeldown=r2down);
 
-medit("Pyramide",Th3,wait=1);
-// FFCS: testing 3d plots
+//medit("Pyramide",Th3,wait=1);
+
 plot(Th3);
+~~~
+
+|The 3d mesh   |
+|--------------|
+|![][_solution]|
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/pyramide/solution.png

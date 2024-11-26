@@ -1,7 +1,19 @@
+---
+name: first
+category: mesh
+folder: 3d
+---
+
+## Manipulation of various data from a mesh and the solution of a PDE, prints of all kind.
+One mesh is read from a file  the other is built from a circular boundary
+~~~freefem
 verbosity=2;
 mesh3 Th("dodecaedre01");
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2=buildmesh(cc(50));
+~~~
+For the $P^2$ elements various quantities are printed.
+~~~freefem
 fespace Vh2(Th2,P2);
 int nbtets=Th.nt;
 cout << " Th mes " << Th.measure << " border mes " << Th.bordermeasure << endl;
@@ -23,21 +35,23 @@ if(1) {
   cout << " nb of vertices = " << nbvertices << endl;
   for (int i=0;i<nbvertices;i++)
 	cout << "Th(" <<i  << ") : "   // << endl;	
-	     << Th(i).x << " " << Th(i).y  << " " << Th(i).z << " " << Th(i).label // version 2.19 
-	  << endl;
- // version >3.4-1
-  // --------- new stuff -----------------
-  int k=0,l=1,e=1;
-  Th.nbe ; // return the number of boundary element \hfilll
-  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
-  Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
-  Th.be(k).Element ;   // return the tet contening the  boundary element k \hfilll
-  Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
-  Th[k].adj(e) ; // return adjacent tet to k by face e, and change the value of e to \hfilll
-  // the corresponding face in the adjacent tet
-  Th[k] == Th[k].adj(e) ;// non adjacent tet return the same 
+	     << Th(i).x << " " << Th(i).y  << " " << Th(i).z << " " << Th(i).label  << endl;
+int k=0,l=1,e=1;
+~~~
+These instructions do nothing
+~~~freefem
+Th.nbe ; // return the number of boundary elements
+Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$
+Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of boundary element k
+Th.be(k).Element ;   // return the tet containing the boundary element k
+Th.be(k).whoinElement ;  // return the egde number of triangle containing the boundary element k
+Th[k].adj(e) ;
+~~~
+return adjacent tet to k by face e, and change the value of e to the corresponding face in the adjacent tet
+~~~freefem
+Th[k] == Th[k].adj(e) ;// non adjacent tet return the same
   Th[k] != Th[k].adj(e) ;// true adjacent tet 
-  Th.be(k).N;   // return the Normal  of  boundary element k \hfilll
+  Th.be(k).N;   // return the Normal  of  boundary element k
   
   cout << " print mesh connectivity " << endl;
   int nbelement = Th.nt; 
@@ -45,7 +59,6 @@ if(1) {
     cout << k << " :  " << int(Th[k][0]) << " " << int(Th[k][1]) << " " <<  int(Th[k][2]) 
          << " " <<  int(Th[k][3])
 	 << " , label  " << Th[k].label << endl; 
-  //  
   
   for (int k=0;k<nbelement;++k)
     for (int e=0,ee;e<4;++e) 
@@ -67,6 +80,9 @@ if(1) {
 	  
 savemesh(Th,"dd.meshb");
  }
+~~~
+This finite element space is also $P^2$
+~~~freefem
 fespace Vh(Th,P23d);
 Vh xx=x;
 if(xx[].n == Th.nv)
@@ -82,16 +98,19 @@ cout << Th[5].region << endl;
 // cout << Th(0,0,0).region << endl;  a faire ...
 cout << Th[5][3] << endl;  // ok.. 
 
-
 for(int i=0;i<Vh.ndofK;++i )
   cout << Vh(11,i) << " ";
  cout << endl;
 
-cout << ue(0.1,0.2,0.3)<< "  == " << f(0.1,0.2,0.3) << endl; ;
+cout << ue(0.1,0.2,0.3)<< "  == " << f(0.1,0.2,0.3) << endl;
+~~~
+Now a PDE is solved by building first the matrix
+~~~freefem
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
 varf vbc(u,v) =  on(0,u=1);
-varf vlap(u,v) = int3d(Th)(Grad3(v)' *Grad3(u)) + int3d(Th)(f*v) + on(0,u=ue);
+varf vlap(u,v) = int3d(Th)(Grad3(v)' *Grad3(u))//'
+ + int3d(Th)(f*v) + on(0,u=ue);
 varf vBord(u,v,solver=CG) = int2d(Th)(u*v) ;
 verbosity=10; 
 matrix A=vlap(Vh,Vh);
@@ -106,7 +125,6 @@ ofstream fb("B.txt");
 fa << A ;
 fb << b[] ;
 }
-
 
 cout << b[]. min << " " << b[].max << endl;
 u[]=A^-1*b[];
@@ -127,3 +145,4 @@ plot(u2,wait=1);
 	for (j=0;j<u[].n ; j++)  
 	  file << d[][j] << endl; 
     }  
+~~~

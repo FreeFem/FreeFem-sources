@@ -1,23 +1,29 @@
-/*
-   $ - \Delta p = f $   on $\Omega$, 
-   $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{1}$ 
-   $ p = gd  $ on $\Gamma_{2}$    
-   with de Mixte finite element formulation 
+---
+name: LaplaceRT-3d
+category: Applied Math
+folder: 3d
+---
 
-   Find $p\in L^2(\Omega) $  and $u\in H(div) $ such than 
-   $$  u - Grad p = 0    $$
-   $$ - div u =  f $$
-   $$  u. n = (g1d,g2d). n   \mbox{ on } \Gamma_{2}$$
-   $$ p = gd  \mbox{ on }\Gamma_{1}$$
-   the variationnel form is: 
-                                                                                                                   
- $\forall v\in H(div)$;  $v.n = 0$ on $\Gamma_{2} $:  
+## Solve the Laplace Equations in a Cube by a Mixed Method
 
-  $ \int_\Omega  u v + p div v -\int_{\Gamma_{1}} gd* v.n  = 0 $ 
- $\forall q\in L^2$:   $  +\int_\Omega q div u = -\int_Omega f q  $
-and $ u.n = (g1n,g2n).n$ on $\Gamma_2$
+$$
+-\Delta p = f    \hbox{ in }\Omega,\quad
+\frac{\partial p }{\partial n} = (g_1^d,g_2^d). n \hbox{ on }\Gamma_{1}\quad
+p = g^d  \hbox{ on }\Gamma_{2}
+$$
 
-*/
+with the mixed finite element formulation,
+
+Find $p\in L^2(\Omega) $  and $u\in H(div) $ such that
+$$  u - \nabla p = 0 , \quad - \nabla\cdot u =  f, \quad
+  u\cdot n = (g_1^d,g_2^d)\cdot n   \hbox{ on } \Gamma_{2}, \quad
+  p = g^d  \hbox{ on }\Gamma_{1}$$
+the variational form is: $\forall v\in H(div):  v\cdot n|_{\Gamma_{2}}=0,~\forall q\in L^2$:
+
+$$ \int_\Omega  u v + p \nabla\cdot  v -\int_{\Gamma_{1}} g^d v\cdot n     =0,\quad \int_\Omega q \nabla\cdot u = -\int_\Omega f q,\quad
+u\cdot n |_{\Gamma_2}= (g^d_1,g^d_2)\cdot n $$
+
+~~~freefem
 include "cube.idp"
     int[int]  Nxyz=[10,10,10];
     real [int,int]  Bxyz=[[0,1],[0,1],[0,1]];
@@ -152,3 +158,10 @@ cout << " diff err L2 :" << errL2 << endl;
 cout << "    P     L2 :" <<sqrt(int3d(Th)(square(P))) << endl;
 cout << "    p     L2 :" <<sqrt(int3d(Th)(square(p))) << endl;
 assert(errL2<0.05);
+~~~
+
+|The solution            |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/LaplaceRT-3d/solution.png

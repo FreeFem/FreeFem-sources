@@ -1,7 +1,13 @@
-/*
-   Warning in before version 3.2-1 the nomarl are interal normal
-   after the signe is correct and now the noral was exterior normal. 
- */
+---
+name: Laplace3d
+category: Applied Math
+folder: 3d
+---
+
+## Solve the Laplace Equations in a Cube with P2 Elements
+
+First build the mesh
+~~~freefem
 verbosity=2;
 
 int nn=20;
@@ -15,8 +21,13 @@ mesh3 Th=buildlayers(Th2,nn,
   labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-
-
+~~~
+This method is more complex that $\texttt{ mesh3 Th = cube(nn,nn,nn);}$.  Now the following problem is solved
+$$
+\int_{Th}\nabla u\cdot\nabla v = \int_{Th}f v, \quad \frac{\partial u}{\partial n}|_{\Gamma_2}= \vec n\cdot\nabla u_e,\quad u|_{\Gamma_1}=u_e
+$$
+and $f$ is chosen  to be $-\Delta u_e$ so that the solution is $u_e$
+~~~freefem
 fespace Vh(Th,P2);
 
 func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
@@ -40,6 +51,9 @@ macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
   - int2d(Th,2) ( ue*v + (uex*N.x +uey*N.y +uez*N.z)*v )
   + on(1,u=ue);
 Lap3d;
+~~~
+Various quantities are printed including the effect of a quadrature change.
+~~~freefem
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
 real aa1= int3d(Th,qfV=qfV1)(u) ;
@@ -60,4 +74,10 @@ assert( abs(aire2-1.) < 1e-6);
 plot(u,wait=1);
 
 assert( err < 1e-6);
+~~~
 
+|The solution            |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace3d/solution.png

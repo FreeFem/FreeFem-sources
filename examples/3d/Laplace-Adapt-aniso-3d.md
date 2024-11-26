@@ -1,4 +1,20 @@
+---
+name: Laplace-Adapt-3d
+category: Applied Math
+folder: 3d
+---
 
+## Solve the Laplace Equations in a Cube with Discontinous Galerkin Method of degree 1 and anisotropic mesh refinement
+
+This is a continuation of Laplace-Adapt-3d.md. The problem is the same
+$$
+-\Delta u = f,\texttt{ in } \Omega\quad u|_{\partial\Omega}=g
+$$
+where $\Omega$ is the unit cube minus a half unit cube, $f=1$, $g=1$.
+The finite element space chosen if the discontinuous $P^1$.
+
+The unit cube is constructed in a different way with $\texttt{buildlayers}$.
+~~~freefem
 {
 load "tetgen"
 load "mshmet"
@@ -35,18 +51,19 @@ for(int ii=0; ii<4; ii++) //  BUG trap  in interation 3
  
   real[int] met=mshmet(Th3,u,hmin=1e-3,hmax=0.2,err=lerr,aniso=1);
   m11[]=met;
-//  savemesh(Th3,"oo/Th3.mesh");
-//  savesol("oo/Th3.sol",Th3, [m11,m21,m22,m31,m32,m33]);
-//  exec("mmg3d_O3 oo/Th3.mesh -sol oo/Th3.sol -hgrad 2.3 -bucket 700 -v 3");
   Th3=mmg3d(Th3,metric=m11[],hgrad=2.3);//("oo/Th3.o.mesh");
   
   lerr *= 0.6;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
    u=u;
-  if(ii>3) medit("U-adap-iso-"+ii,Th3,u,wait=1);
-
+  if(ii>2) medit("U-adap-iso-"+ii,Th3,u,wait=1);
 }
 cout <<"end Laplace  Adapt aniso 3d. edp " <<endl;
-
-
 }
+~~~
+
+| The third refined mesh |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace-Adapt-aniso-3d/solution.png

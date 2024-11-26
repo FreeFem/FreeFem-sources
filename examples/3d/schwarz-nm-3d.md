@@ -1,3 +1,13 @@
+---
+name: schwarz-nm-3d
+category: math
+layout: 3d
+---
+
+## Use metis to split a triangulation then solve a Laplacian by Schwarz DDM
+
+The mesh of a cube is split using metis.
+~~~freefem
 bool withmetis=1;
 bool RAS=0;
 int sizeoverlaps=2; // size off overlap 
@@ -31,7 +41,7 @@ func bool AddLayers(mesh3 & Th,real[int] &ssd,int n,real[int] &unssd)
       u = u>.1; 
       // plot(u,wait=1);
       unssd+= u[];
-      s[]= M'*u[];//';
+      s[]= M'*u[];//'
       s = s >0.1;
     }
   unssd /= (n);
@@ -67,6 +77,9 @@ if(withmetis)
   }
 if(withplot>1)
 plot(part,fill=1,cmm="dual",wait=1);
+~~~
+Then the PDEs are prepared
+~~~freefem
 mesh3[int] aTh(npart);
 mesh3 Thi=Th;
 fespace Vhi(Thi,P1);
@@ -140,7 +153,9 @@ if(withplot>5)
 cout << sun[].max << " " << sun[].min<< endl;
 // verification of the partition of the unite.
 assert( 1.-1e-9 <= sun[].min  && 1.+1e-9 >= sun[].max);  
-
+~~~
+The Schwarz iterations are implemented
+~~~freefem
 int nitermax=1000;
 {
   Vh un=0;
@@ -174,3 +189,10 @@ int nitermax=1000;
     }
   plot(un,wait=1,dim=3,fill=1);
 }
+~~~
+
+|The solution            |
+|------------------------|
+|![][_solution]          |
+
+[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/schwarz-nm-3d/solution.png
