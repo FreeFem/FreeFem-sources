@@ -123,138 +123,83 @@ download(
 );
 
 # 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
-download(
-    'freeYams',
-    'https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
-    'https://www.ljll.math.upmc.fr/frey/software.html',
-    'freeyams.2012.02.05.tgz',
-    'b7c82a256a3e59beeb2b578de93a4e0b'
-);
-download(
-    'Gmm++',
-    'https://www.ljll.fr/hecht/pkg/gmm-4.2.tar.gz',
-    'https://www.ljll.fr/hecht/pkg/',
-    'gmm-4.2.tar.gz',
-    '35fe900f7459c49f4b4337dc691c8cdf'
-);
-download(
-    'Ipopt',
-    'http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz',
-    'https://projects.coin-or.org/Ipopt',
-    'Ipopt-3.12.4.tgz',
-    '12a8ecaff8dd90025ddea6c65b49cb03'
-);
-download(
-    'METIS',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz',
-    'http://www.netlib.org/linalg/',
-    'metis-5.1.0.tar.gz',
-    '5465e67079419a69e0116de24fce58fe'
-);
-download(
-    'ParMETIS',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz',
-    'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/',
-    'ParMetis-4.0.3.tar.gz',
-    'f69c479586bf6bb7aff6a9bc0c739628'
-);
-download(
-    'MMG3D',
-    'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mmg3d4.0.tgz',
-    'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
-    'mmg3d4.0.tgz',
-    'bfc2b0373bc208e0512415d1aa2e76a1'
-);
-download(
-    'mshmet',
-    'https://www.ljll.math.upmc.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
-    'https://www.ljll.math.upmc.fr/frey/software.html',
-    'mshmet.2012.04.25.tgz',
-    '427f397e0602efc56aa897d38a8e9bfa'
-);
-download(
-    'MUMPS',
-    'http://mumps.enseeiht.fr/MUMPS_5.0.2.tar.gz',
-    'http://mumps.enseeiht.fr/',
-    'MUMPS_5.0.2.tar.gz',
-    '591bcb2c205dcb0283872608cdf04927'
-);
-download(
-    'NLopt',
-    'http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
-    'http://ab-initio.mit.edu/wiki/index.php/NLopt',
-    'nlopt-2.2.4.tar.gz',
-    '9c60c6380a10c6d2a06895f0e8756d4f'
-);
-download(
-    'ScaLAPACK',
-    'http://www.netlib.org/scalapack/scalapack-2.1.0.tgz',
-    'http://www.netlib.org/scalapack/',
-    'scalapack-2.1.0.tgz',
-    '3b239ef80353c67354a0a62d54946fa8'
-);
-download(
-    'Scotch',
-'https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.0/scotch-v6.1.0.tar.gz',
-    'https://gitlab.inria.fr/scotch/',
-    'scotch-v6.1.0.tar.gz',
-    '7bfad4aaa851af6815b2160da7ebe36a'
-);    # web certificate from gforge.inria.fr is rejected
-download(
-    'SuiteSparse',
-    'http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.4.4.tar.gz',
-    'http://faculty.cse.tamu.edu/davis/SuiteSparse/',
-    'SuiteSparse-4.4.4.tar.gz',
-    'e0af74476935c9ff6d971df8bb6b82fc'
-);
-
+download('freeYams','https://www.ljll.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
+	'https://www.ljll.fr/frey/software.html',
+	'freeyams.2012.02.05.tgz',
+	'b7c82a256a3e59beeb2b578de93a4e0b');
+download('Gmm++','https://www.ljll.fr/hecht/pkg/gmm-4.2.tar.gz',
+	'https://www.ljll.fr/hecht/pkg/',
+	'gmm-4.2.tar.gz',
+	'35fe900f7459c49f4b4337dc691c8cdf');
+download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz',
+	'https://projects.coin-or.org/Ipopt',
+	'Ipopt-3.12.4.tgz',
+	'12a8ecaff8dd90025ddea6c65b49cb03');
+download('METIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz',
+	'http://www.netlib.org/linalg/',
+	'metis-5.1.0.tar.gz',
+	'5465e67079419a69e0116de24fce58fe');
+download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz',
+	'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/',
+	'ParMetis-4.0.3.tar.gz',
+	'f69c479586bf6bb7aff6a9bc0c739628');
+download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mmg3d4.0.tgz',
+	'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
+	'mmg3d4.0.tgz',
+	'bfc2b0373bc208e0512415d1aa2e76a1');
+download('mshmet','https://www.ljll.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
+	'https://www.ljll.fr/frey/software.html',
+	'mshmet.2012.04.25.tgz',
+	'427f397e0602efc56aa897d38a8e9bfa');
+download('MUMPS','https://ftp.mcs.anl.gov/pub/petsc/externalpackages/MUMPS_5.0.2.tar.gz',
+	'https://ftp.mcs.anl.gov/pub/petsc/externalpackages',
+	'MUMPS_5.0.2.tar.gz',
+	'591bcb2c205dcb0283872608cdf04927');
+download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
+	'http://ab-initio.mit.edu/wiki/index.php/NLopt',
+	'nlopt-2.2.4.tar.gz',
+	'9c60c6380a10c6d2a06895f0e8756d4f');
+download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.1.0.tgz',
+	'http://www.netlib.org/scalapack/',
+	'scalapack-2.1.0.tgz',
+	'3b239ef80353c67354a0a62d54946fa8');
+download('Scotch','https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.0/scotch-v6.1.0.tar.gz',
+	'https://gitlab.inria.fr/scotch/',
+	'scotch-v6.1.0.tar.gz',
+	'7bfad4aaa851af6815b2160da7ebe36a'); # web certificate from gforge.inria.fr is rejected
+download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.4.4.tar.gz',
+	'http://faculty.cse.tamu.edu/davis/SuiteSparse/',
+	'SuiteSparse-4.4.4.tar.gz',
+	'e0af74476935c9ff6d971df8bb6b82fc') ;
 #download('SuperLU','https://github.com/xiaoyeli/superlu/archive/4f2da83a24c52641c1f7ab06f57c00b8954cf215.zip',
 #	'https://github.com/xiaoyeli/superlu',
 #	'superlu.zip',
 #	'596927f39d28a7d6eb396764f46455b2');
-download(
-    'SuperLU',
-    'https://github.com/xiaoyeli/superlu/archive/v5.2.2.zip',
-    'https://github.com/xiaoyeli/superlu',
-    'superlu-5.2.2.zip',
-    '6e24842b0aa07f457d929b162e09ca6c'
-);
-download(
-    'TetGen',
-    'http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
-    'http://www.tetgen.org/1.5/src/',
-    'tetgen1.5.1-beta1.tar.gz',
-    '3d55c197bcbfc611b7ced6f343643756'
-);
-download(
-    'mmg',
-'https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
-    'https://github.com/MmgTools',
-    'mmg.zip',
-    'd824d08dac0544caff20a915194da0fe'
-);
-download(
-    'parmmg',
-'https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
-    'https://github.com/MmgTools',
-    'parmmg.zip',
-    '9a76fef6be1ab66af3a813409a0388c9'
-);
-download(
-    'PETSc',
-'https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.21.3.tar.gz',
-    'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
-    'petsc-3.21.3.tar.gz',
-    'c18cb846f97dffb9319d43e9017896b3'
-);
+download('SuperLU','https://github.com/xiaoyeli/superlu/archive/v5.2.2.zip',
+		'https://github.com/xiaoyeli/superlu',
+		'superlu-5.2.2.zip',
+		'6e24842b0aa07f457d929b162e09ca6c');
+download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
+	'http://www.tetgen.org/1.5/src/',
+	'tetgen1.5.1-beta1.tar.gz',
+	'3d55c197bcbfc611b7ced6f343643756');
+download('mmg','https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
+        'https://github.com/MmgTools',
+        'mmg.zip',
+        'd824d08dac0544caff20a915194da0fe');
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
+        'https://github.com/MmgTools',
+        'parmmg.zip',
+        '9a76fef6be1ab66af3a813409a0388c9');
+download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.22.1.tar.gz',
+	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
+	'petsc-3.22.1.tar.gz',
+	'bb893179c4421facda89928da36e8a25');
 
-download(
-    'htool',
-'https://github.com/htool-ddm/htool/archive/946875d79d0036afb4dc2c0c13c165a607d830df.zip',
-    'https://github.com/htool-ddm/',
-    'htool.zip',
-    '1403db4800a2d4b69f3da7eb3f6687a2'
-);
+download('htool','https://github.com/htool-ddm/htool/archive/f9a7e48eaa90cad7e23515086355388de96bf55a.zip',
+		'https://github.com/htool-ddm/',
+		'htool.zip',
+		'f0b977c3ab24f26e23b5e7398577d0f4');
 
 download(
     'hpddm',
@@ -264,21 +209,21 @@ download(
     '6910b7b974f0b60d9c247c666e7f3862'
 );
 
-download(
-    'bemtool',
-'https://github.com/PierreMarchand20/BemTool/archive/629c44513698405b58c50650cba69419474062ad.zip',
-    'https://github.com/PierreMarchand20/BemTool',
-    'bemtool.zip',
-    '869832f5cbec4dfb2c16e2d94bad0b7d'
-);
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/6e61fbf86d8cd53994d9f597e60fde537650ba14.zip',
+	'https://github.com/PierreMarchand20/BemTool',
+	'bemtool.zip',
+	'2de5404f4a88d7c8847bd85209fd69a1');
 
-download(
-    'Boost',
-    'https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
-    'https://www.boost.org',
-    'boost_for_bemtool.tar.gz',
-    'bb0e3ee1ad06174c80a69bc0756034e7'
-);
+download('Boost','https://www.ljll.fr/~tournier/boost_for_bemtool.tar.gz',
+	'https://www.boost.org',
+	'boost_for_bemtool.tar.gz',
+	'214ac6b98374ecfcde4fd83d4ed0c179');
+
+
+download('libpthread-google','https://www.ljll.fr/hecht/pkg/libpthread-google.tar.gz',
+		'https://www.ljll.fr/hecht/pkg/',
+		'libpthread-google.tar.gz',
+		'945c006d898983d1a710aabf52a32d9c');
 
 download(
     'libpthread-google',

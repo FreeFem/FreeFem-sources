@@ -1,4 +1,3 @@
-load "msh3"
 int n = 100;
 meshL Th = segment(n,[10.*(2.*x-1.),1.*y]);	
 fespace Vh(Th,P1); 	

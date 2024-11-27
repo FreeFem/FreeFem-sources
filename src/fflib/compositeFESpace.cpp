@@ -10,8 +10,6 @@
 #include <lgfem.hpp>
 #include <R3.hpp>
 
-#include <htool/htool.hpp>
-
 // include the bemtool library .... path define in where library
 //#include <bemtool/operator/block_op.hpp>
 #include <bemtool/tools.hpp>

@@ -7,7 +7,6 @@
 /* example of wave guiding with gradient-index lenses */
 
 load "bem"
-load "msh3"
 load "MUMPS"
 
 include "getARGV.idp"

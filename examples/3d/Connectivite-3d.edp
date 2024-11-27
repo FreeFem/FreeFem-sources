@@ -1,4 +1,3 @@
-load "msh3"
 
 mesh3 Th=cube(1,1,1);
 

@@ -116,6 +116,7 @@ int ShowAlloc(const char *s,size_t &);
 // <<yylex>> Connection from grammar to lexer object zzzfff [[file:../fflib/lex.hpp::zzzfff]] of class mylex
 // [[file:../fflib/lex.hpp::class mylex]]. Method mylex::scan() is implemented at [[file:../fflib/lex.cpp::mylex_scan]]
 
+
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 
@@ -869,6 +870,8 @@ void init_lgfem() ;
 void init_lgmesh() ;
 void init_lgmesh3() ;
 void init_algo();
+void msh3_Load_Init( ); //
+
 bool withrgraphique = false;
 
 /// <<Compile>> Called by mainff(). Activates the bison parser by calling yyparse()
@@ -1059,7 +1062,8 @@ int mainff (int  argc, char **argv)
 #endif
 
    if(init_lgparallele)  init_lgparallele();
-  //  callInitsFunct() ; //  init for dynamique libs ...
+   msh3_Load_Init(); // Add msh3 lib !!! 
+     //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
   zzzfff->input(cc,typeofscript); // [[file:../fflib/lex.cpp::mylex_input_filename]]

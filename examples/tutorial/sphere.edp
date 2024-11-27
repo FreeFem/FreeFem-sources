@@ -30,7 +30,7 @@ plot(Th,wait=1);
 Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 plot(Th,wait=1);
 Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
-load "msh3" load "medit" 
+load "medit" 
 //savemesh(Th,"sphere-a",[f1,f2,f3]);
 plot(Th,wait=1);
 meshS Th3= movemesh23(Th,transfo=[f1,f2,f3]);

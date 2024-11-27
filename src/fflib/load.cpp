@@ -53,7 +53,8 @@ set<string> SetLoadFile;
 
 bool load (string ss) {
   // FFCS - do not allow potentially dangerous commands from remote anonymous clients
-
+    static int count =0;
+  if(count++==0) SetLoadFile.insert("msh3");
   if (ffapi::protectedservermode() && (ss == "pipe" || ss == "shell")) {
     cerr << "library " << ss << " not allowed in server environment" << endl;
     CompileError("Error load");
@@ -124,7 +125,7 @@ bool load (string ss) {
         bool ok = false;
 
         // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]]
-        if (ss == "msh3") {
+        if (ss == "msh3-old") {
           // [[file:~/ff/examples++-load/msh3.cpp::msh3_Load_Init]]
           void msh3_Load_Init();
           msh3_Load_Init();

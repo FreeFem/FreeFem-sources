@@ -5,7 +5,6 @@
 // PARAM -frequency 1e+9
 
 load "bem"
-load "msh3"
 
 include "getARGV.idp"
 

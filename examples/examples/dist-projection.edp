@@ -1,5 +1,4 @@
 // test dist and projection on meshL
-load "msh3"
 border C(t=0,2*pi){ x= cos(t); y=sin(t); label=1; region =1;}
 meshL Lh =buildmeshL(C(20));
 mesh Th= square(20,20,[(x-0.5)*3,(y-0.5)*3]);
@@ -25,7 +24,6 @@ plot(d, [Ux,Uy],Lh, wait=1);
  cout << Th2[nu][2].x << endl;
  cout << Th2[nu][2].y  << endl;
 plot([Ux,Uy],Th2, wait=1);
-load "msh3";
 meshL Lh2 = extract(Th2);
 //savemesh(Th2,"/tmp/Th2.mesh");
 //savemesh(Lh2,"/tmp/Lh2.mesh");

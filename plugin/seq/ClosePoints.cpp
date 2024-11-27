@@ -35,16 +35,16 @@ class R2close {
  public:
   double *data;    // minimal points+ delta
   typedef double *Point;
-  int n, nx, offset;
+  long n, nx, offset;
   Point *P;
-  const double EPSILON;
+  const double EPSILON,epscase;
   double x0, y0, x1, y1, coef;    // boundin box
-  R2close( ) : data(0), n(0), nx(1000000), P(new Point[nx]), EPSILON(1e-6), offset(0) {
+  R2close( ) : data(0), n(0), nx(1000000), P(new Point[nx]), EPSILON(1e-6),epscase(EPSILON*2), offset(0) {
     InitialiserListe( );
   }
 
   R2close(double *dd, int mx, double eps = 1e-6, int offsett = 1)
-    : data(dd), n(0), nx(mx), P(new Point[nx]), EPSILON(eps), offset(offsett) {
+    : data(dd), n(0), nx(mx), P(new Point[nx]), EPSILON(eps),epscase(EPSILON*2), offset(offsett) {
     InitialiserListe( );
   }
 
@@ -75,7 +75,7 @@ class R2close {
     }
 
     N = max(sqrt(nx), 10.);
-    m = max(nx / 10, 100);
+    m = max(nx / 10L, 100L);
     next = new int[nx];
     head = new int[m];
 
@@ -147,13 +147,13 @@ class R2close {
       cout << " Find " << x << " " << y << " " << EPSILON << " " << ncase(x, y) << ": ";
     }
 
-    double eps = EPSILON / 2;
+    //double eps = EPSILON ;// size of the virtual grid
     Point *q = 0;
     int kk[9] = {}, k = 0, nc;
 
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
-        nc = ncase(x + eps * i, y + eps * j);
+        nc = ncase(x + epscase * i, y + epscase * j);
         if (nc >= 0) {
           for (int i = 0; i < k; ++i) {    // remove double cas e..
             if (kk[i] == nc) {
@@ -169,8 +169,8 @@ class R2close {
       }
     }
 
-    if (k > 4) {
-      cout << "   ClosePoints: FindAll Bug ??? : " << k << " : ";
+    if (k > 9) {
+      cout << "   ClosePoints R2: FindAll Bug ??? : " << k << " : ";
 
       for (int i = 0; i < k; ++i) {
         cout << " " << kk[i];
@@ -179,7 +179,7 @@ class R2close {
       cout << endl;
     }
 
-    assert(k <= 4);
+    assert(k <= 9);
 
     for (int i = 0; i < k; ++i) {
       int k = kk[i];
@@ -200,13 +200,13 @@ class R2close {
     }
 
     // double x = p[0], y=p[offset];
-    double eps = EPSILON / 2;
+    //double eps = EPSILON ;
     Point *q = 0;
     int kk[9] = {}, k = 0, nc;
 
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
-        nc = ncase(x + eps * i, y + eps * j);
+        nc = ncase(x + epscase * i, y + epscase * j);
         // cout <<x+eps*i << " " << y+eps*j << " " << nc << " . ";
         if (nc >= 0) {
           for (int i = 0; i < k; ++i) {    // remove double cas e..
@@ -223,8 +223,8 @@ class R2close {
       }
     }
 
-    if (k > 4) {
-      cout << "   ClosePoints: Bug ??? : " << k << " : ";
+    if (k > 9) {
+      cout << "   ClosePoints R2.: Bug ??? : " << k << " : ";
 
       for (int i = 0; i < k; ++i) {
         cout << " " << kk[i];
@@ -233,7 +233,7 @@ class R2close {
       cout << endl;
     }
 
-    assert(k <= 4);
+    assert(k < 9);
 
     for (int i = 0; i < k; ++i) {
       q = Exist(x, y, kk[i]);
@@ -273,8 +273,8 @@ class R2close {
     if (x < x0 || x >= x1 || y < y0 || y >= y1) {
       return -1;    // dehors
     } else {
-      return long((x - x0) / EPSILON / 2) +
-             long((y - y0) / EPSILON / 2) * N;    // indice de la case contenant (x,y).
+      return long((x - x0) / epscase) +
+             long((y - y0) / epscase) * N;    // indice de la case contenant (x,y).
     }
   }
 
@@ -290,6 +290,282 @@ class R2close {
   R2close(const R2close &);
   R2close &operator=(const R2close &);
 };
+
+class R3close {
+   //  cube Nx,Ny,Nz : numbering (hx,hy,hz) step in x,y or z direction .
+    //   x : i * hx, y : j * hy , z : k*hz
+    //  I(i,j,k)  = i + j*Nx + k*Nx*Ny  global number
+  // so offset in x,y,z are  1, Nx,Nx*Ny
+ public:
+  double *data;    // minimal points+ delta
+  typedef double *Point;
+  long n, nx, offsetx,offsety,offsetz;
+  Point *P;// Warning double pointeur
+  const double EPSILON,epscase;
+  double x0, y0, x1, y1, z0,z1, coef;    // boundin box
+  R3close( ) : data(0), n(0), nx(1000000), P(new Point[nx]), EPSILON(1e-6),epscase(EPSILON*2),offsetx(0), offsety(1),offsetz(2) {
+    InitialiserListe( );
+  }
+
+    R3close(double *dd, int nxx, double eps = 1e-6, int *o = 0, int *Ng=0)
+    : data(dd), n(0), nx(nxx), P(new Point[nx]), EPSILON(eps),epscase(EPSILON*2), offsetx(o?o[0]:0), offsety(o?o[1]:1),offsetz(o?o[2]:2) {
+    InitialiserListe(Ng );
+  }
+
+  Point operator[](int i) const { return P[i]; }
+
+  int Nxc,Nyc,Nzc, m;     // le nombre de code = ncase()%n
+    int Nx,Nxy; // for ncase ...
+  int *head;    // pointeur tableau de dimension  m    contenant les tete de liste pour chaque code
+  int *next;    // pointeur tableau de dimension nx donnant le point suivant de mÍme code
+  static const int NotaPoint = -1;
+    void InitialiserListe(int *Ng=0 ) {
+        int slong = sizeof(long);
+        int nlong = slong*8;
+        int nlong3 = nlong/3;
+        long mxN = (1L<<nlong3)-1L;
+        cout << " mxN "<< mxN << " " << mxN*mxN*mxN <<" " << nlong3 << endl;
+        ffassert(mxN*mxN*mxN>0);
+        ffassert(EPSILON>1e-30);
+        if (data) {
+            x0 = data[0];
+            y0 = data[1];
+            z0 = data[2];
+            x1 = data[3];
+            y1 = data[4];
+            z1 = data[5];
+        } else {
+            x0 = 0;
+            y0 = 1;
+            x1 = 0;
+            y1 = 1;
+            z1 = 0;
+            z1 = 1;
+        }
+        
+        Nxc=min(long( (x1-x0)/EPSILON),mxN) ;
+        Nyc=min(long( (y1-y0)/EPSILON),mxN) ;
+        Nzc=min(long( (z1-z0)/EPSILON),mxN) ;
+
+        if(Ng)
+        {
+            Nxc=Ng[0];
+            Nyc=Ng[1];
+            Nzc=Ng[2];
+        }
+        Nx=Nxc;
+        Nxy = Nxc*Nyc;
+        coef = 1. / max(max(x1 - x0, y1 - y0),z1-z0);
+        if (verbosity > 10) {
+            cout << "     bounding box ClosePoints  Pmin=[" << x0 << ", " << y0 << ", "<< z0  << "], Pmax=[ " << x1
+            << ", " << y1 << ", " << z1 << "] "
+            << "\n\teps= " << EPSILON << " offset:" << offsetx << " "<<offsety<< " "<< offsetz << ", Nxyz = "<< Nxc << " "<< Nyc << " Nzc " <<endl;
+        }
+        
+        
+        m =  nx; // nombre de code ????
+        next = new int[nx];
+        head = new int[m];
+        
+        for (int i = 0; i < m; ++i) {
+            head[i] = NotaPoint;
+        }
+    }
+
+  int AddSimple(double *p) {
+    double x = p[offsetx], y = p[offsety], z = p[offsetz];
+
+    assert(n < nx);
+    P[n] = p;
+
+    int k = ncase(x, y, z ) % m;
+    assert(k >= 0);
+    next[n] = head[k];
+    head[k] = n;
+    if (debug) {
+      cout << "  AddSimple " << n << " <- " << k << " / " << x << " " << y << " "<< z << " / " << offsety << " "<< offsetz
+           << endl;
+    }
+
+    return n++;
+  }
+
+ private:
+  Point *Exist(double *p) const {
+    double x = p[offsetx], y = p[offsety], z = p[offsetz] ;
+
+    for (int i = 0; i < n; ++i) {
+      if (Equivalent(x, y, z, P[i])) {
+        return P + i;
+      }
+    }
+
+    return 0;
+  }
+
+ public:
+  bool Equivalent(double x0, double y0, double z0, const Point Q) const {
+    return (  (x0 - Q[offsetx]) * (x0 - Q[offsetx])
+            + (y0 - Q[offsety]) * (y0 - Q[offsety])
+            + (z0 - Q[offsetz]) * (z0 - Q[offsetz])
+            ) < EPSILON * EPSILON;
+  }
+
+  Point *Exist(double x, double y,double z, int k) const {
+    for (int i = head[k % m]; i != NotaPoint; i = next[i]) {
+      if (Equivalent(x, y, z, P[i])) {
+        return P + i;
+      }
+    }
+
+    return 0;
+  }
+
+  int Add(double *p) {
+    Point *q = Exist(p);
+
+    if (q) {
+      return q - P;    // numero du point (OK car Point is a  pointeur)
+    } else {
+      return AddSimple(p);
+    }
+  }
+
+  int FindAll(double x, double y, double z, int *p) {
+    int nbp = 0;
+
+    if (debug) {
+      cout << " Find " << x << " " << y << " " << z << " " << EPSILON << " " << ncase(x, y, z) << ": ";
+    }
+
+    Point *q = 0;
+    int kk[27] = {}, ik = 0, nc;
+
+    for (int i = -1; i < 2; ++i) {
+      for (int j = -1; j < 2; ++j) {
+        for (int k = -1; k < 2; ++k) {
+        nc = ncase(x + epscase * i, y + epscase * j,  z + epscase * k);
+        if (nc >= 0) {
+          for (int i = 0; i < ik; ++i) {    // remove double cas ..
+            if (kk[i] == nc) {
+              nc = -1;
+              break;
+            }
+          }
+        }
+
+        if (nc >= 0) {
+          kk[ik++] = nc;
+        }
+      }
+    }
+}
+                                                                                            
+
+
+    for (int i = 0; i < ik; ++i) {
+      int ik = kk[i];
+
+      for (int i = head[ik % m]; i != NotaPoint; i = next[i]) {
+        if (Equivalent(x, y, z, P[i])) {
+          p[nbp++] = i;
+        }
+      }
+    }
+
+    return nbp;
+  }
+
+  Point *Find(double x, double y, double z) {
+    if (debug) {
+      cout << " Find " << x << " " << y << " " << z <<" " << EPSILON << " " << ncase(x, y, z) << ": ";
+    }
+
+    // double x = p[0], y=p[offset];
+    //double eps = EPSILON ;
+    Point *q = 0;
+    int kk[27] = {}, ik = 0, nc;
+
+    for (int i = -1; i < 2; ++i) {
+      for (int j = -1; j < 2; ++j) {
+        for (int k = -1; k < 2; ++k) {
+
+        nc = ncase(x + epscase * i, y + epscase * j, z + epscase * k);
+        // cout <<x+eps*i << " " << y+eps*j << " " << nc << " . ";
+        if (nc >= 0) {
+          for (int i = 0; i < ik; ++i) {    // remove double cas e..
+            if (kk[i] == nc) {
+              nc = -1;
+              break;
+            }
+          }
+        }
+
+        if (nc >= 0) {
+          kk[ik++] = nc;
+        }
+      }
+    }
+                                                                                                 }
+
+
+    for (int i = 0; i < ik; ++i) {
+      q = Exist(x, y, z, kk[i]);
+      if (debug) {
+        cout << " " << kk[i];
+      }
+
+      if (q) {
+        break;
+      }
+    }
+
+    if (debug) {
+      cout << " q= " << q << endl;
+    }
+
+    if (q) {
+      return q;    // numero du point
+    } else {
+      return 0;
+    }
+  }
+
+  Point *Find(double *p) { return Find(*(p + offsetz) , *(p + offsety) , *(p + offsetz)); }
+
+  int AddOpt(double *p) {
+    Point *q = Find(p);
+
+    if (q) {
+      return q - P;    // numero du point
+    } else {
+      return AddSimple(p);
+    }
+  }
+
+  long ncase(double x, double y, double z) {
+   // warning over flow long !!!
+    if (x < x0 || x >= x1 || y < y0 || y >= y1|| z < z0 || z >= z1 ) {
+      return -1;    // dehors
+    } else {
+      return long((x - x0) / epscase) +
+             long((y - y0) / epscase) * Nx +
+             long((z - z0) / epscase) * Nxy;                                                                                     // indice de la case contenant (x,y,z).
+    }
+  }
+
+  ~R3close( ) {
+    delete[] P;
+    delete[] head;
+    delete[] next;
+  }
+
+  // pas de copie de  cette structure
+
+ private:
+  R3close(const R3close &);
+  R3close &operator=(const R3close &);
+}; // END R3close ...
 
 double dist2(int n, double *p, double *q) {
   double s = 0;
@@ -339,6 +615,60 @@ KN< long > *CloseTo2(Stack stack, double const &eps, KNM_< double > const &P,
 
   for (int i = 0; i < Qm0; ++i) {
     R2close::Point *p = S.Find(Q(0, i), Q(1, i));
+    if (p) {
+      (*pr)[i] = p - S.P;
+    } else {
+      (*pr)[i] = -1;
+    }
+  }
+
+  return Add2StackOfPtr2FreeRC(stack, pr);
+}
+
+KN< long > *CloseTo3(Stack stack, double const &eps, KNM_< double > const &P,
+                     KNM_< double > const &Q) {
+  long Pm0 = P.M( );
+  long Qm0 = Q.M( );
+    long Pn0 = P.N( );
+    long Qn0 = Q.N( );
+    ffassert(Pn0>=3 && Qn0>=3);
+  int po00 = 0;
+  int po10 = P.step * P.shapei.step;
+  int po20 = P.step * P.shapei.step*2;
+    int offset[3]={po00,po10,po20};
+  double x0 = P(0, ':').min( );
+  double y0 = P(1, ':').min( );
+  double z0 = P(2, ':').min( );
+  double x1 = P(0, ':').max( );
+  double y1 = P(1, ':').max( );
+  double z1 = P(2, ':').max( );
+
+  // add cc
+  double dd = max(max(x1 - x0, y1 - y0),z1-z0)  * 0.01;
+
+  if (dd == 0) {
+    dd = max(max(abs(x0), abs(y0)), abs(z0))* 1e-8;
+  }
+
+  if (dd == 0) {
+    dd = 1e-8;
+  }
+
+  double data[] = {x0 - dd, y0 - dd,z0 - dd, x1 + dd, y1 + dd,z1 + dd};
+  R3close S(data, Pm0, eps, offset);
+
+  for (int i = 0; i < Pm0; ++i) {
+    if (verbosity > 19) {
+      cout << i << " :: " << P(0, i) << " " << P(1, i) << " " << P(2, i) << endl;
+    }
+
+    S.AddSimple(&P(0, i));
+  }
+
+  KN< long > *pr = new KN< long >(Qm0);
+
+  for (int i = 0; i < Qm0; ++i) {
+    R2close::Point *p = S.Find(Q(0, i), Q(1, i), Q(2, i));
     if (p) {
       (*pr)[i] = p - S.P;
     } else {
@@ -675,6 +1005,76 @@ long Voisinage(KNM_< double > const &P, KNM_< double > const &Q, double const &e
   return 0;
 }
 
+long Voisinage3(KNM_< double > const &P, KNM_< double > const &Q, double const &eps,
+               KN< KN< long > > *const &IJ) {
+  debug = (verbosity > 999);
+  int np = P.N( );
+  int nq = Q.N( );
+  int mp = P.M( );
+  int mq = Q.M( );
+  double *p = &P(0, 0);
+  int offset01 = P.step * P.shapej.step;
+  int offset10 = P.step * P.shapei.step;
+  ffassert(mp == 3);
+  ffassert(mq == 3);
+  KN< int > lp(np);
+
+  IJ->resize(nq);
+
+ 
+  if (verbosity > 99) {
+    cout << " offset01 " << offset01 << " " << offset10 << " p" << p << " " << np << " " << P.M( )
+         << endl;
+  }
+
+  // store - the size in last value of IJ[i][j]
+  double data[6];
+  data[0] = data[3] = p[0];
+  data[1] = data[4] = p[offset01];
+  data[2] = data[5] = p[offset01*2];
+
+  for (int i = 0, k = 0; i < np; ++i, k += offset10) {
+    data[0] = min(data[0], p[k]);
+    data[3] = max(data[3], p[k]);
+    data[1] = min(data[1], p[k + offset01]);
+    data[4] = max(data[4], p[k + offset01]);
+    data[2] = min(data[2], p[k + offset01*2]);
+    data[5] = max(data[5], p[k + offset01*2]);
+    }
+
+  double eps2 = eps + eps;
+  data[0] -= eps2;
+  data[3] += eps2;
+  data[1] -= eps2;
+  data[4] += eps2;
+          
+  data[2] -= eps2;
+  data[5] += eps2;
+    int offs[]={0,offset01,offset01*2};
+  R3close SP(data, np, eps, offs);
+
+  for (int i = 0; i < np; ++i) {
+    SP.AddSimple(&P(i, 0));
+  }
+
+  for (int j = 0; j < nq; ++j) {
+    int nlp = SP.FindAll(Q(j, 0), Q(j, 1),Q(j, 2), lp);
+    (*IJ)[j].resize(nlp);
+    if (verbosity > 99)
+        cout << " Add to j=" << j << " "<< nlp << " : ";
+
+    for (int k = 0; k < nlp; ++k) {
+      int i = lp[k];
+        if (verbosity > 99) cout << i<< " ";
+        (*IJ)[j][k]=i;
+    }
+    if (verbosity > 99) cout << endl;
+  }
+
+  debug = 0;
+  return 0;
+}
+
 #ifdef WITH_flann
 #include <flann/flann.hpp>
 long ff_flann_search(KNM_< double > const &P, KNM_< double > const &Q, double const &eps,
@@ -860,11 +1260,16 @@ static void init( ) {
   Global.Add("Voisinage", "(",
              new OneOperator4_< long, KNM_< double >, KNM_< double >, double, KN< KN< long > > * >(
                Voisinage));
+    Global.Add("Voisinage3", "(",
+               new OneOperator4_< long, KNM_< double >, KNM_< double >, double, KN< KN< long > > * >(
+                 Voisinage3));
   Global.Add("neighborhood", "(",
              new OneOperator4_< long, KNM_< double >, KNM_< double >, double, KN< KN< long > > * >(
                Voisinage));
   Global.Add("ClosePoints2", "(",
              new OneOperator3s_< KN< long > *, double, KNM_< double >, KNM_< double > >(CloseTo2));
+    Global.Add("ClosePoints3", "(",
+               new OneOperator3s_< KN< long > *, double, KNM_< double >, KNM_< double > >(CloseTo3));
 
   // numbering ..
   Global.Add("ClosePoints", "(",

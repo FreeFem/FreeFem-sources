@@ -1,4 +1,3 @@
-load "msh3"
 
 int n=10;
 

@@ -1,6 +1,5 @@
 // (M. Bonazzoli, Nov 2015)
 
-load "msh3"
 load "medit"
 load "Element_Mixte3d" //for Edge13d
 //load "P012_3d_Modif" //for Edge13d (my file)

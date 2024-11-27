@@ -1,4 +1,3 @@
-load "msh3"
 
 macro buildcobramesh(meshname)
 {

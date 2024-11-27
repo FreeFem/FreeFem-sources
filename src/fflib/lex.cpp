@@ -166,16 +166,14 @@ int mylex::EatCommentAndSpace(string *data)
     int incomment =0, inmarkdown= pilesource[level].typeofscript==1;
     if (firsttime)
     {
+        if( inmarkdown) pilesource[level].typeofscript=2   ;// bof !!!
         firsttime=false;
         if(echo && inmarkdown==0) cout << setw(5) <<linenumber << this->sep() ;
-        if(echo && inmarkdown) cout << "\n...MD... \n\n";
+        if(echo && inmarkdown) cout << "\n...MD..:"<<inmarkdown <<"\n\n";
     }
-
-    do
-    {
-        incomment = 0;
+    auto eatspaces= [&]() {
         c = source().peek();
-
+        
         // eat spaces
         while (isspace(c) || c == 0 || c == 10 || c == 13 )
         {
@@ -191,8 +189,12 @@ int mylex::EatCommentAndSpace(string *data)
             };
             if(data) *data+=char(c);
             c=source().peek();
-        }
+        }};
 
+    do
+    {
+        incomment = 0;
+        eatspaces();
         // eat markdown <CR>~~~ or comment
         if(pilesource[level].typeofscript==2 &&  c=='~' && cnl==1) {
                 source().get();
@@ -205,8 +207,9 @@ int mylex::EatCommentAndSpace(string *data)
                     inmarkdown = !inmarkdown;  // bof Bof ....
                     if(inmarkdown) incomment=3; // markdown ...
                     linenumber++;
-                    if(echo) cout << "\n\n...MD...\n\n";
+                    if(echo) cout << "\n\n...MD..." << incomment << "\n\n";
                     if (echomd) cout << "\n" << setw(5) <<linenumber << this->sep() ;
+                    eatspaces();
                 }
                 else {source().putback(c);source().putback(c);source().putback(c);}
             }
@@ -315,13 +318,14 @@ int mylex::EatCommentAndSpace(string *data)
                        if(data) *data+= "~~"+nnn;
                        linenumber++;
                        if (echo) cout << "\n" << setw(5) <<linenumber << this->sep() ;
-
+                       
                    }
                }
            }
            while(c != EOF && end == 0 ) ;
             incomment=0;
-
+           if(end==1 && c != EOF)// end of MD part..-> recall EatCommentAndSpace
+              c = EatCommentAndSpace(data);
         }
     }
     while (incomment);
@@ -765,6 +769,11 @@ bool mylex::SetMacro(int &ret)
                 {
                     item += char(i);
                     i = source().get();
+                }
+                if (i == 10 || i == 13)
+                {
+                    linenumber++;
+                    nl=1;
                 }
                 if( item == newmacro)  kmacro++;
                 if( item == endmacro)
@@ -1395,6 +1404,7 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
     macroarg=macroargs;
     l=0;
     nf=f= new istringstream(s.c_str());
+    //std::cout << " readin "<< s << "!!!.."<< endl;
     sep='@';
     if (!f || !*f)
     {

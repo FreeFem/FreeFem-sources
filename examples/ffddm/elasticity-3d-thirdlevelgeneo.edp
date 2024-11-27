@@ -10,7 +10,6 @@ macro dimension 3// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
-load "msh3"
 
 macro def(i)[i, i#B, i#C]// EOM                         // vector field definition
 macro init(i)[i, i, i]// EOM                        // vector field initialization

@@ -1,6 +1,5 @@
 // meditddm.edp
 load "medit"
-load "msh3"
 load "shell"
 /********************************************
  Initial Problem:

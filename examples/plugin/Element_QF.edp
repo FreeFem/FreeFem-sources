@@ -28,7 +28,6 @@ Zh zz=x+y;
 plot(zz,fill=1,wait=1,cmm="zz");
 }
 {
- load "msh3"
 mesh3 Th=cube(2,2,2);
 //Th=trunc(Th, x <0.5);
 plot(Th,wait=1);

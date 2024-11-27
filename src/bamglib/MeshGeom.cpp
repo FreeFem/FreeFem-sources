@@ -90,9 +90,11 @@ namespace bamg {
     }
     for (i = 0; i < nbt; i++)
       for (j = 0; j < 3; j++) {
+          int orienij;
         // Int4 i0,i1;
         Int4 k = edge4->addtrie(Number(triangles[i][VerticesOfTriangularEdge[j][0]]),
-                                Number(triangles[i][VerticesOfTriangularEdge[j][1]]));
+                                Number(triangles[i][VerticesOfTriangularEdge[j][1]]),&orienij);
+          if(k< nbe) orientedgeold[k]  *= orienij; // Add FH. 30/09/2024 PB orientation of internal edge !!!
         Int4 invisible = triangles[i].Hidden(j);
         if (st[k] == -1)
           st[k] = 3 * i + j;
@@ -195,12 +197,14 @@ namespace bamg {
         }
 
         if (add >= 0 && add < nbe) {
-
+        
           edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
           edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
           edges[add].on = 0;
-          if (i < nbeold)    // in file edge // Modif FH 06122055
+          if (add < nbeold)    // in file edge // Modif FH 06122055
           {
+//  Error in periodic adapt 2d !!!! FH, je ne comprend pas 10/10/24 !!!!!!!
+           //   if(orientedgeold[add]<0) std::swap(edges[add].v[0],edges[add].v[1]);// add modif F.H. 30 sep. 24 !!!!!
             edges[add].ref = edgessave[i].ref;
             edges[add].on =
               edgessave[i].on;    //  HACK pour recuperer les aretes requise midf FH avril 2006 ????
@@ -349,7 +353,7 @@ namespace bamg {
 
     edge4 = new SetOfEdges4(nbe, nbv);
 
-    Real4 *len = new Real4[Gh.nbv];
+    Real8 *len = new Real8[Gh.nbv];
     for (i = 0; i < Gh.nbv; i++) len[i] = 0;
     if (verbosity > 6) {
       int nbr = 0;
@@ -438,7 +442,7 @@ namespace bamg {
 
     for (i = 0; i < Gh.nbv; i++)
       if (Gh.vertices[i].color > 0)
-        Gh.vertices[i].m = Metric(len[i] / (Real4)Gh.vertices[i].color);
+        Gh.vertices[i].m = Metric(len[i] / (Real8)Gh.vertices[i].color);
       else
         Gh.vertices[i].m = Metric(hmin);
     delete[] len;

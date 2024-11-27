@@ -1,6 +1,5 @@
 // first DG test case .. 
 //  with just penalisation of jump ...
-load "msh3"
 
 macro grad(u) [dx(u),dy(u),dz(u)] //
 macro dn(u) (N'*grad(u) ) //  def the normal derivative 

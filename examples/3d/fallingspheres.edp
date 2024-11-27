@@ -1,5 +1,4 @@
 // test of mmg3d for move objets in a mesh ...
-load "msh3" 
 load "tetgen" 
 load "medit" 
 load "mmg3d-v4.0"                                                               

@@ -8,7 +8,6 @@
 // NBPROC 4
 // PARAM -raspart -global 20
 
-load "msh3"
 
 macro dimension 3// EOM            // 2D or 3D
 

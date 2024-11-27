@@ -74,7 +74,6 @@ ENDIFMACRO
 IFMACRO(mdim,3)
 macro dimension 3// EOM
 include "ffddm.idp"
-load "msh3"
 
 real Sqrt = sqrt(2.);
 macro epsilon(u)[dx(u), dy(u#B), dz(u#C), (dz(u#B) + dy(u#C)) / Sqrt, (dz(u) + dx(u#C)) / Sqrt, (dy(u) + dx(u#B)) / Sqrt]// EOM

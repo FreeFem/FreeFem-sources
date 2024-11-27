@@ -1,4 +1,3 @@
-load "msh3"
 load "medit"
 searchMethod=1; // more safe seach algo .. (FH for PICHON ??) 
 verbosity=1;

@@ -2971,8 +2971,16 @@ class E_ForAllLoopMatrix
                 *i=mm->i[kk];
                 *j= mm->j[kk];
                 *v =  mm->aij[kk];
-                data->code(s);
-                mm->aij[kk] = *v;
+                try  {
+                    data->code(s);
+                    mm->aij[kk] = *v;
+                }
+                catch ( E_exception & e) {
+                    if (e.code == E_exception::e_break) break;
+                    else if  (e.code == E_exception::e_continue) continue;
+                    else throw e;
+                }
+
             }
         return Nothing  ;
     }

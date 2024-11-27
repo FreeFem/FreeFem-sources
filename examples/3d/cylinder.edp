@@ -1,4 +1,3 @@
-load "msh3"
 load "tetgen"
 load "medit"
 // Maillage d'un cylindre d'axe 0x

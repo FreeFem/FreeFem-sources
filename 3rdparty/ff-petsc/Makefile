@@ -62,11 +62,9 @@ endif
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool --download-htool-commit=fe5e690b6e6fa1ca64f76bc1d0c602e07ed9715a
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
-else
-FLAGS_MTUNE := -mtune=native
 endif
 unexport MAKEFLAGS
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 --with-tau-perfstubs=0 \

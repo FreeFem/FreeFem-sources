@@ -1298,8 +1298,17 @@ class E_ForAllLoopRNM
             for ( *j=0;*j<t.M();++*j)
             {
                 *v = t(*i,*j);
-                data->code(s);
-                t(*i,*j)= *v;
+                try  {
+                    data->code(s);
+                    t(*i,*j)= *v;
+                }
+                catch ( E_exception & e) {
+                    if (e.code == E_exception::e_break) break;
+                    else if  (e.code == E_exception::e_continue) continue;
+                    else throw e;
+                }
+        
+                
             }
       //  data->end(s);
         return Nothing  ;
@@ -1329,8 +1338,16 @@ class E_ForAllLoopRN
         for ( *i=0;*i<t.N();++*i)
             {
                 *v = t[*i];
-                data->code(s);
-                t[*i]= *v;
+                try  {
+                    data->code(s);
+                    t(*i)= *v;
+                }
+                catch ( E_exception & e) {
+                    if (e.code == E_exception::e_break) break;
+                    else if  (e.code == E_exception::e_continue) continue;
+                    else throw e;
+                }
+
             }
      //   data->end(s);
         return Nothing  ;
@@ -1373,9 +1390,17 @@ class E_ForAllLoopMapSI
                 *v =  vv;
                 // for  Windows otherwise trap ???? FH. march 2016
                 if(verbosity>99999) cout << " " << i << " "<< v  << " "  << kk << " " <<  vv << endl;
-                 data->code(s);
+                try  {
+                    data->code(s);
+                   ii->second  = *v;
+                }
+                catch ( E_exception & e) {
+                    if (e.code == E_exception::e_break) break;
+                    else if  (e.code == E_exception::e_continue) continue;
+                    else throw e;
+                }
 
-                ii->second  = *v;
+                
                 *i=0;
             }
       //  data->end(s);

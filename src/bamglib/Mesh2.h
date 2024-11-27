@@ -77,7 +77,7 @@ int myrand(void);
 
   typedef P2< Real8, Real8 > R2;
   typedef P2xP2< Int2, Int4 > I2xI2;
-  typedef P2< Real4, Real8 > R2xR2;
+  typedef P2< Real8, Real8 > R2xR2;
 
 }    // namespace bamg
 
@@ -88,7 +88,7 @@ namespace bamg {
   inline double OppositeAngle(double a) { return a < 0 ? Pi + a : a - Pi; }
 
 #ifdef DRAWING
-  extern Real4 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;
+  extern Real8 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;
   extern R2 GrafPMin, GrafPMax;
   extern Real8 Grafh;
 #endif
@@ -438,7 +438,7 @@ namespace bamg {
       return aa[i & 3] & 3;
     }    // Number of the  adjacent edge in adj tria
 
-    inline Real4 qualite( );
+    inline Real8 qualite( );
 
     void SetAdjAdj(Int1 a) {
       a &= 3;
@@ -1275,8 +1275,8 @@ namespace bamg {
     on = on->Adj[j];
   }
 
-  inline Real4 qualite(const Vertex &va, const Vertex &vb, const Vertex &vc) {
-    Real4 ret;
+  inline Real8 qualite(const Vertex &va, const Vertex &vb, const Vertex &vc) {
+    Real8 ret;
     I2 ia = va, ib = vb, ic = vc;
     I2 ab = ib - ia, bc = ic - ib, ac = ic - ia;
     Icoor2 deta = Det(ab, ac);
@@ -1318,7 +1318,7 @@ namespace bamg {
     };
   }
 
-  inline Real4 Triangle::qualite( ) { return det < 0 ? -1 : bamg::qualite(*ns[0], *ns[1], *ns[2]); }
+  inline Real8 Triangle::qualite( ) { return det < 0 ? -1 : bamg::qualite(*ns[0], *ns[1], *ns[2]); }
 
   Int4 inline Vertex::Optim(int i, int koption) {
     Int4 ret = 0;
@@ -1478,7 +1478,7 @@ namespace bamg {
 #endif
 
 #ifdef DRAWING
-  extern Real4 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;    // R2 -> I2 transform
+  extern Real8 xGrafCoef, yGrafCoef, xGrafOffSet, yGrafOffSet;    // R2 -> I2 transform
   extern R2 Gpmin, Gpmax;
   // extern Real8 Gh;
   // cf routine ILineTo IMoveto

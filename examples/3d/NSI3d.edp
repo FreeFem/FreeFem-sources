@@ -1,4 +1,3 @@
-load "msh3"
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
 

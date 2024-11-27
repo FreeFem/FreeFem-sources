@@ -1,6 +1,5 @@
 load "Element_P1ncdc"
 load "Element_P1dc1"
-load "msh3"
 int errT=0; 
 
 macro Test(Th,FE,nFE)

@@ -1,5 +1,4 @@
 verbosity=1;
-load "msh3"
 load "tetgen"
 load "medit"
 

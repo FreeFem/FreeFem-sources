@@ -1,4 +1,3 @@
-load "msh3"
 int nn=100;
 
 mesh Th2=square(nn,nn);

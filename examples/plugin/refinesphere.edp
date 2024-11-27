@@ -1,5 +1,4 @@
 // file adaptsphere.edp
-load "msh3"
 load "tetgen"
 load "medit"
 

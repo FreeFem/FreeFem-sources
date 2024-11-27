@@ -1,4 +1,3 @@
-load "msh3" 
 
 int upper = 1;
 int others = 2;

@@ -2447,9 +2447,4 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
   Global.Add("tetgreconstruction", "(", new ReconstructionRefine);
 }
 
-// because i include this file in tetgen.cpp (very bad) FH
-// a will correct this in next version ...
-// <<WITH_NO_INIT>> [[file:msh3.cpp::WITH_NO_INIT]]
-#define WITH_NO_INIT
-#include "msh3.cpp"
 LOADFUNC(Load_Init)

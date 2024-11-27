@@ -1,5 +1,4 @@
 load "Element_Mixte3d"
-load "msh3"
 load "Element_P1dc1"
 // never tested ......
 

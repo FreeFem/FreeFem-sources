@@ -1,4 +1,3 @@
-load "msh3"
 
 // Parameters
 int nn = 30; // Mesh quality

@@ -3319,7 +3319,7 @@ class pb2mat : public E_F0 {
   static E_F0 *f(const basicAC_F0 &args) { return new Plot(args); }
 
   AnyType operator( )(Stack s) const {
-    Problem::Data< FESpace > *data = pb->dataptr(this->stack);
+    Problem::Data< FESpace > *data = pb->dataptr(s);// coorect 9/11/24  Build breaks with clang-19
     if (SameType< K, double >::OK) {
       ffassert(!!data->AR);
       return SetAny< Matrice_Creuse< K > * >(&data->AR);

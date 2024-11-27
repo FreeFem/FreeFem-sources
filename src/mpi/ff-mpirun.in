@@ -32,7 +32,7 @@ while test -n "$1" ; do
 case "$1" in
 "-nw") nw=1;;
 "-win") nw=0;;
-*.edp) a[$j]="${ffmpi}";
+*.edp|*.md) a[$j]="${ffmpi}";
 if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
 ((j++));a[$j]="'$1'";;
 #if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;

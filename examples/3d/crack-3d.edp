@@ -1,6 +1,5 @@
 // F. HECHT example to check eps in trunc check mesh
 
-load "msh3"
 real theta = 1*pi/180.; // 0.7 degree  limit to build the 2d mesh if no refinement in zero
 real xt = cos(theta),yt=sin(theta);
 cout << xt << " " << yt << endl;

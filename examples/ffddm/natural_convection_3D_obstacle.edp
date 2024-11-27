@@ -12,7 +12,6 @@ macro dimension()3// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
-load "msh3"
 
 searchMethod = 1;
 

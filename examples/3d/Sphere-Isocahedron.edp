@@ -1,6 +1,5 @@
 // Sphere from a  partir d'un icosahedron
 // Guillaume Vergez. 
-load "msh3"
 load "medit" 
 load "tetgen"
 load "mmg"
