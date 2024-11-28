@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [12, 13]
+        version: [13]
 
     name: Job3 - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
@@ -62,7 +62,7 @@ jobs:
         run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Configure
         run: |
@@ -95,6 +95,7 @@ jobs:
           install: >-
             mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-autotools
             make
             m4
             patch
@@ -105,8 +106,6 @@ jobs:
             mingw-w64-x86_64-openblas
             mingw-w64-x86_64-hdf5
             mingw-w64-x86_64-gsl
-            autoconf
-            automake-wrapper
             pkg-config
             pkgfile
             tar
