@@ -73,5 +73,5 @@ plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );
 |![][_deflection]            |
 
 
-[_deflection]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/beam-3d/beam3d.png
+[_deflection]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/beam-3d/beam3d.png
 

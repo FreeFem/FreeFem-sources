@@ -90,6 +90,6 @@ assert(err < 1e-9);
 |--------------|
 |![][_error]   |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Poisson3d/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Poisson3d/solution.png
 
-[_error]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Poisson3d/error.png
+[_error]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Poisson3d/error.png

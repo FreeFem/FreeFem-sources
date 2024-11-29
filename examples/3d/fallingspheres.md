@@ -67,4 +67,4 @@ for(int it=0; it<29; it++){
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/fallingspheres/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/fallingspheres/solution.png

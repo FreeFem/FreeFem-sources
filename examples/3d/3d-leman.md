@@ -125,6 +125,6 @@ plot(p,wait=1,nbiso=30,value=1);
 |![][_flow]          |
 
 
-[_depth]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/3d-leman/bathymetry.png
+[_depth]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/3d-leman/bathymetry.png
 
-[_flow]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/3d-leman/flow.png
+[_flow]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/3d-leman/flow.png

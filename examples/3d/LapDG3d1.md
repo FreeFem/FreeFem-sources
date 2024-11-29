@@ -42,4 +42,4 @@ The solution. This display is obtained by typing F (to cancel "fill") and typing
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/LapDG3d1/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/LapDG3d1/solution.png

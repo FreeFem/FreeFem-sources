@@ -122,5 +122,5 @@ the following:
 | ---------------------------- |
 | ![][_adaptedmesh]            |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/BlackScholes2D/solution.png
-[_adaptedmesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/BlackScholes2D/adaptedmesh.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/BlackScholes2D/solution.png
+[_adaptedmesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/BlackScholes2D/adaptedmesh.png

@@ -53,6 +53,6 @@ plot(u, value=true, wait=1, fill=true);
 | --------------- |
 | ![][_solution]  |
 
-[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/thermal/mesh.png
+[_mesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/thermal/mesh.png
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/thermal/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/thermal/solution.png

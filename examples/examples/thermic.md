@@ -52,4 +52,4 @@ plot(vold);
 | ----------------- |
 | ![][_solution]    |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/thermic/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/thermic/solution.png

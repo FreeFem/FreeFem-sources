@@ -94,4 +94,4 @@ varf vL(u, v) = on(2, 4, u=30);
 plot(u, cmm="u2");
 cout << " cpu method 1 = " << cpu1 << " cpu method matrix = " << cpu2 << " ratio = " <<  cpu1/cpu2 << endl;
 ~~~
-![](https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/Heat/solution.png)
+![](https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/Heat/solution.png)

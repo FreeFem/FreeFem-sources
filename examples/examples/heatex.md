@@ -54,4 +54,4 @@ plot(u, value=true, wait=1, fill=true);
 | -------------- |
 | ![][_solution] |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/heatex/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/heatex/solution.png

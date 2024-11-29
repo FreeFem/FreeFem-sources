@@ -48,4 +48,4 @@ plot(Th);
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/sphere6/SOLUTION.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/sphere6/SOLUTION.png

@@ -35,4 +35,4 @@ mesh3 Th3sph=tetg(Thb,switch="paAAQYY",nbofregions=1,regionlist=domain);
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Sphere-Isocahedron/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Sphere-Isocahedron/solution.png

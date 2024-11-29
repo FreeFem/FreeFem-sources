@@ -148,4 +148,4 @@ medit("   uh ",Th, uh,wait=1);
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Poisson-cube-ballon/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Poisson-cube-ballon/solution.png

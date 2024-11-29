@@ -109,4 +109,4 @@ assert(err==0);
 |----------------------------|
 |![][_solution]              |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/intlevelset3d/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/intlevelset3d/solution.png

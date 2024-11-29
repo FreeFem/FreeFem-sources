@@ -101,4 +101,4 @@ plot(u,nbiso=10);
 |------------------------|
 |![][_periodic]          |
 
-[_periodic]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cube-period/periodic.png
+[_periodic]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cube-period/periodic.png

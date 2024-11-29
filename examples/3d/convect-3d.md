@@ -94,4 +94,4 @@ assert(err==0);
 |-------------------------|
 |![][_cut]                |
 
-[_cut]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/convect-3d/cut.png
+[_cut]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/convect-3d/cut.png

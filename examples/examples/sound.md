@@ -69,6 +69,6 @@ plot(v, wait=1, ps="eigen.eps");
 | -------------- |
 | ![][_eigen0]   |
 
-[_pressure]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/sound/pressure.png
+[_pressure]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/sound/pressure.png
 
-[_eigen0]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/sound/eigen0.png
+[_eigen0]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/sound/eigen0.png

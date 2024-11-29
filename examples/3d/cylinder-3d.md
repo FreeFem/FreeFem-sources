@@ -86,8 +86,8 @@ plot(Th2,cmm="Cyl3");
 |----------------------|
 |![][_volume]          |
 
-[_cylinder]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cylinder-3d/cylinder.png
+[_cylinder]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cylinder-3d/cylinder.png
 
-[_surface]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cylinder-3d/surface.png
+[_surface]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cylinder-3d/surface.png
 
-[_volume]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cylinder-3d/volume.png
+[_volume]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cylinder-3d/volume.png

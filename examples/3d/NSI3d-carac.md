@@ -141,4 +141,4 @@ plot([ux,uz],p2,cmm=" cut y = 0.5, time ="+t,wait=1);
 |------------------------|
 |![][_solution]          |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/NSI3d-carac/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/NSI3d-carac/solution.png

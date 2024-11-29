@@ -49,6 +49,6 @@ cout<<"All is well that ends well "<<endl;
 |![][_crack3d]      |
 
 
-[_crack2d]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/crack-3d/crack2d.png
+[_crack2d]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/crack-3d/crack2d.png
 
-[_crack3d]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/crack-3d/crack3d.png
+[_crack3d]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/crack-3d/crack3d.png

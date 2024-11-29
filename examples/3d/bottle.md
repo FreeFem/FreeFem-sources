@@ -121,9 +121,9 @@ medit("Th",Th);
 Medit can rotate the object. Press "esc" to end medit.
 
 
-[_bottle]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/bottle/bottle.png
+[_bottle]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/bottle/bottle.png
 
 
-[_mesh2d]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/bottle/mesh2d.png
+[_mesh2d]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/bottle/mesh2d.png
 
-[_bottlezero]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/bottle/bottlezero.png
+[_bottlezero]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/bottle/bottlezero.png

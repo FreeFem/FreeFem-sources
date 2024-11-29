@@ -1,4 +1,3 @@
-
 ---
 name: NSNewton
 category: Fluid Mechanics
@@ -130,6 +129,6 @@ cout << " CPU "<< clock()<< " s " << endl;
 | -------------- |
 | ![][_solution] |
 
-[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSNewton/mesh.png
+[_mesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/NSNewton/mesh.png
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSNewton/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/NSNewton/solution.png

@@ -41,8 +41,8 @@ plot(Th3T,cmm="cone");
 |![][_cone]         |
 
 
-[_Triangle]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cone/Triangle.png
+[_Triangle]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cone/Triangle.png
 
-[_mesh2D]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cone/mesh2D.png
+[_mesh2D]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cone/mesh2D.png
 
-[_cone]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/cone/cone.png
+[_cone]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/cone/cone.png

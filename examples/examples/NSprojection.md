@@ -136,8 +136,8 @@ plot(u, wait=1, ps="NSprojU.ps");
 | ------------ |
 | ![][_p]      |
 
-[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/mesh.png
+[_mesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/NSprojection/mesh.png
 
-[_u]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/u.png
+[_u]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/NSprojection/u.png
 
-[_p]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/NSprojection/p.png
+[_p]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/NSprojection/p.png

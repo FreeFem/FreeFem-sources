@@ -70,6 +70,6 @@ cout << "   displacement (20,0) = " << u(20,0) << " " << v(20,0) << endl;
 | ------------------ |
 | ![][_dispbeam]     |
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/lame/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/lame/solution.png
 
-[_dispbeam]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/lame/dispbeam.png
+[_dispbeam]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/lame/dispbeam.png

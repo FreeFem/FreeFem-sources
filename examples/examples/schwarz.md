@@ -58,6 +58,6 @@ plot(U, u, wait=1, cmm="Final solution");
 | --------------------------- |
 | ![][_solfour]               |
 
-[_solone]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/schwarz/solone.png
+[_solone]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/schwarz/solone.png
 
-[_solfour]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/schwarz/solfour.png
+[_solfour]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/schwarz/solfour.png

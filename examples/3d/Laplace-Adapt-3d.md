@@ -72,10 +72,10 @@ for(int ii=0; ii<5; ii++)
 |-------------------------|
 |![][_solution5]          |
 
-[_solution1]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace-Adapt-3d/solution1.png
+[_solution1]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Laplace-Adapt-3d/solution1.png
 
-[_solution2]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace-Adapt-3d/solution2.png
+[_solution2]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Laplace-Adapt-3d/solution2.png
 
-[_solution4]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace-Adapt-3d/solution4.png
+[_solution4]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Laplace-Adapt-3d/solution4.png
 
-[_solution5]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/Laplace-Adapt-3d/solution5.png
+[_solution5]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/Laplace-Adapt-3d/solution5.png

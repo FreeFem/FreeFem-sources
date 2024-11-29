@@ -65,6 +65,6 @@ Notice that the solution is stored in a file condensor.eps in postscript format 
 
 ![][_solution]
 
-[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/condensor/mesh.png
+[_mesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/condensor/mesh.png
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/condensor/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/condensor/solution.png

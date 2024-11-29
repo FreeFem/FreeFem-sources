@@ -107,10 +107,10 @@ plot(u, wait=1, ps="tempmuonde.ps", fill=true);
 | ----------------- |
 | ![][_heat] |
 
-[_geometry]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/muwave/geometry.png
+[_geometry]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/muwave/geometry.png
 
-[_realpart]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/muwave/realpart.png
+[_realpart]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/muwave/realpart.png
 
-[_imaginepart]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/muwave/imaginepart.png
+[_imaginepart]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/muwave/imaginepart.png
 
-[_heat]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/muwave/heat.png
+[_heat]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/muwave/heat.png

@@ -73,17 +73,15 @@ solve P3(u3,v3) = int3d(Th3)(grad3(u3)'*grad3(v3)//'
                   +1e-6*u3*v3) - int3d(Th3)(f3*v3) ;
 //plot(u3,u3h,cmm=1);
 plot(u3,cmm=1);
-/*
 u3[]-=u3h[];
 cout << " err3  = " << u3[].linfty << endl;
 assert(u3[].linfty < 0.07);
-*/
 ~~~
 
 |The solution            |
 |------------------------|
 |![][_solution]          |
 
-[_mesh]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/periodic-3d/mesh.png
+[_mesh]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/periodic-3d/mesh.png
 
-[_solution]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/3d/periodic-3d/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/3d/periodic-3d/solution.png

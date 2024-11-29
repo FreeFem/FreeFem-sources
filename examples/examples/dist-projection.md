@@ -64,8 +64,8 @@ plot(d3,wait=1);
 | ----------------------- |
 | ![][_plot3]             |
 
-[_Ud]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/dist-projection/Ud.png
+[_Ud]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/dist-projection/Ud.png
 
-[_plot2]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/dist-projection/plot2.png
+[_plot2]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/dist-projection/plot2.png
 
-[_plot3]: https://raw.githubusercontent.com/phtournier/ffmdtest/refs/heads/main/figures/examples/dist-projection/plot3.png
+[_plot3]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/dist-projection/plot3.png
