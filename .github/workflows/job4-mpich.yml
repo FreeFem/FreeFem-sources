@@ -2,58 +2,56 @@ name: Job4 MPICH - Full FreeFEM version [release mode]
 #on: [push]
 on:
   workflow_dispatch:
-#    branches:
-#      - slegrand-actions
+
 jobs:
-  # linux:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       version: [20.04, 22.04]
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [20.04, 22.04]
 
-  #   name: Job4 MPICH - Ubuntu ${{ matrix.version }}
-  #   runs-on: ubuntu-${{ matrix.version }}
+    name: Job4 MPICH - Ubuntu ${{ matrix.version }}
+    runs-on: ubuntu-${{ matrix.version }}
 
-  #   steps:
-  #     - uses: actions/checkout@main
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Install
-  #       run: |
-  #         sudo apt update
-  #         sudo apt install gcc g++ gfortran m4 patch \
-  #           git libblas-dev liblapack-dev libsuitesparse-dev \
-  #           libhdf5-dev libgsl-dev flex bison wget cmake autoconf \
-  #           automake autotools-dev
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch \
+            git libblas-dev liblapack-dev libsuitesparse-dev \
+            libhdf5-dev libgsl-dev flex bison wget cmake autoconf \
+            automake autotools-dev
 
-  #     - name: Configure
-  #       run: |
-  #         autoreconf -i
-  #         ./configure --enable-download --prefix="${HOME}/freefem"
-  #         ./3rdparty/getall -a -o PETSc
-
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
         
-  #     - name: PETSc
-  #       run: |
-  #         cd 3rdparty/ff-petsc
-  #         make petsc-slepc
-  #         cd -
-  #         ./reconfigure
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
 
-  #     - name: Build
-  #       run: make -j2
+      - name: Build
+        run: make -j2
 
-  #     - name: Check
-  #       continue-on-error: true
-  #       run: make check
+      - name: Check
+        continue-on-error: true
+        run: make check
 
-  #     - name: Install
-  #       run: make install
+      - name: Install
+        run: make install
 
   macos:
     strategy:
       fail-fast: false
       matrix:
-        version: [14]
+        version: [13]
 
     name: Job4 MPICH - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
@@ -65,13 +63,15 @@ jobs:
       F77: gfortran
 
     steps:
-      - uses: actions/checkout@main
+      - uses: actions/checkout@v4
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Install
-        run: brew install gcc m4 git bison suitesparse hdf5 cmake wget autoconf automake
+        run: |
+          brew install gcc m4 git bison suitesparse hdf5 cmake wget autoconf \
+          automake
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"

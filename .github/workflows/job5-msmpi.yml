@@ -45,17 +45,20 @@ jobs:
             python
 
       - name: Remove packages
-        run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
+        run: |
+          pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
+          mingw-w64-x86_64-gdb-multiarch
 
       - uses: actions/checkout@v4
 
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode --enable-debug \
-            --prefix="${HOME}/freefem" \
-            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin" \
-            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          ./configure --enable-generic --enable-optim --enable-download \
+          --enable-maintainer-mode --enable-debug \
+          --prefix="${HOME}/freefem" \
+          --with-mpipath="/c/Progam Files/Microsoft MPI/Bin" \
+          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc

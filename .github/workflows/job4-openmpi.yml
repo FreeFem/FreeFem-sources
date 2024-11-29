@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [12, 13]
+        version: [13]
 
     name: Job4 OpenMPI - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
@@ -74,7 +74,7 @@ jobs:
         run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake open-mpi
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Configure
         run: |
@@ -97,4 +97,4 @@ jobs:
         run: make check
 
       - name: Install
-        run: sudo make install #TODO should work without sudo
+        run: make install

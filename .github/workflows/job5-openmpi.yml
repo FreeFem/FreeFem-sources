@@ -19,11 +19,9 @@ jobs:
       - name: Install
         run: |
           sudo apt update
-          sudo apt install gcc g++ gfortran m4 patch \
-            git libblas-dev liblapack-dev libsuitesparse-dev \
-            libhdf5-dev libgsl-dev flex bison wget cmake autoconf \
-            automake autotools-dev \
-            libopenmpi-dev
+          sudo apt install gcc g++ gfortran m4 patch git libblas-dev \
+          liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison \
+          wget cmake autoconf automake autotools-dev libopenmpi-dev
 
       - name: Configure
         run: |
@@ -52,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [12, 13]
+        version: [13]
 
     name: Job5 OpenMPI - MacOS ${{ matrix.version }}
     runs-on: macos-${{ matrix.version }}
@@ -71,10 +69,12 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake open-mpi
+        run: |
+          brew install gcc m4 git flex bison suitesparse hdf5 cmake wget \
+          autoconf automake open-mpi
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Configure
         run: |
@@ -97,4 +97,4 @@ jobs:
         run: make check
 
       - name: Install
-        run: sudo make install #TODO should work without sudo
+        run: make install
