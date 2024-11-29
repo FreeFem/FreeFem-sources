@@ -18,14 +18,14 @@ border b2(t=0.5,-0.5) {x=a/2; y=a*t; label=2;};
 border b3(t=0.5,-0.5) {x=a*t; y=a/2; label=3;};
 border b4(t=0.5,-0.5) {x=-a/2; y=a*t; label=4;};
 border i1(t=0,2*pi) {x=d/2*cos(t); y=-d/2*sin(t); label=7;};
-int nnb=7, nni=10; 
+int nnb=10, nni=20; 
 mesh Th=buildmesh(b1(-nnb)+b3(nnb)+b2(-nnb)+b4(nnb)+i1(nni));//, fixedborder=true);
 //Th=adaptmesh(Th,0.1,IsMetric=1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
 
 ~~~
 Now we renumber the vertices
 ~~~freefem
-int nz=3;
+int nz=10;
 { // Between braces to declare all var local, hence save on memory.
 int[int] old2new(0:Th.nv-1);
 fespace Vh2(Th,P1);
@@ -66,11 +66,13 @@ The finite element space with periodic mesh can be define and a PDE can be solve
 ~~~freefem
 fespace Vh(Th3,P2, periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
 macro grad3(u) [dx(u),dy(u),dz(u)]//
-func u3e =(sin(x+1)*sin(y+2)*sin(z+3));
+func u3e =(sin(2*pi*x+1)*sin(2*pi*y+2)*sin(4*pi*z+3));
 Vh u3,v3,u3h=u3e;
-func f3= 3.*u3e;
+real ccc= pi^2*(4+4+16);
+func f3= ccc*u3e;
 solve P3(u3,v3) = int3d(Th3)(grad3(u3)'*grad3(v3)//'
-                  +1e-6*u3*v3) - int3d(Th3)(f3*v3) ;
+                  +1e-6*u3*v3) - int3d(Th3)(f3*v3) 
+                  + on(7,u3=u3e);
 //plot(u3,u3h,cmm=1);
 plot(u3,cmm=1);
 u3[]-=u3h[];
