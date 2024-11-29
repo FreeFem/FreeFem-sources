@@ -236,16 +236,17 @@ int mylex::EatCommentAndSpace(string *data)
             c=source().peek();
         }};
     
-    auto ifblock = [&]() {// begin end markdown block !!!
+    auto ifblock = [&](char mark) {// begin end markdown block !!!
         int ret  =0;
-        if(c=='~' && cnl==1) {
+        char mark3[4]={mark,mark,mark,0};
+        if(c==mark && cnl==1) {
                 source().get();
                 int c1=source().get();
                 int c2=source().get();
-                if( c1=='~' && c2=='~') {
+                if( c1==mark && c2==mark) {
                     getline(source(),nnn); // get end of line
-                    if(data) *data += "~~~"+nnn;
-                    if (echomd) cout << "~~~"<< nnn  ;
+                    if(data) *data += mark3+nnn;
+                    if (echomd) cout << mark3<< nnn  ;
                     linenumber++;
                     //if(echo) cout << "\n\n...MD..." << nnn << ":" << incomment << "\n\n";
                     if (echomd) cout << "\n" << setw(5) <<linenumber << this->sep() ;
@@ -263,7 +264,7 @@ int mylex::EatCommentAndSpace(string *data)
         ffassert(count++<100);
         eatspaces();
         // eat markdown <CR>~~~ or comment
-        if(ifblock()==1) {
+        if(ifblock('~')==1 ||ifblock('`')==1 ) {
             LineNumber();// eat CR ???
             incomment=3;// in markdown
         }
@@ -328,7 +329,7 @@ int mylex::EatCommentAndSpace(string *data)
                 linenumber++;
                 if(data) *data+=nnn+'\n';
                 //  search end
-                if (nnn.find("~~~freefem")==0) // we find => end MD
+                if (nnn.find("~~~freefem")==0 ||nnn.find("```freefem")==0) // we find => end MD
                     end = 1;
                //  cr eat by getline
             }
