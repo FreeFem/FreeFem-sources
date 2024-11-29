@@ -15,15 +15,15 @@ $$
 \Sigma=\{x\in\partial\Omega, t\in(0,T) ~:~{\bf n}_\Gamma\cdot{\bf u} <0\}.
 $$
 
-~~~freefem
+```freefem
 int nn=8;
 
 mesh Th2=square(nn,nn,[x*2.-1.,y*2.-1.]);
 fespace Vh2(Th2,P1);
 int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
-~~~
+```
 These arrays are used by buildlayers to assign labels to faces. Hence because of rup[0,2] the region 0 in the triangulation of the square becomes the top face of the cube with label = 2.  Similarly the bottom face has label 1 because of rdown[] and finally the sides  which had label 1,2,3,4 (because of the boundary labels of $\texttt{square}$ become faces with label=1.
-~~~freefem
+```freefem
 real zmin=-1,zmax=1.;
 
 mesh3 Th=buildlayers(Th2,nn,
@@ -32,9 +32,9 @@ mesh3 Th=buildlayers(Th2,nn,
   labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-~~~
+```
 The concentration of the tracer is shaped like a hill around the $[x_0,y_0,z_0]^T$ at time $t=0$.  The velocity is $[1,2,3]^T$.
-~~~freefem
+```freefem
 func  real hill(real r2){return exp(-10.*(r2));};
 
 fespace Vh(Th,P13d);
@@ -54,7 +54,7 @@ real dt=0.1;
 func u1=1.;
 func u2=2.;
 func u3=3.;
-~~~
+```
 The PDE is discretized by the method of characteristics
 $$
 v_h(x,t+\delta t)= \Pi v_h(x-\delta t{\bf u}(x,t),t).
@@ -64,7 +64,7 @@ The method is simple but diffusive. A more precise, elbeit more expensive, discr
 $$
 \int_\Omega v_h(x,t+\delta t) \hat v dx = \int_\Omega v(x-\delta t{\bf u}(x,t),t) \hat v dx ~~\text{ for all hat function of }V_h.
 $$
-~~~freefem
+```freefem
 verbosity = 1;
 v=convect([u1,u2,u3],-dt,vo);
 verbosity = 1;
@@ -88,7 +88,7 @@ Verif(x,1)
 Verif(y,2)
 Verif(z,3)     
 assert(err==0);
-~~~
+```
 
 | The solution at $y=0.5$ |
 |-------------------------|

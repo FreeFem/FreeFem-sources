@@ -25,8 +25,8 @@ int  md2edp(const char *fname)
         {
             string ln ;
             getline(fin,ln);
-            if(ln.find("~~~freefem")==0) cas++;
-            else if ((cas%2 == 0 ) && (ln.find("~~~")==0))  cas++;
+            if( (ln.find("~~~freefem")==0) || (ln.find("```freefem")==0)) cas++;
+            else if ((cas%2 == 0 ) && ( (ln.find("~~~")==0 )|| (ln.find("```")==0)))  cas++;
             else if( cas%2==0) { 
                 if(!fout) { fout = new ofstream(ofn.c_str()); 
                 if(!fout) break; 
