@@ -65,7 +65,7 @@ EXTRA_DIST = *.edp all.edp
 
 all.edp: Makefile
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
-	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do \
+	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$' | LC_ALL=C sort` ; do \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;searchMethod=0;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\

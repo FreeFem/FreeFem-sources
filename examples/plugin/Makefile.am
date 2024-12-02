@@ -288,7 +288,7 @@ all.edp:
 	mkdir o
 	@test -f ../../src/bin-win32/FreeFem++.exe && ffpp=../../src/bin-win32/FreeFem++.exe || ffpp=../../src/nw/FreeFem++; \
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
-	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
+	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$' | LC_ALL=C sort` ; do  \
 	    if $$ffpp -ns -jc -v 0 $$i  1>/dev/null 2>/dev/null ; then \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \

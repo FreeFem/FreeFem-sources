@@ -106,6 +106,7 @@ endif
 # Build date changes at every change
 EXTRA_DIST=strversionnumber.m4
 BUILT_SOURCES=strversionnumber.cpp
+BUILD_DATE="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 strversionnumber.cpp: $(libff_a_SOURCES2) ../../Makefile 
-	m4 -DVersionFreeFemDate="`date`" -DGitVersion="`git describe --tags 2>/dev/null|| echo 'no git'`" strversionnumber.m4 > $@
+	m4 -DVersionFreeFemDate="$(BUILD_DATE)" -DGitVersion="`git describe --tags 2>/dev/null|| echo 'no git'`" strversionnumber.m4 > $@
 FORCE:
