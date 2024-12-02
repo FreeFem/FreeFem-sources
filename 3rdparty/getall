@@ -163,14 +163,14 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-download('mmg','https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
+download('mmg','https://github.com/MmgTools/mmg/archive/2263f92c032a26672c2625230a0689e29e8d96c6.zip',
         'https://github.com/MmgTools',
         'mmg.zip',
-        'd824d08dac0544caff20a915194da0fe');
-download('parmmg','https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
+        'ded40f7bf72915cf5a92df76b3c5ae35');
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/beb4147b7b29a2891e1a55745ff95863e93bcc0d.zip',
         'https://github.com/MmgTools',
         'parmmg.zip',
-        '9a76fef6be1ab66af3a813409a0388c9');
+        '6562e135150c1031e872ea3bb086347f');
 download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.22.2.tar.gz',
 	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
 	'petsc-3.22.2.tar.gz',
@@ -279,7 +279,7 @@ sub downloadone{
 	# check if resulting package contents are valid
 	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){
-		print "Download failed (MD5 check) from $url of $pkg\n";
+		print "Download failed (MD5 check $md5check ) from $url of $pkg\n";
 		my $url="https://www.ljll.fr/hecht/pkg/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
