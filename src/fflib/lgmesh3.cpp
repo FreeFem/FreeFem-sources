@@ -2684,7 +2684,7 @@ template<class R>  R * set_initinit( R* const & a,const long & n){
 //3d Volume
 void init_mesh3_array()
 {
-    cout << " init_mesh3_array"<< endl;
+    if(mpirank==0 && verbosity>1)cout << " init_mesh3_array"<< endl;
     Dcl_Type<KN<pmesh3> *>(0,::DestroyKN<pmesh3> );
     atype<KN<pmesh3>* >()->Add("[","",new OneOperator2_<pmesh3*,KN<pmesh3>*,long >(get_elementp_<pmesh3,KN<pmesh3>*,long>));
     TheOperators->Add("<-", 
