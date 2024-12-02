@@ -1412,14 +1412,13 @@ typedef complex<R> C;
 #ifdef _WIN32
 typedef long long  int64;
 #else
-typedef long int64;
+typedef long long int64;
 #endif
 
 template class HashMatrix<int,R>;
 template class HashMatrix<int,C >;
 template class HashMatrix<int64,R>;
 template class HashMatrix<int64,C >;
-
 template HashMatrix<int64,R>::HashMatrix(const HashMatrix<int,R> & );
 template HashMatrix<int64,C>::HashMatrix(const HashMatrix<int,C> & );
 template HashMatrix<int,C>::HashMatrix(const HashMatrix<int64,C> & );

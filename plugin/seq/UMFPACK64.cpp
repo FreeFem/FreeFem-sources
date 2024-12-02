@@ -30,6 +30,11 @@
 #include <iostream>
 using namespace std;
 #include "ff++.hpp"
+#ifdef _WIN32
+typedef long long  int64;
+#else
+typedef long long int64;
+#endif
 
 template< class K = double >
 class VirtualSolverUMFPACK64 : public VirtualSolver< int, K > {
@@ -37,13 +42,13 @@ class VirtualSolverUMFPACK64 : public VirtualSolver< int, K > {
   // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
   static const int orTypeSol = 1 | 16 | 32;
   typedef HashMatrix< int, K > HMat;
-  typedef HashMatrix< SuiteSparse_long, K > HMat64;
+  typedef HashMatrix< int64, K > HMat64;
   HMat *pA;
   HMat64 *pA64;
-  VirtualSolverUMFPACK< SuiteSparse_long, K > v64;
+  VirtualSolverUMFPACK< int64, K > v64;
 
   VirtualSolverUMFPACK64(HMat &AA, const Data_Sparse_Solver &ds, Stack stack)
-    : pA(&AA), pA64(new HashMatrix< SuiteSparse_long, K >(AA)), v64(*pA64, ds, stack) {}
+    : pA(&AA), pA64(new HashMatrix< int64, K >(AA)), v64(*pA64, ds, stack) {}
   void dosolver(K *x, K *b, int N, int trans) { return v64.dosolver(x, b, N, trans); }
 
   void fac_init( ) { v64.fac_init( ); }    // n, nzz fixe
