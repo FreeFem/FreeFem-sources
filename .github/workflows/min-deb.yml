@@ -1,0 +1,113 @@
+name: Minimal version [debug mode]
+#on: [push]
+on:
+  workflow_dispatch:
+  
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [22.04, 24.04]
+
+    name: Ubuntu ${{ matrix.version }} - ${{github.worflow}}
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install autoconf gcc g++ gfortran m4 patch git liblapack-dev flex bison
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi --enable-debug --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: make install
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [13, 14, 15]
+
+    name: MacOS ${{ matrix.version }} - ${{github.worflow}}
+    runs-on: macos-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Automake is necessary on MacOS since aclocal is not included in autoconf
+      - name: Install
+        run: brew install autoconf automake gcc m4 git flex bison
+
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi --enable-debug --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 3
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: make install
+
+  windows:
+    name: Windows Server 2022 - ${{github.worflow}}
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-autotools
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-lapack
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi --enable-debug --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Install
+        run: make install
