@@ -1409,11 +1409,6 @@ void HashMatrix<I,R>::UnHalf()
 typedef double R;
 typedef complex<R> C;
 //  because for UMFPACK 64  because long are only 32 bits under windows 
-#ifdef _WIN32
-typedef long long  int64;
-#else
-typedef long long int64;
-#endif
 
 template class HashMatrix<int,R>;
 template class HashMatrix<int,C >;
@@ -1421,8 +1416,11 @@ template class HashMatrix<long,R>;
 template class HashMatrix<long,C >;
 template class HashMatrix<long long,R>;
 template class HashMatrix<long long,C >;
-template HashMatrix<int64,R>::HashMatrix(const HashMatrix<int,R> & );
-template HashMatrix<int64,C>::HashMatrix(const HashMatrix<int,C> & );
+template HashMatrix<long,R>::HashMatrix(const HashMatrix<int,R> & );
+template HashMatrix<long,C>::HashMatrix(const HashMatrix<int,C> & );
+template HashMatrix<long long,R>::HashMatrix(const HashMatrix<int,R> & );
+template HashMatrix<long long,C>::HashMatrix(const HashMatrix<int,C> & );
+
 template HashMatrix<int,C>::HashMatrix(const HashMatrix<long,C> & );
 template HashMatrix<int,C>::HashMatrix(const HashMatrix<long long,C> & );
 template HashMatrix<int,R>::HashMatrix(const HashMatrix<int,C> & , R(*ff)(C));
