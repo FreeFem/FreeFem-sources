@@ -50,11 +50,7 @@ then run with
 ~~~
 
 ### Remark
-You are reading this Markdown file which contains explainations and the FreeFEM script. When running Markdown files, FreeFEM selects the code lines enclosed in Markdown FreeFEM code blocks:
-
-\`\`\`freefem  
-[freefem code]  
-\`\`\`
+You are reading this Markdown file which contains explainations and the FreeFEM script. When running Markdown files, FreeFEM selects the code lines enclosed in Markdown FreeFEM code blocks.
 
 For a user friendly environment install the **vscode-FreeFEM** extension in the **VSCode** app. If your code is "not trusted" do Ctrl+Maj+P and look for "trust workspace settings".
 
