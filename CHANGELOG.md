@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file.
 -add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
 -add tool to put FreeFEM code in Markdow file (with suffix .md)    
       they only execute code beetwen
-      two  line  starting with ~~~  (in test),
+      two  line  starting with ~~~freefem or ```freefem  and finishing by ~~~ or ```,
       to mixte in same file comment and code.
 
 -add `real[int,int] at=A';`

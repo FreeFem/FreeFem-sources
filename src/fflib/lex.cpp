@@ -49,7 +49,7 @@ static const bool debugmacro = false;
 int  setMarkdown(const char * fn)
   {
     if(fn) {
-        size_t l =  strlen(fn);
+        size_t l =  strnlen(fn,32768);
         return strcasecmp(".md",fn+l-3) == 0  ;
     }
     else
