@@ -236,17 +236,21 @@ public:
         double lIJ2 = IJ.norme2();
         double lIJ = sqrt(lIJ2);
 
-        int exact = 25; // choose the quadrature formula
+        int exact = 5; // choose the quadrature formula
         const GQuadratureFormular<Fem2D::R2> * pQF= QF_Simplex<Fem2D::R2>(exact), QF = *pQF;
 
         double kappa_ij = 0; // mean value of kappa on the (i,j) line segment
 
         int cpt = 0;
+        if (lIJ < 1e-10)
+            kappa_ij = KappaGrid_eval(kappa0, I[0], I[1], I[2]);
+        else
         // quadrature over segment IJ with step size dic to compute kappa_ij
-        for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
-            R3 aux = I + ic/lIJ*IJ;
-            kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
-        }
+            for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
+                R3 aux = I + ic/lIJ*IJ;
+                kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
+            }
+
         kappa_ij /= cpt;
 
         double a_ij = 0;

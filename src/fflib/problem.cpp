@@ -2279,7 +2279,7 @@ struct DataQPElm {
             Ph=from.Ph;
             P=from.P;
             outside=from.outside;
-            pK = from.pk;
+            pK = from.pK;
             it = from.it;
         } //
         else {
