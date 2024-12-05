@@ -1,4 +1,4 @@
-name: Minimal version [release mode]
+name: Minimal version
 #on: [push]
 on:
   workflow_dispatch:
@@ -9,8 +9,11 @@ jobs:
       fail-fast: false
       matrix:
         version: [22.04, 24.04]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
 
-    name: Ubuntu ${{ matrix.version }} - ${{github.worflow}}
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
@@ -24,7 +27,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --without-mpi --prefix="${HOME}/freefem"
+          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
@@ -41,8 +44,11 @@ jobs:
       fail-fast: false
       matrix:
         version: [13, 14, 15]
-
-    name: MacOS ${{ matrix.version }} - ${{github.worflow}}
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: macos-${{ matrix.version }}
 
     steps:
@@ -58,7 +64,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --without-mpi --prefix="${HOME}/freefem"
+          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 3
@@ -71,7 +77,14 @@ jobs:
         run: make install
 
   windows:
-    name: Windows Server 2022 - ${{github.workflow}}
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: windows-2022
 
     defaults:
@@ -100,7 +113,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --without-mpi --prefix="${HOME}/freefem"
+          ./configure --without-mpi ${{ matrix.cfg.opt }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
