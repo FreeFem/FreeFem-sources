@@ -27,19 +27,24 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
--add read binary file with short number in bfstream plugin
--add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
--add tool to put FreeFEM code in Markdow file (with suffix .md)    
-      they only execute code beetwen
-      two  line  starting with ~~~  (in test),
-      to mixte in same file comment and code.
+- FreeFEM can now run Markdown (.md) files as well as .edp files. Markdown can be used to document your FreeFEM scripts (see for example the .md files in the [examples/examples](https://github.com/FreeFem/FreeFem-sources/tree/master/examples/examples) directory). When running a .md file, FreeFEM will execute the code contained in the FreeFEM code blocks, delimited by  
+  ````
+  ```freefem
+  [freefem code]
+  ```
+  ````
 
--add `real[int,int] at=A';`
+  Documented Markdown examples in the distribution can be viewed on the [documentation website](https://doc.freefem.org) (toggle Search in examples). Markdown can be previewed with e.g Visual Studio Code, with the [FreeFEM VS Code extension](https://marketplace.visualstudio.com/items?itemName=Pierre-Marchand.vscode-freefem) providing syntax highlighting for FreeFEM code blocks.
 
-- Powell Sabin `splitmesh6PowellSabin(Th)`  spliting for Scott–Vogelius lowest Stokes Element in 2D
+- add read binary file with short number in bfstream plugin
+- add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
+
+- add `real[int,int] at=A';`
+
+- Powell Sabin `splitmesh6PowellSabin(Th)`  splitting for Scott–Vogelius lowest Stokes Element in 2D
   in plugin/seq/splitmesh6.cpp
 
-- Worsey Farin `splitmesh12WorseyFarin(Th3)` pliting for Scott–Vogelius lowest Stokes Element in 3D
+- Worsey Farin `splitmesh12WorseyFarin(Th3)` splitting for Scott–Vogelius lowest Stokes Element in 3D
   in  plugin/seq/splitmesh12.cpp
 
 - interface with functional interface with `fgmres` (Linear and affine) in real and complex case
@@ -51,15 +56,14 @@ All notable changes to this project will be documented in this file.
   matrix A = va(Ph,Vh);
   int[int][int] a = A, at= A';//  only the sparsity pattern of  matrix
   ```
-- a meshL finite function can be see as real function with 1, or 2 parameters
+- a meshL finite element function can be seen as a real function with 1, or 2 parameters:
   ```
    meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
    cout << u(0.5)   << endl;
    cout << u(0.5,0) << endl;
   ```
-- Exemple to code convolution of 2 function with one with a small support
-  too be not to expensive
-  see tutorial/Convolution-Sample.edp example
+- Example to code convolution of two functions with one with a small support
+  to be not too expensive, see tutorial/Convolution-Sample.edp example
 - Support for dense blocks in PETSc matrices
 - GenEO for saddle-point examples with PCHPDDM in PETSc
 - Distributed ParaView output on `meshS`
@@ -69,7 +73,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - PETSc 3.20.4
-- move the plugin msh3 in kernel , so remove all `load "msh3"` in all examples and .idp file
+- move the plugin msh3 in kernel , so remove all `load "msh3"` in all examples and .idp files
 
 ### Deprecated
 
@@ -83,27 +87,27 @@ All notable changes to this project will be documented in this file.
  - try to fix orientation of internal edges in 2d.
  - fix missing break and continue in for [ i,ai:a] loop 
  - line number in macro error (thank to P-H Tournier)
- - fix problem integration of moving test or unknow function in 2d mesh:
- ```
- varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v); 
-     matrix AB = ab(Zh,Rh);
-```     
+ - fix problem in integration of moving test or unknown function in 2d mesh:
+    ```
+    varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v);
+    matrix AB = ab(Zh,Rh);
+    ```
    we remove code a piece of code. 
 
- - fix problem in mesh of ring from a square (missing option to reomve duplicate vertices)
+ - fix problem in mesh of a ring from a square (missing option to remove duplicate vertices)
    example: `mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;`
- - problem of segfalse in Write_hdf5 (problem of allocation in the stack not on the heap).
+ - Segmentation fault problem in Write_hdf5 (problem of allocation in the stack not on the heap).
    if the mesh2 is too large.
 - fix `(A'+A)` where func  `A =[[0,1],[0,0]] ;`
 - correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
-     thank to G. Sadaka to find the bug.
+     thanks to G. Sadaka for finding the bug.
 - correct hidden faces on surface mesh (ffglut)
-- remove optimisation flag ppm2rnm.cpp in macos (load trap)
+- remove optimisation flag ppm2rnm.cpp in macOS (load trap)
 - correct abcisse curviline on reparametrage function (setcurveabcisse) in load "Curvature"
 - correct compilation on ARM sonoma xcode 15.2
 - correct mpi essai.edp MPI_ANY_SOURCE Pb.
 - bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
-- in `segment(10,region=1,label=ll);` region is now used..
+- in `segment(10,region=1,label=ll);` region is now used.
 
 ---
 
