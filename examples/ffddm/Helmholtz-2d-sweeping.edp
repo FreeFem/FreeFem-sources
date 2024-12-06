@@ -12,7 +12,6 @@ real freq = getARGV("-frequency",10.); // frequency
 int nppwl = getARGV("-nppwl",4); // number of points per wavelength
 int npml = getARGV("-npml",4); // number of points for global PML
 
-load "msh3"
 load "geophysics"
 
 int Dirichlet = 1;

@@ -253,7 +253,7 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "rmInternalEdges", &typeid(bool)}
 };
 
-int  ChangeLab(const map<int,int> & m,int lab)
+static int  ChangeLab(const map<int,int> & m,int lab)
 {
   map<int,int>::const_iterator i=m.find(lab);
   if(i != m.end())

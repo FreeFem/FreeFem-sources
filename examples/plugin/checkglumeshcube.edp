@@ -1,6 +1,5 @@
 // file tetgencube.edp
 // this is  a BUGGUS  file work in progress F. Hecht .... Oct 2011
-load "msh3"
 load "tetgen"
 load "medit"
 

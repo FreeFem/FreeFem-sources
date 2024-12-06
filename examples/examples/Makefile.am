@@ -25,29 +25,29 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LI
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS_OTHER = BlackScholes2D.edp \
-	condensor.edp \
-	convects.edp \
-	Heat.edp \
-	heatex.edp \
-	lame.edp \
-	membrane.edp \
+TESTS_OTHER = BlackScholes2D.md \
+	condensor.md \
+	convects.md \
+	Heat.md \
+	heatex.md \
+	lame.md \
+	membrane.md \
 	membranerror.edp \
-	muwave.edp \
-	NSNewton.edp \
-	NSprojection.edp \
-	optimcontrol.edp \
-	potential.edp \
-	schwarz.edp \
-	stokes.edp \
-	stokes_composite.edp \
-	stokes_periodic_composite.edp \
+	muwave.md \
+	NSNewton.md \
+	NSprojection.md \
+	optimcontrol.md \
+	potential.md \
+	schwarz.md \
+	stokes.md \
+	stokes_composite.md \
+	stokes_periodic_composite.md \
 	test1.edp \
-	thermal.edp \
-	thermic.edp \
-	dist-projection.edp  
+	thermal.md \
+	thermic.md \
+	dist-projection.md
 
-TESTS_ARPARCK = sound.edp
+TESTS_ARPARCK = sound.md
 
 
 if ARPACK
@@ -63,7 +63,7 @@ LIST_CONDITIONAL = $(TESTS_OTHER) \
 
 
 # if .. no arpack or too long
-XFAIL_TESTS = NSprojection.edp
+XFAIL_TESTS = NSprojection.md
 
 EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp
 

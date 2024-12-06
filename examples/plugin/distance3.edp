@@ -1,5 +1,4 @@
 load "distance"
-load "msh3"
 load "medit"
 mesh3 Th=cube(10,10,10);
 fespace Vh(Th,P1);

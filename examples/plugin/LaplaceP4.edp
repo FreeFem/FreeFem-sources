@@ -1,7 +1,6 @@
 load "Element_P4"
 load "Element_P3"
 load "qf11to25"
-load "msh3"
 
 mesh Th=square(10,10);
 mesh3 Th3=cube(10,10,10);

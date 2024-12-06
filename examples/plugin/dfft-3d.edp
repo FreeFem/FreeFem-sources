@@ -4,7 +4,6 @@
 //   Discret Fast Fourier Transform 
 // -------------------------------
  load "dfft"
- load "msh3"
  {
 int nx=32,ny=32,nz=32,N=nx*ny*nz;
 // warning the fourier space is not exactly the unite square due to periodic condition
@@ -69,7 +68,7 @@ mapkk(u[],K,n2,K.norm2);
 plot(u,wait=1);
 
 }
-{ load "msh3"
+{
 int n1=32,n2=32,n3=32;
 mesh3 Th= cube(n1-1,n2-1,n3-1);
 fespace Vh(Th,P1);

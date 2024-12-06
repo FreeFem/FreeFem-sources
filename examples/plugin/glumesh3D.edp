@@ -1,4 +1,3 @@
-load "msh3"
 
 real x0=-1.,x1=-0.5;
 real y0=-0.5,y1=0.5;

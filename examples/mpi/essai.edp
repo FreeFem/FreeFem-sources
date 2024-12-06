@@ -1,7 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-
 verbosity=2;
 cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
 cout << " rank = " << mpiRank(mpiCommWorld) << " " << " size " << mpiSize(mpiCommWorld) << endl;
@@ -100,6 +99,7 @@ else if (mpirank==0) Irecv(processor(1,mpiCommWorld,rr),B[3]);
 mpiWait(rr);
 if (mpirank==0)  cout << " B3= " << B[3] << endl;
 if (mpirank==1)  cout << " A= " << A << endl;
+
 }
 
 // asyncronous  send/recv  messages....
@@ -128,7 +128,7 @@ if(mpirank==0)
   {
     for (int i=0;i<mpisize;++i)
       {
-	processor(-1) >> ww;  
+	processor(mpiAnySource) >> ww;  // correction jan 2024  mpiAnySource==-2 in mpich 
 	cout << " case " << i << "   " <<  ww[0] << endl ;
       }
   }

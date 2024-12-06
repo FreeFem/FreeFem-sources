@@ -12,7 +12,6 @@
 
 load "PETSc-complex"
 
-load "msh3"
 macro dimension()3L//
 include "macro_ddm.idp"
 

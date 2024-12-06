@@ -607,7 +607,18 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;
 };
+/* To Do FH 2024
+class opPrint : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
 
+    opDot(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
+    opDot(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
+
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;
+};*/
 class opColumn : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
@@ -1377,6 +1388,9 @@ void Init_map_type()
     
       // add frev 2007
       TheOperators->Add("\'", new opTrans);
+    //  Pas formel !!!!
+   // TheOperators->Add("<<",new opPrint("<<",atype<ostream*>(),atype<ostream*>(),atype<E_Array>() )   );
+   // TheOperators->Add("<<",new opPrint("<<",atype<ostream*>(),atype<ostream*>(),atype<TransE_Array>() )   );
 
     TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
@@ -2051,15 +2065,82 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     const E_Array & b=  tb ? *teb->v : *eb;
     int na=a.size();
     int nb=b.size();
-    if(na != nb) CompileError(" formal   [ [...] [] ] : [ [..], [..] , ... ]  ");
+    if(na <1 && nb < 1) CompileError(" empty array  [ ...] + [ ...  ]  ");
 
+    bool mab= b[0].left()==atype<E_Array>();
+    bool maa= a[0].left()==atype<E_Array>();
+    int ma =1;
+    int mb =1;
+
+    if(maa) {
+        ma= a[0].LeftValue()->nbitem();
+        for (int i=1;i<na;i++)
+            if( ma != (int) a[i].LeftValue()->nbitem())
+                CompileError(" first matrix with variable number of columm");
+
+    }
+    if(mab) {
+        mb= b[1].LeftValue()->nbitem();
+        for (int i=1;i<nb;i++)
+            if( mb != (int) b[i].LeftValue()->nbitem())
+                CompileError(" second matrix with variable number of columm");
+    }
+    int na1=na,ma1=ma,nb1=nb,mb1=mb;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(tb) RNM::Exchange(nb1,mb1);
+
+    if(na1 != nb1 || ma1 != mb1) CompileError(" formal   [ [...] [] ] + [ [..], [..] , ... ]  ");
+
+    KNM<CC_F0> A(na1,ma1), B(nb1,mb1);
+    if(maa)
+        for (int i=0;i<na;++i)
+        {
+            const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+            ffassert(li);
+            for (int j=0; j<ma;++j)
+                if(!ta)  A(i,j) = (*li)[j];
+                else     A(j,i) = TryConj((*li)[j]);
+        }
+    else
+        for (int i=0;i<na;++i)
+            if(!ta)  A(i,0) = a[i];
+            else     A(0,i) = TryConj(a[i]);
+
+    if(mab)
+        for (int i=0;i<nb;++i)
+        {
+            const E_Array * li=  dynamic_cast<const E_Array *>(b[i].LeftValue());
+            ffassert(li);
+            for (int j=0; j<mb;++j)
+                if(!tb)  B(i,j) = (*li)[j];
+                else     B(j,i) = TryConj((*li)[j]);
+        }
+    else
+        for (int i=0;i<nb;++i)
+            if(!tb)  B(i,0) = b[i];
+            else     B(0,i) = TryConj(b[i]);
 
     AC_F0  v;
     v = 0; // empty
-	for (int i=0;i<na;++i)
-	    v += C_F0(TheOperators,op,ta ? TryConj(a[i]) : a[i],tb ? TryConj(b[i]): b[i]) ;
-	return C_F0(TheOperators,"[]",v);
-
+    if( ma1 == 1) // 1 vecteur
+    {
+        for (int i=0;i<na;++i)
+            v += C_F0(TheOperators,op,ta ? TryConj(a[i]) : a[i],tb ? TryConj(b[i]): b[i]) ;
+        return C_F0(TheOperators,"[]",v);
+    }
+    else {
+        // return formal matrix
+        AC_F0  w,v;
+        w=0;
+        for (int i=0;i<na1;++i)
+        {
+            v=0;
+            for (int j=0;j<ma1;++j)
+                v+= C_F0(TheOperators,"+",A(i,j),B(i,j));
+            w+=C_F0(TheOperators,"[]",v);
+        }
+        return C_F0(TheOperators,"[]",w);
+    }
 }
 //  to be sure new and delele be in see dll for windows
 string  *newstring(){string * p=new string();

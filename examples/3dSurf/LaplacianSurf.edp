@@ -1,6 +1,5 @@
 // test to validate the addition of surfacic finite elements in FreeFEM
 
-load "msh3"
 load "medit"
 
 /////variational form

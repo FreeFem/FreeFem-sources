@@ -18,6 +18,7 @@
 
 extern long mpirank;
 extern long verbosity;
+extern int typeofscript; 
 extern FILE *ThePlotStream; // Add for new plot. FH oct 2008
 // for the environnement variables ...
 extern const char *prognamearg;
@@ -27,7 +28,7 @@ extern bool consoleatend;
 extern bool echo_edp;
 extern bool NoGraphicWindow;
 extern const char *  check_plugin;
-
+extern int typeofscript;
 char *Shell_Space(const char *s);
 
 char *Shell_Space(const char *s) {
@@ -77,6 +78,7 @@ extern bool load(string s);
 int getprog(char *fn, int argc, char **argv) {
   waitatend = 0; // init_lgparallele==0; // wait if not parallel
   consoleatend = false; // bug with redirection FH
+  typeofscript=0; // edp or markdown ..
   int ret = 0;
   *fn = '\0';
 check_plugin=0; // no pluging to check ..
@@ -126,7 +128,7 @@ check_plugin=0; // no pluging to check ..
       waitatend = false;
     }
   }
-  bool flagnw = 0;
+   bool flagnw = 0;
   echo_edp = true;
   ffapi::ff_justcompile = false;
   if(argc) {
@@ -153,6 +155,9 @@ check_plugin=0; // no pluging to check ..
       else if (strcmp(argv[i], "-wg") == 0) {
         noffglut = false;
         NoGraphicWindow = false;
+      }
+      else if (strcmp(argv[i], "-md") == 0) {
+        typeofscript = 1;
       }
 
       else if (strcmp(argv[i], "-ne") == 0) // no edp
@@ -216,13 +221,16 @@ check_plugin=0; // no pluging to check ..
         strncpy(fn, argv[++i],1024);
         ret = 1;
         edpfilenamearg = argv[i];
-        if (verbosity > 4) cout << " fn: " << fn << endl;
+       //   if(!typeofscript )  typeofscript= setMD(fn);
+
+        if (verbosity > 4) cout << " fn: " << fn << " " << typeofscript << endl;
       }
       else if (ret == 0) {
         strncpy(fn, argv[i],1024);
         edpfilenamearg = argv[i];
+      //    if(!typeofscript )typeofscript= setMD(fn);
         ret = 1;
-        if (verbosity > 4) cout << " fn: " << fn << endl;
+        if (verbosity > 4) cout << " fn: " << fn << " " << typeofscript << endl;
       }
     }
   }
@@ -306,6 +314,7 @@ check_plugin=0; // no pluging to check ..
     cout << "\t-cdtmp:             change directory to /tmp" << endl;
     cout << "\t-jc:                just compile" << endl;
     cout << "\t-ns:                same as -ne" << endl;
+    cout << "\t-md:                MarkDown script" << endl;
     cout << "\t-nowait:            do not wait graphics at the end" << endl;
     cout << "\t-nc:                without console (MS Windows only)" << endl;
     cout << "\t-log:               with console (MS Windows only)" << endl;

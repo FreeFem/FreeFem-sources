@@ -598,12 +598,12 @@ ConstructDataFElement::~ConstructDataFElement()
 
  }
 
-ConstructDataFElement::ConstructDataFElement (const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/
+ConstructDataFElement::ConstructDataFElement (const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace*/
 const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm,
 int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
 : counter(NewCounter())
 {
- Make(Th,TFEs,/*NbDfOnSommet,NbDfOnEdge,NbDfOnElement,*/ tm,nbdfv,ndfv,nbdfe,ndfe);
+ Make(Th,TFEs,/*NbDfOnSommet,ndfonEdge,ndfonFace,*/ tm,nbdfv,ndfv,nbdfe,ndfe);
 }
 
 ConstructDataFElement::ConstructDataFElement(const FESpace ** l,int k,const KN<const TypeOfFE *>  & TFEs)
@@ -616,14 +616,14 @@ ConstructDataFElement::ConstructDataFElement(const FESpace ** l,int k,const KN<c
      ffassert( l[i]->TFE.constant());
    }
 
- Make(Th,TFEs);//NbDfOnSommet,NbDfOnEdge,NbDfOnElement,0);
+ Make(Th,TFEs);//NbDfOnSommet,ndfonEdge,ndfonFace,0);
 }
 
 
 void ConstructDataFElement::Make(const Mesh &Th,
 const  KN<const TypeOfFE *> & TFEs,
 
-/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement,*/const TypeOfMortar *tm,
+/*int NbDfOnSommet,int ndfonEdge,int ndfonFace,*/const TypeOfMortar *tm,
 int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
 /* pour le condition de periodicit� ..
   nb_dfv :  nombre de sommets recolle par periodicit�
@@ -638,16 +638,16 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
   assert(TFEs.constant());
   const TypeOfFE & TFE(*TFEs[0]);
   int nbdfe=TFE.NbDoF;
-  int NbDfOnSommet=TFE.NbDfOnVertex;
-  int NbDfOnEdge=TFE.NbDfOnEdge;
-  int NbDfOnElement=TFE.NbDfOnElement;
+  int NbDfOnSommet=TFE.ndfonVertex;
+  int ndfonEdge=TFE.ndfonEdge;
+  int ndfonFace=TFE.ndfonFace;
   int NbNodeonVertex=0;
   int NbNodeonEdge=0;
   int NbNodeonElement=0;
   int NbNodes=TFE.NbNode;
 
 
-   assert( nbdfe == 3*NbDfOnSommet+3*NbDfOnEdge+NbDfOnElement);
+   assert( nbdfe == 3*NbDfOnSommet+3*ndfonEdge+ndfonFace);
 
    KN<int> NbDFonNode(NbNodes), NodeIsOn(NbNodes);
    NbDFonNode=0;
@@ -688,7 +688,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
   FirstDfOfNode =0;
   FirstNodeOfElement=0;
   MaxNbDFPerElement=nbdfe;
-  assert(3*NbDfOnSommet+3*NbDfOnEdge+NbDfOnElement==MaxNbDFPerElement);
+  assert(3*NbDfOnSommet+3*ndfonEdge+ndfonFace==MaxNbDFPerElement);
 
   int ks=TFE.NbNodeOnVertex>0,
       ke=TFE.NbNodeOnEdge>0,
@@ -942,9 +942,9 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      Th(TTh),
      ptrTFE(new TypeOfFESum(tef,k)),
      TFE(1,0,ptrTFE),
-     cdef(new ConstructDataFElement(TTh,TFE,//sum(tef,&TypeOfFE::NbDfOnVertex,k),
-                                       // sum(tef,&TypeOfFE::NbDfOnEdge,k),
-                                        //sum(tef,&TypeOfFE::NbDfOnElement,k),
+     cdef(new ConstructDataFElement(TTh,TFE,//sum(tef,&TypeOfFE::ndfonVertex,k),
+                                       // sum(tef,&TypeOfFE::ndfonEdge,k),
+                                        //sum(tef,&TypeOfFE::ndfonFace,k),
                                         0,nbdfv,ndfv,nbdfe,ndfe)),
      cmesh(TTh),
      N(sum(tef,&TypeOfFE::N,k)),
@@ -988,7 +988,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      MaxNbNodePerElement(cdef->MaxNbNodePerElement),
      MaxNbDFPerElement(cdef->MaxNbDFPerElement)
 {
-  if(tef.NbDfOnVertex || tef.NbDfOnEdge) renum();
+  if(tef.ndfonVertex || tef.ndfonEdge) renum();
   Show();
 }
 
@@ -1005,7 +1005,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      Th(TTh),
      ptrTFE(0),
      TFE(1,0,&tef),
-     cdef(new ConstructDataFElement(TTh,TFE,&tm)),//tef.NbDfOnVertex,tef.NbDfOnEdge,tef.NbDfOnElement,&tm)),
+     cdef(new ConstructDataFElement(TTh,TFE,&tm)),//tef.ndfonVertex,tef.ndfonEdge,tef.ndfonFace,&tm)),
      cmesh(TTh),
      N(tef.N),
      Nproduit(1),
@@ -1416,7 +1416,7 @@ class TypeOfMortarCas1: public TypeOfMortar {
      { int l(M.NbLeft()),r(M.NbRight());
        int n =Max(l,r);
        int mn=Min(l,r);
-       return (l+r)*(NbDfOnVertex + NbDfOnEdge) + (n+1)*NbDfOnVertex + n*NbDfOnEdge -mn-1;
+       return (l+r)*(ndfonVertex + ndfonEdge) + (n+1)*ndfonVertex + n*ndfonEdge -mn-1;
       }
   int NbOfNodes(const Mesh &,const Mortar &M) const // call one time
      {int l(M.NbLeft()),r(M.NbRight()); return (l+r)*(vertex_is_node+edge_is_node)+1;}
@@ -1424,7 +1424,7 @@ class TypeOfMortarCas1: public TypeOfMortar {
      { int l(M.NbLeft()),r(M.NbRight());
        int n =Max(l,r);
        int mn=Min(l,r);
-       return (l+r)*(NbDfOnVertex + NbDfOnEdge) + (n+1)*NbDfOnVertex + n*NbDfOnEdge -mn-1;
+       return (l+r)*(ndfonVertex + ndfonEdge) + (n+1)*ndfonVertex + n*ndfonEdge -mn-1;
       }
 
    int NodeOfDF(const FESpace &Vh,const Mortar &M,int i) const

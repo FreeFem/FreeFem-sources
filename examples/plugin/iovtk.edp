@@ -1,4 +1,3 @@
-load "msh3"
 load "iovtk"
 mesh3 Th = cube(1,1,1,region=11);
 fespace Vh(Th,P1);

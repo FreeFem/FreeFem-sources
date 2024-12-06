@@ -81,6 +81,8 @@ for (iter=1;iter<=nbiter;iter++)
 	  ofstream tt("tt.b");
 	  tt << f1[]  << endl;
 	}
+	[uu1,uu2,pp]=[0,0,0];
+	cout << uu1[].n << " " << A.n << " x "<< A.m << " "<< f1[].n << endl;
 	uu1[]  = A^-1*f1[];
       }
       verbosity=1;

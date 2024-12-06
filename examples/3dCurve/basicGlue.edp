@@ -1,4 +1,3 @@
-load "msh3"
 
 int n=2;
 meshL Th1 = segment(n);

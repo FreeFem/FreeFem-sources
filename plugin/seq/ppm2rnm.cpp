@@ -28,6 +28,8 @@
 /* Usage in FreeFEM .edp file
  * see: examples/plugin/ppm2rnm.edp
  */
+// error of MacOS 14.2.1 ?????  F. Hecht with optimisation !!!!
+#pragma clang optimize off
 #include <iostream>
 #include <cfloat>
 using namespace std;

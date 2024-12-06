@@ -1,6 +1,5 @@
 // basic example io vtk for meshS/meshL
 load "iovtk"
-load "msh3"
 
 mesh Th = square(10,10);
 savevtk("Th.vtk",Th,bin=1); 

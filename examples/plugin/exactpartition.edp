@@ -1,5 +1,4 @@
 load "exactpartition"
-load "msh3"
 mesh Th=square(10,10);
 mesh3 Th3=buildlayers(Th,10); 
 fespace Vh(Th,P1);

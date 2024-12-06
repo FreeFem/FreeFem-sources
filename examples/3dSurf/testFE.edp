@@ -1,4 +1,3 @@
-load "msh3"
 int errT=0; 
 
 macro Test(Th,FE,nFE)

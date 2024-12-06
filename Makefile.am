@@ -19,6 +19,8 @@
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : Antoine Le Hyaric, Simon Garnotel
 # E-MAIL  :
+# add F. Hecht 
+bin_PROGRAMS=bin/md2edp
 
 SUBDIRS=3rdparty src \
 	plugin  \
@@ -45,6 +47,7 @@ EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
 	bin/Install-MacOS.command.in \
 	bin/Searchdylib \
 	bin/test-driver-ff \
+	etc/tools/md2edp.cpp  \
 	etc/tools/srcHeader.txt \
 	etc/tools/.uncrustify \
 	etc/debian/freefem++-doc.doc-base \
@@ -154,6 +157,7 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/plugin/lg.pgm \
 	examples/mpi/regtests.sh \
 	examples/misc/speedtest.sh \
+        examples/*/*.md \
 	examples/*/*.edp \
 	examples/CheckAllEdp \
 	examples/plugin/ch.pts \
@@ -199,6 +203,9 @@ ide:
 	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/ide && $(MAKE) $(AM_MAKEFLAGS) FreeFem++-cs$(EXEEXT)
 
+bin/md2edp$(EXEEXT):etc/tools/md2edp.cpp 
+	$(CXX) etc/tools/md2edp.cpp -o bin/md2edp$(EXEEXT)
+
 # Cleaning generated files which are stored in the CVS repository, to
 # avoid technical CVS conflicts.
 clean-gen:
@@ -230,7 +237,7 @@ WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	sed -i 's;/mingw64/ff-petsc;/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
-	-DHOSTOS='$(host_os)' -DFFPETSC='$(FF_prefix_petsc)' \
+	-DHOSTOS='$(host_os)' -DFFPETSC='$(FF_prefix_petsc_win32)' \
 	 etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
 	echo loadpath += '"!\."'  >freefem++.pref
 	echo includepath += '"!\idp"'  >>freefem++.pref
@@ -277,23 +284,26 @@ bin/init-var.sh:Makefile
 	
 	
 	
-install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
+install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2edp
+
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 "$(DESTDIR)/etc/paths.d/"
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 "$(DESTDIR)/usr/local/bin"
+	make build-edp 
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd "$(DESTDIR)$(pkgdatadir)/$(VERSION)"; tar xvf -)
 	$(INSTALL_SCRIPT) examples/CheckAll examples/CheckAllEdp "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
 	$(mkinstalldirs) -m 755 "$(DESTDIR)${bindir}"
-	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf "$(DESTDIR)$(pkgdatadir)" 
-	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
-	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
-	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )
-	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
-	test `uname` != Darwin || ( $(MAKE) bin/movefortranlib )
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
 	cd idp; for i in *.idp; do \
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
+	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf "$(DESTDIR)$(pkgdatadir)" 	
+	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
+	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
+#    need sudo ...	
+#winDssSSs	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
+#	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
+#	test `uname` != Darwin || ( $(MAKE) bin/movefortranlib )
 
 bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" bin/script/PostInstall.m4 > bin/script/PostInstall.sh
@@ -521,6 +531,12 @@ findtags:
 	find . -type f -name '*.?pp'|grep -v lg.tab|xargs etags
 clean-local::
 	-rm TAGS
+
+build-edp:bin/md2edp
+	make bin/md2edp `echo  examples/*/*.md ' ' | sed 's/.md /.edp /g'`
+##  New rule to build .edp file for md file
+.md.edp: 
+	bin/md2edp $<
 
 ##  trick to check if the configure configure.ac Makefile.in .. are correct in time
 Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)

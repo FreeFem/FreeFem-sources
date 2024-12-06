@@ -1,6 +1,5 @@
 load "Element_P1bl"
 load "splitmesh3"
-load "msh3"
 
 // 2d OK ???
 {

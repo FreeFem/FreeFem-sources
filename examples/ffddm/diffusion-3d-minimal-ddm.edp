@@ -10,7 +10,6 @@
 
 macro dimension 3// EOM            // 2D or 3D
 
-load "msh3"
 
 include "ffddm.idp"
 

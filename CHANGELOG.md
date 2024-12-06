@@ -18,26 +18,125 @@
 -->
 
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-## [4.14]
+---
+
+## [4.15]
+
 ### Added
-- Finite element BDM2 and BDM2ortho  in test, Bug in BDM2ortho corrected  the 4 sept 2014 in version: v4.13-130-g1af52457
-- Conversion of  matrix or transpose of matrix in `int[int][int]` array  to get the structure of sparse matrix. 
-    see tutorial/sparse-matrix.edp example at end
+
+- FreeFEM can now run Markdown (.md) files as well as .edp files. Markdown can be used to document your FreeFEM scripts (see for example the .md files in the [examples/examples](https://github.com/FreeFem/FreeFem-sources/tree/master/examples/examples) directory). When running a .md file, FreeFEM will execute the code contained in the FreeFEM code blocks, delimited by  
+  ````
+  ```freefem
+  [freefem code]
+  ```
+  ````
+
+  Documented Markdown examples in the distribution can be viewed on the [documentation website](https://doc.freefem.org) (toggle Search in examples). Markdown can be previewed with e.g Visual Studio Code, with the [FreeFEM VS Code extension](https://marketplace.visualstudio.com/items?itemName=Pierre-Marchand.vscode-freefem) providing syntax highlighting for FreeFEM code blocks.
+
+-add tool to put FreeFEM code in Markdow file (with suffix .md)    
+      they only execute code beetwen
+      two  line  starting with ~~~freefem or ```freefem  and finishing by ~~~ or ```,
+      to mixte in same file comment and code.
+-add command `md2edp` to extract freefem code form Markdown file.
+
+- add read binary file with short number in bfstream plugin
+- add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
+
+- add `real[int,int] at=A';`
+
+- Powell Sabin `splitmesh6PowellSabin(Th)`  splitting for Scott–Vogelius lowest Stokes Element in 2D
+  in plugin/seq/splitmesh6.cpp
+
+- Worsey Farin `splitmesh12WorseyFarin(Th3)` splitting for Scott–Vogelius lowest Stokes Element in 3D
+  in  plugin/seq/splitmesh12.cpp
+
+- interface with functional interface with `fgmres` (Linear and affine) in real and complex case
+  see tutorial/algo.edp
+- Finite element `BDM2` and `BDM2ortho` in test, Bug in BDM2ortho corrected the 4 sept 2023 in version: v4.13-130-g1af52457
+- Conversion of matrix or transpose of matrix in `int[int][int]` array to get the structure of sparse matrix.
+  see tutorial/sparse-matrix.edp example at end
+  ```
+  matrix A = va(Ph,Vh);
+  int[int][int] a = A, at= A';//  only the sparsity pattern of  matrix
+  ```
+- a meshL finite element function can be seen as a real function with 1, or 2 parameters:
+  ```
+   meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
+   cout << u(0.5)   << endl;
+   cout << u(0.5,0) << endl;
+  ```
+- Example to code convolution of two functions with one with a small support
+  to be not too expensive, see tutorial/Convolution-Sample.edp example
+- Support for dense blocks in PETSc matrices
+- GenEO for saddle-point examples with PCHPDDM in PETSc
+- Distributed ParaView output on `meshS`
+- Interface to `mmg2d` for two-dimensional `mesh`
+- Support for Mmg parameters `-localParameter`, `-nosizreq`, `-hgradreq`
+
+### Changed
+
+- PETSc 3.20.4
+- move the plugin msh3 in kernel , so remove all `load "msh3"` in all examples and .idp files
+
+### Deprecated
+
+-
+
+### Removed
+
+-
+
+### Fixed
+ - try to fix orientation of internal edges in 2d.
+ - fix missing break and continue in for [ i,ai:a] loop 
+ - line number in macro error (thank to P-H Tournier)
+ - fix problem in integration of moving test or unknown function in 2d mesh:
     ```
-    matrix A = va(Ph,Vh); 
-    int[int] a = A, at= A'; 
-    ````
+    varf ab([u],[v]) = int2d(Th,mapu=[Xo,Yo])(u*v);
+    matrix AB = ab(Zh,Rh);
+    ```
+   we remove code a piece of code. 
+
+ - fix problem in mesh of a ring from a square (missing option to remove duplicate vertices)
+   example: `mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;`
+ - Segmentation fault problem in Write_hdf5 (problem of allocation in the stack not on the heap).
+   if the mesh2 is too large.
+- fix `(A'+A)` where func  `A =[[0,1],[0,0]] ;`
+- correct integer overflow (in rare case) when calling INTER_SEG1d use in interpolation on Th3,ThS, ThL
+     thanks to G. Sadaka for finding the bug.
+- correct hidden faces on surface mesh (ffglut)
+- remove optimisation flag ppm2rnm.cpp in macOS (load trap)
+- correct abcisse curviline on reparametrage function (setcurveabcisse) in load "Curvature"
+- correct compilation on ARM sonoma xcode 15.2
+- correct mpi essai.edp MPI_ANY_SOURCE Pb.
+- bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
+- in `segment(10,region=1,label=ll);` region is now used.
+
+---
+
+## [4.14]
+
+### Added
+
+- Finite element BDM2 and BDM2ortho in test, Bug in BDM2ortho corrected the 4 sept 2014 in version: v4.13-130-g1af52457
+- Conversion of matrix or transpose of matrix in `int[int][int]` array to get the structure of sparse matrix.
+  see tutorial/sparse-matrix.edp example at end
+  ```
+  matrix A = va(Ph,Vh);
+  int[int] a = A, at= A';
+  ```
 - a meshL finite function can be see as real function with 1, or 2 parameters
-    ```
-     meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
-     cout << u(0.5)   << endl; 
-     cout << u(0.5,0) << endl; 
-    ```
--  Exemple to code convolution of 2 function with one with a small support 
-       too be not to expanxive
-      see tutorial/Convolution-Sample.edp example
+  ```
+   meshL ThL = segment(10); fespace VhL(ThL,P1); VhL u= x;
+   cout << u(0.5)   << endl;
+   cout << u(0.5,0) << endl;
+  ```
+- Exemple to code convolution of 2 function with one with a small support
+  too be not to expanxive
+  see tutorial/Convolution-Sample.edp example
 - Support for dense blocks in PETSc matrices
 - GenEO for saddle-point examples with PCHPDDM in PETSc
 - Distributed ParaView output on `meshS`
@@ -45,23 +144,30 @@ All notable changes to this project will be documented in this file.
 - Support for Mmg parameters `localParameter`, `-nosizreq`, -hgradreq`
 
 ### Changed
+
 - PETSc 3.20.2
 
 ### Deprecated
+
 -
 
 ### Removed
+
 -
 
 ### Fixed
--  bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr ) 
--  in segment(10,region=1,label=ll);  region is now used.. 
+
+- bug in P3pnc3d in vectorial case (thank to loic.balaziatchynillama@cea.fr )
+- in segment(10,region=1,label=ll); region is now used..
+
+---
 
 ## [4.13]
 
 ### Added
 
 - Composite FE spaces and variational forms for coupled problems:
+
   - can now define composite FE spaces with different meshes/mesh types as
     ```
     fespace Uh(Th1,[P2,P2]);
@@ -69,6 +175,7 @@ All notable changes to this project will be documented in this file.
     fespace Vh=Uh*Ph;
     ```
   - can define coupled problems using composite FE spaces, or directly with `<` `>` syntax:
+
     ```
     fespace Uh(Th1,[P2,P2]);
     fespace Ph(Th2,P1);
@@ -77,158 +184,182 @@ All notable changes to this project will be documented in this file.
 
     solve Pb (<[u1,u2],[p]>, <[v1,v2],[q]>) = ...
     ```
+
     see `examples/examples/stokes_composite.edp` and `examples/examples/stokes_periodic_composite.edp`
+
   - this new type of composite problem can be used for FEM-BEM coupling and also benefits from automatic parallel assembly (in test) and can be easily solved using the distributed solver MUMPS, see `examples/bem/Helmholtz-2d-FEM-BEM-coupling-MUMPS-composite.edp`
   - composite problems can also be solved using PETSc (in test), see `examples/hpddm/Helmholtz-2d-FEM-BEM-coupling-PETSc-composite.edp`
 
 - remove spurious cout in Curve/Line DG definition.
 
-- add New Finite element 2d on mesh :  RT0dc (discontinios RT0 ) in plugin Element_Mixte
-      	see example plugin/RT0dc.edp 
+- add New Finite element 2d on mesh : RT0dc (discontinios RT0 ) in plugin Element_Mixte
+  see example plugin/RT0dc.edp
   and P1nc (Crouziex-Raviart) + bulle : name P1bnc in plugin Element_P1ncdc
-  and P1nc totaly discontinous + bulle  ; name P1bdcnc in plugin Element_P1ncdc
-      	see example plugin/example testp1dcnc.edp
-	for akram.beni-hamad@inria.fr 
-- add New finite element:  P4S P^4 on meshS , P3pnc3d in Element_P3pnc_3d (Couziex-Raviart with P3 )
-   see loic.balaziatchynillama@cea.fr for more information. 
+  and P1nc totaly discontinous + bulle ; name P1bdcnc in plugin Element_P1ncdc
+  see example plugin/example testp1dcnc.edp
+  for akram.beni-hamad@inria.fr
+- add New finite element: P4S P^4 on meshS , P3pnc3d in Element_P3pnc_3d (Couziex-Raviart with P3 )
+  see loic.balaziatchynillama@cea.fr for more information.
 - add new interface for metis (see examples/plugin/metis.edp)
-- Correct jump, mean, otherside of finite element function on mesh3, meshS, meshL 
-   (add missing code in method: MeshPoint::SetAdj()  thanks to zuqi.tang@univ-lille.fr)  
--  try to build dmg install mac version 
--  add  file script to build meshS from boundary meshL TL if the boundary is
-    the graph of function from  mean plane. see example in examples/3dSurf/buildmeshS.edp
-    meshS Ts=buildmeshSminsurf(TL,1);// minimal surface
-    meshS Tsl=buildmeshSLap(TL,1);//  Laplace Surface ..
-    meshS Tsl=buildmesh(TL,1,op);// op = 0 Lap and op =1 => minsurf. 
-- add sparse block to sparse  matrix 
+- Correct jump, mean, otherside of finite element function on mesh3, meshS, meshL
+  (add missing code in method: MeshPoint::SetAdj() thanks to zuqi.tang@univ-lille.fr)
+- try to build dmg install mac version
+- add file script to build meshS from boundary meshL TL if the boundary is
+  the graph of function from mean plane. see example in examples/3dSurf/buildmeshS.edp
+  meshS Ts=buildmeshSminsurf(TL,1);// minimal surface
+  meshS Tsl=buildmeshSLap(TL,1);// Laplace Surface ..
+  meshS Tsl=buildmesh(TL,1,op);// op = 0 Lap and op =1 => minsurf.
+- add sparse block to sparse matrix
   matrix A = va(Vh,Vh);
   matrix B(A.n*5,A.n*5);
   int i=2;
-  B.add(1.+10*i,A,i*ndof,i*ndof); 
+  B.add(1.+10*i,A,i*ndof,i\*ndof);
+
 ### Changed
--  change  isoline to do the job for meshS, see example plugin/isoline.edp
--  change  Curve function to be with 3 components to use the isoline data.
--  change  Curvature plugin to compatible with new isoline data for 3 d case.
--  change some sprintf in snprint to remove warning 
+
+- change isoline to do the job for meshS, see example plugin/isoline.edp
+- change Curve function to be with 3 components to use the isoline data.
+- change Curvature plugin to compatible with new isoline data for 3 d case.
+- change some sprintf in snprint to remove warning
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL  and also discontinous  version (missing  initialisation)
-- bug in  plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
-- genere a bug if zero size element in read MeshL from file. 
-- remove  mistake when the border is badly defined , remove empty element in buildmeshL function. 
+
+- bug in all P0face, P0edge, P0VF on mesh3,meshS, MeshL and also discontinous version (missing initialisation)
+- bug in plot function and ffglut with parameter pdf="file.pdf" , because shift in plot named parameter not change in ffglut.
+- genere a bug if zero size element in read MeshL from file.
+- remove mistake when the border is badly defined , remove empty element in buildmeshL function.
 - bug in array quadrature FE.
+
+---
+
 ## [4.12]
+
 ### Added
+
 - add new finite Element P2pnc3d of Stokes problem like Crouzeix-Raviard in 3d of P2 pylynome (see G. Allaire or loic.balaziatchynillama@cea.fr
   for detail )
 - add pdfPLOT form fujiwara@acs.i.kyoto-u.ac.jp [http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff++-programs/]
   usage: plot( ..., pdf="filename.pdf", svg="filename.svg" );
-- add missing code for Discontinous Galerkin in 3d for RHS 
-   ( see [problem-in-3d-discontinuous-galerkin-computation][https://community.freefem.org/t/problem-in-3d-discontinuous-galerkin-computation/2015/6] )
-- add in examples/mpi/chamonix.edp : radiative transfer (use new plugin 
-     plugin/mpi/RadiativeTransfer_htool.cpp, illustrates the use of htool for compression
-     of user defined matrix operator)
+- add missing code for Discontinous Galerkin in 3d for RHS
+  ( see [problem-in-3d-discontinuous-galerkin-computation][https://community.freefem.org/t/problem-in-3d-discontinuous-galerkin-computation/2015/6] )
+- add in examples/mpi/chamonix.edp : radiative transfer (use new plugin
+  plugin/mpi/RadiativeTransfer_htool.cpp, illustrates the use of htool for compression
+  of user defined matrix operator)
 - transform a surface meshS in 2d mesh (warning with overloaping, no test) with movemesh:
- 
-    meshS Ths = square3(10,10,[x,y,square(2*x-1)+square(2*y-1)]); 
-    real[int] gzz;
-    mesh Th2 = movemesh(Ths,transfo=[x,y,z],getZ=gzz);//  get flat 2d mesh form meshS 
 
-- New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3` 
-	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
-	see example end of example plugin/testFE-P3
+  meshS Ths = square3(10,10,[x,y,square(2*x-1)+square(2*y-1)]);
+  real[int] gzz;
+  mesh Th2 = movemesh(Ths,transfo=[x,y,z],getZ=gzz);// get flat 2d mesh form meshS
+
+- New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3`
+  meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
+  see example end of example plugin/testFE-P3
 - missing new 1d finite element P4 in plugin `Elemnt_P4`
-- plugin `plugin/seq/MatrixMarket.cpp`  to read and save matrix in MatrixMarket and add also a binary form 
-     (see examples/plugin/MatrixMarket.edp test)
-- add ILU on complex matrix in plugin IncompleteCholesky 
-    remark:the IncompleteCholesky is writen but not tested
-- add test of functionnal interface of complex eigen value problem in 
-    `examples/eigen/LapEigenValueFuncComplex.edp`
-### Changed
--  correct some old code with old version of K.facePermutation() function in 
-      plugin/seq/Element_Mixte3d.cpp and plugin/seq/Element_P2bulle3.cpp 
-      (not tested) 
+- plugin `plugin/seq/MatrixMarket.cpp` to read and save matrix in MatrixMarket and add also a binary form
+  (see examples/plugin/MatrixMarket.edp test)
+- add ILU on complex matrix in plugin IncompleteCholesky
+  remark:the IncompleteCholesky is writen but not tested
+- add test of functionnal interface of complex eigen value problem in
+  `examples/eigen/LapEigenValueFuncComplex.edp`
 
+### Changed
+
+- correct some old code with old version of K.facePermutation() function in
+  plugin/seq/Element_Mixte3d.cpp and plugin/seq/Element_P2bulle3.cpp
+  (not tested)
 
 ### Deprecated
+
 -
 
 ### Removed
+
 -
 
 ### Fixed
--  fixe in A.RemoveHalf (alway return a new matrix)
+
+- fixe in A.RemoveHalf (alway return a new matrix)
+
+---
 
 ## [4.11]
+
 ### Added
-- add computation scalar product of R3 example :  ( N'*Tl)
+
+- add computation scalar product of R3 example : ( N'\*Tl)
 - add tools to do compution with R3 vector see tutorial/calculus.edp
-- add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
-- add R3 Th.be(k).N to  get the normal of boundary element (in all mesh type)
-- add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
-- add R3 Th.be(k).measure to  get the measure of the boundary elment 
-- add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
-- see new example dist-projection.edp example in examples 
-- add dxx, dyy, dzz, dxy,  .. on P2L finite element 
-- add tools to compute solid angle :  let R3 O; a given point, Th3 a mesh3 and ThS a meshS. 
-     solidangle(O,Th3.be(ke)) // triangular face is the boundary face 
-     solidangle(O,Th3[k],nuface) // triangular face is face nuface of tet Th3[k]
-     solidangle(O,ThS[k]) // triangular face is ThS[k]
-     solidangle(O,A,B,C) // triangular face i (A,B,C) 
-     Volume(O,Th3.be(ke)) // O, triangular face is the boundary face 
-     Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
-     Volume(O,ThS[k]) // O, triangular face is ThS[k]
-     Volume(O,A,B,C) // (O,A,B,C) tet ..
-- in bem pluging add array of HMatrix 
-     
--  examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
-- 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
-   R3 K; // le fourier variable allway 3d (sorry)
-   int n1=16,n2=8, n3=4; 
-   real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny*nz);
-   mapk(tab1,K,sqr(K.x));
-   mapkk(tab2,ny,K,K.norm2);
-   mapkkk(tab3,ny,nz,K,K.norm2);
-   //  Remark you can change K by P (current point)     
+- add an example tutorial/tgv-test.edp see see what tgv do on matrix build.
+- add R3 Th.be(k).N to get the normal of boundary element (in all mesh type)
+- add R3 Th.be(k)[i].P to get the point (R3) of boundary vertices
+- add R3 Th.be(k).measure to get the measure of the boundary elment
+- add projection function to a mesh , meshL, MeshS or mesh3 with return a R3 point
+- see new example dist-projection.edp example in examples
+- add dxx, dyy, dzz, dxy, .. on P2L finite element
+- add tools to compute solid angle : let R3 O; a given point, Th3 a mesh3 and ThS a meshS.
+  solidangle(O,Th3.be(ke)) // triangular face is the boundary face
+  solidangle(O,Th3[k],nuface) // triangular face is face nuface of tet Th3[k]
+  solidangle(O,ThS[k]) // triangular face is ThS[k]
+  solidangle(O,A,B,C) // triangular face i (A,B,C)
+  Volume(O,Th3.be(ke)) // O, triangular face is the boundary face
+  Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
+  Volume(O,ThS[k]) // O, triangular face is ThS[k]
+  Volume(O,A,B,C) // (O,A,B,C) tet ..
+- in bem pluging add array of HMatrix
+- examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test.
+- 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre
+  R3 K; // le fourier variable allway 3d (sorry)
+  int n1=16,n2=8, n3=4;
+  real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny\*nz);
+  mapk(tab1,K,sqr(K.x));
+  mapkk(tab2,ny,K,K.norm2);
+  mapkkk(tab3,ny,nz,K,K.norm2);
+  // Remark you can change K by P (current point)
 - in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
-- new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
-   Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
-   current on  Edge in orientate edge by number of vertices.  
--  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  nonconforming  (continuite of P2 mod)   
-   and add 2 examples with this new finite element 
-      examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
--  plugin Element_P3nc for new 2d finite element P3pnc (P3 )  nonconforming  (continuite of P2 mod)   
-   and add  examples with this new finite element 
-      examples/plugin/testFE-P3pnc.edp
-- function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
-    (if none zero => set BC ) 
-  setBC(A,au1[],-2); and the example 
-      examples/3d/Elasticity-simple-support-BC.edp
-  
+- new finite element on MeshS this finite element is the ortogonal of RT0 on surface, or
+  Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the
+  current on Edge in orientate edge by number of vertices.
+- plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles) nonconforming (continuite of P2 mod)  
+  and add 2 examples with this new finite element
+  examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+- plugin Element_P3nc for new 2d finite element P3pnc (P3 ) nonconforming (continuite of P2 mod)  
+  and add examples with this new finite element
+  examples/plugin/testFE-P3pnc.edp
+- function to set dirichlet Boundary conditon on matrix A (real ou compex) trought an real[int]
+  (if none zero => set BC )
+  setBC(A,au1[],-2); and the example
+  examples/3d/Elasticity-simple-support-BC.edp
+
 ### Changed
+
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
 - PETSc 3.17.0
 
 ### Deprecated
+
 -
 
 ### Removed
-- map function  in plugin dfft 
+
+- map function in plugin dfft
 
 ### Fixed
-- pow(int,int) now call int version not complex version..
-- correct the normal the N implicite variable   on meshL case 
-- correct version dump in banner FreeFem++ - version 4.10 (V ...
-- correct  in CPU time on big mesh due to do bad HCode in HashTable.hpp
-- bug in array of finite element on meshhS, meshL (ie.  `fespace Vh(ThS,[P1,P1]);` ) 
 
+- pow(int,int) now call int version not complex version..
+- correct the normal the N implicite variable on meshL case
+- correct version dump in banner FreeFem++ - version 4.10 (V ...
+- correct in CPU time on big mesh due to do bad HCode in HashTable.hpp
+- bug in array of finite element on meshhS, meshL (ie. `fespace Vh(ThS,[P1,P1]);` )
+
+---
 
 ## [4.10]
+
 ### Added
+
 - ridgeangle named parameter in ExtractMeshL in msh3 plugin
 - DG formulation in 1d :
   add integral of all border of element : `intallBE(ThL)` and unified the notation by adding
@@ -241,95 +372,118 @@ All notable changes to this project will be documented in this file.
 - add nuVertex to get the vextex on element in some int?
 
 ### Changed
+
 - PETSc 3.16.1
 
 ### Deprecated
+
 - SLEPc and SLEPc-complex have been part of PETSc and PETSc-complex for multiple releases and are now deprecated
 
 ### Removed
+
 -
 
 ### Fixed
+
 - examples/potential.edp correct problem in times loops and BC
 - tutorial/mortar-DN-4.edp correct problem of region number in meshL
-- fix problem in Curve mesh and intallBE , vertex number is wrong 
+- fix problem in Curve mesh and intallBE , vertex number is wrong
 - portability issue on arm64-apple with `make petsc-slepc`
 - fix assertion failure with `transfer` and `transferMat` with some finite elements
 
+---
+
 ## [4.9]
+
 ### Added
+
 - add P3 lagrange finite element on meshS and meshS
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
-  add functions  int[int] In=iminP1K(Th,u) or int[int] Ix=imaxP1K(Th,u)  get the array min/max of value u[i]  
-  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k;
+  add functions int[int] In=iminP1K(Th,u) or int[int] Ix=imaxP1K(Th,u) get the array min/max of value u[i]  
+  where i is vertex number on each element k, so we have u[Im[k]] = min u[i]/ i in k;
 - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
 - add gluemesh of array of MeshL and MeshS type
 - interface to `PC_MG_GALERKIN_BOTH`
 - Kronecker product of two sparse matrices `matrix C = kron(A, B)`
 - add lot of finite element on Mesh3, MeshS, MeshL of Discontinous Galerling Element
-  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d ,
-  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS,
-  on Curve   : P1dcL, P2dcL, P3dcL, P4dcL ,  P0VFL ,P0VFdcL
-  remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all  dc finite element corresponding to
+  in 3d : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d , P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d ,
+  on Surface : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS,
+  on Curve : P1dcL, P2dcL, P3dcL, P4dcL , P0VFL ,P0VFdcL
+  remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all dc finite element corresponding to
   no continuity across element.
-- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.)
-- add dist function to a mesh , meshL, MeshS or  mesh3 
-- signeddistfunction to a meshL or  meshS 
-- add buildmesh functon to build a 2d mesh from a meshL (same as buildmesh see examples/3dCurve/border.edp) 
+- add code of intallfaces to do Discontinous Galerkin formulation in 3d (in test FH.)
+- add dist function to a mesh , meshL, MeshS or mesh3
+- signeddistfunction to a meshL or meshS
+- add buildmesh functon to build a 2d mesh from a meshL (same as buildmesh see examples/3dCurve/border.edp)
+
 ### Changed
+
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
-- on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve
-  where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
-  And new  the element label are te region number not the label.
+- on MeshL defined with buildmeshL now the default label are 2*k-1 (resp. 2*k) for the begin (resp. end) of curve
+  where k is the order of curve use in buildmeshL. So if you have one curve the labels are 1 and 2.
+  And new the element label are te region number not the label.
   This element are not really test so be carfull.
 - PETSc 3.15.0
 
 ### Deprecated
+
 -
 
 ### Removed
+
 -
 
 ### Fixed
+
 - bug in Find triangle contening point in 2d (border case),
-   `int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const`
-   the parameter l not correclty return due to local variable.
+  `int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const`
+  the parameter l not correclty return due to local variable.
 - set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
   to remove following error: implicit declaration of function
   correct `3dCurve/basicGlue.edp`and add missing test
 - bugs in SLEPc `SVDSolve()` with a rectangular `Mat`
 - bugs in nElementonB for DG 3d formulation.
 
+---
+
 ## [4.8]
+
 ### Added
+
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
-- add trivial example to check periodic boundary condition on meshS , meshL  , mesh3
-    examples/3d/periodic3.edp	examples/3dSurf/periodicS.edp
-    examples/3dCurve/periodicL.edp
+- add trivial example to check periodic boundary condition on meshS , meshL , mesh3
+  examples/3d/periodic3.edp examples/3dSurf/periodicS.edp
+  examples/3dCurve/periodicL.edp
 
 ### Changed
+
 - PETSc version 3.14.2
 - Mmg version 5.5.2
-- link of ffglut so change in configure.ac and Makefile.am  LIBS -> FF_LIBS and LIBS become empty
-    to remove default libs
+- link of ffglut so change in configure.ac and Makefile.am LIBS -> FF_LIBS and LIBS become empty
+  to remove default libs
 - change number of save plot in ffglut from 10 to 20 for O. Pironneau
 
 ### Fixed
+
 - some memory leaks
 - the periodic boundary condition have wrong before first a sementic level of MeshS and MeshL case.
-     the new syntexe is for example:
-     meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]);
-     meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
-- fixed '*' keyboard trick,  to keep  the viewpoint in ffglut or not.
+  the new syntexe is for example:
+  meshL Tl=segment(10); fespace Vl(Tl,P1,periodic=[[1],[2]]);
+  meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
+- fixed '\*' keyboard trick, to keep the viewpoint in ffglut or not.
+
+---
 
 ## [4.7-1]
+
 ### Changed
+
 - change the language definition to use type as a construction function with named arguments for bem plugin
 - PETSc version 3.14.0
 - ARPACK compiled by SLEPc
@@ -337,16 +491,21 @@ All notable changes to this project will be documented in this file.
 - -std=c++14 instead of -std=c++11 when possible
 
 ### Removed
+
 - plugins thresholdings, symmetrizeCSR, and fflapack and associed example
 
 ### Fixed
+
 - problem compilation with gfortran-10 of arpack and mumps (add -fallow-argument-mismatch flags)
 
+---
+
 ## [4.7]
+
 ### Added
 
 - new way to build matrix between 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
-- add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatible to exterior normal.
+- add `Ns` normal vector in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan is [0,0,-1]) no be compatible to exterior normal.
 - add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
@@ -364,6 +523,7 @@ All notable changes to this project will be documented in this file.
 - possibility to assemble a symmetric `HMatrix<complex>` and to densify a `HMatrix<complex>` into a `Mat<complex>`
 
 ### Changed
+
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
@@ -373,25 +533,32 @@ All notable changes to this project will be documented in this file.
 - rename `view`, `hasType`, `changeSchur` to respectively `ObjectView`, `HasType`, and `ChangeSchur`
 
 ### Deprecated
+
 - rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
 - `Nt` the normal vector of the current (wrong on meshL) use `Ns` or `Tl`
+
 ### Removed
+
 - `augmentation` routine from the PETSc plugin
 - `MPIF77` variable
 
 ### Fixed
+
 - lot of mistake in MeshL element add a example o check lot of thing `tutomesh1d.edp`
 - fixed problem of change of mesh when rebuild 2d mesh with buildmesh, .... (Thank to P. Jovilet to points this problem)
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 - fixed ffglut for the plotting of FE array solution
-- fixed  ffglut bug on MacOS Catalina , draw inn only half windows screen (Apple Bug ???)
-- correct P0VF  finite element
+- fixed ffglut bug on MacOS Catalina , draw inn only half windows screen (Apple Bug ???)
+- correct P0VF finite element
 - `abs` function of array
+
+---
 
 ## [4.6]
 
 ### Added
+
 - new search algorithm for the element containing a point (more safe) in mesh of type mesh3, meshS, or meshL.
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
 - eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
@@ -405,10 +572,11 @@ All notable changes to this project will be documented in this file.
 - new parallel interpolator on non-matching meshes, cf. `examples/hpddm/transfer.edp`
 - ability to solve problems in single precision or with 64 bit integers
 - tool to read data form vtk file only in 3d (cf. plugin iovtk a first example `examples/plugin/iovtk.edp`)
-- tool to read/wrile ply file of meshL, mesh3, MeshS : Polygon File Format / Stanford Triangle Format do  `load "ioply"`
-     see `examples//3dSurf/operatorsOnMeshS.edp`
+- tool to read/wrile ply file of meshL, mesh3, MeshS : Polygon File Format / Stanford Triangle Format do `load "ioply"`
+  see `examples//3dSurf/operatorsOnMeshS.edp`
 
 ### Changed
+
 - new `tgv` values: -10 => zero row, -20 => zero row/column
 - Windows binary now shipped with PETSc/SLEPc
 - BEM examples are now in `examples/mpi`
@@ -416,6 +584,7 @@ All notable changes to this project will be documented in this file.
 - PETSc version 3.13.0
 
 ### Fixed
+
 - `--enable-download_package` may now be used to download a single package, e.g., `--enable-download_metis`
 - compilation of PETSc under Windows
 - compilation of plugins when using static libraries
@@ -425,9 +594,12 @@ All notable changes to this project will be documented in this file.
 - correct ambiguity bug in `plugin/seq/bfstream.cpp` (reading real or integer)
 - compilation of plugin libff-mmap-semaphore.c under windows
 
+---
+
 ## [4.5]
 
 ### Added
+
 - for windows version: rename under mpi `MUMPS` in `MUMPS_mpi` and in sequentiel in `MUMPS_seq` due to conflict between seq. and mpi version so all MUMPS load become `MUMPS_seq` or `MUMPS_mpi`in all examples
 - correct link edition with fortran mpi under windows juste use the msmpi (just use `libmsmpi.dll` )
 - new `mmg` and `parmmg` (parallel mmg) plugins interfacing mmg5 and parmmg libraries, to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
@@ -444,6 +616,7 @@ All notable changes to this project will be documented in this file.
 - PETSc as a subdomain solver for HPDDM
 
 ### Changed
+
 - correct ffglut (bug in case of changing number of nb isovalue)
 - PETSc version 3.12.4
 - Change the point search triangle algorithm to be sure in any case (in test)
@@ -452,15 +625,20 @@ All notable changes to this project will be documented in this file.
 - PETSc now download OpenBLAS if there is no BLAS found by FreeFEM configure
 
 ### Deprecated
+
 - freeyams plugin
 - mmg3d-v4.0 plugin
 
 ### Fixed
+
 - fix plot for curve mesh
 
+---
 
 ## [4.4-3]
+
 ### Added
+
 - Preliminary support for symmetric distributed PETSc matrices (MATMPISBAIJ instead of MATMPIAIJ)
 - Interface to AMS, Hiptmair--Xu preconditioner for problems in H(curl), see maxwell-3d-PETSc.edp
 - FEM on curve 3D (in test)
@@ -474,10 +652,12 @@ All notable changes to this project will be documented in this file.
 - `mpiCommSelf` keyword
 
 ### Changed
+
 - function buildSurface(...) renamed by buildBdMesh(...)
 - line3(...) renamed by SLine(...)
 
 ### Removed
+
 - FFTW is not compiled by PETSc anymore
 - Spurious outputs in TetGen plugin
 - curve3 type -> border
@@ -486,6 +666,7 @@ All notable changes to this project will be documented in this file.
 - `export` function for `macro_ddm.idp`, use `savevtk` as in the sequential iovtk plugin
 
 ### Fixed
+
 - plotMPI function for plotting 3D solutions, problem with serialize
 - variable mes in clean_mesh function
 - correct bug verflow in plugin iohdf5
@@ -493,23 +674,28 @@ All notable changes to this project will be documented in this file.
 - correct i/o vtk and by defaut write at binary format
 - fix an overflow in RT13d FE
 - problem with auto-build of border mesh
+
+---
+
 ## [4.4-2]
+
 ### Added
+
 - add matrix and array tools (FH)
-   ```
-    matrix A=eye(10);
-	real[int,int] af = eye(10,10);
-    real[int,int] a(10,10);
-    int[int] I=[1,3,6];
-    real[int] d = a.diag ; // get the diag of full matrix (no copy)
-	real[int] dI= d(I); // init a array from renumbering array
-    real[int] c= a(:,1)(I); // init a array from renumbering array
-    real[int] aa= a.asarray; //  view full the matrice  as an array (no copy)
-	a(2:5,3:7).diag= 200;
-	a.diag += 100;
-	```
+  ```
+   matrix A=eye(10);
+  real[int,int] af = eye(10,10);
+   real[int,int] a(10,10);
+   int[int] I=[1,3,6];
+   real[int] d = a.diag ; // get the diag of full matrix (no copy)
+  real[int] dI= d(I); // init a array from renumbering array
+   real[int] c= a(:,1)(I); // init a array from renumbering array
+   real[int] aa= a.asarray; //  view full the matrice  as an array (no copy)
+  a(2:5,3:7).diag= 200;
+  a.diag += 100;
+  ```
 - adding of a global variable `lockOrientation` to allows the building of mesh without checking the orientation elements (AF)
-- add plugin tool to build matrix edge/P1 with sign `mat_edgeP1`	(FH)
+- add plugin tool to build matrix edge/P1 with sign `mat_edgeP1` (FH)
 - new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
 - support for nonzero scalars in PETSc block matrices
 - simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
@@ -517,6 +703,7 @@ All notable changes to this project will be documented in this file.
 - add mpi meshS (serialize object)
 
 ### Changed
+
 - correct mistake in mpirank in case of broadcast with comm (thank tp PHT)
 - update fftw to v3.3.8 and openblas v0.3.6
 - in movemesh23 correct the argument label -> region to change label
@@ -526,18 +713,24 @@ All notable changes to this project will be documented in this file.
 - add conditional tests in make check
 
 ### Fixed
+
 - spurious output in PARDISO
 - fix problem in ffglut (AF)
 - detect hdf5 and gsl if no enable-download
 
+---
+
 ## [4.4]
+
 ### Added
+
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
 - simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
 - some unit tests
 
 ### Changed
+
 - PETSc version 3.11.3
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 - API of the macro `plotMPI`
@@ -546,16 +739,22 @@ All notable changes to this project will be documented in this file.
 - `.mesh` are now saved using version 2 (which stores floating-point scalars in double precision)
 
 ### Removed
+
 - legacy linear solver interfaces using the old matrix type
 - dot products using CBLAS because of errors at link time
 - Newtow function (bad name)
 
 ### Fixed
+
 - assertion failure with some 3D meshes when doing `trunc(Th, true)` (thanks to F. Feppon)
 - compile error when plotting arrays of vectorial functions
 
+---
+
 ## [4.2.1]
+
 ### Added
+
 - nested fieldsplit example `examples/hpddm/natural-convection-2d-PETSc-fieldsplit.edp`
 - `int[int][int] array;` is now supported (a size was previously needed, i.e., `array(0);`)
 - check selectivity during `make check`, depending on available 3rd party librairies
@@ -564,64 +763,86 @@ All notable changes to this project will be documented in this file.
 - square3, buildSurface... operators for meshS
 
 ### Changed
+
 - SLEPc is now directly downloaded by PETSc with `--download-slepc`
 - HPDDM and PETSc API have been simplified, instead of an `int[int]` and an `int[int][int]`, only a single `int[int][int]` is now needed
 - `build` macros for HPDDM and PETSc have been simplified to follow the above API change, two parameters have been permuted as well to match the HPDDM and PETSc constructors
 - PETSc version 3.11.2 and HPDDM with multilevel GenEO
 
 ### Removed
+
 - old interfaces that were not maintained anymore (pARMS, PaStiX, hips) and that are available through PETSc
 - spurious outputs when destroying some meshes
 - old surface msh3 type, replaced by meshS
 
 ### Fixed
+
 - multiple segmentation faults when using unitialized values (thanks to G. Sadaka)
 - nested fieldsplits in the PETSc interface
 - memory leaks in `SNESSolve` (nonlinear PETSc solvers)
 - bug fix of `Cofactor` function
 - various bug fixes on surface mesh
 
+---
+
 ## [4.1]
+
 ### Fixed
-- missing conj operation is some hermitian operation on complex sparse matrix like  A+c*B', A*B' thanks to P-H Tournier
+
+- missing conj operation is some hermitian operation on complex sparse matrix like A+c*B', A*B' thanks to P-H Tournier
 - writing CheckAllEdp to be compatible with new tree
 - fix eps in trunc in case of very anisotrope mesh, Thank G. Sadaka
 
 ### Added
+
 - CMake, thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
 - Surface finite element, thanks to [AFourmont](https://github.com/AFourmont)
 - AppImage generation, thanks to [Alexander Sashnov](https://github.com/asashnov)
 
 ### Changed
+
 - PETSc/SLEPc version 3.11
 
+---
+
 ## [4.0]
-- correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)
-- uniformize 2d/3d in element, method   EdgeOrientation(e)  now return +1/-1
+
+- correct bug in RT1Ortho and RT2Ortho 2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)
+- uniformize 2d/3d in element, method EdgeOrientation(e) now return +1/-1
 - change all the sparse matrix structure
 - remove all map matrix jan 2019
 
 ### Added
+
 - surface finite element (in progress)
 - nElementonB (version 2d and 3d of nTonEge)
-- area  ( same the lenEdge) in 3d
-- add function labels to get the array of label of a  mesh
-- add function regions to get the array of label of a  mesh
-- correct big bug in 	toRarray,toZarray, toCarray  transform [ ... ] array to int[int], real[int], complex[int]  
+- area ( same the lenEdge) in 3d
+- add function labels to get the array of label of a mesh
+- add function regions to get the array of label of a mesh
+- correct big bug in toRarray,toZarray, toCarray transform [ ... ] array to int[int], real[int], complex[int]
+
+---
 
 ## [3.62] - 2018-08-31
+
 ### Added
-- add  x0=true/false, add veps=eps in solver parameters to initialazed of not the the CG , GMRES algo
+
+- add x0=true/false, add veps=eps in solver parameters to initialazed of not the the CG , GMRES algo
   with 0 or previous value and veps is to get the absolue tolerance
 - A tool of solve adjoint matrix A with only one single LU decomposition with LU, UMFPACK, GMRES  
-    `u[]=A'^-1*b;`  
+   `u[]=A'^-1*b;`
 - Add plugin to save matrix in Harwell-Boeing format (see Harwell-Boeing format)
 
 ### Fixed
+
 - Fix bug in `trunc` (2d) in case of very fine mesh (eps too small)
 
+---
+
 ## [3.61] - 2018-06-20
+
 ### Added
+
 - Add name parameter `kerneln=`, `kernelt=`, `kerneldim=` for dissection solver
 - Add option in method `toClose` function in `fquatree` to get the nearst point (for intersect meshes)
 - Add missing file `curvature.edp`
@@ -630,17 +851,24 @@ All notable changes to this project will be documented in this file.
 - Add cosmetics in macro (macro name, macro line...)
 
 ### Changed
+
 - Pass to PETSc/SLEPc version 3.8.4/3.8.3
 
 ### Fixed
+
 - Fix launchff.exe bug under windows 64 to choose a filescrip if no parameter
 - Fix the label definition in case of `intalledges` in 2d
 - Fix mpi_comm with MUMPS (very rare)
 
-## 3.60 - 2018-04-13
+---
+
+## [3.60] - 2018-04-13
+
 ### Changed
+
 - The main distribution is now on Github
 
+[4.15]: https://github.com/FreeFem/FreeFem-sources/compare/v4.14..v4.15
 [4.14]: https://github.com/FreeFem/FreeFem-sources/compare/v4.13..v4.14
 [4.13]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..v4.13
 [4.12]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..v4.12

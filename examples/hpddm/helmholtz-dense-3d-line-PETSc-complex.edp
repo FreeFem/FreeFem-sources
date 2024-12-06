@@ -2,7 +2,6 @@
 // NBPROC 4
 // PARAM
 
-load "msh3"
 load "bem"
 load "PETSc-complex"
 include "macro_ddm.idp"

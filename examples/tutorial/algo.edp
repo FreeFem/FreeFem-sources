@@ -1,8 +1,10 @@
 //  cleanning version 07/2008  FH in Sevilla.
+// VERSION 2024  avec FGMRES test ...  FH
 int nerr =0; 
 int debugJ =0; 
 int debugdJ =0; 
 real umax=0;
+//load "fgmres"
 {
  func  bool stop(int iter,real[int] u,real[int] g)	
 {
@@ -12,6 +14,7 @@ real umax=0;
   // minimisation of $J(u) = \frac12\sum (i+1) u_i^2 - b_i $	
   // work array 
   real[int] b(10),u(10); 
+  complex[int] cb(10),cu(10); 
   
   func real J(real[int] & u)
     {
@@ -21,8 +24,16 @@ real umax=0;
       if(debugJ) cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
       return s;
     }
+    func complex cJ(complex[int] & u)
+      {
+        complex s=0;
+        for (int i=0;i<u.n;i++)
+  	s +=(i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
+        if(debugJ) cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
+        return s;
+      }
 
-//  the grad of J (this is a affine version (the RHS is in  )
+//  the grad of J (this	 is a affine version (the RHS is in  )
   func real[int] DJ(real[int] &u)
     { 
       for (int i=0;i<u.n;i++)
@@ -32,6 +43,15 @@ real umax=0;
       if(debugdJ) cout << "dJ-b ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
       return u;  // return of global variable ok 
     };
+    func complex[int] cDJ(complex[int] &u)
+      { 
+        for (int i=0;i<u.n;i++)
+  	u[i]=(i+1)*u[i];
+        if(debugdJ) cout << "dJ0  ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
+        u -= cb; 
+        if(debugdJ) cout << "dJ-b ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
+        return u;  // return of global variable ok 
+      };
 
 // the grad of the bilinear part of J (the RHS in remove)
   func real[int] DJ0(real[int] &u)
@@ -50,7 +70,15 @@ real umax=0;
 	s += abs((i+1)*u[i] - b[i]);
    return s;    
    }
+   func real error(complex[int] & u,complex[int] & b)
+    {
+    real s=0;
+      for (int i=0;i<u.n;i++)
+ 	s += abs((i+1)*u[i] - b[i]);
+    return s;    
+    }
   func real[int] matId(real[int] &u) { return u;};
+  func complex[int] cmatId(complex[int] &u) { return u;};
   int verb=5; // verbosity of algo ..
   b=1. ; u=0.; // set  right hand side and initial gest
   LinearCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
@@ -70,12 +98,24 @@ real umax=0;
   nerr += !(error(u,b) < 1e-5);
   if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
 
-
   b=1; u=0; // set  right hand side and initial gest
   AffineGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb); // correct in version 3.11 
   cout << "LinearGMRES (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
   nerr += !(error(u,b) < 1e-5);
   if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
+
+  b=1; u=0; // set  right hand side and initial gest
+  AffineFGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb); // correct in version 3.11 
+  cout << "LinearFGMRES (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
+  cb=1; cu=0; // set  right hand side and initial gest
+  AffineFGMRES(cDJ,cu,eps=1.e-6,nbiter=20,verbosity=verb); // correct in version 3.11 
+  cout << "complex LinearFGMRES (Affine) : " << " err=" << error(cu,cb) << endl;
+  nerr += !(error(cu,cb) < 1e-5);
+  if(nerr) cout << "    sol: "<< " cu =" <<  cu[0] << " " << cu[1] << " " << cu[2]  << "...\n" ;		
 
   b=1; u=0; // set  right hand side and initial gest
   LinearGMRES(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);

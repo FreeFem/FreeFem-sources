@@ -30,6 +30,11 @@
 #include <iostream>
 using namespace std;
 #include "ff++.hpp"
+#ifdef _WIN32
+typedef long long  int64;
+#else
+typedef long long int64;
+#endif
 
 template< class K = double >
 class VirtualSolverUMFPACK64 : public VirtualSolver< int, K > {

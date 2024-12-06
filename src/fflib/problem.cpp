@@ -2213,32 +2213,143 @@ template<class R>
     }
 
 
+template<class Mesh>  using QFMesh= GQuadratureFormular<typename Mesh::RdHat>     ;
+template<class Mesh>  using QFMeshB= GQuadratureFormular<typename Mesh::BorderElement::RdHat>     ;
 
-    template<class R>
-    void  AddMatElem(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
-                     const FESpace & Uh,const FESpace & Vh,
-                     const QuadratureFormular & FI,
-                     const QuadratureFormular1d & FIb,
-                     double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
+template<class Rd> void  getmap(Stack stack,Rd & P,Expression const * const map)
+{
+    if(map)
+     for(int i=0; i< Rd::d;++i)
+     P[i] = GetAny<double>((*map[i])(stack));
+};
+/*
+ 
+ */
+R3 toR3(R2 P){ return R3(P.x,P.y,0);}
+R3 toR3(R3 P){ return P;}
+R3 toR3(R1 P){ return R3(P.x,0.,0);}
+
+template<class Mesh>
+struct DataQPElm {
+
+    typedef typename Mesh::Element Elm;
+    typedef typename  Mesh::Rd Rd;
+    typedef typename  Mesh::RdHat RdHat;
+    typedef typename  Mesh::BorderElement::RdHat RdHatB;
+
+    const Mesh &Th;
+    RdHat Ph;
+    Rd P;
+    bool outside;
+    const Elm * pK;
+    long it ;
+    Stack stack;
+    Expression const * const mapp;
+    DataQPElm(Stack  s,const Mesh &TTh,Expression const * const mappp=0): Th(TTh),stack(s),mapp(mappp){}
+    void Set(RdHat PPh,Elm * pKK)
     {
+        Ph=PPh;
+        pK=pKK;
+        it = Th(pK);
+        P = (*pK)(Ph) ;
+        outside = false;
+    }
+    template<class M> bool same(DataQPElm<M> & from) {return false;}
+    bool same(DataQPElm<Mesh> & from) {return & Th == & from.Th;}
+
+    template<class M>
+    bool copy(DataQPElm<M> & from)
+    {
+        R3 P3 = toR3(from.P); // to be sure !!!!!
+        P = Rd(&P3);
+        getmap(stack,P,mapp);
+        pK= Th.Find(P,Ph,outside);
+        if( !pK ||  outside) {
+            if(verbosity>99) cout << " Do not find P (u or v) " << P << " in " << Th << endl;
+            return false;}
+        it = Th(pK);
+    
+        return true;
+    }
+    //template<>
+    bool copy(DataQPElm<Mesh> & from)
+    {
+        if( & Th == &from.Th && mapp ==0 ) // same mesh and no map
+        {// just copy
+            Ph=from.Ph;
+            P=from.P;
+            outside=from.outside;
+            pK = from.pK;
+            it = from.it;
+        } //
+        else {
+            P = from.P;
+            getmap(stack,P,mapp);
+            pK= Th.Find(P,Ph,outside);
+            if( !pK ||  outside) {
+                if(verbosity>99) cout << " Do not find P (u or v) " << P << " in " << Th << endl;
+                return false;}
+            it = Th(pK);
+        }
+       return true;
+    }
+    
+};
+
+/* Essai F. Hecht !!!
+template<class Mesh,class Rd,class RdH,class ElmU>
+bool optfindnotsame(const Mesh &Thu,const ElmU *&Ku,Rd & Pu,RdH & Ptu,bool & outsideu)
+    {
+        Ku= Thu.Find(Pu,Ptu,outsideu);
+        if( !Ku ||  outsideu) {
+            if(verbosity>100) cout << " On a pas trouver (u or v  ) " << Pu << " " << endl;
+            return false;}
+    };
+
+template<class RdH,class ElmU>
+bool optfindsame(const ElmU *&K,RdH & Pt,bool &outside, const ElmU *&Ku,RdH & Ptu,bool &outsideu)
+   {
+        Ku=K;
+        outsideu=outside;
+        Ptu=Pt;
+        return true;
+    }
+*/
+
+    template<class R,class Mesh,class FESpaceU,class FESpaceV>
+    void  AddMatElem2(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                     const FESpaceU & Uh,const FESpaceV & Vh,
+                     const QFMesh<Mesh> & FI,
+                     const QFMeshB<Mesh> & FIb,
+                     double *p,   void *vstack, bool intmortar=false,typename Mesh::Rd *Q=0)
+    {
+        typedef typename FESpaceU::Mesh MeshU;
+        typedef typename FESpaceV::Mesh MeshV;
+        typedef typename FESpaceU::FElement  FElmU;
+        typedef typename FESpaceV::FElement  FElmV;
+
+        typedef typename Mesh::Element Elm;
         //cout << "AddMatElem" << Q << " "  << ie << endl;
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-        const Mesh & Thu(Uh.Th);
-        const Mesh & Thv(Vh.Th);
-
-        bool same = (&Uh == & Vh) && !mapu && !mapt;
-        bool sameu =  &Th == & Thu && !mapu ;
-        bool samev =  &Th == & Thv && !mapt ;
-        const Triangle & T  = Th[it];
+        const MeshU & Thu(Uh.Th);
+        const MeshV & Thv(Vh.Th);
+        DataQPElm<Mesh> Pq(stack,Th);
+        DataQPElm<MeshU> Pu(stack,Th,mapu);
+        DataQPElm<MeshV> Pv(stack,Th,mapt);
+    
+        bool same = ((const void*) &Uh == (const void*)& Vh) && !mapu && !mapt;
+        bool sameu =  (const void*)&Th == (const void*)& Thu && !mapu ;
+        bool samev =  (const void*)&Th == (const void*)& Thv && !mapt ;
+        
+        const Elm & T  = Th[it];
         long npi;
         long i,j;
         bool classoptm = copt && Op.optiexpK;
         assert(Op.MaxOp() <last_operatortype);
         //
-
-
+        
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
         int lastop=1+Dop.last([](bool x){return x;});
@@ -2248,58 +2359,21 @@ template<class R>
         {
             for (npi=0;npi<FI.n;npi++) // loop on the integration point
             {
-                QuadraturePoint pi(FI[npi]);
-                double coef = T.area*pi.a;
-                R2 Pt(pi),Ptu,Ptv;
-                R2 P(T(Pt)),Pu(P),Pv(P);
-                MeshPointStack(stack)->set(Th,P,Pt,T,label);
-
-                if(mapu)
-                Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
-                if(mapt)
-                Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
-                if(verbosity>9999 && (mapu || mapt) )
-                cout << " mapinng: " << P << " AddMatElem + map  -> (u) " << Pu << "  (t) ->"<< Pv << endl;
-                bool outsideu,outsidev;
-                // ici trouve le T
-                int iut=0,ivt=0;
-                const Triangle * tu,*tv;
-                if(sameu )
-                {
-                    tu =&T;
-                    Ptu=Pt;
-                }
-                else
-                {
-                    tu= Thu.Find(Pu,Ptu,outsideu);
-                    if( !tu ||  outsideu) {
-                        if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
-                        continue;}}
-                if(same )
-                {
-                    tv=tu;
-                    outsidev=outsideu;
-                    Ptv=Ptu;
-                }
-                else if(samev)
-                {
-                    tv =&T;
-                    Ptv=Pt;
-
-                }
-                else
-                {
-                    tv= Thv.Find(Pv,Ptv,outsidev);
-                    if( !tv || outsidev) {
-                        if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
-                        continue;
-                    }
-                }
-                iut = Thu(tu);
-                ivt = Thv(tv);
+                auto pi(FI[npi]);
+                Pq.Set(pi);
+                MeshPointStack(stack)->set(Th,Pq.P,Pq.Ph,Pq.T,notalabel);
+                if(!Pu.copy(Pq)) continue;//  no in mesh !!!
+                if(same) Pv.copy(Pu);// simple copy
+                else if(!Pv.copy(Pq)) continue;// refinded !!!
+                 
+                double coef = T.mes()*pi.a;
+ 
+                int iut = Pu.it;//Thu(tu);
+                int ivt = Pv.it;
                 if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
-                FElement Ku(Uh[iut]);
-                FElement Kv(Vh[ivt]);
+                auto Ku=*Pu.pK;
+                auto Kv=*Pv.pK;
+               // FElmV Kv(Vh[ivt]);
                 long n= Kv.NbDoF() ,m=Ku.NbDoF();
                 long N= Kv.N;
                 long M= Ku.N;
@@ -2307,9 +2381,9 @@ template<class R>
                 RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
 
 
-                Ku.BF(Dop,Ptu,fu);
+                Ku.BF(Dop,Pu.Ph,fu);
                 if (classoptm) (*Op.optiexpK)(stack); // call optim version
-                if (!same) Kv.BF(Dop,Ptv,fv);
+                if (!same) Kv.BF(Dop,Pv.Ph,fv);
                 for ( i=0;  i<n;   i++ )
                 {
 
@@ -2340,74 +2414,23 @@ template<class R>
                 }
             }
         }
-        else // int on edge ie
+        else // int on edge or face !!! ie
         {
-            R2 PA,PB,E;
-            if(Q)
+            double mes = T.mesBord(ie);
+            auto NN = T.N(ie);
+             for (npi=0;npi<FIb.n;npi++) // loop on the integration point
             {
-                PA=Q[0];
-                PB=Q[1];
-                E=T(PB)-T(PA);
-                // cout << " AddMAtElem " <<  PA <<  " " << PB << " "<< sqrt((E,E))<< endl;
-            }
-            else
-            {
-                PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
-                PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
-                E=T.Edge(ie);
-            }
-            double le = sqrt((E,E));
+                auto pi( FIb[npi]);
+                double coef = mes*pi.a;
+                auto Pt(T.PBord(ie,pi));
+                MeshPointStack(stack)->set(Th,Pq.P,Pq.Ph,T,label,NN,ie);
+                if(!Pu.copy(Pq)) continue;//  no in mesh !!!
+                if(same) Pv.copy(Pu);// simple copy
+                else if(!Pv.copy(Pq)) continue;// refinded !!!
+                 
 
-            for (npi=0;npi<FIb.n;npi++) // loop on the integration point
-            {
-                QuadratureFormular1dPoint pi( FIb[npi]);
-                double sa=pi.x,sb=1-sa;
-                double coef = le*pi.a;
-
-                R2 Pt(PA*sa+PB*sb ); //
-
-                R2 Ptu,Ptv;
-                R2 P(T(Pt)),Pu(P),Pv(P);
-                MeshPointStack(stack)->set(Th,P,Pt,T,label,R2(E.y,-E.x)/le,ie);
-                if(mapu)
-                Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
-                if(mapt)
-                Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
-
-                bool outsideu,outsidev;
-                // ici trouve le T
-                int iut=0,ivt=0;
-                const Triangle * tu, *tv;
-                if(sameu )
-                {
-                    tu =&T;
-                    Ptu=Pt;
-                }
-                else
-                {
-                    tu= Thu.Find(Pu,Ptu,outsideu);
-                    if( !tu ||  (outsideu && !intmortar) )  {
-                        //R dd=-1;
-                        //if(tu) { R2 PP((*tu)(Ptu)),PPP(P,PP) ; cout << PP << " " << sqrt( (PPP,PPP) ) <<"    "; }
-                        if(verbosity>100) cout << " On a pas trouver (u) " << P << " " <<Ptu << " " << tu <<   endl;
-                        continue;}}
-                iut = Thu(tu);
-
-
-                if(samev)
-                {
-                    tv =&T;
-                    Ptv=Pt;
-                }
-                else {
-                    tv= Thv.Find(Pv,Ptv,outsidev);
-                    if( !tv || (outsidev&& !intmortar))  {
-                        if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
-                        continue;}}
-                ivt = Thv(tv);
-
-                FElement Ku(Uh[iut]);
-                FElement Kv(Vh[ivt]);
+                const FElement Ku =*Pu.pK;
+                const FElement Kv =*Pv.pK;
                 long n= Kv.NbDoF() ,m=Ku.NbDoF();
                 long N= Kv.N;
                 long M= Ku.N;
@@ -2415,19 +2438,15 @@ template<class R>
                 RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
                 RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
 
-                Ku.BF(Dop,Ptu,fu);
+                Ku.BF(Dop,Pu.Ph,fu);
                 if( !same)
-                Kv.BF(Dop,Ptv,fv);
-
-
-                // int label=-999999; // a passer en argument
+                Kv.BF(Dop,Pv.Ph,fv);
 
                 if (classoptm) (*Op.optiexpK)(stack); // call optim version
 
 
                 for ( i=0;  i<n;   i++ )
-                // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
-                {
+                 {
                     RNM_ wi(fv(i,'.','.'));
                     int ig=Kv(i);
                     for ( j=0;  j<m;   j++ )
@@ -2458,6 +2477,260 @@ template<class R>
 
         *MeshPointStack(stack) = mp;
     }
+
+template<>
+void  AddMatElem2<R,MeshS,FESpaceS,FESpaceS>(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                 const FESpaceS & Uh,const FESpaceS & Vh,
+                 const QFMesh<MeshS> & FI,
+                 const QFMeshB<MeshS> & FIb,
+                                          double *p,   void *vstack, bool intmortar,MeshS::Rd *Q);
+
+// Warning reput F Hecht 3 May 2024 from
+// commit 897a6ed0606d497b043b593e0d7db86448731889 (HEAD -> master, tag: v4.9, origin/master, origin/HEAD)
+    template<class R>
+    void  AddMatElem(Expression const *const  mapu,Expression const * const mapt, MatriceMap<R> & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                     const FESpace & Uh,const FESpace & Vh,
+                     const QuadratureFormular & FI,
+                     const QuadratureFormular1d & FIb,
+                     double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
+ {
+     //cout << "AddMatElem" << Q << " "  << ie << endl;
+     Stack stack=pvoid2Stack(vstack);
+     MeshPoint mp= *MeshPointStack(stack);
+     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+     const Mesh & Thu(Uh.Th);
+     const Mesh & Thv(Vh.Th);
+
+     bool same = (&Uh == & Vh) && !mapu && !mapt;
+     bool sameu =  &Th == & Thu && !mapu ;
+     bool samev =  &Th == & Thv && !mapt ;
+     const Triangle & T  = Th[it];
+     long npi;
+     long i,j;
+     bool classoptm = copt && Op.optiexpK;
+     assert(Op.MaxOp() <last_operatortype);
+     //
+
+
+     KN<bool> Dop(last_operatortype);
+     Op.DiffOp(Dop);
+     int lastop=1+Dop.last([](bool x){return x;});
+     //assert(lastop<=3);
+
+     if (ie<0)
+     {
+         for (npi=0;npi<FI.n;npi++) // loop on the integration point
+         {
+             QuadraturePoint pi(FI[npi]);
+             double coef = T.area*pi.a;
+             R2 Pt(pi),Ptu,Ptv;
+             R2 P(T(Pt)),Pu(P),Pv(P);
+             MeshPointStack(stack)->set(Th,P,Pt,T,label);
+
+             if(mapu)
+             Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+             if(mapt)
+             Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+             if(verbosity>9999 && (mapu || mapt) )
+             cout << " mapinng: " << P << " AddMatElem + map  -> (u) " << Pu << "  (t) ->"<< Pv << endl;
+             bool outsideu,outsidev;
+             // ici trouve le T
+             int iut=0,ivt=0;
+             const Triangle * tu,*tv;
+             if(sameu )
+             {
+                 tu =&T;
+                 Ptu=Pt;
+             }
+             else
+             {
+                 tu= Thu.Find(Pu,Ptu,outsideu);
+                 if( !tu ||  outsideu) {
+                     if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                     continue;}}
+             if(same )
+             {
+                 tv=tu;
+                 outsidev=outsideu;
+                 Ptv=Ptu;
+             }
+             else if(samev)
+             {
+                 tv =&T;
+                 Ptv=Pt;
+
+             }
+             else
+             {
+                 tv= Thv.Find(Pv,Ptv,outsidev);
+                 if( !tv || outsidev) {
+                     if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                     continue;
+                 }
+             }
+             iut = Thu(tu);
+             ivt = Thv(tv);
+             if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+             FElement Ku(Uh[iut]);
+             FElement Kv(Vh[ivt]);
+             long n= Kv.NbDoF() ,m=Ku.NbDoF();
+             long N= Kv.N;
+             long M= Ku.N;
+             RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+             RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
+
+             Ku.BF(Dop,Ptu,fu);
+             if (classoptm) (*Op.optiexpK)(stack); // call optim version
+             if (!same) Kv.BF(Dop,Ptv,fv);
+             for ( i=0;  i<n;   i++ )
+             {
+
+                 // attention la fonction test donne la ligne
+                 //  et la fonction test est en second
+                 int ig = Kv(i);
+                 RNM_ wi(fv(i,'.','.'));
+                 for ( j=0;  j<m;   j++ )
+                 {
+                     RNM_ wj(fu(j,'.','.'));
+                     int il=0;
+                     int jg(Ku(j));
+                     if ( !sym ||  ig <= jg )
+                     for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                     {  // attention la fonction test donne la ligne
+                         //  et la fonction test est en second
+                         BilinearOperator::K ll(*l);
+                         pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                         double w_i =  wi(ii.first,ii.second);
+                         double w_j =  wj(jj.first,jj.second);
+                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack))   ;
+                         if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " on T \n"   ;
+                         double wij =  w_i*w_j;
+                         if (abs(wij)>= 1e-10)
+                         A[make_pair(ig,jg)] += coef * ccc * wij;
+                     }
+                 }
+             }
+         }
+     }
+     else // int on edge ie
+     {
+         R2 PA,PB,E;
+         if(Q)
+         {
+             PA=Q[0];
+             PB=Q[1];
+             E=T(PB)-T(PA);
+             // cout << " AddMAtElem " <<  PA <<  " " << PB << " "<< sqrt((E,E))<< endl;
+         }
+         else
+         {
+             PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
+             PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
+             E=T.Edge(ie);
+         }
+         double le = sqrt((E,E));
+
+         for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+         {
+             QuadratureFormular1dPoint pi( FIb[npi]);
+             double sa=pi.x,sb=1-sa;
+             double coef = le*pi.a;
+
+             R2 Pt(PA*sa+PB*sb ); //
+
+             R2 Ptu,Ptv;
+             R2 P(T(Pt)),Pu(P),Pv(P);
+             MeshPointStack(stack)->set(Th,P,Pt,T,label,R2(E.y,-E.x)/le,ie);
+             if(mapu)
+             Pu = R2( GetAny<double>((*mapu[0])(vstack)), GetAny<double>((*mapu[1])(vstack)));
+             if(mapt)
+             Pv = R2( GetAny<double>((*mapt[0])(vstack)), GetAny<double>((*mapt[1])(vstack)));
+
+             bool outsideu,outsidev;
+             // ici trouve le T
+             int iut=0,ivt=0;
+             const Triangle * tu, *tv;
+             if(sameu )
+             {
+                 tu =&T;
+                 Ptu=Pt;
+             }
+             else
+             {
+                 tu= Thu.Find(Pu,Ptu,outsideu);
+                 if( !tu ||  (outsideu && !intmortar) )  {
+                     //R dd=-1;
+                     //if(tu) { R2 PP((*tu)(Ptu)),PPP(P,PP) ; cout << PP << " " << sqrt( (PPP,PPP) ) <<"    "; }
+                     if(verbosity>100) cout << " On a pas trouver (u) " << P << " " <<Ptu << " " << tu <<   endl;
+                     continue;}}
+             iut = Thu(tu);
+
+
+             if(samev)
+             {
+                 tv =&T;
+                 Ptv=Pt;
+             }
+             else {
+                 tv= Thv.Find(Pv,Ptv,outsidev);
+                 if( !tv || (outsidev&& !intmortar))  {
+                     if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                     continue;}}
+             ivt = Thv(tv);
+
+             FElement Ku(Uh[iut]);
+             FElement Kv(Vh[ivt]);
+             long n= Kv.NbDoF() ,m=Ku.NbDoF();
+             long N= Kv.N;
+             long M= Ku.N;
+             //  cout << P << " " <<  Pt << " " <<  iut << " " << ivt  << "  Ptu : " << Ptu << " Ptv: " << Ptv << " n:" << n << " m:" << m << endl;
+             RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+             RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
+             Ku.BF(Dop,Ptu,fu);
+             if( !same)
+             Kv.BF(Dop,Ptv,fv);
+
+
+             // int label=-999999; // a passer en argument
+
+             if (classoptm) (*Op.optiexpK)(stack); // call optim version
+
+
+             for ( i=0;  i<n;   i++ )
+             // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
+             {
+                 RNM_ wi(fv(i,'.','.'));
+                 int ig=Kv(i);
+                 for ( j=0;  j<m;   j++ )
+                 {
+                     RNM_ wj(fu(j,'.','.'));
+                     int il=0;
+                     int jg=Ku(j);
+                     if( ! sym || ig <= jg )
+                     for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                     {
+                         BilinearOperator::K ll(*l);
+                         pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                         double w_i =  wi(ii.first,ii.second);
+                         double w_j =  wj(jj.first,jj.second);
+                         // R ccc = GetAny<R>(ll.second.eval(stack));
+
+                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                         double wij =  w_i*w_j;
+                         if (abs(wij)>= 1e-10&& (verbosity>1000))
+                         cout << " \t\t\t" << ig << " " << jg << " "  <<  ccc <<  " " <<  coef * ccc * w_i*w_j << " on edge \n" ;
+                         if (abs(wij)>= 1e-10)
+                         A[make_pair(ig,jg)] += wij*coef*ccc ;
+                     }
+                 }
+             }
+         }
+     }
+
+     *MeshPointStack(stack) = mp;
+ }
 
 
     //3D volume
@@ -9305,9 +9578,10 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( c != cc) {
-                                cerr << c << " =! " << cc << endl;
+                            if ( abs(c-cc) >   abs(c)*1e-10) {
+                                cerr << c << " =! " << cc << " diff " << c -cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
+                                cerr << " PI = " << PI << " in K v " << Vh.Th(K) << " " << " K in Th " <<ThI.number(KI) <<  " "<< PIt << endl;
                                 ExecError("In Optimized version "); }
                         }
 
@@ -9409,9 +9683,11 @@ void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 &
                         if ( copt && ( optim==1) && Kv.number<1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( c != cc) {
-                                cerr << c << " =! " << cc << endl;
+                            if ( abs(c-cc) >   abs(c)*1e-10) {
+                                cerr << c << " =! " << cc << " diff = " << c-cc << endl;
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
+                                cerr << " Pt = " << Pt << " in Kv " << Vh.Th(K) << "K in Th " << ThI.number(KI) << " "<< PIt << endl;
+
                                 ExecError("In Optimized version "); }
                         }
 
@@ -9516,7 +9792,10 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                     
                     if( bf->di->dHat==2)
                     {
-                        cout << " int on MeshS toDo  ( Linear Form )" << endl;
+                        cout << " int on Mesh toDo  ( Linear Form )" << endl;
+                        cout << "Mesh::d  " <<MMesh::Rd::d << endl;
+                        cout << "Mesh v ::d  " <<FESpace2::Mesh::Rd::d << endl;
+                        cout << "int  ::d  "<<bf->di->kind<< endl; 
                         ffassert(0);
                         
                     }
@@ -9625,6 +9904,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         KN<R> gg(buf);
@@ -9782,6 +10063,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;
@@ -9939,6 +10222,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;
@@ -10104,6 +10389,8 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
             tgv = -10;
             else if (std::abs(tgv+2.0) < 1.0e-10)
             tgv = -20;
+            else if (std::abs(tgv+3.0) < 1.0e-10)
+            tgv = -30;
         }
 
         int Nbcomp=Vh.N;

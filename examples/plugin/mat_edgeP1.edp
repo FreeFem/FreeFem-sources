@@ -1,5 +1,4 @@
 load "mat_edgeP1"
-load "msh3"
 load "Element_PkEdge"
 load "Element_Mixte3d"
 int err=0;

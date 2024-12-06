@@ -37,7 +37,7 @@ FF_OBJ_AC = array_complex.o
 FF_OBJ_AR = array_real.o
 FF_OBJ_AL = array_long.o
 FF_OBJ1 = AFunction.o InitFunct.o strversionnumber.o mt19937ar.o string_def.o
-FF_OBJ2 = BamgFreeFem.o Drawing.o Element_P2h.o Element_RT.o FESpace.o FQuadTree.o InitFunct.o Mesh2.o MeshDraw.o MeshGeom.o MeshQuad.o MeshRead.o MeshWrite.o Meshio.o Metric.o QuadTree.o QuadratureFormular.o R2.o SetOfE4.o @EIGENOBJ@ fem.o gibbs.o  lgalgo.o lgfem.o lgmat.o lgmesh.o  mshptg.o problem.o DefColor.o lgmesh3.o  P012_2d.o P012_3d.o P012_3dSurf.o P012_3dCurve.o FESpacen.o HashMatrix.o CG.o SparseLinearSolver.o chrono.o libmeshb7.o memory.o eigenv.o Mesh1dn.o Mesh2dn.o Mesh3dn.o MeshSn.o MeshnL.o GQuadTree.o glumesh2D.o UMFPack_Solver.o splitsimplex.o P1IsoValue.o
+FF_OBJ2 = BamgFreeFem.o Drawing.o Element_P2h.o Element_RT.o FESpace.o FQuadTree.o InitFunct.o Mesh2.o MeshDraw.o MeshGeom.o MeshQuad.o MeshRead.o MeshWrite.o Meshio.o Metric.o QuadTree.o QuadratureFormular.o R2.o SetOfE4.o @EIGENOBJ@ fem.o gibbs.o  lgalgo.o lgfem.o lgmat.o lgmesh.o  mshptg.o problem.o DefColor.o lgmesh3.o  P012_2d.o P012_3d.o P012_3dSurf.o P012_3dCurve.o FESpacen.o HashMatrix.o CG.o SparseLinearSolver.o chrono.o libmeshb7.o memory.o eigenv.o Mesh1dn.o Mesh2dn.o Mesh3dn.o MeshSn.o MeshnL.o GQuadTree.o glumesh2D.o UMFPack_Solver.o splitsimplex.o P1IsoValue.o msh3.o
 FF_OBJIDE = FreeFem___cs-cs.o FreeFem___cs-commands.o FreeFem___cs-draw.o FreeFem___cs-strversionnumber.o FreeFem___cs-socket.o FreeFem___cs-threads.o FreeFem___cs-hl_yacc.o FreeFem___cs-hl_lex.o FreeFem___cs-highlight.o FreeFem___cs-spawn.o FreeFem___cs-editor.o FreeFem___cs-server.o    windres.o
 
 FFD_OBJ0 = ../fflib/CodeAlloc.o ../fflib/AFunction2.o ../femlib/CheckPtr.o ../fflib/lex.o ../fflib/global.o ../fflib/environment.o ../fflib/load.o
@@ -46,9 +46,9 @@ FFD_OBJ_AL = $(patsubst %.o,../fflib/%.o,$(FF_OBJ_AL))
 FFD_OBJ_AR = $(patsubst %.o,../fflib/%.o,$(FF_OBJ_AR))
 FFD_OBJ1 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ1))
 if ENABLE_EIGEN
-FFD_OBJ2 = ../femlib/BamgFreeFem.o ../femlib/Drawing.o ../femlib/Element_P2h.o ../femlib/Element_RT.o ../femlib/FESpace.o ../femlib/FQuadTree.o ../fflib/InitFunct.o ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../femlib/QuadratureFormular.o ../bamglib/R2.o ../bamglib/SetOfE4.o ../Eigen/eigenvalue.o ../femlib/fem.o ../femlib/gibbs.o ../Algo/lgalgo.o ../fflib/lgfem.o ../fflib/lgmat.o ../fflib/lgmesh.o ../femlib/mshptg.o ../fflib/problem.o ../Graphics/DefColor.o ../fflib/lgmesh3.o ../femlib/P012_2d.o ../femlib/P012_3d.o ../femlib/P012_3dSurf.o ../femlib/P012_3dCurve.o ../femlib/FESpacen.o ../femlib/HashMatrix.o ../femlib/CG.o ../femlib/SparseLinearSolver.o ../libMesh/chrono.o ../libMesh/libmeshb7.o ../libMesh/memory.o ../libMesh/eigenv.o ../femlib/Mesh1dn.o ../femlib/Mesh2dn.o ../femlib/Mesh3dn.o ../femlib/MeshSn.o ../femlib/MeshLn.o ../femlib/GQuadTree.o ../fflib/glumesh2D.o ../fflib/UMFPack_Solver.o ../femlib/splitsimplex.o ../fflib/P1IsoValue.o ../fflib/compositeFESpace.o
+FFD_OBJ2 = ../femlib/BamgFreeFem.o ../femlib/Drawing.o ../femlib/Element_P2h.o ../femlib/Element_RT.o ../femlib/FESpace.o ../femlib/FQuadTree.o ../fflib/InitFunct.o ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../femlib/QuadratureFormular.o ../bamglib/R2.o ../bamglib/SetOfE4.o ../Eigen/eigenvalue.o ../femlib/fem.o ../femlib/gibbs.o ../Algo/lgalgo.o ../fflib/lgfem.o ../fflib/lgmat.o ../fflib/lgmesh.o ../femlib/mshptg.o ../fflib/problem.o ../Graphics/DefColor.o ../fflib/lgmesh3.o ../femlib/P012_2d.o ../femlib/P012_3d.o ../femlib/P012_3dSurf.o ../femlib/P012_3dCurve.o ../femlib/FESpacen.o ../femlib/HashMatrix.o ../femlib/CG.o ../femlib/SparseLinearSolver.o ../libMesh/chrono.o ../libMesh/libmeshb7.o ../libMesh/memory.o ../libMesh/eigenv.o ../femlib/Mesh1dn.o ../femlib/Mesh2dn.o ../femlib/Mesh3dn.o ../femlib/MeshSn.o ../femlib/MeshLn.o ../femlib/GQuadTree.o ../fflib/glumesh2D.o ../fflib/UMFPack_Solver.o ../femlib/splitsimplex.o ../fflib/P1IsoValue.o  ../fflib/compositeFESpace.o ../fflib/msh3.o
 else
-FFD_OBJ2 = ../femlib/BamgFreeFem.o ../femlib/Drawing.o ../femlib/Element_P2h.o ../femlib/Element_RT.o ../femlib/FESpace.o ../femlib/FQuadTree.o ../fflib/InitFunct.o ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../femlib/QuadratureFormular.o ../bamglib/R2.o ../bamglib/SetOfE4.o  ../femlib/fem.o ../femlib/gibbs.o ../Algo/lgalgo.o ../fflib/lgfem.o ../fflib/lgmat.o ../fflib/lgmesh.o ../femlib/mshptg.o ../fflib/problem.o ../Graphics/DefColor.o ../fflib/lgmesh3.o ../femlib/P012_2d.o ../femlib/P012_3d.o ../femlib/P012_3dSurf.o ../femlib/P012_3dCurve.o ../femlib/FESpacen.o ../femlib/HashMatrix.o ../femlib/CG.o ../femlib/SparseLinearSolver.o ../libMesh/chrono.o ../libMesh/libmeshb7.o ../libMesh/memory.o ../libMesh/eigenv.o ../femlib/Mesh1dn.o ../femlib/Mesh2dn.o ../femlib/Mesh3dn.o ../femlib/MeshSn.o ../femlib/MeshLn.o ../femlib/GQuadTree.o ../fflib/glumesh2D.o ../fflib/UMFPack_Solver.o ../femlib/splitsimplex.o ../fflib/P1IsoValue.o ../fflib/compositeFESpace.o
+FFD_OBJ2 = ../femlib/BamgFreeFem.o ../femlib/Drawing.o ../femlib/Element_P2h.o ../femlib/Element_RT.o ../femlib/FESpace.o ../femlib/FQuadTree.o ../fflib/InitFunct.o ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../femlib/QuadratureFormular.o ../bamglib/R2.o ../bamglib/SetOfE4.o  ../femlib/fem.o ../femlib/gibbs.o ../Algo/lgalgo.o ../fflib/lgfem.o ../fflib/lgmat.o ../fflib/lgmesh.o ../femlib/mshptg.o ../fflib/problem.o ../Graphics/DefColor.o ../fflib/lgmesh3.o ../femlib/P012_2d.o ../femlib/P012_3d.o ../femlib/P012_3dSurf.o ../femlib/P012_3dCurve.o ../femlib/FESpacen.o ../femlib/HashMatrix.o ../femlib/CG.o ../femlib/SparseLinearSolver.o ../libMesh/chrono.o ../libMesh/libmeshb7.o ../libMesh/memory.o ../libMesh/eigenv.o ../femlib/Mesh1dn.o ../femlib/Mesh2dn.o ../femlib/Mesh3dn.o ../femlib/MeshSn.o ../femlib/MeshLn.o ../femlib/GQuadTree.o ../fflib/glumesh2D.o ../fflib/UMFPack_Solver.o ../femlib/splitsimplex.o ../fflib/P1IsoValue.o ../fflib/compositeFESpace.o ../fflib/msh3.o
 
 endif
 
@@ -107,14 +107,15 @@ drawbdmesh.exe:../std/Pcrgraph.o ../bamg/drawbdmesh.o $(LIBS_FF)
 	$(CXX) $(GCCNOCYGWIN) -mwindows -Wl,--enable-auto-import $^ -o $@
 launchff++.exe:launchff++.cpp
 	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe -lcomdlg32
-
+md2edp.exe:../../etc/tools/md2edp.cpp 
+	$(CXX) $(GCCNOCYGWIN) ../../etc/tools/md2edp.cpp  -o md2edp.exe -lcomdlg32
 ff-c++:../../plugin/seq/load.link.in
 	../../config.status --file=ff-c++:$<
 	chmod a+x ff-c++
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) md2edp.exe launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
 	$(INSTALL_SCRIPT) *.dll "$(DESTDIR)${bindir}"
 install-exec-local--::
 

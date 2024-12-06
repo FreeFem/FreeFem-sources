@@ -1,7 +1,6 @@
 //  -----  
 // the convolution of fonction:  int(Sh) ( fh(x-y) * phih(y) dy ),
 // for regularisation 
-load "msh3"
 load "Element_P3"
 real eps =  0.02;// support of the  function phih ...
 func f = x >0 ; //y*x*x+y*y*y+h*tanh(val*(sin(5.0*y)-2.0*x));

@@ -1,6 +1,5 @@
 load "gmsh"
 
-load "msh3"
 int nn=20;
 mesh Th2=square(nn,nn,region=0);
 fespace Vh2(Th2,P2);

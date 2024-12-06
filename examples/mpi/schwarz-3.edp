@@ -5,7 +5,6 @@
 cd /Users/hecht/work/freefem++/examples/mpi 
 mpirun -np 2 FreeFem++-mpi schwarz-3.edp -glut ffglut
 */
-load "msh3"
 if ( mpisize != 2 ) {
 cout << " sorry number of processeur !=2 " << endl;
 exit(1);}

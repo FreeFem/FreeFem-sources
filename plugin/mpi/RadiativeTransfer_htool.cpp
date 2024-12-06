@@ -87,7 +87,7 @@ public:
     const int e2[10][2] = {{ 0,0},{ 0,1},{ 0,2},{ 0,3}, {1,1}, {1,2}, {1,3}, {2,2},{2,3}, {3,3}};
 
     Generator_Volume(pmesh3 pth3, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pth3->nv), Th(*pth3), kappa0(k),
+    VirtualGenerator<double>(), Th(*pth3), kappa0(k),
         edges(pth3->nt*3+pth3->nv,pth3->nv), heade(), nexte(pth3->nt*10) {
         // pour i,j -> liste de tet de sommet i,j
         // i,j -> liste des tet contenant i et j  ??
@@ -212,7 +212,7 @@ public:
     KN<int> headv, nextv;
 
     Generator_Boundary(pmesh3 pth3, pmeshS pthS, KN_<double> see, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pthS->nv), Th3(*pth3), ThS(*pthS), seeface(see),
+    VirtualGenerator<double>(), Th3(*pth3), ThS(*pthS), seeface(see),
         kappa0(k), headv(pthS->nv,-1), nextv(pthS->nt*3) {
 
         for(int k=0; k<ThS.nt; ++k)
@@ -236,17 +236,21 @@ public:
         double lIJ2 = IJ.norme2();
         double lIJ = sqrt(lIJ2);
 
-        int exact = 25; // choose the quadrature formula
+        int exact = 5; // choose the quadrature formula
         const GQuadratureFormular<Fem2D::R2> * pQF= QF_Simplex<Fem2D::R2>(exact), QF = *pQF;
 
         double kappa_ij = 0; // mean value of kappa on the (i,j) line segment
 
         int cpt = 0;
+        if (lIJ < 1e-10)
+            kappa_ij = KappaGrid_eval(kappa0, I[0], I[1], I[2]);
+        else
         // quadrature over segment IJ with step size dic to compute kappa_ij
-        for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
-            R3 aux = I + ic/lIJ*IJ;
-            kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
-        }
+            for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
+                R3 aux = I + ic/lIJ*IJ;
+                kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
+            }
+
         kappa_ij /= cpt;
 
         double a_ij = 0;
@@ -367,4 +371,3 @@ static void Init_RT() {
 }
 
 LOADFUNC(Init_RT)
-

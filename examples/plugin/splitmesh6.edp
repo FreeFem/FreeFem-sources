@@ -1,7 +1,9 @@
 load "splitmesh6"
 mesh Th=square(5,5);
 mesh Th6=splitmesh6(Th);
+mesh Th6b=splitmesh6PowellSabin(Th);// Add for François Bouchut  feb 2024 
 plot(Th6,wait=1);
+plot(Th6b,wait=1);
 
 fespace Vh(Th,P1);
 fespace Nh(Th,P0);

@@ -6,7 +6,6 @@ assert(version>=4.7 || version >= 4.11);
 //  with matrix -et Precon Conjugade Gradient --
 //    Neuman -> Dirichlet . 
 //  -------------------------------
-load "msh3"
 func f=1+x+y;
 real g=1; 
 int withprecon=1; 

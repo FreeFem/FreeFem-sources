@@ -31,7 +31,7 @@ if(!NoUseOfWait)
     plot(vi,wait=0,cmm=" v"+i);
     if(0)
       { 
-      load "medit" load "msh3"
+      load "medit"
       meshS Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
       medit("mm",Th3); 
 

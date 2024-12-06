@@ -4,7 +4,6 @@
 
 load "bem"
 load "PETSc-complex"
-load "msh3"
 include "macro_ddm.idp"
 
 if(!HasType("Mat", "Htool")) exit(0);

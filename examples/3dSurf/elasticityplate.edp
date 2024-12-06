@@ -1,4 +1,3 @@
-load "msh3" 
 
 // c0 lap u + c1 u = f 
 // CL u|x=0 = 0

@@ -731,7 +731,7 @@ namespace bamg {
       } else {    // next triangle by  adjacent by edge ocut
         deti = dt[i];
         detj = dt[j];
-        Real4 dij = detj - deti;
+        Real8 dij = detj - deti;
         ba[i] = detj / dij;
         ba[j] = -deti / dij;
         ba[3 - i - j] = 0;
@@ -1709,7 +1709,7 @@ namespace bamg {
         Vertex &vi = *ordre[i];
         vi.i = toI2(vi.r);
         vi.r = toR2(vi.i);
-        Real4 hx, hy;
+        Real8 hx, hy;
         vi.m.Box(hx, hy);
         Icoor1 hi = (Icoor1)(hx * coefIcoor), hj = (Icoor1)(hy * coefIcoor);
         if (!quadtree->ToClose(vi, seuil, hi, hj)) {
@@ -2435,7 +2435,7 @@ namespace bamg {
     quadtree->Add(*v0);
     quadtree->Add(*v1);
 
-    // on ajoute les sommets un Ò un
+    // on ajoute les sommets un Ã  un
     Int4 NbSwap = 0;
 
     time1 = CPUtime( );
@@ -2594,7 +2594,7 @@ namespace bamg {
             Triangle *tc = HeapTriangle[i];    // triangle courant
             if (!tc->Locked(na))               // arete non frontiere
             {
-              Triangle *ta = tc->TriangleAdj(na);    // næ triangle adjacent
+              Triangle *ta = tc->TriangleAdj(na);    // nÂ° triangle adjacent
               if (ta->link == 0)                     // non deja chainer => on enpile
               {
                 i++;

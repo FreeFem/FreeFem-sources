@@ -81,7 +81,11 @@ AnyType SCOTCH_Op< T, V, K >::operator( )(Stack stack) const {
 
   int nve = T::RdHat::d + 1;
   long lpart = GetAny< long >((*lpartition)(stack));
-  ffassert(lpart > 1 && part->n == nt && lpart < nt);
+  ffassert(lpart > 0 && part->n == nt && lpart < nt);
+  if(lpart == 1) {
+    *part = 0.0;
+    return 0L;
+  }
 
   KN< long > *weight = nargs[0] ? GetAny< KN< long > * >((*nargs[0])(stack)) : (KN< long > *)0;
 
@@ -140,9 +144,7 @@ AnyType SCOTCH_Op< T, V, K >::operator( )(Stack stack) const {
   SCOTCH_stratExit(&StratSCOTCH);
   *part = epart;
   delete[] verttab;
-  if (velotab) {
-    delete[] velotab;
-  }
+  delete[] velotab;
 
   return 0L;
 }

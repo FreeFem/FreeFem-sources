@@ -31,6 +31,7 @@ VERSION=$(shell grep "'petsc-" ../getall | perl -pe '($$_)=/([0-9]+([.][0-9]+)+)
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
+DARWIN=$(shell uname | grep Darwin 2> /dev/null)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 ifeq ($(COMPILE_OPENBLAS),openblas)
@@ -61,11 +62,9 @@ endif
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool --download-htool-commit=946875d79d0036afb4dc2c0c13c165a607d830df
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool --download-htool-commit=fe5e690b6e6fa1ca64f76bc1d0c602e07ed9715a
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
-else
-FLAGS_MTUNE := -mtune=native
 endif
 unexport MAKEFLAGS
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 --with-tau-perfstubs=0 \
@@ -85,6 +84,9 @@ ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
 PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
+ifeq ($(DARWIN),Darwin)
+PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi 'LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs'
+endif
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
 endif
@@ -148,7 +150,6 @@ all-local:
 	@echo "	make petsc-slepc "
 
 MPI_DIR:=$(shell dirname "$(MPI_INC_DIR)")
-W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
 ifeq ($(LAPACKLIBS), $(BLASLIBS))
   BLAS_LAPACK_LIBS=$(LAPACKLIBS)
@@ -203,7 +204,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr install-lib
-	cd $(SRCDIR) && export HWLOC_HIDE_ERRORS=2 && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr check
+	-cd $(SRCDIR) && export HWLOC_HIDE_ERRORS=2 && $(MAKE) PETSC_DIR=$(DIR_INSTALL_REAL) SLEPC_DIR=$(DIR_INSTALL_REAL) PETSC_ARCH="" check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h
 	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	touch $@

@@ -24,7 +24,14 @@
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
 /* clang-format on */
+/* add
+ add Powell-Sabin division:
+ – Center of triangle is taken the center of the inscribed circle
+ – Points on edges are obtained by intersecting the edge with the line joining the centers of the two and on boundary just barycenter .
 
+
+ 
+ */
 #include <iostream>
 #include <cfloat>
 using namespace std;
@@ -37,9 +44,43 @@ using namespace std;
 #include <cmath>
 
 using namespace Fem2D;
+// seg intersection in 2d
+R2 Intersection(R2 B,R2 BB,R2 A,R2 AA)
+{
+    double b = -det(A, AA, B);
+    double bb = det(A, AA, BB);
+    double s = b + bb;
+    assert( b/s > 0 && bb/s >=0 );
+    R2 P = BB * b / s + B* bb / s;
+    return P;
 
-Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
+}
+// c
+R2 incircleCenter(R2 A, R2 B, R2 C)
+{
+    R2 AB(A,B),CA(C,A),BC(B,C);
+    double lc=AB.norme(),lb=CA.norme(),la=BC.norme();
+    R2 ABu =AB/lc, CAu=CA/lb, BCu = BC/la;
+    R2 AA = A + (ABu-CAu);
+    R2 BB = B + (BCu-ABu);
+    R2 CC = C + (CAu-BCu);
+    //  inter (A,AA) et ((B,BB)
+    // intersection ddroite [a,aa] and [b,bb]
+    R2 G= Intersection(A,AA,B,BB);
+    assert(det(A,B,G)>0);
+    assert(det(A,G,C)>0);
+    assert(det(G,B,C)>0);
+    return G;
+ }
+
+Mesh const *SplitMesh6New(Stack stack, Fem2D::Mesh const *const &pTh,int flags) {
+  //  flags == 0 basis
+    //  flags == 1  Powell-Sabin refinend
+    
   assert(pTh);
+    bool PowellSabin = flags ==1;
+    if(verbosity>1)
+         cout << "SplitMesh6New "<<flags <<endl;
   const Mesh &Th(*pTh);    // le maillage d'origne a decoupe
   using Fem2D::BoundaryEdge;
   using Fem2D::Mesh;
@@ -78,10 +119,14 @@ Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
     vv++;
   }
 
-  // generation des points barycentre de trianngles
+  // generation des points barycentre de trianngles o c
   for (int k = 0; k < nbt; k++) {
     Triangle &K = Th[k];
-    R2 G = ((R2)K[0] + K[1] + K[2]) / 3.;
+      R2 G;
+      if(PowellSabin)
+          G = incircleCenter(K[0] ,K[1] ,K[2] );
+      else
+          G = ((R2)K[0] + K[1] + K[2]) / 3.;
     vv->x = G.x;
     vv->y = G.y;
     vv->lab = 0;
@@ -98,7 +143,11 @@ Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
       if ((kk >= k) || (kk < 0)) {
         int v0 = Th(k, EdgesVertexTriangle[e][0]);
         int v1 = Th(k, EdgesVertexTriangle[e][1]);
-        R2 M = ((R2)Th(v0) + Th(v1)) / 2.;
+          R2 M;
+        if(PowellSabin && kk >0 && k !=kk)
+            M = Intersection(Th(v0),Th(v1),v[nbv+k],v[nbv+kk]);
+        else
+          M = ((R2)Th(v0) + Th(v1)) / 2.;
         int lab = 0;
         BoundaryEdge *be = Th.TheBoundaryEdge(v0, v1);
         if (be) {
@@ -117,8 +166,8 @@ Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
       }
     }
   }
-
-  cout << " nb edge = " << nbe << " == " << nn << endl;
+  if(verbosity>9)
+  cout << " SplitMesh6New:: nb edge = " << nbe << " == " << nn << endl;
   ffassert(nbe == nn);
 
   // generation des triangles
@@ -155,6 +204,7 @@ Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
   // generation de la class Mesh a partir des 3 tableaux : v,t,b
   {
     Mesh *m = new Mesh(nbv + nbt + nbe, nbt * 6, neb * 2, v, t, b);
+    m->renum(); 
     R2 Pn, Px;
     m->BoundingBox(Pn, Px);
     m->quadtree = new Fem2D::FQuadTree(m, Pn, Px, m->nv);
@@ -163,26 +213,39 @@ Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) {
     return m;
   }
 }
+Mesh const *SplitMesh6(Stack stack, Fem2D::Mesh const *const &pTh) 
+{
+    return SplitMesh6New(stack,pTh,0);
+}
+Mesh const *SplitPowellSabin(Stack stack, Fem2D::Mesh const *const &pTh)
+{
+    return SplitMesh6New(stack,pTh,1);
+}
 
 // truc pour que la fonction
 // static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier
 //
-
+//  PowellSabin
 static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
   if (verbosity) {
-    cout << " lood: Split6  " << endl;
+    cout << " load: splitmesh6  " << endl;
   }
 
-  Global.Add("splitmesh6", "(", new OneOperator1s_< Mesh const *, Mesh const * >(SplitMesh6));
-  // utilisation
+    Global.Add("splitmesh6", "(", new OneOperator1s_< Mesh const *, Mesh const * >(SplitMesh6));
+    Global.Add("splitmesh6PowellSabin", "(", new OneOperator1s_< Mesh const *, Mesh const * >(SplitPowellSabin));
+   
+     // utilisation
   // mesh Th,Th3;
   // ... construction du maillage Th ici
   // Th3=splitmesh3(Th);
   /*  example complet : splitmesh3.edp
    *  load "splitmesh3"
    *  mesh Th=square(5,5);
-   *  mesh Th3=splitmesh3(Th);
+   *  mesh Th6=splitmesh6(Th); //  split with barycentrer
+   *  mesh ThPS=splitmesh6PowellSabin(Th); //  split with PowellSabin point
+   
+ 
    *  plot(Th3,wait=1);
    */
 }

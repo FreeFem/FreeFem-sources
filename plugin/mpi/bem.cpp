@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: [mkl|blas] mpi pthread htool bemtool boost [metis]
+//ff-c++-LIBRARY-dep: htool [mkl|blas] mpi pthread bemtool boost [metis]
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -9,8 +9,6 @@
 #include <AFunction_ext.hpp>
 #include <lgfem.hpp>
 #include <R3.hpp>
-
-#include <htool/htool.hpp>
 
 // include the bemtool library .... path define in where library
 //#include <bemtool/operator/block_op.hpp>
@@ -174,10 +172,10 @@ public:
                 }
             }
             else {
-                const std::vector<SubMatrix<K>*>& dmats = (*H)->get_MyNearFieldMats();
-                
+                std::vector<const HMatrix<K> *> dmats = (*H)->get_dense_blocks();
+                std::vector<const HMatrix<K> *> lrmats = (*H)->get_low_rank_blocks();
                 int nbdense = dmats.size();
-                int nblr = (*H)->get_MyFarFieldMats_size();
+                int nblr = lrmats.size();
                 
                 int sizeworld = (*H)->get_sizeworld();
                 int rankworld = (*H)->get_rankworld();
@@ -192,15 +190,14 @@ public:
                     nbdenseg += nbdenseworld[i];
                     nblrg += nblrworld[i];
                 }
-                
                 int* buf = new int[4*(mpirank==0?nbdenseg:nbdense) + 5*(mpirank==0?nblrg:nblr)];
                 
                 for (int i=0;i<nbdense;i++) {
-                    const SubMatrix<K>& l = *(dmats[i]);
-                    buf[4*i] = l.get_offset_i();
-                    buf[4*i+1] = l.get_offset_j();
-                    buf[4*i+2] = l.nb_rows();
-                    buf[4*i+3] = l.nb_cols();
+                    const HMatrix<K>& l = *(dmats[i]);
+                    buf[4*i] = l.get_target_cluster().get_offset();
+                    buf[4*i+1] = l.get_source_cluster().get_offset();
+                    buf[4*i+2] = l.get_target_cluster().get_size();
+                    buf[4*i+3] = l.get_source_cluster().get_size();
                 }
                 
                 int displs[sizeworld];
@@ -217,13 +214,13 @@ public:
                 double* bufcomp = new double[mpirank==0?nblrg:nblr];
                 
                 for (int i=0;i<nblr;i++) {
-                    const LowRankMatrix<K>& l = (*H)->get_MyFarFieldMats(i);
-                    buflr[5*i] = l.get_offset_i();
-                    buflr[5*i+1] = l.get_offset_j();
-                    buflr[5*i+2] = l.nb_rows();
-                    buflr[5*i+3] = l.nb_cols();
-                    buflr[5*i+4] = l.rank_of();
-                    bufcomp[i] = l.space_saving();
+                    const HMatrix<K>& l = *lrmats[i];
+                    buflr[5*i] = l.get_target_cluster().get_offset();
+                    buflr[5*i+1] = l.get_source_cluster().get_offset();
+                    buflr[5*i+2] = l.get_target_cluster().get_size();
+                    buflr[5*i+3] = l.get_source_cluster().get_size();
+                    buflr[5*i+4] = l.get_low_rank_data()->rank_of();
+                    bufcomp[i] = l.get_low_rank_data()->space_saving();
                 }
                 
                 for (int i=0; i<sizeworld; i++) {
@@ -310,16 +307,17 @@ public:
         std::vector<K> invdiag;
         
         HMatVirtPrec(T ttt) : tt(ttt), CGMatVirt<int,K>((*ttt)->nb_rows()), invdiag((*ttt)->nb_rows(),0) {
-            std::vector<SubMatrix<K>*> diagblocks = (*tt)->get_MyStrictlyDiagNearFieldMats();
+            std::vector<const HMatrix<K>*> diagblocks = (*tt)->get_diagonal_blocks();
             std::vector<K> tmp((*ttt)->nb_rows(),0);
             for (int j=0;j<diagblocks.size();j++){
-                SubMatrix<K>& submat = *(diagblocks[j]);
-                int local_nr = submat.nb_rows();
-                int local_nc = submat.nb_cols();
-                int offset_i = submat.get_offset_i();
-                int offset_j = submat.get_offset_j();
+                const HMatrix<K>& submat = *(diagblocks[j]);
+                const Matrix<K>& subdensemat= *submat.get_dense_data();
+                int local_nr = submat.get_target_cluster().get_size();
+                int local_nc = submat.get_source_cluster().get_size();
+                int offset_i = submat.get_target_cluster().get_offset();
+                int offset_j = submat.get_source_cluster().get_offset();
                 for (int i=offset_i;i<offset_i+std::min(local_nr,local_nc);i++){
-                    tmp[i] = 1./submat(i-offset_i,i-offset_i);
+                    tmp[i] = 1./subdensemat(i-offset_i,i-offset_i);
                 }
             }
             (*tt)->cluster_to_target_permutation(tmp.data(),invdiag.data());
@@ -361,7 +359,7 @@ class CompressMat : public OneOperator {
                 public:
                 Expression a,b,c,d;
 
-                static const int n_name_param = 8;
+                static const int n_name_param = 7;
                 static basicAC_F0::name_and_type name_param[] ;
                 Expression nargs[n_name_param];
                 long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
@@ -394,7 +392,6 @@ basicAC_F0::name_and_type  CompressMat<K>::Op::name_param[]= {
   {  "commworld", &typeid(pcommworld)},
   {  "eta", &typeid(double)},
   {  "minclustersize", &typeid(long)},
-  {  "maxblocksize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
   {  "compressor", &typeid(string*)},
@@ -405,7 +402,7 @@ class MyMatrix: public VirtualGenerator<K>{
         const KNM<K> &M;
 
 public:
-        MyMatrix(const KNM<K> &mat):VirtualGenerator<K>(mat.N(),mat.M()),M(mat) {}
+        MyMatrix(const KNM<K> &mat):M(mat) {}
 
         K get_coef(const int& i, const int& j)const {return M(i,j);}
         void copy_submatrix(int m, int n, const int *const rows, const int *const cols, K *ptr) const {
@@ -433,10 +430,9 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   pcommworld pcomm=mi->argc(1,stack,nullptr);
   double eta=mi->arg(2,stack,ff_htoolEta);
   int minclustersize=mi->argl(3,stack,ff_htoolMinclustersize);
-  int maxblocksize=mi->argl(4,stack,ff_htoolMaxblocksize);
-  int mintargetdepth=mi->argl(5,stack,ff_htoolMintargetdepth);
-  int minsourcedepth=mi->argl(6,stack,ff_htoolMinsourcedepth);
-  string* pcompressor=mi->args(7,stack,0);
+  int mintargetdepth=mi->argl(4,stack,ff_htoolMintargetdepth);
+  int minsourcedepth=mi->argl(5,stack,ff_htoolMinsourcedepth);
+  string* pcompressor=mi->args(6,stack,0);
 
   string compressor = pcompressor ? *pcompressor : "partialACA";
 
@@ -467,16 +463,20 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
     p[3*i+1] = yy[i];
     p[3*i+2] = zz[i];
   }
-
-  std::shared_ptr<Cluster<PCARegularClustering>> t = std::make_shared<Cluster<PCARegularClustering>>();
-  t->set_minclustersize(minclustersize);
-  t->build(xx.n,p.data(),2,comm);
+  
+  int sizeWorld,rankWorld;
+  MPI_Comm_size(comm, &sizeWorld);
+  MPI_Comm_rank(comm, &rankWorld);
+  htool::ClusterTreeBuilder<double> cluster_builder;
+  std::shared_ptr<Cluster<double>> t;
+  cluster_builder.set_minclustersize(minclustersize);
+  t = std::make_shared<htool::Cluster<double>>(cluster_builder.create_cluster_tree(xx.n,3,p.data(),2,sizeWorld));
 
   //cout << M.N() << " " << xx.M() << " " << yy.n << " " << zz.n<< endl;
   if (init) delete *Hmat;
     
-  *Hmat = new HMatrixImpl<K>(t,t,epsilon,eta);
-  std::shared_ptr<htool::VirtualLowRankGenerator<K>> LowRankGenerator = nullptr;
+  auto hmatrix_builder = htool::HMatrixTreeBuilder<K, double>(*t, *t, epsilon, eta, 'N','N', -1, rankWorld,rankWorld);
+  std::shared_ptr<htool::VirtualLowRankGenerator<K,double>> LowRankGenerator = nullptr;
 
   if ( compressor == "" || compressor == "partialACA")
     LowRankGenerator = std::make_shared<htool::partialACA<K>>();
@@ -488,11 +488,11 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
        cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
        ffassert(0);
    }
-  (*Hmat)->set_compression(LowRankGenerator);
-  (*Hmat)->set_maxblocksize(maxblocksize);
-  (*Hmat)->set_mintargetdepth(mintargetdepth);
-  (*Hmat)->set_minsourcedepth(minsourcedepth);
-  (*Hmat)->build(A,p.data());
+  hmatrix_builder.set_low_rank_generator(LowRankGenerator);
+  hmatrix_builder.set_minimal_target_depth(mintargetdepth);
+  hmatrix_builder.set_minimal_source_depth(minsourcedepth);
+  *Hmat = new HMatrixImpl<K>(A, t,t,hmatrix_builder,comm);
+
   return Hmat;
 }
 
@@ -739,7 +739,7 @@ class OpHMatrixUser : public OneOperator
         class Op : public E_F0info {
             public:
                 Expression g, uh1, uh2;
-                static const int n_name_param = 9;
+                static const int n_name_param = 8;
                 static basicAC_F0::name_and_type name_param[] ;
                 Expression nargs[n_name_param];
                 long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
@@ -765,7 +765,6 @@ basicAC_F0::name_and_type  OpHMatrixUser<K,v_fes1,v_fes2>::Op::name_param[]= {
   {  "commworld", &typeid(pcommworld)},
   {  "eta", &typeid(double)},
   {  "minclustersize", &typeid(long)},
-  {  "maxblocksize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
   {  "compressor", &typeid(string*)},
@@ -795,8 +794,8 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     ffassert(Vh);
     ffassert(Uh);
 
-    int n=Uh->NbOfDF;
-    int m=Vh->NbOfDF;
+    int m=Uh->NbOfDF;
+    int n=Vh->NbOfDF;
 
     HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*emat)(stack));
 
@@ -808,11 +807,10 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     ds.commworld = op->argc(1,stack,ds.commworld);
     ds.eta = op->arg(2,stack,ds.eta);
     ds.minclustersize = op->argl(3,stack,ds.minclustersize);
-    ds.maxblocksize = op->argl(4,stack,ds.maxblocksize);
-    ds.mintargetdepth = op->argl(5,stack,ds.mintargetdepth);
-    ds.minsourcedepth = op->argl(6,stack,ds.minsourcedepth);
-    ds.compressor = *(op->args(7,stack,&ds.compressor));
-    ds.initialclustering = *(op->args(8,stack,&ds.initialclustering));
+    ds.mintargetdepth = op->argl(4,stack,ds.mintargetdepth);
+    ds.minsourcedepth = op->argl(5,stack,ds.minsourcedepth);
+    ds.compressor = *(op->args(6,stack,&ds.compressor));
+    ds.initialclustering = *(op->args(7,stack,&ds.initialclustering));
 
     const SMesh & ThU =Uh->Th;
     const TMesh & ThV =Vh->Th;
@@ -826,8 +824,8 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
 
     *Hmat =0;
 
-    vector<double> p1(3*n);
-    vector<double> p2(3*m);
+    vector<double> pt(3*n);
+    vector<double> ps(3*m);
     Fem2D::R3 pp;
     bemtool::R3 p;
     SRdHat pbs;
@@ -851,7 +849,7 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     bool TP0 = TRdHat::d == 1 ? (Tnbv == 0) && (Tnbe == 1) && (Tnbt == 0) : (Tnbv == 0) && (Tnbe == 0) && (Tnbt == 1);
     bool TP1 = (Tnbv == 1) && (Tnbe == 0) && (Tnbt == 0);
 
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<m; i++) {
         if (SP1)
             pp = ThU.vertices[i];
         else if (SP0)
@@ -860,13 +858,13 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
             if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
             ffassert(0);
         }
-        p1[3*i+0] = pp.x;
-        p1[3*i+1] = pp.y;
-        p1[3*i+2] = pp.z;
+        ps[3*i+0] = pp.x;
+        ps[3*i+1] = pp.y;
+        ps[3*i+2] = pp.z;
     }
 
     if(!samemesh) {
-        for (int i=0; i<m; i++) {
+        for (int i=0; i<n; i++) {
             if (TP1)
                 pp = ThV.vertices[i];
             else if (TP0)
@@ -875,22 +873,22 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
                 if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
                 ffassert(0);
             }
-            p2[3*i+0] = pp.x;
-            p2[3*i+1] = pp.y;
-            p2[3*i+2] = pp.z;
+            pt[3*i+0] = pp.x;
+            pt[3*i+1] = pp.y;
+            pt[3*i+2] = pp.z;
         }
     }
     else{
-        p2=p1;
+        pt=ps;
     }
 
     VirtualGenerator<R>** generator = GetAny<VirtualGenerator<R>**>((*op->g)(stack));
 
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
-    std::shared_ptr<VirtualCluster> t, s;
-    t = build_clustering(n, Uh, p1, ds, comm);
-    s = build_clustering(m, Vh, p2, ds, comm);
-    buildHmat(Hmat, *generator, ds, t, s, p1, p2, comm);
+    std::shared_ptr<Cluster<double>> t, s;
+    s = build_clustering(m, Uh, ps, ds, comm);
+    t = build_clustering(n, Vh, pt, ds, comm);
+    buildHmat(Hmat, *generator, ds, t, s, pt, ps, comm);
 
     return Hmat;
 }
@@ -987,11 +985,13 @@ static void Init_Bem() {
     Dcl_Type<listBemKernel> ();
     TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
     //TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >); // no need is the combinaison is only with 2 kernels
-    TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
-    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
 
-    TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,pBemKernel >(&set_copy_incr));
-    TheOperators->Add("=", new OneOperator2<pBemKernel*,pBemKernel*,pBemKernel >(&set_eqdestroy_incr));
+    TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,pBemKernel> >);
+    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,pBemKernel> >);
+
+    TheOperators->Add("=",new OneBinaryOperator_st< Op_setCombBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
+    TheOperators->Add("<-", new OneBinaryOperator_st< Op_setCombBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
+
     TheOperators->Add("*",new OneBinaryOperator_st< Op_coeffBemKernel1<pBemKernel,Complex,pBemKernel> >);
     
     Dcl_Type< const CBemDomainOfIntegration * >( );
@@ -1019,7 +1019,6 @@ static void Init_Bem() {
     Global.New("htoolEta",CPValue<double>(ff_htoolEta));
     Global.New("htoolEpsilon",CPValue<double>(ff_htoolEpsilon));
     Global.New("htoolMinclustersize",CPValue<long>(ff_htoolMinclustersize));
-    Global.New("htoolMaxblocksize",CPValue<long>(ff_htoolMaxblocksize));
     Global.New("htoolMintargetdepth",CPValue<long>(ff_htoolMintargetdepth));
     Global.New("htoolMinsourcedepth",CPValue<long>(ff_htoolMinsourcedepth));
     ArrayofHmat<double>();

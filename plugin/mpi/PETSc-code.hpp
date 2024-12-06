@@ -228,7 +228,6 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
     bemtool::Geometry *node = new bemtool::Geometry;
     MeshBemtool *mesh = new MeshBemtool;
     Mesh2Bemtool(ThU, *node, *mesh);
-    bemtool::Dof<P1> *dof = new bemtool::Dof<P1>(*mesh,true);
     vector<double> p1;
     p1.reserve(3*n);
     vector<double> p2;
@@ -786,11 +785,15 @@ namespace PETSc {
                   if(i < std::min(N, M)) {
                       PC parent;
                       KSPGetPC(ptParent->_ksp, &parent);
-                      KSP *subksp;
-                      PetscInt nsplits;
-                      PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
-                      KSPGetPC(subksp[i], &pc);
-                      PetscFree(subksp);
+                      PetscBool isType;
+                      PetscObjectTypeCompare((PetscObject)parent, PCFIELDSPLIT, &isType);
+                      if(isType) {
+                          KSP *subksp;
+                          PetscInt nsplits;
+                          PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
+                          KSPGetPC(subksp[i], &pc);
+                          PetscFree(subksp);
+                      }
                   }
               }
               else if(ptA->_ksp) {
@@ -901,6 +904,8 @@ namespace PETSc {
             delete[] ja;
             delete[] c;
           }
+          if (!ptA->_A)
+            delete dN;
         } else if (!assembled) {
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
@@ -913,12 +918,12 @@ namespace PETSc {
           MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
         }
         if (ptParent) {
+          Mat** mat;
+          PetscInt M, N;
           PetscBool assembled;
+          MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
           MatAssembled(ptParent->_petsc, &assembled);
           if (!assembled) {
-            PetscInt M, N;
-            Mat** mat;
-            MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
             PetscBool assemble = PETSC_TRUE;
             for (PetscInt i = 0; i < M && assemble; ++i) {
               for (PetscInt j = 0; j < N && assemble; ++j) {
@@ -929,10 +934,53 @@ namespace PETSc {
                 }
               }
             }
-            if (assemble) {
-              MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
-              MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+            if (assemble) assembled = PETSC_TRUE;
+          }
+          if (PetscDefined(USE_COMPLEX)) {
+            for (PetscInt i = 0; i < M; ++i) {
+              for (PetscInt j = 0; j < N; ++j) {
+                if (mat[i][j]) {
+                  MatType type;
+                  PetscBool isType[2];
+                  MatGetType(mat[i][j], &type);
+                  PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, isType);
+                  if (!isType[0])
+                    PetscStrcmp(type, MATTRANSPOSEVIRTUAL, isType + 1);
+                  else
+                    isType[1] = PETSC_FALSE;
+                  if (isType[0] || isType[1]) {
+                    Mat C, D;
+                    if (isType[0])
+                      MatHermitianTransposeGetMat(mat[i][j], &C);
+                    else
+                      MatTransposeGetMat(mat[i][j], &C);
+                    if (C == ptA->_petsc) {
+                      PetscReal norm;
+                      MatDuplicate(C, MAT_COPY_VALUES, &D);
+                      MatRealPart(D);
+                      MatAXPY(D, -1.0, C, SAME_NONZERO_PATTERN);
+                      MatNorm(D, NORM_INFINITY, &norm);
+                      MatDestroy(&D);
+                      if (norm < PETSC_MACHINE_EPSILON && isType[0]) {
+                        MatCreateTranspose(C, &D);
+                        MatNestSetSubMat(ptParent->_petsc, i, j, D);
+                        MatDestroy(&D);
+                      }
+                      else if (norm > PETSC_MACHINE_EPSILON && isType[1]) {
+                        MatCreateHermitianTranspose(C, &D);
+                        MatNestSetSubMat(ptParent->_petsc, i, j, D);
+                        MatDestroy(&D);
+                      }
+                      i = M, j = N;
+                    }
+                  }
+                }
+              }
             }
+          }
+          if (assembled) {
+            MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
           }
         }
         if (ptA->_ksp) {
@@ -1484,7 +1532,7 @@ namespace PETSc {
           mA->CSR( );
           if (i < mA->n) {
             int j = mA->p[i];
-            for (; j < mA->p[i + 1] && mA->p[j] < dims[ptJ ? v[k].first : k]; ++j)
+            for (; j < mA->p[i + 1] && mA->j[j] < dims[ptJ ? v[k].first : k]; ++j)
               ja[nnz + j - mA->p[i]] = mA->j[j] + offset;
             std::copy_n(mA->aij + mA->p[i], j - mA->p[i], c + nnz);
             nnz += j - mA->p[i];
@@ -2632,11 +2680,22 @@ namespace PETSc {
                 if (!A->HPDDM_ia) {
                   Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
                     nargs[15] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+                  Mat aux = nullptr;
+                  HPDDM::MatrixCSR< PetscScalar >* B = nullptr;
                   if (ptK && ptK->A) {
                     MatriceMorse< upscaled_type<PetscScalar> >* mA =
                       static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                    Mat aux = ff_to_PETSc(B);
+                    B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    aux = ff_to_PETSc(B);
+                  }
+                  else {
+                      MatCreate(PETSC_COMM_SELF, &aux);
+                      MatSetSizes(aux, 0, 0, 0, 0);
+                      MatSetType(aux, MATSEQAIJ);
+                      MatAssemblyBegin(aux, MAT_FINAL_ASSEMBLY);
+                      MatAssemblyEnd(aux, MAT_FINAL_ASSEMBLY);
+                  }
+                  if (aux) {
                     Mat N;
                     PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
                     if (!A->HPDDM_sym && ptA->_petsc) {
@@ -3245,7 +3304,7 @@ namespace PETSc {
   }
   void prepareConvert(Mat A, Mat* B) {
     MatType type;
-    PetscBool isType;
+    PetscBool isType[2];
     Mat** mat;
     PetscInt M, N;
     MatNestGetSubMats(A, &M, &N, &mat);
@@ -3255,13 +3314,23 @@ namespace PETSc {
       for (PetscInt j = 0; j < N; ++j) {
         if (mat[i][j]) {
           MatGetType(mat[i][j], &type);
-          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
-          if (isType) {
+          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, isType);
+          if (PetscDefined(USE_COMPLEX) && !isType[0])
+            PetscStrcmp(type, MATTRANSPOSEVIRTUAL, isType + 1);
+          else
+            isType[1] = PETSC_FALSE;
+          if (isType[0] || isType[1]) {
             b.emplace_back(std::make_pair(std::make_pair(i, j), Mat( )));
             Mat D = mat[i][j];
             Mat C;
-            MatHermitianTransposeGetMat(D, &b.back( ).second);
-            MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            if (isType[0]) {
+              MatHermitianTransposeGetMat(D, &b.back( ).second);
+              MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            }
+            else {
+              MatTransposeGetMat(D, &b.back( ).second);
+              MatTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
+            }
             PetscObjectReference((PetscObject)b.back().second);
             MatNestSetSubMat(A, i, j, C);
             MatDestroy(&C);
@@ -3717,9 +3786,13 @@ namespace PETSc {
         std::copy_n(ptB->_num, dA->HPDDM_n, ptA->_num);
         ptA->_first = ptB->_first;
         ptA->_last = ptB->_last;
+        if (ptB->_A->getScaling()) {
+            ptA->_D = new KN<PetscReal>(dA->HPDDM_n);
+            for (int i = 0; i < dA->HPDDM_n; ++i) ptA->_D->operator[](i) = ptB->_A->getScaling()[i];
+        }
         initPETScStructure<false>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE,
-          static_cast< KN< double >* >(nullptr));
+          ptA->_D);
       } else {
         int n = ptB->_A->getDof();
         ffassert(dA->HPDDM_n == n);
@@ -3756,6 +3829,8 @@ namespace PETSc {
         initPETScStructure<false>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty);
         delete empty;
+        if (c != 0 || !ptK->A)
+            delete dA;
       }
       if (c == 1) {
         MatSetType(ptA->_petsc, MATSHELL);
@@ -4664,6 +4739,12 @@ namespace PETSc {
           SNESSetKSP(snes, ksp);
           KSPDestroy(&ksp);
         }
+        if(nargs[11]) {
+          TSConvergedReason reason;
+          TSGetConvergedReason(ts, &reason);
+          long* ret = GetAny< long* >((*nargs[11])(stack));
+          *ret = static_cast<long>(reason);
+        }
         TSDestroy(&ts);
         delete user->mon;
         delete user->r;
@@ -4731,10 +4812,16 @@ namespace PETSc {
                       PetscObjectTypeCompareAny((PetscObject)mat[i][j], &isType, MATMPIDENSE, MATSEQDENSE, "");
                       PetscInt n = 0, m = 0;
                       if(!isType) {
+                          Mat C = NULL;
                           PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
-                          if(isType) {
-                              Mat C;
+                          if(isType)
                               MatHermitianTransposeGetMat(mat[i][j], &C);
+                          else if(PetscDefined(USE_COMPLEX)) {
+                              PetscStrcmp(type, MATTRANSPOSEVIRTUAL, &isType);
+                              if(isType)
+                                  MatTransposeGetMat(mat[i][j], &C);
+                          }
+                          if(C) {
                               PetscObjectTypeCompareAny((PetscObject)C, &isType, MATMPIDENSE, MATSEQDENSE, "");
                               if(isType) MatGetSize(C, &m, &n);
                               type = MATHERMITIANTRANSPOSEVIRTUAL;
@@ -5924,13 +6011,10 @@ namespace PETSc {
 
   // function to transform freefem matrix in matIS.
   void ff_createMatIS( MatriceMorse<PetscScalar> &ff_mat, Mat &matIS, MPI_Comm comm){
-      std::set<PetscInt> irows;
-      std::set<PetscInt> jcols;
-
       ff_mat.CSR(); // transform the matrix to CSR format
 
-      std::vector<PetscInt> perm_row(ff_mat.n,-1);
-      std::vector<PetscInt> perm_col(ff_mat.m,-1);
+      std::vector<PetscInt> indices_row(ff_mat.n), perm_row(ff_mat.n,-1);
+      std::vector<PetscInt> indices_col(ff_mat.m), perm_col(ff_mat.m,-1);
 
       for (int ii=0; ii < ff_mat.n; ii++) {
         for (int la = ff_mat.p[ii]; la < ff_mat.p[ii+1]; la++) {
@@ -5950,24 +6034,29 @@ namespace PETSc {
       for(int ii=0; ii<10; ii++)
         cout << "perm_row["<<ii<<"]=" << perm_row[ii] << endl;
 
-    // construction of irows
+    // construction of indices_row
+    int cpt = 0;
     for (int ii=0; ii < ff_mat.n; ii++)
       if (perm_row[ii] == 1) {
-        auto it = irows.insert(ii);
-        perm_row[ii] = std::distance(irows.begin(),it.first);
+        perm_row[ii] = cpt;
+        indices_row[cpt++] = ii;
       }
-    // construction of jcols
+    indices_row.resize(cpt);
+
+    // construction of indices_col
+    cpt = 0;
     for (int ii=0; ii < ff_mat.m; ii++)
       if (perm_col[ii] == 1) {
-        auto it = jcols.insert(ii);
-        perm_col[ii] = std::distance(jcols.begin(),it.first);
+        perm_col[ii] = cpt;
+        indices_col[cpt++] = ii;
       }
+    indices_col.resize(cpt);
 
-    PetscInt *IA = new PetscInt[irows.size()+1];
+    PetscInt *IA = new PetscInt[indices_row.size()+1];
     PetscInt *JA = new PetscInt[ff_mat.nnz];
     PetscScalar* aa = new PetscScalar[ff_mat.nnz];
 
-    int cpt = 0;
+    cpt = 0;
     IA[0] = 0;
     for (int ii=0; ii < ff_mat.n; ii++)
       if (ff_mat.p[ii] != ff_mat.p[ii+1]){
@@ -5975,21 +6064,16 @@ namespace PETSc {
         ffassert( perm_row[ii] == cpt);
         cpt++;
       }
+
     IA[ cpt ] = ff_mat.nnz;
     ffassert( IA[cpt] == ff_mat.nnz);
-    ffassert(cpt==irows.size());
+    ffassert(cpt==indices_row.size());
 
     for (int ii=0; ii < ff_mat.nnz; ii++) {
       JA[ii] = perm_col[ff_mat.j[ii]];
     }
 
     std::copy_n(ff_mat.aij, ff_mat.nnz, aa);
-
-    std::vector<PetscInt> indices_row; indices_row.reserve(irows.size());
-    for(const auto& p : irows) indices_row.emplace_back(p);
-
-    std::vector<PetscInt> indices_col; indices_col.reserve(jcols.size());
-    for(const auto& p : jcols) indices_col.emplace_back(p);
 
     ISLocalToGlobalMapping mapping_row;
     ISLocalToGlobalMappingCreate(comm, 1, indices_row.size(), indices_row.data(), PETSC_COPY_VALUES, &mapping_row);
@@ -6012,7 +6096,7 @@ namespace PETSc {
     // This 4 lines are equivalent to MatCreateSeqAIJ
     MatCreate(PETSC_COMM_SELF, &matISlocal);
     MatSetType(matISlocal,MATSEQAIJ);
-    MatSetSizes(matISlocal, irows.size(), jcols.size(), irows.size(), jcols.size());
+    MatSetSizes(matISlocal, indices_row.size(), indices_col.size(), indices_row.size(), indices_col.size());
     // nullptr can be replaced by the vector of nnz
     MatSeqAIJSetPreallocation(matISlocal, 0, nullptr);
 
@@ -6187,8 +6271,7 @@ namespace PETSc {
                   const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesS, v_fesS>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
@@ -6199,8 +6282,7 @@ namespace PETSc {
                   const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else{
@@ -6244,8 +6326,7 @@ namespace PETSc {
                   const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PUh->NbOfDF, PUh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PUh, PUh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
@@ -6255,8 +6336,7 @@ namespace PETSc {
                   const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
 
                   Abemblocki = new PETSc::DistributedCSR< HpddmType >;
-                  MatCreate(comm, &Abemblocki->_petsc);
-                  MatSetSizes(Abemblocki->_petsc, PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF);
+                  MatCreateAIJ(comm,PETSC_DECIDE, PETSC_DECIDE, PVh->NbOfDF, PVh->NbOfDF,0,NULL,0,NULL,&Abemblocki->_petsc);
                   varfBem<v_fesL, v_fesL>(PVh, PVh, 1, VFBEM, stack, bi, ds, Abemblocki);
                 }
                 else{

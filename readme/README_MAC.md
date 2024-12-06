@@ -21,28 +21,36 @@
 
 ##  Sep 2023
 
-the mac version is compile wit the script 
- bin/compile-version-MacOS  gitbranch  path-where-to-compile configure-parameter
+The mac version is compiled with the script:
+
+``` bash
+bin/compile-version-MacOS gitbranch path-where-to-compile configure-parameter
+```
+
+`configure-parameter` can take the following values:
+
++ generic for --enable-generic
++ debug for --enable-debug
++ optim for --enable-optim
  
- configure-parameter compilation:
- generic for --enable-genenic
- debug for --enable-debug
- optim for --enable-optim
- 
- and exact :
-  bin/compile-version-MacOS master $HOME/tmp generic 
+and exact:
+```bash
+bin/compile-version-MacOS master $HOME/tmp generic
+```
+
 ## Feb 2022
 
-The Version 4.10 is compiled Under Monteray (Apple M1: arm64e) and on (Apple : x86 )
+The Version 4.10 is compiled Under Monteray (Apple M1: arm64e) and on (Apple : x86)
 
 ### for Apple M1 (arm64e)
 
-Add with home brew 
-1. install brew  see
-[install Homebrew]{https://brew.sh/index_fr}
+Add with Homebrew 
 
-    
-2. install this brew package to compile FreeFEM++
+1. Install Homebrew
+
+See [install Homebrew](https://brew.sh/index_fr)
+
+2. Install these brew packages to compile FreeFEM++
 
 ```bash
 brew install \
@@ -64,7 +72,7 @@ gd				isl				libunistring	openssl@1.1		zip \
 gdbm			jansson			libvmaf			p11-kit			zstd 
 ```
 
-3. download the sources of  FreeFEM++ with git 
+3. Download the sources of FreeFEM++ with git 
 
 	```bash
 	git clone git@github.com:FreeFem/FreeFem-sources.git ff++
@@ -74,7 +82,7 @@ or the develop version
 	```bash
 	git clone -b develop   git@github.com:FreeFem/FreeFem-sources.git ff++
 	```
-4. Compile FreeFem++ without petsc and MPI
+4. Compile FreeFem++ without PETSc and MPI
 
 	```bash
 	cd ff++ 

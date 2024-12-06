@@ -585,7 +585,7 @@ class mshmet2d_Op : public E_F0mps {
   int dim;
   vector< Expression > sol;
 
-  static const int n_name_param = 12;    //
+  static const int n_name_param = 3;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -806,7 +806,7 @@ AnyType mshmet2d_Op::operator( )(Stack stack) const {
   return SetAny< KN< double > >(metric);
 }
 
-static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+static void Load_Init( ) {    // le constructeur qui ajoute la fonction "mshmet"  a freefem++
   if (verbosity && mpirank == 0) {
     cout << " load: mshmet  " << endl;
   }

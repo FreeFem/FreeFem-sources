@@ -181,7 +181,7 @@ size_t CodeAlloc::memoryusage=0;
 bool CodeAlloc::sort=true;
 bool  CodeAlloc::cleanning=false;
 bool echo_edp=true; // add F.H of remove script dump
-
+int typeofscript = 0; //  0 .epd, 1: .md (markdown);, 2 : markdown after init  Add FH. 21 may 2024
 //  add F. Hecht
 EnvironmentData  ffenvironment;
 

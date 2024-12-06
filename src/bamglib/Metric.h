@@ -44,10 +44,10 @@ namespace bamg {
 
   class MetricIso {
     friend class MatVVP2x2;
-    Real4 h;
+    Real8 h;
 
    public:
-    MetricIso(Real4 a) : h(a) {}
+    MetricIso(Real8 a) : h(a) {}
     MetricIso(const MetricAnIso M);    // {MatVVP2x2 vp(M);h=1/sqrt(Max(vp.lambda1,vp.lambda2));}
     MetricIso(Real8 a11, Real8 a21, Real8 a22);    // {*this=MetricAnIso(a11,a21,a22));}
     MetricIso( ) : h(1){};                         //
@@ -71,7 +71,7 @@ namespace bamg {
     MetricIso operator/(Real8 c) const { return MetricIso(h * c); }
     Real8 det( ) const { return 1. / (h * h * h * h); }
     operator D2xD2( ) { return D2xD2(1 / (h * h), 0., 0., 1 / (h * h)); }
-    void Box(Real4& hx, Real4& hy) { hx = h, hy = h; }
+    void Box(Real8& hx, Real8& hy) { hx = h, hy = h; }
     friend ostream& operator<<(ostream& f, const MetricIso& M) {
       f << " h=" << M.h << ";";
       return f;
@@ -114,7 +114,7 @@ namespace bamg {
     Real8 operator( )(R2 x, R2 y) const {
       return x.x * y.x * a11 + (x.x * x.y + x.y * y.x) * a21 + x.y * y.y * a22;
     };
-    inline void Box(Real4& hx, Real4& hy) const;
+    inline void Box(Real8& hx, Real8& hy) const;
     friend ostream& operator<<(ostream& f, const MetricAnIso& M) {
       f << " mtr a11=" << M.a11 << " a21=a12=" << M.a21 << " a22=" << M.a22 << ";";
       return f;
@@ -204,7 +204,7 @@ namespace bamg {
     a22 = v00 * M.lambda2 + v11 * M.lambda1;
   }
 
-  inline void MetricAnIso::Box(Real4& hx, Real4& hy) const {
+  inline void MetricAnIso::Box(Real8& hx, Real8& hy) const {
     Real8 d = a11 * a22 - a21 * a21;
     hx = sqrt(a22 / d);
     hy = sqrt(a11 / d);

@@ -25,57 +25,57 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LI
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS_OTHER = 3d-Leman.edp \
+TESTS_OTHER = 3d-leman.md \
 	ArrayFE-3d.edp \
-	beam-3d.edp \
-	cone.edp \
-	convect-3d.edp \
-	cube-period.edp \
-	cylinder-3d.edp \
-	EqPoisson.edp \
-	extract-boundary3d.edp \
-	first.edp \
-	intlevelset3d.edp \
-	Lac.edp \
-	Laplace3d.edp \
-	LaplaceRT-3d.edp \
+	beam-3d.md \
+	cone.md \
+	convect-3d.md \
+	cube-period.md \
+	cylinder-3d.md \
+	EqPoisson.md \
+	extract-boundary3d.md \
+	first.md \
+	intlevelset3d.md \
+	Lac.md \
+	Laplace3d.md \
+	LaplaceRT-3d.md \
 	meditddm.edp \
-	NSI3d-carac.edp \
+	NSI3d-carac.md \
 	NSI3d.edp \
 	p.edp \
-	periodic-3d.edp \
+	periodic-3d.md \
 	Poisson.edp \
-	pyramide.edp \
-	sphere2.edp \
-	sphere6.edp \
-	Stokes.edp \
+	pyramide.md \
+	sphere2.md \
+	sphere6.md \
+	Stokes.md \
 	TruncLac.edp \
-	crack-3d.edp \
+	crack-3d.md \
 	periodic3.edp \
-	LapDG3d1.edp \
-	LapDG3d.edp \
-	Connectivite-3d.edp \
-	Elasticity-simple-support-BC.edp
+	LapDG3d1.md \
+	LapDG3d.md \
+	Connectivity-3d.md \
+	Elasticity-simple-support-BC.md
 
-TESTS_METIS = schwarz-nm-3d.edp
+TESTS_METIS = schwarz-nm-3d.md
 
 TESTS_TETGEN = cylinder.edp \
-	Poisson3d.edp \
-	Poisson-cube-ballon.edp \
-	refinesphere.edp \
+	Poisson3d.md \
+	Poisson-cube-ballon.md \
+	refinesphere.md \
 	tetgencube.edp \
-	tetgenholeregion.edp
+	tetgenholeregion.md
 
-TESTS_TETGEN_MMG = Sphere-Isocahedron.edp Period-Poisson-cube-ballon.edp \
-	sphereincube.edp
+TESTS_TETGEN_MMG = Sphere-Isocahedron.md Period-Poisson-cube-ballon.md \
+	sphereincube.md
 
-TESTS_TETGEN_MMG_MSHMET = Laplace-Adapt-aniso-3d.edp
+TESTS_TETGEN_MMG_MSHMET = Laplace-Adapt-aniso-3d.md
 
-TESTS_TETGEN_GSL = bottle.edp
+TESTS_TETGEN_GSL = bottle.md
 
-TESTS_TETGEN_MMG3D_MMG = fallingspheres.edp
+TESTS_TETGEN_MMG3D_MMG = fallingspheres.md
 
-TESTS_TETGEN_MSHMET = Laplace-Adapt-3d.edp
+TESTS_TETGEN_MSHMET = Laplace-Adapt-3d.md
 
 if METIS
 CONDITIONAL_METIS = $(TESTS_METIS)
@@ -152,7 +152,7 @@ freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
 
-3d-Leman.edp: freefem++.pref
+3d-leman.md: freefem++.pref
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4

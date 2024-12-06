@@ -1,4 +1,3 @@
-load "msh3" // bizarre
 int nn= 4; 
 int[int] ll=[10,11]; 
 meshL Th= segment(nn,[x*nn,0,0],label=ll,region=1); // 

@@ -46,6 +46,16 @@ extern YYSTYPE *plglval;
 
 static const bool debugmacro = false;
 
+int  setMarkdown(const char * fn)
+  {
+    if(fn) {
+        size_t l =  strnlen(fn,32768);
+        return strcasecmp(".md",fn+l-3) == 0  ;
+    }
+    else
+        return 0;
+  };
+
 void  mylex::Add(Key k,int i)
 {
     Check(!i,k,"mot clef");
@@ -143,23 +153,43 @@ inline bool isNLCR(istream & f,int c)
 
 int mylex::EatCommentAndSpace(string *data)
 {
+//    extern int  typeofscript ;
 // if data is !0 then add reading char in data
 // return the last read char c
 //  --------------------
-    int c,caux,sep=0;
+    int c,c1,c2,caux,sep=0,cnl=3;
+    string nnn;
+    int echomd=echo && (verbosity>4);
+/*
+ =0  no markdown block
+ pilesource[level].typeofscript==1;  => markdown file
+ */
     const int space=(int) ' ';
-    int incomment =0;
-    do
+    // incomment : loop if !=0
+    // markdown FH 22 mai 2024
+    // incomment = .  => // comment
+    // incomment = 2 => /* */ comment
+    // incomment = 3 => markdown comment
+    int incomment =1, inmarkdown= pilesource[level].typeofscript==1;
+    if (firsttime)
     {
-        incomment = 0;
+        if( inmarkdown) incomment=3; // start with markdown !!!
+        firsttime=false;
+        if(echo && inmarkdown==0) cout << setw(5) <<linenumber << this->sep() ;
+        if(echo && inmarkdown) cout << "\n...MD..@:"<<inmarkdown <<"\n\n";
+    }
+    auto LineNumber = [&]() {
+        int ret=0;
         c = source().peek();
-
-        // eat spaces
-        while (isspace(c) || c == 0 || c == 10 || c == 13 )
+        int nc=0;
+        while ( c == 10 || c == 13 )
         {
+            if( nc >2) break;
+            cnl++;
+            nc++;
             sep=space;
             c = source().get();
-            if(isNLCR(source(),c)) c='\n';
+            if(isNLCR(source(),c)) cnl=1,c='\n';
             if (echo) cout << (char) c;
             if(c=='\n')
             {
@@ -169,46 +199,102 @@ int mylex::EatCommentAndSpace(string *data)
             if(data) *data+=char(c);
             c=source().peek();
         }
-
-        // eat comment
-        if(c=='/')
+    };
+    auto  PushBack = [&](string s) {
+        for (auto i = s.rbegin(); i != s.rend(); ++i)
+         source().putback(*i);
+    };
+    auto  RemoveLF = [&](string s)
+    {
+        if( *(s.end()-1) =='\r')
+            s.erase( s.end()-1);
+        return s;
+    };
+    auto  GetLine = [&](string nnn) {
+        // begin of line !!!
+        getline(source(),nnn);
+        LineNumber();
+        
+    };
+     auto eatspaces= [&]() {
+        c = source().peek();
+        
+        // eat spaces
+        while (isspace(c) || c == 0 || c == 10 || c == 13 )
         {
-            c = source().get();
-            caux=source().peek();
-            if(caux =='/') incomment = 1;
-            else if (caux == '*' ) incomment = 2;
-            if(!incomment) source().putback(c);
-        }
-
-
-        if(incomment==1)
-        {
+            cnl++;
             sep=space;
-            if (echo) cout << "//" ;
-            source().get();
-            if(data) *data+="//";
-
-            do
+            c = source().get();
+            if(isNLCR(source(),c)) cnl=1,c='\n';
+            if (echo) cout << (char) c;
+            if(c=='\n')
             {
-                c=source().get();
-                if(isNLCR(source(),c)) c='\n';
-                if (echo) cout << (char) c;
-                if(data) *data+=char(c);
-                if(c=='\n')
-                {
+                linenumber++;
+                if (echo) cout << setw(5) <<linenumber << this->sep() ;
+            };
+            if(data) *data+=char(c);
+            c=source().peek();
+        }};
+    
+    auto ifblock = [&](char mark) {// begin end markdown block !!!
+        int ret  =0;
+        char mark3[4]={mark,mark,mark,0};
+        if(c==mark && cnl==1) {
+                source().get();
+                int c1=source().get();
+                int c2=source().get();
+                if( c1==mark && c2==mark) {
+                    getline(source(),nnn); // get end of line
+                    if(data) *data += mark3+nnn;
+                    if (echomd) cout << mark3<< nnn  ;
                     linenumber++;
-                    if (echo) cout << setw(5) <<linenumber << this->sep() ;
-                };
+                    //if(echo) cout << "\n\n...MD..." << nnn << ":" << incomment << "\n\n";
+                    if (echomd) cout << "\n" << setw(5) <<linenumber << this->sep() ;
+                    eatspaces();
+                    ret= 1;
+                }
+                else {source().putback(c);source().putback(c);source().putback(c);}
             }
-            while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
+        return ret;
+    };
+    int count=0;
+    do  // loop on type of comment !!
+    {
+       // cout << "incomment"<< incomment << " "<< int(c) << " " << c << endl;
+        ffassert(count++<100);
+        eatspaces();
+        // eat markdown <CR>~~~ or comment
+        if(ifblock('~')==1 ||ifblock('`')==1 ) {
+            LineNumber();// eat CR ???
+            incomment=3;// in markdown
         }
-        else if(incomment==2)
+        if(incomment==1)
+        {// normal case
+            if(c=='/')
+            {
+                c = source().get();
+                caux=source().peek();
+                if(caux =='/') {// ex:
+                    source().get();
+                    getline(source(),nnn); // eat \n
+                    if (echo) cout << "//"<< nnn  ;
+                    if(data) *data+="//"+nnn;
+                    source().putback('\n');
+                    LineNumber();
+                    eatspaces();
+                }
+                else if (caux == '*' ) incomment = 2;// in /*
+                else {source().putback(c);incomment=0;} // a Char not in comment
+            }
+            else incomment=0;
+        }
+        if(incomment==2) // in /* ..*/
         {
+            
             sep=space;
             if (echo) cout << "/*" ;
             if(data) *data+="/*";
-
-            source().get();
+            
             do
             {
                 c=source().get();
@@ -223,7 +309,6 @@ int mylex::EatCommentAndSpace(string *data)
                 caux = source().peek();
             }
             while(c != EOF && !(c=='*' && caux=='/') ) ;
-
             if(c != EOF)
             {
                 c = source().get();
@@ -231,9 +316,34 @@ int mylex::EatCommentAndSpace(string *data)
                 if(data) *data+=char(c);
             }
             else erreur( " Unterminated comment");
+            incomment=1; // end comment /* */
+        }
+        else if( incomment == 3)
+        { // warning tart at  begin of line  end eat all the line
+            int end =0;
+            sep=space;
+            do
+            {
+                getline(source(),nnn);//  get line
+                if(echomd) cout << linenumber << " ::: " << nnn << endl;
+                linenumber++;
+                if(data) *data+=nnn+'\n';
+                //  search end
+                if (nnn.find("~~~freefem")==0 ||nnn.find("```freefem")==0) // we find => end MD
+                    end = 1;
+               //  cr eat by getline
+            }
+            while(!source().eof()  && end == 0 ) ;
+            if (echo) cout << "\n" << setw(5) <<linenumber << this->sep() ;
+            incomment=1;
+            // if(end==1 && c != EOF)// end of MD part..-> recall EatCommentAndSpace
+            //     c = EatCommentAndSpace(data);
+            
         }
     }
     while (incomment);
+    
+    
     return (c==EOF) ? c : sep;
 }
 
@@ -256,11 +366,6 @@ int mylex::basescan()
 debut:
     TheCurrentLine=linenumber;
     // modif FH
-    if (firsttime)
-    {
-        firsttime=false;
-        if(echo) cout << setw(5) <<linenumber << this->sep() ;
-    }
     EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
     c =source().get(); // the current char
     char nc = source().peek(); // next char
@@ -679,6 +784,11 @@ bool mylex::SetMacro(int &ret)
                     item += char(i);
                     i = source().get();
                 }
+                if (i == 10 || i == 13)
+                {
+                    linenumber++;
+                    nl=1;
+                }
                 if( item == newmacro)  kmacro++;
                 if( item == endmacro)
                 {
@@ -712,6 +822,7 @@ bool mylex::SetMacro(int &ret)
         }
         while(1);
         macroparm.d.push_back(def);
+        if(verbosity>999) cout <<" macro : " << macroname<< ", def =  :"<< def << endl;
         if (nbparam)
             if(echo) cout << " )  " ;
         MapMacroDef & MacroDef =listMacroDef->back();
@@ -1211,11 +1322,12 @@ bool mylex::CallMacro(int &ret)
     return false;
 }
 
-void  mylex::xxxx::open(mylex *lex,const char * ff)
+void  mylex::xxxx::open(mylex *lex,const char * ff,int ts)
 {
 
     string dirname;
-
+    typeofscript=ts ? ts: setMarkdown(ff) ;
+    
     l=0;
     nf=f=0;
     sep=':';
@@ -1307,6 +1419,7 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
     macroarg=macroargs;
     l=0;
     nf=f= new istringstream(s.c_str());
+   if(verbosity>999) std::cout << " readin :"<< s << "!!!.."<< endl;
     sep='@';
     if (!f || !*f)
     {
@@ -1329,13 +1442,13 @@ void mylex::xxxx::close()
 
 // <<mylex_input_filename>>
 
-void mylex::input(const char *  filename)
+void mylex::input(const char *  filename,int ts)
 {
     ffassert(level<99 && level >= -1);
     if (level>=0)
         pilesource[level].l =linenumber;
 
-    pilesource[level+1].open(this,filename);
+    pilesource[level+1].open(this,filename,ts);
     pilesource[level+1].l =0;
     linenumber = 1;
     level++;

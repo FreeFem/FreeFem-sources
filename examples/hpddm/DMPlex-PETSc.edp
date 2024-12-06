@@ -2,14 +2,15 @@
 // NBPROC 4
 
 load "PETSc"
-load "msh3"
 load "medit"
 
 int[int] out;
 int[int] part;
-{
-    DM dm("rectangle.msh");
+if(1) {
+    DM dm("circle.msh");
     mesh localMesh2D = dm;
+    if(mpirank == 0)
+        cout << labels(localMesh2D) << endl;
     macro dimension()2//
     include "macro_ddm.idp"
     plotDmesh(localMesh2D, cmm = "Distributed 2D mesh");
@@ -19,14 +20,16 @@ int[int] part;
     PartitionCreate(localMesh2D, u[], P1);
     plotD(localMesh2D, u, cmm = "Reconstructed 2D partition of unity");
 }
-if(0) { // not sure why this doesn't work on Jenkins
+if(1) { // not sure why this doesn't work on Jenkins
 if(mpirank == 0) {
     DM dm("cube_5tets.cas", communicator = mpiCommSelf);
     mesh3 Th = dm;
     medit("Fluent .cas", Th);
 }
-DM dm("cube.msh", overlap = 0, neighbors = out, partition = part);
+DM dm("sphere.msh", overlap = 0, neighbors = out, partition = part);
 mesh3 localMesh3D = dm;
+if(mpirank == 0)
+    cout << labels(localMesh3D) << endl;
 fespace Ph(localMesh3D, P0);
 Ph plt;
 for[i, v : part] plt[][i] = v;
@@ -41,7 +44,7 @@ fespace Vh(localMesh3D, P1);
 Vh u;
 PartitionCreate(localMesh3D, u[], P1);
 plotD(localMesh3D, u, cmm = "Reconstructed 3D partition of unity");
-DM overlap("cube.msh", overlap = 1, prefix = "with_overlap_", sparams = "-petscpartitioner_type ptscotch");
+DM overlap("sphere.msh", overlap = 1, prefix = "with_overlap_", sparams = "-petscpartitioner_type ptscotch");
 localMesh3D = overlap;
 plotDmesh(localMesh3D, cmm = "Distributed 3D mesh");
 }

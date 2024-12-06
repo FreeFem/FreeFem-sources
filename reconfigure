@@ -12,7 +12,7 @@ then
 		## Exclude duplicate
 		for path in $PATHS
 		do
-			[ "${PATH#*$path}" = "$PATH" ] && eval export PATH="$path:$PATH"
+			[ "${PATH#*$path}" = "$PATH" ] && eval export PATH=\"$path:$PATH\"
 		done
 	fi
 

@@ -37,6 +37,11 @@ real regtest;
   int[int] lab=[5,5,5,5]; // the 4 side 1,2,3,4 have label 5
   mesh th=square(4,5,label=lab,region=1);
   plot(Th,th,ps="twosquare.eps");
+  
+  // mesh of a ring with no duplication of point and edge on common border.
+  mesh Th2=square(19,5,[(1+y)*cos(2*pi*x),(1+y)*sin(x*pi*2)],removeduplicate=1)   ;
+   plot(Th2,wait=1);
+  
 
 }
 // ------------------------------------------------------------

@@ -1,4 +1,3 @@
-load "msh3"
 
 mesh3 Th3 = cube(10,10,10,[x*2*pi,y*2*pi,z*2*pi]);
 

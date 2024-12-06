@@ -31,7 +31,6 @@ macro readmeshN()readmesh// EOM     // two-dimensional problem
 macro defVel(uP)[uP, uP#Y]// EOM    // two-dimensional velocity for convect/advect
 ENDIFMACRO
 IFMACRO(dimension,3)
-load "msh3"
 macro meshN()mesh3// EOM            // three-dimensional problem
 macro intN()int3d// EOM             // three-dimensional integral
 macro intN1()int2d// EOM            // two-dimensional integral
@@ -39,14 +38,12 @@ macro readmeshN()readmesh3// EOM    // three-dimensional problem
 macro defVel(uP)[uP, uP#Y, uP#Z]// EOM // three-dimensional velocity for convect/advect
 ENDIFMACRO
 IFMACRO(dimension,3S)
-load "msh3"
 macro meshN()meshS// EOM            // three-dimensional surface problem
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
 macro intNxN()int2dx2d// EOM        // two-dimensional integral for BEM
 ENDIFMACRO
 IFMACRO(dimension,3L)
-load "msh3"
 macro meshN()meshL// EOM            // three-dimensional line problem
 macro intN()int1d// EOM             // one-dimensional integral
 macro intN1()int0d// EOM            // zero-dimensional integral
@@ -693,7 +690,15 @@ IFMACRO(ThName#Periodicity)
 IFMACRO(ThName#RefinementFactor)
 exit(12); /* not currently implemented */
 ENDIFMACRO
+IFMACRO(ThName#Overlap)
+assert(ThName#Overlap > 0);
+meshN privateBorder;
+int privateS = 1;
+buildOverlapPeriodic(ThName, privateBorder, -111111, privateS, ThName#Overlap, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, false, ThName#Periodicity)
+ENDIFMACRO
+IFMACRO(!ThName#Overlap)
 buildPeriodic(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, ThName#Periodicity);
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
 IFMACRO(!ThName#Periodicity)
@@ -719,6 +724,7 @@ IFMACRO(ThName#RefinementFactor)
 int privateS = ThName#RefinementFactor;
 ENDIFMACRO
 IFMACRO(ThName#Overlap)
+assert(ThName#Overlap > 0);
 meshN privateBorder;
 buildOverlap(ThName, privateBorder, -111111, privateS, ThName#Overlap, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, false);
 ENDIFMACRO

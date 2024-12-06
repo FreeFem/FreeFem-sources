@@ -1,5 +1,4 @@
 //  august 2015 add 
-load "msh3"
 //  DEF LABEL unit CUBE before transformation 
 //  6 face plan label are:
 //  y = 0 ) label 1, 

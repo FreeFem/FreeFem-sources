@@ -8,7 +8,6 @@ The polarization is such that:
 mpirun -np 2 ../../src/mpi/FreeFem++-mpi Maxwell_EFIE_sphere.edp -wg -frequency 6e8
 */
 
-//load "msh3"
 load "bem"
 load "PETSc-complex"
 include "getARGV.idp"
@@ -111,7 +110,7 @@ Uh3<complex> [mcx,mcy,mcz];  // FE function for magnetic current
 BemKernel KerMA("MA_SL",k=k);
 // construction of BEM H-matrix for EFIE operator
 varf vEFIE([u1,u2,u3],[v1,v2,v3])=int2dx2d(ThS)(ThS)(BEM(KerMA,[u1,u2,u3],[v1,v2,v3]));    
-HMatrix<complex> H = vEFIE(Uh3,Uh3,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000,nbiter=4000);
+HMatrix<complex> H = vEFIE(Uh3,Uh3,eta=10,eps=1e-2,minclustersize=10,nbiter=4000);
 
 if (mpirank == 0) cout << H.infos << endl;
 display(H);
@@ -134,7 +133,7 @@ UhOutV<complex> [Ex, Ey, Ez];
 BemPotential PotMA("MA_SL", k=k);
 
 varf vpotMA([u1,u2,u3],[v1,v2,v3])=int2d(ThS)(POT(PotMA,[u1,u2,u3],[v1,v2,v3]));
-HMatrix<complex> HpotMA = vpotMA(Uh3,UhOutV,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HpotMA = vpotMA(Uh3,UhOutV,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HpotMA.infos << endl;
 display(HpotMA);

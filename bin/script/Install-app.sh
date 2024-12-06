@@ -95,5 +95,5 @@ vvv=`$dirff/FreeFem++ -nw| grep 'version'| wc -l`
 if [ $vvv -eq 0 ]; then
   echo Error missing install missing lib or quarantine ?
 else
-	echo FreeFem++ work
+	echo FreeFem++ seems to work!
 fi

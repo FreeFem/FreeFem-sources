@@ -240,18 +240,23 @@ ostream *Write( ostream * f, T data) {
     f->write(reinterpret_cast< const char * >(&dataw), sizeof(T));
     return f;
 }
-
+// correction 27/09/24 FH..
 template< class T,class TR=T >
 istream * Reada( istream * f, KN_<T>  a) {
-    if( a.contiguous() || is_same<T,TR>::value )
+    if(verbosity>9) cout << " reada " << (a.contiguous() && is_same<T,TR>::value ) << endl;
+    if( a.contiguous() && is_same<T,TR>::value )
         f->read(reinterpret_cast<  char * >((T*) a), sizeof(T)*a.N());
     else
     {
-        for(int i=0; i<a.N();++i)
-        {   TR b;
-            f->read(reinterpret_cast<  char * >(&b), sizeof(T));
+        TR b;
+        for(long i=0; i<a.N();++i)
+        {
+            f->read(reinterpret_cast<  char * >(&b), sizeof(TR));
             a[i]=b;
+            if(i<256 && (verbosity>19))
+                cout << "Reada cmp " << i << " "<< b << " " << a[i]<< endl;
         }
+       
     }
    return f;
 }
@@ -315,7 +320,15 @@ static void inittt( ) {
                new OneOperator2<istream *,istream *,long*>(readswapbyte<long,int64_t>)
                );
     Global.Add("readint", "(",
-               new OneOperator2<istream *,istream *,long*>(Read<long,int>)
+               new OneOperator2<istream *,istream *,long*>(Read<long,int>),
+               new OneOperator2<istream *,istream *,KN_<long> >(Reada<long,int>),
+               new OneOperator2<istream *,istream *,KN_<double> >(Reada<double,int>) 
+               );
+    Global.Add("readshort", "(",
+               new OneOperator2<istream *,istream *,long*>(Read<long,short>),
+               new OneOperator2<istream *,istream *,KN_<double> >(Reada<double,short>) ,
+               new OneOperator2<istream *,istream *,KN_<long> >(Reada<long,short>)
+
                );
     Global.Add("readfloat", "(",
                new OneOperator2<istream *,istream *,double*>(Read<double,float>)

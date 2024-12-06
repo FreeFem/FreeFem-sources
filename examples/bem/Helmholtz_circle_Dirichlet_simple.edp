@@ -12,7 +12,6 @@
 */
 
 load "bem"
-load "msh3"
 load "gsl"
 
 include "getARGV.idp"
@@ -54,7 +53,7 @@ func complex exactsol(real xi, real yi){
 // Hmatrix for formulation of first kind
 BemKernel ker1("SL",k=k);
 varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v));
-HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
@@ -85,7 +84,7 @@ vinc = finc;
 // HMatrix for potential
 BemPotential Pot("SL",k=k);
 varf vp(u,v)=int1d(Th)(POT(Pot,u,v));
-HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10);
 
 if (mpirank == 0) cout << HPot.infos << endl;
 display(HPot);

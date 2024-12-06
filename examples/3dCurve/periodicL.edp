@@ -1,4 +1,3 @@
-load "msh3"
 
 meshL Th=segment(10,[x*pi*2]);
 fespace Vh(Th,P1,periodic=[[1],[2]]);

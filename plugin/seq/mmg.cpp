@@ -792,11 +792,11 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  if (nargs[21]) {
-    prequiredEdge = GetAny< KN< long > * >((*nargs[21])(stack));
-  }
   if (nargs[22]) {
-    prequiredVertex = GetAny< KN< long > * >((*nargs[22])(stack));
+    prequiredEdge = GetAny< KN< long > * >((*nargs[22])(stack));
+  }
+  if (nargs[23]) {
+    prequiredVertex = GetAny< KN< long > * >((*nargs[23])(stack));
   }
 
   MMG5_pMesh mesh;

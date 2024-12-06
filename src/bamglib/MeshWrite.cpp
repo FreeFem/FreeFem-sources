@@ -537,7 +537,10 @@ namespace bamg {
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     float coord[nbv][2];
-    int Connectivity[nbInT][3];
+    //int Connectivity[nbInT][3];
+      
+      typedef int int3[3];
+      int3 *Connectivity =new int3[nbInT];
 
     for (i = 0; i < nbv; i++) {
       coord[i][0] = vertices[i].r.x;
@@ -556,11 +559,11 @@ namespace bamg {
     WriteHdf5 *Hdf5MeshFile2D = new WriteHdf5(f, nbInT, nbv);
     Hdf5MeshFile2D->WriteHdf5MeshFile2D(coord, Connectivity);
     delete Hdf5MeshFile2D;
-
     // write xdmf file
     WriteXdmf *XdmfMeshFile2D = new WriteXdmf(f, nbInT, nbv);
     XdmfMeshFile2D->WriteXdmfMeshFile2D( );
     delete XdmfMeshFile2D;
+    delete []  Connectivity;
 
     delete[] reft;
 #else

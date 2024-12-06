@@ -1,4 +1,3 @@
-load "msh3"
 load "mat_psi"
 border a(t=0, 2*pi)     {    x = cos(t);    y = sin(t);  };
 mesh th2 = buildmesh(a(70));

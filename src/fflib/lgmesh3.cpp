@@ -2517,7 +2517,7 @@ class Op3_pfL2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
     };
 };
 template<class K,class v_fes>
-class Op2_pfL2K : public binary_function<pair<FEbase<K,v_fes> *,int>,R,K> { public:
+class Op2_pfL2K : public mybinary_function<pair<FEbase<K,v_fes> *,int>,R,K> { public:
     
     
     class Op : public E_F0mps { public:
@@ -2684,6 +2684,7 @@ template<class R>  R * set_initinit( R* const & a,const long & n){
 //3d Volume
 void init_mesh3_array()
 {
+    if(mpirank==0 && verbosity>1)cout << " init_mesh3_array"<< endl;
     Dcl_Type<KN<pmesh3> *>(0,::DestroyKN<pmesh3> );
     atype<KN<pmesh3>* >()->Add("[","",new OneOperator2_<pmesh3*,KN<pmesh3>*,long >(get_elementp_<pmesh3,KN<pmesh3>*,long>));
     TheOperators->Add("<-", 

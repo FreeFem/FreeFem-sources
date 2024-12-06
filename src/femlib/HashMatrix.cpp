@@ -1209,28 +1209,28 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
             ntgv++;
             if(ttgv<0)
             {
-                
+
                 if( wbc[ii] )
                 {
                     for (I k=p[ii];k<p[ii+1]; ++k)
                         if( j[k]==ii )
-                            aij[k] = (std::abs(ttgv+10.0) < 1.0e-10 ? 0.0 : 1.0);
-                        else
-                            aij[k]=0;// put the line to Zero.
+                            aij[k] = (ttgv < -9.0 ? 0.0 : 1.0);
+                        else if ( std::abs(ttgv+3.0) > 1.0e-10 && std::abs(ttgv+30.0) > 1.0e-10)
+                            aij[k]=0;// put row to zero
                 }
                 
             }
             else
                 operator()(ii,ii)=ttgv;
         }
-    if( std::abs(ttgv+2.0) < 1.0e-10 || std::abs(ttgv+20.0) < 1.0e-10) //  remove also columm tgv == -2 .....
+    if( std::abs(ttgv+2.0) < 1.0e-10 || std::abs(ttgv+20.0) < 1.0e-10 || std::abs(ttgv+3.0) < 1.0e-10 || std::abs(ttgv+30.0) < 1.0e-10) //  remove also columm tgv == -2,-3 .....
     {
         CSC();
         for(I jj=0; jj< this->n; ++jj)
             if( wbc[jj] ) {
                 for (I k=p[jj];k<p[jj+1]; ++k)
-                    if( i[k]!=jj || std::abs(ttgv+20.0) < 1.0e-10)
-                        aij[k]=0;//
+                    if( i[k]!=jj || ttgv < -19.0)
+                        aij[k]=0;// put column to zero
             }
     }
     
@@ -1409,20 +1409,20 @@ void HashMatrix<I,R>::UnHalf()
 typedef double R;
 typedef complex<R> C;
 //  because for UMFPACK 64  because long are only 32 bits under windows 
-#ifdef _WIN32
-typedef long long  int64;
-#else
-typedef long int64;
-#endif
 
 template class HashMatrix<int,R>;
 template class HashMatrix<int,C >;
-template class HashMatrix<int64,R>;
-template class HashMatrix<int64,C >;
+template class HashMatrix<long,R>;
+template class HashMatrix<long,C >;
+template class HashMatrix<long long,R>;
+template class HashMatrix<long long,C >;
+template HashMatrix<long,R>::HashMatrix(const HashMatrix<int,R> & );
+template HashMatrix<long,C>::HashMatrix(const HashMatrix<int,C> & );
+template HashMatrix<long long,R>::HashMatrix(const HashMatrix<int,R> & );
+template HashMatrix<long long,C>::HashMatrix(const HashMatrix<int,C> & );
 
-template HashMatrix<int64,R>::HashMatrix(const HashMatrix<int,R> & );
-template HashMatrix<int64,C>::HashMatrix(const HashMatrix<int,C> & );
-template HashMatrix<int,C>::HashMatrix(const HashMatrix<int64,C> & );
+template HashMatrix<int,C>::HashMatrix(const HashMatrix<long,C> & );
+template HashMatrix<int,C>::HashMatrix(const HashMatrix<long long,C> & );
 template HashMatrix<int,R>::HashMatrix(const HashMatrix<int,C> & , R(*ff)(C));
 //template HashMatrix<int,C>::HashMatrix(const HashMatrix<int,R> & );
 
@@ -1434,7 +1434,8 @@ template HashMatrix<int,R>::HashMatrix(const HashMatrix<int,C> & , R(*ff)(C));
 template  void Addto<int,R,C>(HashMatrix<int,R> *P0, const HashMatrix<int,C> *PA,R (*f)(C) ,bool trans, int ii00,int jj00);
 template  void Addto<int,C,R>(HashMatrix<int,C> *P0, const HashMatrix<int,R> *PA,C (*f)(R) ,bool trans, int ii00,int jj00);
 
-template void HashMatrix<int,R>::set<int64>(int64 nn,int64 mm,int hhalf,size_t nnnz, int64 *ii, int64*jj, R *aa,int f77);
+template void HashMatrix<int,R>::set<long>(long nn,long mm,int hhalf,size_t nnnz, long *ii, long*jj, R *aa,int f77);
+template void HashMatrix<int,R>::set<long long>(long long nn,long long mm,int hhalf,size_t nnnz, long long *ii, long long*jj, R *aa,int f77);
 //template void HashMatrix<int,R>::set<int,R>(int nn,int mm,bool hhalf,size_t nnnz, int *ii, int*jj, R *aa,int f77,R(*ff)(R));
 //template void HashMatrix<int,R>::set<long,R>(long nn,long mm,bool hhalf,size_t nnnz, long *ii, long *jj, R *aa,int f77,R(*ff)(R));
 template void HashMatrix<int,C>::set<int,C>(int nn,int mm,int hhalf,size_t nnnz, int *ii, int*jj, C *aa,int f77,C(*ff)(C));

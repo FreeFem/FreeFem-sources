@@ -27,7 +27,6 @@ where
 
 */
 
-load "msh3"
 macro lap (u,v) (dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))//
 macro gradn (u) (dx(u)*N.x + dy(u)*N.y + dz(u)*N.z)//
 

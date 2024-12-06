@@ -25,9 +25,10 @@ endif
 FAIT.done:tag-tar
 	-mkdir build
 	cd build && cmake ../mmg-sources \
+	-DMMG_INSTALL_PRIVATE_HEADERS=1 \
 	-DCMAKE_C_COMPILER=$(CC) \
 	-DCMAKE_C_FLAGS="$(CFLAGS) -fPIC" \
-	-DCMAKE_CXX_COMPILER=$(CXX) \
+	-DCMAKE_CXX_COMPILER="$(CXX)" \
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
 	-DM_LIB="-lm" -DUSE_ELAS=OFF -DUSE_VTK=OFF \
 	-DSCOTCH_DIR=$(scotch_dir) \

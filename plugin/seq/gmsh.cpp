@@ -249,7 +249,7 @@ Mesh *GMSH_Load(const string &filename) {
 
                 // ignore any other tags for now
               }
-
+	      if (verbosity > 99) cout << type << endl;
               ffassert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
                 cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
@@ -266,7 +266,7 @@ Mesh *GMSH_Load(const string &filename) {
             }
 
             if (type == 4) {
-              cout << "We are loading a two dimensionnal mesh " << endl;
+              if (verbosity > 1) cerr << "We are loading a two dimensional mesh " << endl;
               exit(1);
             }
 
@@ -296,7 +296,7 @@ Mesh *GMSH_Load(const string &filename) {
             int numVertices;
             assert(type >= 1 && type <= 31);
             if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-              cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+              cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
               exit(1);
             }
 
@@ -326,7 +326,7 @@ Mesh *GMSH_Load(const string &filename) {
               }
 
               if (type == 4) {
-                cout << "We are loading a two dimensionnal mesh " << endl;
+                if (verbosity > 1) cerr << "We are loading a two dimensional mesh " << endl;
                 exit(1);
               }
             }
@@ -394,7 +394,7 @@ Mesh *GMSH_Load(const string &filename) {
 
               assert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-                cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+                cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
                 exit(1);
               }
             }
@@ -433,11 +433,6 @@ Mesh *GMSH_Load(const string &filename) {
                 cout << "mes=" << tff[it].area << endl;
               }
 
-              if (tff[it].area < 1e-8) {
-                cout << "bug : mes < 1e-8 !" << endl;
-                exit(1);
-              }
-
               it++;
             }
           }
@@ -465,7 +460,7 @@ Mesh *GMSH_Load(const string &filename) {
             int numVertices;
             assert(type >= 1 && type <= 31);
             if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-              cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+              cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
               exit(1);
             }
 
@@ -659,7 +654,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
                  !strncmp(&str[1], "ParametricNodes", 15)) {
         const bool parametric = !strncmp(&str[1], "ParametricNodes", 15);
         if (parametric == true) {
-          cerr << " ParametricNodes is not considered yet in freefem++" << endl;
+          cerr << " ParametricNodes is not considered yet in FreeFem++" << endl;
           exit(1);
         }
 
@@ -748,7 +743,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
 
               assert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-                cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+                cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
                 exit(1);
               }
             }
@@ -796,7 +791,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
             int numVertices;
             assert(type >= 1 && type <= 31);
             if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-              cout << "Element of type " << type << " is not considered in Freefem++" << endl;
+              cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
               exit(1);
             }
 
@@ -819,7 +814,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
               int *indices = &data[numTags + 1];
 
               if (type == 1 && i == 0) {
-                cout << "edges in 3D mesh are not used in freefem++,skeep data" << endl;
+                if (verbosity>0) cout << " Edges in 3D mesh are not used in FreeFem++; skip data" << endl;
                 // exit(1);
               }
 
@@ -906,7 +901,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
 
               assert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-                cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+                cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
                 exit(1);
               }
             }
@@ -966,7 +961,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
             int numVertices;
             assert(type >= 1 && type <= 31);
             if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-              cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+              cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
               exit(1);
             }
 
@@ -1020,11 +1015,11 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
         }
       } else if (!strncmp(&str[1], "NodeData", 8)) {
         if (verbosity) {
-          cout << " NodeData is not considered in freefem++ " << endl;
+          cout << " NodeData is not considered in FreeFem++ " << endl;
         }
       } else if (!strncmp(&str[1], "ElementData", 11) || !strncmp(&str[1], "ElementNodeData", 15)) {
         if (verbosity) {
-          cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
+          cout << " ElementData/ElementNodeData is not considered in FreeFem++ " << endl;
         }
       }
     }
@@ -1033,7 +1028,7 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
   fclose(fp);
 
   if (nt == 0) {
-    cout << " Return type false, your mesh is MeshS type, use gmshloadS function" << endl;
+    cout << " Return type false. Your mesh is MeshS type; use gmshloadS function." << endl;
     ffassert(0);
     
   } else {
@@ -1084,7 +1079,7 @@ class GMSH_LoadMeshT_Op : public E_F0mps {
  public:
   GMSH_LoadMeshT_Op(const basicAC_F0 &args, Expression ffname) : filename(ffname) {
     if (verbosity > 1) {
-      cout << "Load mesh given by GMSH " << endl;
+      cout << "Load mesh given by GMSH." << endl;
     }
 
     args.SetNameParam(n_name_param, name_param, nargs);
@@ -1192,7 +1187,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
                  !strncmp(&str[1], "ParametricNodes", 15)) {
         const bool parametric = !strncmp(&str[1], "ParametricNodes", 15);
         if (parametric == true) {
-          cerr << " ParametricNodes is not considered yet in freefem++" << endl;
+          cerr << " ParametricNodes is not considered yet in FreeFem++" << endl;
           exit(1);
         }
 
@@ -1280,7 +1275,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
 
               assert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-                cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+                cerr << "Element of type " << type << ", nv elem =" << nvElemGmsh[type - 1] << " is not considered in FreeFem++" << endl;
                 exit(1);
               }
             }
@@ -1291,7 +1286,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
             if (type == 2 && is_same< MMesh, MeshS >::value) nt++;
 
             if (type == 4) {
-              cout << "We are loading a three dimensionnal SURFACE mesh " << endl;
+              cerr << "We are loading a three dimensional SURFACE mesh." << endl;
               exit(1);
             }
 
@@ -1320,7 +1315,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
             int numVertices;
             assert(type >= 1 && type <= 31);
             if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-              cout << "Element of type " << type << " is not considered in Freefem++" << endl;
+              cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
               exit(1);
             }
 
@@ -1348,7 +1343,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
               if (type == 2 && is_same< MMesh, MeshS >::value) nt++;
 
               if (type == 4) {
-                cout << "We are loading a three dimensionnal SURFACE mesh " << endl;
+                cerr << "We are loading a three dimensional SURFACE mesh " << endl;
                 exit(1);
               }
             }
@@ -1423,7 +1418,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
 
               assert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
-                cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
+                cerr << "Element of type " << type << " is not considered in FreeFem++" << endl;
                 exit(1);
               }
             }
@@ -1466,7 +1461,7 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
               }
 
               if (tff[it].mesure( ) < 1e-8) {
-                cout << "bug : mes < 1e-8 !" << endl;
+                cerr << "bug : measure < 1e-8 !" << endl;
                 exit(1);
               }
 
@@ -1553,11 +1548,11 @@ MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
         }
       } else if (!strncmp(&str[1], "NodeData", 8)) {
         if (verbosity) {
-          cout << " NodeData is not considered in freefem++ " << endl;
+          cout << " NodeData is not considered in FreeFem++ " << endl;
         }
       } else if (!strncmp(&str[1], "ElementData", 11) || !strncmp(&str[1], "ElementNodeData", 15)) {
         if (verbosity) {
-          cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
+          cout << " ElementData/ElementNodeData is not considered in FreeFem++ " << endl;
         }
       }
     }
