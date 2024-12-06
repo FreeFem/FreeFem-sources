@@ -36,11 +36,7 @@ All notable changes to this project will be documented in this file.
 
   Documented Markdown examples in the distribution can be viewed on the [documentation website](https://doc.freefem.org) (toggle Search in examples). Markdown can be previewed with e.g Visual Studio Code, with the [FreeFEM VS Code extension](https://marketplace.visualstudio.com/items?itemName=Pierre-Marchand.vscode-freefem) providing syntax highlighting for FreeFEM code blocks.
 
--add tool to put FreeFEM code in Markdow file (with suffix .md)    
-      they only execute code beetwen
-      two  line  starting with ~~~freefem or ```freefem  and finishing by ~~~ or ```,
-      to mixte in same file comment and code.
--add command `md2edp` to extract freefem code form Markdown file.
+- add command `md2edp` to extract freefem code form Markdown file.
 
 - add read binary file with short number in bfstream plugin
 - add 3d case in ClosePoints plugin : function Voisinage3, ClosePoints3
@@ -78,7 +74,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- PETSc 3.20.4
+- PETSc 3.22.2
 - move the plugin msh3 in kernel , so remove all `load "msh3"` in all examples and .idp files
 
 ### Deprecated
