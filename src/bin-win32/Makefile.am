@@ -107,14 +107,15 @@ drawbdmesh.exe:../std/Pcrgraph.o ../bamg/drawbdmesh.o $(LIBS_FF)
 	$(CXX) $(GCCNOCYGWIN) -mwindows -Wl,--enable-auto-import $^ -o $@
 launchff++.exe:launchff++.cpp
 	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe -lcomdlg32
-
+md2edp.exe:../../etc/tools/md2edp.cpp 
+	$(CXX) $(GCCNOCYGWIN) ../../etc/tools/md2edp.cpp  -o md2edp.exe -lcomdlg32
 ff-c++:../../plugin/seq/load.link.in
 	../../config.status --file=ff-c++:$<
 	chmod a+x ff-c++
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) md2edp.exe launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
 	$(INSTALL_SCRIPT) *.dll "$(DESTDIR)${bindir}"
 install-exec-local--::
 
