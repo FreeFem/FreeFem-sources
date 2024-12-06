@@ -284,7 +284,7 @@ bin/init-var.sh:Makefile
 	
 	
 	
-install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2edp
+install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2edp$(EXEEXT)
 
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
