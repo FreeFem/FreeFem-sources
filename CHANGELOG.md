@@ -21,6 +21,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
 ---
 
 ## [4.15]
@@ -864,6 +880,7 @@ All notable changes to this project will be documented in this file.
 
 - The main distribution is now on Github
 
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.15..develop
 [4.15]: https://github.com/FreeFem/FreeFem-sources/compare/v4.14..v4.15
 [4.14]: https://github.com/FreeFem/FreeFem-sources/compare/v4.13..v4.14
 [4.13]: https://github.com/FreeFem/FreeFem-sources/compare/v4.12..v4.13
