@@ -7,9 +7,10 @@ dircommand=`dirname "$0"`
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@ @UMFPACK_CPPFLAGS@ @HDF5_CPPFLAGS@'
 FFFFLAGS='@FFLAGS@'
-# change FH 22/12/20202  
+# change FH 22/12/2022  
 FFFLIBS='@FF_LIBS@'
 FFCXX11FLAGS='@CXX11FLAGS@'
+FFLDFLAGS=@LDFLAGS@
 INCFF=
 if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
@@ -289,9 +290,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	echo
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS  $DLL $OTHER $WMPI_LIB 
+	echo $CXX $FFLDFLAGS $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS  $DLL $OTHER $WMPI_LIB 
 	if [  $do = yes ] ; then
-	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
+	   eval $CXX $FFLDFLAGS $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	echo
@@ -304,9 +305,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	    test $do = yes &&   cp $DLL "$bin"
 	fi
 	if [ -n "$OWMPI" ] ; then
-	    echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
+	    echo $CXX $FFLDFLAGS $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
 	    if [  $do = yes ] ; then
-		eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
+		eval $CXX $FFLDFLAGS $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
 		ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	    fi
 	    echo
