@@ -67,6 +67,8 @@ Source: "freefem++.pref"; DestDir: "{app}"
 ifelse(len(MPIPROG),0,; ,)Source: "src\bin-win32\FreeFem++-mpi.exe"; DestDir: "{app}"
 ifelse(len(MPIPROG),0,; ,)Source: "src\mpi\ff-mpirun"; DestDir: "{app}"
 Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
+Source: "src\bin-win32\md2edp.exe"; DestDir: "{app}"
+;
 ;   no freefem++-cs today see ALH (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
 ;Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
