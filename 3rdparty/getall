@@ -77,12 +77,12 @@ if(-x "../getall"){chdir ".."}
 system "mkdir -p pkg";
 my @downloads;
 
-download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz',
- 	'http://www.caam.rice.edu/software/ARPACK',
+download('ARPACK','https://www.ljll.fr/hecht/pkg/arpack96.tar.gz',
+ 	'https://www.ljll.fr/hecht/pkg',
 	'arpack96.tar.gz',
 	'fffaa970198b285676f4156cebc8626e');
-download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
-	'http://www.caam.rice.edu/software/ARPACK',
+download('ARPACK','https://www.ljll.fr/hecht/pkg/patch.tar.gz',
+	'https://www.ljll.fr/hecht/pkg',
 	'patch.tar.gz',
 	'14830d758f195f272b8594a493501fa2');
 download('BLAS','http://www.netlib.org/blas/blas-3.7.1.tgz',
@@ -115,12 +115,12 @@ download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz'
 	'https://projects.coin-or.org/Ipopt',
 	'Ipopt-3.12.4.tgz',
 	'12a8ecaff8dd90025ddea6c65b49cb03');
-download('METIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz',
+download('METIS','https://www.ljll.fr/hecht/pkg/metis-5.1.0.tar.gz',
 	'http://www.netlib.org/linalg/',
 	'metis-5.1.0.tar.gz',
 	'5465e67079419a69e0116de24fce58fe');
-download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz',
-	'http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/',
+download('ParMETIS','https://www.ljll.fr/hecht/pkg/ParMetis-4.0.3.tar.gz',
+	'https://www.ljll.fr/hecht/pkg',
 	'ParMetis-4.0.3.tar.gz',
 	'f69c479586bf6bb7aff6a9bc0c739628');
 download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mmg3d4.0.tgz',
