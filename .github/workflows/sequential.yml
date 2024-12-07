@@ -132,6 +132,3 @@ jobs:
       - name: Check
         continue-on-error: true
         run: make check
-
-      - name: Install
-        run: make install
