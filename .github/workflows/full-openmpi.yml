@@ -1,8 +1,8 @@
 # Full version of FreeFem, using OpenMPI
 name: Full version OpenMPI
-on: [push]
-#on:
-#  workflow_dispatch:
+#on: [push]
+on:
+  workflow_dispatch:
   
 jobs:
   linux:
@@ -100,4 +100,3 @@ jobs:
 
       - name: Install
         run: make install
-
