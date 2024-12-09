@@ -1,8 +1,8 @@
 # Full version of FreeFem, using Microsoft MS-MPI
 name: Full version MS-MPI
-on: [push]
-#on:
-#  workflow_dispatch:
+#on: [push]
+on:
+  workflow_dispatch:
 
 jobs:
   windows:
