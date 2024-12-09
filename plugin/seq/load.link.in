@@ -10,7 +10,7 @@ FFFFLAGS='@FFLAGS@'
 # change FH 22/12/2022  
 FFFLIBS='@FF_LIBS@'
 FFCXX11FLAGS='@CXX11FLAGS@'
-FFLDFLAGS=@LDFLAGS@
+FFLDFLAGS='@LDFLAGS@'
 INCFF=
 if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
