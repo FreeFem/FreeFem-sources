@@ -32,7 +32,8 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
         
       - name: PETSc
@@ -56,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [13]
+        version: [13, 14]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
@@ -66,6 +67,12 @@ jobs:
       
     runs-on: macos-${{ matrix.version }}
 
+    env:
+      CC: clang
+      CXX: clang++
+      FC: gfortran
+      F77: gfortran
+      
     steps:
       - uses: actions/checkout@v4
 
