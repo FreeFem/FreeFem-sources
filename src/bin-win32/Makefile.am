@@ -67,12 +67,12 @@ all-local: $(WIN32DLLTARGET)
 # correctly built.
 
 if ENABLE_FFCS
-win32-dll-target: FreeFem++.exe ff-c++
+win32-dll-target: FreeFem++.exe ff-c++ md2edp.exe
 	-for i in $(LDADD2) ; do case $$i in *.dll) echo cp -p $$i .; cp -p $$i . ;; esac ; done
 	./copy-dll.sh
 	echo "on a fini"
 else
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe launchff++.exe ff-c++ $(MPIPROG)
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe launchff++.exe ff-c++ md2edp.exe $(MPIPROG)
 	-cp ../nw/ffglut.exe . 2> /dev/null
 	-for i in $(LDADD2) ; do case $$i in *.dll) echo cp -p $$i .; cp -p $$i . ;; esac ; done
 	./copy-dll.sh

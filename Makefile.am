@@ -204,7 +204,7 @@ ide:
 	cd src/ide && $(MAKE) $(AM_MAKEFLAGS) FreeFem++-cs$(EXEEXT)
 
 bin/md2edp$(EXEEXT):etc/tools/md2edp.cpp 
-	$(CXX) etc/tools/md2edp.cpp -o bin/md2edp$(EXEEXT)
+	$(CXX) $(CXXFLAGS) etc/tools/md2edp.cpp -o bin/md2edp$(EXEEXT)
 
 # Cleaning generated files which are stored in the CVS repository, to
 # avoid technical CVS conflicts.
