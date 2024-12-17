@@ -267,6 +267,7 @@ int mylex::EatCommentAndSpace(string *data)
         if(ifblock('~')==1 ||ifblock('`')==1 ) {
             LineNumber();// eat CR ???
             incomment=3;// in markdown
+            cnl=1; // starting line !!
         }
         if(incomment==1)
         {// normal case
@@ -332,6 +333,7 @@ int mylex::EatCommentAndSpace(string *data)
                 if (nnn.find("~~~freefem")==0 ||nnn.find("```freefem")==0) // we find => end MD
                     end = 1;
                //  cr eat by getline
+                cnl=1; // starting line !!
             }
             while(!source().eof()  && end == 0 ) ;
             if (echo) cout << "\n" << setw(5) <<linenumber << this->sep() ;
