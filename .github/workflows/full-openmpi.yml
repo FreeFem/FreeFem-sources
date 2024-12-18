@@ -68,10 +68,14 @@ jobs:
     runs-on: macos-${{ matrix.version }}
 
     env:
-      CC: clang
-      CXX: clang++
+      CC: gcc
+      CXX: "g++ -Wl -ld_classic -Wno-unused-command-line-argument"
       FC: gfortran
       F77: gfortran
+      MPIRUN: mpirun
+      MPICC: mpicc
+      MPICXX: mpicxx
+      MPIFC: mpif90
       
     steps:
       - uses: actions/checkout@v4
@@ -83,13 +87,19 @@ jobs:
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
-          
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+        
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          ./configure --enable-download --with-mpi=openmpi ${{ matrix.cfg.opts }} \
           --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
         
       - name: PETSc
         run: |
