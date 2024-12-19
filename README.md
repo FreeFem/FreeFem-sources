@@ -18,10 +18,11 @@
 <details>
 <summary> CI </summary>
 
-Each of the subsequent sections correspond to a workflow composed of a set of
-jobs: Release/Debug + different plateform.  A workflow appeara as `failed` if
-only one of its jobs has failed. To get more details about the failing
-configuration, click on the corresponding badge below.
+Each of the following entries correspond to a workflow composed of a
+set of jobs: **Release/Debug + different plateforms**. A workflow
+appears as `failed` as soon as one of its jobs has failed. To get more
+details about the failing subsequent configuration, click on the
+corresponding badge below.
 
 | master                                                                                                           | develop                                                                                                                         |
 |:----------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|
