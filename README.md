@@ -16,21 +16,20 @@
 <!----------------------------------------------------------------------------------->
 
 <details>
-<summary> CI / CD tools </summary>
+<summary> CI </summary>
 
-[Commit check](.github/CI.md)
+Each of the subsequent sections correspond to a workflow composed of a set of
+jobs: Release/Debug + different plateform.  A workflow appeara as `failed` if
+only one of its jobs has failed. To get more details about the failing
+configuration, click on the corresponding badge below.
 
-[Release](.github/RELEASE.md)
-
-Jenkins ([FreeFEM](https://ci.inria.fr/freefem/)):
-
-_Master branch_
-
-|                                                                                    Release                                                                                    |                                                                                 .pkg                                                                                  |                                                                                    AppImage                                                                                     |                                                                                 .deb                                                                                  |                                                                 .exe                                                                  |                                                                     Docker                                                                      |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------: |
-| [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-createRelease)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-createRelease/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployPKG)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployPKG/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployAppImage)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployAppImage/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployDEB)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployDEB/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=deployEXE)](https://ci.inria.fr/freefem/view/Master/job/deployEXE/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-docker)](https://ci.inria.fr/freefem/view/Docker/job/FreeFEM-docker/) |
-
-See [CI/CD Tools](#cicd-tools)
+| master                                                                                                           | develop                                                                                                                         |
+|:----------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|
+| ![Minimal version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/minimal.yml/badge.svg)           | ![Minimal version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/minimal.yml/badge.svg?branch=develop)           |
+| ![Sequential version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/sequential.yml/badge.svg)     | ![Sequential version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/sequential.yml/badge.svg?branch=develop)     |
+| ![Full version OpenMPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-openmpi.yml/badge.svg) | ![Full version OpenMPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-openmpi.yml/badge.svg?branch=develop) |
+| ![Full version MPICH](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-mpich.yml/badge.svg)     | ![Full version MPICH](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-mpich.yml/badge.svg?branch=develop)     |
+| ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg)    | ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg?branch=develop)    |
 
 </details>
 
@@ -93,69 +92,4 @@ Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
 
 ## CI/CD Tools
 
-### FreeFEM-dev
-
-See [Jenkins configuration files](etc/jenkins)
-
-### FreeFEM
-
-All: all dependency packages are installed (computer with root access).<br/>
-No: dependency packages are not installed (computer without root access).
-
-<sup>1</sup>: Ubuntu 18.04 x86
-
-<sup>2</sup>: macOS 10.13
-
-<sup>3</sup>: macOS 10.9
-
-<sup>4</sup>: Windows 7 + MSYS2 + MS MPI 7
-
-**Executed commands:**
-
-Automatic configuration:
-
-```bash
-autoreconf -i
-```
-
-Configuration:
-
-```bash
-./configure --enable-download --enable-optim
-```
-
-If you do not have administrator rights or do not want FreeFEM files scattered around on your machine, please use the `--prefix` option, e.g.:
-
-```bash
-./configure --enable-download --enable-optim --prefix=${HOME}/FreeFem-install
-```
-
-Download:
-
-```bash
-./3rdparty/getall -a
-```
-
-PETSc:
-
-```bash
-cd 3rdparty/ff-petsc
-make petsc-slepc
-cd -
-./reconfigure
-```
-
-Make:
-
-```bash
-make -j2
-make check
-```
-
-Install:
-
-```bash
-(sudo) make install
-```
-
-See [CI/CD Tools Wiki](https://github.com/FreeFem/FreeFem-sources/wiki/CI-CD-Tools) for more informations.
+See [Github Actions workflow files](.github/workflows)
