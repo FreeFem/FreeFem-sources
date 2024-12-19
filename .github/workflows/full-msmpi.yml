@@ -81,5 +81,4 @@ jobs:
         run: make -j 4
 
       - name: Check
-        continue-on-error: true
         run: make check
