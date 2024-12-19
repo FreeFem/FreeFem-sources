@@ -1,0 +1,39 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Version
+        id: version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          echo "number=$VERSION" >> $GITHUB_OUTPUT
+      - name: CHANGELOG
+        id: changelog
+        run: |
+          csplit CHANGELOG.md '/^---$/' '{*}' --suppress-matched
+          RELEASE_NOTE="$(cat xx02)"
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        continue-on-error: true
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: FreeFEM v${{ steps.version.outputs.number }}
+          tag_name: v${{ steps.version.outputs.number }}-testActions
+          body: ${{ steps.changelog.outputs.release_notes }}
+          draft: false
+          prerelease: true

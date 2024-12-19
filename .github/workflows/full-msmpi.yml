@@ -1,0 +1,95 @@
+# Full version of FreeFem, using Microsoft MS-MPI
+name: Full version MS-MPI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      
+  pull_request:
+    branches:
+      - develop
+
+# For development phase
+# on:
+#   workflow_dispatch:
+
+jobs:
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: msmpi
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-hdf5
+            mingw-w64-x86_64-gsl
+            autoconf
+            automake-wrapper
+            pkg-config
+            pkgfile
+            tar
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-msmpi
+            python
+
+      # Otherwise PETSc doesn't know which python to use and returns error at
+      # configure
+      - name: Remove packages
+        run: |
+          pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
+          mingw-w64-x86_64-gdb-multiarch
+          
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure ${{ matrix.cfg.opts }} --enable-download \
+          --enable-maintainer-mode \
+          --prefix="${HOME}/freefem" \
+          --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"
+          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          ./3rdparty/getall -a -o PETSc
+
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: make check

@@ -1,0 +1,93 @@
+name: Release Windows
+on:
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
+
+jobs:
+  windows:
+    name: EXE release
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: msmpi
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-hdf5
+            mingw-w64-x86_64-gsl
+            autoconf
+            automake-wrapper
+            pkg-config
+            pkgfile
+            tar
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-msmpi
+            python
+            mingw-w64-x86_64-freeglut
+
+      - name: Remove packages
+        run: pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+            --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"
+            MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          ./3rdparty/getall -a
+
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j2
+
+      - name: Check
+        continue-on-error: true
+        run: make check
+
+      - name: Create EXE
+        id: exe
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          TMP_EXE_NAME=Output/FreeFem++-${VERSION}-win64.exe
+          EXE_NAME=FreeFEM-${VERSION}-win64.exe
+          echo "file=$EXE_NAME" >> $GITHUB_OUTPUT
+
+          cp AUTHORS readme/AUTHORS
+          make win32
+          mv "$TMP_EXE_NAME" "$EXE_NAME"
+
+      - name: Upload release
+        uses: AButler/upload-release-assets@v2.0.x
+        with:
+          files: ${{ steps.exe.outputs.file }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: v${{ steps.exe.outputs.version }}-testActions

@@ -10,60 +10,72 @@ optionconf=
 nameopt=
 export dirdmgpkg=
 case $3 in
-*generic*) optionconf+=--enable-generic;;
+*generic*) optionconf+=--enable-generic ;;
 esac
 case $3 in
-*debug*) optionconf+=--enable-debug;nameopt+=-g;;
+*debug*)
+	optionconf+=--enable-debug
+	nameopt+=-g
+	;;
 esac
 case $3 in
-*optim*) optionconf+=--enable-optim;nameopt+=-O;;
+*optim*)
+	optionconf+=--enable-optim
+	nameopt+=-O
+	;;
 esac
 addprefix=$4
 addconf=$4
 
+
+export CC=clang
+export CXX=clang++
 
 echo " option de configuration" $optionconf
 echo ==========================================================
 
 ## stop on error ....
 
-set -e 
-#-x 
-dirscript=`dirname $0`
+set -e
+#-x
+dirscript=$(dirname $0)
 case $dirscript in
-".")  dirscript=$PWD;;
-[^/]*)  dirscript=$PWD/"$dirscript";;
+".") dirscript=$PWD ;;
+[^/]*) dirscript=$PWD/"$dirscript" ;;
 esac
 # compute the number of jobs possible ...
-njob=$(( $(sysctl -n hw.ncpu)*2 ))
+njob=$(($(sysctl -n hw.ncpu) * 2))
 # echo $dirscript
 mvdylib=$dirscript/move-dylib
 changedylibgfortran=$dirscript/change-dylib-gfortran-2
 #myver=`git describe --tags`
-arch=`arch`
+arch=$(arch)
 case $arch in
-*x86*) ARCH=Intel;;
-*i386*) ARCH=Intel;;
-*arm64*) ARCH=Apple-Silicon;;
-*) echo2 "unknow arch, stop" ; exit 1;; 
-esac;
+*x86*) ARCH=Intel ;;
+*i386*) ARCH=Intel ;;
+*arm64*) ARCH=Apple-Silicon ;;
+*)
+	echo2 "unknow arch, stop"
+	exit 1
+	;;
+esac
 echo ARCH = $ARCH ...
 tmp=/tmp
 cd $dircompilation
 
-test  -d $gitbranch-ff++  || git clone -b $gitbranch https://github.com/FreeFem/FreeFem-sources.git $gitbranch-ff++
+test -d $gitbranch-ff++ || git clone -b $gitbranch https://github.com/FreeFem/FreeFem-sources.git $gitbranch-ff++
 cd $gitbranch-ff++
 ffscr=$dircompilation/$gitbranch-ff++
-echo 
-ver=`git describe --tags`
-verb=`git describe --tags| sed s/v// | sed 's/-.*$//'`	
+echo
+ver=$(git describe --tags)
+verb=$(git describe --tags | sed s/v// | sed 's/-.*$//')
 dirpkg=$dircompilation/pkg-ff-$gitbranch-$ver
 dirdmgpkg=FreeFEM-$ver-$ARCH$nameopt
 LOG=$dircompilation/log-ff-$ver-$ARCH$nameopt.log
 echo the LOG file $LOG
-exec 1>$LOG  2>&1  # save log is $LOG
+# exec 1>$LOG  2>&1  # save log is $LOG
 
-echo2 compilation FreeFEM  version ${ver} on Mac ${arch} in $(pwd)
+echo2 compilation FreeFEM version ${ver} on Mac ${arch} in $(pwd)
 echo2 ==========================================================
 
 prefix=/Applications/FreeFem++.app/Contents/ff-$verb$addprefix
@@ -72,33 +84,36 @@ test -d $prefix || mkdir -p $prefix
 ##  check gfortran 
 gfortran --version
 test -d $prefix/gnu/ || mkdir $prefix/gnu/
-echo2  copy lib fortran in $prefix/gnu/
+echo2 copy lib fortran in $prefix/gnu/
 ## copy lib fortran in $prefix/gnu/
 echo2 ==========================================================
 (
-fftmp=/tmp/ff++-tmp-$$
-test -d fftmp ||mkdir $fftmp
-cd $ffsrc 
-printf  "      program sizeofint\n       integer  i\n       end\n" >$fftmp/ffff.f
-gfortran $fftmp/ffff.f -o $fftmp/ffff
-(export DYLD_PRINT_LIBRARIES=1;$fftmp/ffff ) 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib|$fftmp/ffff|grep .dylib' >$prefix/gnu/list-dylib-gfortran 
-rm -rf $fftmp
+	fftmp=/tmp/ff++-tmp-$$
+	test -d fftmp || mkdir $fftmp
+	cd $ffsrc
+	printf "      program sizeofint\n       integer  i\n       end\n" >$fftmp/ffff.f
+	gfortran $fftmp/ffff.f -o $fftmp/ffff
+	(
+		export DYLD_PRINT_LIBRARIES=1
+		$fftmp/ffff
+	) 2>&1 | awk '{print $NF}' | egrep -v '/usr/lib|$fftmp/ffff|grep .dylib' >$prefix/gnu/list-dylib-gfortran
+	rm -rf $fftmp
 )
-brewlibgfortran=`grep gfortran $prefix/gnu/list-dylib-gfortran` 
-brewlibquadmath=`grep libquadmath $prefix/gnu/list-dylib-gfortran` 
-brewlibgcc_s=`grep libgcc_s $prefix/gnu/list-dylib-gfortran` 
-( 
-cd  $(dirname $brewlibgfortran)
-cp -f libgfortran.5.dylib libquadmath.0.dylib libgcc_s.1.1.dylib $prefix/gnu/
-cd $prefix/gnu/
-ln -sf libgfortran.?.dylib libgfortran.dylib
-ln -sf libquadmath.?.dylib  libquadmath.dylib
-## inutile ???? je ne retouve plus cette lib ???? FH..
-test -d /opt/homebrew && libemutls_w=`find /opt/homebrew -name libemutls_w.a`
-if [ -f  "$libemutls_w" ] ; then
-  cp $libemutls_w .
-fi
-$mvdylib $prefix/gnu  $prefix/gnu/*.dylib
+brewlibgfortran=$(grep gfortran $prefix/gnu/list-dylib-gfortran)
+brewlibquadmath=$(grep libquadmath $prefix/gnu/list-dylib-gfortran)
+brewlibgcc_s=$(grep libgcc_s $prefix/gnu/list-dylib-gfortran)
+(
+	cd $(dirname $brewlibgfortran)
+	cp -f libgfortran.5.dylib libquadmath.0.dylib libgcc_s.1.1.dylib $prefix/gnu/
+	cd $prefix/gnu/
+	ln -sf libgfortran.?.dylib libgfortran.dylib
+	ln -sf libquadmath.?.dylib libquadmath.dylib
+	## inutile ???? je ne retouve plus cette lib ???? FH..
+	test -d /opt/homebrew && libemutls_w=$(find /opt/homebrew -name libemutls_w.a)
+	if [ -f "$libemutls_w" ]; then
+		cp $libemutls_w .
+	fi
+	$mvdylib $prefix/gnu $prefix/gnu/*.dylib
 )
 dirlibgfortranold=$(dirname $brewlibgfortran)
 dirlibgfortrannew=$prefix/gnu
@@ -106,21 +121,21 @@ libgfortrandylib=$(basename $brewlibgfortran)
 libquadmathdylib=$(basename $brewlibquadmath)
 libgccsdylib=$(basename $brewlibgcc_s)
 echo2 dylibfort : $libgfortrandylib $libquadmathdylib $libgccsdylib
-cd - 
-test -d pkg || mkdir -v pkg 
+cd -
+test -d pkg || mkdir -v pkg
 (
-  VERSION_MPI=4.2.1
-  VERSION_GSL=2.8
-  VERSION_HDF5_RE=1.14
-  VERSION_HDF5=1.14.2
-cd pkg
-test -f mpich-$VERSION_MPI.tar.gz || wget https://www.mpich.org/static/downloads/$VERSION_MPI/mpich-$VERSION_MPI.tar.gz
-##  compile mpi https://www.mpich.org/static/downloads/$VERSION_MPI/mpich-$VERSION_MPI.tar.gz
+	VERSION_MPI=4.2.1
+	VERSION_GSL=2.8
+	VERSION_HDF5_RE=1.14
+	VERSION_HDF5=1.14.2
+	cd pkg
+	test -f mpich-$VERSION_MPI.tar.gz || wget https://www.mpich.org/static/downloads/$VERSION_MPI/mpich-$VERSION_MPI.tar.gz
+	##  compile mpi https://www.mpich.org/static/downloads/$VERSION_MPI/mpich-$VERSION_MPI.tar.gz
 
-## compile gsl https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz
-test -f gsl-$VERSION_GSL.tar.gz || wget https://ftp.gnu.org/gnu/gsl/gsl-$VERSION_GSL.tar.gz
-## compile hdf5  https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$VERSION_HDF5_RE/hdf5-$VERSION_HDF5/src/hdf5-$VERSION_HDF5.tar.bz2
-test -f hdf5-$VERSION_HDF5.tar.bz2 || wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-$VERSION_HDF5/src/hdf5-$VERSION_HDF5.tar.bz2
+	## compile gsl https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz
+	test -f gsl-$VERSION_GSL.tar.gz || wget https://ftp.gnu.org/gnu/gsl/gsl-$VERSION_GSL.tar.gz
+	## compile hdf5  https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$VERSION_HDF5_RE/hdf5-$VERSION_HDF5/src/hdf5-$VERSION_HDF5.tar.bz2
+	test -f hdf5-$VERSION_HDF5.tar.bz2 || wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-$VERSION_HDF5/src/hdf5-$VERSION_HDF5.tar.bz2
 
 tar zxf gsl-$VERSION_GSL.tar.gz	
 tar zxf  hdf5-$VERSION_HDF5.tar.bz2
@@ -181,86 +196,86 @@ grep use_dylibs mpicc mpicxx mpifort
 echo2 "succeed to compile  gsl, hdf5  in intsall petsc real and complex  in $prefix dir"
 )
 
-echo2 ================================
-echo2 compilation de freefem++
-echo2 ================================
+	echo2 ================================
+	echo2 compilation de freefem++
+	echo2 ================================
 
-./reconfigure 
-make -j $njob 
+	./reconfigure
+	make -j $njob
 )
-make  FreeFem++.app.tgz
+make FreeFem++.app.tgz
 echo2 ================================
-echo2 instalation de freefem++  in $dirpkg
+echo2 instalation de freefem++ in $dirpkg
 echo2 ================================
 ## copy pre installed  in DESTDIR ($dirpkg)
 mkdir -p $dirpkg/$prefix || echo2 dir $dirpkg/$prefix exist
-echo2 create Mac  application in $dirpkg/Applications  bof bof !!
-tar  zxvf FreeFem++.app.tgz -C $dirpkg/Applications 
-echo2 rsync -av $prefix/.  $dirpkg/$prefix/.
-rsync -av $prefix/.  $dirpkg/$prefix/.
+echo2 create Mac application in $dirpkg/Applications bof bof !!
+tar zxvf FreeFem++.app.tgz -C $dirpkg/Applications
+echo2 rsync -av $prefix/. $dirpkg/$prefix/.
+rsync -av $prefix/. $dirpkg/$prefix/.
 make install DESTDIR=$dirpkg
 # remove ref on fg
 echo2 ================================
-echo2 fix gfortran lib  distribution $dirpkg/$prefix
+echo2 fix gfortran lib distribution $dirpkg/$prefix
 echo2 ================================
 tmpdylib=/tmp/dylib-ff-$$.txt
 tmplst=/tmp/otool-ff-$$.txt
-echo2 find $dirpkg/$prefix -name '*.dylib' 
-echo2 .. $changedylibgfortran  $dirlibgfortrannew  
-find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
- $changedylibgfortran  $dirlibgfortrannew `cat $tmpdylib`
- ## verification 
- echo2 dylib to brew in installation for debug !!!! 
- cat $tmpdylib| xargs otool -L | egrep -i 'brew|/opt/' ||echo2 OK 
-  
+echo2 find $dirpkg/$prefix -name '*.dylib'
+echo2 .. $changedylibgfortran $dirlibgfortrannew
+find $dirpkg/$prefix -name '*.dylib' >$tmpdylib
+$changedylibgfortran $dirlibgfortrannew $(cat $tmpdylib)
+## verification
+echo2 dylib to brew in installation for debug !!!!
+cat $tmpdylib | xargs otool -L | egrep -i 'brew|/opt/' || echo2 OK
+
 echo2 ================================
-##   build of PACKAGE directory 
-echo2  build of PACKAGE/DMG  directory /tmp/$dirdmgpkg
+##   build of PACKAGE directory
+echo2 build of PACKAGE/DMG directory /tmp/$dirdmgpkg
 echo2 ================================
 
-##  to rebuild all distribution !!! 
+##  to rebuild all distribution !!!
 test -d /tmp/$dirdmgpkg && rm -rf /tmp/$dirdmgpkg
-test -d /tmp/$dirdmgpkg || ( 
-mkdir /tmp/$dirdmgpkg
-cd /tmp/$dirdmgpkg
-mv $dirpkg/Applications/FreeFem++.app  /tmp/$dirdmgpkg
-cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
-fftestedp=`find . -name Laplace.edp`
-sed -e "s/@VV@/$ver/" -e "s%@APPFF@%$dirdmgpkg%" -e s%@FFTEST@%$fftestedp% <$dirscript/script/README.md.in  > README.md
+test -d /tmp/$dirdmgpkg || (
+	mkdir /tmp/$dirdmgpkg
+	cd /tmp/$dirdmgpkg
+	mv $dirpkg/Applications/FreeFem++.app /tmp/$dirdmgpkg
+	cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
+	fftestedp=$(find . -name Laplace.edp)
+	sed -e "s/@VV@/$ver/" -e "s%@APPFF@%$dirdmgpkg%" -e s%@FFTEST@%$fftestedp% <$dirscript/script/README.md.in >README.md
 
 )
 
 # verif brew lib !!!
-# remove -e option abort on err 
-set +e 
+# remove -e option abort on err
+set +e
 (
-echo2 " verif PB brew lib in installation ?? /tmp/$dirdmgpkg "
-listoo=/tmp/list-otool-$$
-find  /tmp/$dirdmgpkg  -name '*.dylib' |xargs otool -L >$listoo
- grep brew $listoo 1>&3 
-ret=$?
-echo2 "ret : $ret " 
-if [ "$ret" -eq 0 ] ; then 
-echo2 " try to refix fortran lib "
-find  /tmp/$dirdmgpkg  -name '*.dylib' |xargs  $changedylibgfortran  $dirlibgfortrannew  
-if  grep brew $listoo ; then 
-  echo2  " fatal BUG " some brew lib 
-  exit 1; 
-else
-  echo " OK no brew lib in dylib"
-fi
-fi
-# clean xattr 
-xattr -rc /tmp/$dirdmgpkg/FreeFem++.app/
+	echo2 " verif PB brew lib in installation ?? /tmp/$dirdmgpkg "
+	listoo=/tmp/list-otool-$$
+	find /tmp/$dirdmgpkg -name '*.dylib' | xargs otool -L >$listoo
+	grep brew $listoo 1>&3
+	ret=$?
+	echo2 "ret : $ret "
+	if [ "$ret" -eq 0 ]; then
+		echo2 " try to refix fortran lib "
+		find /tmp/$dirdmgpkg -name '*.dylib' | xargs $changedylibgfortran $dirlibgfortrannew
+		if grep brew $listoo; then
+			echo2 " fatal BUG " some brew lib
+			exit 1
+		else
+			echo " OK no brew lib in dylib"
+		fi
+	fi
+	# clean xattr
+	xattr -rc /tmp/$dirdmgpkg/FreeFem++.app/
 )
-set -e 
+set -e
 cp $dirscript/script/Install-app.sh /tmp/$dirdmgpkg
 
 exec 1>&3 # save log is close $LOG
-cat  $LOG  >> /tmp/$dirdmgpkg/build-log.log
+# cat $LOG >>/tmp/$dirdmgpkg/build-log.log
 
 # build dmg file $HOME/desktop/$dirdmgpkg.dmg
-echo hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
+echo hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+ $HOME/desktop/$dirdmgpkg.dmg
 test -f $HOME/desktop/$dirdmgpkg.dmg && rm $HOME/desktop/$dirdmgpkg.dmg
-hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+  $HOME/desktop/$dirdmgpkg.dmg
-echo  /tmp/$dirdmgpkg
+hdiutil create -srcfolder /tmp/$dirdmgpkg -fs HFS+ $HOME/desktop/$dirdmgpkg.dmg
+echo /tmp/$dirdmgpkg

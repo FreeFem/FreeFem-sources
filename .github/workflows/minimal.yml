@@ -1,0 +1,130 @@
+name: Minimal version
+on:
+  push:
+    branches:
+      - develop
+      - master
+      
+  pull_request:
+    branches:
+      - develop
+      
+# For development phase
+#on:
+#  workflow_dispatch:
+  
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [22.04, 24.04]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install autoconf gcc g++ gfortran m4 patch git liblapack-dev flex bison
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: make check
+
+      - name: Install
+        run: make install
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [13, 14, 15]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+    runs-on: macos-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@main
+
+      # Automake is necessary on MacOS since aclocal is not included in autoconf
+      - name: Install
+        run: brew install gcc autoconf automake m4 git flex bison
+
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 3
+
+      - name: Check
+        run: make check
+
+      - name: Install
+        run: make install
+
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-autotools
+            make
+            m4
+            patch
+            git
+            flex
+            bison
+            unzip
+            mingw-w64-x86_64-lapack
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --without-mpi ${{ matrix.cfg.opt }} --prefix="${HOME}/freefem"
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: make check

@@ -24,17 +24,17 @@
 
 use strict;
 use Getopt::Std;
-use Digest::MD5 qw(md5_hex); # [[http://perldoc.perl.org/Digest/MD5.html]]
+use Digest::MD5 qw(md5_hex);    # [[http://perldoc.perl.org/Digest/MD5.html]]
 
 # This download script needs to be able to work on platforms that do not have threads (eg Mingw).
 
-my $can_use_threads=eval 'use threads;use threads::shared;1';
+my $can_use_threads = eval 'use threads;use threads::shared;1';
 
 my %opts;
-getopts('afho:',\%opts);
+getopts( 'afho:', \%opts );
 
-if($opts{h}){
-	print <<EOF;
+if ( $opts{h} ) {
+    print <<EOF;
 getall [options]: Download third-party packages independently of the FreeFEM configuration procedure
 
 Available options:
@@ -45,34 +45,34 @@ Available options:
 -o name,name,... = only download packages with the given names
 
 EOF
-	exit 0;
+    exit 0;
 }
 
 # Accumulate errors and print them all at the end of the script
 
-my $errors='';
-if($can_use_threads){share(\$errors)}
+my $errors = '';
+if ($can_use_threads) { share( \$errors ) }
 
 # Accumulate errors and print them all at the end of the script
 
-my $errors='';
-if($can_use_threads){share(\$errors)}
+my $errors = '';
+if ($can_use_threads) { share( \$errors ) }
 
 # list required packages
-my $only=0;
+my $only = 0;
 my %packs;
-if(defined $opts{o}){
-	$only=1;
-	foreach(split(/,/,$opts{o})){$packs{$_}=1}
+if ( defined $opts{o} ) {
+    $only = 1;
+    foreach ( split( /,/, $opts{o} ) ) { $packs{$_} = 1 }
 }
 
 # can be run from the parent directory
 
-if(-x "3rdparty/getall"){chdir "3rdparty"}
+if ( -x "3rdparty/getall" ) { chdir "3rdparty" }
 
 # can be run from any of the child directories
 
-if(-x "../getall"){chdir ".."}
+if ( -x "../getall" ) { chdir ".." }
 
 system "mkdir -p pkg";
 my @downloads;
@@ -99,9 +99,6 @@ download('OpenBLAS','http://github.com/xianyi/OpenBLAS/archive/v0.3.6.tar.gz',
 	'8a110a25b819a4b94e8a9580702b6495',
 	'BAD_CERT');
 
-download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
-	'http://www.fftw.org',
-	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
 # 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
 download('freeYams','https://www.ljll.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
 	'https://www.ljll.fr/frey/software.html',
@@ -181,11 +178,13 @@ download('htool','https://github.com/htool-ddm/htool/archive/f9a7e48eaa90cad7e23
 		'htool.zip',
 		'f0b977c3ab24f26e23b5e7398577d0f4');
 
-	
-download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f52490cb27941a87b96542f',
-	'https://codeload.github.com/hpddm',
-	'hpddm.zip',
-	'6910b7b974f0b60d9c247c666e7f3862');
+download(
+    'hpddm',
+'https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f52490cb27941a87b96542f',
+    'https://codeload.github.com/hpddm',
+    'hpddm.zip',
+    '6910b7b974f0b60d9c247c666e7f3862'
+);
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/6e61fbf86d8cd53994d9f597e60fde537650ba14.zip',
 	'https://github.com/PierreMarchand20/BemTool',
@@ -203,53 +202,61 @@ download('libpthread-google','https://www.ljll.fr/hecht/pkg/libpthread-google.ta
 		'libpthread-google.tar.gz',
 		'945c006d898983d1a710aabf52a32d9c');
 
+download(
+    'libpthread-google',
+    'https://www.ljll.fr/hecht/pkg/libpthread-google.tar.gz',
+    'https://www.ljll.fr/hecht/pkg/',
+    'libpthread-google.tar.gz',
+    '945c006d898983d1a710aabf52a32d9c'
+);
 
 # run all downloads concurrently
 
-if($can_use_threads){
-	my @threads;
-	foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
-	foreach(@threads){$_->join()}
+if ($can_use_threads) {
+    my @threads;
+    foreach (@downloads) { push @threads, threads->create( \&downloadone, $_ ) }
+    foreach (@threads)   { $_->join() }
 }
-else{
-	foreach(@downloads){downloadone($_)}
-}
-
-if($errors ne ''){
-	print "\n$errors";
-	exit 1;
+else {
+    foreach (@downloads) { downloadone($_) }
 }
 
-sub download{
-	my($title,$url,$lic,$pkg,$md5,$opts)=@_;
+if ( $errors ne '' ) {
+    print "\n$errors";
+    exit 1;
+}
 
-	# skip packages that have not been requested explicitely
-	return if($only && !defined $packs{$title});
+sub download {
+    my ( $title, $url, $lic, $pkg, $md5, $opts ) = @_;
 
-	# skip packages that are already present
-	if(-f "pkg/$pkg" && !$opts{f}){
-		my $md5check=md5_hex(`cat pkg/$pkg`);
-		if( ( $md5 eq "none") || ($md5check eq $md5)){
-			print "$title $pkg done\n";
-			return;
-		}
-		else {
-			print "$title $pkg  md5 change => reget \n";
-		}
-	}
+    # skip packages that have not been requested explicitely
+    return if ( $only && !defined $packs{$title} );
 
-	# we do not store the answers to these questions. To repeat the same downloads without manual input, options "-a" and
-	# "-o names" are provided.
+    # skip packages that are already present
+    if ( -f "pkg/$pkg" && !$opts{f} ) {
+        my $md5check = md5_hex(`cat pkg/$pkg`);
+        if ( ( $md5 eq "none" ) || ( $md5check eq $md5 ) ) {
+            print "$title $pkg done\n";
+            return;
+        }
+        else {
+            print "$title $pkg  md5 change => reget \n";
+        }
+    }
 
-	if(!$opts{a}){
-		print "$title: please check the licence at $lic. Do you want to download $url? (yN)\n";
-		my $ans=uc <STDIN>;
-		chomp $ans;
-		return if $ans ne 'Y';
-	}
+# we do not store the answers to these questions. To repeat the same downloads without manual input, options "-a" and
+# "-o names" are provided.
 
-	# uses [[file:../bin/build/download]]
-	push @downloads,"$url,$pkg,$md5,$opts";
+    if ( !$opts{a} ) {
+        print
+"$title: please check the licence at $lic. Do you want to download $url? (yN)\n";
+        my $ans = uc <STDIN>;
+        chomp $ans;
+        return if $ans ne 'Y';
+    }
+
+    # uses [[file:../bin/build/download]]
+    push @downloads, "$url,$pkg,$md5,$opts";
 }
 
 sub downloadone{

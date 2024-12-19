@@ -1,0 +1,128 @@
+# Full version of FreeFem, using OpenMPI
+name: Full version OpenMPI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      
+  pull_request:
+    branches:
+      - develop
+
+# For development phase
+# on:
+#   workflow_dispatch:
+  
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [22.04, 24.04]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+            - ${{ github.workflow }}
+            
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch git libblas-dev wget cmake \
+          liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison \
+          autoconf automake autotools-dev libopenmpi-dev
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+        
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: make check
+
+      - name: Install
+        run: make install
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [13, 14]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+      - ${{ github.workflow }}
+      
+    runs-on: macos-${{ matrix.version }}
+
+    env:
+      CC: gcc
+      CXX: "g++ -Wl -ld_classic -Wno-unused-command-line-argument"
+      FC: gfortran
+      F77: gfortran
+      MPIRUN: mpirun
+      MPICC: mpicc
+      MPICXX: mpicxx
+      MPIFC: mpif90
+      
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          brew install gcc m4 git bison suitesparse hdf5 cmake wget autoconf \
+          automake open-mpi
+
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+        
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download --with-mpi=openmpi ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+        
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Build
+        run: make -j 3
+
+      - name: Check
+        run: make check
+
+      - name: Install
+        run: make install

@@ -1,8 +1,8 @@
-#!/bin/bash 
-##  change path gfortran lib in freefem install 
+#!/bin/bash
+##  change path gfortran lib in freefem install
 ## usage : change-dylibgfortran oldlibdir newlibdir  libnam1 libnam2   list of dylyb file pathname to change ...
-## F. hecht sep. 2023 on MoOS Ventura , Monterey 
-## remark the file $oldlibdir/$libnam1 , ... must exist ... 
+## F. hecht sep. 2023 on MoOS Ventura , Monterey
+## remark the file $oldlibdir/$libnam1 , ... must exist ...
 olddir=$1
 shift
 newdir=$1
@@ -14,36 +14,35 @@ shift
 lib3=$1
 shift
 
-
-if test -f "$olddir/$lib1" -a  -f "$olddir/$lib2" -a  -f "$olddir/$lib3" \
-    -a  -f "$newdir/$lib1" -a  -f "$newdir/$lib2" -a  -f "$newdir/$lib3" ; then 
-for ff in $@; do
-ch=0
-for lib in $lib1 $lib2 $lib3; do 
-  old=$olddir/$lib	
-  new=$newdir/$lib	
-  nnl=`otool -L $ff|grep $lib|awk '{print $1}'`
-  case $nnl in
-	  /* ) old=$nnl
-  esac
-#  echo "old .. " $old  $nnl
-#  otool -L $ff|awk "/$lib/ "'{print $1}'
-  nn=`otool -L $ff|grep $old|wc -l`
-#  echo "nn=" $nn $nnl $old
-  otool -L $ff| grep brew	  
-  if test $nn -ne 0  ; then
-#    echo ..change $old to $new in $ff
-    ch=1
-    echo change  $old to  $new1 in $ff
-    install_name_tool -change $old $new $ff
-  fi
-  done
-  if test $ch -eq 1  ; then
-    codesign  --remove-signature $ff
-    codesign -s -  $ff
-  fi
-  done 
+if test -f "$olddir/$lib1" -a -f "$olddir/$lib2" -a -f "$olddir/$lib3" \
+	-a -f "$newdir/$lib1" -a -f "$newdir/$lib2" -a -f "$newdir/$lib3"; then
+	for ff in $@; do
+		ch=0
+		for lib in $lib1 $lib2 $lib3; do
+			old=$olddir/$lib
+			new=$newdir/$lib
+			nnl=$(otool -L $ff | grep $lib | awk '{print $1}')
+			case $nnl in
+			/*) old=$nnl ;;
+			esac
+			#  echo "old .. " $old  $nnl
+			#  otool -L $ff|awk "/$lib/ "'{print $1}'
+			nn=$(otool -L $ff | grep $old | wc -l)
+			#  echo "nn=" $nn $nnl $old
+			otool -L $ff | grep brew
+			if test $nn -ne 0; then
+				#    echo ..change $old to $new in $ff
+				ch=1
+				echo change $old to $new1 in $ff
+				install_name_tool -change $old $new $ff
+			fi
+		done
+		if test $ch -eq 1; then
+			codesign --remove-signature $ff
+			codesign -s - $ff
+		fi
+	done
 else
-	echo "$olddir/$lib1"  "$olddir/$lib2"  "$olddir/$lib3"  do some not exist!
-	echo "$newdir/$lib1"  "$newdir/$lib2"  "$newdir/$lib3" do not exist!
+	echo "$olddir/$lib1" "$olddir/$lib2" "$olddir/$lib3" do some not exist!
+	echo "$newdir/$lib1" "$newdir/$lib2" "$newdir/$lib3" do not exist!
 fi

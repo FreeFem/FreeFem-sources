@@ -16,38 +16,22 @@
 <!----------------------------------------------------------------------------------->
 
 <details>
-<summary> CI / CD tools </summary>
+<summary> CI </summary>
 
-| LGTM | Coverity |
-|:----:|:--------:|
-| [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp) | <a href="https://scan.coverity.com/projects/freefem-freefem-sources"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/15433/badge.svg"/></a> |
+Each of the following entries correspond to a workflow composed of a
+set of jobs: **Release/Debug + different plateforms**. A workflow
+appears as `failed` as soon as one of its jobs has failed. To get more
+details about the failing subsequent configuration, click on the
+corresponding badge below.
 
-Jenkins ([FreeFEM-dev](https://ci.inria.fr/freefem-dev/)):
+| master                                                                                                           | develop                                                                                                                         |
+|:----------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|
+| ![Minimal version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/minimal.yml/badge.svg)           | ![Minimal version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/minimal.yml/badge.svg?branch=develop)           |
+| ![Sequential version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/sequential.yml/badge.svg)     | ![Sequential version](https://github.com/FreeFem/FreeFem-sources/actions/workflows/sequential.yml/badge.svg?branch=develop)     |
+| ![Full version OpenMPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-openmpi.yml/badge.svg) | ![Full version OpenMPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-openmpi.yml/badge.svg?branch=develop) |
+| ![Full version MPICH](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-mpich.yml/badge.svg)     | ![Full version MPICH](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-mpich.yml/badge.svg?branch=develop)     |
+| ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg)    | ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg?branch=develop)    |
 
-*Develop branch only*
-
-|         | macOS     | Ubuntu    | Windows|
-|:-------:|:---------:|:---------:|:------:|
-| **Job** | **10.14** | **20.04** | **10** |
-| #1 | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job1)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job1/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job1)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job1/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-windows10-job1)](https://ci.inria.fr/freefem-dev/view/Windows%207/job/FreeFEM-sources-windows10-job1/) |
-| #2 | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job2)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job2/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job2)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job2/) | |
-| #3 |[![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job3)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job3/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job3)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job3/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-windows10-job3)](https://ci.inria.fr/freefem-dev/view/Windows%207/job/FreeFEM-sources-windows10-job3/) |
-| #4 (OpenMPI) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job4_openmpi)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job4_openmpi/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job4_openmpi)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job4_openmpi/) | |
-| #4 (MPICH) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job4_mpich)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job4_mpich/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job4_mpich)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job4_mpich/) | |
-| #4 (MSMPI) | | | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-windows10-job4)](https://ci.inria.fr/freefem-dev/view/Windows%207/job/FreeFEM-sources-windows10-job4/) |
-| #5 (OpenMPI) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job5_openmpi)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job5_openmpi/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job5_openmpi)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job5_openmpi/) | |
-| #5 (MPICH) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-macos1014-job5_mpich)](https://ci.inria.fr/freefem-dev/job/FreeFEM-sources-macos1014-job5_mpich/) | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-ubuntu2004-job5_mpich)](https://ci.inria.fr/freefem-dev/view/Ubuntu%2020.04/job/FreeFEM-sources-ubuntu2004-job5_mpich/) | |
-| #5 (MSMPI) | | | [![Build Status](https://ci.inria.fr/freefem-dev/buildStatus/icon?job=FreeFEM-sources-windows10-job5)](https://ci.inria.fr/freefem-dev/view/Windows%207/job/FreeFEM-sources-windows10-job5/) |
-
-Jenkins ([FreeFEM](https://ci.inria.fr/freefem/)):
-
-*Master branch*
-
-| Release | .pkg | AppImage | .deb | .exe | Docker |
-|:-------:|:----:|:--------:|:----:|:----:|:------:|
-| [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-createRelease)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-createRelease/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployPKG)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployPKG/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployAppImage)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployAppImage/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployDEB)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployDEB/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=deployEXE)](https://ci.inria.fr/freefem/view/Master/job/deployEXE/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-docker)](https://ci.inria.fr/freefem/view/Docker/job/FreeFEM-docker/) |
-
-See [CI/CD Tools](#cicd-tools)
 </details>
 
 # FreeFEM sources
@@ -65,6 +49,7 @@ The user documentation is available [here](https://github.com/FreeFem/FreeFem-do
 If you use FreeFEM for academic research, please use the following:
 
 **BibTeX:**
+
 ```
 @article{MR3043640,
   AUTHOR = {Hecht, F.},
@@ -81,16 +66,19 @@ If you use FreeFEM for academic research, please use the following:
 ```
 
 **APA:**
+
 ```
 Hecht, F. (2012). New development in FreeFem++. Journal of numerical mathematics, 20(3-4), 251-266.
 ```
 
 **ISO 690:**
+
 ```
 HECHT, Frédéric. New development in FreeFem++. Journal of numerical mathematics, 2012, vol. 20, no 3-4, p. 251-266.
 ```
 
 **MLA:**
+
 ```
 Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathematics 20.3-4 (2012): 251-266.
 ```
@@ -105,69 +93,4 @@ Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
 
 ## CI/CD Tools
 
-### FreeFEM-dev
-
-See [Jenkins configuration files](etc/jenkins)
-
-### FreeFEM
-
-All: all dependency packages are installed (computer with root access).<br/>
-No: dependency packages are not installed (computer without root access).
-
-<sup>1</sup>: Ubuntu 18.04 x86
-
-<sup>2</sup>: macOS 10.13
-
-<sup>3</sup>: macOS 10.9
-
-<sup>4</sup>: Windows 7 + MSYS2 + MS MPI 7
-
-__Executed commands:__
-
-Automatic configuration:
-
-```bash
-autoreconf -i
-```
-
-Configuration:
-
-```bash
-./configure --enable-download --enable-optim
-```
-
-If you do not have administrator rights or do not want FreeFEM files scattered around on your machine, please use the `--prefix` option, e.g.:
-
-```bash
-./configure --enable-download --enable-optim --prefix=${HOME}/FreeFem-install
-```
-
-Download:
-
-```bash
-./3rdparty/getall -a
-```
-
-PETSc:
-
-```bash
-cd 3rdparty/ff-petsc
-make petsc-slepc
-cd -
-./reconfigure
-```
-
-Make:
-
-```bash
-make -j2
-make check
-```
-
-Install:
-
-```bash
-(sudo) make install
-```
-
-See [CI/CD Tools Wiki](https://github.com/FreeFem/FreeFem-sources/wiki/CI-CD-Tools) for more informations.
+See [Github Actions workflow files](.github/workflows)
