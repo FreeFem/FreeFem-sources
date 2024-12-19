@@ -1,8 +1,19 @@
 # Full version of FreeFem, using MPICH installed by PETSc
 name: Full version MPICH
-#on: [push]
+
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - master
+      
+  pull_request:
+    branches:
+      - develop
+
+# For development phase
+# on:
+#   workflow_dispatch:
   
 jobs:
   linux:

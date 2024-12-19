@@ -1,8 +1,19 @@
 # Full version of FreeFem, using OpenMPI
 name: Full version OpenMPI
-#on: [push]
+
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - master
+      
+  pull_request:
+    branches:
+      - develop
+
+# For development phase
+# on:
+#   workflow_dispatch:
   
 jobs:
   linux:
