@@ -22,7 +22,7 @@ AppName=FreeFem++-win`'SIZEOFPTR-VERSION
 AppVerName=FreeFem++ version VERSION (win SIZEOFPTR bits)
 DefaultDirName={commonpf}\FreeFem++`'SUFF64
 DefaultGroupName=FreeFem++`'SUFF64
-
+PrivilegesRequired=admin
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -229,7 +229,7 @@ Name: modifypath; Description: &Add application directory to your system path (i
 [Code]
 const
 	ModPathName = 'modifypath';
-	ModPathType = 'user';
+	ModPathType = 'system';
 
 function ModPathDir(): TArrayOfString;
 begin
