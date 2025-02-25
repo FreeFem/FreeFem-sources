@@ -38,7 +38,7 @@
 // -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
 
 #include "ff++.hpp"
-#include "msh3.hpp"
+//#include "msh3.hpp"
 #include "mshmetlib.h"
 
 #ifdef __cplusplus
