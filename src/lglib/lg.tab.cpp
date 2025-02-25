@@ -3764,7 +3764,7 @@ void init_lgfem() ;
 void init_lgmesh() ;
 void init_lgmesh3() ;
 void init_algo();
-//void msh3_Load_Init( ); //
+void msh3_Load_Init( ); //
 
 bool withrgraphique = false;
 
@@ -3956,7 +3956,7 @@ int mainff (int  argc, char **argv)
 #endif
 
    if(init_lgparallele)  init_lgparallele();
-//   msh3_Load_Init(); // Add msh3 lib !!!
+   msh3_Load_Init(); // Add msh3 lib !!!
      //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;

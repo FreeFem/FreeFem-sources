@@ -40,7 +40,7 @@
 //
 
 #include "ff++.hpp"
-//#include "msh3.hpp"
+#include "msh3.hpp"
 #define TETLIBRARY
 #include "tetgen.h"
 

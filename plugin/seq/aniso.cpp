@@ -34,7 +34,7 @@
  */
 
 #include "ff++.hpp"
-//#include "msh3.hpp"
+#include "msh3.hpp"
 #include "eigenv.h"
 // #define ADAPTLIBRARY
 /*
@@ -161,5 +161,5 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
 }
 
 #define WITH_NO_INIT
-//#include "msh3.hpp"
+#include "msh3.hpp"
 LOADFUNC(Load_Init)
