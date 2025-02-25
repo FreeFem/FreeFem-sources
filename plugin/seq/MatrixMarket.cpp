@@ -759,7 +759,7 @@ long savemtx(std::string *const &hb_filename, Matrice_Creuse< R > *const &sparse
   std::cout << "Savemtx : filename = " << hb_filename->c_str( ) << " " << isDouble <<std::endl;
     const int N = A->N;
     const int M = A->M;
-    if (N != M) return 1;
+    //if (N != M) return 1; //suspicious
 
     if(verbosity) std::cout << "SaveMTX : # of unknowns = " << N << std::endl;
 
