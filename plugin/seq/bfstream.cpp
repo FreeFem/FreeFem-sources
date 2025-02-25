@@ -176,6 +176,38 @@ istream *Read(Stream_b< istream > const &io, KN< T > *const &data) {
 }
 
 /*!
+ * \brief Read
+ * \param io Stream_b<istream> const &
+ * \param data KNM<T> * const &
+ * \return istream *
+ */
+template<class T, class TF=T>
+istream *Read(Stream_b<istream> const &io, KNM<T> *const &data) {
+    int64_t m, n;
+    
+    io.f->read(reinterpret_cast<char *>(&n), sizeof(int64_t));
+    io.f->read(reinterpret_cast<char *>(&m), sizeof(int64_t));
+    
+    if (verbosity > 0) 
+        cout << "Read matrix of size (" << n << ", " << m << ")" << endl;
+    
+    data->resize(n, m);
+    T *p = *data;
+
+    if (is_same<T, TF>::value) {
+        io.f->read(reinterpret_cast<char *>(p), m * n * sizeof(T));
+    } else {
+        TF pf;
+        for (int i = 0; i < m * n; ++i) {
+            io.f->read(reinterpret_cast<char *>(&pf), sizeof(TF));
+            p[i] = pf;
+        }
+    }
+    
+    return io.f;
+}   
+
+/*!
  * \brief Write
  * \param io Stream_b<ostream> const &
  * \param data KN<T> * const
@@ -195,6 +227,7 @@ ostream *Write(Stream_b< ostream > const &io, KN< T > *const &data) {
         {
             TR b= p[i];
             io.f->write(reinterpret_cast< const char * >(&b), sizeof(TR));
+    if (verbosity > 5) cout << " write entry " << i << " p[i]=" << p[i] <<  endl;
         }
     }
     return io.f;
@@ -231,6 +264,36 @@ ostream *Write(Stream_b< ostream > const &io, T const &data) {
         TF dataf=data;
         io.f->write(reinterpret_cast< const char * >(&dataf), sizeof(dataf));
     }
+    return io.f;
+}
+
+/*!
+ * \brief Write
+ * \param io Stream_b<ostream> const &
+ * \param data KNM<T> * const &
+ * \return ostream *
+ */
+template<class T, class TR=T>
+ostream *Write(Stream_b<ostream> const &io, KNM<T> *const &data) {
+    int64_t m = data->M();
+    int64_t n = data->N();
+    
+    if (verbosity > 0) 
+        cout << "Write matrix of size (" << n << ", " << m << ")" << endl;
+    
+    io.f->write(reinterpret_cast<const char *>(&n), sizeof(int64_t));
+    io.f->write(reinterpret_cast<const char *>(&m), sizeof(int64_t));
+    
+    T *p = *data;
+    if (is_same<T, TR>::value) {
+        io.f->write(reinterpret_cast<const char *>(p), m * n * sizeof(T));
+    } else {
+        for (long i = 0; i < m * n; ++i) {
+            TR b = p[i];
+            io.f->write(reinterpret_cast<const char *>(&b), sizeof(TR));
+        }
+    }
+    
     return io.f;
 }
 
@@ -292,6 +355,8 @@ void initK( ) {
     Add< OB >("(", "", new OneOperator2_< ostream *, OB, K >(Write<K,KF>));
     Add< IB >("(", "", new OneOperator2_< istream *, IB, KN< K > * >(Read<K,KF>));
     Add< OB >("(", "", new OneOperator2_< ostream *, OB, KN< K > * >(Write<K,KF>));
+    Add< IB >("(", "", new OneOperator2_<istream *, IB, KNM<K> * >(Read<K,KF>));
+    Add< OB >("(", "", new OneOperator2_<ostream *, OB, KNM<K> * >(Write<K,KF>));
 }
 
 static void inittt( ) {
