@@ -123,7 +123,6 @@ ifneq ($(WIN32DLLTARGET),)
 COMMON_FLAGS += --with-shared-libraries=0 \
 	CXXFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
 	CFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
-	FFLAGS='$(FCFLAGS)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
