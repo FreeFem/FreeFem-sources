@@ -388,15 +388,15 @@ debut:
         int i=1;
         buf[0]=c;
         bool real= (c=='.');
-        while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
+        while ( isdigit(nc) && i < 1024 ) buf[i++]=source().get(),nc=source().peek();
         if (!real && (nc == '.')) real=true,buf[i++]=source().get(),nc=source().peek();
-        while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
+        while ( isdigit(nc) && i < 1024 ) buf[i++]=source().get(),nc=source().peek();
         if (nc =='E' || nc =='e' || nc =='D' || nc =='d')
         {
             real=true;
             buf[i++]=source().get(),nc=source().peek();
             if (nc =='+' || nc =='-' || isdigit(nc))  buf[i++]=source().get(),nc=source().peek();
-            while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
+            while ( isdigit(nc) && i < 1024 ) buf[i++]=source().get(),nc=source().peek();
         }
         if (i>= 1024) erreur("Number too long");
 
@@ -420,8 +420,7 @@ debut:
         int i;
         for (i = 1; i < 1024 && isalnum(source().peek()); i++)
             buf[i]=source().get();
-        if (i >= 1024)
-            erreur ("Identifier too long");
+        if (i == 1024) erreur ("Identifier too long");
         buf[i] = 0;
     }
 
@@ -470,7 +469,7 @@ debut:
             else
                 buf[i] = source().get();
         }
-        if (i >= 1024) erreur ("String too long");
+        if (i == 1024) erreur ("String too long");
         buf[i] = 0;
         if(source().get() != '"') erreur("End of String could not be found");
         plglval->str = newcopy(buf);
