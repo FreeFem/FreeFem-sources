@@ -388,19 +388,17 @@ debut:
         int i=1;
         buf[0]=c;
         bool real= (c=='.');
-
-
-        while ( isdigit(nc) && i< 50 ) buf[i++]=source().get(),nc=source().peek();
+        while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
         if (!real && (nc == '.')) real=true,buf[i++]=source().get(),nc=source().peek();
-        while ( isdigit(nc) && i< 50 ) buf[i++]=source().get(),nc=source().peek();
+        while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
         if (nc =='E' || nc =='e' || nc =='D' || nc =='d')
         {
             real=true;
             buf[i++]=source().get(),nc=source().peek();
             if (nc =='+' || nc =='-' || isdigit(nc))  buf[i++]=source().get(),nc=source().peek();
-            while ( isdigit(nc) && i< 50 ) buf[i++]=source().get(),nc=source().peek();
+            while ( isdigit(nc) ) buf[i++]=source().get(),nc=source().peek();
         }
-        if (i>= 50) erreur("Number too long");
+        if (i>= 1024) erreur("Number too long");
 
         buf[i]=0;
         if (nc=='i' )
@@ -420,9 +418,9 @@ debut:
     {
         ret =  ID;
         int i;
-        for (i = 1; i < 256 && isalnum(source().peek()); i++)
+        for (i = 1; i < 1024 && isalnum(source().peek()); i++)
             buf[i]=source().get();
-        if (i == 256)
+        if (i >= 1024)
             erreur ("Identifier too long");
         buf[i] = 0;
     }
@@ -433,7 +431,7 @@ debut:
         int i;
         char cc,ccc;
         for (     i = 0,cc=source().peek();
-                  i < 256 &&  ( (isprint(cc)|isspace(cc)) && cc !='\n'  && cc !='"');
+                  i < 1024 &&  ( (isprint(cc)|isspace(cc)) && cc !='\n'  && cc !='"');
                   cc=source().peek(),++i
             )
         {
@@ -472,7 +470,7 @@ debut:
             else
                 buf[i] = source().get();
         }
-        if (i == 256) erreur ("String too long");
+        if (i >= 1024) erreur ("String too long");
         buf[i] = 0;
         if(source().get() != '"') erreur("End of String could not be found");
         plglval->str = newcopy(buf);
