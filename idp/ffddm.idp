@@ -58,7 +58,6 @@ int pr#ncoarsespace = 0;
 pr#prfe#K[int][int] pr#Z(0);
 
 int pr#nbiter = 0;
-real[int] pr#reshistory(0);
 
 pr#prfe#K[int][int] pr#RitzValues(0),pr#RitzHarmonicValues(0);
 

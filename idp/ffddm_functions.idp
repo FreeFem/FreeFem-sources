@@ -729,7 +729,6 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     real relres = 0;
     
     pr#nbiter = 1;
-    pr#reshistory.resize(maxit);
     
     x0i = x0;
     
@@ -889,7 +888,6 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
           ;
         }
 
-        pr#reshistory[pr#nbiter-1] = relres/normb;
         if(relres/normb < abs(eps)) {
           if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
             cout << "["+Stringification(pr)+"] GMRES has converged in " + (pr#nbiter) + " iterations " << endl;
@@ -914,7 +912,6 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
     }
     ENDIFMACRO
-    pr#reshistory.resize(min(maxit,pr#nbiter));
     preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
     return uni;
   }
