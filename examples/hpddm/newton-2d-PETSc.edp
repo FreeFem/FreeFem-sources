@@ -51,6 +51,9 @@ func int funcJ(real[int]& inPETSc) {
     A = vhJ(Vh, Vh, tgv = -1);
     return 0;
 }
+func int funcMonitor(int it, real norm, real[int]& inPETSc){
+    if(mpirank==0) cout << "SNES iter: " << it << ", residual norm: " << norm << endl;
+}
 
 real[int] xPETSc, bPETSc;
 u[] = vC(0, Vh);
@@ -58,7 +61,8 @@ ChangeNumbering(A, u[], bPETSc);
 xPETSc.resize(bPETSc.n);
 xPETSc = 0;
 int ret;
-SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view", reason = ret);
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, monitor = funcMonitor, reason = ret,
+        sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
 assert(ret == 3);
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
@@ -68,7 +72,7 @@ Vh v;
 int j;
 real absTol = 1e-2;
 macro myplot() cmm = "Global " + (j == 0 ? "solution" : "decrement") + " at iteration " + it, wait = 1, fill = 1, dim = 3// EOM
-func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[int]& du) {
+func int funcConvergence(int it, real xnorm, real gnorm, real f, real[int]& u, real[int]& du) {
     ChangeNumbering(A, v[], u, inverse = true, exchange = true);
     j = 0;
     plotMPI(Th, v, Pk, def, real, myplot);
@@ -79,7 +83,7 @@ func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[
     mpiAllReduce(abs, red, mpiCommWorld, mpiMAX);
     return it > 0 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
 }
-SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor, reason = ret);
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor, convergence = funcConvergence, reason = ret);
 assert(ret == 2);
 ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
