@@ -79,8 +79,8 @@ func int funcConvergence(int it, real xnorm, real gnorm, real f, real[int]& u, r
     ChangeNumbering(A, v[], du, inverse = true, exchange = true);
     j = 1;
     plotMPI(Th, v, Pk, def, real, myplot);
-    real abs = du.linfty, red;
-    mpiAllReduce(abs, red, mpiCommWorld, mpiMAX);
+    real absdu = du.linfty, red;
+    mpiAllReduce(absdu, red, mpiCommWorld, mpiMAX);
     return it > 0 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
 }
 SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor, convergence = funcConvergence, reason = ret);
