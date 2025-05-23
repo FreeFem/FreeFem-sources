@@ -4704,6 +4704,7 @@ namespace PETSc {
           PetscNew(&user);
           user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeJ);
           user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
+          user->mon = nullptr;
           user->conv = nullptr;
           SNES snes;
           SNESCreate(PETSC_COMM_WORLD, &snes);
@@ -4759,6 +4760,7 @@ namespace PETSc {
           }
           SNESDestroy(&snes);
           delete user->conv;
+          delete user->mon;
           delete user->r;
           delete user->op;
           PetscFree(user);
