@@ -4735,11 +4735,11 @@ namespace PETSc {
             user->mon = new NonlinearSolver< Type >::IMonF_O(in->n, stack, codeM);
             SNESMonitorSet(snes, Monitor< NonlinearSolver< Type > >, &user, NULL);
           }
-          const Polymorphic* op2 = nargs[12] ? dynamic_cast< const Polymorphic* >(nargs[12]) : nullptr;
-          if (op2) {
-            ffassert(op2);
+          op = nargs[12] ? dynamic_cast< const Polymorphic* >(nargs[12]) : nullptr;
+          if (op) {
+            ffassert(op);
             const OneOperator* codeC =
-              op2->Find("(", ArrayOfaType(atype< long >( ), atype< double >( ), atype< double >( ),
+              op->Find("(", ArrayOfaType(atype< long >( ), atype< double >( ), atype< double >( ),
                                           atype< double >( ), atype< KN< PetscScalar >* >( ),
                                           atype< KN< PetscScalar >* >( ), false));
             user->conv = new NonlinearSolver< Type >::IConvF_O(in->n, stack, codeC);
