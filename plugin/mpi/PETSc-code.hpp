@@ -4741,8 +4741,8 @@ namespace PETSc {
             ffassert(op);
             const OneOperator* codeC =
               op->Find("(", ArrayOfaType(atype< long >( ), atype< double >( ), atype< double >( ),
-                                          atype< double >( ), atype< KN< PetscScalar >* >( ),
-                                          atype< KN< PetscScalar >* >( ), false));
+                                         atype< double >( ), atype< KN< PetscScalar >* >( ),
+                                         atype< KN< PetscScalar >* >( ), false));
             user->conv = new NonlinearSolver< Type >::IConvF_O(in->n, stack, codeC);
             SNESSetConvergenceTest(snes, Convergence< NonlinearSolver< Type > >, &user, NULL);
           }
