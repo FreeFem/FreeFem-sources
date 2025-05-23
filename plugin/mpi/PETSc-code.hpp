@@ -4380,8 +4380,11 @@ namespace PETSc {
     SNESConvergedDefault(snes, it, xnorm, gnorm, f, reason, ctx);
     if (*reason == SNES_CONVERGED_ITERATING)
       *reason = SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww));
-    else if (*reason > 0)
-      *reason = ((SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww)) >= 0) ? *reason : SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww)));
+    else if (*reason > 0) {
+      PetscInt userreason = mat->apply(it, xnorm, gnorm, f, xx, ww);
+      if (userreason < 0)
+        *reason = SNESConvergedReason(userreason);
+    }
     VecRestoreArrayRead(du, &din);
     VecRestoreArrayRead(u, &in);
     PetscFunctionReturn(PETSC_SUCCESS);
