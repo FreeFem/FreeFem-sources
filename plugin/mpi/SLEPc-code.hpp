@@ -296,7 +296,6 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
                         KN<Matrice_Creuse<upscaled_type<PetscScalar>>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<upscaled_type<PetscScalar>>>*>((*nargs[7])(stack)) : 0;
                         KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
-                        KSP ksp;
                         STGetKSP(st, &ksp);
                         KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                         setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
