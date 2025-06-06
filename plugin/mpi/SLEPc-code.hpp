@@ -445,7 +445,6 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         PetscScalar* tmp2i;
                         VecGetArray(xr, &tmpr);
                         K* pt, *pti;
-                        K* pt2, *pt2i;
                         if(!std::is_same<SType, SVD>::value) {
                             if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                                 VecGetArray(xi, &tmpi);
@@ -478,12 +477,12 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 VecGetArray(yr, &tmp2r);
                                 if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                                     VecGetArray(yi, &tmp2i);
-                                    pt2 = new K[n];
-                                    copy(pt2, n, tmp2r, tmp2i);
+                                    pti = new K[n];
+                                    copy(pti, n, tmp2r, tmp2i);
                                 }
                                 else
-                                    pt2 = reinterpret_cast<K*>(tmp2r);
-                                HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt2, static_cast<PetscInt>(cpy.n), 1);
+                                    pti = reinterpret_cast<K*>(tmp2r);
+                                HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
                                 if(ptA->_A)
                                     ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
                                 else
@@ -491,7 +490,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 if(lvectors)
                                     lvectors->set(i, cpy);
                                 if(larray && !codeA) {
-                                    KN<K> cpy(m, pt2);
+                                    KN<K> cpy(m, pti);
                                     (*larray)(':', i) = cpy;
                                 }
                             }
@@ -521,14 +520,14 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 KN<K> cpy(m, pt);
                                 (*rarray)(':', i) = cpy;
                             }
-                            if(larray) {// This may not be correct in EPS case..
+                            if(larray) {
                                 KN<K> cpy(nr, pti);
                                 (*larray)(':', i) = cpy;
                             }
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                             delete [] pt;
-                            delete [] pt2;
+                            delete [] pti;
                         }
                         if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
                             VecRestoreArray(xi, &tmpi);
