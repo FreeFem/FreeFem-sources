@@ -7,7 +7,7 @@
 #define WITH_SLEPC
 #endif
 
-//#ifdef WITH_SLEPC
+#ifdef WITH_SLEPC
 
 #include "slepc.h"
 
