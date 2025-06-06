@@ -389,7 +389,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 NEPGetConverged(nep, &nconv);
             else
                 PEPGetConverged(pep, &nconv);
-            if(nconv > 0 && ((nargs[2] || nargs[3] || nargs[4] || nargs[7] || nargs[8]))) {
+            if(nconv > 0 && (nargs[2] || nargs[3] || nargs[4] || nargs[7] || nargs[8])) {
                 KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>* eigenvalues = nargs[2] ? GetAny<KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>*>((*nargs[2])(stack)) : nullptr;
                 KN<PetscReal>* errorestimate = nargs[10] ? GetAny<KN<PetscReal>*>((*nargs[10])(stack)) : nullptr;
                 KNM<K>* rarray = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
@@ -475,22 +475,12 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                             }
                             if(std::is_same<SType, EPS>::value && (nargs[7] || nargs[8])) {
                                 VecGetArray(yr, &tmp2r);
-                                if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
+                                if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
                                     VecGetArray(yi, &tmp2i);
-                                    pti = new K[n];
-                                    copy(pti, n, tmp2r, tmp2i);
-                                }
-                                else
-                                    pti = reinterpret_cast<K*>(tmp2r);
-                                HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
-                                if(ptA->_A)
-                                    ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
-                                else
-                                    ptA->_exchange[0]->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
                                 if(lvectors)
                                     lvectors->set(i, cpy);
                                 if(larray && !codeA) {
-                                    KN<K> cpy(m, pti);
+                                    KN<K> cpy(m, pt);
                                     (*larray)(':', i) = cpy;
                                 }
                             }
@@ -521,14 +511,12 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 (*rarray)(':', i) = cpy;
                             }
                             if(larray) {
-                                KN<K> cpy(nr, pti);
+                                KN<K> cpy(nr, std::is_same<SType, EPS>::value ? pt : pti);
                                 (*larray)(':', i) = cpy;
                             }
                         }
-                        if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
+                        if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
                             delete [] pt;
-                            delete [] pti;
-                        }
                         if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
                             VecRestoreArray(xi, &tmpi);
                         VecRestoreArray(xr, &tmpr);
