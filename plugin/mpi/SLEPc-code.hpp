@@ -342,9 +342,30 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 }
                 rvectors->resize(0);
             }
+            FEbaseArrayKn<K>* lvectors = nargs[7] ? GetAny<FEbaseArrayKn<K>*>((*nargs[7])(stack)) : nullptr;
+            Vec* lbasis = nullptr;
+            PetscInt nl = 0;
+            if(lvectors) {
+                ffassert(!isType);
+                if(lvectors->N > 0 && lvectors->get(0) && lvectors->get(0)->n > 0) {
+                    nl = lvectors->N;
+                    lbasis = new Vec[nl];
+                    for(int i = 0; i < nl; ++i) {
+                        MatCreateVecs(ptA->_petsc, &lbasis[i], NULL);
+                        PetscScalar* pt;
+                        VecGetArray(lbasis[i], &pt);
+                        if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
+                            distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(lvectors->get(i))), pt, lvectors->get(i)->n);
+                        VecRestoreArray(lbasis[i], &pt);
+                    }
+                }
+                lvectors->resize(0);
+            }
             if(std::is_same<SType, EPS>::value) {
                 if(n)
                     EPSSetInitialSpace(eps, n, basis);
+                if(nl)
+                    EPSSetLeftInitialSpace(eps, nl, lbasis);
                 KNM<PetscScalar>* ptDeflation = nargs[9] ? GetAny<KNM<PetscScalar>*>((*nargs[9])(stack)) : NULL;
                 if(ptDeflation && ptDeflation->M()) {
                     PetscInt m;
@@ -380,6 +401,9 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
             for(int i = 0; i < n; ++i)
                 VecDestroy(&basis[i]);
             delete [] basis;
+            for(int i = 0; i < nl; ++i)
+                VecDestroy(&lbasis[i]);
+            delete [] lbasis;
             PetscInt nconv;
             if(std::is_same<SType, EPS>::value)
                 EPSGetConverged(eps, &nconv);
@@ -393,7 +417,6 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>* eigenvalues = nargs[2] ? GetAny<KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>*>((*nargs[2])(stack)) : nullptr;
                 KN<PetscReal>* errorestimate = nargs[10] ? GetAny<KN<PetscReal>*>((*nargs[10])(stack)) : nullptr;
                 KNM<K>* rarray = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
-                FEbaseArrayKn<K>* lvectors = nargs[7] ? GetAny<FEbaseArrayKn<K>*>((*nargs[7])(stack)) : nullptr;
                 KNM<K>* larray = nargs[8] ? GetAny<KNM<K>*>((*nargs[8])(stack)) : nullptr;
                 if(eigenvalues)
                     eigenvalues->resize(nconv);
@@ -518,10 +541,16 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                             delete [] pt;
-                            delete [] pti;
+                            if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                                delete [] pti;
                         }
-                        if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
+                        if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)) {
                             VecRestoreArray(xi, &tmpi);
+                            if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                                VecRestoreArray(yi, &tmp2i);
+                        }
+                        if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                            VecRestoreArray(yr, &tmp2r);
                         VecRestoreArray(xr, &tmpr);
                     }
                     if(eigenvalues) {
