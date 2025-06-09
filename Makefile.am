@@ -103,14 +103,6 @@ EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
 	etc/logo/logo.bmp \
 	etc/doxygen/mainpage.dox \
 	etc/doxygen/Doxyfile \
-	etc/jenkins \
-	etc/jenkins/install.sh \
-	etc/jenkins/deployDEB.sh \
-	etc/jenkins/build.sh \
-	etc/jenkins/check.sh \
-	etc/jenkins/configure.sh \
-	etc/jenkins/clean.sh \
-	etc/jenkins/build_PETSc.sh \
 	etc/ff/ff.xcodeproj \
 	etc/ff/ff.xcodeproj/project.pbxproj  \
 	readme/BUGS readme/HISTORY_BEFORE_2005 readme/README_MAC.md readme/TODO \

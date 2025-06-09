@@ -31,7 +31,6 @@ TESTS_OTHER = 3d-leman.md \
 	cone.md \
 	convect-3d.md \
 	cube-period.md \
-	cylinder-3d.md \
 	EqPoisson.md \
 	extract-boundary3d.md \
 	first.md \
@@ -60,6 +59,7 @@ TESTS_OTHER = 3d-leman.md \
 TESTS_METIS = schwarz-nm-3d.md
 
 TESTS_TETGEN = cylinder.edp \
+	cylinder-3d.md \
 	Poisson3d.md \
 	Poisson-cube-ballon.md \
 	refinesphere.md \

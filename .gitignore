@@ -40,6 +40,7 @@
 *freefem++.pref
 WHERE*
 CheckAll-out
+build
 examples/*/*.b
 examples/*/*.dat
 examples/*/*.dt

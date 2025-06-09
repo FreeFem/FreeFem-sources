@@ -1,0 +1,154 @@
+# Full version of FreeFem, using MPICH installed by PETSc
+name: Full version MPICH
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - slegrand-actions-debug
+      
+  pull_request:
+    branches:
+      - develop
+
+  # For development phase
+  workflow_dispatch:
+  
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [22.04, 24.04]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+            - ${{ github.workflow }}
+            
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch git wget cmake \
+          libhdf5-dev libgsl-dev flex bison autoconf automake \
+          autotools-dev
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+        
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Upload PETSc and reconfigure logs on fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PETSc-reconfigure-logs
+          path: |
+            3rdparty/ff-petsc/petsc-*/configure.log
+            config.log
+          compression-level: 9
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: |
+          make check -i
+          echo "Tests failed: " $(grep :test-result examples/*/*.trs | grep FAIL | wc -l)
+          ./etc/actions/failed_tests_logs.sh
+
+      - name: Install
+        run: make install
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [13, 14, 15]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+        
+    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+      - ${{ github.workflow }}
+      
+    runs-on: macos-${{ matrix.version }}
+      
+    steps:
+      - uses: actions/checkout@v4
+
+      # Remove homebrew LLVM compiler, and use most recent Xcode development
+      # tools
+      - name: Set environment
+        run: |
+          if [ "${{ matrix.version }}" -eq "15" ]; then
+            echo "LLVM_VERSION=18" >> $GITHUB_ENV
+            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+          elif [ "${{ matrix.version }}" -eq "14" ]; then
+            echo "LLVM_VERSION=15" >> $GITHUB_ENV
+            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+          elif [ "${{ matrix.version }}" -eq "13" ]; then
+            echo "LLVM_VERSION=15" >> $GITHUB_ENV
+            sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+            echo "LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs" >> $GITHUB_ENV
+          fi
+
+      - name: Install
+        run: |
+          brew install m4 git bison hdf5 wget autoconf automake
+          brew remove llvm@$LLVM_VERSION
+
+      - name: Symlink gfortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+        
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Upload PETSc and reconfigure logs on fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PETSc-reconfigure-logs
+          path: |
+            3rdparty/ff-petsc/petsc-*/configure.log
+            config.log
+          compression-level: 9
+
+      - name: Build
+        run: make -j 3
+
+      - name: Check
+        run: |
+          make check -i
+          echo "Tests failed: " $(grep :test-result examples/*/*.trs | grep FAIL | wc -l)
+          ./etc/actions/failed_tests_logs.sh
+
+      - name: Install
+        run: make install

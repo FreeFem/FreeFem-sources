@@ -147,8 +147,8 @@ basicAC_F0::name_and_type eigensolver<Type, K, SType>::E_eigensolver::name_param
     {"sparams", &typeid(std::string*)},
     {"prefix", &typeid(std::string*)},
     {"values", &typeid(KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>*)},
-    {!std::is_same<SType, SVD>::value ? "vectors" : "lvectors", &typeid(FEbaseArrayKn<K>*)},
-    {!std::is_same<SType, SVD>::value ? "array" : "larray", &typeid(KNM<K>*)},
+    {!std::is_same<SType, SVD>::value ? "vectors" : "rvectors", &typeid(FEbaseArrayKn<K>*)},
+    {!std::is_same<SType, SVD>::value ? "array" : "rarray", &typeid(KNM<K>*)},
     {"fields", &typeid(KN<double>*)},
     {"names", &typeid(KN<String>*)},
     {!std::is_same<SType, SVD>::value ? "lvectors" : "rvectors", &typeid(FEbaseArrayKn<K>*)},
@@ -324,24 +324,43 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 PEPSetFromOptions(pep);
                 PEPSetUp(pep);
             }
-            FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>*>((*nargs[3])(stack)) : nullptr;
+            FEbaseArrayKn<K>* rvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>*>((*nargs[3])(stack)) : nullptr;
             Vec* basis = nullptr;
             PetscInt n = 0;
-            if(eigenvectors) {
+            if(rvectors) {
                 ffassert(!isType);
-                if(eigenvectors->N > 0 && eigenvectors->get(0) && eigenvectors->get(0)->n > 0) {
-                    n = eigenvectors->N;
+                if(rvectors->N > 0 && rvectors->get(0) && rvectors->get(0)->n > 0) {
+                    n = rvectors->N;
                     basis = new Vec[n];
                     for(int i = 0; i < n; ++i) {
                         MatCreateVecs(ptA->_petsc, &basis[i], NULL);
                         PetscScalar* pt;
                         VecGetArray(basis[i], &pt);
                         if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
-                            distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(eigenvectors->get(i))), pt, eigenvectors->get(i)->n);
+                            distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(rvectors->get(i))), pt, rvectors->get(i)->n);
                         VecRestoreArray(basis[i], &pt);
                     }
                 }
-                eigenvectors->resize(0);
+                rvectors->resize(0);
+            }
+            FEbaseArrayKn<K>* lvectors = nargs[7] ? GetAny<FEbaseArrayKn<K>*>((*nargs[7])(stack)) : nullptr;
+            Vec* lbasis = nullptr;
+            PetscInt nl = 0;
+            if(lvectors) {
+                ffassert(!isType);
+                if(lvectors->N > 0 && lvectors->get(0) && lvectors->get(0)->n > 0) {
+                    nl = lvectors->N;
+                    lbasis = new Vec[nl];
+                    for(int i = 0; i < nl; ++i) {
+                        MatCreateVecs(ptA->_petsc, &lbasis[i], NULL);
+                        PetscScalar* pt;
+                        VecGetArray(lbasis[i], &pt);
+                        if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
+                            distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(lvectors->get(i))), pt, lvectors->get(i)->n);
+                        VecRestoreArray(lbasis[i], &pt);
+                    }
+                }
+                lvectors->resize(0);
             }
             FEbaseArrayKn<K>* othervectors = nargs[7] ? GetAny<FEbaseArrayKn<K>*>((*nargs[7])(stack)) : nullptr;
             Vec* otherbasis = nullptr;

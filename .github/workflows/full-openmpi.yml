@@ -1,0 +1,79 @@
+# Full version of FreeFem, using OpenMPI
+name: Full version OpenMPI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - slegrand-actions-debug
+      
+  pull_request:
+    branches:
+      - develop
+
+  # For development phase
+  workflow_dispatch:
+  
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [22.04, 24.04]
+        cfg:
+        - {opts: --enable-debug}
+        - {opts: --enable-optim --enable-generic}
+
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+            - ${{ github.workflow }}
+            
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch git wget cmake \
+          libhdf5-dev libgsl-dev flex bison autoconf automake \
+          autotools-dev libopenmpi-dev
+
+      - name: Configure
+        run: |
+          autoreconf -i
+          ./configure --enable-download ${{ matrix.cfg.opts }} \
+          --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
+
+      - name: PETSc
+        run: |
+          cd 3rdparty/ff-petsc
+          make petsc-slepc
+          cd -
+          ./reconfigure
+
+      - name: Upload PETSc and reconfigure logs on fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PETSc-reconfigure-logs
+          path: |
+            3rdparty/ff-petsc/petsc-*/configure.log
+            config.log
+          compression-level: 9
+
+      - name: Build
+        run: make -j 4
+
+      - name: Check
+        run: |
+          make check -i
+          echo "Tests failed: " $(grep :test-result examples/*/*.trs | grep FAIL | wc -l)
+          ./etc/actions/failed_tests_logs.sh
+
+      - name: Install
+        run: make install
+
+# No test for MacOS, the homebrew bottle open-mpi seems broken.

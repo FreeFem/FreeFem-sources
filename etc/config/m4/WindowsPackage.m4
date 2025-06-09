@@ -20,7 +20,7 @@
 [Setup]
 AppName=FreeFem++-win`'SIZEOFPTR-VERSION
 AppVerName=FreeFem++ version VERSION (win SIZEOFPTR bits)
-DefaultDirName={pf}\FreeFem++`'SUFF64
+DefaultDirName={commonpf}\FreeFem++`'SUFF64
 DefaultGroupName=FreeFem++`'SUFF64
 PrivilegesRequired=admin
 Compression=lzma
@@ -96,23 +96,42 @@ Source: "plugin\seq\ff-get-dep"; DestDir: "{app}"
 
 
 IFMGW32 ; mingw32  ....    FH. I have put all dll in bin-win32 dir ....
-IFMGW32 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
-; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\bin\libgfortran-*.dll"; DestDir: "{app}"
-IFMGW32 Source: "C:\MinGW\bin\libquadmath-*.dll"; DestDir: "{app}"
+#ifexist "C:\MinGW\bin\mingwm10.dll"
+	IFMGW32 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
+	; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\bin\libgfortran-*.dll"; DestDir: "{app}"
+	IFMGW32 Source: "C:\MinGW\bin\libquadmath-*.dll"; DestDir: "{app}"
 
-IFMGW64 Source: "C:\msys64\mingw64\bin\libgcc_s_seh-*.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libstdc++-*.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
-IFMGW64 Source: "C:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libgcc_s_seh-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libstdc++-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
+	IFMGW64 Source: "C:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
+#endif
+#ifexist "D:\MinGW\bin\mingwm10.dll"
+	IFMGW32 Source: "D:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
+	; Source: "D:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\bin\libgfortran-*.dll"; DestDir: "{app}"
+	IFMGW32 Source: "D:\MinGW\bin\libquadmath-*.dll"; DestDir: "{app}"
 
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libgcc_s_seh-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libstdc++-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
+	IFMGW64 Source: "D:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
+#endif
 
 IFMGW64 ; mingw64 ....   FH. I have put all dll in bin-win32 dir ....
 
@@ -154,7 +173,12 @@ IFMPI Source: "examples\bem\*.edp"; DestDir: "{app}\examples\bem"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
 ;PETSc
+#if DirExists("FFPETSC")
 IFPETSC Source: "FFPETSC\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+#endif
+#if DirExists("D:\a\_temp\msys64\mingw64\ff-petsc\")
+IFPETSC Source: "D:\a\_temp\msys64\mingw64\ff-petsc\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
+#endif
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.

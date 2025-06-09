@@ -406,42 +406,44 @@ namespace PETSc {
     WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);
 
     Dmat& B(*GetAny<Dmat*>((*a)(stack)));
-    if(!PUh || !PVh)
-      return SetAny<Dmat*>(&B);
     const FESpace1& Uh = *PUh;
     const FESpace2& Vh = *PVh;
-    const Mesh1& Th = Uh.Th;
-    bool same = isSameMesh(b->largs, &Uh.Th, &Vh.Th, stack);
+    bool same = isSameMesh(b->largs, PUh ? &Uh.Th : nullptr, PVh ? &Vh.Th : nullptr, stack);
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
     int VFBEM = typeVFBEM(b->largs, stack);
 #else
     int VFBEM = -1;
 #endif
     if (VFBEM == -1) {
-      ffassert((std::is_same< fes1, fes2 >::value));
       Matrice_Creuse<upscaled_type<K>> A;
       A.init();
       if(same) {
-        if(A.Uh != Uh || A.Vh != Vh) {
-          A.Uh = Uh;
-          A.Vh = Vh;
-          if(ds.sym) {
-            A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Vh.NbOfDF, 0, ds.sym));
-            assert_ptr(&Uh, &Vh);
+        if(PUh && PVh) {
+          if(A.Uh != Uh || A.Vh != Vh) {
+            A.Uh = Uh;
+            A.Vh = Vh;
+            if(ds.sym) {
+              A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Vh.NbOfDF, 0, ds.sym));
+              assert_ptr(&Uh, &Vh);
+            }
+            else
+              A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
           }
-          else
-            A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
-        }
-        if(AssembleVarForm<upscaled_type<K>, MatriceCreuse<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
-          AssembleBC<upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          if(AssembleVarForm<upscaled_type<K>, MatriceCreuse<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, b->largs))
+            AssembleBC<upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          }
+        else
+          A.A.master(new MatriceMorse<upscaled_type<K>>(PVh ? Vh.NbOfDF : 0, PUh ? Uh.NbOfDF : 0, 0, 0));
       }
       else {
-        MatriceMorse<upscaled_type<K>> *pMA = new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
+        MatriceMorse<upscaled_type<K>> *pMA = new MatriceMorse<upscaled_type<K>>(PVh ? Vh.NbOfDF : 0, PUh ? Uh.NbOfDF : 0, 0, ds.sym);
         MatriceMap<upscaled_type<K>>& D = *pMA;
-        bool bc = AssembleVarForm<upscaled_type<K>, MatriceMap<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
+        bool bc = false;
+        if (PUh && PVh)
+          bc = AssembleVarForm<upscaled_type<K>, MatriceMap<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, &D, 0, b->largs);
         A.A.master(pMA);
         if(bc)
-          AssembleBC<upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          AssembleBC<upscaled_type<K>>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
       }
       changeOperatorSimple(&B, &A);
       if(B._A)
@@ -866,7 +868,7 @@ namespace PETSc {
             PetscInt* cnum = ptA->_num + dN->HPDDM_n;
             if (ptA->_petsc) {
                 int rank, size, N;
-                unsigned int flag = mN->nnz == mN->n * mN->m ? 1 : 0;
+                unsigned int flag = mN->nnz && mN->nnz == mN->n * mN->m ? 1 : 0;
                 MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_petsc), &size);
                 if (size > 1) {
                   PetscBool dense;
@@ -4923,7 +4925,7 @@ namespace PETSc {
                               type = MATHERMITIANTRANSPOSEVIRTUAL;
                           }
                       } else MatGetSize(mat[i][j], &n, &m);
-                      if(isType && m >= n) {
+                      if(isType && m >= n && !(cast[i * N + j] && cast[i * N + j]->_num)) {
                           PetscMPIInt rank;
                           MPI_Comm_rank(PetscObjectComm((PetscObject)mat[i][j]), &rank);
                           if(rank == 0) {
@@ -6673,16 +6675,13 @@ static void Init_PETSc( ) {
   TheOperators->Add("<-", new PETSc::OpMatrixtoBilinearFormVGPETSc< HpSchwarz< PetscScalar> >(1));
   TheOperators->Add(
     "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
-         new PETSc::varfToMat< PetscScalar, Mesh, v_fes, v_fes >,
+         new PETSc::varfToMat< PetscScalar, Mesh , v_fes , v_fes  >,
          new PETSc::varfToMat< PetscScalar, Mesh3, v_fes3, v_fes3 >,
          new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fesS >,
-         new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesL >
-#if defined(WITH_bemtool) && defined(WITH_htool)
-                                                                   ,
+         new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesL >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fes  >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesS >,
-         new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fes  >
-#endif
+         new PETSc::varfToMat< PetscScalar, MeshL, v_fes , v_fesL >
                                                                    );
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
   typedef const BemKernel fkernel;
