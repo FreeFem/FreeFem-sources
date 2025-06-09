@@ -219,6 +219,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
             User<Type, K, NEP> func = nullptr;
             MatType type;
             PetscBool isType;
+            PetscBool isTwoSided;
             MatGetType(ptA->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
             PetscInt m;
@@ -362,9 +363,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 lvectors->resize(0);
             }
             if(std::is_same<SType, EPS>::value) {
+                EPSGetTwoSided(eps, &isTwoSided);
                 if(n)
                     EPSSetInitialSpace(eps, n, basis);
-                if(nl)
+                if(nl && isTwoSided)
                     EPSSetLeftInitialSpace(eps, nl, lbasis);
                 KNM<PetscScalar>* ptDeflation = nargs[9] ? GetAny<KNM<PetscScalar>*>((*nargs[9])(stack)) : NULL;
                 if(ptDeflation && ptDeflation->M()) {
@@ -379,8 +381,6 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         VecDestroy(deflation + i);
                     delete [] deflation;
                 }
-                if(nargs[7] || nargs[8])
-                    EPSSetTwoSided(eps, PETSC_TRUE);
                 EPSSolve(eps);
             }
             else if(std::is_same<SType, SVD>::value) {
@@ -437,7 +437,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         larray->resize(nr, nconv);
                     VecGetLocalSize(xr, &n);
                 } else xr = xi = NULL;
-                if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)
                     MatCreateVecs(ptA->_petsc, &yi, &yr);
                 else yr = yi = NULL;
                 for(PetscInt i = 0; i < nconv; ++i) {
@@ -446,7 +446,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PetscReal errest;
                     if(std::is_same<SType, EPS>::value) {
                         EPSGetEigenpair(eps, i, &kr, &ki, (rvectors || rarray) ? xr : NULL, (rvectors || rarray) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
-                        if(lvectors || larray)
+                        if((lvectors || larray) && isTwoSided)
                             EPSGetLeftEigenvector(eps, i, yr, yi);
                         if(errorestimate)
                             EPSGetErrorEstimate(eps, i, &errest);
@@ -469,7 +469,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         PetscScalar* tmp2r;
                         PetscScalar* tmp2i;
                         VecGetArray(xr, &tmpr);
-                        if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                        if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)
                             VecGetArray(yr, &tmp2r);
                         K* pt, *pti;
                         if(!std::is_same<SType, SVD>::value) {
@@ -477,7 +477,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 VecGetArray(xi, &tmpi);
                                 pt = new K[n];
                                 copy(pt, n, tmpr, tmpi);
-                                if(std::is_same<SType, EPS>::value && (lvectors || larray)) {
+                                if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided) {
                                     VecGetArray(yi, &tmp2i);
                                     pti = new K[nr];
                                     copy(pti, nr, tmp2r, tmp2i);
@@ -485,7 +485,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                             }
                             else {
                                 pt = reinterpret_cast<K*>(tmpr);
-                                if(std::is_same<SType, EPS>::value && (lvectors || larray)) 
+                                if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided) 
                                     pti = reinterpret_cast<K*>(tmp2r);
                             }
                         }
@@ -508,7 +508,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 KN<K> cpy(m, pt);
                                 (*rarray)(':', i) = cpy;
                             }
-                            if(std::is_same<SType, SVD>::value || (std::is_same<SType, EPS>::value && (lvectors || larray))) {
+                            if(std::is_same<SType, SVD>::value || (std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)) {
                                 KN<K> cpy(ptA->_cnum && ptA->_exchange[1] ? ptA->_exchange[1]->getDof() : (ptA->_A ? ptA->_A->getDof() : 0));
                                 cpy = K(0.0);
                                 if(ptA->_cnum && ptA->_exchange[1]) {
@@ -541,15 +541,15 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                             delete [] pt;
-                            if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                            if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)
                                 delete [] pti;
                         }
                         if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)) {
                             VecRestoreArray(xi, &tmpi);
-                            if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                            if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)
                                 VecRestoreArray(yi, &tmp2i);
                         }
-                        if(std::is_same<SType, EPS>::value && (lvectors || larray))
+                        if(std::is_same<SType, EPS>::value && (lvectors || larray) && isTwoSided)
                             VecRestoreArray(yr, &tmp2r);
                         VecRestoreArray(xr, &tmpr);
                     }

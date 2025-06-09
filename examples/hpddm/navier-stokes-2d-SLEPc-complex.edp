@@ -45,13 +45,11 @@ complex[int]     val(nev);      // array to store eigenvalues
 Wh<complex>[int] def(vec)(nev); // array to store eigenvectors
 Wh<complex>[int] def(lvec)(nev); // array to store adjoint (left) eigenvectors
 complex s = getARGV("-shift_real", 1.0e-6) + getARGV("-shift_imag", 0.6) * 1i;
-bool twosided = getARGV("-eps_two_sided", 0);
+bool twosided = getARGV("-eps_two_sided", 0); // if true, compute left (adjoint) eigenvectors
 string params = "-eps_tol 1.0e-6 -eps_nev " + nev + " " +
     "-eps_type krylovschur -st_type sinvert -eps_monitor_all " +
-    "-eps_target " + real(s) + "+" + imag(s) + "i";
-int k;
-if (twosided) k = EPSSolve(J, M, lvectors = lvec, vectors = vec, values  = val, sparams = params);
-else k = EPSSolve(J, M, vectors = vec, values  = val, sparams = params);
+    "-eps_target " + real(s) + ((imag(s) < 0.0) ? "-" : "+") + abs(imag(s)) + "i";
+int k = EPSSolve(J, M, lvectors = lvec, vectors = vec, values  = val, sparams = params);
 if(!NoGraphicWindow) {
     fespace Zh(Th, [P2, P2]);
     fespace Qh(Th, P1); // pressure space
