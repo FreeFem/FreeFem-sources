@@ -384,12 +384,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 EPSSolve(eps);
             }
             else if(std::is_same<SType, SVD>::value) {
-                if(n && !othern)
-                    SVDSetInitialSpaces(svd, 0, NULL, n, basis);
-                else if(!n && othern)
-                    SVDSetInitialSpaces(svd, othern, otherbasis, 0, NULL);
-                else if(n && othern)
-                    SVDSetInitialSpaces(svd, othern, otherbasis, n, basis);
+                SVDSetInitialSpaces(svd, othern, otherbasis, n, basis);
                 SVDSolve(svd);
             }
             else if(std::is_same<SType, NEP>::value) {
@@ -489,7 +484,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                             }
                             else {
                                 pt = reinterpret_cast<K*>(tmpr);
-                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided) 
+                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
                                     pti = reinterpret_cast<K*>(tmp2r);
                             }
                         }
