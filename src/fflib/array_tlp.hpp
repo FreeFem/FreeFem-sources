@@ -2003,6 +2003,8 @@ void ArrayOperatorF()
      Global.Add("log","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(log));
      Global.Add("log10","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(log10));
      Global.Add("sqrt","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(sqrt));
+     if constexpr (!std::is_same<K, std::complex<double>>::value)
+        Global.Add("cbrt","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(cbrt));
      Global.Add("sin","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(sin));
      Global.Add("cos","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(cos));
      Global.Add("tan","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(tan));

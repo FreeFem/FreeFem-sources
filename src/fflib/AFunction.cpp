@@ -1627,6 +1627,7 @@ void Init_map_type()
 
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
+     Global.Add("cbrt","(",new OneOperator1<double>(cbrt,2));
      Global.Add("abs","(",new OneOperator1<double>(Abs));
      Global.Add("abs","(",new OneOperator1<long>(Abs));
      Global.Add("cos","(",new OneOperator1_<Complex>(cos));
