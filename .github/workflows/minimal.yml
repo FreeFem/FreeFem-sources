@@ -1,18 +1,23 @@
 name: Minimal version
+
 on:
   push:
     branches:
       - develop
       - master
       - slegrand-actions-debug
-      
+
   pull_request:
     branches:
       - develop
-      
+
   # For development phase
   workflow_dispatch:
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     strategy:
@@ -59,7 +64,7 @@ jobs:
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
-        
+
     name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: macos-${{ matrix.version }}
 
@@ -97,7 +102,7 @@ jobs:
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
-        
+
     name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: windows-2022
 

@@ -27,6 +27,13 @@
  */
 #ifndef PROBLEM_HPP_
 #define PROBLEM_HPP_
+
+#include <limits>
+namespace FreeFempp {
+template<class R>
+class TypeVarForm;
+}
+
 extern Block *currentblock;
 
 template<class K> class Matrice_Creuse;
@@ -1379,11 +1386,38 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
      ffassert(px->N() == NbOfDF);
    }
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
-  if(zero && NbOfDF )
-   xx=R();
+  KN<R> cc;
+    list<C_F0>::const_iterator ii,ib=l->largs.begin(),
+    ie=l->largs.end();
+    using namespace FreeFempp;
+    TypeVarForm<R> *tvf=FreeFempp::TypeVarForm<R>::Global;
+    assert( tvf);
+    bool ret = false;
+    for (ii=ib;ii != ie;ii++)
+    {
+        if (ii->left() == tvf->tBC) {
+            ret=true;
+            continue;
+        }
+    }
+  if(zero && NbOfDF)
+    xx=R();
+  else if(!zero && NbOfDF && ret) {
+    cc.resize(xx.n);
+    cc = xx;
+  }
 
-  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
-    AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
+  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) ) {
+    if (!zero && NbOfDF && ret) {
+      KN<R> bb(xx.n, std::numeric_limits<double>::lowest());
+      AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&bb,0,l->largs,tgv);
+      for(int i = 0; i < xx.n; ++i)
+        if(bb[i] != std::numeric_limits<double>::lowest())
+          xx[i] = cc[i] + bb[i];
+    }
+    else
+      AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
+  }
   return SetAny<KN_<R> >(xx);
 }
 

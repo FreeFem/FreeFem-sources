@@ -10017,7 +10017,7 @@ bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESp
                             int ddf=K(df);
                             // AA(ddf,ddf) =tgv;
                             if (Aii)  onBC[ddf]='1'; ;//A->SetBC(ddf, tgv);// change 21 dec 2010 FH (Hack of ILU)
-                            if (B) (*B)[ddf]=  tgv1*gg[df];
+                            if (B) (*B)[ddf]=tgv1*gg[df];
                             if (X) (*X)[ddf]=gg[df];
                         }
                     }

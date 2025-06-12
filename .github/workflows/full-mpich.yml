@@ -7,14 +7,18 @@ on:
       - develop
       - master
       - slegrand-actions-debug
-      
+
   pull_request:
     branches:
       - develop
 
   # For development phase
   workflow_dispatch:
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     strategy:
@@ -27,7 +31,7 @@ jobs:
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
             - ${{ github.workflow }}
-            
+
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
@@ -46,7 +50,7 @@ jobs:
           ./configure --enable-download ${{ matrix.cfg.opts }} \
           --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
-        
+
       - name: PETSc
         run: |
           cd 3rdparty/ff-petsc
@@ -84,12 +88,12 @@ jobs:
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
-        
+
     name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
       - ${{ github.workflow }}
-      
+
     runs-on: macos-${{ matrix.version }}
-      
+
     steps:
       - uses: actions/checkout@v4
 
@@ -123,7 +127,7 @@ jobs:
           ./configure --enable-download ${{ matrix.cfg.opts }} \
           --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
-        
+
       - name: PETSc
         run: |
           cd 3rdparty/ff-petsc

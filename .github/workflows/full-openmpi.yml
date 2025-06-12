@@ -7,14 +7,18 @@ on:
       - develop
       - master
       - slegrand-actions-debug
-      
+
   pull_request:
     branches:
       - develop
 
   # For development phase
   workflow_dispatch:
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     strategy:
@@ -27,7 +31,7 @@ jobs:
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
             - ${{ github.workflow }}
-            
+
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:

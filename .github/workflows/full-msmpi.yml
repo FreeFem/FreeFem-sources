@@ -7,13 +7,17 @@ on:
       - develop
       - master
       - slegrand-actions-debug
-      
+
   pull_request:
     branches:
       - develop
 
 # For development phase
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   windows:
@@ -23,7 +27,7 @@ jobs:
         cfg:
 #        - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
-        
+
     name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
     runs-on: windows-2022
 
@@ -68,7 +72,7 @@ jobs:
         run: |
           pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
           mingw-w64-x86_64-gdb-multiarch
-          
+
       - uses: actions/checkout@v4
 
       - name: Configure
