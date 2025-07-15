@@ -227,7 +227,7 @@ MeshS *yams_pSurfMesh_to_meshS(yams_pSurfMesh sm, int infondang, int infocc, int
     }
   }
 
-  cout << "sm->ntet=" << sm->ntet << endl;
+  if (verbosity) cout << "sm->ntet=" << sm->ntet << endl;
 
   /* mark used vertices */
   np = nav = 0;
@@ -346,9 +346,7 @@ MeshS *yams_pSurfMesh_to_meshS(yams_pSurfMesh sm, int infondang, int infocc, int
   BoundaryEdgeS *ff_bb = ff_b;
 
   // les autres avoir par la suite
-  if (verbosity > 1) {
-    cout << " nv " << ff_nv << " nt" << ff_nt << " nbe" << ff_nbe << endl;
-  }
+  if (verbosity > 1) cout << " nv " << ff_nv << " nt" << ff_nt << " nbe" << ff_nbe << endl;
 
   MeshS *THS_T = new MeshS(ff_nv, ff_nt, ff_nbe, ff_v, ff_t, ff_b);
 
@@ -419,8 +417,7 @@ void solyams_pSurfMesh(yams_pSurfMesh sm, const int &type, const KN< double > &t
     }
   }
 
-  // if(verbosity>4)
-  {
+  if (verbosity > 4) {
     cout << " freeyams (metric in) :  hmin " << hmin << " , hmax " << hmax << endl;
     if (type == 3) {
       cout << "             min max of eigen val  " << vpmin << " " << vpmax << endl;
@@ -428,7 +425,7 @@ void solyams_pSurfMesh(yams_pSurfMesh sm, const int &type, const KN< double > &t
   }
 
   if (type == 3 && vpmin < 0) {
-    cout << "   Error Freeyam :  metric    min max of eigen val  " << vpmin << " " << vpmax << endl;
+    cerr << "   Error freeyams :  metric    min max of eigen val  " << vpmin << " " << vpmax << endl;
     ExecError("Error in metric definition freeyams (negative eigen value");
   }
 }
@@ -577,7 +574,6 @@ class yams_Op_meshS : public E_F0mps {
 
  public:
   yams_Op_meshS(const basicAC_F0 &args) : sol(args.size( ) - 1) {
-    cout << "yams" << endl;
     args.SetNameParam(n_name_param, name_param, nargs);
     eTh = to< pmeshS >(args[0]);
     dim = 3;
@@ -832,9 +828,7 @@ AnyType yams_Op_meshS::operator( )(Stack stack) const {
     }
   }
 
-  if (verbosity > 10) {
-    cout << "nbsol  " << nargs[2] << endl;
-  }
+  if (verbosity > 10) cout << "nbsol  " << nargs[2] << endl;
 
   if (nargs[2] || (nbsol > 0)) {
     float hmin, hmax;
@@ -853,12 +847,10 @@ AnyType yams_Op_meshS::operator( )(Stack stack) const {
 
   int infondang = 0, infocc = 0;
   int res = yams_main(yamsmesh, intopt, fopt, infondang, infocc);
-  if (verbosity > 10) {
-    cout << " yamsmesh->dim " << yamsmesh->dim << endl;
-  }
+  if (verbosity > 10) cout << " yamsmesh->dim " << yamsmesh->dim << endl;
 
   if (res > 0) {
-    cout << " problem with yams :: error " << res << endl;
+    cerr << " problem with freeyams :: error " << res << endl;
     ExecError("Freeyams error");
   }
 
@@ -936,7 +928,6 @@ class yams_Op_mesh3 : public E_F0mps {
 
  public:
   yams_Op_mesh3(const basicAC_F0 &args) : sol(args.size( ) - 1) {
-    cout << "yams" << endl;
     args.SetNameParam(n_name_param, name_param, nargs);
     eTh = to< pmesh3 >(args[0]);
     dim = 3;
@@ -1185,9 +1176,7 @@ AnyType yams_Op_mesh3::operator( )(Stack stack) const {
     }
   }
 
-  if (verbosity > 10) {
-    cout << "nbsol  " << nargs[2] << endl;
-  }
+  if (verbosity > 10) cout << "nbsol  " << nargs[2] << endl;
 
   if (nargs[2] || (nbsol > 0)) {
     float hmin, hmax;
@@ -1206,12 +1195,10 @@ AnyType yams_Op_mesh3::operator( )(Stack stack) const {
 
   int infondang = 0, infocc = 0;
   int res = yams_main(yamsmesh, intopt, fopt, infondang, infocc);
-  if (verbosity > 10) {
-    cout << " yamsmesh->dim " << yamsmesh->dim << endl;
-  }
+  if (verbosity > 10) cout << " yamsmesh->dim " << yamsmesh->dim << endl;
 
   if (res > 0) {
-    cout << " problem with yams :: error " << res << endl;
+    cerr << " problem with freeyams :: error " << res << endl;
     ExecError("Freeyams error");
   }
 
@@ -1248,9 +1235,7 @@ AnyType yams_Op_mesh3::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-  if (verbosity) {
-    cout << " load: freeyams  " << endl;
-  }
+  if (verbosity) cout << " load: freeyams  " << endl;
 
   Global.Add("freeyams", "(", new OneOperatorCode< yams_Op_mesh3 >);    //
   Global.Add("freeyams", "(", new OneOperatorCode< yams_Op_meshS >);
