@@ -41,12 +41,14 @@ IFMACRO(dimension,3S)
 macro meshN()meshS// EOM            // three-dimensional surface problem
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
+macro readmeshN()readmeshS// EOM    // three-dimensional surface problem
 macro intNxN()int2dx2d// EOM        // two-dimensional integral for BEM
 ENDIFMACRO
 IFMACRO(dimension,3L)
 macro meshN()meshL// EOM            // three-dimensional line problem
 macro intN()int1d// EOM             // one-dimensional integral
 macro intN1()int0d// EOM            // zero-dimensional integral
+macro readmeshN()readmeshL// EOM    // three-dimensional line problem
 macro intNxN()int1dx1d// EOM        // one-dimensional integral for BEM
 ENDIFMACRO
 
