@@ -30,26 +30,40 @@ macro intN1()int1d// EOM            // one-dimensional integral
 macro readmeshN()readmesh// EOM     // two-dimensional problem
 macro defVel(uP)[uP, uP#Y]// EOM    // two-dimensional velocity for convect/advect
 ENDIFMACRO
-IFMACRO(dimension,3)
+IFMACRO((dimension,3S)|(dimension,3L))
+if(mpirank == 0) cout << "Deprecated \"dimension\" value, switch to: \n  NewMacro dimension()3 EndMacro\n  NewMacro meshtype()S EndMacro (for meshS, or L for meshL)" << endl;
+ENDIFMACRO
+IFMACRO((dimension,3)|(dimension,3S)|(dimension,3L))
+IFMACRO(dimension,3S)
+NewMacro meshtype()S EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+NewMacro meshtype()L EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(!meshtype)
+NewMacro meshtype()V EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,V)
 macro meshN()mesh3// EOM            // three-dimensional problem
 macro intN()int3d// EOM             // three-dimensional integral
 macro intN1()int2d// EOM            // two-dimensional integral
 macro readmeshN()readmesh3// EOM    // three-dimensional problem
 macro defVel(uP)[uP, uP#Y, uP#Z]// EOM // three-dimensional velocity for convect/advect
 ENDIFMACRO
-IFMACRO(dimension,3S)
+IFMACRO(meshtype,S)
 macro meshN()meshS// EOM            // three-dimensional surface problem
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
 macro readmeshN()readmeshS// EOM    // three-dimensional surface problem
 macro intNxN()int2dx2d// EOM        // two-dimensional integral for BEM
 ENDIFMACRO
-IFMACRO(dimension,3L)
+IFMACRO(meshtype,L)
 macro meshN()meshL// EOM            // three-dimensional line problem
 macro intN()int1d// EOM             // one-dimensional integral
 macro intN1()int0d// EOM            // zero-dimensional integral
 macro readmeshN()readmeshL// EOM    // three-dimensional line problem
 macro intNxN()int1dx1d// EOM        // one-dimensional integral for BEM
+ENDIFMACRO
 ENDIFMACRO
 
 macro plotDmesh(Th, params)
@@ -657,17 +671,31 @@ real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
 IFMACRO(!meshN)
-IFMACRO(dimension,3)
+IFMACRO((dimension,3S)|(dimension,3L))
+if(mpirank == 0) cout << "Deprecated \"dimension\" value, switch to: \n  NewMacro dimension()3 EndMacro\n  NewMacro meshtype()S EndMacro (for meshS, or L for meshL)" << endl;
+ENDIFMACRO
+IFMACRO((dimension,3)|(dimension,3S)|(dimension,3L))
+IFMACRO(dimension,3S)
+NewMacro meshtype()S EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+NewMacro meshtype()L EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(!meshtype)
+NewMacro meshtype()V EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,V)
 NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
 NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
 ENDIFMACRO
-IFMACRO(dimension,3S)
+IFMACRO(meshtype,S)
 NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
 NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
 ENDIFMACRO
-IFMACRO(dimension,3L)
+IFMACRO(meshtype,L)
 NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
 NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!meshN)
 NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */
@@ -714,14 +742,14 @@ IFMACRO(ThName#CartesianPartitioning)
 IFMACRO(!dimension)
 NewMacro dimension()2 EndMacro
 ENDIFMACRO
+IFMACRO((meshtype,S)|(meshtype,L))
+exit(106); /* not currently implemented */
+ENDIFMACRO
 NewMacro privateDmesh#CartesianPartitioning() EndMacro
 IFMACRO(ThName#RefinementFactor)
 exit(13); /* not currently implemented */
 ENDIFMACRO
-IFMACRO(removeZeros,true)
-exit(103); /* not currently implemented */
-ENDIFMACRO
-IFMACRO(trueRestrict,true)
+IFMACRO((removeZeros,true)|(trueRestrict,true))
 exit(103); /* not currently implemented */
 ENDIFMACRO
 ENDIFMACRO
@@ -930,17 +958,31 @@ macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!meshN)
-IFMACRO(dimension,3)
+IFMACRO((dimension,3S)|(dimension,3L))
+if(mpirank == 0) cout << "Deprecated \"dimension\" value, switch to: \n  NewMacro dimension()3 EndMacro\n  NewMacro meshtype()S EndMacro (for meshS, or L for meshL)" << endl;
+ENDIFMACRO
+IFMACRO((dimension,3)|(dimension,3S)|(dimension,3L))
+IFMACRO(dimension,3S)
+NewMacro meshtype()S EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+NewMacro meshtype()L EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(!meshtype)
+NewMacro meshtype()V EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,V)
 NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
 NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
 ENDIFMACRO
-IFMACRO(dimension,3S)
+IFMACRO(meshtype,S)
 NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
 NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
 ENDIFMACRO
-IFMACRO(dimension,3L)
+IFMACRO(meshtype,L)
 NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
 NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!meshN)
 NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */
@@ -1026,17 +1068,31 @@ IFMACRO(!privateDmesh#ThName)
 DmeshCreate(ThName)
 {
 IFMACRO(!meshN)
-IFMACRO(dimension,3)
+IFMACRO((dimension,3S)|(dimension,3L))
+    if(mpirank == 0) cout << "Deprecated \"dimension\" value, switch to: \n  NewMacro dimension()3 EndMacro\n  NewMacro meshtype()S EndMacro (for meshS, or L for meshL)" << endl;
+ENDIFMACRO
+IFMACRO((dimension,3)|(dimension,3S)|(dimension,3L))
+IFMACRO(dimension,3S)
+    NewMacro meshtype()S EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+    NewMacro meshtype()L EndMacro /* TODO FIXME: remove at some point (deprecated since July 2025) */
+ENDIFMACRO
+IFMACRO(!meshtype)
+    NewMacro meshtype()V EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,V)
     NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
     NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
 ENDIFMACRO
-IFMACRO(dimension,3S)
+IFMACRO(meshtype,S)
     NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
     NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
 ENDIFMACRO
-IFMACRO(dimension,3L)
+IFMACRO(meshtype,L)
     NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
     NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!meshN)
     NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */

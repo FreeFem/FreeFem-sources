@@ -23,7 +23,8 @@ int[int] n2o;
 macro ThLN2O()n2o//
 Mat<complex> A;
 {
-    macro dimension()3L// EOM
+    macro dimension()3// EOM
+    macro meshtype()L// EOM
     MatCreate(ThL, A, P1);
     Mat<complex> T;
     MatCreate(ThL, T, P0);

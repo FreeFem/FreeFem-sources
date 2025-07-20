@@ -4,7 +4,8 @@
 // code borrowed from examples/ffddm/heat-torus-3d-surf.edp
 
 load "hpddm"                        // HPDDM plugin
-macro dimension()3S// EOM           // 2D, 3D, or 3S
+macro dimension()3// EOM            // 2 or 3
+macro meshtype()S// EOM
 include "macro_ddm.idp"             // additional DDM functions
 
 macro def(i)i// EOM                         // scalar field definition

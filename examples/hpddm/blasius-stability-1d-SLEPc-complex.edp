@@ -12,7 +12,8 @@
 
 load "PETSc-complex"
 
-macro dimension()3L//
+macro dimension()3//
+macro meshtype()L//
 include "macro_ddm.idp"
 
 func Pb2 = [P2, P2];

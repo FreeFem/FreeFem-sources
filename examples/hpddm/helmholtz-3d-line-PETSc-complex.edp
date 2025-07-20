@@ -29,7 +29,8 @@ fespace UhG(ThG, Pk);
 varf vk(u, v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k), u, v));
 Mat<complex> H, MatT, MatV;
 {
-macro dimension()3L// EOM
+macro dimension()3// EOM
+macro meshtype()L// EOM
 MatCreate(ThL, H, Pk);
 MatCreate(ThL, MatT, P0);
 MatCreate(ThL, MatV, P1);

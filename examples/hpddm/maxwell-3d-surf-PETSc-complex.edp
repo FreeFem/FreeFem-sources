@@ -5,7 +5,8 @@
 load "bem"
 load "Element_Mixte3d"
 load "PETSc-complex"
-macro dimension()3S// EOM
+macro dimension()3// EOM
+macro meshtype()S// EOM
 include "macro_ddm.idp"
 include "cobrameshcavity.idp"
 

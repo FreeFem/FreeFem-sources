@@ -3,7 +3,8 @@
 
 load "PETSc"
 load "medit"
-macro dimension()3S//
+macro dimension()3//
+macro meshtype()S//
 include "macro_ddm.idp"
 
 real R  = 3.0, r = 1.0;
