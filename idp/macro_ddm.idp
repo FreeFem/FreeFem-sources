@@ -577,7 +577,7 @@ ENDIFMACRO
     searchMethod = backupSM;
 }// EOM
 
-macro saveDmesh(ThName, name)
+macro DmeshSave(ThName, name)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!ThName#Comm)
@@ -605,7 +605,7 @@ assert(0);
 ENDIFMACRO
 EndMacro
 
-macro loadDmesh(ThName, name)
+macro DmeshLoad(ThName, name)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
 NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
@@ -661,7 +661,7 @@ ENDIFMACRO
 }
 EndMacro
 
-macro buildDmesh(ThName)
+macro DmeshCreate(ThName)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
 NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
@@ -772,7 +772,7 @@ ENDIFMACRO
 }
 EndMacro
 
-macro reconstructDmesh(ThName)
+macro DmeshReconstruct(ThName)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
 NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
@@ -827,10 +827,10 @@ ENDIFMACRO
             }
         }
     }
-    reconstructDmeshWithNeighbors(ThName, neighbors)
+    DmeshReconstructWithNeighbors(ThName, neighbors)
 }
 EndMacro
-macro reconstructDmeshWithNeighbors(ThName, neighborsName)
+macro DmeshReconstructWithNeighbors(ThName, neighborsName)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
 NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
@@ -930,7 +930,7 @@ IFMACRO(!ThName#Overlap)
 ENDIFMACRO
 }
 EndMacro
-macro initializeDmesh(NewName)
+macro DmeshInitialize(NewName)
 IFMACRO(!privateDmesh#NewName)
 NewMacro privateDmesh#NewName()privateDmesh#NewName EndMacro
 NewMacro privateDmesh#NewName#khi()privateDmesh#NewName#khiDef EndMacro
@@ -939,7 +939,7 @@ real[int][int] privateDmesh#NewName#khi(2);
 real[int][int] privateDmesh#NewName#intersection;
 ENDIFMACRO
 EndMacro
-macro copyDmesh(OldName, NewName)
+macro DmeshCopy(OldName, NewName)
 DmeshInitialize(NewName)
 IFMACRO(privateDmesh#OldName)
 NewName = OldName;
@@ -954,7 +954,7 @@ for(int i = 0; i < privateDmesh#NewName#intersection.n; ++i) {
 }
 ENDIFMACRO
 EndMacro
-macro createMat(ThName, MatName, PkName)
+macro MatCreate(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!meshN)
@@ -1105,7 +1105,7 @@ ENDIFMACRO
 ENDIFMACRO
 EndMacro
 
-macro createPartition(ThName, PartName, PkName)
+macro PartitionCreate(ThName, PartName, PkName)
 IFMACRO(!privateDmesh#ThName)
 DmeshCreate(ThName)
 ENDIFMACRO
@@ -1900,7 +1900,7 @@ ENDIFMACRO
     real[int] D, backupRegion(ThName.nt);
     VhLocalOldPrivate<PetscScalar> def(scaledU);
 IFMACRO(!transfer#Q)
-    createPartition(ThName, D, Pk)
+    PartitionCreate(ThName, D, Pk)
     scaledU[] = uA[];
 ENDIFMACRO
 IFMACRO(transfer#Q)
@@ -2017,7 +2017,7 @@ IFMACRO(ThName#NestedIn#ThNew)
 IFMACRO(!transfer#Q)
     def(uANew) = def(uA);
     Mat<PetscScalar> exchange;
-    createMat(ThNew, exchange, PkNew)
+    MatCreate(ThNew, exchange, PkNew)
     PetscScalar[int] tmp;
     ChangeNumbering(exchange, uANew[], tmp);
     ChangeNumbering(exchange, uANew[], tmp, inverse = true, exchange = true);
@@ -2041,23 +2041,23 @@ assert(0);
 ENDIFMACRO
 // EOM
 
-macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P) {
+macro MatInterpolate(ThName, Pk, A, ThNew, PkNew, ANew, P) {
 NewMacro transfer#Q() EndMacro
 transferBase(ThName, Pk, A, ThNew, PkNew, ANew, P)
 }// EOM
 
-macro transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew) {
+macro VecInterpolate(ThName, Pk, uPrivate, ThNew, PkNew, uNew) {
 transferBase(ThName, Pk, uPrivate, ThNew, PkNew, uNew, 1)
 }// EOM
 
-macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
+macro ParMmgCreateCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
     Mat<PetscScalar> A;
-    createMat(ThName, A, P1);
+    MatCreate(ThName, A, P1);
     real[int] D(ThName.nt);
-    createPartition(ThName, D, P0);
+    PartitionCreate(ThName, D, P0);
     fespace PhPrivate(ThName, P0);
     PhPrivate d;
     d[] = D;
@@ -2071,7 +2071,7 @@ ENDIFMACRO
     ParMmgCommunicators(A, gamma, restriction, ThCommunicators);
 }// EOM
 
-macro gatherDmesh(ThName, comm, ThGatherName) {
+macro DmeshGather(ThName, comm, ThGatherName) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
@@ -2120,9 +2120,9 @@ ENDIFMACRO
             cout.scientific << " --- distributed mesh gathered (in " << mpiWtime() - timerGather << ")" << endl;
     }
 }
-reconstructDmesh(ThGatherName)// EOM
+DmeshReconstruct(ThGatherName)// EOM
 
-macro scatterDmesh(ThName, comm, ThScatterName) {
+macro DmeshScatter(ThName, comm, ThScatterName) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
@@ -2177,9 +2177,9 @@ ENDIFMACRO
             cout.scientific << " --- distributed mesh scattered (in " << mpiWtime() - timerScatter << ")" << endl;
     }
 }
-reconstructDmesh(ThScatterName)// EOM
+DmeshReconstruct(ThScatterName)// EOM
 
-macro gatherSolution(ThName, comm, ThGatherName, Pk, uPrivate, uNew) {
+macro VecGather(ThName, comm, ThGatherName, Pk, uPrivate, uNew) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
@@ -2205,7 +2205,7 @@ IFMACRO(with,PETSc)
     PetscScalar[int] vPrivate(uPrivate[]);
     {
         Mat<PetscScalar> gather;
-        createMat(ThName, gather, Pk)
+        MatCreate(ThName, gather, Pk)
         PetscScalar[int] trash;
         ChangeNumbering(gather, vPrivate, trash);
         ChangeNumbering(gather, vPrivate, trash, inverse = true, exchange = false);
@@ -2264,7 +2264,7 @@ ENDIFMACRO
         }
 IFMACRO(with,PETSc)
         Mat<PetscScalar> gather;
-        createMat(ThGatherName, gather, Pk)
+        MatCreate(ThGatherName, gather, Pk)
         exchange(gather, uNew[], scaled = false);
 ENDIFMACRO
     }
@@ -2288,7 +2288,7 @@ ENDIFMACRO
     }
 }// EOM
 
-macro scatterSolution(ThName, comm, ThScatterName, Pk, uPrivate, uNew) {
+macro VecScatter(ThName, comm, ThScatterName, Pk, uPrivate, uNew) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
@@ -2382,20 +2382,21 @@ ENDIFMACRO
     ThGlobal = change(ThGlobal, renumt = globalIntT, renumv = globalIntV);
 }// EOM
 
-macro DmeshSave(ThName, name)saveDmesh(ThName, name)// EOM
-macro DmeshLoad(ThName, name)loadDmesh(ThName, name)// EOM
-macro DmeshCreate(ThName)buildDmesh(ThName)// EOM
-macro DmeshReconstruct(ThName)reconstructDmesh(ThName)// EOM
-macro DmeshReconstructWithNeighbors(ThName, neighborsName)reconstructDmeshWithNeighbors(ThName, neighborsName)// EOM
-macro DmeshInitialize(NewName)initializeDmesh(NewName)// EOM
-macro DmeshCopy(OldName, NewName)copyDmesh(OldName, NewName)// EOM
-macro DmeshScatter(ThName, comm, ThScatterName)scatterDmesh(ThName, comm, ThScatterName)// EOM
-macro DmeshGather(ThName, comm, ThGatherName)gatherDmesh(ThName, comm, ThGatherName)// EOM
-macro PartitionCreate(ThName, PartName, PkName)createPartition(ThName, PartName, PkName)// EOM
-macro ParMmgCreateCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)// EOM
-macro VecScatter(ThName, comm, ThScatterName, Pk, uPrivate, uNew)scatterSolution(ThName, comm, ThScatterName, Pk, uPrivate, uNew)// EOM
-macro VecGather(ThName, comm, ThGatherName, Pk, uPrivate, uNew)gatherSolution(ThName, comm, ThGatherName, Pk, uPrivate, uNew)// EOM
-macro VecInterpolate(ThName, Pk, uPrivate, ThNew, PkNew, uNew)transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew)// EOM
-macro MatCreate(ThName, MatName, PkName)createMat(ThName, MatName, PkName)// EOM
-macro MatInterpolate(ThName, Pk, A, ThNew, PkNew, ANew, P)transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P)// EOM
+/* TODO FIXME: remove at some point (deprecated since May 2023) */
+macro saveDmesh(ThName, name)if (mpirank == 0) cout << "Deprecated function name, use DmeshSave()" << endl; DmeshSave(ThName, name)// EOM
+macro loadDmesh(ThName, name)if (mpirank == 0) cout << "Deprecated function name, use DmeshLoad()" << endl; DmeshLoad(ThName, name)// EOM
+macro buildDmesh(ThName)if (mpirank == 0) cout << "Deprecated function name, use DmeshCreate()" << endl; DmeshCreate(ThName)// EOM
+macro reconstructDmesh(ThName)if (mpirank == 0) cout << "Deprecated function name, use DmeshReconstruct()" << endl; DmeshReconstruct(ThName)// EOM
+macro reconstructDmeshWithNeighbors(ThName, neighborsName)if (mpirank == 0) cout << "Deprecated function name, use DmeshReconstructWithNeighbors()" << endl; DmeshReconstructWithNeighbors(ThName, neighborsName)// EOM
+macro initializeDmesh(NewName)if (mpirank == 0) cout << "Deprecated function name, use DmeshInitialize()" << endl; DmeshInitialize(NewName)// EOM
+macro copyDmesh(OldName, NewName)if (mpirank == 0) cout << "Deprecated function name, use DmeshCopy()" << endl; DmeshCopy(OldName, NewName)// EOM
+macro scatterDmesh(ThName, comm, ThScatterName)if (mpirank == 0) cout << "Deprecated function name, use DmeshScatter()" << endl; DmeshScatter(ThName, comm, ThScatterName)// EOM
+macro gatherDmesh(ThName, comm, ThGatherName)if (mpirank == 0) cout << "Deprecated function name, use DmeshGather()" << endl; DmeshGather(ThName, comm, ThGatherName)// EOM
+macro createPartition(ThName, PartName, PkName)if (mpirank == 0) cout << "Deprecated function name, use PartitionCreate()" << endl; PartitionCreate(ThName, PartName, PkName)// EOM
+macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)if (mpirank == 0) cout << "Deprecated function name, use ParMmgCreateCommunicators()" << endl; ParMmgCreateCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators)// EOM
+macro scatterSolution(ThName, comm, ThScatterName, Pk, uPrivate, uNew)if (mpirank == 0) cout << "Deprecated function name, use VecScatter()" << endl; VecScatter(ThName, comm, ThScatterName, Pk, uPrivate, uNew)// EOM
+macro gatherSolution(ThName, comm, ThGatherName, Pk, uPrivate, uNew)if (mpirank == 0) cout << "Deprecated function name, use VecGather()" << endl; VecGather(ThName, comm, ThGatherName, Pk, uPrivate, uNew)// EOM
+macro transfer(ThName, Pk, uPrivate, ThNew, PkNew, uNew)if (mpirank == 0) cout << "Deprecated function name, use VecInterpolate()" << endl; VecInterpolate(ThName, Pk, uPrivate, ThNew, PkNew, uNew)// EOM
+macro createMat(ThName, MatName, PkName)if (mpirank == 0) cout << "Deprecated function name, use MatCreate()" << endl; MatCreate(ThName, MatName, PkName)// EOM
+macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P)if (mpirank == 0) cout << "Deprecated function name, use MatInterpolate()" << endl; MatInterpolate(ThName, Pk, A, ThNew, PkNew, ANew, P)// EOM
 ENDIFMACRO
