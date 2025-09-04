@@ -28,13 +28,13 @@ The "Generator" class contains the description of the kernel; it is created thro
 
 The Generator can then be passed to Htool through the Build() function, which returns the compressed H-Matrix built by Htool from the user-defined copy_submatrix (or get_coef) routine  of the Generator computing the matrix coefficients:
 
-	HMatrix HSE = Build(GenSE,VhS,Vh,eta=100,eps=1e-2,minclustersize=10);
+	HMatrix HSE = Build(GenSE,VhS,Vh,eta=100,eps=1e-2,maxleafsize=10);
 
 ### To launch this script:
 for example:
 
 ~~~bash
-ff-mpirun -np 8 chamonix3.edp -ns -wg -Kmax 1 -fullmesh -n 15
+ff-mpirun -np 8 chamonix.md -ns -wg -Kmax 1 -fullmesh -n 15
 ~~~
 
 which means run with 8 cores, no script output, with graphics, with one level of $\kappa$ (grey case) and a mesh refinement defined by n=15.
@@ -46,7 +46,7 @@ In order to run the test cases from the JCP article you can select  the chamonix
 ~~~
 then run with
 ~~~bash
-	 ff-mpirun -np 8 chamonix3.edp -ns -wg -Kmax 9
+	 ff-mpirun -np 8 chamonix.md -ns -wg -Kmax 9
 ~~~
 
 ### Remark
@@ -456,7 +456,7 @@ if (kappaInK[K]) {
 	// We use the truncated volume mesh Th3t (without the surface) for the boundary operator,
 	// as we use an analytic formula for surface-surface interactions
 	Generator GenSE(Th3t,ThS,seeface,kappag);
-	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10);
+	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,maxleafsize=10);
 	if (mpirank == 0) cout << HSE.infos << endl; 
 	display(HSE);
 	SEt[] = HSE*ones[]; // SE = \int_∑ ((x-x').n) exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^3
@@ -467,7 +467,7 @@ if (kappaInK[K]) {
 	if (mpirank == 0) cout<<"Building volume matrix K= "<<K<<endl;
 
 	Generator GenVolume(Th3,kappag);
-	HVolume[K] = Build(GenVolume,Vh,Vh,eta=100,eps=1e-2,minclustersize=10);
+	HVolume[K] = Build(GenVolume,Vh,Vh,eta=100,eps=1e-2,maxleafsize=10);
 	if (mpirank == 0) cout << HVolume[K].infos << endl; 
 	display(HVolume[K]); // = \int_Omega kappa(nu,x') exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^2
 }

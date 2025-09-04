@@ -1,7 +1,7 @@
 //ff-mpirun -np 4 Maxwell_cube_EFIE.edp -wg
 
 // for the make check:
-// NBPROC 4
+// NBPROC 2
 // PARAM -frequency 2.e+8
 
 load "bem"

@@ -1104,8 +1104,14 @@ pair<BemKernel*,Complex> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             
             BilinearOperator::K ll(*l);   //  LinearComb<pair<MGauche,MDroit>,C_F0> BilinearOperator;
             pair<int,int> finc(ll.first.first),ftest(ll.first.second);
-                                   
-            alpha = GetAny<Complex>(ll.second.eval(stack));
+
+            // TODO use FieldofForm to convert largs to complex instead
+            bool isComplex = ll.second.right() == atype<Complex>();
+            if (isComplex)
+                alpha = GetAny<Complex>(ll.second.eval(stack));
+            else
+                alpha = GetAny<double>(ll.second.eval(stack));
+
             if(mpirank == 0 && verbosity>5) cout << " test coeff mass matrix " << alpha << endl;
           
             if(mpirank == 0 && verbosity>5) {

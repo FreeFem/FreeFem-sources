@@ -334,12 +334,20 @@ public:
     HMatrixInv(T v, U w) : t(v), u(w) {}
     
     void solve(U out) const {
-        HMatVirt A(t);
-        HMatVirtPrec P(t);
-        double eps =1e-6;
-        int niterx=3000;
-        bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,niterx,(mpirank==0)*verbosity);
-        //bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,200,(mpirank==0)*verbosity);
+        if ((*t)->solver == "HLU") {
+            (*t)->factorization();
+            std::copy_n((K*)*u,(*t)->nb_rows(),(K*)*out);
+            htool::MatrixView<K> out_view((*t)->nb_rows(),1,(K*)*out);
+            (*t)->solve(out_view);
+        }
+        else {
+            HMatVirt A(t);
+            HMatVirtPrec P(t);
+            double eps =1e-6;
+            int niterx=3000;
+            bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,niterx,(mpirank==0)*verbosity);
+            //bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,200,(mpirank==0)*verbosity);
+        }
     }
     
     static U inv(U Ax, HMatrixInv<T, U, K, trans> A) {
@@ -359,10 +367,11 @@ class CompressMat : public OneOperator {
                 public:
                 Expression a,b,c,d;
 
-                static const int n_name_param = 7;
+                static const int n_name_param = 8;
                 static basicAC_F0::name_and_type name_param[] ;
                 Expression nargs[n_name_param];
                 long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+                bool argb(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
                 string* args(int i,Stack stack,string* a) const{ return nargs[i] ? GetAny<string*>( (*nargs[i])(stack) ): a;}
                 double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
                 pcommworld argc(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
@@ -391,10 +400,11 @@ basicAC_F0::name_and_type  CompressMat<K>::Op::name_param[]= {
   {  "eps", &typeid(double)},
   {  "commworld", &typeid(pcommworld)},
   {  "eta", &typeid(double)},
-  {  "minclustersize", &typeid(long)},
+  {  "maxleafsize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
   {  "compressor", &typeid(string*)},
+  {  "recompress", &typeid(bool)}
 };
 
 template<class K>
@@ -429,10 +439,11 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   double epsilon=mi->arg(0,stack,ff_htoolEpsilon);
   pcommworld pcomm=mi->argc(1,stack,nullptr);
   double eta=mi->arg(2,stack,ff_htoolEta);
-  int minclustersize=mi->argl(3,stack,ff_htoolMinclustersize);
+  int maxleafsize=mi->argl(3,stack,ff_htoolMaxleafsize);
   int mintargetdepth=mi->argl(4,stack,ff_htoolMintargetdepth);
   int minsourcedepth=mi->argl(5,stack,ff_htoolMinsourcedepth);
   string* pcompressor=mi->args(6,stack,0);
+  bool recompress=mi->argb(7,stack,false);
 
   string compressor = pcompressor ? *pcompressor : "partialACA";
 
@@ -469,29 +480,35 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   MPI_Comm_rank(comm, &rankWorld);
   htool::ClusterTreeBuilder<double> cluster_builder;
   std::shared_ptr<Cluster<double>> t;
-  cluster_builder.set_minclustersize(minclustersize);
+  cluster_builder.set_maximal_leaf_size(maxleafsize);
   t = std::make_shared<htool::Cluster<double>>(cluster_builder.create_cluster_tree(xx.n,3,p.data(),2,sizeWorld));
 
   //cout << M.N() << " " << xx.M() << " " << yy.n << " " << zz.n<< endl;
   if (init) delete *Hmat;
     
-  auto hmatrix_builder = htool::HMatrixTreeBuilder<K, double>(*t, *t, epsilon, eta, 'N','N', -1, rankWorld,rankWorld);
-  std::shared_ptr<htool::VirtualLowRankGenerator<K,double>> LowRankGenerator = nullptr;
+  auto hmatrix_builder = htool::HMatrixTreeBuilder<K, double>(epsilon, eta, 'N','N', -1);
+  std::shared_ptr<htool::VirtualInternalLowRankGenerator<K>> LowRankGenerator = nullptr;
 
+  
   if ( compressor == "" || compressor == "partialACA")
-    LowRankGenerator = std::make_shared<htool::partialACA<K>>();
+    LowRankGenerator = std::make_shared<htool::partialACA<K>>(A, t->get_permutation().data(), t->get_permutation().data());
    else if (compressor == "fullACA")
-    LowRankGenerator = std::make_shared<htool::fullACA<K>>();
+    LowRankGenerator = std::make_shared<htool::fullACA<K>>(A, t->get_permutation().data(), t->get_permutation().data());
    else if (compressor == "SVD")
-    LowRankGenerator = std::make_shared<htool::SVD<K>>();
+    LowRankGenerator = std::make_shared<htool::SVD<K>>(A, t->get_permutation().data(), t->get_permutation().data());
    else {
        cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
        ffassert(0);
    }
-  hmatrix_builder.set_low_rank_generator(LowRankGenerator);
+    if (recompress){
+        std::shared_ptr<htool::VirtualInternalLowRankGenerator<K>> RecompressedLowRankGenerator = std::make_shared<htool::RecompressedLowRankGenerator<K>>(*LowRankGenerator,std::function<void(htool::LowRankMatrix<K> &)>(htool::SVD_recompression<K>));
+        hmatrix_builder.set_low_rank_generator(RecompressedLowRankGenerator);
+    }else{
+        hmatrix_builder.set_low_rank_generator(LowRankGenerator);
+    }
   hmatrix_builder.set_minimal_target_depth(mintargetdepth);
   hmatrix_builder.set_minimal_source_depth(minsourcedepth);
-  *Hmat = new HMatrixImpl<K>(A, t,t,hmatrix_builder,comm);
+  *Hmat = new HMatrixImpl<K>(A, t,t,hmatrix_builder,"HLU",comm);
 
   return Hmat;
 }
@@ -739,10 +756,11 @@ class OpHMatrixUser : public OneOperator
         class Op : public E_F0info {
             public:
                 Expression g, uh1, uh2;
-                static const int n_name_param = 8;
+                static const int n_name_param = 11;
                 static basicAC_F0::name_and_type name_param[] ;
                 Expression nargs[n_name_param];
                 long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+                long argb(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
                 string* args(int i,Stack stack,string* a) const{ return nargs[i] ? GetAny<string*>( (*nargs[i])(stack) ): a;}
                 double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
                 pcommworld argc(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
@@ -764,11 +782,14 @@ basicAC_F0::name_and_type  OpHMatrixUser<K,v_fes1,v_fes2>::Op::name_param[]= {
   {  "eps", &typeid(double)},
   {  "commworld", &typeid(pcommworld)},
   {  "eta", &typeid(double)},
-  {  "minclustersize", &typeid(long)},
+  {  "maxleafsize", &typeid(long)},
   {  "mintargetdepth", &typeid(long)},
   {  "minsourcedepth", &typeid(long)},
   {  "compressor", &typeid(string*)},
-  {  "initialclustering", &typeid(string*)}
+  {  "recompress", &typeid(bool)},
+  {  "initialclustering", &typeid(string*)},
+  {  "clusteringdirections", &typeid(string*)},
+  {  "adaptiveclustering", &typeid(bool)}
 };
 
 template<class R, class v_fes1,class v_fes2, int init>
@@ -806,11 +827,14 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     ds.epsilon = op->arg(0,stack,ds.epsilon);
     ds.commworld = op->argc(1,stack,ds.commworld);
     ds.eta = op->arg(2,stack,ds.eta);
-    ds.minclustersize = op->argl(3,stack,ds.minclustersize);
+    ds.maxleafsize = op->argl(3,stack,ds.maxleafsize);
     ds.mintargetdepth = op->argl(4,stack,ds.mintargetdepth);
     ds.minsourcedepth = op->argl(5,stack,ds.minsourcedepth);
     ds.compressor = *(op->args(6,stack,&ds.compressor));
-    ds.initialclustering = *(op->args(7,stack,&ds.initialclustering));
+    ds.recompress = op->argb(7,stack,ds.recompress);
+    ds.initialclustering = *(op->args(8,stack,&ds.initialclustering));
+    ds.clusteringdirections = *(op->args(9,stack,&ds.clusteringdirections));
+    ds.adaptiveclustering = op->argb(10,stack,ds.adaptiveclustering);
 
     const SMesh & ThU =Uh->Th;
     const TMesh & ThV =Vh->Th;
@@ -1018,7 +1042,7 @@ static void Init_Bem() {
 
     Global.New("htoolEta",CPValue<double>(ff_htoolEta));
     Global.New("htoolEpsilon",CPValue<double>(ff_htoolEpsilon));
-    Global.New("htoolMinclustersize",CPValue<long>(ff_htoolMinclustersize));
+    Global.New("htoolMaxleafsize",CPValue<long>(ff_htoolMaxleafsize));
     Global.New("htoolMintargetdepth",CPValue<long>(ff_htoolMintargetdepth));
     Global.New("htoolMinsourcedepth",CPValue<long>(ff_htoolMinsourcedepth));
     ArrayofHmat<double>();

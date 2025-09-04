@@ -2,6 +2,9 @@
 #define BEM_HPP_
 
 #include <htool/htool.hpp>
+#include <htool/matrix/matrix_view.hpp>
+#include <htool/distributed_operator/linalg.hpp>
+#include <htool/hmatrix/lrmat/recompressed_low_rank_generator.hpp>
 
 #if defined(WITH_metis)
 extern "C" {
@@ -74,11 +77,13 @@ KN< R > *partmetis( KN< R > *const &part, const FESPACE * pVh, long const &lpart
 #endif
 
 double ff_htoolEta=10., ff_htoolEpsilon=1e-3;
-long ff_htoolMinclustersize=10, ff_htoolMintargetdepth=0, ff_htoolMinsourcedepth=0;
+long ff_htoolMaxleafsize=100, ff_htoolMintargetdepth=0, ff_htoolMinsourcedepth=0;
 
 template<class K>
 class HMatrixVirt {
 public:
+    string solver = "fgmres";
+    int state = 0;
     virtual const std::map<std::string, std::string>& get_infos() const = 0;
     virtual void mvprod_global(const K* const in, K* const out,const int& mu=1) const = 0;
     virtual int nb_rows() const = 0;
@@ -96,6 +101,8 @@ public:
     virtual htool::Matrix<K> get_local_dense() const = 0;
     virtual int get_permt(int) const = 0;
     virtual int get_perms(int) const = 0;
+    virtual void factorization() = 0;
+    virtual void solve(htool::MatrixView<K>) = 0;
 
     virtual ~HMatrixVirt() {};
 };
@@ -106,16 +113,25 @@ class HMatrixImpl : public HMatrixVirt<K> {
 private:
     std::shared_ptr<htool::Cluster<double>>  target_cluster;
     std::shared_ptr<htool::Cluster<double>>  source_cluster;
-    htool::DistributedOperatorFromHMatrix<K> distributed_operator_holder;
+    htool::DefaultApproximationBuilder<K> distributed_operator_holder;
 
 
 public:
-    const htool::HMatrix<K>& H;
+    htool::HMatrix<K>& H;
     const htool::DistributedOperator<K>& distributed_operator;
     std::map<std::string, std::string> infos;
-    HMatrixImpl(htool::VirtualGenerator<K> &mat, std::shared_ptr<htool::Cluster<double>> t, std::shared_ptr<htool::Cluster<double>> s,const htool::HMatrixTreeBuilder<K,double>& hmatrix_tree_builder,MPI_Comm comm) : target_cluster(t), source_cluster(s), distributed_operator_holder(mat,*target_cluster,*source_cluster,hmatrix_tree_builder,comm),distributed_operator(distributed_operator_holder.distributed_operator), H(distributed_operator_holder.hmatrix), infos(htool::get_distributed_hmatrix_information(H,distributed_operator.get_comm())){}
+    HMatrixImpl(htool::VirtualGenerator<K> &mat, std::shared_ptr<htool::Cluster<double>> t, std::shared_ptr<htool::Cluster<double>> s,const htool::HMatrixTreeBuilder<K,double>& hmatrix_tree_builder,string slvr,MPI_Comm comm) : target_cluster(t), source_cluster(s), distributed_operator_holder(mat,*target_cluster,*source_cluster,hmatrix_tree_builder,comm),distributed_operator(distributed_operator_holder.distributed_operator), H(distributed_operator_holder.hmatrix), infos(htool::get_distributed_hmatrix_information(H,distributed_operator.get_comm())){this->solver=slvr;}
     const std::map<std::string, std::string>& get_infos() const { return infos; }
-    void mvprod_global(const K* const in, K* const out,const int& mu=1) const {return distributed_operator.matrix_product_global_to_global(in,out,mu);}
+    void mvprod_global(const K* const in, K* const out,const int& mu=1) const {
+        K* work=nullptr;
+        if (mu==1){
+            add_distributed_operator_vector_product_global_to_global('N',K(1),distributed_operator,in,K(0),out,work);
+        } else{
+            htool::MatrixView<K> out_view(distributed_operator.get_target_partition().get_global_size() ,mu,out);
+            htool::MatrixView< const K> in_view(distributed_operator.get_source_partition().get_global_size() ,mu,in);
+            add_distributed_operator_matrix_product_global_to_global('N',K(1),distributed_operator,in_view,K(0),out_view,work);
+        }    
+    }
     int nb_rows() const { return distributed_operator.get_target_partition().get_global_size();}
     int nb_cols() const { return distributed_operator.get_source_partition().get_global_size();}
     void cluster_to_target_permutation(const K* const in, K* const out) const {return htool::cluster_to_user(*target_cluster,in,out);}
@@ -158,23 +174,29 @@ public:
     htool::Matrix<K> get_local_dense() const {htool::Matrix<K> dense(H.nb_rows(),H.nb_cols());htool::copy_to_dense(H,dense.data());return dense;}
     int get_permt(int i) const {return H.get_target_cluster().get_permutation()[i];}
     int get_perms(int i) const {return H.get_source_cluster().get_permutation()[i];}
+    void factorization() {if (!this->state) {htool::lu_factorization(H); this->state=3;}}
+    void solve(htool::MatrixView<K> b) {if (!this->state) factorization(); htool::lu_solve('N',H,b);}
 };
 
 
 struct Data_Bem_Solver
 : public Data_Sparse_Solver {
     double eta;
-    int minclustersize,mintargetdepth,minsourcedepth;
-    string compressor, initialclustering;
+    int maxleafsize,mintargetdepth,minsourcedepth;
+    string compressor, initialclustering, clusteringdirections;
+    bool recompress, adaptiveclustering;
        
     Data_Bem_Solver()
        : Data_Sparse_Solver(),
        eta(ff_htoolEta),
-       minclustersize(ff_htoolMinclustersize),
+       maxleafsize(ff_htoolMaxleafsize),
        mintargetdepth(ff_htoolMintargetdepth),
        minsourcedepth(ff_htoolMinsourcedepth),
        compressor("partialACA"),
-       initialclustering("pca")
+       recompress(false),
+       initialclustering("default"),
+       clusteringdirections("pca"),
+       adaptiveclustering(true)
     
         {epsilon=ff_htoolEpsilon;}
      
@@ -261,11 +283,14 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
             if(mpirank==0 && verbosity>4) cout << "  **Warning: set default solver to " << ds.solver << endl;
         }
         if (nargs[++kk]) ds.eta = GetAny<double>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.minclustersize = GetAny<int>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.maxleafsize = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.mintargetdepth = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.compressor = *GetAny<string*>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.recompress = GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.initialclustering = *GetAny<string*>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.clusteringdirections = *GetAny<string*>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.adaptiveclustering = GetAny<bool>((*nargs[kk])(stack));
         ffassert(++kk == n_name_param);
     }   
 }
@@ -301,15 +326,27 @@ std::shared_ptr<htool::Cluster<double>> build_clustering(int n, const FESPACE * 
     htool::ClusterTreeBuilder<double> cluster_builder;
     std::shared_ptr<htool::Cluster<double>> cluster;
 
-    cluster_builder.set_direction_computation_strategy(std::make_shared<htool::ComputeLargestExtent<double>>());
-    cluster_builder.set_splitting_strategy(std::make_shared<htool::RegularSplitting<double>>());
-    cluster_builder.set_minclustersize(ds.minclustersize);
+    if (ds.clusteringdirections == "pca") {
+        if (ds.adaptiveclustering)
+            cluster_builder.set_partitioning_strategy(std::make_shared<htool::Partitioning_N<double, htool::ComputeLargestExtent<double>, htool::RegularSplitting<double>>>());
+        else
+            cluster_builder.set_partitioning_strategy(std::make_shared<htool::Partitioning<double, htool::ComputeLargestExtent<double>, htool::RegularSplitting<double>>>());
+    } else if (ds.clusteringdirections == "boundingbox") {
+        if (ds.adaptiveclustering)
+            cluster_builder.set_partitioning_strategy(std::make_shared<htool::Partitioning_N<double, htool::ComputeBoundingBox<double>, htool::RegularSplitting<double>>>());
+        else
+            cluster_builder.set_partitioning_strategy(std::make_shared<htool::Partitioning<double, htool::ComputeBoundingBox<double>, htool::RegularSplitting<double>>>());
+    }
+    else {
+        if (mpirank == 0) std::cerr << "Error: unknown choice of clustering directions \"" << ds.clusteringdirections << "\", please use \"pca\" or \"boundingbox\"" << std::endl;
+        ffassert(0);
+    }
+    cluster_builder.set_maximal_leaf_size(ds.maxleafsize);
     // std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> c = std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
 
     int sizeWorld;
     MPI_Comm_size(comm, &sizeWorld);
-    // c->set_minclustersize(ds.minclustersize);
-    if (ds.initialclustering == "" || ds.initialclustering == "pca") {
+    if (ds.initialclustering == "" || ds.initialclustering == "default") {
         cluster = std::make_shared<htool::Cluster<double>>(cluster_builder.create_cluster_tree(n,3,p.data(),2,sizeWorld));
     }
     else if (ds.initialclustering == "metis") {
@@ -333,7 +370,8 @@ std::shared_ptr<htool::Cluster<double>> build_clustering(int n, const FESPACE * 
     }
     else
         std::fill(part.begin(),part.end(),0);
-    cluster = std::make_shared<htool::Cluster<double>>(cluster_builder.create_cluster_tree(n,3,p.data(),2,sizeWorld,part.data()));
+    
+    cluster = std::make_shared<htool::Cluster<double>>(cluster_builder.create_cluster_tree_from_global_partition(n,3,p.data(),2,sizeWorld,part.data()));
     #else
     if (mpirank == 0) std::cerr << "Error: cannot use metis for initial htool clustering ; no metis library" << std::endl;
     ffassert(0);
@@ -348,7 +386,7 @@ std::shared_ptr<htool::Cluster<double>> build_clustering(int n, const FESPACE * 
     #endif
     }
     else {
-        if (mpirank == 0) std::cerr << "Error: unknown initial clustering \"" << ds.initialclustering << "\", please use \"pca\" or \"metis\"" << std::endl;
+        if (mpirank == 0) std::cerr << "Error: unknown initial clustering \"" << ds.initialclustering << "\", please use \"default\" or \"metis\"" << std::endl;
         ffassert(0);
     }
     return cluster;
@@ -359,26 +397,36 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
                 std::shared_ptr<htool::Cluster<double>> t, std::shared_ptr<htool::Cluster<double>> s,
                 vector<double> &pt,vector<double> &ps,MPI_Comm comm) {
 
-    int rankWorld;
-    MPI_Comm_rank(comm, &rankWorld);
-    auto hmatrix_builder = htool::HMatrixTreeBuilder<R, double>(*t, *s, data.epsilon, data.eta, data.sym?'S':'N',data.sym?'U':'N', -1,rankWorld,rankWorld);
-    std::shared_ptr<htool::VirtualLowRankGenerator<R,double>> LowRankGenerator = nullptr;
+    int sizeWorld;
+    MPI_Comm_size(comm, &sizeWorld);
+    auto hmatrix_builder = htool::HMatrixTreeBuilder<R, double>(data.epsilon, data.eta, data.sym?'S':'N',data.sym?'U':'N', -1);
+    std::shared_ptr<htool::VirtualInternalLowRankGenerator<R>> LowRankGenerator = nullptr;
     if (data.compressor=="" || data.compressor == "partialACA")
-        LowRankGenerator = std::make_shared<htool::partialACA<R>>();
+        LowRankGenerator = std::make_shared<htool::partialACA<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else if (data.compressor == "fullACA")
-        LowRankGenerator = std::make_shared<htool::fullACA<R>>();
+        LowRankGenerator = std::make_shared<htool::fullACA<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else if (data.compressor == "SVD")
-        LowRankGenerator = std::make_shared<htool::SVD<R>>();
+        LowRankGenerator = std::make_shared<htool::SVD<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else {
         cerr << "Error: unknown htool compressor \""+data.compressor+"\"" << endl;
         ffassert(0);
     }
 
-    hmatrix_builder.set_low_rank_generator(LowRankGenerator);
+    if (data.recompress){
+        std::shared_ptr<htool::VirtualInternalLowRankGenerator<R>> RecompressedLowRankGenerator = std::make_shared<htool::RecompressedLowRankGenerator<R>>(*LowRankGenerator,std::function<void(htool::LowRankMatrix<R> &)>(htool::SVD_recompression<R>));
+        hmatrix_builder.set_low_rank_generator(RecompressedLowRankGenerator);
+    }else{
+        hmatrix_builder.set_low_rank_generator(LowRankGenerator);
+    }
+
+
     hmatrix_builder.set_minimal_target_depth(data.mintargetdepth);
     hmatrix_builder.set_minimal_source_depth(data.minsourcedepth);
-    hmatrix_builder.set_block_tree_consistency(false);
-    HMatrixImpl<R>* test =new HMatrixImpl<R>(*generatorP, t,s,hmatrix_builder,comm);
+    if ((sizeWorld > 1) || (t != s))
+        hmatrix_builder.set_block_tree_consistency(false);
+    HMatrixImpl<R>* test =new HMatrixImpl<R>(*generatorP, t,s,hmatrix_builder,data.solver,comm);
+    if (data.factorize && (data.solver == "HLU"))
+        test->factorization();
     *Hmat = test;
 }
 
