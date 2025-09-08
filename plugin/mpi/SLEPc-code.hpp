@@ -436,7 +436,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         otherarray->resize(nr, nconv);
                     VecGetLocalSize(xr, &n);
                 } else xr = xi = NULL;
-                if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
+                if(std::is_same<SType, EPS>::value && (othervectors || otherarray))
                     MatCreateVecs(ptA->_petsc, &yi, &yr);
                 else yr = yi = NULL;
                 for(PetscInt i = 0; i < nconv; ++i) {
@@ -468,7 +468,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         PetscScalar* tmp2r;
                         PetscScalar* tmp2i;
                         VecGetArray(xr, &tmpr);
-                        if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
+                        if(std::is_same<SType, EPS>::value && (othervectors || otherarray))
                             VecGetArray(yr, &tmp2r);
                         K* pt, *pti;
                         if(!std::is_same<SType, SVD>::value) {
@@ -476,15 +476,15 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 VecGetArray(xi, &tmpi);
                                 pt = new K[n];
                                 copy(pt, n, tmpr, tmpi);
-                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided) {
+                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray)) {
                                     VecGetArray(yi, &tmp2i);
-                                    pti = new K[n];
-                                    copy(pti, n, tmp2r, tmp2i);
+                                    pti = new K[nr];
+                                    copy(pti, nr, tmp2r, tmp2i);
                                 }
                             }
                             else {
                                 pt = reinterpret_cast<K*>(tmpr);
-                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
+                                if(std::is_same<SType, EPS>::value && (othervectors || otherarray))
                                     pti = reinterpret_cast<K*>(tmp2r);
                             }
                         }
@@ -540,15 +540,14 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                             delete [] pt;
-                            if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
-                                delete [] pti;
+                            delete [] pti;
                         }
                         if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)) {
                             VecRestoreArray(xi, &tmpi);
-                            if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
+                            if(std::is_same<SType, EPS>::value && (othervectors || otherarray))
                                 VecRestoreArray(yi, &tmp2i);
                         }
-                        if(std::is_same<SType, EPS>::value && (othervectors || otherarray) && isTwoSided)
+                        if(std::is_same<SType, EPS>::value && (othervectors || otherarray))
                             VecRestoreArray(yr, &tmp2r);
                         VecRestoreArray(xr, &tmpr);
                     }
