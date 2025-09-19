@@ -1242,11 +1242,6 @@ class E_F0_Func1 :public  E_F0 { public:
      const  E_F0_Func1* tt=dynamic_cast<const E_F0_Func1 *>(t);
      if (tt && f == tt->f) rr = a->compare(tt->a);
      else rr = E_F0::compare(t);
-     if(tt && 0)
-      {
-       cout << "\n\t\t\t -------- " << (void *) f << " " << (void *) tt->f << " rr=" << a->compare(tt->a) << endl;
-       cout << "\t\t\tcmp E_F0_Func1 " << rr <<" << " << *this << " cmp " << *t << " " << tt << ">>\n";
-      }
      return rr;
      } // to give a order in instuction 
   // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation

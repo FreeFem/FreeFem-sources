@@ -925,30 +925,6 @@ AnyType Adaptation::operator()(Stack stack) const
   Th.SmoothMetric(raison);
   Th.MaxSubDivision(maxsubdiv);
   Th.BoundAnisotropy(anisomax);
-   if(nbcperiodic && false ) // in test
-       // to be sure that the metric is ok with periotic BC
-   {  // bof Bof ...
-       if(verbosity>1) cout << "  inforce de periodic BC on Metric" << endl;
-       KN<double> m(3*ndfv.N()), c(ndfv.N());
-       c=0.;
-       m=0.;
-      for ( iv=0;iv<Th.nbv;iv++)
-       {
-           int jv = ndfv[iv];
-           c[jv] += 1.;
-           m[jv*3  ] += Th[iv].m.a11;
-           m[jv*3+1] += Th[iv].m.a22;
-           m[jv*3+2] += Th[iv].m.a21;
-       }
-       for ( iv=0;iv<Th.nbv;iv++)
-       {
-           int jv = ndfv[iv];
-           Th[iv].m.a11 = m[jv*3  ] /c[jv]  ;
-           Th[iv].m.a22 = m[jv*3+1] /c[jv];
-           Th[iv].m.a21 = m[jv*3+2] /c[jv];
-
-       }
-   }
   // end of metric's computation
    if (mtx)
     for ( iv=0;iv<Th.nbv;iv++)

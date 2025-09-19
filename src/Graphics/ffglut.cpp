@@ -3111,13 +3111,6 @@ case 20+index: {type dummy; fin >= dummy;} break;
     PmaxT=Pmax;
     fminT=fmin;
     fmaxT=fmax;
-    if(old && 0)
-    {
-        Pmin= Minc(Pmin,old->PminT);
-        Pmax= Maxc(Pmax,old->PmaxT);
-        fmax= Max(fmax,old->fmaxT);
-        fmin= Min(fmin,old->fminT);
-    }
 
     z0= fminT -(fmaxT-fminT)*0.01;
     if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT

@@ -246,17 +246,7 @@ public:
 			}
 
 			if (NbAdj) NbOfEdges++;
-			if(NbAdj==1)
-                        {
-                            if (! (TonBoundary[i]& MaskEdge[j]) && 0)
-			    { NbOfMEdges++;
-				if(verbosity>99)
-				    cout << " Edge (" << j0 << " "<< j1 << ") : "  << j  << " of Triangle " << &T-triangles << " on mortar \n"
-				    <<" --- > " << number(T[0]) << " " << number(T[1]) << " " << number(T[2]) << " /" << int(TonBoundary[i])<< "\n" ;
-				TonBoundary[i]+= AddMortar[j];
-			    }
-				else { NbOfBEdges++; }
-                        }
+			if(NbAdj==1) NbOfBEdges++;
 		    }
 		}
 
@@ -2200,11 +2190,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R2 G=(A+B+C)/3.,PHat;
 		    double d=Area2(A,B,C);
 		    dmin=min(d,dmin);
-		    if(d<=1e-5 && 0)
-		    {
-			cout<< " T = "<<  i << " det= " << d << "  ::  " << A << " " << B << " " << C  << endl;
-
-		    }
 		    bool outside;
 		    const Triangle * t=Th.Find(G,PHat,outside,0);
 		    if(!outside ) {
