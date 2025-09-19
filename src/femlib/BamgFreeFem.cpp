@@ -797,25 +797,6 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
 
           }
 
-      if(0)
-        {
-
-
-          Th->SetVertexFieldOn();
-          for( int i=0;i<Th->nbv;++i)
-        {
-          VertexOnGeom *on=0;
-          if( (on =Th->vertices[i].on) ) // we are on geometrie
-            {
-              if(on->abscisse <0) {
-              bamg::GeometricalVertex * gv= on->gv;
-              }
-              else {// erreur car un point est sur un arete en non un sommet
-              bamg::GeometricalEdge * ge= on->ge;
-              }
-            }
-        }
-        }
           m=bamg2msh(Th,true);
 
       }
@@ -1168,25 +1149,6 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 
           }
 
-	  if(0)
-	    {
-
-
-	      Th->SetVertexFieldOn();
-	      for( int i=0;i<Th->nbv;++i)
-		{
-		  VertexOnGeom *on=0;
-		  if( (on =Th->vertices[i].on) ) // we are on geometrie
-		    {
-		      if(on->abscisse <0) {
-			  bamg::GeometricalVertex * gv= on->gv;
-		      }
-		      else {// erreur car un point est sur un arete en non un sommet
-			  bamg::GeometricalEdge * ge= on->ge;
-		      }
-		    }
-		}
-	    }
           m=bamg2msh(Th,true);
 
       }

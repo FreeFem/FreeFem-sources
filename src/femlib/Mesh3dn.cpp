@@ -129,13 +129,6 @@ namespace Fem2D
                 if(ff[nvedgeTet[i][0]]+ff[nvedgeTet[i][1]]==0)
                     onWhatIsFace[j][i+4]=2;
         }
-        if(0)
-            for(int j=0;j<4;++j)
-            {
-                for(int i=0;i<15;++i)
-                    cout << onWhatIsFace[j][i] << " ";
-                cout << endl;
-            }
         
         return onWhatIsFace;
     }

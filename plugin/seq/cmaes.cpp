@@ -1751,18 +1751,6 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
     cp += sprintf(cp, "Manual: stop signal read\n");
   }
 
-#if 0
-	else if (0) {
-		for (i = 0, cTemp = 0; i < N; ++i) {
-			cTemp += (sigma * sqrt(C[i][i]) < stopdx) ? 1 : 0;
-			cTemp += (sigma * rgpc[i] < stopdx) ? 1 : 0;
-		}
-
-		if (cTemp == 2 * N) {
-			flgStop = 1;
-		}
-	}
-#endif
 
   if (cp - sTestOutString > 320) {
     ERRORMESSAGE("Bug in cmaes_t:Test(): sTestOutString too short", 0, 0, 0);

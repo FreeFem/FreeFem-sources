@@ -901,27 +901,14 @@ namespace bamg {
             assert(j >= 0 && j < nbv);
             R2 Aij = (R2)vj - (R2)vi;
             Real8 ll = Norme2(Aij);
-            if (0) {
-              Real8 hi = ll / vi.m(Aij);
-              Real8 hj = ll / vj.m(Aij);
-              if (hi < hj) {
-                Real8 dh = (hj - hi) / ll;
-                // cout << " dh = " << dh << endl;
-                if (dh > logseuil) {
-                  vj.m.IntersectWith(vi.m / (1 + logseuil * ll / hi));
-                  if (first_np_or_next_t1[j] < 0) kch++, first_np_or_next_t1[j] = Head1, Head1 = j;
-                }
-              }
-            } else {
-              Real8 li = vi.m(Aij);
-              // Real8 lj = vj.m(Aij);
-              //		if ( i == 2 || j == 2)
-              //  cout << " inter " << i << " " << j << " " << ((1 +logseuil*li)) <<  endl;
-              if (vj.m.IntersectWith(vi.m / (1 + logseuil * li)))
-                // if( vj.m.IntersectWith(vi.m*(lj/li/(1 +logseuil*lj))) )
-                if (first_np_or_next_t1[j] < 0)    // if the metrix change
-                  kch++, first_np_or_next_t1[j] = Head1, Head1 = j;
-            }
+            Real8 li = vi.m(Aij);
+            // Real8 lj = vj.m(Aij);
+            //		if ( i == 2 || j == 2)
+            //  cout << " inter " << i << " " << j << " " << ((1 +logseuil*li)) <<  endl;
+            if (vj.m.IntersectWith(vi.m / (1 + logseuil * li)))
+              // if( vj.m.IntersectWith(vi.m*(lj/li/(1 +logseuil*lj))) )
+              if (first_np_or_next_t1[j] < 0)    // if the metrix change
+                kch++, first_np_or_next_t1[j] = Head1, Head1 = j;
           }
           if (&vj == pvj0) break;
         }

@@ -329,54 +329,6 @@ static void finit( ) {    // equivalent2d  3d EFQF
   static AddNewFE3 AddNewFE_QF3d5("FEQF53d", &TypeOfFE_QF3d5);
   static AddNewFE3 AddNewFE_QF3ddef("FEQF3d", &TypeOfFE_QF3d5);
 
-  if (0) {    // ne marche pas ??????
-    TEF2dto3d[FindFE2("FEQF")] = &TypeOfFE_QF3d5;
-    TEF2dto3d[FindFE2("FEQF1")] = &TypeOfFE_QF3d1;
-    TEF2dto3d[FindFE2("FEQF2")] = &TypeOfFE_QF3d2;
-    TEF2dto3d[FindFE2("FEQF5")] = &TypeOfFE_QF3d5;
-  }
-
-  if (0) {    // Add tools cree new FiniteElement2d
-    static AddNewFE3 *pAddNewFE3[15];
-
-    for (int i = 1; i <= 14; ++i) {
-      if (verbosity > 9) {
-        cout << "\n";
-      }
-
-      pAddNewFE3[i] = 0;
-      char sqfv[100];
-      sprintf(sqfv, "qfVp%d", i);
-      C_F0 cfq = Global.Find(sqfv);
-      if (cfq.NotNull( )) {
-        if (verbosity > 99) {
-          cout << "  find " << i << " " << sqfv << " type  " << cfq.left( ) << endl;
-        }
-
-        const EConstant< const GQuadratureFormular< R3 > * > *efq =
-          dynamic_cast< const EConstant< const GQuadratureFormular< R3 > * > * >(cfq.LeftValue( ));
-        if (efq) {
-          char *EFsqfv = new char[16];
-          sprintf(EFsqfv, "FEqfVp%d", i);
-
-          const GQuadratureFormular< R3 > *qf =
-            GetAny< const GQuadratureFormular< R3 > * >((*efq)(0));
-          if (verbosity > 9) {
-            cout << " \t " << sqfv << " " << qf->n << " " << qf->exact << ",  EF : " << EFsqfv
-                 << endl;
-          }
-
-          // int m = 5;
-          TypeOfFE_QF3d *FEqf = new TypeOfFE_QF3d(*qf);
-          pAddNewFE3[i] = new AddNewFE3(EFsqfv, FEqf);
-        }
-      } else if (verbosity > 9) {
-        cout << " try  " << i << " " << sqfv << " not found" << endl;
-      }
-
-      ;
-    }
-  }
 
   Dcl_Type< pEF2d * >(::InitializePtr< pEF2d >, ::DeletePtr< pEF2d >);
   if (verbosity > 9) {

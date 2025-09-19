@@ -1624,21 +1624,6 @@ void ArrayOperator()
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
        );
- if(0) //  a  change il faut regle un PB ambiguite ...
-     TheOperators->Add("=",
-        new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Add_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,DotStar_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,DotSlash_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Sub_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Mulc_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Divc_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Mul_KNM_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,KN_<K> > > , // Add FH juin 2005
-        new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > , // Add FH aug 2005
-        new OneBinaryOperator<set_eqarraypd<KN<K> ,if_arth_KN_<K>* > >
-      //  new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >   // test aug 2009
-      );
   // add august 2007
 
      TheOperators->Add("<-",
