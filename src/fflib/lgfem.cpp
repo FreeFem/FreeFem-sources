@@ -7315,20 +7315,20 @@ E_F0 *Op_CopyArray::code(const basicAC_F0 &args) const {
   int na = a.size( );
   int nb = b.size( );
   if (na != nb) CompileError("Copy of Array with incompatible size!");
+  Expression r = 0;    // new code FH sep 2009.
+  if (!r) r = Op_CopyArrayT< double, v_fes >(a, b);
+  if (!r) r = Op_CopyArrayT< Complex, v_fes >(a, b);
+  if (!r) r = Op_CopyArrayT< double, v_fes3 >(a, b);
+  if (!r) r = Op_CopyArrayT< Complex, v_fes3 >(a, b);
+  if (!r) r = Op_CopyArrayT< double, v_fesS >(a, b);
+  if (!r) r = Op_CopyArrayT< Complex, v_fesS >(a, b);
+  if (!r) r = Op_CopyArrayT< double, v_fesL >(a, b);
+  if (!r) r = Op_CopyArrayT< Complex, v_fesL >(a, b);
+  if (r) return r;
   else {
-    Expression r = 0;    // new code FH sep 2009.
-    if (!r) r = Op_CopyArrayT< double, v_fes >(a, b);
-    if (!r) r = Op_CopyArrayT< Complex, v_fes >(a, b);
-    if (!r) r = Op_CopyArrayT< double, v_fes3 >(a, b);
-    if (!r) r = Op_CopyArrayT< Complex, v_fes3 >(a, b);
-    if (!r) r = Op_CopyArrayT< double, v_fesS >(a, b);
-    if (!r) r = Op_CopyArrayT< Complex, v_fesS >(a, b);
-    if (!r) r = Op_CopyArrayT< double, v_fesL >(a, b);
-    if (!r) r = Op_CopyArrayT< Complex, v_fesL >(a, b);
-    if (r) return r;
+    CompileError("Internal Error: General Copy of Array : to do ");
+    return ret;
   }
-  CompileError("Internal Error: General Copy of Array : to do ");
-  return ret;
 }
 
 template< class v_fes, int DIM >
