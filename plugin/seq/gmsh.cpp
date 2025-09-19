@@ -1649,7 +1649,7 @@ bool SaveGMSH(pmesh3 pTh, string *filewoext) {
     return 1;
   }
 
-  f1.precision(15);
+  f1.precision(17);
   const Mesh3 &msh = *pTh;
   long nbvertices = msh.nv;
   f1 << "$MeshFormat" << endl;
@@ -1701,7 +1701,7 @@ bool SaveGMSH(pmeshS pTh, string *filewoext) {
     return 1;
   }
 
-  f1.precision(15);
+  f1.precision(17);
   const MeshS &msh = *pTh;
   long nbvertices = msh.nv;
   f1 << "$MeshFormat" << endl;
@@ -1750,7 +1750,7 @@ bool SaveGMSH(pmeshL pTh, string *filewoext) {
     return 1;
   }
 
-  f1.precision(15);
+  f1.precision(17);
   const MeshL &msh = *pTh;
   long nbvertices = msh.nv;
   f1 << "$MeshFormat" << endl;

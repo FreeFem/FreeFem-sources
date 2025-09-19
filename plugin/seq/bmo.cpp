@@ -200,7 +200,7 @@ double BijanMO::main(Vect &xx, Vect &xxmin, Vect &xxmax) {
       }
 
       if (debug) {
-        cout.precision(15);
+        cout.precision(17);
         cout << " F = " << costsavemin << " FM = " << costsaveming << endl;
       }
 
@@ -224,7 +224,7 @@ L9101:
 
   result(xoptg, vinit);
   cout << "-------------------------------------------\n";
-  cout.precision(15);
+  cout.precision(17);
   cout << " FM = " << costsaveming << " nb eval J : " << nbeval << " nbevalp : " << nbevalp << endl;
   if (ncstr > 0) {
     cout << "-------------------------------------------\n";
@@ -367,7 +367,7 @@ int BijanMO::gradopt(Vect &x1, Vect &fpx, Vect &temp, double &rho, double &f, do
     gnorm /= gnorm0;
     if (histpath) {
       ofstream fhist(histpath->c_str( ), ios::app);
-      fhist.precision(16);
+      fhist.precision(17);
       fhist << f << " " << gnorm * gnorm0 << " ";
       int n1 = min(ndim, 10);
 
@@ -378,7 +378,7 @@ int BijanMO::gradopt(Vect &x1, Vect &fpx, Vect &temp, double &rho, double &f, do
 
     if (histcpath) {
       ofstream fhist(histcpath->c_str( ), ios::app);
-      fhist.precision(16);
+      fhist.precision(17);
       fhist << fseul << endl;
 
       for (int i = 0; i < ncstr; ++i) {

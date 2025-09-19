@@ -112,7 +112,7 @@ class DxWriter {
 
     _vecmesh.push_back(mesh);
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
     _ofdata << "object \"pos_" << _vecmesh.size( ) - 1
             << "\" class array type float rank 1 shape 2 items " << Th.nv << " data follows"
             << std::endl;
@@ -168,7 +168,7 @@ class DxWriter {
 
     _vecofts[jj].vecistant.push_back(t);
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
     _ofdata << "object \"" << nameofts << "_data_" << _vecofts[jj].vecistant.size( ) - 1
             << "\" class array type float rank 0 items " << val.size( ) << " data follows"
             << std::endl;
@@ -203,7 +203,7 @@ class DxWriter {
     }
 
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
     _ofdata << "object \"" << nameoffield << "_data\" class array type float rank 0 items "
             << val.size( ) << " data follows" << std::endl;
 

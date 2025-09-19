@@ -78,7 +78,7 @@ class VtkWriter {
 
     _vecmesh.push_back(mesh);
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
 
     _ofdata << "<?xml version=\"1.0\"?>" << std::endl;
     _ofdata << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">"
@@ -136,7 +136,7 @@ class VtkWriter {
   /*!Add a field*/
   void addscalar(const string &nameoffield, const Mesh3 *mesh, const KN< double > &val) {
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
 
     _ofdata << "<DataArray type=\"Float32\" Name=\"" << nameoffield
             << "\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
@@ -165,7 +165,7 @@ class VtkWriter {
   void addvector(const string &nameoffield, const Mesh3 *mesh, const KN< double > &val,
                  const KN< double > &val2, const KN< double > &val3) {
     _ofdata.flags(std::ios_base::scientific);
-    _ofdata.precision(15);
+    _ofdata.precision(17);
 
     _ofdata << "<DataArray type=\"Float32\" Name=\"" << nameoffield
             << "\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;

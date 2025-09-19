@@ -6906,17 +6906,17 @@ void saveMatlab(const string &file, const Mesh &Th) {
       pf << "x = [ ";
 
       for (size_t n = 0; n < 3; n++) {
-        pf << std::setprecision(5) << setw(18) << K[n].x << " ";
+        pf << std::setprecision(17) << setw(18) << K[n].x << " ";
       }
 
-      pf << std::setprecision(5) << setw(18) << K[0].x << " ]; ";
+      pf << std::setprecision(17) << setw(18) << K[0].x << " ]; ";
       pf << "y = [ ";
 
       for (size_t n = 0; n < 3; n++) {
-        pf << std::setprecision(5) << setw(18) << K[n].y << " ";
+        pf << std::setprecision(17) << setw(18) << K[n].y << " ";
       }
 
-      pf << std::setprecision(5) << setw(18) << K[0].y << " ]; ";
+      pf << std::setprecision(17) << setw(18) << K[0].y << " ]; ";
       pf << "line(x,y);" << endl;
     }
 
@@ -6953,7 +6953,7 @@ void saveTecplot(const string &file, const Mesh &Th) {
   pf << "ZONE N=" << Th.nv << ", E=" << Th.nt << ", F=FEPOINT, ET=" << shape << endl;
 
   for (int i = 0; i < Th.nv; i++) {
-    pf << std::setprecision(5) << setw(18) << (R2)Th(i) << " \n";
+    pf << std::setprecision(17) << setw(18) << (R2)Th(i) << " \n";
   }
 
   for (int k = 0; k < Th.nt; ++k) {
