@@ -1029,7 +1029,7 @@ namespace bamg {
     assert(i < 512);
     LastMetricInterpole.lab = l;
     LastMetricInterpole.opt = i;
-    if (i > 200 && kkk++ < 10)
+    if (i > 200 && kkk++ < 10 && verbosity)
       cout << "Warning LengthInterpole: ( i = " << i << " l = " << l << " sss " << sss << " ) "
            << sstop << endl;
     return l;
