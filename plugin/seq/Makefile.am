@@ -91,7 +91,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/femlib/assertion.hpp ../../src/femlib/BamgFreeFem.hpp ../../src/Algo/BFGS.hpp ../../src/Algo/BrentLS.hpp		\
 	../../src/femlib/CGNL.hpp ../../src/fflib/CodeAlloc.hpp ../../config.h 	\
 	../../src/Algo/CubicLS.hpp ../../src/Algo/defs.hpp ../../src/femlib/DOperator.hpp ../../src/libMesh/eigenv.h		\
-	../../src/fflib/endian.hpp ../../src/fflib/environment.hpp ../../src/fflib/error.hpp ../../src/femlib/fem3.hpp		\
+	../../src/fflib/endian.hpp ../../src/fflib/environment.hpp ../../src/fflib/error.hpp		\
 	../../src/femlib/fem.hpp ../../src/femlib/FESpace.hpp ../../src/femlib/FESpacen.hpp ../../src/fflib/ff++.hpp		\
 	../../src/fflib/ffstack.hpp ../../src/femlib/FQuadTree.hpp ../../src/femlib/GenericMesh.hpp				\
 	../../src/Graphics/getprog-unix.hpp ../../src/Graphics/glrgraph.hpp ../../src/femlib/gmres.hpp				\
