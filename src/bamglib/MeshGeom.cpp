@@ -783,16 +783,12 @@ namespace bamg {
           GeometricalEdge &e2 = *e1.link;
           cerr << i << " " << e1[0].The( ) << " " << e2[0].The( ) << " " << e1[1].The( ) << " "
                << e2[1].The( ) << endl;
-          if (e1[0].The( ) == e2[0].The( ) && e1[1].The( ) == e2[1].The( )) {
-          } else if (e1[0].The( ) == e2[1].The( ) && e1[1].The( ) == e2[0].The( )) {
-          } else {
+          if (!((e1[0].The( ) == e2[0].The( ) && e1[1].The( ) == e2[1].The( )) || 
+                (e1[0].The( ) == e2[1].The( ) && e1[1].The( ) == e2[0].The( )))) {
             err++;
             cerr << " Cracked edges with no same vertex " << &e1 - edges << " " << &e2 - edges
                  << endl;
           }
-        } else {
-          //  if (!edges[i][0].IsThe()) err++;
-          // if (!edges[i][1].IsThe()) err++;
         }
       if (err) {
         cerr << " Some vertex was not distint and not on cracked edge " << err << endl;

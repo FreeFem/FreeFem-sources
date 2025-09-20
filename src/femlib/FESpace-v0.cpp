@@ -1064,8 +1064,7 @@ void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
   
-  if (val.N() <3) 
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
 //  throwassert(val.K()==3 );
   
@@ -1126,8 +1125,7 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y, l1=P.x, l2=P.y, lb=l0*l1*l2*9.; 
   
-  if (val.N() <4) 
-   throwassert(val.N() >=4);
+  throwassert(val.N() >=4);
   throwassert(val.M()==1 );
 //  throwassert(val.K()==3 );
   

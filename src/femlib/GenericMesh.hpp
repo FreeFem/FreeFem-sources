@@ -654,8 +654,7 @@ public:
 	  R lb[Rd::d+1];//{1.-PHat.sum(),PHat};
 	  R lbb[Rd::d+1];//{1.-PHat.sum(),PHat};
 	  PHat.toBary(lb); // R1 R2 R3
-	  if(Abs(lb[j])>1e-10)
-	   assert(Abs(lb[j])<1e-10);
+	  assert(Abs(lb[j])<1e-10);
 	int sigma[T::nva];
 	const void * nvkj[T::nva], *nvkkjj[T::nva];
 	int jj=p%nea;

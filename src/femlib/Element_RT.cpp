@@ -122,8 +122,7 @@ class TypeOfFE_RT : public  TypeOfFE { public:
   R2 A(K[0]), B(K[1]),C(K[2]);
   // R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
  // R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
-  if (val.N() <3) 
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==2 );
 //  throwassert(val.K()==3 );
   val=0;     
@@ -227,8 +226,7 @@ class TypeOfFE_RTmodif : public  TypeOfFE { public:
   R2 A(K[0]), B(K[1]),C(K[2]);
   R la=1-PHat.x-PHat.y,lb=PHat.x,lc=PHat.y; 
   R2 Dla(K.H(0)), Dlb(K.H(1)), Dlc(K.H(2));
-  if (val.N() <3) 
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==2 );
 
   R2 AB(A,B),AC(A,C),BA(B,A),BC(B,C),CA(C,A),CB(C,B);
@@ -386,8 +384,7 @@ void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,c
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
   
-  if (val.N() <3) 
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
   
   val=0; 
@@ -465,8 +462,7 @@ void TypeOfFE_P1ncLagrange::FB(const bool * whatd,const Mesh & ,const Triangle &
   //  l1(  cshrink1*(cshrink*((1,0)-G)+G)-G)+G  = 1
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
   
-  if (val.N() <3) 
-    throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
   // throwassert(val.K()==3 );
   
@@ -525,8 +521,7 @@ class TypeOfFE_RTortho : public  TypeOfFE { public:
   R2 A(K[0]), B(K[1]),C(K[2]);
   //R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
  // R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
-  if (val.N() <3) 
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==2 );
 //  throwassert(val.K()==3 );
   val=0;  
@@ -680,8 +675,7 @@ void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,cons
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
   
-  if (val.N() <3) 
-    throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
   //  throwassert(val.K()==3 );
   

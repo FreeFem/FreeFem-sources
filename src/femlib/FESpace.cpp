@@ -489,8 +489,7 @@ void TypeOfFE_P0VF::FB(const bool *whatd,const Mesh & ,const Triangle & K,const 
   l2 = l2 * 3. < 1;
   l0 = 1 - l1 -l2;// FH & AS july 2020
 
-  if (val.N() <3)
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
 
   val=0;
@@ -1102,8 +1101,7 @@ void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y;
 
-  if (val.N() <3)
-   throwassert(val.N() >=3);
+  throwassert(val.N() >=3);
   throwassert(val.M()==1 );
 
   val=0;
@@ -1145,8 +1143,7 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-PHat.x-PHat.y, l1=PHat.x, l2=PHat.y, lb=l0*l1*l2*9.;
 
-  if (val.N() <4)
-   throwassert(val.N() >=4);
+  throwassert(val.N() >=4);
   throwassert(val.M()==1 );
 
   val=0;

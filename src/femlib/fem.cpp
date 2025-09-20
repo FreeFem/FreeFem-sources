@@ -471,10 +471,8 @@ public:
 							{pV = &V;break;} //  ok good
 						    }
 						}
-						if ( ! (p>=0 && pV))
-						    throwassert(p>=0 && pV); //  PB reach the end without founding
-						if ( ! ( Abs((AM.perp(),A-*pV)) < 1e-5) )
-						    throwassert( Abs((AM.perp(),A-*pV)) < 1e-5);
+						throwassert(p>=0 && pV); //  PB reach the end without founding
+						throwassert( Abs((AM.perp(),A-*pV)) < 1e-5);
 
 						throwassert(sm != number(pV));
 						int kkgd= 3*k + j;
@@ -489,8 +487,7 @@ public:
 
 						    throwassert( s == number(triangles[kkgd/3][VerticesOfTriangularEdge[kkgd%3][dg]]));
 						    sgd[gd]=s;// save the last
-							if ( ! ( Abs((AM.perp(),A-vertices[s])) < 1e-5) )
-							    throwassert( Abs((AM.perp(),A-vertices[s])) < 1e-5);
+							throwassert( Abs((AM.perp(),A-vertices[s])) < 1e-5);
 							throwassert(kkgd>=0 && kkgd < 3*nt);
 							if (datamortars)
 							{
