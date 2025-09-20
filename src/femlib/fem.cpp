@@ -99,7 +99,7 @@ public:
 	    //  here a mortar is a connected componand of he whole edge of the coarse triangle
 	    //   minus  the extremite of mortar
 	    //  -----------
-	    int NbCollision=0,NbOfEdges=0,NbOfBEdges=0,NbOfMEdges=0;
+	    int NbCollision=0,NbOfEdges=0,NbOfBEdges=0;
 	    const char MaskEdge[]={1,2,4};
 	    const char AddMortar[]={8,16,32};
 	    //    reffecran();
@@ -255,7 +255,6 @@ public:
 			<< nt << endl ;
 			cout << "    Nb of edge on user boundary  " << neb
 			<< " ,  Nb of edges on true boundary  " << NbOfBEdges << endl;
-			if(NbOfMEdges) cout << "    Nb of edges on Mortars  = " << NbOfMEdges << endl;
 
 		    }
 		    delete [] Head; // cleanning memory
@@ -597,7 +596,6 @@ public:
 		{
 		    cout << "    Number of Edges                 = " << NbOfEdges << endl;
 		    cout << "    Number of Boundary Edges        = " << NbOfBEdges << " neb = " << neb << endl;
-		    cout << "    Number of Mortars  Edges        = " << NbOfMEdges << endl;
 		    cout << "    Nb Of Mortars with Paper Def    = " <<  NbMortarsPaper << " Nb Of Mortars = " << NbMortars;
 		    cout << "    Euler Number nt- NbOfEdges + nv = "
 			<< nt + NbMortars - NbOfEdges + nv << "= Nb of Connected Componant - Nb Of Hole "
