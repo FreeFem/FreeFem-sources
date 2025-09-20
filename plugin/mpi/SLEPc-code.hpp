@@ -245,7 +245,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PetscNew(&user);
                     user->mat = new typename eigensolver<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>::MatF_O(m, stack, codeA);
                     MatCreateShell(PetscObjectComm((PetscObject)ptA->_petsc), m, m, M, M, user, &S);
-                    MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>);
+                    MatShellSetOperation(S, MATOP_MULT, (PetscErrorCodeFn *)MatMult_User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>);
                     if(std::is_same<SType, EPS>::value)
                         EPSSetOperators(eps, S, NULL);
                     else if(std::is_same<SType, SVD>::value)

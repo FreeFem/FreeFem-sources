@@ -65,7 +65,7 @@ jobs:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
-    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+    name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: macos-${{ matrix.version }}
 
     steps:

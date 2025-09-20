@@ -170,7 +170,7 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         }
         else {
             PetscBool update = (mS && ptA->_ksp ? PETSC_TRUE : PETSC_FALSE);
-            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, ptA->_A->getCommunicator());
+            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPI_C_BOOL, MPI_MAX, ptA->_A->getCommunicator());
             if(update) {
                 Mat S;
                 MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &S);

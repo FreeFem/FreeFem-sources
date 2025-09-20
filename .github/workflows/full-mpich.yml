@@ -89,7 +89,7 @@ jobs:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
-    name: MacOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+    name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
       - ${{ github.workflow }}
 
     runs-on: macos-${{ matrix.version }}
@@ -115,7 +115,7 @@ jobs:
 
       - name: Install
         run: |
-          brew install m4 bison hdf5 wget autoconf automake
+          brew install m4 bison hdf5 autoconf automake
           brew remove llvm@$LLVM_VERSION
 
       - name: Symlink gfortran

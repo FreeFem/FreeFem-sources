@@ -52,8 +52,8 @@ PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
-PETSC_DOWNLOAD := --download-metis --download-ptscotch \
-		--download-hypre --download-hypre-commit=v2.33.0 --download-parmetis \
+PETSC_DOWNLOAD := --download-metis --download-ptscotch --download-ptscotch-commit=v7.0.10 \
+		--download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen
 ifneq ($(TOOL_DYLIB_mmg),)
 PETSC_DOWNLOAD += --download-mmg
@@ -125,8 +125,8 @@ endif
 
 ifneq ($(WIN32DLLTARGET),)
 COMMON_FLAGS += --with-shared-libraries=0 \
-	CXXFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
-	CFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
+	CXXFLAGS+='-fno-stack-protector -Wno-format -Wno-format-extra-args' \
+	CFLAGS+='-fno-stack-protector -Wno-format -Wno-format-extra-args -Wno-maybe-uninitialized' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)

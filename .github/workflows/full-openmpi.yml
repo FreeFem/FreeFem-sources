@@ -80,4 +80,4 @@ jobs:
       - name: Install
         run: make install
 
-# No test for MacOS, the homebrew bottle open-mpi seems broken.
+# No test for macOS, the homebrew bottle open-mpi seems broken.

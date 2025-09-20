@@ -1,7 +1,7 @@
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/PTScotch.py petsc-3.23.6-p1/config/BuildSystem/config/packages/PTScotch.py
---- petsc-3.23.6/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 15:00:03
-+++ petsc-3.23.6-p1/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 17:06:45
-@@ -63,4 +63,10 @@
+diff --color -Naur petsc-3.24.0/config/BuildSystem/config/packages/PTSCOTCH.py petsc-3.24.0-p1/config/BuildSystem/config/packages/PTSCOTCH.py
+--- petsc-3.24.0/config/BuildSystem/config/packages/PTSCOTCH.py	2025-03-26 15:00:03
++++ petsc-3.24.0-p1/config/BuildSystem/config/packages/PTSCOTCH.py	2025-03-26 17:06:45
+@@ -62,4 +62,10 @@
 
      args.append('-DBUILD_FORTRAN:BOOL=OFF')
      args.append('-DENABLE_TESTS:BOOL=OFF')
@@ -12,9 +12,9 @@ diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/PTScotch.py p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.23.6-p1/config/BuildSystem/config/packages/SuiteSparse.py
---- petsc-3.23.6/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
-+++ petsc-3.23.6-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.24.0/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.24.0-p1/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.24.0/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
++++ petsc-3.24.0-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
 @@ -70,4 +70,10 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
@@ -26,9 +26,9 @@ diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/SuiteSparse.p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/SuperLU.py petsc-3.23.6-p1/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.23.6/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
-+++ petsc-3.23.6-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.24.0/config/BuildSystem/config/packages/SuperLU.py petsc-3.24.0-p1/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.24.0/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
++++ petsc-3.24.0-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
 @@ -54,5 +54,11 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
@@ -41,10 +41,10 @@ diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/SuperLU.py pe
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
 
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/metis.py petsc-3.23.6-p1/config/BuildSystem/config/packages/metis.py
---- petsc-3.23.6/config/BuildSystem/config/packages/metis.py	2025-03-08 23:51:15
-+++ petsc-3.23.6-p1/config/BuildSystem/config/packages/metis.py	2025-03-26 17:07:16
-@@ -44,6 +44,12 @@
+diff --color -Naur petsc-3.24.0/config/BuildSystem/config/packages/METIS.py petsc-3.24.0-p1/config/BuildSystem/config/packages/METIS.py
+--- petsc-3.24.0/config/BuildSystem/config/packages/METIS.py	2025-03-08 23:51:15
++++ petsc-3.24.0-p1/config/BuildSystem/config/packages/METIS.py	2025-03-26 17:07:16
+@@ -45,6 +45,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
      args.append('-DMATH_LIB="'+self.libraries.toStringNoDupes(self.mathlib.lib)+'"')
@@ -57,9 +57,9 @@ diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/metis.py pets
      return args
 
    def configureLibrary(self):
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/mmg.py petsc-3.23.6-p1/config/BuildSystem/config/packages/mmg.py
---- petsc-3.23.6/config/BuildSystem/config/packages/mmg.py	2025-03-26 15:00:03
-+++ petsc-3.23.6-p1/config/BuildSystem/config/packages/mmg.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.24.0/config/BuildSystem/config/packages/Mmg.py petsc-3.24.0-p1/config/BuildSystem/config/packages/Mmg.py
+--- petsc-3.24.0/config/BuildSystem/config/packages/Mmg.py	2025-03-26 15:00:03
++++ petsc-3.24.0-p1/config/BuildSystem/config/packages/Mmg.py	2025-03-26 17:07:16
 @@ -29,6 +29,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
@@ -73,15 +73,59 @@ diff --color -Naur petsc-3.23.6/config/BuildSystem/config/packages/mmg.py petsc-
      if self.getDefaultIndexSize() == 64:
        int64_t = '''
  #if !(defined(PETSC_HAVE_STDINT_H) && defined(PETSC_HAVE_INTTYPES_H) && defined(PETSC_HAVE_MPI_INT64_T))
-diff --color -Naur petsc-3.23.6/config/BuildSystem/config/package.py petsc-3.23.6-p1/config/BuildSystem/config/package.py
---- petsc-3.23.6/config/BuildSystem/config/package.py	2025-03-26 15:00:03
-+++ petsc-3.23.6-p1/config/BuildSystem/config/package.py	2025-03-26 17:07:16
-@@ -432,7 +432,7 @@ class Package(config.base.Configure):
-     if self.requirekandr:
-       outflags += self.setCompilers.KandRFlags
-     with self.Language('C'):
--      if self.brokengnu23 and config.setCompilers.Configure.isGcc150plus(self.getCompiler(), self.log):
-+      if self.brokengnu23 and (config.setCompilers.Configure.isGcc150plus(self.getCompiler(), self.log) or config.setCompilers.Configure.isMINGW(self.getCompiler(), self.log)):
-         outflags.append('-std=gnu17')
-     return ' '.join(outflags)
-
+diff --git petsc-3.24.0/config/BuildSystem/config/compilerOptions.py petsc-3.24.0-p1/config/BuildSystem/config/compilerOptions.py
+--- petsc-3.24.0/config/BuildSystem/config/compilerOptions.py
++++ petsc-3.24.0-p1/config/BuildSystem/config/compilerOptions.py
+@@ -32,7 +32,7 @@ class CompilerOptions(config.base.Configure):
+         if config.setCompilers.Configure.isGcc110plus(compiler, self.log):
+           flags.extend(['-Wno-stringop-overflow'])
+         # skip -fstack-protector for brew gcc - as this gives SEGV
+-        if not (config.setCompilers.Configure.isDarwin(self.log) and config.setCompilers.Configure.isGNU(compiler, self.log)):
++        if not ((config.setCompilers.Configure.isDarwin(self.log) or config.setCompilers.Configure.isMINGW(compiler, self.log)) and config.setCompilers.Configure.isGNU(compiler, self.log)):
+           flags.extend(['-fstack-protector'])
+         if config.setCompilers.Configure.isDarwinCatalina(self.log) and config.setCompilers.Configure.isClang(compiler, self.log):
+           flags.extend(['-fno-stack-check'])
+@@ -144,7 +144,7 @@ class CompilerOptions(config.base.Configure):
+           flags.extend(['-Wno-psabi'])
+         if not any([
+             # skip -fstack-protector for brew gcc - as this gives SEGV
+-            config.setCompilers.Configure.isDarwin(self.log) and config.setCompilers.Configure.isGNU(compiler, self.log),
++            (config.setCompilers.Configure.isDarwin(self.log) or config.setCompilers.Configure.isMINGW(compiler, self.log)) and config.setCompilers.Configure.isGNU(compiler, self.log),
+             # hipcc for ROCm-4.0 crashes on some source files with -fstack-protector
+             config.setCompilers.Configure.isHIP(compiler, self.log),
+         ]):
+diff --git petsc-3.24.0/config/BuildSystem/config/setCompilers.py petsc-3.24.0-p1/config/BuildSystem/config/setCompilers.py
+--- petsc-3.24.0/config/BuildSystem/config/setCompilers.py
++++ petsc-3.24.0-p1/config/BuildSystem/config/setCompilers.py
+@@ -352,6 +352,15 @@ class Configure(config.base.Configure):
+         if (int(VMAJOR),int(VMINOR)) >= (11,0):
+           if log: log.write('Detected Gcc110plus compiler\n')
+           return 1
++      else:
++        if config.setCompilers.Configure.isGNU(compiler, log) and config.setCompilers.Configure.isMINGW(compiler, log):
++          (output, error, status) = config.base.Configure.executeShellCommand(compiler+' -dumpversion', log = log)
++          strmatch = re.match(r'(\d+)\.(\d+)',output)
++          if strmatch:
++            VMAJOR,VMINOR = strmatch.groups()
++            if (int(VMAJOR),int(VMINOR)) >= (11,0):
++              if log: log.write('Detected Gcc110plus compiler\n')
++              return 1
+       if log: log.write('Did not detect Gcc110plus compiler\n')
+     except RuntimeError:
+       if log: log.write('Did not detect Gcc110plus compiler due to exception\n')
+@@ -370,6 +379,15 @@ class Configure(config.base.Configure):
+         if (int(VMAJOR),int(VMINOR)) >= (15,0):
+           if log: log.write('Detected Gcc150plus compiler\n')
+           return 1
++      else:
++        if config.setCompilers.Configure.isGNU(compiler, log) and config.setCompilers.Configure.isMINGW(compiler, log):
++          (output, error, status) = config.base.Configure.executeShellCommand(compiler+' -dumpversion', log = log)
++          strmatch = re.match(r'(\d+)\.(\d+)',output)
++          if strmatch:
++            VMAJOR,VMINOR = strmatch.groups()
++            if (int(VMAJOR),int(VMINOR)) >= (15,0):
++              if log: log.write('Detected Gcc150plus compiler\n')
++              return 1
+       if log: log.write('Did not detect Gcc150plus compiler\n')
+     except RuntimeError:
+       if log: log.write('Did not detect Gcc150plus compiler due to exception\n')
