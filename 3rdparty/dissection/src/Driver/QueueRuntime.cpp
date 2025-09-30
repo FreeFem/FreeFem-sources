@@ -2773,6 +2773,23 @@ void QueueRuntime::exec_num_fact(const int called)
    }    // loop : it
  }
  #endif
+// begin : scope for fout
+  if (0) {
+    char fname[256];
+    int pid = get_process_id();
+    sprintf(fname, "tasks-before.%d.%d.data", pid, called);
+    FILE *fp;
+    if ((fp = fopen(fname, "a")) != NULL) {
+      write_dependency(fp);
+      fclose(fp);
+    }
+    else {
+      fprintf(stderr,
+	      "%s %d : fail to open %s\n",
+	      __FILE__, __LINE__, fname);
+      exit(-1);
+    }
+  }  // end : scope for fout
 
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
@@ -2821,6 +2838,23 @@ void QueueRuntime::exec_num_fact(const int called)
   _fout.close();
 #endif
 
+  // begin : scope for fout
+  if (0) {
+    char fname[256];
+    int ppid = get_process_id();
+    sprintf(fname, "tasks-copied.%d.data", ppid);
+    FILE *fp;
+    if ((fp = fopen(fname, "a")) != NULL) {
+      write_dependency(fp);
+      fclose(fp);
+    }
+    else {
+      fprintf(stderr,
+	      "%s %d : fail to open %s\n",
+	      __FILE__, __LINE__, fname);
+      exit(-1);
+    }
+  }
 
 #ifdef DEBUG_THREAD_TIME
   {
