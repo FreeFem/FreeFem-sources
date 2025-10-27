@@ -48,9 +48,6 @@ void initArrayOperatordouble() {
   Global.Add("fabs", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(fabs));
   Global.Add("abs", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(fabs));
   Global.Add("cbrt","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(cbrt));
-  Global.Add("acos", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(acos));
-  Global.Add("asin", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(asin));
-  Global.Add("atan", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>,K, KK, KN_<K> >(atan));
   Global.Add("floor", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>,K, KK, KN_<K> >(floor));
   Global.Add("ceil", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>,K, KK, KN_<K> >(ceil));
 

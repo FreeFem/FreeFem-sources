@@ -139,7 +139,7 @@ template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(M
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Min (const T &a,const T & b,const T & c,const T & d){return Min(Min(a,b),Min(c,d));}
 template<class T> inline T Max (const T &a,const T & b,const T & c,const T & d){return Max(Max(a,b),Max(c,d));}
-
+template<class T> inline T Fma (const T &a,const T & b,const T & c){return fma(a,b,c);}
 template<class T> inline T Square (const T &a){return a*a;}
 
 struct SubArray2 {
@@ -1550,7 +1550,6 @@ void Init_map_type()
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
 
-    Global.Add("cos","(",new OneOperator1<double>(cos,2));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
@@ -1569,11 +1568,17 @@ void Init_map_type()
     Global.Add("lround","(",new OneOperator1<long,Complex>(lroundc));  // add aout   2020
 
      Global.Add("sin","(",new OneOperator1<double>(sin,2));
+     Global.Add("cos","(",new OneOperator1<double>(cos,2));
      Global.Add("tan","(",new OneOperator1<double>(tan,2));
+     Global.Add("asin","(",new OneOperator1<double>(asin));
+     Global.Add("acos","(",new OneOperator1<double>(acos));
      Global.Add("atan","(",new OneOperator1<double>(atan,2));
      Global.Add("sinh","(",new OneOperator1<double>(sinh,2));
      Global.Add("cosh","(",new OneOperator1<double>(cosh,2));
      Global.Add("tanh","(",new OneOperator1<double>(tanh,2));
+     Global.Add("asinh","(",new OneOperator1<double>(asinh));
+     Global.Add("acosh","(",new OneOperator1<double>(acosh));
+     Global.Add("atanh","(",new OneOperator1<double>(atanh));
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
     Global.Add("atol","(",new OneOperator1<long,string*>(atoi));// add march 2010
@@ -1583,11 +1588,6 @@ void Init_map_type()
     Global.Add("strtol","(",new OneOperator2<long,string*,long>(ffstrtol));// add march 2017
     Global.Add("strtod","(",new OneOperator1<double,string*>(ffstrtod));// add march 2017
 
-     Global.Add("atanh","(",new OneOperator1<double>(atanh));
-     Global.Add("asin","(",new OneOperator1<double>(asin));
-     Global.Add("acos","(",new OneOperator1<double>(acos));
-     Global.Add("asinh","(",new OneOperator1<double>(asinh));
-     Global.Add("acosh","(",new OneOperator1<double>(acosh));
 #ifdef HAVE_ERFC
      Global.Add("erf","(",new OneOperator1<double>(erf));
      Global.Add("erfc","(",new OneOperator1<double>(erfc));
@@ -1606,8 +1606,12 @@ void Init_map_type()
       Global.Add("yn","(",new OneOperator2<double,long,double>(myyn));
 #endif
      Global.Add("exp","(",new OneOperator1<double>(exp));
+     Global.Add("exp2","(",new OneOperator1<double>(exp2));
+     Global.Add("expm1","(",new OneOperator1<double>(expm1));
      Global.Add("log","(",new OneOperator1<double>(log));
      Global.Add("log10","(",new OneOperator1<double>(log10));
+     Global.Add("log1p","(",new OneOperator1<double>(log1p));
+     Global.Add("log2","(",new OneOperator1<double>(log2));
 //     Global.Add("pow","(",new OneOperator2<double,double>(pow));
     Global.Add("pow","(",new OneBinaryOperator<Op2_pow<double,double,double> >);
     Global.Add("pow","(",new OneBinaryOperator<Op2_pow<long,long,long> >);
@@ -1636,6 +1640,7 @@ void Init_map_type()
     Global.Add("atan2","(",new OneOperator2<double>(atan2));
     Global.Add("fmod","(",new OneOperator2<double>(fmod));// add sep 2017
     Global.Add("fdim","(",new OneOperator2<double>(fdim));// add sep 2017
+    Global.Add("fma","(",new OneOperator3_<double, double, double>(Fma));
     Global.Add("fmax","(",new OneOperator2<double>(fmax));// add sep 2017
     Global.Add("fmin","(",new OneOperator2<double>(fmin));// add sep 2017
 
