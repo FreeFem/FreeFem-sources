@@ -15,3 +15,8 @@ configuration, click on the corresponding badge below.
 | ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg)    | ![Full version MS-MPI](https://github.com/FreeFem/FreeFem-sources/actions/workflows/full-msmpi.yml/badge.svg?branch=develop)    |
 
 GitHub Actions workflows definition files available [here](.github/workflows).
+
+## Triggers
+
+CI worklows are triggered whenever there is a **push on develop or master**
+branches, or when creating a **pull request on develop** branch.
