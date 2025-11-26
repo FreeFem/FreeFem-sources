@@ -1,0 +1,62 @@
+load "GrundmannMoller" 
+load "qf11to25" 
+include "getARGV.idp"
+
+/* qf11to25 quadratures will be our exact values for 2D & 3D
+/!\ Warning: The method exhibits stability issues as the order increases
+    the one can have some FreeFem warnings like : 
+    Erreur dans la formule d'integration d=1 exact = 40 Nb Point = 861
+    which can also affect the quality of the results*/
+// 1D verification
+cout
+<< "--------------------1D--------------------\n";
+int NN = 10;                        //  number of intervals
+meshL Th1D = segment(NN, [ x, 0 ]); // creation of the 1D mesh over [0,1]
+int kk = 2;
+func f1D = x ^ kk;                                           //  function to be integrated
+real integral1D = int1d(Th1D, qfe = GMQuadrature1D(10))(f1D); // integration over 1D mesh
+cout.precision(20);
+cout << "Result 1D:" << integral1D << endl;
+cout.precision(20);
+cout << "Error 1D:" << abs(integral1D - 1. / (kk + 1)) << endl;
+cout << "kk= " << kk << " |intergral 1D=" << integral1D << " |Exact 1D=" << 1. / (kk + 1) << endl;
+// 2D
+cout << "--------------------2D--------------------\n";
+
+real k = getARGV("-waven", 5.);
+real lambda2D = 2 * pi / k;
+
+real epsilonprob = 0;
+int Dirichlet = 1;
+int Robin = 2;
+
+int[int] chlab = [ 1, Robin, 2, Robin, 3, Robin, 4, Robin ];
+
+real npplo2D = 15.;
+
+mesh Th2D = square(npplo2D * 1. / lambda2D, npplo2D * 1. / lambda2D); // global mesh
+func f2D = x ^ kk + y ^ kk;
+
+Th2D = change(Th2D, refe = chlab);
+real Val2Dex = real(int2d(Th2D, qforder = 10)(abs(f2D)));
+real Val2Dapp = real(int2d(Th2D, qft = GMQuadrature2D(7))(abs(f2D)));
+
+cout.precision(20);
+cout << "Result 2D: " << Val2Dex << endl;
+cout.precision(20);
+cout << "Error: 2D: " << abs(Val2Dex - Val2Dapp) << endl;
+cout << "kk= " << kk << " |intergral 2D= " << Val2Dapp << " |Exact 2D =" << Val2Dex << endl;
+
+// 3D verification
+cout << "--------------------3D--------------------\n";
+func f3D = x ^ kk + y ^ kk + z ^ kk;
+real lambda3D = 2 * pi / k;
+int npplo = 4;
+mesh3 Th3D = cube(npplo * 1. / lambda3D, npplo * 1. / lambda3D, npplo * 1. / lambda3D); // global mesh
+real Val3Dex = real(int3d(Th3D, qfV = qfVp7)(f3D));
+real Val3Dapp = real(int3d(Th3D, qfV = GMQuadrature3D(9))(f3D));
+cout.precision(20);
+cout << "Result 3D: " << Val3Dex << endl;
+cout.precision(20);
+cout << "Error: 3D: " << abs(Val3Dex - Val3Dapp) << endl;
+cout << "kk= " << kk << " |intergral 3D= " << Val3Dapp << " |Exact 3D =" << Val3Dex << endl;
