@@ -1,0 +1,127 @@
+# Call the corresponding build workflow with the proper arguments:
+# - Build_type: Release
+# - Upload build_tree: true
+name: Release DEB
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_freefem:
+    uses: ./.github/workflows/full-openmpi.yml
+    with:
+      versions: '[22.04, 24.04]'
+      build-types: '["release"]'
+      skip_check: true
+      upload_build_artifacts: true
+
+  package_freefem_2204:
+    needs: build_freefem
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version, tag and .deb file name
+        id: version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          RELEASE_TAG_NAME="v$VERSION"
+          OSRELEASE=$(lsb_release -r|awk '{print $2}')
+          GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubuntu${OSRELEASE}.deb"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_tag_name=$RELEASE_TAG_NAME" >> $GITHUB_OUTPUT
+          echo "gh_deb_name=$GH_DEB_NAME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Release tag name: $RELEASE_TAG_NAME"
+          echo "Package name: $GH_DEB_NAME"
+          
+      - uses: actions/download-artifact@v5
+        with:
+          name: install_tree_22.04
+          path: ./artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Untar artifact and package .deb
+        run: |
+          mkdir ./install_tree
+          tar -xzf ./artifacts/install_tree.tar.gz -C ./install_tree/
+          bash etc/actions/releases/package_deb_ubuntu.sh \
+          ./install_tree \
+          ${{ steps.version.outputs.version }}
+          
+      - name: Upload .deb as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.release_tag_name }}-22.04
+          path: ./*.deb
+
+  package_freefem_2404:
+    needs: build_freefem
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version, tag and .deb file name
+        id: version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          RELEASE_TAG_NAME="v$VERSION"
+          OSRELEASE=$(lsb_release -r|awk '{print $2}')
+          GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubuntu${OSRELEASE}.deb"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_tag_name=$RELEASE_TAG_NAME" >> $GITHUB_OUTPUT
+          echo "gh_deb_name=$GH_DEB_NAME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Release tag name: $RELEASE_TAG_NAME"
+          echo "Package name: $GH_DEB_NAME"
+          
+      - uses: actions/download-artifact@v5
+        with:
+          name: install_tree_24.04
+          path: ./artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Unta artifact and package .deb
+        run: |
+          mkdir ./install_tree
+          tar -xzf ./artifacts/install_tree.tar.gz -C ./install_tree/
+          bash etc/actions/releases/package_deb_ubuntu.sh \
+          ./install_tree \
+          ${{ steps.version.outputs.version }}
+          
+      - name: Upload .deb as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.release_tag_name }}-24.04
+          path: ./*.deb
+
+
+  create_release:
+    needs: [package_freefem_2204, package_freefem_2404]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create releases
+    steps:
+      - name: Download all .deb packages
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-assets
+          merge-multiple: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Untar the artifact
+        run:  find ./release-assets -name "*.tar.gz" -exec tar -xzf {} -C ./release-assets \;
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./release-assets/*.deb
+          draft: false
+          prerelease: false
+          # generate_release_notes: true
+          tag_name: ${{ github.ref_name }}  # Should automatically uses the tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
