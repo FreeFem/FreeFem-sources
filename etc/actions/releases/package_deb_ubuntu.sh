@@ -35,7 +35,7 @@ touch "$DEB_NAME/DEBIAN/control"
 	echo "Version: $VERSION";
 	echo "Section: custom";
 	echo "Architecture: amd64";
-	echo "Depends: libc6 (>= 2.31), g++ (>= 9.3), gcc (>= 9.3), gfortran (>= 9.3), libgsl-dev (>=2.5), libhdf5-dev (>=1.10.4), liblapack-dev (>= 3.9), libopenmpi-dev (>=4.0.3) ,freeglut3-dev (>= 2.8.1)";
+	echo "Depends: libc6 (>= 2.31), g++ (>= 9.3), gcc (>= 9.3), gfortran (>= 9.3), libgsl-dev (>=2.5), libhdf5-dev (>=1.10.4), liblapack-dev (>= 3.9), freeglut3-dev (>= 2.8.1)";
 	echo "Maintainer: FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr>";
 	echo "Description: FreeFEM, Finite Element Language software";
 	echo "Homepage: https://freefem.org"
