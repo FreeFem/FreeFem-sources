@@ -18,13 +18,14 @@ class TypeOfFE_PkLagrange : public TypeOfFE {
   private:
     // static int * pdata;
     // FUnction to Fill Data table
-    static int *PrepareData(int PK) {
+    /*int *PrepareData(int PK) {
         int ndof = (PK + 2) * (PK + 1) / 2;
-        static vector<int> data(5 * ndof + 3, 0);
+        //static vector<int> data(5 * ndof + 3, 0);
         // Fill data
-        FillDataLagrange(PK, data);
-        return data.data();
-    }
+        int *Data= FillDataLagrange(PK);
+        //return data.data();
+        return Data;
+    }*/
 
   public:
     int k; // The degree
@@ -41,7 +42,7 @@ class TypeOfFE_PkLagrange : public TypeOfFE {
     vector<long> kl; //[ndf];
     // Constuctor
     TypeOfFE_PkLagrange(int PK)
-        : TypeOfFE((PK + 1) * (PK + 2) / 2, 1, PrepareData(PK), PK, PK,
+        : TypeOfFE((PK + 1) * (PK + 2) / 2, 1, FillDataLagrange(PK), PK, PK,
                    (PK + 1) * (PK + 2) / 2 + ((PK % 2) ? (PK - 1) * 3 : (PK - 2) * 3), (PK + 1) * (PK + 2) / 2, 0) {
         k = PK;
         ndf = (k + 2) * (k + 1) / 2;
@@ -210,13 +211,21 @@ void TypeOfFE_PkLagrange::FB(const bool *whatd, const Mesh &, const Triangle &K,
         }
     }
 }
-
-static TypeOfFE_PkLagrange PKLagrange(9);
+static TypeOfFE_PkLagrange PKLagrange5(5);
+static TypeOfFE_PkLagrange PKLagrange6(6);
+static TypeOfFE_PkLagrange PKLagrange7(7);
+static TypeOfFE_PkLagrange PKLagrange8(8);
 
 static void init() {
 
-    AddNewFE("PKLagrange", &PKLagrange);
-    static ListOfTFE FE_PK("PKLagrange", &PKLagrange); // to add PKLagrange in list of Common FE*/
+    AddNewFE("PKLagrange5", &PKLagrange5);
+    static ListOfTFE FE_PK5("PKLagrange5", &PKLagrange5); // to add PKLagrange in list of Common FE
+    AddNewFE("PKLagrange6", &PKLagrange6);
+    static ListOfTFE FE_PK6("PKLagrange6", &PKLagrange6); // to add PKLagrange in list of Common FE
+    AddNewFE("PKLagrange7", &PKLagrange7);
+    static ListOfTFE FE_PK7("PKLagrange7", &PKLagrange7); // to add PKLagrange in list of Common FE
+    AddNewFE("PKLagrange8", &PKLagrange8);
+    static ListOfTFE FE_PK8("PKLagrange8", &PKLagrange8); // to add PKLagrange in list of Common FE*/
 }
 
 } // namespace Fem2D

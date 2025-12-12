@@ -43,13 +43,13 @@ vector<R2> PtConstruction(int k) {
     return Pt;
 }
 
-void FillDataLagrange(int k, vector<int> &Data) {
+int * FillDataLagrange(int k) {
     /* Fill Data array in PKlagrange element (see P3 or P4
     for more details)
     */
-
     int ndof = (k + 1) * (k + 2) * 0.5;
-    Data.resize(5 * ndof + 3, 0);
+    //Data.resize(5 * ndof + 3, 0);
+    int *Data = new int [5 * ndof + 3];
 
     // First row(the support number  of the node of the df)
     // Data[0]=0;
@@ -99,6 +99,7 @@ void FillDataLagrange(int k, vector<int> &Data) {
     /*Data[5*ndof+1]=0;
     Data[5*ndof]=0;*/
     // Pi_h_coef.resize(ndof,1.);
+    return Data;
 }
 
 vector<pair<int, int>> ExchangeidxVector(int k) {
