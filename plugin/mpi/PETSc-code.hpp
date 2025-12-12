@@ -2658,38 +2658,28 @@ namespace PETSc {
             nargs[8] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : 0;
           int dim = ptNS ? ptNS->N : 0;
           int dimPETSc = ptPETScNS ? ptPETScNS->M( ) : 0;
-          if (dim || dimPETSc) {
+          if (dim) {
             Vec v;
             MatCreateVecs(ptA->_petsc, &v, NULL);
             Vec* ns;
-            VecDuplicateVecs(v, std::max(dim, dimPETSc), &ns);
+            VecDuplicateVecs(v, dim, &ns);
             VecDestroy(&v);
-            if (std::max(dim, dimPETSc) == dimPETSc) {
-              PetscInt m;
-              VecGetLocalSize(ns[0], &m);
-              for (unsigned short i = 0; i < dimPETSc; ++i) {
-                PetscScalar* x;
-                VecGetArray(ns[i], &x);
-                for (int j = 0; j < m; ++j) x[j] = (*ptPETScNS)(j, i);
-                VecRestoreArray(ns[i], &x);
+            for (unsigned short i = 0; i < dim; ++i) {
+              PetscScalar* x;
+              VecGetArray(ns[i], &x);
+              upscaled_type<PetscScalar>* get = *ptNS->get(i);
+              PetscScalar* base = reinterpret_cast<PetscScalar*>(get);
+              if(!std::is_same<upscaled_type<PetscReal>, PetscReal>::value) {
+                  for(int j = 0; j < ptNS->get(i)->n; ++j)
+                      base[j] = get[j];
               }
-            } else
-              for (unsigned short i = 0; i < dim; ++i) {
-                PetscScalar* x;
-                VecGetArray(ns[i], &x);
-                upscaled_type<PetscScalar>* get = *ptNS->get(i);
-                PetscScalar* base = reinterpret_cast<PetscScalar*>(get);
-                if(!std::is_same<upscaled_type<PetscReal>, PetscReal>::value) {
-                    for(int j = 0; j < ptNS->get(i)->n; ++j)
-                        base[j] = get[j];
-                }
-                HPDDM::Subdomain< PetscScalar >::template distributedVec< 0 >(
-                  ptA->_num, ptA->_first, ptA->_last, base,
-                  x, static_cast<PetscInt>(ptNS->get(i)->n));
-                VecRestoreArray(ns[i], &x);
-              }
-            PetscScalar* dots = new PetscScalar[std::max(dim, dimPETSc)];
-            for (unsigned short i = 0; i < std::max(dim, dimPETSc); ++i) {
+              HPDDM::Subdomain< PetscScalar >::template distributedVec< 0 >(
+                ptA->_num, ptA->_first, ptA->_last, base,
+                x, static_cast<PetscInt>(ptNS->get(i)->n));
+              VecRestoreArray(ns[i], &x);
+            }
+            PetscScalar* dots = new PetscScalar[dim];
+            for (unsigned short i = 0; i < dim; ++i) {
               if (i > 0) {
                 VecMDot(ns[i], i, ns, dots);
                 for (int j = 0; j < i; ++j) dots[j] *= -1.0;
@@ -2699,11 +2689,40 @@ namespace PETSc {
             }
             delete[] dots;
             MatNullSpace sp;
-            MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
-            if (dim) MatSetNearNullSpace(ptA->_petsc, sp);
-            else MatSetNullSpace(ptA->_petsc, sp);
+            MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, dim, ns, &sp);
+            MatSetNearNullSpace(ptA->_petsc, sp);
             MatNullSpaceDestroy(&sp);
-            VecDestroyVecs(std::max(dim, dimPETSc), &ns);
+            VecDestroyVecs(dim, &ns);
+          }
+          if (dimPETSc) {
+            Vec v;
+            MatCreateVecs(ptA->_petsc, &v, NULL);
+            Vec* ns;
+            VecDuplicateVecs(v, dimPETSc, &ns);
+            VecDestroy(&v);
+            PetscInt m;
+            VecGetLocalSize(ns[0], &m);
+            for (unsigned short i = 0; i < dimPETSc; ++i) {
+              PetscScalar* x;
+              VecGetArray(ns[i], &x);
+              for (int j = 0; j < m; ++j) x[j] = (*ptPETScNS)(j, i);
+              VecRestoreArray(ns[i], &x);
+            }
+            PetscScalar* dots = new PetscScalar[dimPETSc];
+            for (unsigned short i = 0; i < dimPETSc; ++i) {
+              if (i > 0) {
+                VecMDot(ns[i], i, ns, dots);
+                for (int j = 0; j < i; ++j) dots[j] *= -1.0;
+                VecMAXPY(ns[i], i, dots, ns);
+              }
+              VecNormalize(ns[i], NULL);
+            }
+            delete[] dots;
+            MatNullSpace sp;
+            MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, dimPETSc, ns, &sp);
+            MatSetNullSpace(ptA->_petsc, sp);
+            MatNullSpaceDestroy(&sp);
+            VecDestroyVecs(dimPETSc, &ns);
           }
           PC pc;
           KSPGetPC(ksp, &pc);
