@@ -11,6 +11,31 @@ on:
     branches:
       - develop
 
+  workflow_call:
+    inputs:
+      build-types:
+        description: 'Build types as JSON array'
+        required: false
+        type: string
+        default: '["debug", "release"]'
+      versions:
+        description: 'Ubuntu version as JSON array'
+        required: false
+        type: string
+        default: '[22.04, 24.04]'
+      skip_check:
+        required: false
+        type: boolean
+        default: false
+      skip_macos:
+        required: false
+        type: boolean
+        default: false
+      upload_build_artifacts:
+        required: false
+        type: boolean
+        default: false
+
   # For development phase
   workflow_dispatch:
 
@@ -23,25 +48,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [22.04, 24.04]
-        cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+        version:  ${{ fromJson(inputs.versions  || '[22.04, 24.04]') }}
+        build-type: ${{ fromJson(inputs.build-types  || '["debug", "release"]') }}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
             - ${{ github.workflow }}
-
+    env:
+      INSTALL_DIR: /usr/local
     runs-on: ubuntu-${{ matrix.version }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install gcc g++ gfortran m4 patch git wget cmake \
-          libhdf5-dev flex bison autoconf automake \
-          autotools-dev
+          sudo apt install -y gcc g++ gfortran m4 patch git wget cmake \
+          libhdf5-dev flex bison autoconf automake unzip patch \
+          autotools-dev python3 freeglut3-dev
+
+      - name: Set configure flags and variables
+        id: flags
+        run: |
+          if [ "${{ matrix.build-type }}" = "debug" ]; then
+            echo "configure-flags=--enable-debug" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.build-type }}" = "release" ]; then
+            echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
+          fi
+          echo "staging-dir=${{ github.workspace }}/install_staging" >> $GITHUB_OUTPUT
 
       - name: Extract PETSc and runner info
         id: petsc-info
@@ -62,15 +95,15 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download ${{ matrix.cfg.opts }} \
-          --prefix="${HOME}/freefem"
+          ./configure --enable-download ${{ steps.flags.outputs.configure-flags }} \
+          --prefix="$INSTALL_DIR"
 
       - name: PETSc
         if: steps.cache-petsc.outputs.cache-hit != 'true'
         run: |
           ./3rdparty/getall -a -o PETSc
           cd 3rdparty/ff-petsc
-          make petsc-slepc
+          sudo make petsc-slepc
           cd -
           ./reconfigure
 
@@ -84,18 +117,39 @@ jobs:
             config.log
           compression-level: 9
 
+        # Weird problem of permission on libfftw3.la without sudo
       - name: Build
-        run: make -j 4
+        run: sudo make -j 4
 
       - name: Check
+        if: ${{ inputs.skip_check == false }}
         run: |
           make check -i
           ./etc/actions/failed_tests_logs.sh
 
-      - name: Install
-        run: make install
+      - name: Install to staging directory
+        if: ${{ inputs.upload_build_artifacts == true }}
+        run: |
+          mkdir -p ${{ steps.flags.outputs.staging-dir }}/$INSTALL_DIR
+          sudo make install DESTDIR=${{ steps.flags.outputs.staging-dir }}
+          sudo cp -r $INSTALL_DIR/ff-petsc ${{ steps.flags.outputs.staging-dir }}/$INSTALL_DIR
+          
+      - name: Tar to keep permission when upload/download
+        if: ${{ inputs.upload_build_artifacts == true }}
+        run: |
+          cd ${{ steps.flags.outputs.staging-dir }}/${{ env.INSTALL_DIR }}
+          tar -czf ${{ github.workspace }}/install_tree.tar.gz .
+        
+      - name: Upload
+        if: ${{ inputs.upload_build_artifacts == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: install_tree_${{ matrix.version }}
+          path: install_tree.tar.gz
+          retention-days: 1
 
   macos:
+    if: ${{ inputs.skip_macos == false }}
     strategy:
       fail-fast: false
       matrix:

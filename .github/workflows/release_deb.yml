@@ -10,11 +10,12 @@ on:
 
 jobs:
   build_freefem:
-    uses: ./.github/workflows/full-openmpi.yml
+    uses: ./.github/workflows/full-mpich.yml
     with:
       versions: '[22.04, 24.04]'
       build-types: '["release"]'
       skip_check: true
+      skip_macos: true
       upload_build_artifacts: true
 
   package_freefem_2204:
