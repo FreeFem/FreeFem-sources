@@ -2116,7 +2116,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 21;
+      static const int n_name_param = 22;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -2170,7 +2170,8 @@ namespace PETSc {
     {"precon", &typeid(Polymorphic*)},                                                            // 17
     {"setup", &typeid(bool)},                                                                     // 18
     {"monitor", &typeid(Polymorphic*)},                                                           // 19
-    {"deflation", &typeid(FEbaseArrayKn<upscaled_type<PetscScalar>>*)}                            // 20
+    {"deflation", &typeid(FEbaseArrayKn<upscaled_type<PetscScalar>>*)},                           // 20
+    {"transposenullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)}                           // 21
   };
   class ShellInjection;
   template< class Type >
@@ -2656,8 +2657,11 @@ namespace PETSc {
             nargs[1] ? GetAny< FEbaseArrayKn< upscaled_type<PetscScalar> >* >((*nargs[1])(stack)) : 0;
           KNM< upscaled_type<PetscScalar> >* ptPETScNS =
             nargs[8] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : 0;
+          KNM< upscaled_type<PetscScalar> >* ptPETScTNS =
+            nargs[21] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[21])(stack)) : 0;
           int dim = ptNS ? ptNS->N : 0;
           int dimPETSc = ptPETScNS ? ptPETScNS->M( ) : 0;
+          int dimPETScT = ptPETScTNS ? ptPETScTNS->N( ) : 0;
           if (dim) {
             Vec v;
             MatCreateVecs(ptA->_petsc, &v, NULL);
@@ -2723,6 +2727,36 @@ namespace PETSc {
             MatSetNullSpace(ptA->_petsc, sp);
             MatNullSpaceDestroy(&sp);
             VecDestroyVecs(dimPETSc, &ns);
+          }
+          if (dimPETScT) {
+            Vec v;
+            MatCreateVecs(ptA->_petsc, NULL, &v);
+            Vec* ns;
+            VecDuplicateVecs(v, dimPETScT, &ns);
+            VecDestroy(&v);
+            PetscInt m;
+            VecGetLocalSize(ns[0], &m);
+            for (unsigned short i = 0; i < dimPETScT; ++i) {
+              PetscScalar* x;
+              VecGetArray(ns[i], &x);
+              for (int j = 0; j < m; ++j) x[j] = (*ptPETScTNS)(j, i);
+              VecRestoreArray(ns[i], &x);
+            }
+            PetscScalar* dots = new PetscScalar[dimPETScT];
+            for (unsigned short i = 0; i < dimPETScT; ++i) {
+              if (i > 0) {
+                VecMDot(ns[i], i, ns, dots);
+                for (int j = 0; j < i; ++j) dots[j] *= -1.0;
+                VecMAXPY(ns[i], i, dots, ns);
+              }
+              VecNormalize(ns[i], NULL);
+            }
+            delete[] dots;
+            MatNullSpace sp;
+            MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, dimPETScT, ns, &sp);
+            MatSetTransposeNullSpace(ptA->_petsc, sp);
+            MatNullSpaceDestroy(&sp);
+            VecDestroyVecs(dimPETScT, &ns);
           }
           PC pc;
           KSPGetPC(ksp, &pc);
