@@ -2682,7 +2682,7 @@ namespace PETSc {
                 x, static_cast<PetscInt>(ptNS->get(i)->n));
               VecRestoreArray(ns[i], &x);
             }
-            PetscScalar* dots = new PetscScalar[dim];
+            PetscScalar* dots = new PetscScalar[dim - 1];
             for (unsigned short i = 0; i < dim; ++i) {
               if (i > 0) {
                 VecMDot(ns[i], i, ns, dots);
@@ -2712,7 +2712,7 @@ namespace PETSc {
               for (int j = 0; j < m; ++j) x[j] = (*ptPETScNS)(j, i);
               VecRestoreArray(ns[i], &x);
             }
-            PetscScalar* dots = new PetscScalar[dimPETSc];
+            PetscScalar* dots = new PetscScalar[dimPETSc - 1];
             for (unsigned short i = 0; i < dimPETSc; ++i) {
               if (i > 0) {
                 VecMDot(ns[i], i, ns, dots);
@@ -2742,7 +2742,7 @@ namespace PETSc {
               for (int j = 0; j < m; ++j) x[j] = (*ptPETScTNS)(j, i);
               VecRestoreArray(ns[i], &x);
             }
-            PetscScalar* dots = new PetscScalar[dimPETScT];
+            PetscScalar* dots = new PetscScalar[dimPETScT - 1];
             for (unsigned short i = 0; i < dimPETScT; ++i) {
               if (i > 0) {
                 VecMDot(ns[i], i, ns, dots);
