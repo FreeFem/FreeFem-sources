@@ -101,8 +101,8 @@ jobs:
 #        - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
-    name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
-    runs-on: windows-2022
+    name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
+    runs-on: windows-2025
 
     defaults:
       run:
