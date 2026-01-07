@@ -54,7 +54,6 @@ jobs:
             unzip
             mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-openblas
-            mingw-w64-x86_64-hdf5
             autoconf
             automake-wrapper
             pkg-config
