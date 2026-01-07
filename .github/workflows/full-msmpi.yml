@@ -77,9 +77,7 @@ jobs:
           autoreconf -i
           ./configure ${{ matrix.cfg.opts }} --enable-download \
           --enable-maintainer-mode \
-          --prefix="${HOME}/freefem" \
-          --with-mpipath="/c/Progam Files/Microsoft MPI/Bin"
-          MPICC=mpicc MPICXX=mpicxx MPIFC=mpif90
+          --prefix="${HOME}/freefem"
           ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
