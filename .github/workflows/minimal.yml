@@ -129,7 +129,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --without-mpi ${{ matrix.cfg.opt }} --prefix="${HOME}/freefem"
+          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
