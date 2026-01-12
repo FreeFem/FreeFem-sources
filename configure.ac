@@ -617,7 +617,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		if test $enable_ffcs = no
 		then
 		    export PATH="$PATH:`cygpath $MSMPI_BIN`"
-		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
+		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexec.exe`
 		    if test "$enable_fortran" != no -a "$with_flib" != no ;   then
 			case "$F77" in
 	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran -lquadmath";;
