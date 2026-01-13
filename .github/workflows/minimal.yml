@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [14, 15]
+        version: [14, 15, 26]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}

@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [14, 15]
+        version: [14, 15, 26]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
@@ -105,16 +105,14 @@ jobs:
           elif [ "${{ matrix.version }}" -eq "14" ]; then
             echo "LLVM_VERSION=15" >> $GITHUB_ENV
             sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          elif [ "${{ matrix.version }}" -eq "13" ]; then
-            echo "LLVM_VERSION=15" >> $GITHUB_ENV
-            sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
-            echo "LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs" >> $GITHUB_ENV
           fi
 
       - name: Install
         run: |
           brew install m4 bison hdf5 autoconf automake
-          brew remove llvm@$LLVM_VERSION
+          if [ "${{ matrix.version }}" -ne "26" ]; then
+            brew remove llvm@$LLVM_VERSION
+          fi
 
       - name: Symlink gfortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
