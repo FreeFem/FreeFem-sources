@@ -99,10 +99,10 @@ jobs:
       # tools
       - name: Set environment
         run: |
-          if [ "${{ matrix.version }}" -eq "15" ]; then
+          if (( ${{ matrix.version }} == 15 )); then
             echo "LLVM_VERSION=18" >> $GITHUB_ENV
             sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          elif [ "${{ matrix.version }}" -eq "14" ]; then
+          elif (( ${{ matrix.version }} == 14 )); then
             echo "LLVM_VERSION=15" >> $GITHUB_ENV
             sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
           fi
@@ -110,7 +110,7 @@ jobs:
       - name: Install
         run: |
           brew install m4 bison hdf5 autoconf automake
-          if [ "${{ matrix.version }}" -ne "26" ]; then
+          if (( ${{ matrix.version }} != 26 )); then
             brew remove llvm@$LLVM_VERSION
           fi
 
