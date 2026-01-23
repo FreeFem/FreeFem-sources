@@ -11,6 +11,27 @@ on:
     branches:
       - develop
 
+  workflow_call:
+    inputs:
+      build-types:
+        description: 'Build types as JSON array'
+        required: false
+        type: string
+        default: '["release"]' # Debug is currently not working
+      versions:
+        description: 'Windows version as JSON array'
+        required: false
+        type: string
+        default: '[2025]'
+      skip_check:
+        required: false
+        type: boolean
+        default: false
+      upload_build_artifacts:
+        required: false
+        type: boolean
+        default: false
+
 # For development phase
   workflow_dispatch:
 
@@ -23,10 +44,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cfg:
-        - {opts: --enable-optim --enable-generic}
+        version:  ${{ fromJson(inputs.versions  || '[2025]') }}
+        build-type: ${{ fromJson(inputs.build-types  || '["release"]') }}
 
-    name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
+    name: Windows Server ${{ matrix.version }} ${{ matrix.build-type }} - ${{github.workflow}}
     runs-on: windows-2025
 
     defaults:
@@ -71,6 +92,15 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Set configure flags and variables
+        id: flags
+        run: |
+          if [ "${{ matrix.build-type }}" = "debug" ]; then
+            echo "configure-flags=--enable-debug" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.build-type }}" = "release" ]; then
+            echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
+          fi
+
       - name: Extract PETSc and runner info
         id: petsc-info
         run: |
@@ -87,13 +117,13 @@ jobs:
           path: |
             ${{ steps.petsc-info.outputs.win_home }}/freefem/ff-petsc
           key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
-          
+
       - name: Configure
         run: |
           autoreconf -i
-          ./configure ${{ matrix.cfg.opts }} --enable-download \
-          --enable-maintainer-mode \
-          --prefix="${HOME}/freefem"
+          ./configure ${{ steps.flags.outputs.configure-flags }} --enable-download \
+          --enable-maintainer-mode --prefix="${HOME}/freefem"
+          ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
         if: steps.cache-petsc.outputs.cache-hit != 'true'
@@ -118,6 +148,19 @@ jobs:
         run: make -j 4
 
       - name: Check
+        if: ${{ inputs.skip_check == false }}
         run: |
           make check -i
           ./etc/actions/failed_tests_logs.sh
+
+      - name: Package EXE
+        if: ${{ inputs.upload_build_artifacts == true }}
+        run: make win32
+
+      - name: Upload EXE
+        if: ${{ inputs.upload_build_artifacts == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows_${{ matrix.version }}_exe
+          path: Ouptut/*.exe
+          retention-days: 1
