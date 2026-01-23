@@ -71,16 +71,34 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Extract PETSc and runner info
+        id: petsc-info
+        run: |
+          VERSION=$(grep -E -o "petsc-([0-9]{1,}\.)+[0-9]{1,}" 3rdparty/getall | head -1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image=$ImageOS" >> $GITHUB_OUTPUT
+          # Convert MSYS2 path to Windows path
+          echo "win_home=$(cygpath -w "$HOME")" >> $GITHUB_OUTPUT
+
+      - name: Cache PETSc installation
+        id: cache-petsc
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.petsc-info.outputs.win_home }}/freefem/ff-petsc
+          key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
+          
       - name: Configure
         run: |
           autoreconf -i
           ./configure ${{ matrix.cfg.opts }} --enable-download \
           --enable-maintainer-mode \
           --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
+        if: steps.cache-petsc.outputs.cache-hit != 'true'
         run: |
+          ./3rdparty/getall -a -o PETSc
           cd 3rdparty/ff-petsc
           make petsc-slepc
           cd -

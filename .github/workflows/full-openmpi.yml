@@ -43,15 +43,32 @@ jobs:
           libhdf5-dev flex bison autoconf automake \
           autotools-dev libopenmpi-dev
 
+      - name: Extract PETSc and runner info
+        id: petsc-info
+        run: |
+          VERSION=$(grep -E -o "petsc-([0-9]{1,}\.)+[0-9]{1,}" 3rdparty/getall | head -1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image=$ImageOS" >> $GITHUB_OUTPUT
+          echo "home=$HOME" >> $GITHUB_OUTPUT
+
+      - name: Cache PETSc installation
+        id: cache-petsc
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.petsc-info.outputs.home }}/freefem/ff-petsc
+          key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
+          
       - name: Configure
         run: |
           autoreconf -i
           ./configure --enable-download ${{ matrix.cfg.opts }} \
-          --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o PETSc
-
+          --prefix=$HOME/freefem
+          
       - name: PETSc
+        if: steps.cache-petsc.outputs.cache-hit != 'true'
         run: |
+          ./3rdparty/getall -a -o PETSc
           cd 3rdparty/ff-petsc
           make petsc-slepc
           cd -
@@ -68,7 +85,8 @@ jobs:
           compression-level: 9
 
       - name: Build
-        run: make -j 4
+        run: |
+          make -j 4
 
       - name: Check
         run: |
