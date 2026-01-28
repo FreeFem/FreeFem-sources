@@ -65,14 +65,14 @@ jobs:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
-    name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.worflow }}
+    name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: macos-${{ matrix.version }}
 
     steps:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install m4 flex bison suitesparse hdf5 autoconf automake
+        run: brew install m4 flex bison suitesparse autoconf automake
 
       - name: Symlink GCC & Fortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"

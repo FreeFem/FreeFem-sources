@@ -126,7 +126,7 @@ jobs:
 
       - name: Install
         run: |
-          brew install m4 bison hdf5 autoconf automake
+          brew install m4 bison autoconf automake
           if (( ${{ matrix.version }} != 26 )); then
             brew remove llvm@$LLVM_VERSION
           fi
