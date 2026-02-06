@@ -89,7 +89,7 @@ meshL ThI2 = extract(Th2, label=labs);
 
 ### Domain decomposition
 
-In order to use domain decomposition, we will take advantage of PETSc's capabilities through the `macro_ddm` script in FreeFEM. However, the datatype `mesh` requires `macro_ddm` to be set up for a 2D volume mesh, whereas the `meshL` datatype requires a 3D line mesh setup. To accommodate this we will scope the relevant parts of the code doing the decomposition. To prepare for this, we need to prepare some variables that will get defined inside of those scoped regions but are also needed outside of them:
+In order to use domain decomposition, we will take advantage of PETSc's capabilities through the `macro_ddm` script in FreeFEM. However, the datatype `mesh` requires `macro_ddm` to be set up for a 2D volume mesh, whereas the `meshL` datatype requires a 3D line mesh setup. To accommodate this, we will scope the relevant parts of the code doing the decomposition. To prepare for this, we need to prepare some variables that will get defined inside of those scoped regions but are also needed outside of them:
 
 ~~~freefem
 Mat L11, L22;
@@ -102,7 +102,7 @@ Ph1 part1;
 Ph2 part2;
 ~~~
 
-The `fespaces` defined will hold the decomposition which will allow us to reuse the decomposition of the surface mesh in the line mesh along the interface. Next, we decompose our surface meshes using a custom partitioning performed with `metis`, storing the partitioning in `part1` and `part2`:
+The `fespace`s defined will hold the decomposition which will allow us to reuse the decomposition of the surface mesh in the line mesh along the interface. Next, we decompose our surface meshes using a custom partitioning performed with `metis`, storing the partitioning in `part1` and `part2`:
 
 ~~~freefem
 {
