@@ -4,16 +4,16 @@ category: Coupled Physics
 layout: hpddm
 ---
 
-## Coupled physics problem in 2d
+## Coupled-physics problem in 2D
 
-In this example we will solve a coupled physics problem with two domains in 2d using domain decomposition, Krylov solvers and GenEO preconditioning. The setup consists of two domains that share an interface. On each domain a reaction-diffusion equation is defined,
+In this example, we will solve a coupled-physics problem with two domains in 2D using domain decomposition, Krylov solvers and GenEO preconditioning. The setup consists of two domains that share an interface. On each domain a reaction-diffusion equation is defined,
 
 $$
 -\nabla u_1 + \eta u_1 = f_1\text{ on }\Omega_1\\
--\nabla u_2 + \eta u_2=f_2\text{ on } \Omega_2
+-\nabla u_2 + \eta u_2 = f_2\text{ on }\Omega_2
 $$
 
-where $u_1$ and $u_2$ correspond to the local solution on the two domain, $\Omega_1$ and $\Omega_2$, and $f_1$ and $f_2$ are the two corresponding right hand sides. For this example we assume that $f_1 = f_2 = f$. In addition to the local equations on the two domains we also define some cross-interface conditions for how the two domains interact,
+where $u_1$ and $u_2$ correspond to the local solution on the two domains, $\Omega_1$ and $\Omega_2$, and $f_1$ and $f_2$ are the two corresponding right hand sides. For this example, we assume that $f_1 = f_2 = f$. In addition to the local equations on the two domains, we also define some cross-interface conditions for how the two domains interact,
 
 $$
 \left(\frac{1}{\alpha}p_1 + u_1\right) + \left(\frac{1}{\alpha}p_2 - u_2\right) = 0 \text{ on } \Gamma_1\\
@@ -57,10 +57,8 @@ $$
 First, we include the necessary headers and define some global constants and compute $\alpha$,
 
 ~~~freefem
-load "bem"
 include "getARGV.idp"
 load "PETSc"
-load "MUMPS_mpi"
 // Controlling the number of dof's
 int nn = getARGV("-n", 200);
 // domain 1
@@ -91,7 +89,7 @@ meshL ThI2 = extract(Th2, label=labs);
 
 ### Domain decomposition
 
-In order to use domain decomposition, we will take advantage of PETSc's capabilities through the `macro_ddm` script in FreeFem. However, the datatype `mesh` requires `macro_ddm` to be set up for a 2D volume mesh, whereas the `meshL` datatype requires a 3D line mesh setup. To accommodate this we will scope the relevant parts of the code doing the decomposition. To prepare for this, we need to prepare some variables that will get defined inside of those scoped regions but are also needed outside of them:
+In order to use domain decomposition, we will take advantage of PETSc's capabilities through the `macro_ddm` script in FreeFEM. However, the datatype `mesh` requires `macro_ddm` to be set up for a 2D volume mesh, whereas the `meshL` datatype requires a 3D line mesh setup. To accommodate this we will scope the relevant parts of the code doing the decomposition. To prepare for this, we need to prepare some variables that will get defined inside of those scoped regions but are also needed outside of them:
 
 ~~~freefem
 Mat L11, L22;
@@ -158,7 +156,7 @@ We can now decompose the interface meshes in a similar way as we did with the su
 }
 ~~~
 
-In this scoped section we also set up two interpolation matrices in order to move from the interface mesh in one of $\Omega_1$ or $\Omega_2$ to the other. Since the decompositions of the two domains is not assumed to match along the interface, we will need to set up our cross-interface matrices in one of the domains and project it across the interface as we will see later.
+In this scoped section, we also set up two interpolation matrices in order to move from the interface mesh in one of $\Omega_1$ or $\Omega_2$ to the other. Since the decompositions of the two domains is not assumed to match along the interface, we will need to set up our cross-interface matrices in one of the domains and project it across the interface as we will see later.
 
 With all the meshes decomposed, we can now set up our distributed finite element spaces,
 
@@ -171,7 +169,7 @@ fespace VhI2(ThI2, Pkp2);
 
 ### Problem specification
 
-We define our problem including the corresponding right hand side in the usual FreeFem manner,
+We define our problem, including the corresponding right-hand side, in the usual FreeFEM manner,
 
 ~~~freefem
 func f = x^2*y*100;
@@ -218,7 +216,7 @@ C11 = mC11;
 C22 = mC22;
 ~~~
 
-Note that the value of the `solver` parameter is completely irrelevant as we will solve the system through PETSc later-on. However, the default solver in distributed FreeFem includes collective MPI operations, which does not allow us to only conditionally fill `B11`, `B22`, `C11`, and `C22`, as otherwise the execution would be stalled as soon as one of the subdomains does not include any part of the boundary.
+Note that the value of the `solver` parameter is completely irrelevant as we will solve the system through PETSc later-on. However, the default solver in distributed FreeFEM includes collective MPI operations, which does not allow us to only conditionally fill `B11`, `B22`, `C11`, and `C22`, as otherwise the execution would be stalled as soon as one of the subdomains does not include any part of the boundary.
 
 The cross-interface matrices will be set up on the source domain only, as we cannot assume that we have matching decompositions on the other side of the interface:
 
@@ -377,7 +375,7 @@ plotMPI(Th1, u1, Pku1, def, real, cmm="Global velocity (u1)");
 plotMPI(Th2, u2, Pku2, def, real, cmm="Global velocity (u2)");
 ~~~
 
-For 16 MPI ranks a possible combined plot is shown below:
+For 16 MPI processes, a possible combined plot is shown below:
 
 ![][_solution]
 
