@@ -1,12 +1,12 @@
 ---
-name: coupledgeneo
+name: coupleddd
 category: Coupled Physics
-layout: hpddm
+layout: mpi
 ---
 
 ## Coupled-physics problem in 2D
 
-In this example, we will solve a coupled-physics problem with two domains in 2D using domain decomposition, Krylov solvers and GenEO preconditioning. The setup consists of two domains that share an interface. On each domain a reaction-diffusion equation is defined,
+In this example, we will solve a coupled-physics problem with two domains in 2D using domain decomposition, Krylov solvers and LU. The setup consists of two domains that share an interface. On each domain a reaction-diffusion equation is defined,
 
 $$
 -\nabla u_1 + \eta u_1 = f_1\text{ on }\Omega_1\\
@@ -250,116 +250,39 @@ Mat A = [[     L11      ,      B11     ,       0       ,       0      ],
          [interpI21*BT12, interpI21*C12,      B22'     ,      C22     ]];
 ~~~
 
-### Preconditioner
-
-In addition to the full system matrix, we also define two additional smaller block matrices that define the problem local to the two domains, $\Omega_1$ and $\Omega_2$:
-
-~~~freefem
-Mat PrecA1 = [[L11 , B11],
-              [B11', C11]];
-Mat PrecA2 = [[L22 , B22],
-              [B22', C22]];
-~~~
-
-The preconditioner that will be used to solve these two subproblems as defined by the matrices `PrecA1` and `PrecA2` is constructed as a block-Jacobi type preconditioner, extracting the right hand side corresponding to the local problem defined on $\Omega_1$ and $\Omega_2$ respectively, excluding any cross-interface components:
-
-~~~freefem
-func real[int] preconditioner(real[int] &res) {
-    real[int] ret(res.n);
-    real[int] rhs1 = res(0:L11.n+C11.n-1);
-    real[int] rhs2 = res(L11.n+C11.n:L11.n+C11.n+L22.n+C22.n-1);
-    real[int] sol1(rhs1.n), sol2(rhs2.n);
-    KSPSolve(PrecA1, rhs1, sol1);
-    KSPSolve(PrecA2, rhs2, sol2);
-    ret(0:L11.n+C11.n-1) = sol1;
-    ret(L11.n+C11.n:L11.n+C11.n+L22.n+C22.n-1) = sol2;
-    return ret;
-}
-~~~
-
-After extracting the component of the right hand sides, this function in turn calls `KSPSolve` for each of the two subproblems, as they are both fully independent problems. Both of these make use of the same solver options. As they both define a saddle point-type problem, we use `fgmres` preconditioned by a `fieldsplit` with a Schur-splitting, where both fields use a Krylov solver preconditioned by GenEO through HPDDM:
-
-~~~freefem
-string PrecBlockParams =
-        " -ksp_type fgmres" +
-        " -ksp_max_it 20" +
-        " -ksp_rtol 1e-4" +
-        " -ksp_gmres_modifiedgramschmidt" +
-        " -pc_type fieldsplit" +
-        " -pc_fieldsplit_type schur" +
-        " -pc_fieldsplit_schur_precondition self" +
-        " -prefix_push fieldsplit_1_" +
-            " -ksp_type fgmres" +
-            " -ksp_max_it 20" +
-            " -ksp_gmres_modifiedgramschmidt" +
-            " -ksp_rtol 1.0E-1" +
-            " -pc_type hpddm" +
-            " -pc_hpddm_has_neumann" +
-            " -pc_hpddm_ksp_pc_side right" +
-            " -pc_hpddm_ksp_rtol 1.0E-1" +
-            " -pc_hpddm_schur_precondition geneo" +
-            " -prefix_push pc_hpddm_levels_1_" +
-                " -eps_nev 10" +
-                " -eps_threshold_absolute 0.5" +
-                " -st_share_sub_ksp" +
-                " -eps_gen_non_hermitian" +
-                " -sub_pc_type cholesky" +
-                " -sub_pc_factor_mat_solver_type mumps" +
-                " -eps_tol 1.0E-2" +
-            " -prefix_pop" +
-            " -prefix_push pc_hpddm_coarse_" +
-                " -correction balanced" +
-                " -pc_type cholesky" +
-                " -pc_factor_mat_solver_type mumps" +
-            " -prefix_pop" +
-        " -prefix_pop";
-string PrecA00Params =
-        "-prefix_push fieldsplit_0_" +
-            " -pc_type hpddm" +
-            " -ksp_pc_side right" +
-            " -pc_hpddm_has_neumann" +
-            " -pc_hpddm_define_subdomains" +
-            " -prefix_push pc_hpddm_levels_1_" +
-                " -eps_nev 10" +
-                " -eps_threshold_absolute 0.3" +
-                " -st_share_sub_ksp" +
-                " -sub_pc_type cholesky" +
-                " -sub_pc_factor_mat_solver_type mumps" +
-            " -prefix_pop" +
-            " -prefix_push pc_hpddm_coarse_" +
-                " -pc_type cholesky" +
-                " -pc_factor_mat_solver_type mumps" +
-            " -prefix_pop" +
-        " -prefix_pop";
-set(PrecA1, sparams=PrecBlockParams, setup=1);
-set(L11, parent=PrecA1, sparams=PrecA00Params);
-set(C11, parent=PrecA1);
-set(PrecA2, sparams=PrecBlockParams, setup=1);
-set(L22, parent=PrecA2, sparams=PrecA00Params);
-set(C22, parent=PrecA2);
-~~~
-
-Note that the order of which part of the solver is set up matters, thus the specification of the `parent` parameter for the various parts.
-
 ### Solving the system
 
-Finally, to tie everything together, in order to solve our system we use PETSc's `fgmres` Krylov solver on the full system matrix $A$ with
+For solving the problem we use PETSc's `fgmres` solver on the global system preconditioned by a solve of the two 2x2 diagonal blocks, which define each a saddle point problem local to domain $\Omega_1$ and $\Omega_2$ respectively. These two saddle point systems are solved with PETSc's `gmres` solver preconditioned in turn by `lu`:
 
 ~~~freefem
 set(A, sparams=" -ksp_type fgmres" +
                " -ksp_pc_side right" +
-               " -pc_type shell" +
+               " -pc_type fieldsplit" +
+               " -pc_fieldsplit_type additive" +
+               " -pc_fieldsplit_0_fields 0,1" +
+               " -pc_fieldsplit_1_fields 2,3" +
+               " -fieldsplit_0_ksp_type gmres" +
+               " -fieldsplit_0_ksp_max_it 20" +
+               " -fieldsplit_0_ksp_rtol 1e-4" +
+               " -fieldsplit_0_ksp_gmres_modifiedgramschmidt" +
+               " -fieldsplit_0_pc_type lu" +
+               " -fieldsplit_0_pc_factor_mat_solver_type mumps" +
+               " -fieldsplit_1_ksp_type gmres" +
+               " -fieldsplit_1_ksp_max_it 20" +
+               " -fieldsplit_1_ksp_rtol 1e-4" +
+               " -fieldsplit_1_ksp_gmres_modifiedgramschmidt" +
+               " -fieldsplit_1_pc_type lu" +
+               " -fieldsplit_1_pc_factor_mat_solver_type mumps" +
                " -ksp_rtol 1e-6" +
                " -ksp_atol 1e-8" +
                " -ksp_max_it 100" +
                " -ksp_gmres_restart 100" +
                " -ksp_monitor_true_residual" +
                " -ksp_converged_reason" +
-               " -ksp_gmres_modifiedgramschmidt",
-        precon=preconditioner);
+               " -ksp_gmres_modifiedgramschmidt");
 ~~~
 
-The `shell` preconditioner referenced in the PETSc options above causes the `preconditioner` function to be called as it is the name passed on to the `precond` parameter. We are now ready to solve our system and plot the solution:
+The `fieldsplit` preconditioner in PETSc allows us to define a block-Jacobi type splitting, with each split containing the fields corresponding to the respective 2x2 block matrix. We are now ready to solve the problem and plot the solution:
 
 ~~~freefem
 real[int] sol = A^-1 * rhs;
@@ -379,4 +302,4 @@ For 16 MPI processes, a possible combined plot is shown below:
 
 ![][_solution]
 
-[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/coupledgeneo/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/coupleddd/solution.png
