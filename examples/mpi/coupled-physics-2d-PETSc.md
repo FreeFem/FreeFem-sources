@@ -261,20 +261,10 @@ set(A, sparams=" -ksp_type fgmres" +
                " -pc_fieldsplit_type additive" +
                " -pc_fieldsplit_0_fields 0,1" +
                " -pc_fieldsplit_1_fields 2,3" +
-               " -fieldsplit_0_ksp_type gmres" +
-               " -fieldsplit_0_ksp_max_it 20" +
-               " -fieldsplit_0_ksp_rtol 1e-4" +
-               " -fieldsplit_0_ksp_gmres_modifiedgramschmidt" +
+               " -fieldsplit_0_ksp_type preonly" +
                " -fieldsplit_0_pc_type lu" +
-               " -fieldsplit_0_pc_factor_mat_solver_type mumps" +
-               " -fieldsplit_1_ksp_type gmres" +
-               " -fieldsplit_1_ksp_max_it 20" +
-               " -fieldsplit_1_ksp_rtol 1e-4" +
-               " -fieldsplit_1_ksp_gmres_modifiedgramschmidt" +
+               " -fieldsplit_1_ksp_type preonly" +
                " -fieldsplit_1_pc_type lu" +
-               " -fieldsplit_1_pc_factor_mat_solver_type mumps" +
-               " -ksp_rtol 1e-6" +
-               " -ksp_atol 1e-8" +
                " -ksp_max_it 100" +
                " -ksp_gmres_restart 100" +
                " -ksp_monitor_true_residual" +
@@ -302,4 +292,4 @@ For 16 MPI processes, a possible combined plot is shown below:
 
 ![][_solution]
 
-[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/coupleddd/solution.png
+[_solution]: https://raw.githubusercontent.com/FreeFem/FreeFem-markdown-figures/main/examples/examples/coupledphysics/solution.png
