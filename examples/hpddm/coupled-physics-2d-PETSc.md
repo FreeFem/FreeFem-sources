@@ -1,5 +1,5 @@
 ---
-name: coupleddd
+name: coupledphysics
 category: Coupled Physics
 layout: mpi
 ---
