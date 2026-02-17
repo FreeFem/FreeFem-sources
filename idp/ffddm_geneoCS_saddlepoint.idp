@@ -1,4 +1,4 @@
-macro ffddmgeneofullsetup(pr,fgeneoA1,fgeneoB)
+macro ffddmgeneofullsetup(pr,fgeneoA1,fgeneoB,fgeneoA)
 
 pr#bCM = 0;
 
@@ -94,10 +94,44 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
 
   int nok = 0;
 
+  /* figure out the lowest mpirank with a nonzero Dk[i] */
+  /* that rank will print out some error info */
+  int printRank = mpiSize(pr#prfe#prmesh#commddm);
+  if(pr#prfe#Dk[i].n > 0)
+    printRank = mpiRank(pr#prfe#prmesh#commddm);
+  mpiReduce(printRank, printRank, processor(0), mpiMIN);
+  broadcast(processor(0), printRank);
+
   if (pr#prfe#Dk[i].n > 0) {
     NewMacro localmacroK pr#prfe#K EndMacro
     IFMACRO(localmacroK,real)
-    int kk = EigenValue(pr#prfe#Dk[i].n, A1=fgeneoA1, B=ffullgeneoB, mode=3, sym=1, tol=1e-1,sigma=0,value=ev,rawvector=eV,ncv=max(20,2*nev));
+
+    load "PETSc"
+
+    Mat<pr#prfe#K> fgeneoAshell(pr#prfe#Dk[i].n, communicator = mpiCommSelf);
+    Mat<pr#prfe#K> ffullgeneoBshell(pr#prfe#Dk[i].n, communicator = mpiCommSelf);
+    Mat<pr#prfe#K> fgeneoAOP(fgeneoAshell, fgeneoA);
+    Mat<pr#prfe#K> ffullgeneoBOP(ffullgeneoBshell, ffullgeneoB);
+    set(fgeneoAOP,precon = fgeneoA1, sparams="-ksp_type preonly");
+
+    int kk = EPSSolve(fgeneoAOP,
+                      ffullgeneoBOP,
+                      sparams = "-prefix_push SP_ "+
+                                "-eps_nev "+nev+" "+
+                                "-eps_type krylovschur "+
+                                "-eps_gen_hermitian "+
+                                "-eps_target 0. "+
+                                "-eps_tol 1e-8 "+
+                                "-st_type sinvert "+
+                                "-st_ksp_type preonly "+
+                                "-bv_orthog_type mgs " +
+                                "-bv_orthog_refine always " +
+                                (mpiRank(pr#prfe#prmesh#commddm) == printRank ?"-eps_error_absolute ::ascii_info_detail ":" ")+
+                                "-prefix_pop",
+                      values = ev,
+                      array = eV,
+                      prefix="SP_");
+
     ENDIFMACRO
     IFMACRO(localmacroK,complex)
     int kk = complexEigenValue(pr#prfe#Dk[i].n, A1=fgeneoA1, B=ffullgeneoB, mode=3, tol=1e-3,sigma=0,value=ev,rawvector=eV,ncv=max(20,3*nev));
@@ -394,7 +428,7 @@ func real[int] SP#Simatvecblock(real[int] &l, int mu) {
    Sisolve corresponds to the inverse of rhs of eigenvalue problem (18) for Arpack ;
    Simatvecblock corresponds to the local Schur complement, i.e. the local contribution
    to the S_1 sum -- and to the lhs sum of (18) */
-ffddmgeneofullsetup(SP#S1tilde,SP#Sisolve,SP#Simatvecblock);
+ffddmgeneofullsetup(SP#S1tilde,SP#Sisolve,SP#Simatvecblock,SP#Simatvec);
 
 SP#S1tildecorr = "BNN";
 
