@@ -13,12 +13,16 @@ on:
 
   workflow_call:
     inputs:
-      build-types:
+      release_version:
+        description: 'Release version number'
+        required: false
+        type: string
+      build_types:
         description: 'Build types as JSON array'
         required: false
         type: string
         default: '["release"]' # Debug is currently not working
-      versions:
+      windows_versions:
         description: 'Windows version as JSON array'
         required: false
         type: string
@@ -44,11 +48,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.versions  || '[2025]') }}
+        version:  ${{ fromJson(inputs.windows_versions  || '[2025]') }}
         build-type: ${{ fromJson(inputs.build-types  || '["release"]') }}
 
     name: Windows Server ${{ matrix.version }} ${{ matrix.build-type }} - ${{github.workflow}}
-    runs-on: windows-2025
+    runs-on: windows-${{ matrix.version }}
 
     defaults:
       run:
@@ -161,6 +165,6 @@ jobs:
         if: ${{ inputs.upload_build_artifacts == true }}
         uses: actions/upload-artifact@v4
         with:
-          name: Windows_${{ matrix.version }}_exe
-          path: Ouptut/*.exe
+          name: v${{ inputs.release_version }}-Windows-${{ matrix.windows_version }}
+          path: Output/*.exe
           retention-days: 1
