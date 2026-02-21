@@ -39,8 +39,9 @@ on:
 # For development phase
   workflow_dispatch:
 
+# Hardcode workflow name since github.workflow is inherited from the caller.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: MS-MPI-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
