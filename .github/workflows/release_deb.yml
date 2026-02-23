@@ -25,7 +25,7 @@ jobs:
       skip_macos: true
       upload_build_artifacts: true
 
-package_freefem:
+  package_freefem:
     needs: build_freefem_ubuntu
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     strategy:

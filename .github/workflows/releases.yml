@@ -58,6 +58,6 @@ jobs:
             ./release-assets/*.exe
           draft: false
           prerelease: false
-          tag_name: v${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
