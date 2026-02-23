@@ -13,12 +13,12 @@ on:
 
   workflow_call:
     inputs:
-      build-types:
+      build_types:
         description: 'Build types as JSON array'
         required: false
         type: string
         default: '["debug", "release"]'
-      versions:
+      ubuntu_versions:
         description: 'Ubuntu version as JSON array'
         required: false
         type: string
@@ -39,8 +39,9 @@ on:
   # For development phase
   workflow_dispatch:
 
+# Hardcode workflow name since github.workflow is inherited from the caller.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: MPICH-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -48,8 +49,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.versions  || '[22.04, 24.04]') }}
-        build-type: ${{ fromJson(inputs.build-types  || '["debug", "release"]') }}
+        version:  ${{ fromJson(inputs.ubuntu_versions  || '[22.04, 24.04]') }}
+        build-type: ${{ fromJson(inputs.build_types  || '["debug", "release"]') }}
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
             - ${{ github.workflow }}

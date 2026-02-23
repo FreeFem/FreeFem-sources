@@ -1,0 +1,63 @@
+name: Releases
+
+on:
+  push:
+    tags:
+      - 'v*.*'  # Only run on version tags
+
+jobs:
+  extract_version:
+    runs-on: ubuntu-latest
+    outputs:
+      ff_version: ${{ steps.get_version.outputs.ff_version }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version from configure.ac
+        id: get_version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          echo "ff_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted FreeFEM version: $VERSION"
+          
+  get_deb_packages:
+    needs: extract_version
+    uses: ./.github/workflows/release_deb.yml
+    with:
+      release_version: ${{ needs.extract_version.outputs.ff_version }}
+      ubuntu_versions: '[22.04, 24.04]'
+
+  get_exe_packages:
+    needs: extract_version
+    uses: ./.github/workflows/full-msmpi.yml
+    with:
+      windows_versions: '[2025]'
+      build_types: '["release"]'
+      skip_check: true
+      upload_build_artifacts: true
+
+  create_release:
+    needs: [extract_version, get_deb_packages, get_exe_packages]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create releases
+    steps:
+      - name: Download all assets
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-assets
+          merge-multiple: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./release-assets/*.deb
+            ./release-assets/*.exe
+          draft: false
+          prerelease: false
+          tag_name: v${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
