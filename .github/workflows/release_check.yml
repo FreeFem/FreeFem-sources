@@ -1,0 +1,98 @@
+# Verify release assets are functional
+name: Release packages check
+
+on:
+  workflow_call:
+    inputs:
+      release_version:
+        description: 'Release version number'
+        required: true
+        type: string
+      ubuntu_versions:
+        description: 'Ubuntu versions as JSON array'
+        required: true
+        type: string
+      windows_versions:
+        description: 'Windows versions as JSON array'
+        required: true
+        type: string
+
+jobs:
+  # Needed because released package have this number in name, not the tag.
+  extract_version:
+    runs-on: ubuntu-latest
+    outputs:
+      ff_version: ${{ steps.get_version.outputs.ff_version }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version from configure.ac
+        id: get_version
+        run: |
+          VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
+          echo "ff_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted FreeFEM version: $VERSION"
+    
+  ubuntu:
+    needs: extract_version
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04]') }}
+    name: Ubuntu ${{ matrix.version }} - Check .deb
+    runs-on: ubuntu-${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download package
+        run: |
+          wget https://github.com/FreeFem/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-ubuntu${{ matrix.version }}.deb
+      
+      - name: Install package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ./FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-ubuntu${{ matrix.version }}.deb
+      
+      - name: Verify installation
+        run: |
+          which FreeFem++
+          ff-mpirun -np 4 ./examples/mpi/MUMPS.edp
+      
+  windows:
+    needs: extract_version
+    strategy:
+      fail-fast: false
+      matrix:
+        version:  ${{ fromJson(inputs.windows_versions || '[2025]') }}
+    name: Windows ${{ matrix.version }} - Check .exe
+    runs-on: windows-${{ matrix.version }}
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: msmpi
+
+      - uses: actions/checkout@v4
+      
+      - name: Download package
+        run: |
+          Invoke-WebRequest https://github.com/FreeFem/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe `
+          -UseBasicParsing `
+          -OutFile FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe
+      
+      - name: Install package
+        run: |
+          Start-Process -FilePath ".\FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe" `
+          -ArgumentList "/silent" `
+          -Wait
+      
+      - name: Verify installation
+        run: |
+          cd "C:\Program Files (x86)\FreeFem++"
+          & "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -n 4 \
+          .\FreeFem++-mpi.exe .\examples\mpi\MUMPS.edp
+  
