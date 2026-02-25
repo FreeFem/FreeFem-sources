@@ -12,7 +12,7 @@ on:
         type: string
       ubuntu_versions:
         description: 'Ubuntu versions as JSON array'
-        required: false
+        required: true
         type: string
 
 jobs:

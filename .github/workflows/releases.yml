@@ -26,8 +26,8 @@ jobs:
       - name: Set OS versions
         id: set_os_versions
         run: |
-          echo "ubuntu_versions='[22.04, 24.04]'" >> $GITHUB_OUTPUT
-          echo "windows_versions='[2025]'" >> $GITHUB_OUTPUT
+          echo "ubuntu_versions=[22.04, 24.04]" >> $GITHUB_OUTPUT
+          echo "windows_versions=[2025]" >> $GITHUB_OUTPUT
           
   get_deb_packages:
     needs: set_versions
@@ -75,6 +75,6 @@ jobs:
     needs: [set_versions, create_release]
     uses: ./.github/workflows/release_check.yml
     with:
-      release_version: ${{ needs.set_versions.outputs.ff_version }}
+      release_version: ${{ github.ref_name }}
       windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
       ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
