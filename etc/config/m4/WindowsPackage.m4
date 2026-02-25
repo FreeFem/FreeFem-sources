@@ -26,7 +26,7 @@ PrivilegesRequired=admin
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-OutputBaseFilename=FreeFem++-VERSION-win`'SIZEOFPTR
+OutputBaseFilename=FreeFEM-VERSION-amd64-win`'SIZEOFPTR
 ChangesEnvironment=yes
 
 [Dirs]
