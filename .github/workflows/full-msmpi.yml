@@ -19,14 +19,12 @@ on:
         type: string
       build_types:
         description: 'Build types as JSON array'
-        required: false
+        required: true
         type: string
-        default: '["release"]' # Debug is currently not working
       windows_versions:
-        description: 'Windows version as JSON array'
-        required: false
+        description: 'Windows versions as JSON array'
+        required: true
         type: string
-        default: '[2025]'
       skip_check:
         required: false
         type: boolean

@@ -15,14 +15,12 @@ on:
     inputs:
       build_types:
         description: 'Build types as JSON array'
-        required: false
+        required: true
         type: string
-        default: '["debug", "release"]'
       ubuntu_versions:
-        description: 'Ubuntu version as JSON array'
-        required: false
+        description: 'Ubuntu versions as JSON array'
+        required: true
         type: string
-        default: '[22.04, 24.04]'
       skip_check:
         required: false
         type: boolean
