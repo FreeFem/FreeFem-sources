@@ -157,11 +157,11 @@ jobs:
           make check -i
           ./etc/actions/failed_tests_logs.sh
 
-      - name: Package EXE
+      - name: Package .exe
         if: ${{ inputs.upload_build_artifacts == true }}
         run: make win32
 
-      - name: Upload EXE
+      - name: Upload .exe
         if: ${{ inputs.upload_build_artifacts == true }}
         uses: actions/upload-artifact@v4
         with:

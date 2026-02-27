@@ -1,7 +1,7 @@
 # Call the corresponding build workflow with the proper arguments:
 # - Build_type: Release
 # - Upload build_tree: true
-name: Release DEB
+name: Release .deb
 
 on:
   workflow_call:
@@ -33,7 +33,7 @@ jobs:
         ubuntu_version: ${{ fromJSON(inputs.ubuntu_versions) }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set version variables
         id: version
         run: |
@@ -42,17 +42,17 @@ jobs:
           echo "release_tag_name=$RELEASE_TAG_NAME" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
           echo "Release tag name: $RELEASE_TAG_NAME"
-          
+
       - uses: actions/download-artifact@v5
         with:
           name: install_tree_${{ matrix.ubuntu_version }}
           path: ./artifacts
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Untar artifact and package .deb
         run: |
           mkdir ./install_tree
-          tar -xzf ./artifacts/install_tree.tar.gz -C ./install_tree/
+          tar xzf ./artifacts/install_tree.tar.gz -C ./install_tree/
           bash etc/actions/releases/package_deb_ubuntu.sh \
             ./install_tree ${{ inputs.release_version }}
 

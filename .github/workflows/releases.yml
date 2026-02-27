@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Extract version from configure.ac
         id: get_version
         run: |
@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "ubuntu_versions=[22.04, 24.04]" >> $GITHUB_OUTPUT
           echo "windows_versions=[2025]" >> $GITHUB_OUTPUT
-          
+
   get_deb_packages:
     needs: set_versions
     uses: ./.github/workflows/release_deb.yml
@@ -58,7 +58,7 @@ jobs:
           merge-multiple: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:

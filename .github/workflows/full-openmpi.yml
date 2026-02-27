@@ -31,7 +31,7 @@ on:
         required: false
         type: boolean
         default: false
-        
+
   # For development phase
   workflow_dispatch:
 
@@ -87,7 +87,7 @@ jobs:
           path: |
             ${{ steps.petsc-info.outputs.home }}/freefem/ff-petsc
           key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
-          
+
       - name: Configure
         run: |
           autoreconf -i
@@ -129,13 +129,13 @@ jobs:
           mkdir -p ${{ steps.flags.outputs.staging-dir }}/$INSTALL_DIR
           sudo make install DESTDIR=${{ steps.flags.outputs.staging-dir }}
           sudo cp -r $INSTALL_DIR/ff-petsc ${{ steps.flags.outputs.staging-dir }}/$INSTALL_DIR
-          
+
       - name: Tar to keep permission when upload/download
         if: ${{ inputs.upload_build_artifacts == true }}
         run: |
           cd ${{ steps.flags.outputs.staging-dir }}/${{ env.INSTALL_DIR }}
-          tar -czf ${{ github.workspace }}/install_tree.tar.gz .
-        
+          tar czf ${{ github.workspace }}/install_tree.tar.gz
+
       - name: Upload
         if: ${{ inputs.upload_build_artifacts == true }}
         uses: actions/upload-artifact@v4
