@@ -11,17 +11,11 @@ set -u
 set -e
 
 ## Parameters
-
 INSTALL_TREE=$1
 VERSION=$2
 
-# TOKEN=$1
-#ORGANIZATION="simonlegrand"
 REPOSITORY="FreeFem-sources"
-#VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" -f1)
-#RELEASE_TAG_NAME="v$VERSION"
 OSRELEASE=$(lsb_release -r|awk '{print $2}')
-
 
 DEB_NAME="freefem-${VERSION}-amd64-ubuntu${OSRELEASE}"
 GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubuntu${OSRELEASE}.deb"
