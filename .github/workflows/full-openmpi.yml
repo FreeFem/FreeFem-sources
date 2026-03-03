@@ -72,6 +72,9 @@ jobs:
           fi
           echo "staging-dir=${{ github.workspace }}/install_staging" >> $GITHUB_OUTPUT
 
+      - name: CPU info
+        run: lscpu
+
       - name: Extract PETSc and runner info
         id: petsc-info
         run: |
@@ -86,7 +89,7 @@ jobs:
         with:
           path: |
             ${{ steps.petsc-info.outputs.home }}/freefem/ff-petsc
-          key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
+          key: "petsc-Full version Open MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
         run: |

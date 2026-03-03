@@ -105,6 +105,10 @@ jobs:
             echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
           fi
 
+      - name: CPU info
+        shell: pwsh
+        run: systeminfo
+
       - name: Extract PETSc and runner info
         id: petsc-info
         run: |
@@ -120,7 +124,7 @@ jobs:
         with:
           path: |
             ${{ steps.petsc-info.outputs.win_home }}/freefem/ff-petsc
-          key: petsc-${{ github.workflow }}-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}
+          key: "petsc-Full version MS-MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
         run: |
