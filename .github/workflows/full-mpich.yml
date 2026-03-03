@@ -91,7 +91,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ steps.petsc-info.outputs.home }}/freefem/ff-petsc
+            ${{ env.INSTALL_DIR }}/ff-petsc
           key: "petsc-Full version MPICH-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
