@@ -123,7 +123,7 @@ jobs:
             unzip
             mingw-w64-x86_64-lapack
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configure
         run: |

@@ -24,7 +24,7 @@ jobs:
     outputs:
       ff_version: ${{ steps.get_version.outputs.ff_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Extract version from configure.ac
         id: get_version
@@ -45,7 +45,7 @@ jobs:
       - name: CPU info
         run: lscpu
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download package
         run: |
@@ -82,7 +82,7 @@ jobs:
         with:
           mpi: msmpi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download package
         run: |

@@ -14,7 +14,7 @@ jobs:
       windows_versions: ${{ steps.set_os_versions.outputs.windows_versions }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Extract version from configure.ac
         id: get_version
@@ -60,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ./release-assets/*.deb

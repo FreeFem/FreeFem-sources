@@ -32,7 +32,7 @@ jobs:
       matrix:
         ubuntu_version: ${{ fromJSON(inputs.ubuntu_versions) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set version variables
         id: version
@@ -43,7 +43,7 @@ jobs:
           echo "Version: $VERSION"
           echo "Release tag name: $RELEASE_TAG_NAME"
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: install_tree_${{ matrix.ubuntu_version }}
           path: ./artifacts
@@ -57,7 +57,7 @@ jobs:
             ./install_tree ${{ inputs.release_version }}
 
       - name: Upload .deb as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: v${{ inputs.release_version }}-ubuntu-${{ matrix.ubuntu_version }}
           path: ./*.deb

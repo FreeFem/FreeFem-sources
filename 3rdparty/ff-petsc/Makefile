@@ -70,14 +70,20 @@ PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool
 unexport MAKEFLAGS
-COMMON_FLAGS := --with-debugging=0 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-hg=0 --with-c2html=0 --with-coverage=0 --with-syclc=0 --with-hipc=0 --with-cudac=0 --with-tau-perfstubs=0 --with-python=0 \
+COMMON_FLAGS := --with-debugging=0 FOPTFLAGS=-O --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-hg=0 --with-c2html=0 --with-coverage=0 --with-syclc=0 --with-hipc=0 --with-cudac=0 --with-tau-perfstubs=0 --with-python=0 \
 		--download-slepc --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)
 COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
 endif
+
 ifeq ($(FF_generic_petsc), yes)
-COMMON_FLAGS += --with-avx512-kernels=0 CFLAGS+='-mtune=generic' CXXFLAGS+='-mtune=generic' FFLAGS+='-mtune=generic'
+COMMON_FLAGS += COPTFLAGS=-O2 CXXOPTFLAGS=-O2 --with-avx512-kernels=0 FFLAGS+='-mtune=generic'
+ifeq ($(WIN32DLLTARGET),)
+COMMON_FLAGS += CFLAGS+='-mtune=generic' CXXFLAGS+='-mtune=generic'
+endif
+else
+COMMON_FLAGS += COPTFLAGS=-O3 CXXOPTFLAGS=-O3
 endif
 
 ifeq ($(FC),)
@@ -126,10 +132,12 @@ endif
 endif
 
 ifneq ($(WIN32DLLTARGET),)
-COMMON_FLAGS += --with-shared-libraries=0 \
-	CXXFLAGS+='-fno-stack-protector -Wno-format -Wno-format-extra-args' \
-	CFLAGS+='-fno-stack-protector -Wno-format -Wno-format-extra-args -Wno-maybe-uninitialized' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
+COMMON_FLAGS += --with-shared-libraries=0 --with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
+PETSC_CXXFLAGS := -fno-stack-protector -Wno-format -Wno-format-extra-args
+ifeq ($(FF_generic_petsc), yes)
+PETSC_CXXFLAGS += -mtune=generic
+endif
+COMMON_FLAGS += CFLAGS+='$(PETSC_CXXFLAGS) -Wno-maybe-uninitialized' CXXFLAGS+='$(PETSC_CXXFLAGS)'
 ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
 PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --with-packages-download-dir=~/.petsc_pkg'
