@@ -1,8 +1,8 @@
-diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/PTSCOTCH.py petsc-3.24.5-p1/config/BuildSystem/config/packages/PTSCOTCH.py
---- petsc-3.24.5/config/BuildSystem/config/packages/PTSCOTCH.py	2025-03-26 15:00:03
-+++ petsc-3.24.5-p1/config/BuildSystem/config/packages/PTSCOTCH.py	2025-03-26 17:06:45
+diff --color --color -aur petsc-3.25.0/config/BuildSystem/config/packages/PTSCOTCH.py petsc-3.25.0-p1/config/BuildSystem/config/packages/PTSCOTCH.py
+--- petsc-3.25.0/config/BuildSystem/config/packages/PTSCOTCH.py	2026-03-16 16:18:25
++++ petsc-3.25.0-p1/config/BuildSystem/config/packages/PTSCOTCH.py	2026-03-16 20:02:52
 @@ -62,4 +62,10 @@
-
+ 
      args.append('-DBUILD_FORTRAN:BOOL=OFF')
      args.append('-DENABLE_TESTS:BOOL=OFF')
 +    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
@@ -12,13 +12,13 @@ diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/PTSCOTCH.py p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.24.5-p1/config/BuildSystem/config/packages/SuiteSparse.py
---- petsc-3.24.5/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
-+++ petsc-3.24.5-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
-@@ -70,4 +70,10 @@
+diff --color --color -aur petsc-3.25.0/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.25.0-p1/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.25.0/config/BuildSystem/config/packages/SuiteSparse.py	2026-03-16 16:18:25
++++ petsc-3.25.0-p1/config/BuildSystem/config/packages/SuiteSparse.py	2026-03-16 20:02:52
+@@ -77,4 +77,10 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
-
+ 
 +    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
 +    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
 +    if mpicc and mpicxx:
@@ -26,13 +26,13 @@ diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/SuiteSparse.p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/SuperLU.py petsc-3.24.5-p1/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.24.5/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
-+++ petsc-3.24.5-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
-@@ -54,5 +54,11 @@
+diff --color --color -aur petsc-3.25.0/config/BuildSystem/config/packages/SuperLU.py petsc-3.25.0-p1/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.25.0/config/BuildSystem/config/packages/SuperLU.py	2026-03-16 16:18:25
++++ petsc-3.25.0-p1/config/BuildSystem/config/packages/SuperLU.py	2026-03-16 20:02:52
+@@ -54,4 +54,10 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
-
+ 
 +    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
 +    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
 +    if mpicc and mpicxx:
@@ -40,10 +40,9 @@ diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/SuperLU.py pe
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-
-diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/METIS.py petsc-3.24.5-p1/config/BuildSystem/config/packages/METIS.py
---- petsc-3.24.5/config/BuildSystem/config/packages/METIS.py	2025-03-08 23:51:15
-+++ petsc-3.24.5-p1/config/BuildSystem/config/packages/METIS.py	2025-03-26 17:07:16
+diff --color --color -aur petsc-3.25.0/config/BuildSystem/config/packages/METIS.py petsc-3.25.0-p1/config/BuildSystem/config/packages/METIS.py
+--- petsc-3.25.0/config/BuildSystem/config/packages/METIS.py	2025-09-29 15:58:07
++++ petsc-3.25.0-p1/config/BuildSystem/config/packages/METIS.py	2026-03-16 20:02:52
 @@ -45,6 +45,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
@@ -55,11 +54,11 @@ diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/METIS.py pets
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-
+ 
    def configureLibrary(self):
-diff --color -Naur petsc-3.24.5/config/BuildSystem/config/packages/Mmg.py petsc-3.24.5-p1/config/BuildSystem/config/packages/Mmg.py
---- petsc-3.24.5/config/BuildSystem/config/packages/Mmg.py	2025-03-26 15:00:03
-+++ petsc-3.24.5-p1/config/BuildSystem/config/packages/Mmg.py	2025-03-26 17:07:16
+diff --color --color -aur petsc-3.25.0/config/BuildSystem/config/packages/Mmg.py petsc-3.25.0-p1/config/BuildSystem/config/packages/Mmg.py
+--- petsc-3.25.0/config/BuildSystem/config/packages/Mmg.py	2025-09-29 15:58:07
++++ petsc-3.25.0-p1/config/BuildSystem/config/packages/Mmg.py	2026-03-16 20:02:52
 @@ -29,6 +29,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
