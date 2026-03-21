@@ -743,7 +743,7 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     else
         return NULL;
 
-    sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
+    snprintf(buffer, MM_MAX_LINE_LENGTH, "%s %s %s %s", types[0], types[1], types[2], types[3]);
     return mm_strdup(buffer);
 
 }

@@ -24,8 +24,8 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
     KN<int> *wcl;
     double tgv;
     int ntgv;
-    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=0) :CGMatVirt<I,K>(AA->n),A(AA),//diag(!ds || !ds->precon|| !stk),
-    xx_del(0),code_del(0),precon(0),stack(stk),wcl(0),xx(0),diag1(0),tgv(1e30),ntgv(0)
+    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=nullptr) :CGMatVirt<I,K>(AA->n),A(AA),//diag(!ds || !ds->precon|| !stk),
+    xx_del(nullptr),code_del(nullptr),precon(nullptr),stack(stk),wcl(nullptr),xx(nullptr),diag1(nullptr),tgv(1e30),ntgv(0)
     {
         I n = A->n;
         if(ds) {
@@ -37,7 +37,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
                 wcl = new KN<int>(n);
                 double tgve =  tgvm;// ds->tgv;
                 if( tgve <=0) tgve = 1e200;// no tgv
-                ntgv =0;;
+                ntgv =0;
                 for (int i=0;i<n;i++)
                 ntgv += (*wcl)[i] = real((*A)(i,i))==tgve;
             }
@@ -97,7 +97,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
         if( (*wcl)[i])
         x[i] = rhs[i]/tgv;
     }
-    int * pwcl() const {return wcl ?  (int*) *wcl  : 0; ;}
+    int * pwcl() const {return wcl ?  (int*) *wcl  : 0;}
     ~HMatVirtPrecon()
     {
         if(verbosity>99) cout << " ## ~HMatVirtPrecon "<< this << endl;
@@ -122,7 +122,7 @@ public:
     double eps;
     double *veps;
     long *getnbiter;
-    SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0,double *vveps=0, long * git=0)
+    SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0,double *vveps=nullptr, long * git=nullptr)
     :A(&AA),pC(0),verb(v),itermax(itx>0?itx:A->n/2),erronerr(eoe),eps(eeps), veps(vveps), getnbiter(git)
     {
         if(verb>4)
@@ -207,7 +207,7 @@ public:
     long *piter;
     SolverGMRES(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int rrestart=50,int itx=0)
     :A(&AA),pC(0), verb(v),itermax(itx>0?itx:A->n/2),restart(rrestart),
-    erronerr(eoe),eps(eeps),peps(0),piter(0)
+    erronerr(eoe),eps(eeps),peps(nullptr),piter(nullptr)
     {assert(A->n == A->m);
         pC = new HMatVirtPrecon<I,K>(A);
     }

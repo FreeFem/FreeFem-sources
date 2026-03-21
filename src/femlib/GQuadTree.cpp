@@ -111,7 +111,7 @@ template<class Vertex>
         
         // xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
         
-        Vertex *vn=0;
+        Vertex *vn=nullptr;
         
         // init for optimisation ---
         b = root;
@@ -192,7 +192,7 @@ template<class Vertex>
       int c2infty = 1+trueNearest;// 2 if trueNearest
     // xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
     
-    Vertex *vn=0;
+    Vertex *vn=nullptr;
     
     // init for optimisation ---
     b = root;
@@ -209,7 +209,7 @@ template<class Vertex>
 
 		QuadTreeBox * b0= b->b[k];
  
-		if ( ( b0 == 0) || (b0->n == 0) ){
+		if ( ( b0 == nullptr) || (b0->n == 0) ){
 		  break; // null box or empty box   => break 
 		}   
 		NbQuadTreeBoxSearch++;
@@ -317,7 +317,7 @@ if(verbosity>2000)
     const Zd p(RdtoZd(v));
     R seuil2 = seuil*seuil;
     // const Metric  Mx(v.m);
-    Vertex * pvr=0; 
+    Vertex * pvr=nullptr; 
     QuadTreeBox * pb[ MaxDeep ];
     int  pi[ MaxDeep  ];
     Zd pp[  MaxDeep ];
@@ -329,7 +329,7 @@ if(verbosity>2000)
     Zd p0( 0 );
     
     if (!root->n)
-      return 0; // empty tree 
+      return nullptr; // empty tree 
    
     // general case -----
     pb[0]= root;
@@ -427,7 +427,7 @@ if(verbosity>2000)
 	Vertex *v4[N]; // copy of the QuadTreeBox vertices      
 	for(int i=0;i<N;++i)
 	  { v4[i]= b->v[i];
-	  b->v[i]=0;}
+	  b->v[i]=nullptr;}
 	
 	b->n = -b->n; // mark is pointer QuadTreeBox
 	
@@ -509,7 +509,7 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
       {
 	b[i].n =0;
 	for(int j=0;j<N;++j)
-	  b[i].b[j]=0;
+	  b[i].b[j]=nullptr;
       }
     bc =b;
     be = b +ll;
@@ -555,7 +555,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     Zd   p0;
     Zd  plus(RdtoZd(P) );//xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
     
-    Vertex *vn=0;
+    Vertex *vn=nullptr;
     // init for optimisation ---
     b = root;
     long  n0;
@@ -569,7 +569,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	long hb2 = hb >> 1 ;
 	int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
 	QuadTreeBox * b0= b->b[k];
-	if ( ( b0 == 0) || (b0->n == 0) ) 
+	if ( ( b0 == nullptr) || (b0->n == 0) ) 
 	  break; // null box or empty   => break 	    
 	NbQuadTreeBoxSearch++;	
 	p0.Add(k,hb2);	
@@ -1536,7 +1536,7 @@ int  TrueBorder(const Mesh &Th,typename Mesh::Vertex *P,double *delta)
 inline double CPUtime(){      return ((double) std::clock())/CLOCKS_PER_SEC;}
 template<typename Mesh>
 GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int ddebug)
-: pTh(_pTh),tree(0),nbfind(0), nbelement(0), P(bborder ? pTh->nbe: pTh->nt),delta(P.N()),lp(0),debug(ddebug)
+: pTh(_pTh),tree(nullptr),nbfind(0), nbelement(0), P(bborder ? pTh->nbe: pTh->nt),delta(P.N()),lp(0),debug(ddebug)
 {
     double t0=  CPUtime(); 
     //cout << " enter in GenericDataFindBoundary"<< endl;

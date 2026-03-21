@@ -28,6 +28,7 @@
 
 #ifndef CODE_ALLOC_HPP
 #define CODE_ALLOC_HPP
+#include <cstdint>
 
 class CodeAlloc { public:
 
@@ -41,12 +42,12 @@ class CodeAlloc { public:
   static bool isdel(int i)
 
   {
-    return  ((char *) (void *)  mem[i] - (char *) 0) % 2 == 1;
+    return  reinterpret_cast<intptr_t>(mem[i]) % 2 == 1;
   }
       
   static void setdel(int i)
   {
-    mem[i] = (CodeAlloc *) (void *) (((char *) mem[i] - (char *) 0)+ 1);
+    mem[i] = (CodeAlloc *) (void *) (reinterpret_cast<intptr_t>(mem[i]) + 1);
   }
   static void resize(); 
   

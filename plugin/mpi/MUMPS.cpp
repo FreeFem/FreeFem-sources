@@ -58,7 +58,7 @@ template<> struct MUMPS_STRUC_TRAIT<Complex>  {typedef ZMUMPS_STRUC_C MUMPS; typ
 void mumps_c(DMUMPS_STRUC_C *id) { dmumps_c(id);}
 void mumps_c(ZMUMPS_STRUC_C *id) { zmumps_c(id);}
 
-template<class T> struct MPI_TYPE {static MPI_Datatype  TYPE(){return MPI_BYTE;}};;
+template<class T> struct MPI_TYPE {static MPI_Datatype  TYPE(){return MPI_BYTE;}};
 template<> struct MPI_TYPE<long>      {static MPI_Datatype  TYPE(){return MPI_LONG;}};
 template<> struct MPI_TYPE<int>      {static MPI_Datatype TYPE(){return MPI_INT;}};
 template<> struct MPI_TYPE<double>    {static MPI_Datatype TYPE(){return MPI_DOUBLE;}};
@@ -127,13 +127,13 @@ public:
         delete [] id.jcn_loc;
         delete [] id.a_loc;
 
-        id.irn_loc = 0;
-        id.jcn_loc = 0;
-        id.a_loc = 0;
+        id.irn_loc = nullptr;
+        id.jcn_loc = nullptr;
+        id.a_loc = nullptr;
 
-        id.irn=0;
-        id.jcn=0;
-        id.a =0;
+        id.irn=nullptr;
+        id.jcn=nullptr;
+        id.a =nullptr;
     }
     void to_mumps_mat()
     {
@@ -172,9 +172,9 @@ public:
                 else
                 { //  no matrix
                     id.nz=0;
-                    id.a =0;
-                    id.irn = 0;;
-                    id.jcn = 0;
+                    id.a =nullptr;
+                    id.irn = nullptr;
+                    id.jcn = nullptr;
                     
                 }
                 
@@ -187,7 +187,7 @@ public:
                 id.a_loc = (MR *)(void *)a;
                 
             }
-            id.rhs = 0;
+            id.rhs = nullptr;
             ffassert( A.half == id.sym );//
             ICNTL(5) = 0;    // input matrix type
             ICNTL(7) = 7;    // NUMBERING ...
@@ -255,7 +255,7 @@ public:
             }
         }
     }
-    SolveMUMPS_mpi (HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+    SolveMUMPS_mpi (HMat  &AA, const Data_Sparse_Solver & ds,Stack )
     : A(AA), verb(ds.verb),
     eps(ds.epsilon),
     tgv(ds.tgv),cn(0),cs(0),
@@ -274,9 +274,9 @@ public:
         int myid = 0;
         MPI_Comm_rank(MPI_COMM_WORLD, &myid);
         
-        id.irn=0;
-        id.jcn=0;
-        id.a =0;
+        id.irn=nullptr;
+        id.jcn=nullptr;
+        id.a =nullptr;
         
         id.job = JOB_INIT;
         id.par = 1;

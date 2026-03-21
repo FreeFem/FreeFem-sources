@@ -71,12 +71,12 @@ namespace Fem2D {
     static const int NbOfVertexOnHyperFace =1;
     typedef Vertex3 V;
     typedef  V::Rd Rd;
-    static R mesure(  V * pv[NbOfVertices]  ) {
+    static R mesure(  V *[NbOfVertices]  ) {
       return 0.;
     }
     typedef R0 RdHat;
     typedef R0 RdHatBord;   //hack no defined
-    static RdHat PBord(const int * nvb,const RdHatBord & P)  { return R0() ;}
+    static RdHat PBord(const int *,const RdHatBord &)  { return R0() ;}
         
         
   };
@@ -96,7 +96,7 @@ namespace Fem2D {
         }
         typedef R1 RdHat;
         typedef R0 RdHatBord;
-        static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
+        static RdHat PBord(const int * nvb,const RdHatBord &)  { return RdHat(*nvb) ;}
         
         
     };
@@ -105,8 +105,8 @@ namespace Fem2D {
   class BoundaryPointL: public GenericElement<DataPoint3>
   {
   public: 
-    BoundaryPointL() {}; // constructor empty for array
-    Rd operator()(R0 P) const  {return this->at(0); }
+    BoundaryPointL() {} // constructor empty for array
+    Rd operator()(R0) const  {return this->at(0); }
       
   };
 
@@ -114,7 +114,7 @@ namespace Fem2D {
   
   class EdgeL: public GenericElement<DataSeg3> {
   public:
-    EdgeL() {}; // constructor empty for array
+    EdgeL() {} // constructor empty for array
         
     R1 H(int i) const { ASSERTION(i>=0 && i <1);
       return (2-i)/mesure();} // heigth
@@ -161,7 +161,7 @@ namespace Fem2D {
     // mapping for surface/line vertices
     int *mapSurf2Curv;
     int *mapCurv2Surf;
-    MeshL():mapSurf2Curv(0),mapCurv2Surf(0) {};
+    MeshL():mapSurf2Curv(nullptr),mapCurv2Surf(nullptr) {}
     MeshL(const string);
     MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, bool labeledBoundary=false, double ridgeangledetection=8.*atan(1.)/9.);
       
@@ -172,7 +172,7 @@ namespace Fem2D {
     MeshL(const Serialize&);
 
     int load(const string & filename);
-    const Element * Find( Rd P, R1 & Phat,bool & outside,const Element * tstart=0) const;
+    const Element * Find( Rd P, R1 & Phat,bool & outside,const Element * tstart=nullptr) const;
     int Save(const string & filename) const;
     //void flipSurfaceMeshS(int surface_orientation);
     void GSave(FILE * f,int offset=0) const ;
@@ -192,6 +192,12 @@ namespace Fem2D {
     MeshL(const MeshL &); // pas de construction par copie
     void operator=(const MeshL &);// pas affectation par copy
   };
+
+  template<> const int (* const GenericElement<DataSeg3>::nvface)[3];
+  template<> const int (* const GenericElement<DataSeg3>::nvedge)[2];
+  template<> const int (* const GenericElement<DataSeg3>::nvadj)[1];
+  template<> const int  GenericElement<DataSeg3>::nitemdim[4];
+  template<> const int (* const GenericElement<DataSeg3>::onWhatBorder)[3];
     
 }
 

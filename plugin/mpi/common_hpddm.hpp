@@ -24,7 +24,7 @@
 #include <mkl.h>
 #endif
 
-#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+#if defined(HPDDM_SCHWARZ) && (HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD)
 #ifdef WITH_mkl
 #define MKL_PARDISOSUB
 #elif defined(WITH_mumps)
@@ -40,7 +40,7 @@
 #undef HPDDM_INEXACT_COARSE_OPERATOR
 #define HPDDM_INEXACT_COARSE_OPERATOR 0
 #endif
-#if HPDDM_PRECISION == 2
+#if defined(HPDDM_PRECISION) && HPDDM_PRECISION == 2
 #if defined(WITH_slepc) || defined(WITH_slepccomplex)
 #define MU_SLEPC
 #elif defined(HAVE_LIBARPACK)
@@ -128,7 +128,7 @@ HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<upscaled_type<K>>* mA, bo
         return nullptr;
 }
 template<class K>
-HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfree=false,int *is=0,int *js=0)
+HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfree=false,int *is=nullptr,int *js=nullptr)
 { if(mA)
 {
     mA->CSR();
@@ -137,7 +137,7 @@ HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfr
     return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nnz, is, js , mA->half > 0,mfree);
 }
 else
-    return 0;
+    return nullptr;
 }
 
 template<class K>
@@ -146,9 +146,9 @@ void set_ff_matrix(MatriceMorse<upscaled_type<K>>* mA,const HPDDM::MatrixCSR<K> 
     //void HashMatrix<I,R>::set(I nn,I mm,int hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
     if(verbosity>99) cout << " set_ff_matrix " <<endl;
     // Warning this pointeur a change or not in hpddm => not del in HashMatrix
-    mA->j=0;
-    mA->p=0;
-    mA->aij=0;
+    mA->j=nullptr;
+    mA->p=nullptr;
+    mA->aij=nullptr;
     
     mA->set(dA.HPDDM_n,dA.HPDDM_m,dA.HPDDM_sym,dA.HPDDM_nnz,dA.HPDDM_ia,dA.HPDDM_ja,reinterpret_cast<upscaled_type<K>*>(dA.HPDDM_a),0,1);
 }
@@ -164,7 +164,7 @@ class STL {
     T* const _it;
     const int _size;
     public:
-        STL(const KN<T>& v) : _it(v), _size(v.size()) { };
+        STL(const KN<T>& v) : _it(v), _size(v.size()) { }
         int size() const {
             return _size;
         }
@@ -183,7 +183,7 @@ class STL {
 template<class K>
 class Pair {
     public:
-        Pair() : p() { };
+        Pair() : p() { }
         std::pair<MPI_Request, const K*>* p;
         void init() { }
         void destroy() {
@@ -197,7 +197,7 @@ template<class A> inline AnyType DeleteDTOR(Stack, const AnyType& x) {
     a->dtor();
     a = NULL;
     return Nothing;
-};
+}
 
 extern KN<String>* pkarg;
 
@@ -209,7 +209,7 @@ void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) {
         pA->template exchange<false>(pin, mu);
 }
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
-void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) { }
+void exchange(Type* const&, K*, unsigned short, bool) { }
 template<class U, class Type, class K>
 void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
     if(pA) {
@@ -653,7 +653,7 @@ static void Init_Common() {
         Global.Add("kron", "(", new OneOperator2s_<newpMatrice_Creuse<double>, Matrice_Creuse<double>*, Matrice_Creuse<double>*>(kron));
         Global.Add("kron", "(", new OneOperator2s_<newpMatrice_Creuse<std::complex<double>>, Matrice_Creuse<std::complex<double>>*, Matrice_Creuse<std::complex<double>>*>(kron));
     }
-#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+#if defined(HPDDM_SCHWARZ) && (HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD)
     aType t;
     int r;
     if(!zzzfff->InMotClef("pair", t, r)) {

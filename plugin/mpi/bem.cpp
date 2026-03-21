@@ -40,7 +40,7 @@ AnyType AddIncrement(Stack stack, const AnyType &a) {
 }
 
 template<class Type, class K>
-AnyType To(Stack stack,Expression emat,Expression einter,int init)
+AnyType To(Stack stack,Expression emat,Expression einter,int)
 {
     ffassert(einter);
     HMatrixVirt<K>** Hmat = GetAny<HMatrixVirt<K>** >((*einter)(stack));
@@ -74,8 +74,8 @@ public:
     const V u;
     Prod(HMatrixVirt<K>** v, V w) : h(*v), u(w) {}
     
-    void prod(V x) const {int mu = this->u->n/h->nb_cols(); h->mvprod_global(*(this->u), *x, 'N', mu);};
-    void prodT(V x) const {int mu = this->u->n/h->nb_rows(); h->mvprod_global(*(this->u), *x, 'C', mu);};
+    void prod(V x) const {int mu = this->u->n/h->nb_cols(); h->mvprod_global(*(this->u), *x, 'N', mu);}
+    void prodT(V x) const {int mu = this->u->n/h->nb_rows(); h->mvprod_global(*(this->u), *x, 'C', mu);}
     
     static V mv(V Ax, Prod<V, K, 'N'> A) {
         *Ax = K();
@@ -191,10 +191,10 @@ public:
                 int sizeworld = (*H)->get_sizeworld();
                 int rankworld = (*H)->get_rankworld();
                 
-                int nbdenseworld[sizeworld];
-                int nblrworld[sizeworld];
-                MPI_Allgather(&nbdense, 1, MPI_INT, nbdenseworld, 1, MPI_INT, (*H)->get_comm());
-                MPI_Allgather(&nblr, 1, MPI_INT, nblrworld, 1, MPI_INT, (*H)->get_comm());
+                std::vector<int> nbdenseworld(sizeworld);
+                std::vector<int> nblrworld(sizeworld);
+                MPI_Allgather(&nbdense, 1, MPI_INT, nbdenseworld.data(), 1, MPI_INT, (*H)->get_comm());
+                MPI_Allgather(&nblr, 1, MPI_INT, nblrworld.data(), 1, MPI_INT, (*H)->get_comm());
                 int nbdenseg = 0;
                 int nblrg = 0;
                 for (int i=0; i<sizeworld; i++) {
@@ -211,15 +211,15 @@ public:
                     buf[4*i+3] = l.get_source_cluster().get_size();
                 }
                 
-                int displs[sizeworld];
-                int recvcounts[sizeworld];
+                std::vector<int> displs(sizeworld);
+                std::vector<int> recvcounts(sizeworld);
                 displs[0] = 0;
                 
                 for (int i=0; i<sizeworld; i++) {
                     recvcounts[i] = 4*nbdenseworld[i];
                     if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
-                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buf, recvcounts[rankworld], MPI_INT, buf, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
+                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buf, recvcounts[rankworld], MPI_INT, buf, recvcounts.data(), displs.data(), MPI_INT, 0, (*H)->get_comm());
                 
                 int* buflr = buf + 4*(mpirank==0?nbdenseg:nbdense);
                 double* bufcomp = new double[mpirank==0?nblrg:nblr];
@@ -239,14 +239,14 @@ public:
                     if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
                 
-                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buflr, recvcounts[rankworld], MPI_INT, buflr, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
+                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buflr, recvcounts[rankworld], MPI_INT, buflr, recvcounts.data(), displs.data(), MPI_INT, 0, (*H)->get_comm());
                 
                 for (int i=0; i<sizeworld; i++) {
                     recvcounts[i] = nblrworld[i];
                     if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
                 
-                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts, displs, MPI_DOUBLE, 0, (*H)->get_comm());
+                MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts.data(), displs.data(), MPI_DOUBLE, 0, (*H)->get_comm());
                 
                 if (mpirank == 0 && ThePlotStream ) {
                     
@@ -455,7 +455,7 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   int maxleafsize=mi->argl(3,stack,ff_htoolMaxleafsize);
   int mintargetdepth=mi->argl(4,stack,ff_htoolMintargetdepth);
   int minsourcedepth=mi->argl(5,stack,ff_htoolMinsourcedepth);
-  string* pcompressor=mi->args(6,stack,0);
+  string* pcompressor=mi->args(6,stack,nullptr);
   bool recompress=mi->argb(7,stack,false);
 
   string compressor = pcompressor ? *pcompressor : "partialACA";
@@ -551,7 +551,7 @@ class SetHMatrix : public OneOperator { public:
 };
 
 template<class R>
-aType SetHMatrix_Op<R>::btype=0;
+aType SetHMatrix_Op<R>::btype=nullptr;
 template<class R>
 basicAC_F0::name_and_type SetHMatrix_Op<R>::name_param[] = {
     {"bmat", &typeid(Matrice_Creuse< R > *)},
@@ -583,7 +583,7 @@ long get_hmat_m(HMatrixVirt<K>** p) {return (p && *p) ? (*p)->nb_cols() : 0;}
 template<class K>
 void addHmat() {
    // Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
-    Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
+    Dcl_TypeandPtr<HMatrixVirt<K>*>(nullptr,nullptr,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
     //atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
     
     Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
@@ -675,15 +675,8 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     typedef typename v_fes2::FESpace FESpace2;
     typedef typename FESpace1::Mesh SMesh;
     typedef typename FESpace2::Mesh TMesh;
-    typedef typename SMesh::RdHat SRdHat;
-    typedef typename TMesh::RdHat TRdHat;
     
     
-    typedef typename std::conditional<SMesh::RdHat::d==1,Mesh1D,Mesh2D>::type MeshBemtool;
-    typedef typename std::conditional<SMesh::RdHat::d==1,P0_1D,P0_2D>::type P0;
-    typedef typename std::conditional<SMesh::RdHat::d==1,P1_1D,P1_2D>::type P1;
-    typedef typename std::conditional<SMesh::RdHat::d==1,P2_1D,P2_2D>::type P2;
-
     assert(b && b->nargs);
     const list<C_F0> & largs=b->largs;
     
@@ -719,11 +712,11 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);
 
      if(init)
-        *Hmat =0;
-      *Hmat =0;
+        *Hmat =nullptr;
+      *Hmat =nullptr;
     if( *Hmat)
         delete *Hmat;
-    *Hmat =0;
+    *Hmat =nullptr;
 
     creationHMatrixtoBEMForm<R,MMesh,FESpace1,FESpace2>( Uh, Vh, VFBEM, largs, stack, ds, Hmat);
 
@@ -750,7 +743,7 @@ return false;}
 
 
 
-EquationEnum whatEquationEnum(BemKernel *K,int i) {
+EquationEnum whatEquationEnum(BemKernel *K,int) {
     int nk=2; // restriction, max 2 kernels for combined
     int type[2]={-1,-1};
     EquationEnum equation[3] = {LA,HE,YU};
@@ -794,7 +787,7 @@ template< class R >
 R *set_initinit(R *const &a, const long &n) {
   SHOWVERB(cout << " set_init " << typeid(R).name( ) << " " << n << endl);
   a->init(n);
-  for (int i = 0; i < n; i++) (*a)[i] = 0;
+  for (int i = 0; i < n; i++) (*a)[i] = {};
   return a;
 }
 
@@ -805,7 +798,7 @@ void ArrayofHmat()
     typedef Mat *PMat;
     typedef KN< Mat > AMat;
 
-    Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
+    Dcl_Type< AMat * >(nullptr, ::DestroyKNmat< Mat >);
     // to declare HMatrix[int]
     map_type_of_map[make_pair(atype< long >( ), atype< PMat >( )->right())] = atype< AMat * >( );
     atype<  AMat * >( )->Add(
@@ -921,12 +914,12 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;
 
      if(init)
-        *Hmat =0;
-      *Hmat =0;
+        *Hmat =nullptr;
+      *Hmat =nullptr;
     if( *Hmat)
             delete *Hmat;
 
-    *Hmat =0;
+    *Hmat =nullptr;
 
     vector<double> pt(3*n);
     vector<double> ps(3*m);
@@ -1020,8 +1013,6 @@ static void Init_Bem() {
     aType t_C_args = map_type[typeid(const C_args *).name( )];
     atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbem) );    // bad
     
-    typedef  const BemKernel fkernel;
-    typedef  const BemPotential fpotential;
     // new type for bem
     typedef const BemKernel *pBemKernel;
     typedef const BemPotential *pBemPotential;
@@ -1032,10 +1023,10 @@ static void Init_Bem() {
     Dcl_Type< const OP_MakeBemKernelFunc::Op * >( );
     Dcl_Type< const OP_MakeBemPotentialFunc::Op * >( );
     
-    Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
+    Dcl_TypeandPtr< pBemKernel >(nullptr, nullptr, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
                                  AddIncrement< pBemKernel >, NotReturnOfthisType);
     // pBemPotential initialize
-    Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
+    Dcl_TypeandPtr< pBemPotential >(nullptr, nullptr, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
                                     AddIncrement< pBemPotential >, NotReturnOfthisType);
  
     
@@ -1131,8 +1122,8 @@ static void Init_Bem() {
     ArrayofHmat<complex<double>>();
 
     // Build HMatrix from custom user generator
-    Dcl_TypeandPtr< VirtualGenerator<double>* >(0, 0,::InitializePtr< VirtualGenerator<double>* >, ::DeletePtr< VirtualGenerator<double>*> );
-    Dcl_TypeandPtr< VirtualGenerator<std::complex<double>>* >(0, 0,::InitializePtr< VirtualGenerator<std::complex<double>>* >, ::DeletePtr< VirtualGenerator<std::complex<double>>*> );
+    Dcl_TypeandPtr< VirtualGenerator<double>* >(nullptr, nullptr,::InitializePtr< VirtualGenerator<double>* >, ::DeletePtr< VirtualGenerator<double>*> );
+    Dcl_TypeandPtr< VirtualGenerator<std::complex<double>>* >(nullptr, nullptr,::InitializePtr< VirtualGenerator<std::complex<double>>* >, ::DeletePtr< VirtualGenerator<std::complex<double>>*> );
     zzzfff->Add("Generator", atype<VirtualGenerator<double>** >( ));
     map_type_of_map[make_pair(atype<VirtualGenerator<double>**>(), atype<double*>())] = atype<VirtualGenerator<double>**>();
     map_type_of_map[make_pair(atype<VirtualGenerator<double>**>(), atype<Complex*>())] = atype<VirtualGenerator<std::complex<double> >**>();

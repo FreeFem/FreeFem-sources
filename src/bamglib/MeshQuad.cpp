@@ -140,7 +140,7 @@ namespace bamg {
                                              Vertex &R, VertexOnEdge &BR, VertexOnGeom &GR)
 
   {
-    void *pA = 0, *pB = 0;
+    void *pA = nullptr, *pB = nullptr;
     Real8 tA = 0, tB = 0;
     R2 A = vA, B = vB;
     Vertex *pvA = &vA, *pvB = &vB;
@@ -285,7 +285,7 @@ namespace bamg {
     }
     cerr << " Big Bug" << endl;
     MeshError(678);
-    return 0;    // just for the compiler
+    return nullptr;    // just for the compiler
   }
 
   void Triangles::MakeQuadrangles(double costheta) {
@@ -366,9 +366,9 @@ namespace bamg {
       BTh.SetVertexFieldOn( );
 
     Int4 newnbt = 0, newnbv = 0;
-    Int4 *kedge = 0;
+    Int4 *kedge = nullptr;
     Int4 newNbOfQuad = NbOfQuad;
-    Int4 *ksplit = 0, *ksplitarray = 0;
+    Int4 *ksplit = nullptr, *ksplitarray = nullptr;
     Int4 kkk = 0;
     int ret = 0;
     if (nbvx < nbv + nbe) return 1;    //
@@ -396,7 +396,7 @@ namespace bamg {
     // do allocation for pointeur to the geometry and background
     VertexOnGeom *newVerticesOnGeomEdge = new VertexOnGeom[newNbVerticesOnGeomEdge];
     VertexOnEdge *newVertexOnBThEdge =
-      newNbVertexOnBThEdge ? new VertexOnEdge[newNbVertexOnBThEdge] : 0;
+      newNbVertexOnBThEdge ? new VertexOnEdge[newNbVertexOnBThEdge] : nullptr;
     if (NbVerticesOnGeomEdge)
       memcpy(newVerticesOnGeomEdge, VerticesOnGeomEdge,
              sizeof(VertexOnGeom) * NbVerticesOnGeomEdge);
@@ -416,10 +416,10 @@ namespace bamg {
     Int4 kvb = NbVertexOnBThEdge;
     Int4 kvg = NbVerticesOnGeomEdge;
     Int4 ie = 0;
-    Edge **edgesGtoB = 0;
+    Edge **edgesGtoB = nullptr;
     if (withBackground) edgesGtoB = BTh.MakeGeometricalEdgeToEdge( );
     Int4 ferr = 0;
-    for (i = 0; i < nbe; i++) newedges[ie].on = 0;
+    for (i = 0; i < nbe; i++) newedges[ie].on = nullptr;
 
     for (i = 0; i < nbe; i++) {
       GeometricalEdge *ong = edges[i].on;
@@ -464,7 +464,7 @@ namespace bamg {
       {
         vertices[k].r = ((R2)edges[i][0] + (R2)edges[i][1]) * 0.5;
         vertices[k].m = Metric(0.5, edges[i][0], 0.5, edges[i][1]);
-        vertices[k].on = 0;
+        vertices[k].on = nullptr;
       }
       // vertices[k].i = toI2( vertices[k].r);
       R2 AB = vertices[k].r;
@@ -501,7 +501,7 @@ namespace bamg {
     }
 #endif
     if (edgesGtoB) delete[] edgesGtoB;
-    edgesGtoB = 0;
+    edgesGtoB = nullptr;
 
     newnbv = k;
     newNbVerticesOnGeomEdge = kvg;
@@ -524,7 +524,7 @@ namespace bamg {
       for (int j = 0; j < 3; j++) {
         const TriangleAdjacent ta = t.Adj(j);
         const Triangle &tt = ta;
-        if (&tt >= lastT) t.SetAdj2(j, 0, 0);    // unset adj
+        if (&tt >= lastT) t.SetAdj2(j, nullptr, 0);    // unset adj
         const Vertex &v0 = t[VerticesOfTriangularEdge[j][0]];
         const Vertex &v1 = t[VerticesOfTriangularEdge[j][1]];
         Int4 ke = edge4->findtrie(Number(v0), Number(v1));
@@ -680,9 +680,9 @@ namespace bamg {
       // save the flag Hidden
       int hid[] = {t0.Hidden(0), t0.Hidden(1), t0.Hidden(2)};
       // un set all adj -- save Hidden flag --
-      t0.SetAdj2(0, 0, hid[0]);
-      t0.SetAdj2(1, 0, hid[1]);
-      t0.SetAdj2(2, 0, hid[2]);
+      t0.SetAdj2(0, nullptr, hid[0]);
+      t0.SetAdj2(1, nullptr, hid[1]);
+      t0.SetAdj2(2, nullptr, hid[2]);
       // --  remake
       switch (kk) {
         case 1:

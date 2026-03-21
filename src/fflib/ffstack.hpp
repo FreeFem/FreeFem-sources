@@ -62,7 +62,7 @@ typedef void StackType;
 typedef void *Stack;
 
 
- const Stack  NullStack=0;
+ const Stack  NullStack=nullptr;
 //typedef StackType& Stack;
 inline Stack pvoid2Stack(void * pv) { return pv;}
 
@@ -175,7 +175,7 @@ struct PtrArrayType: public VOIDPtrType {
  // clean pointeur ceated by the language 
  // ----
  struct BaseNewInStack {
-  virtual ~BaseNewInStack() {};
+  virtual ~BaseNewInStack() {}
 };
 
 struct BaseNewInStack;

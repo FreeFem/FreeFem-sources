@@ -64,7 +64,7 @@ extern  long verbosity ;
   nv : number of point on    
 */
 //  d = 1   trivial
-void SplitSimplex(int N,R1 *P,int *K,int op=0,R1 *AB=0)
+void SplitSimplex(int N,R1 *P,int *K,int op=0,R1 *AB=nullptr)
 {
   assert(N>0);
   double h = 1./ N;
@@ -138,7 +138,7 @@ inline int NumSimplex3(int i,int j,int k) { return NumSimplex3(i+j+k)+NumSimplex
 }
 
 // d = 2
-void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
+void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=nullptr)
 {
     // warning PB of oriention if (i+j<N)  , the transo is positif => no swap on 1, 2 ve
   assert(N>0);
@@ -214,7 +214,7 @@ void SplitSimplex(int N,R3 *P,int *K,int op=0,R3 *ABC=0)
 } */
 
 
-void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
+void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=nullptr)
 {
     const int n=N;
   const int n2=n*n;

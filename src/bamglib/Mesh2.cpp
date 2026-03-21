@@ -96,7 +96,7 @@ namespace bamg {
 
   int Triangles::counter = 0;
 
-  Triangles *CurrentTh = 0;
+  Triangles *CurrentTh = nullptr;
 
   int hinterpole = 1;
 
@@ -331,7 +331,7 @@ namespace bamg {
       j = NextEdge[jc];
       assert(k < 2000);
     } while ((this != t));
-    return TriangleAdjacent(0, 0);
+    return TriangleAdjacent(nullptr, 0);
   }
 
   TriangleAdjacent CloseBoundaryEdgeV2(I2 C, Triangle *t, double &a, double &b) {
@@ -341,7 +341,7 @@ namespace bamg {
     //  Triangle *torigine = t;
     // restart:
     //   int dir=0;
-    assert(t->link == 0);
+    assert(t->link == nullptr);
     // to have a starting edges
     // try the 3 edge bourna-- in case of internal hole
     // and choice  the best
@@ -350,7 +350,7 @@ namespace bamg {
     // the probleme is in case of  the fine and long internal hole
     // for exemple neart the training edge of a wing
     //
-    Vertex *s = 0, *s1 = 0, *s0 = 0;
+    Vertex *s = nullptr, *s1 = nullptr, *s0 = nullptr;
     Icoor2 imax = MaxICoor22;
     Icoor2 l0 = imax, l1 = imax;
     double dd2 = imax;    // infinity
@@ -405,7 +405,7 @@ namespace bamg {
           er = ta;
           l0 = (AC, AC);
           l1 = (BC, BC);
-          s = 0;
+          s = nullptr;
           cas = -1;
           //	 cout << " ABAC " <<  ABAC << " ABAC " << ABAC
           //	      << " AB2 " << AB2 << endl;
@@ -423,7 +423,7 @@ namespace bamg {
       TriangleAdjacent edge(er);
 
       int kkk = 0;
-      int linkp = t->link == 0;
+      int linkp = t->link == nullptr;
 
       Triangle *tt = t = edge = Adj(Previous(edge));
       //  cout << CurrentTh->Number(t) << " " << linkp << endl;
@@ -431,7 +431,7 @@ namespace bamg {
 
         assert(edge.EdgeVertex(0) == s && kkk++ < 10000);
 
-        int link = tt->link == 0;
+        int link = tt->link == nullptr;
         //	 cout << CurrentTh->Number(tt) << " " << link << " " << CurrentTh->Number(s)
         //	      << " " << CurrentTh->Number(er.EdgeVertex(0))
         //	      << " " << CurrentTh->Number(er.EdgeVertex(1))
@@ -788,7 +788,7 @@ namespace bamg {
     int n;
     if (!Size || Norme2_2(lIntTria[Size - 1].x - A)) {
       if (Size == MaxSize) ReShape( );
-      lIntTria[Size].t = 0;
+      lIntTria[Size].t = nullptr;
       lIntTria[Size].x = A;
       lIntTria[Size].m = mm;
 #ifdef DEBUG1
@@ -861,7 +861,7 @@ namespace bamg {
     Real8 si = sint;
 
     int EndSeg = Size;
-    SegInterpolation *SegI = 0;
+    SegInterpolation *SegI = nullptr;
     if (NbSeg) SegI = lSegsI, EndSeg = SegI->last;
 
     for (int k = 1; k < nbi; k++) {
@@ -1061,7 +1061,7 @@ namespace bamg {
     int NbSwap = 0;
     assert(a.t && b.t);    // the 2 vertex is in a mesh
     int k = 0;
-    taret = TriangleAdjacent(0, 0);    // erreur
+    taret = TriangleAdjacent(nullptr, 0);    // erreur
 
     TriangleAdjacent tta(a.t, EdgesVertexTriangle[a.vint][0]);
     Vertex *v1, *v2 = tta.EdgeVertex(0), *vbegin = v2;
@@ -1214,13 +1214,13 @@ namespace bamg {
 
     int OnSwap = 0;
     // si 2 triangle infini (bord) => detT = -2;
-    if (sa == 0) {    // les deux triangles sont frontieres
+    if (sa == nullptr) {    // les deux triangles sont frontieres
       det2 = bamg::det(s2->i, sb->i, s1->i);
       OnSwap = det2 > 0;
-    } else if (sb == 0) {    // les deux triangles sont frontieres
+    } else if (sb == nullptr) {    // les deux triangles sont frontieres
       det1 = bamg::det(s1->i, sa->i, s2->i);
       OnSwap = det1 > 0;
-    } else if ((s1 != 0) && (s2 != 0)) {
+    } else if ((s1 != nullptr) && (s2 != nullptr)) {
       det1 = bamg::det(s1->i, sa->i, s2->i);
       det2 = detT - det1;
       OnSwap = (Abs(det1) + Abs(det2)) < detA;    // convexe
@@ -2403,11 +2403,11 @@ namespace bamg {
     // construit avec le 2 aretes orientes et
     Vertex *v0 = ordre[0], *v1 = ordre[1];
 
-    triangles[0](0) = 0;    // sommet pour infini
+    triangles[0](0) = nullptr;    // sommet pour infini
     triangles[0](1) = v0;
     triangles[0](2) = v1;
 
-    triangles[1](0) = 0;    // sommet pour infini
+    triangles[1](0) = nullptr;    // sommet pour infini
     triangles[1](2) = v0;
     triangles[1](1) = v1;
     const int e0 = OppositeEdge[0];
@@ -2515,7 +2515,7 @@ namespace bamg {
       MeshError(11, this);
     }
 
-    TriangleAdjacent ta(0, 0);
+    TriangleAdjacent ta(nullptr, 0);
     for (Int4 i = 0; i < nbe; i++) {
       nbswp = ForceEdge(edges[i][0], edges[i][1], ta);
 
@@ -2566,7 +2566,7 @@ namespace bamg {
     Triangle *t, *t1;
     Int4 k, it;
 
-    for (Int4 itt = 0; itt < nbt; itt++) triangles[itt].link = 0;    // par defaut pas de couleur
+    for (Int4 itt = 0; itt < nbt; itt++) triangles[itt].link = nullptr;    // par defaut pas de couleur
 #ifdef DRAWING1
     reffecran( );
 #endif
@@ -2595,7 +2595,7 @@ namespace bamg {
             if (!tc->Locked(na))               // arete non frontiere
             {
               Triangle *ta = tc->TriangleAdj(na);    // n° triangle adjacent
-              if (ta->link == 0)                     // non deja chainer => on enpile
+              if (ta->link == nullptr)                     // non deja chainer => on enpile
               {
                 i++;
 #ifdef DRAWING1
@@ -2628,7 +2628,7 @@ namespace bamg {
             NbOutT++;
             t1 = t;
             t = t->link;
-            t1->link = 0;
+            t1->link = nullptr;
           }    // while (t)
         }
       }
@@ -2723,7 +2723,7 @@ namespace bamg {
               NbOutT++;
               t1 = t;
               t = t->link;
-              t1->link = 0;
+              t1->link = nullptr;
             }    // while (t)
           }
 
@@ -2735,7 +2735,7 @@ namespace bamg {
       delete[] mark;
 
     } else {    // find the head for all sub domaine
-      if (Gh.NbSubDomains != NbSubDomains && subdomains) delete[] subdomains, subdomains = 0;
+      if (Gh.NbSubDomains != NbSubDomains && subdomains) delete[] subdomains, subdomains = nullptr;
       if (!subdomains) subdomains = new SubDomain[Gh.NbSubDomains];
       NbSubDomains = Gh.NbSubDomains;
       if (verbosity > 4) cout << " Find the " << NbSubDomains << " subdomain " << endl;
@@ -2782,7 +2782,7 @@ namespace bamg {
             // cout << "      triangle  =" << Number(t) << " = " << (*t)[0].r <<  (*t)[1].r <<
             // (*t)[2].r << endl;
             if (t < triangles || t >= triangles + nbt || t->det < 0 ||
-                t->link == 0)    // Ajoute aout 200
+                t->link == nullptr)    // Ajoute aout 200
             {
               cerr << " Error in the definition of subdomain " << i << " boundary border "
                    << NbSubDomains - i << "/" << NbSubDomains << ": wrong direction "
@@ -2836,7 +2836,7 @@ namespace bamg {
       }
 
       for (it = 0; it < nbt; it++)
-        if (mark[it] == -1) NbOutT++, triangles[it].link = 0;
+        if (mark[it] == -1) NbOutT++, triangles[it].link = nullptr;
       delete[] GeometricalEdgetoEdge;
       delete[] mark;
     }
@@ -3054,7 +3054,7 @@ namespace bamg {
     OnDisk = 0;
     NbRef = 0;
     //  allocGeometry=0;
-    identity = 0;
+    identity = nullptr;
     NbOfTriangleSearchFind = 0;
     NbOfSwapTriangle = 0;
     nbiv = 0;
@@ -3066,12 +3066,12 @@ namespace bamg {
     NbSubDomains = 0;
     NbVertexOnBThVertex = 0;
     NbVertexOnBThEdge = 0;
-    VertexOnBThVertex = 0;
-    VertexOnBThEdge = 0;
+    VertexOnBThVertex = nullptr;
+    VertexOnBThEdge = nullptr;
 
     NbCrackedVertices = 0;
     NbCrackedEdges = 0;
-    CrackedEdges = 0;
+    CrackedEdges = nullptr;
     nbe = 0;
     name = fname;
     warning = 0;
@@ -3085,13 +3085,13 @@ namespace bamg {
       triangles = new Triangle[nbtx];
       assert(triangles);
     } else {
-      vertices = 0;
-      ordre = 0;
-      triangles = 0;
+      vertices = nullptr;
+      ordre = nullptr;
+      triangles = nullptr;
       nbtx = 0;
     }
     if (name || inbvx) {
-      time_t timer = time(0);
+      time_t timer = time(nullptr);
       char buf[70];
       strftime(buf, 70, ", Date: %y/%m/%d %H:%M %Ss", localtime(&timer));
       counter++;
@@ -3110,16 +3110,16 @@ namespace bamg {
       // cout << "New MAILLAGE "<< identity << endl;
     }
 
-    quadtree = 0;
+    quadtree = nullptr;
     //  edgescomponante=0;
-    edges = 0;
-    VerticesOnGeomVertex = 0;
-    VerticesOnGeomEdge = 0;
+    edges = nullptr;
+    VerticesOnGeomVertex = nullptr;
+    VerticesOnGeomEdge = nullptr;
     NbVerticesOnGeomVertex = 0;
     NbVerticesOnGeomEdge = 0;
     //  nbMaxIntersectionTriangles=0;
     //  lIntTria;
-    subdomains = 0;
+    subdomains = nullptr;
     NbSubDomains = 0;
     //  Meshbegin = vertices;
     //  Meshend  = vertices + nbvx;
@@ -3200,7 +3200,7 @@ namespace bamg {
         // cout << "--------- "  <<Number(Gh[i].to) << " " << Gh[i].to << " " << i << endl;
         nbv++;
       } else
-        Gh[i].to = 0;
+        Gh[i].to = nullptr;
     //
     for (i = 0; i < BTh.NbVerticesOnGeomVertex; i++) {
       VertexOnGeom &vog = BTh.VerticesOnGeomVertex[i];
@@ -3313,7 +3313,7 @@ namespace bamg {
             A0 = GA0->to;    // the vertex in new mesh
             Vertex *A1;
             VertexOnGeom *GA1;
-            Edge *PreviousNewEdge = 0;
+            Edge *PreviousNewEdge = nullptr;
             //  cout << "  --------------New Curve phase " << phase
             //       << "---------- A0=" << *A0 << ei[k0]  <<endl;
             assert(A0 - vertices >= 0 && A0 - vertices < nbv);
@@ -3442,7 +3442,7 @@ namespace bamg {
               e->v[1] = A1;
               e->ref = peequi->ref;
               e->adj[0] = PreviousNewEdge;
-              e->adj[1] = 0;
+              e->adj[1] = nullptr;
               if (PreviousNewEdge) PreviousNewEdge->adj[1] = e;
               PreviousNewEdge = e;
               //		      cout << "Last new edge " << nbe << " " << " on " <<
@@ -3528,7 +3528,7 @@ namespace bamg {
     //  for (Int4 iv=0;iv<BTh.nbv;iv++)
     //    BTh[iv].i = toI2(BTh[iv].r);
     NewPoints(BTh, KeepBackVertices);
-    CurrentTh = 0;
+    CurrentTh = nullptr;
     //#undef  DRAWING1
   }
 
@@ -3600,7 +3600,7 @@ namespace bamg {
               //  cout << " New curve = " << NbOfCurves << endl;
               Int4 nbvend = 0;
 
-              Edge *PreviousNewEdge = 0;
+              Edge *PreviousNewEdge = nullptr;
 
               lstep = -1;    // to do not create points
               if (ei.Required( )) {
@@ -3617,8 +3617,8 @@ namespace bamg {
                     ;
                     edges[nbe].ref = e->ref;
                     edges[nbe].on = e;
-                    edges[nbe].adj[0] = 0;
-                    edges[nbe].adj[1] = 0;
+                    edges[nbe].adj[0] = nullptr;
+                    edges[nbe].adj[1] = nullptr;
 #ifdef DRAWING1
                     edges[nbe].Draw( );
 #endif
@@ -3631,7 +3631,7 @@ namespace bamg {
                   // if 2nd step where 2 step
                   // -- 1 compute le length of the curve
                   // -- create the points and edge
-                  PreviousNewEdge = 0;
+                  PreviousNewEdge = nullptr;
                   NbNewPoints = 0;
                   NbEdgeCurve = 0;
                   assert(nbvend < nbvx);
@@ -3782,7 +3782,7 @@ namespace bamg {
                   edges[nbe].ref = e->ref;
                   edges[nbe].on = e;
                   edges[nbe].adj[0] = PreviousNewEdge;
-                  edges[nbe].adj[1] = 0;
+                  edges[nbe].adj[1] = nullptr;
                   if (PreviousNewEdge) PreviousNewEdge->adj[1] = &edges[nbe];
 
 #ifdef DRAWING1
@@ -3829,7 +3829,7 @@ namespace bamg {
 #endif
     // NewPointsOld(*this) ;
     NewPoints(*this, 0);
-    CurrentTh = 0;
+    CurrentTh = nullptr;
   }
 
   Edge **Triangles::MakeGeometricalEdgeToEdge( ) {
@@ -3878,7 +3878,7 @@ namespace bamg {
 
   void Triangles::clear( ) {
     assert(NbRef <= 0);
-    if (CurrentTh == this) CurrentTh = 0;
+    if (CurrentTh == this) CurrentTh = nullptr;
     if (verbosity > 10) cout << " ~Triangles " << this << " " << identity << endl;
     if (vertices) delete[] vertices;
     if (edges) delete[] edges;
@@ -3987,7 +3987,7 @@ namespace bamg {
              << " Pmax = " << pmax << endl;
 
       assert(ordre);
-      for (i = 0; i < nbv; i++) ordre[i] = 0;
+      for (i = 0; i < nbv; i++) ordre[i] = nullptr;
 
       NbSubDomains = 0;
 
@@ -4076,7 +4076,7 @@ namespace bamg {
       // generation of the mesh with boundary points
       Int4 nbvb = 0;
       for (i = 0; i < nbv; i++) {
-        vertices[i].t = 0;
+        vertices[i].t = nullptr;
         vertices[i].vint = 0;
         if (ordre[i]) ordre[nbvb++] = ordre[i];
       }
@@ -4085,7 +4085,7 @@ namespace bamg {
       Int4 savenbt = nbt;
       Int4 savenbtx = nbtx;
       SubDomain *savesubdomains = subdomains;
-      subdomains = 0;
+      subdomains = nullptr;
 
       Int4 Nbtriafillhole = 2 * nbvb;
       Triangle *triafillhole = new Triangle[Nbtriafillhole];
@@ -4104,11 +4104,11 @@ namespace bamg {
 
       Vertex *v0 = ordre[0], *v1 = ordre[1];
 
-      triangles[0](0) = 0;    // sommet pour infini
+      triangles[0](0) = nullptr;    // sommet pour infini
       triangles[0](1) = v0;
       triangles[0](2) = v1;
 
-      triangles[1](0) = 0;    // sommet pour infini
+      triangles[1](0) = nullptr;    // sommet pour infini
       triangles[1](2) = v0;
       triangles[1](1) = v1;
       const int e0 = OppositeEdge[0];
@@ -4164,7 +4164,7 @@ namespace bamg {
 
       // Int4 nbtfillhole = nbt;
       // inforce the boundary
-      TriangleAdjacent ta(0, 0);
+      TriangleAdjacent ta(nullptr, 0);
       Int4 nbloss = 0, knbe = 0;
       for (i = 0; i < nbe; i++)
         if (st[i] >= 0)    // edge alone => on border ...  FH oct 2009
@@ -4222,7 +4222,7 @@ namespace bamg {
       for (i = 0; i < nbt; i++)
         if (triangles[i].color >= 0) {
           savetriangles[savenbt] = triangles[i];
-          savetriangles[savenbt].link = 0;
+          savetriangles[savenbt].link = nullptr;
           savenbt++;
         }
       // gestion of the adj
@@ -4307,7 +4307,7 @@ namespace bamg {
     Int4 i;
     // do all the allocation to be sure all the pointer existe
 
-    char *cname = 0;
+    char *cname = nullptr;
     if (Th.name) {
       cname = new char[strlen(Th.name) + 1];
       strcpy(cname, Th.name);
@@ -4337,9 +4337,9 @@ namespace bamg {
     } else {    // no add on back ground mesh
       BTh.NbRef++;
       NbVertexOnBThVertex = 0;
-      VertexOnBThVertex = 0;
+      VertexOnBThVertex = nullptr;
       NbVertexOnBThEdge = 0;
-      VertexOnBThEdge = 0;
+      VertexOnBThEdge = nullptr;
       //       assert (& BTh == this); // --- a voir
     }
 
@@ -4356,7 +4356,7 @@ namespace bamg {
       VerticesOnGeomVertex[i].Set(Th.VerticesOnGeomVertex[i], Th, *this);
     for (i = 0; i < NbVerticesOnGeomEdge; i++)
       VerticesOnGeomEdge[i].Set(Th.VerticesOnGeomEdge[i], Th, *this);
-    quadtree = 0;
+    quadtree = nullptr;
 
     //  assert(!OutSidesTriangles);
   }
@@ -4440,7 +4440,7 @@ namespace bamg {
   void Triangles::SmoothingVertex(int nbiter, Real8 omega) {
     //  if quatree exist remove it end reconstruct
     if (quadtree) delete quadtree;
-    quadtree = 0;
+    quadtree = nullptr;
     ReMakeTriangleContainingTheVertex( );
     Triangle vide;    // a triangle to mark the boundary vertex
     Triangle **tstart = new Triangle *[nbv];
@@ -4449,7 +4449,7 @@ namespace bamg {
     if (this == &BTh)
       for (i = 0; i < nbv; i++) tstart[i] = vertices[i].t;
     else
-      for (i = 0; i < nbv; i++) tstart[i] = 0;
+      for (i = 0; i < nbv; i++) tstart[i] = nullptr;
     for (j = 0; j < NbVerticesOnGeomVertex; j++) tstart[Number(VerticesOnGeomVertex[j].mv)] = &vide;
     for (k = 0; k < NbVerticesOnGeomEdge; k++) tstart[Number(VerticesOnGeomEdge[k].mv)] = &vide;
     if (verbosity > 2)
@@ -4602,21 +4602,21 @@ namespace bamg {
         cout << " 0 ";
       else
         cout << exp(lmin + i / delta);
-      cout.width( );
+      (void)cout.width( );
       cout << ",";
       cout.width(10);
       if (i == kmax)
         cout << " +infty ";
       else
         cout << exp(lmin + (i + 1) / delta);
-      cout.width( );
+      (void)cout.width( );
       cout << "   |   ";
 
       cout.precision(4);
       cout.width(6);
       cout << ((long)((10000.0 * histo[i]) / nbedges)) / 100.0;
-      cout.width( );
-      cout.precision( );
+      (void)cout.width( );
+      (void)cout.precision( );
       cout << "   |   " << histo[i] << endl;
     }
     cout << "        ------------------- | ---------- | ----------- " << endl << endl;
@@ -4873,7 +4873,7 @@ namespace bamg {
     // t the triangle and s0,s1,s2 the 3 vertices of t
     // in dete[3] = { det(B,s1,s2) , det(s0,B,s2), det(s0,s1,B)}
     // with det(a,b,c ) = -1 if one of 3 vertices a,b,c is NULL
-    Triangle *t = 0;
+    Triangle *t = nullptr;
     int j, jp, jn, jj;
     if (tstart)
       t = tstart;

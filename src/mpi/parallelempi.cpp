@@ -181,7 +181,7 @@ long WSend (R *v, int l, int who, int tag, MPI_Comm comm, MPI_Request *rq) {
   MPI_Request rq0, *request = &rq0;
   if(verbosity>100)
     cout << mpirank << " send to " << who << " tag " << tag << " " << rq << " " << comm << " syncro " << (rq == Syncro_block) << endl;
-  if (rq == Syncro_block || rq == 0)
+  if (rq == Syncro_block || rq == nullptr)
     ret = MPI_Send((void *)v, l, MPI_TYPE<R>::TYPE(), who, tag, comm);
   else {
     ret = MPI_Isend((void *)v, l, MPI_TYPE<R>::TYPE(), who, tag, comm, request);
@@ -212,7 +212,7 @@ long WSend<Complex> (Complex *v, int n, int who, int tag, MPI_Comm comm, MPI_Req
   MPI_Request rq0, *request = &rq0;
   if (verbosity > 100)
     cout << mpirank << " send to " << who << " tag " << tag << " " << rq << " " << comm << " syncro "<< (rq == Syncro_block) << endl;
-  if (rq == Syncro_block || rq == 0) {
+  if (rq == Syncro_block || rq == nullptr) {
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
     ret = MPI_Send(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX, who, tag, comm);
 #else
@@ -282,7 +282,7 @@ struct MPIrank {
   MPI_Request *rq;
   // mutable bool block;
 
-  MPIrank(int i=0, MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0)
+  MPIrank(int i=0, MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=nullptr)
     : who(i), comm(com), rq(rqq) {
         ffassert(who >=0 || who == MPI_ANY_SOURCE ); // check jan 2024 PHT , FH 
     int n;
@@ -414,7 +414,7 @@ struct MPIrank {
   const MPIrank & Bcast (Fem2D::Mesh const *&a) const {
     if(verbosity>100)
       cout << " MPI Bcast (mesh *) " << a << endl;
-    Serialize *buf = 0;
+    Serialize *buf = nullptr;
     long nbsize = 0;
     if (who == lmpirank) {
       buf = new Serialize((*a).serialize());
@@ -444,7 +444,7 @@ struct MPIrank {
   const MPIrank & Bcast (Fem2D::Mesh3 const *&a) const {
     if(verbosity>100)
       cout << " MPI Bcast (const mesh3 *) " << a << endl;
-    Serialize *buf = 0;
+    Serialize *buf = nullptr;
     long nbsize[2]={0,0};
     if (who == lmpirank) {
         if((*a).meshS) {
@@ -481,7 +481,7 @@ struct MPIrank {
   const MPIrank & Bcast (Fem2D::MeshS const *&a) const {
     if(verbosity>100)
       cout << " MPI Bcast (const meshS *) " << a << endl;
-    Serialize *buf = 0;
+    Serialize *buf = nullptr;
     long nbsize[2]={0,0};
     if (who == lmpirank) {
         if((*a).meshL) {
@@ -517,7 +517,7 @@ struct MPIrank {
   const MPIrank & Bcast (Fem2D::MeshL const *&a) const {
       if(verbosity>100)
           cout << " MPI Bcast (const meshL *) " << a << endl;
-      Serialize *buf = 0;
+      Serialize *buf = nullptr;
       long nbsize = 0;
       if (who == lmpirank) {
           buf = new Serialize((*a).serialize());
@@ -547,7 +547,7 @@ struct MPIrank {
   const MPIrank & Bcast(Matrice_Creuse<R> &a) const {
     if(verbosity>100)
       cout << mpirank << ": MPI Bcast " << who << " (Matrice_Creuse &) " << &a << " " << a.A << endl;
-    MatriceMorse<R> *mA = 0;
+    MatriceMorse<R> *mA = nullptr;
     int ldata[4] = {0, 0, 0, 0};
     if (who == lmpirank) {
       if(a.A) {
@@ -598,7 +598,7 @@ struct MPIrank {
 class DoOnWaitMPI_Request : public MPIrank {
 public:
   bool sync;
-  DoOnWaitMPI_Request( MPIrank mpr) : MPIrank(mpr), sync((rq == 0 || rq == Syncro_block)) {}
+  DoOnWaitMPI_Request( MPIrank mpr) : MPIrank(mpr), sync((rq == nullptr || rq == Syncro_block)) {}
   virtual bool Do(MPI_Request *rrq) = 0; // false -> end
   bool DoSR() { // do the Send/Recv Op.
     bool ret = false;
@@ -691,13 +691,13 @@ public:
   int state;
   int ldata[4];
   RevcWMatd(const MPIrank *mpirank, Mat * pm)
-    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(0), state(0) {
+    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(nullptr), state(0) {
     int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
     int ll = WRecv(ldata, 4, who, tag, comm, rq);
     ffassert(ll == MPI_SUCCESS);
   }
 
-  bool  Do(MPI_Request *rrq) {
+  bool  Do(MPI_Request *) {
     state++;
     int tag = MPI_TAG<Mat *>::TAG;
     if (verbosity > 100)
@@ -720,7 +720,7 @@ public:
         mA->Increaze(ldata[2], ldata[2]);
         CheckPtrHashMatrix(mA, " WRecv ");
         pmat->A.master(mA);
-        mA = 0;
+        mA = nullptr;
         return false;
         break;
     }
@@ -744,7 +744,7 @@ public:
   int state;
   int ldata[4];
   SendWMatd(const MPIrank *mpirank, Mat *pm)
-    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(0), state(0) {
+    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(nullptr), state(0) {
     mA = pmat->pHM();
     CheckPtrHashMatrix(mA, " SendWMatd ");
     ldata[0] = mA->n;
@@ -755,7 +755,7 @@ public:
     int ll = WSend(ldata, 4, who, tag, comm, rq);
     ffassert(ll == MPI_SUCCESS);
   }
-  bool Do(MPI_Request *rrq) {
+  bool Do(MPI_Request *) {
     state++;
     int tag = MPI_TAG<Mat *>::TAG;
     if (verbosity > 100)
@@ -873,7 +873,7 @@ public:
   }
 
     
-  SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh, bool havebordermesh)
+  SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh, bool)
   : DoOnWaitMPI_Request(*mpirank), Serialize((**ppThh).serialize_withBorderMesh()),
   ppTh(ppThh) {
       {
@@ -907,7 +907,7 @@ public:
         rqSecond = MPI_REQUEST_NULL;
   }
   
-  bool Do(MPI_Request *rrq) {
+  bool Do(MPI_Request *) {
       if(rqSecond != MPI_REQUEST_NULL)
         MPI_Wait(&rqSecond, MPI_STATUS_IGNORE);
       return false;// Fini
@@ -995,7 +995,7 @@ long MPIrank::Recv(const Fem2D::Mesh *& a) const  {
 	cout << " MPI >> (mesh *) &" << a << " " << &a << endl;
     RevcWMeshd<Mesh> *rwm= new RevcWMeshd<Mesh>(this,&a);
     if( rwm->DoSR() ) delete rwm;
-    if((rq==0 || rq == Syncro_block))
+    if((rq==nullptr || rq == Syncro_block))
       ffassert( a );
     return MPI_SUCCESS;
 }
@@ -1005,7 +1005,7 @@ long MPIrank::Recv(const Fem2D::Mesh3 *& a) const  {
       cout << " MPI >> (mesh3 *) &" << a << " " << &a << endl;
     RevcWMeshd<Mesh3> *rwm= new RevcWMeshd<Mesh3>(this,&a);
     if( rwm->DoSR() ) delete rwm;
-    if((rq==0 || rq == Syncro_block))
+    if((rq==nullptr || rq == Syncro_block))
       ffassert( a );
     return MPI_SUCCESS;
 }
@@ -1015,7 +1015,7 @@ long MPIrank::Recv(const Fem2D::MeshS *& a) const  {
       cout << " MPI >> (meshS *) &" << a << " " << &a << endl;
     RevcWMeshd<MeshS> *rwm= new RevcWMeshd<MeshS>(this,&a);
     if( rwm->DoSR() ) delete rwm;
-    if((rq==0 || rq == Syncro_block))
+    if((rq==nullptr || rq == Syncro_block))
       ffassert( a );
     return MPI_SUCCESS;
 }
@@ -1025,7 +1025,7 @@ long MPIrank::Recv(const Fem2D::MeshL *& a) const  {
       cout << " MPI >> (meshL *) &" << a << " " << &a << endl;
     RevcWMeshd<MeshL> *rwm= new RevcWMeshd<MeshL>(this,&a);
     if( rwm->DoSR() ) delete rwm;
-    if((rq==0 || rq == Syncro_block))
+    if((rq==nullptr || rq == Syncro_block))
       ffassert( a );
     return MPI_SUCCESS;
 }
@@ -1035,7 +1035,7 @@ void Serialize::mpisend(const MPIrank & rank,long tag,const void * vmpirank)
   const MPIrank * mpirank=static_cast<const MPIrank *> (vmpirank);
   MPI_Comm comm=mpirank->comm;
   MPI_Request *rq=mpirank->rq;
-  ffassert(rq==0 || rq == Syncro_block);
+  ffassert(rq==nullptr || rq == Syncro_block);
   char * pp = p-sizeof(long);
   long countsave=count(); // save count
   count()=lg; // store length in count
@@ -1065,10 +1065,10 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
   if(verbosity>100)
     cout << " -- waiting " << mpirank << " from  " << rank << " serialized " << what
 	 << " tag = " << tag <<  endl;
-  if(!(rq==0 || rq == Syncro_block))
+  if(!(rq==nullptr || rq == Syncro_block))
     {
       ExecError("Not async recv of complex  objet!  Sorry to hard to code (FH!).");
-      ffassert(rq==0 || rq == Syncro_block);
+      ffassert(rq==nullptr || rq == Syncro_block);
     }
 
 
@@ -1113,7 +1113,7 @@ struct Op_Recvmpi {
   using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
-    ffassert(f.rq ==0 || f.rq == Syncro_block); // Block
+    ffassert(f.rq ==nullptr || f.rq == Syncro_block); // Block
     return f.Recv(*a);
 
   }
@@ -1125,7 +1125,7 @@ struct Op_IRecvmpi {
   using result_type          = long;
   static MPIrank  f(MPIrank const  & f,A *  const  & a)
   {
-    ffassert(f.rq !=0 || f.rq != Syncro_block); // no Block
+    ffassert(f.rq !=nullptr || f.rq != Syncro_block); // no Block
     return f.Recv(*a);
 
   }
@@ -1493,7 +1493,7 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
         int who = root.who;
 	ffassert( sA );
 	MatriceMorse<R> * sM = s->pHM();
-        MatriceMorse<R> * rM=0;
+        MatriceMorse<R> * rM=nullptr;
         if(  !rA && (mpirankw==who) ) { // build a zero matric copy of sM on proc root
             MatriceMorse<R> *rm=new MatriceMorse<R>(*sM); //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
             *rm=R(); // set the matrix to Zero ..
@@ -1552,7 +1552,7 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
                 cerr << " Fatal error  MPI_reduce mat: the pattern of the all recv matrix are not the same "<< endl;
                 cerr << " set the recv matrix with same patten" <<endl;
                  for(int i=0; i<mpisizew;++i)
-                     cout << " proc "<< i << " pattern code: "<< code[i] << " != " << rcode << endl;;
+                     cout << " proc "<< i << " pattern code: "<< code[i] << " != " << rcode << endl;
                 ffassert(0);
             }
 
@@ -2365,36 +2365,36 @@ long mpiRank(fMPI_Comm  cmm) {
     return s;
 }
 
-AnyType InitializeGroup(Stack stack,const AnyType &x){
+AnyType InitializeGroup(Stack,const AnyType &x){
     MPI_Group *g=*PGetAny<fMPI_Group>(x);
     *g=MPI_GROUP_NULL;
      MPI_Comm_group(MPI_COMM_WORLD, g);
     return  g;
 }
-AnyType DeleteGroup(Stack stack,const AnyType &x){
+AnyType DeleteGroup(Stack,const AnyType &x){
     MPI_Group *g=*PGetAny<fMPI_Group>(x);
     if(g && (*g != MPI_GROUP_NULL))MPI_Group_free(g);
     return  Nothing;
 }
-AnyType InitializeComm(Stack stack,const AnyType &x){
+AnyType InitializeComm(Stack,const AnyType &x){
     MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
     *comm=MPI_COMM_NULL;
     MPI_Comm_dup(MPI_COMM_WORLD, comm);
     return  comm;
 }
-AnyType DeleteComm(Stack stack,const AnyType &x){
+AnyType DeleteComm(Stack,const AnyType &x){
     MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
     if(comm && (*comm != MPI_COMM_NULL && *comm != MPI_COMM_WORLD))// add MPI_COMM_WORLD FH 11/2010 FH
       MPI_Comm_free(comm);
     return  Nothing;
 }
-AnyType InitializeRequest(Stack stack,const AnyType &x){
+AnyType InitializeRequest(Stack,const AnyType &x){
     MPI_Request *comm=*PGetAny<fMPI_Request>(x);
     *comm=MPI_REQUEST_NULL;
 
     return  comm;
 }
-AnyType DeleteRequest(Stack stack,const AnyType &x){
+AnyType DeleteRequest(Stack,const AnyType &x){
     MPI_Request *comm=*PGetAny<fMPI_Request>(x);
     if(comm && ( *comm!=MPI_REQUEST_NULL )) MPI_Request_free(comm);
     return  Nothing;
@@ -2402,17 +2402,17 @@ AnyType DeleteRequest(Stack stack,const AnyType &x){
 //  Hack to Bypass a bug in freefem FH  ...
 template<>
 class ForEachType<MPI_Group>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...)
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(MPI_Group),sizeof(MPI_Group),0,0,iv,id,OOnReturn) { }
+    ForEachType(Function1 iv=nullptr,Function1 id=nullptr,Function1 OOnReturn=nullptr):basicForEachType(typeid(MPI_Group),sizeof(MPI_Group),nullptr,nullptr,iv,id,OOnReturn) { }
 };
 
 template<>
 class ForEachType<fMPI_Comm>:  public basicForEachType{public:// coorection july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...)
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(fMPI_Comm),sizeof(fMPI_Comm),0,0,iv,id,OOnReturn) {}
+    ForEachType(Function1 iv=nullptr,Function1 id=nullptr,Function1 OOnReturn=nullptr):basicForEachType(typeid(fMPI_Comm),sizeof(fMPI_Comm),nullptr,nullptr,iv,id,OOnReturn) {}
 };
 
 template<>
 class ForEachType<fMPI_Request>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...)
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(fMPI_Request),sizeof(fMPI_Request),0,0,iv,id,OOnReturn) {}
+    ForEachType(Function1 iv=nullptr,Function1 id=nullptr,Function1 OOnReturn=nullptr):basicForEachType(typeid(fMPI_Request),sizeof(fMPI_Request),nullptr,nullptr,iv,id,OOnReturn) {}
 };
 // end Hack  ...
 
@@ -2536,7 +2536,7 @@ AnyType ClearReturnKK_(Stack stack, const AnyType & a)
     return SetAny<KK_>(*cm);
 }
 fMPI_Request * get_elementp_( KN<MPI_Request> * const & a,const long & b){
-  if( a==0 || b<0 || a->N() <= b)
+  if( a==nullptr || b<0 || a->N() <= b)
     { if(a) cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " KN<MPI_Request> * " << endl;
       ExecError("Out of bound in operator []");}
   return  reinterpret_cast<fMPI_Request *> (&((*a)[b]));}// bofBof ...
@@ -2654,7 +2654,7 @@ static inline bool splitCommunicator(const MPI_Comm& in, MPI_Comm& out, const bo
             float area = size * size / (2.0 * p);
             *pm = 0;
             for(unsigned short i = 1; i < p; ++i)
-                pm[i] = static_cast<int>(size - std::sqrt(std::max(size * size - 2 * size * pm[i - 1] - 2 * area + pm[i - 1] * pm[i - 1], 1.0f)) + 0.5);
+                pm[i] = static_cast<int>(size - std::sqrt(std::max(size * size - 2 * size * pm[i - 1] - 2 * area + pm[i - 1] * pm[i - 1], 1.0f)) + 0.5f);
         }
         else
             for(unsigned short i = 0; i < p; ++i)
@@ -2694,14 +2694,14 @@ void f_init_lgparallele()
   {
     if(verbosity && mpirank == 0) cout << "parallelempi ";
     using namespace Fem2D;
-    Dcl_TypeandPtr<MPIrank>(0);
+    Dcl_TypeandPtr<MPIrank>(nullptr);
 
-    Dcl_TypeandPtr<fMPI_Group>(0,0,InitializeGroup,DeleteGroup);
-    Dcl_TypeandPtr<fMPI_Comm>(0,0,InitializeComm,DeleteComm);
+    Dcl_TypeandPtr<fMPI_Group>(nullptr,nullptr,InitializeGroup,DeleteGroup);
+    Dcl_TypeandPtr<fMPI_Comm>(nullptr,nullptr,InitializeComm,DeleteComm);
     Dcl_Type<fMPI_Op>();
-    Dcl_TypeandPtr<fMPI_Request>(0,0,InitializeRequest,DeleteRequest); // bof bof ...
+    Dcl_TypeandPtr<fMPI_Request>(nullptr,nullptr,InitializeRequest,DeleteRequest); // bof bof ...
     Dcl_TypeandPtr_<KN_<MPI_Request> ,KN<MPI_Request>*  >
-      (0,0,0,::Destroy<KN<MPI_Request> >,
+      (nullptr,nullptr,nullptr,::Destroy<KN<MPI_Request> >,
        ::ClearReturnKK_<MPI_Request,KN<MPI_Request>,KN_<MPI_Request> >,
        ::ClearReturnpKK<MPI_Request,KN<MPI_Request> >);
 
@@ -3058,4 +3058,4 @@ void init_ptr_parallelepmi();
 void init_ptr_parallelepmi(){
 initparallele=&f_initparallele ;
 init_lgparallele=&f_init_lgparallele;
-};
+}

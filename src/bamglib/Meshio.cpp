@@ -31,7 +31,7 @@
 namespace bamg {
 
   const char *OFortranUnFormattedFile::unkown("unknown file name");
-  void (*MeshIstreamErrorHandler)(ios &) = 0;
+  void (*MeshIstreamErrorHandler)(ios &) = nullptr;
   ///////////////////////////////////////////////////////////
   void WriteStr(ostream &out, char *str) {
     int i = 0;
@@ -52,7 +52,7 @@ namespace bamg {
     MeshIstream frbb(file);
     int dimlu, typesollu;
     long i;
-    double *sol = 0;
+    double *sol = nullptr;
     frbb >> dimlu >> nbsol >> lsol >> typesollu;
     if (typesol != typesollu) {
       cerr << " incorrect type of solution (read) " << typesollu << " != (wanted) " << typesol
@@ -77,9 +77,9 @@ namespace bamg {
 
     MeshIstream frbb(file);
     int dimlu, typesollu;
-    typesols = 0;
+    typesols = nullptr;
     long i, n = 0;
-    double *sol = 0;
+    double *sol = nullptr;
     int sizeoftype[] = {1, dim, dim * (dim + 1) / 2, dim * dim};
     // char * charoftype[] = {  "Scalar" , "dim Vector" ,"dim x dim Sym-Matric","dim x dim
     // Full-Matric" } ;
@@ -95,8 +95,8 @@ namespace bamg {
         nbsol = 0;
         lsol = 0;
         delete[] typesols;
-        typesols = 0;
-        return 0;
+        typesols = nullptr;
+        return nullptr;
       }
       n += sizeoftype[typesols[i]];
     }
@@ -221,7 +221,7 @@ namespace bamg {
         cout << "delete OFortranUnFormattedFile " << file_name << " @end  = " << n << endl;
       delete f;
     }
-    f = 0;
+    f = nullptr;
   }
 
   IFortranUnFormattedFile::~IFortranUnFormattedFile( ) {
@@ -230,7 +230,7 @@ namespace bamg {
         cout << " delete IFortranUnFormattedFile" << file_name << "  @end = " << n << endl;
       delete f;
     }
-    f = 0;
+    f = nullptr;
   }
 
   long IFortranUnFormattedFile::Record( ) {

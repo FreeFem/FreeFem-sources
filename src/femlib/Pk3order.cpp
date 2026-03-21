@@ -72,8 +72,8 @@ int main(int argc,const char ** argv)
   //  fonction_i =  $\Pi_{j=0,k-1} (\Lambda_{nn[i][j]} - aa[i][j])  $
   TTab aa,nn;
 
-  ostream * cf = 0;
-   ofstream *  ccf=0;
+  ostream * cf = nullptr;
+   ofstream *  ccf=nullptr;
   if(argc>3) cf = ccf = new ofstream(argv[3]);
   string s[1000];
   int e0=2;
@@ -144,7 +144,7 @@ int main(int argc,const char ** argv)
     cout << num[l] << ",  ";
   cout << endl;
 
-  if(cf ==0) cf = & cout;
+  if(cf ==nullptr) cf = & cout;
   *cf << prefix <<"nn[" << i << "][" << k << "] = " ;
   dump(i,k,nn,*cf);
   *cf << ";\n";

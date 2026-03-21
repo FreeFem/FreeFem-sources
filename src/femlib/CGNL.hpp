@@ -3,7 +3,7 @@
 #define CGNL_HPP_
 
 template<class R,class DJ>
-R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &w)
+R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &)
 {
   //  Find  ro such thah (dJ(x+ro h),h)  =0 
   // remark input: dJ(x)=g 

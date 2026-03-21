@@ -109,7 +109,7 @@ class String {
 //  String( string & pp) : p(&pp) {}
   String() : p(newstring()) {/*cout << "String" << p <<","<<  *p << endl;*/}
   void init() { p= newstring();} // Add FH march 2010
-void destroy() { freestring(p);p=0;} // Add FH march 2010
+void destroy() { freestring(p);p=nullptr;} // Add FH march 2010
 //  String( string * c) : p(c) {cout << "String" << p <<","<< *p << endl;} 
   String(const String & c) : p(newstring(*c.p)) {/*cout << "String" << p <<","<< *p << endl;*/}
   String(const string & c) : p(newstring(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
@@ -122,7 +122,7 @@ void destroy() { freestring(p);p=0;} // Add FH march 2010
   String(const double * c) : p(PtoString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String & operator=(const String & s){ freestring(p);p=newstring(s);return *this;}
   String  operator+(const String & s)const {return String(newstring(*p+*s.p));} 
-  ~String(){ if(verbosity>999999) cout << "~String" << p <<" "<<  *p << "." << endl; freestring(p); p=0;}
+  ~String(){ if(verbosity>999999) cout << "~String" << p <<" "<<  *p << "." << endl; freestring(p); p=nullptr;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
    operator  const string * ()  const {return p;}

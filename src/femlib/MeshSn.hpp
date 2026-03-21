@@ -78,7 +78,7 @@ typedef GenericVertex<R3> Vertex3;
     class BoundaryEdgeS: public GenericElement<DataSeg3>  
   {
   public: 
-      BoundaryEdgeS() {}; // constructor empty for array
+      BoundaryEdgeS() {} // constructor empty for array
       
       
   };
@@ -87,7 +87,7 @@ typedef GenericVertex<R3> Vertex3;
   
     class TriangleS: public GenericElement<DataTriangle3> { //public Triangle3  {
     public:
-        TriangleS() {}; // constructor empty for array
+        TriangleS() {} // constructor empty for array
         
         void Gradlambda(Rd * GradL) const
         {
@@ -123,7 +123,7 @@ typedef GenericVertex<R3> Vertex3;
         int *mapVol2Surf;
         MeshL *meshL;
         int nPoints;
-        MeshS():mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {};
+        MeshS():mapSurf2Vol(nullptr),mapVol2Surf(nullptr),meshL(nullptr) {}
         MeshS(const string, double ridgeangledetection=8.*atan(1.)/9.);
         //MeshS(const string, const long);
         MeshS(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, bool labeledBoundary=false, double ridgeangledetection=8.*atan(1.)/9.);
@@ -135,7 +135,7 @@ typedef GenericVertex<R3> Vertex3;
         MeshS(const Serialize&);
         MeshS(const Serialize &serialized, int withSurface);
         int load(const string & filename);
-        const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
+        const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=nullptr) const;
         int Save(const string & filename);
         void flipSurfaceMeshS(int surface_orientation);
         void GSave(FILE * f,int offset=0) const ;

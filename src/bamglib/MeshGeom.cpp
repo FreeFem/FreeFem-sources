@@ -122,7 +122,7 @@ namespace bamg {
       }
     Int4 nbedges = edge4->nb( );    // the total number of edges
     delete edge4;
-    edge4 = 0;
+    edge4 = nullptr;
 
     if (verbosity > 5) {
       if (name) cout << "    On Mesh " << name << endl;
@@ -200,7 +200,7 @@ namespace bamg {
         
           edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
           edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
-          edges[add].on = 0;
+          edges[add].on = nullptr;
           if (add < nbeold)    // in file edge // Modif FH 06122055
           {
 //  Error in periodic adapt 2d !!!! FH, je ne comprend pas 10/10/24 !!!!!!!
@@ -218,7 +218,7 @@ namespace bamg {
       if (verbosity > 2) cout << " ConsGeometry: reverse edge ??? " << kos << endl;
     }
     if (orientedgeold) delete[] orientedgeold;
-    orientedgeold = 0;
+    orientedgeold = nullptr;
 
     // construction of edges[].adj
     for (i = 0; i < nbv; i++) vertices[i].color = 0;
@@ -230,7 +230,7 @@ namespace bamg {
       for (j = 0; j < 2; j++) {
         Vertex *v = edges[i].v[j];
         Int4 i0 = v->color, j0;
-        if (i0 < 0) edges[i].adj[j] = 0;    // Add FH Jan 2008
+        if (i0 < 0) edges[i].adj[j] = nullptr;    // Add FH Jan 2008
         if (i0 == -1)
           v->color = i * 2 + j;
         else if (i0 >= 0) {    // i and i0 edge are adjacent by the vertex v
@@ -287,7 +287,7 @@ namespace bamg {
       Int4 isd;
       subdomains = new SubDomain[NbSubDomains];
       for (isd = 0; isd < NbSubDomains; isd++) {
-        subdomains[isd].head = 0;
+        subdomains[isd].head = nullptr;
       }
       k = 0;
       for (it = 0; it < nbt; it++)
@@ -298,7 +298,7 @@ namespace bamg {
             subdomains[isd].head = triangles + it;
             subdomains[isd].ref = triangles[it].color;
             subdomains[isd].sens = j;    // hack
-            subdomains[isd].edge = 0;
+            subdomains[isd].edge = nullptr;
             k++;
           }
         }
@@ -328,7 +328,7 @@ namespace bamg {
     NbVerticesOnGeomVertex = Gh.nbv;
     VerticesOnGeomVertex = new VertexOnGeom[NbVerticesOnGeomVertex];
     NbVerticesOnGeomEdge = 0;
-    VerticesOnGeomEdge = 0;
+    VerticesOnGeomEdge = nullptr;
     for (i = 0; i < Gh.nbv; i++) Gh.vertices[i].Set( );    // bug clang ???? FH 09/2012
     if (verbosity > 6) {
       int nbr = 0;
@@ -466,7 +466,7 @@ namespace bamg {
     delete[] colorV;
     //  -- unset adj
     for (i = 0; i < nbt; i++)
-      for (j = 0; j < 3; j++) triangles[i].SetAdj2(j, 0, triangles[i].GetAllflag(j));
+      for (j = 0; j < 3; j++) triangles[i].SetAdj2(j, nullptr, triangles[i].GetAllflag(j));
     if (verbosity > 6) {
       int nbr = 0;
       for (i = 0; i < Gh.nbv; i++)
@@ -479,13 +479,13 @@ namespace bamg {
   {
     OnDisk = 0;
     NbRef = 0;
-    name = 0;
-    quadtree = 0;
-    curves = 0;
+    name = nullptr;
+    quadtree = nullptr;
+    curves = nullptr;
     // edgescomponante=0;
-    triangles = 0;
-    edges = 0;
-    vertices = 0;
+    triangles = nullptr;
+    edges = nullptr;
+    vertices = nullptr;
     NbSubDomains = 0;
     //  nbtf=0;
     //  BeginOfCurve=0;
@@ -493,7 +493,7 @@ namespace bamg {
     nbe = nbt = nbtx = 0;
     NbOfCurves = 0;
     //  BeginOfCurve=0;
-    subdomains = 0;
+    subdomains = nullptr;
     MaximalAngleOfCorner = 10 * Pi / 180;
   }
 
@@ -501,7 +501,7 @@ namespace bamg {
     Int4 i;
     *this = Gh;
     NbRef = 0;
-    quadtree = 0;
+    quadtree = nullptr;
     name = new char[strlen(Gh.name) + 4];
     strcpy(name, "cp:");
     strcat(name, Gh.name);
@@ -521,7 +521,7 @@ namespace bamg {
   }
 
   GeometricalEdge *Geometry::Contening(const R2 P, GeometricalEdge *start) const {
-    GeometricalEdge *on = start, *pon = 0;
+    GeometricalEdge *on = start, *pon = nullptr;
     // walk with the cos on geometry
     //  cout << P ;
     int k = 0;
@@ -706,7 +706,7 @@ namespace bamg {
       // search the geometrical edge
       assert(s <= 1.0);
       Real8 ls = s * ll;
-      on = 0;
+      on = nullptr;
       s0 = vg0;
       s1 = sensge[bge];
       Real8 l0 = 0, l1;
@@ -996,7 +996,7 @@ namespace bamg {
                 e = e->Adj[k1];         // next edge
 
               }    // for(;;)
-              if (verbosity > 10 && curves == 0)
+              if (verbosity > 10 && curves == nullptr)
                 cout << NbOfCurves << " curve :  nb edges=  " << nee << endl;
               NbOfCurves++;
               if (level) {
@@ -1066,25 +1066,25 @@ namespace bamg {
     delete[] hv;
     delete[] eangle;
   }
-  Geometry::~Geometry( ) {
+  Geometry::~Geometry( ) noexcept(false) {
     assert(NbRef <= 0);
     if (verbosity > 9) cout << "DELETE      ~Geometry " << this << endl;
     if (vertices) delete[] vertices;
-    vertices = 0;
+    vertices = nullptr;
     if (edges) delete[] edges;
-    edges = 0;
+    edges = nullptr;
     // if(edgescomponante) delete [] edgescomponante; edgescomponante=0;
     if (triangles) delete[] triangles;
-    triangles = 0;
+    triangles = nullptr;
     if (quadtree) delete quadtree;
-    quadtree = 0;
+    quadtree = nullptr;
     if (curves) delete[] curves;
-    curves = 0;
+    curves = nullptr;
     NbOfCurves = 0;
     if (name) delete[] name;
-    name = 0;
+    name = nullptr;
     if (subdomains) delete[] subdomains;
-    subdomains = 0;
+    subdomains = nullptr;
     //  if(ordre)     delete [] ordre;
     EmptyGeometry( );
   }

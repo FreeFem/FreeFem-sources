@@ -14,7 +14,7 @@ template<typename T>
 struct SortArray<T,1> {
   T v[1];
 
-SortArray(T *a,int * sens=0)
+SortArray(T *a,int * sens=nullptr)
     {
         v[0]=a[0];
         if(sens) *sens =1;
@@ -37,7 +37,7 @@ struct SortArray<T,2> {
   //  using std::swap;
   T v[2];
 
-    SortArray(T *a,int * sens=0)
+    SortArray(T *a,int * sens=nullptr)
     { int s=1;
     v[0]=a[0];
     v[1]=a[1];
@@ -64,7 +64,7 @@ struct SortArray<T,2> {
 template<typename T>
 struct SortArray<T,3> {
   T v[3];
-  SortArray(T *a,int *sens=0)
+  SortArray(T *a,int *sens=nullptr)
   {
       int s=1;
     v[0]=a[0];
@@ -95,7 +95,7 @@ struct SortArray<T,3> {
 template<typename T>
 struct SortArray<T,4> {
     T v[4];
-    SortArray(T *a,int *sens=0)
+    SortArray(T *a,int *sens=nullptr)
     {
         int s=1;
         v[0]=a[0];
@@ -179,7 +179,7 @@ public:
 	++ncol;
 	if(key == t[k].k) return t+k;
       }
-    return 0;
+    return nullptr;
   } 
     // add FH  21 avril 2009
   size_t  operator()(nKV * p) { return p ? p-t : n;}

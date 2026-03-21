@@ -51,9 +51,9 @@ public:
     cpu += ((double)clock())/CLOCKS_PER_SEC - t0;
     return p;
   }
-  virtual void SetInitWithBC(R*rhs, R *x) const {} // do nothing by default ..
+  virtual void SetInitWithBC(R*, R *) const {} // do nothing by default ..
   CGMatVirt(int nn, int mm=-1) : n(nn), m(mm < 0 ? nn : mm), cpu(0.), it(0) {}
-  virtual int *pwcl() const { return 0; } // array know if node with BC (TGV)
+  virtual int *pwcl() const { return nullptr; } // array know if node with BC (TGV)
 };
 
 template<class TypeIndex=int, class TypeScalar=double>
@@ -74,7 +74,7 @@ bool fgmres(CGMatVirt<Z, K> &A, // fonction et pointeur data pour A
             int &maxits,
             int restart=50,
             int verbo=3,
-            int *perm=0);
+            int *perm=nullptr);
 
 template<class I, class K>
 K *myscopy(I n, const K *x, K *y);

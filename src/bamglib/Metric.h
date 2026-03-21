@@ -50,7 +50,7 @@ namespace bamg {
     MetricIso(Real8 a) : h(a) {}
     MetricIso(const MetricAnIso M);    // {MatVVP2x2 vp(M);h=1/sqrt(Max(vp.lambda1,vp.lambda2));}
     MetricIso(Real8 a11, Real8 a21, Real8 a22);    // {*this=MetricAnIso(a11,a21,a22));}
-    MetricIso( ) : h(1){};                         //
+    MetricIso( ) : h(1){}                         //
     MetricIso(const Real8 a[3], const MetricIso m0, const MetricIso m1, const MetricIso m2)
       : h(hinterpole
             ? (a[0] * m0.h + a[1] * m1.h + a[2] * m2.h)
@@ -60,8 +60,8 @@ namespace bamg {
     R2 Orthogonal(const R2 A) const { return R2(-h * A.y, h * A.x); }
     R2 Orthogonal(const I2 A) const { return R2(-h * A.y, h * A.x); }
     //  D2 Orthogonal(const D2 A)const {return D2(-h*A.y,h*A.x);}
-    Real8 operator( )(R2 x) const { return sqrt((x, x)) / h; };
-    Real8 operator( )(R2 x, R2 y) const { return ((x, y)) / (h * h); };
+    Real8 operator( )(R2 x) const { return sqrt((x, x)) / h; }
+    Real8 operator( )(R2 x, R2 y) const { return ((x, y)) / (h * h); }
     int IntersectWith(MetricIso M) {
       int r = 0;
       if (M.h < h) r = 1, h = M.h;
@@ -88,7 +88,7 @@ namespace bamg {
     Real8 a11, a21, a22;
     MetricAnIso(Real8 a) : a11(1 / (a * a)), a21(0), a22(1 / (a * a)) {}
     MetricAnIso(Real8 a, Real8 b, Real8 c) : a11(a), a21(b), a22(c) {}
-    MetricAnIso( ){};    //
+    MetricAnIso( ){}    //
     MetricAnIso(const Real8 a[3], const MetricAnIso m0, const MetricAnIso m1, const MetricAnIso m2);
     R2 mul(const R2 x) const { return R2(a11 * x.x + a21 * x.y, a21 * x.x + a22 * x.y); }
     Real8 det( ) const { return a11 * a22 - a21 * a21; }
@@ -109,11 +109,11 @@ namespace bamg {
 
     Real8 operator( )(R2 x) const {
       return sqrt(x.x * x.x * a11 + 2 * x.x * x.y * a21 + x.y * x.y * a22);
-    };
+    }
     //  Real8 operator()(D2 x) const { return sqrt(x.x*x.x*a11+2*x.x*x.y*a21+x.y*x.y*a22);};
     Real8 operator( )(R2 x, R2 y) const {
       return x.x * y.x * a11 + (x.x * x.y + x.y * y.x) * a21 + x.y * y.y * a22;
-    };
+    }
     inline void Box(Real8& hx, Real8& hy) const;
     friend ostream& operator<<(ostream& f, const MetricAnIso& M) {
       f << " mtr a11=" << M.a11 << " a21=a12=" << M.a21 << " a22=" << M.a22 << ";";

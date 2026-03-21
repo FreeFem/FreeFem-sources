@@ -21,7 +21,7 @@ extern "C" {
 //#define VERSION VERSION
 }
 #define WITHBLAS 1
-#elif HAVE_VECLIB_CBLAS_BUG
+#elif defined(HAVE_VECLIB_CBLAS_BUG) && HAVE_VECLIB_CBLAS_BUG
 #include <vecLib/cblas.h>
 #define WITHBLAS 1
 #endif

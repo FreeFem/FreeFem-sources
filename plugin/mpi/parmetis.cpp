@@ -140,7 +140,7 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
         idx_t edgecut;
         real_t* tpwgts = new real_t[nparts];
         for(int i = 0; i < nparts; ++i)
-            tpwgts[i] = 1.0 / static_cast<real_t>(nparts);
+            tpwgts[i] = static_cast<real_t>(1.0) / static_cast<real_t>(nparts);
         real_t ubvec = 1.05;
         idx_t* part = ptInt + vtxdist[rank];
         ParMETIS_V3_PartKway(vtxdist, xadg, adjncy.data(), NULL, NULL, &wgtflag, &wgtflag, &ncon, &nparts, tpwgts, &ubvec, &wgtflag, &edgecut, part, &workComm);

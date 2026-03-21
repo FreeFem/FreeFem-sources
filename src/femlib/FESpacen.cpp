@@ -507,7 +507,7 @@ void GTypeOfFESum<Mesh>::Build()
 template<class Mesh> void GTypeOfFESum<Mesh>::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int oocoef,int oodf,int *nnump ) const
      {
 	 int op=0,oc=0,odof=oodf,ocoef=oocoef;
-	 assert(nnump==0);
+	 assert(nnump==nullptr);
 	 for (int i=0,k=0;i<this->nb_sub_fem;i++)
 	   {
 	       const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
@@ -579,8 +579,8 @@ template<class MMesh>
      KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<typename MMesh::RdHat> &Psub,KN<int> &Ksub,int op_U) const
      {
          const int d =  Rd::d;
-         Rd *Ps=0;
-         int *Ks=0;
+         Rd *Ps=nullptr;
+         int *Ks=nullptr;
          int nsb = TFE[0]->nbsubdivision;
          int nvsub,nksub;
          SplitSimplex<Rd>(nsb, nvsub,  Ps,  nksub ,  Ks);
@@ -607,8 +607,8 @@ template<class MMesh>
      {
          typedef typename MeshS::RdHat RdHat;
          const int dHat =  RdHat::d;
-         MeshS::RdHat  *Ps=0;
-         int *Ks=0;
+         MeshS::RdHat  *Ps=nullptr;
+         int *Ks=nullptr;
          int nsb = TFE[0]->nbsubdivision;
          int nvsub,nksub;
          SplitSimplex<RdHat>(nsb, nvsub,  Ps,  nksub ,  Ks); 
@@ -635,8 +635,8 @@ template<class MMesh>
      {
          typedef typename MeshL::RdHat RdHat;
          const int dHat =  RdHat::d;
-         MeshL::RdHat  *Ps=0;
-         int *Ks=0;
+         MeshL::RdHat  *Ps=nullptr;
+         int *Ks=nullptr;
          int nsb = TFE[0]->nbsubdivision;
          int nvsub,nksub;
          SplitSimplex<RdHat>(nsb, nvsub,  Ps,  nksub ,  Ks);

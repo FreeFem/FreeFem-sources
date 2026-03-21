@@ -49,7 +49,7 @@ class  addingInitFunct {  public:
 #ifdef NO_STREAM_REDIRECT
 #define LOADINITIO
 #else
-#if _WIN32
+#ifdef _WIN32
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
     streambuf * si =ffapi::cin()->rdbuf() ;		\

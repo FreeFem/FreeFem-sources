@@ -80,9 +80,9 @@ class mylex : public CodeAlloc {
     istream * nf;
       int typeofscript;
     char sep;
-      xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0),typeofscript(0),sep(':')   {}
+      xxxx() : l(0), f(nullptr) , filename(nullptr),macroarg(0),nf(nullptr),typeofscript(0),sep(':')   {}
     void  open(mylex *lexx,const char * ff,int ts=0) ;
-    void  readin(mylex *lexx,const string & s,const string *name=0,int macroargg=0);
+    void  readin(mylex *lexx,const string & s,const string *name=nullptr,int macroargg=0);
     void close() ;
   };
   
@@ -101,7 +101,7 @@ class mylex : public CodeAlloc {
   list<MapMacroParam> *listMacroParam;
   public:
   
-  mylex(ostream & out,bool eecho=true,const KN<String> *pargs=0 );
+  mylex(ostream & out,bool eecho=true,const KN<String> *pargs=nullptr );
   string token() const;
   void print(ostream &f) const; 
 
@@ -140,7 +140,7 @@ class mylex : public CodeAlloc {
     return "-- unknown --";}
     
   void input(const char *  filename,int ts=0) ;
-  void input(const string &str,const string *name=0,int lg=0);
+  void input(const string &str,const string *name=nullptr,int lg=0);
   bool close() ;
 
   char * newcopy(const char * s)
@@ -155,7 +155,7 @@ class mylex : public CodeAlloc {
 private: 
   int basescan();
   int basescanprint(int lvl=0); // with print if lvl =0 
-  int EatCommentAndSpace(string *data=0);
+  int EatCommentAndSpace(string *data=nullptr);
   int scan1();
   bool SetMacro(int &ret);
   bool CallMacro(int &ret);
@@ -176,7 +176,7 @@ private:
   
 } ;
 
-mylex * Newlex(  ostream & out,bool =true,KN<String> * args=0);
+mylex * Newlex(  ostream & out,bool =true,KN<String> * args=nullptr);
  void Destroylex(mylex * m);
 
 /// <<zzzfff>> This pointer is allocated in [[file:global.cpp::zzzfff]] and initialized in

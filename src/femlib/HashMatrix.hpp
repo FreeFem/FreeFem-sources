@@ -48,7 +48,7 @@ class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire>
 
 public:
 
-    template<class R> static void conj(R *x,TypeIndex nnz){}
+    template<class R> static void conj(R *,TypeIndex){}
     static void conj(complex<double> *x,TypeIndex nnz){ for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
     static void conj(complex<float> *x,TypeIndex nnz){for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
     static double conj(double x){return x;}
@@ -242,7 +242,7 @@ public:
     void CSR();
     void CSC();
     void CSC(I *& JA, I *& IA, R *& A);
-    static int addstateLU(int U) { return U>0 ? 4 : 5; };
+    static int addstateLU(int U) { return U>0 ? 4 : 5; }
 
     size_t SortLU(int U);
     size_t CSC_U(I *& JA, I *& IA, R *& A);
@@ -272,15 +272,15 @@ public:
 
     VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & me) ;
      ostream& dump (ostream&f)  const { return f<<*this;}
-    void SetBC(I ii,double ttgv) { diag(ii)=ttgv;};
+    void SetBC(I ii,double ttgv) { diag(ii)=ttgv;}
 
     double gettgv(I * pntgv=0,double ratio=1e6) const ;
     bool GetReDoNumerics() const { bool b=re_do_numerics; re_do_numerics=0;return b;}
     bool GetReDoSymbolic() const { bool b=re_do_symbolic; re_do_symbolic=0;return  b;}
 
 
-    HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;}
-    double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
+    HashMatrix<I, R> *toMatriceMorse(bool=false,bool=false) const {ffassert(0); return 0;}
+    double psor(KN_<R> &,const  KN_<R> &,const  KN_<R> & , double) {ffassert(0); }
 
     void UnHalf();
     void Half(int wsym) {resize(this->n,this->m,nnz,-1,wsym);}
@@ -296,7 +296,7 @@ public:
 };
 // 0 good , -1 delete, ...
 template<class I,class R> int GoodPtrHashMatrix(const HashMatrix<I,R> *p ) {
-    if( p==0) return 1;
+    if( p==nullptr) return 1;
     if( p->N != p->n) return -2;
     if( p->M != p->m) return -3;
     if (p->nnz ==-1234567802) return  -4;
@@ -344,7 +344,7 @@ inline     R   * HashMatrix<I,R>::pij(I ii,I jj)  const
     re_do_numerics=1;
     Hash h = hash(ii,jj);
     size_t k = find(ii,jj,h);
-    return k==empty ? 0 : aij+k;
+    return k==empty ? nullptr : aij+k;
 }
 
 template<class I,class R>
@@ -565,7 +565,7 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
 }
 
 template<class R>
-tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int,int,bool=false)
 {
 
     typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;

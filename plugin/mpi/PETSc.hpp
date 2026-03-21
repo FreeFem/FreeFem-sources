@@ -95,7 +95,7 @@ void globalMapping(HpddmType* const& A, PetscInt*& num, PetscInt& start, PetscIn
     A->template globalMapping<'C'>(num, num + A->getDof(), start, end, global, A->getScaling(), list);
 }
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
-void globalMapping(HpddmType* const& A, PetscInt* const& num, PetscInt& start, PetscInt& end, long long& global, PetscInt* const list) { }
+void globalMapping(HpddmType* const&, PetscInt* const&, PetscInt&, PetscInt&, long long&, PetscInt* const) { }
 template<class Type, class Tab, typename std::enable_if<!std::is_same<Tab, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
 void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
     int *is, *js;

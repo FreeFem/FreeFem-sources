@@ -29,9 +29,9 @@
 // a shift operator << in a integer.
 // --------------------------------------------
 template<int L>
-inline void w_endian(const unsigned char *c, unsigned char *k) { cerr << " L = " << L << endl; assert(0); }
+inline void w_endian(const unsigned char *, unsigned char *) { cerr << " L = " << L << endl; assert(0); }
 template<int L>
-inline void r_endian(const unsigned char *c, unsigned char *k) { assert(0); }
+inline void r_endian(const unsigned char *, unsigned char *) { assert(0); }
 
 template<>
 inline void w_endian<1>(const unsigned char *c, unsigned char *k) { *k = *c; }

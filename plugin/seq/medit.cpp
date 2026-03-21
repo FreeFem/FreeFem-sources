@@ -959,7 +959,7 @@ static char *meditcmd(long filebin, int nbsol, int smedit, const string &meditff
   }
 
   char meditsol[5];
-  sprintf(meditsol, " %i", smedit);
+  snprintf(meditsol, sizeof(meditsol), " %i", smedit);
   meditcmm += meditsol;
 
   meditcmm += ' ';
@@ -990,7 +990,7 @@ static char *meditcmd(long filebin, int nbsol, int smedit, const string &meditff
       while (nbstrings < smedit) {
         nbstrings++;
         char newsol[10];
-        sprintf(newsol, " ffsol%i", nbstrings);
+        snprintf(newsol, sizeof(newsol), " ffsol%i", nbstrings);
         meditcmm += newsol;
       }
     }

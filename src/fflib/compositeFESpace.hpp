@@ -44,7 +44,7 @@ struct OpMatrixtoBilinearFormVG
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init); }
   OpMatrixtoBilinearFormVG(int initt=0) :
     OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
-    init(initt){};
+    init(initt){}
 
 };
 

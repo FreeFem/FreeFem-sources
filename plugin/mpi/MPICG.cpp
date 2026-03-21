@@ -269,7 +269,7 @@ public:
 	
 	Expression  mat1,mat;
 	typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
-	MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb=0) 
+	MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb=nullptr) 
 	: RNM_VirtualMatrix<R>(n),stack(stk),
 	x(n),c_x(CPValue(x)),b(bb),
 	mat1(op->code(basicAC_F0_wa(c_x))),
@@ -300,8 +300,8 @@ public:
 	    WhereStackOfPtr2Free(stack)->clean();
 	} 
 	plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
-        bool ChecknbLine(int n) const { return true;}
-        bool ChecknbColumn(int m) const { return true;}
+        bool ChecknbLine(int) const { return true;}
+        bool ChecknbColumn(int) const { return true;}
 	
     };  
     
@@ -329,12 +329,12 @@ public:
 	    {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
 		ffassert(op); 
 		C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
-	  else  C =0;
+	  else  C =nullptr;
 	  X = to<Kn*>(args[1]);
 	  if (args.size()>2)
 	      B = to<Kn*>(args[2]);
 	  else 
-	      B=0;
+	      B=nullptr;
 	}
 	
 	virtual AnyType operator()(Stack stack)  const {
@@ -348,7 +348,7 @@ public:
 		int nbitermax=  100;
 		long verb = verbosity;
 		
-		pcommworld vcommworld=0;
+		pcommworld vcommworld=nullptr;
 		long dKrylov=50; 
 		if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
 		if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
@@ -373,7 +373,7 @@ public:
 		      }
 		    bb = &b;
 		}
-		KN<R> * bbgmres =0;
+		KN<R> * bbgmres =nullptr;
 		if ( !B && !CG) bbgmres=bb; // none zero if gmres without B 		
 		MatF_O AA(n,stack,A,bbgmres);
 		if(bbgmres ){

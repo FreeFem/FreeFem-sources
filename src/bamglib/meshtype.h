@@ -91,6 +91,6 @@ namespace bamg {
   const Icoor2 MaxICoor22 = Icoor2(2) * Icoor2(MaxICoor) * Icoor2(MaxICoor);
 #endif
   class Triangles;
-  extern void MeshError(int Err, const Triangles *Th = 0);
+  extern void MeshError(int Err, const Triangles *Th = nullptr);
 }    // namespace bamg
 #endif

@@ -61,7 +61,7 @@ class TensorK {
   vector< double > factorials;
   std::vector< double > exponents;
   double factorial(int n) const {
-    assert(0 <= n <= factorials.size( ));
+    assert(0 <= n && n < (int)factorials.size());
     return factorials[n];
   }
 

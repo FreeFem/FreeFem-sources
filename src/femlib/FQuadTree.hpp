@@ -74,7 +74,7 @@ class FQuadTree {
     QuadTreeBox *b,*bc,*be;
     long len;
     StorageQuadTreeBox *n; // next StorageQuadTreeBox
-    StorageQuadTreeBox(long ,StorageQuadTreeBox * =0);
+    StorageQuadTreeBox(long ,StorageQuadTreeBox * =nullptr);
     ~StorageQuadTreeBox();
     long  SizeOf() const {
       return len*sizeof(QuadTreeBox)+sizeof(StorageQuadTreeBox)+ (n?n->SizeOf():0);

@@ -183,7 +183,7 @@ int inmsh2(pMesh mesh) {
         continue;
       }
 
-      pt1->ref = fabs(ref);
+      pt1->ref = abs(ref);
       pp0 = &mesh->point[pt1->v[0]];
       pp1 = &mesh->point[pt1->v[1]];
       pp2 = &mesh->point[pt1->v[2]];
@@ -204,7 +204,7 @@ int inmsh2(pMesh mesh) {
         continue;
       }
 
-      pq1->ref = fabs(ref);
+      pq1->ref = abs(ref);
       pp0 = &mesh->point[pq1->v[0]];
       pp1 = &mesh->point[pq1->v[1]];
       pp2 = &mesh->point[pq1->v[2]];

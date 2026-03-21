@@ -18,7 +18,7 @@ template<class T> T *resizeandclean1(const Resize<T> & t,const long &n)
   
 	for (int i=n;i<nn;i++)  {delete (*t.v)[i];} // clean
 	t.v->resize(n);
-	for (int i=nn;i<n;i++)  {(*t.v)[i]=0;}  
+	for (int i=nn;i<n;i++)  {(*t.v)[i]=nullptr;}  
 	return  t.v;
 }
 

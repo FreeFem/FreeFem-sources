@@ -217,13 +217,13 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   int nt = Th.nt;
   int nbe = Th.nbe;
 
-  KN< double > *pmetric = 0;
+  KN< double > *pmetric = nullptr;
 
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
 
-  pcommworld pcomm = 0;
+  pcommworld pcomm = nullptr;
 
   if (nargs[1]) {
     pcomm = GetAny<pcommworld>((*nargs[1])(stack));
@@ -245,7 +245,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[34] ? GetAny< KN< KN< long > >* >((*nargs[34])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[34] ? GetAny< KN< KN< long > >* >((*nargs[34])(stack)) : nullptr;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;
@@ -279,8 +279,8 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
         }
       }
     }
-  KN< long > *prequiredTriangle = 0;
-  KNM< double > *plocalParameter = 0;
+  KN< long > *prequiredTriangle = nullptr;
+  KNM< double > *plocalParameter = nullptr;
   if (nargs[32]) {
     prequiredTriangle = GetAny< KN< long > * >((*nargs[32])(stack));
   }
@@ -391,7 +391,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
   if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
-  KN< long > *pneighbors = 0;
+  KN< long > *pneighbors = nullptr;
   if (nargs[35]) {
     pneighbors = GetAny< KN< long > * >((*nargs[35])(stack));
     int icomm,i;
@@ -419,7 +419,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
               PMMG_ARG_ppParMesh, &mesh,
               PMMG_ARG_end);
   if(communicators == NULL) {
-    Serialize *buf = 0;
+    Serialize *buf = nullptr;
     long nbsize = 0;
     if (myrank == root) {
       buf = new Serialize((*Th_T).serialize());

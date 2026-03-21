@@ -822,7 +822,7 @@ void initGrafix(pScene sc, pMesh mesh) {
   glEnable(GL_LIGHTING);
   if (stereoMode != MONO) {
     lightpos[2] = -1.0;
-    if (sc->par.sunpos) sc->par.sunpos[2] = -fabs(sc->par.sunpos[2]);
+    sc->par.sunpos[2] = -fabs(sc->par.sunpos[2]);
   }
 
   if (sc->par.sunp)

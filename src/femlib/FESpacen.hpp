@@ -37,7 +37,7 @@
  *  FEspacen.hpp
  *  EF23n
  *
- *  Created by Frédéric Hecht on 04/12/07.
+ *  Created by FrÃ©dÃ©ric Hecht on 04/12/07.
  *  Copyright 2007 Universite Pierre et marie Curie  All rights reserved.
  *
  */
@@ -240,9 +240,9 @@ public:
   KN<int> begin_dfcomp, end_dfcomp;
   KN<int> first_comp,last_comp; // for each SubFE 
     
-  virtual void init(InterpolationMatrix<RdHat> & M,FElement * pK,int odf,int ocomp,int *pp) const
+  virtual void init(InterpolationMatrix<RdHat> & M,FElement * pK,int,int,int *) const
   {
-    assert(pK==0);
+    assert(pK==nullptr);
     assert(M.np==NbPtforInterpolation);
     assert(M.ncoef==NbcoefforInterpolation);
     M.P=PtInterpolation;
@@ -329,7 +329,7 @@ public:
   
   virtual R operator()(const GFElement<Mesh>  & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const  ;
   virtual void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const =0;
-  virtual void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const {}; // no change by deflaut
+  virtual void set(const Mesh &,const Element &,InterpolationMatrix<RdHat> &,int,int,int * ) const {} // no change by deflaut
     // ocoef is the offset of the coef in M 
     // odf is the offset in the df 
     // nump  if exist give the numbering of p  . 0=> no change
@@ -507,7 +507,7 @@ template<class MMesh>
 template<class MMesh>
 struct GFESpacePtrTFE {
     GTypeOfFE<MMesh> const * const ptrTFE;
-    GFESpacePtrTFE(GTypeOfFE<MMesh> const * const pptrTFE=0) : ptrTFE(pptrTFE) {}
+    GFESpacePtrTFE(GTypeOfFE<MMesh> const * const pptrTFE=nullptr) : ptrTFE(pptrTFE) {}
     virtual  ~GFESpacePtrTFE() { if(ptrTFE) delete ptrTFE;}
 };
     
@@ -553,9 +553,9 @@ public:
   
   //  par defaut P1                
   
-    GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1,int nbequibe=0,int *equibe=0)
+    GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1,int nbequibe=0,int *equibe=nullptr)
     :
-    GFESpacePtrTFE<MMesh>(0),
+    GFESpacePtrTFE<MMesh>(nullptr),
     DataFENodeDF(TTh.BuildDFNumbering(tfe.ndfonVertex,tfe.ndfonEdge,tfe.ndfonFace,tfe.ndfonVolume,nbequibe,equibe)),
     Th(TTh),
     TFE(1,0,&tfe), 
@@ -576,18 +576,18 @@ public:
 			   << " Nb of DoF " << NbOfDF <<endl;
     }
     
-  GFESpace(const GFESpace & Vh,int kk,int nbequibe=0,int *equibe=0);
-  GFESpace(const GFESpace ** Vh,int kk,int nbequibe=0,int *equibe=0);
+  GFESpace(const GFESpace & Vh,int kk,int nbequibe=0,int *equibe=nullptr);
+  GFESpace(const GFESpace ** Vh,int kk,int nbequibe=0,int *equibe=nullptr);
     
   int FirstDFOfNode(int i) const {return FirstDfOfNodeData ? FirstDfOfNodeData[i] : i*Nproduit;}
   int LastDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1] : (i+1)*Nproduit;}
   int NbDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1]-FirstDfOfNodeData[i] : Nproduit;}
-  int MaximalNbOfNodes() const {return MaxNbNodePerElement;};
-  int MaximalNbOfDF() const {return MaxNbDFPerElement;};
+  int MaximalNbOfNodes() const {return MaxNbNodePerElement;}
+  int MaximalNbOfDF() const {return MaxNbDFPerElement;}
     const int * PtrFirstNodeOfElement(int k) const {
       return NodesOfElement 
 	  ? NodesOfElement + (FirstNodeOfElement ? FirstNodeOfElement[k] : k*MaxNbNodePerElement)                 
-	  : 0;}   
+	  : nullptr;}   
   
   int SizeToStoreAllNodeofElement() const {  
       return  FirstNodeOfElement 
@@ -731,7 +731,7 @@ public:
     
   void Build();  // the true constructor 
     
-  void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=0) const;
+  void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=nullptr) const;
   void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const; // no change by deflaut 
   void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const ;
   ~GTypeOfFESum(){}
@@ -789,7 +789,7 @@ InterpolationMatrix<RdHat>::InterpolationMatrix(const GTypeOfFE<Mesh> & tef)
   p(ncoef),
   dofe(ncoef)  
 {
-  //  virtual void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=0) const
+  //  virtual void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=nullptr) const
   tef.GTypeOfFE<Mesh>::init(*this,0,0,0,0);
 }
 

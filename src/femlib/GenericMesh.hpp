@@ -132,8 +132,8 @@ const int TypeVolume =3;
 	return (k%2)+ ((j[0]+3)%3)*2; // signe + depart*2
     }
     // build de permutation
-    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0); }// a error}
-    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0); }// a error}
+    template<int d> inline void SetNumPerm(int,int *) { ffassert(0); }// a error}
+    template<int d> inline void SetNumPerm1(int,int *) { ffassert(0); }// a error}
 
     template<> inline void SetNumPerm<1>(int ,int *p) { p[0]=0;} // a error}
     template<> inline void SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}
@@ -206,7 +206,7 @@ public:
     NbOfDF(aNbOfDF),
     NodesOfElement(aNodesOfElement),
     FirstDfOfNodeData(aFirstDfOfNodeData),
-    FirstNodeOfElement(0),
+    FirstNodeOfElement(nullptr),
     MaxNbNodePerElement(aMaxNbNodePerElement),
     MaxNbDFPerElement(aMaxNbDFPerElement) ,
     MaxNbDFPerNode(maxdfon(andfon))
@@ -246,8 +246,8 @@ class GenericVertex : public Rn,public Label
 public:
   typedef Rn Rd;
   static const int d=Rd::d;
-  GenericVertex() : Rd(),Label(),normal(0) {};
-  GenericVertex(const Rd & P,int r=0): Rd(P),Label(r),normal(0){}
+  GenericVertex() : Rd(),Label(),normal(nullptr) {}
+  GenericVertex(const Rd & P,int r=0): Rd(P),Label(r),normal(nullptr){}
 
   void SetNormal(Rd *&n,const Rd & N)
   { if (normal) {
@@ -266,7 +266,7 @@ private: // pas de copie pour ne pas prendre l'adresse
   void operator=(const GenericVertex &);
 
 };
-  template<int d> inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {  static_assert ( d== 1 ,"dim =1"); return f[0]==0 ? R1(-1):R1(1);  }
+  template<int d> inline  R1 ExtNormal( GenericVertex<R1> *const[2],int const f[1])  {  static_assert ( d== 1 ,"dim =1"); return f[0]==0 ? R1(-1):R1(1);  }
   template<int d> inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {    static_assert ( d== 2 ,"dim=2");  return R2(*v[f[1]],*v[f[0]]).perp();  }
     // correct signe N in 3d mai 2009 (FH)
   template<int d> inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {  static_assert ( d== 3 ,"dim=3"); return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
@@ -375,7 +375,7 @@ public:
       r+=  Phat[i-1]*(*(Rd*) vertices[i]);
     return r;
   }
- double mesBord(int i) // mesure hyperface !!!! 01/2024
+ double mesBord(int) // mesure hyperface !!!! 01/2024
     {
         const Vertex * vb[nva];
         for(int i=0; i< nva;++i)
@@ -471,11 +471,11 @@ private:
 };
 
 
-    template<int N> inline void PermI2J(const void **I,const void **J,int *S)
+    template<int N> inline void PermI2J(const void **,const void **,int *)
     {
 	ffassert(0);
     }
-    template<> inline void PermI2J<1>(const void **I,const void **J,int *S)
+    template<> inline void PermI2J<1>(const void **,const void **,int *S)
     {
 	S[0]=0;
     }
@@ -547,9 +547,9 @@ public:
 
   GenericMesh()
     : nt(0),nv(0),nbe(0),nadjnomanifold(0), mes(0.),mesb(0.) ,
-      vertices(0),elements(0),borderelements(0),bnormalv(0),
-      TheAdjacencesLink(0),BoundaryElementHeadLink(0),
-      ElementConteningVertex(0), gtree(0),gdfb(0)
+      vertices(nullptr),elements(nullptr),borderelements(nullptr),bnormalv(nullptr),
+      TheAdjacencesLink(nullptr),BoundaryElementHeadLink(nullptr),
+      ElementConteningVertex(nullptr), gtree(nullptr),gdfb(nullptr)
   {
       
   }
@@ -599,10 +599,10 @@ public:
   void Buildbnormalv();
   void BuildBound();
   void BuildjElementConteningVertex();
-  void BuildGTree() {if(gtree==0)  gtree=new GTree(vertices,Pmin,Pmax,nv);}
+  void BuildGTree() {if(gtree==nullptr)  gtree=new GTree(vertices,Pmin,Pmax,nv);}
   GenericDataFindBoundary<GMesh> * Buildgdfb() const {if(gdfb==0) gdfb=new GenericDataFindBoundary<GMesh>(this) ; return gdfb;}
-  DataFENodeDF BuildDFNumbering(int dfon[NbTypeItemElement],int nbequibe=0,int *equibe=0) const ;
-    DataFENodeDF BuildDFNumbering(int ndfv,int ndfe,int ndff,int ndft,int nbequibe=0,int *equibe=0) const
+  DataFENodeDF BuildDFNumbering(int dfon[NbTypeItemElement],int nbequibe=0,int *equibe=nullptr) const ;
+    DataFENodeDF BuildDFNumbering(int ndfv,int ndfe,int ndff,int ndft,int nbequibe=0,int *equibe=nullptr) const
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
@@ -736,7 +736,7 @@ public:
 
 
   template<int N,int M>
-  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i,int *psens=0)  const
+  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i,int *psens=nullptr)  const
   {
     int nnv[N];
     const Element & K(elements[CheckT(k)]);
@@ -748,12 +748,12 @@ public:
     return SortArray<int,N>(nnv,psens);
   }
 
-  SortArray<int,B::nv> itemadj(int k,int i,int *psens=0) const
+  SortArray<int,B::nv> itemadj(int k,int i,int *psens=nullptr) const
   {
     return iteme<B::nv,T::nea>(T::nvadj,k,i,psens);
   }
 
-  SortArray<int,B::nv> itembe(int k,int *psens=0) const
+  SortArray<int,B::nv> itembe(int k,int *psens=nullptr) const
   {
     int nnv[B::nv];
     const B & K(borderelements[CheckBE(k)]);
@@ -782,15 +782,15 @@ public:
     delete [] bnormalv;
     if(gtree) delete gtree;
     if(gdfb) delete gdfb;
-      ElementConteningVertex=0;
-      TheAdjacencesLink=0;
-      BoundaryElementHeadLink=0;
-      borderelements=0;
-      elements=0;
-      vertices=0;
-      bnormalv=0;
-      gtree=0;
-      gdfb=0; 
+      ElementConteningVertex=nullptr;
+      TheAdjacencesLink=nullptr;
+      BoundaryElementHeadLink=nullptr;
+      borderelements=nullptr;
+      elements=nullptr;
+      vertices=nullptr;
+      bnormalv=nullptr;
+      gtree=nullptr;
+      gdfb=nullptr;
       nt=(0);
       nv=(0);
       nbe=(0);
@@ -1208,7 +1208,7 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 	      }
 
 
-	      TheBoundaryElementAdjacencesLink[nk]   = TheBoundaryElementAdjacencesLink[p->v];;
+	      TheBoundaryElementAdjacencesLink[nk]   = TheBoundaryElementAdjacencesLink[p->v];
 	      TheBoundaryElementAdjacencesLink[p->v] = sens*(nk+1);
 
 	    }
@@ -1728,7 +1728,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
  */
   const GenericMesh & Th(*this);
   int nnodeK = T::NbNodes(ndfon);
-  int *p = 0, *pp=0;
+  int *p = nullptr, *pp=nullptr;
     unsigned int tinfty=std::numeric_limits<unsigned int>::max()   ;
 
   const int nkv= T::nv;
@@ -1938,7 +1938,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	  int kk=0,nn=0;
 	  for(int k=0;k<nt;++k)
 	    for(int i=0;i<nnodeK;i++)
-		pp[p[nn++]]=ndfon[keysdim[i]];;
+		pp[p[nn++]]=ndfon[keysdim[i]];
 	  for(int n=0;n<nbNodes;++n)
 	    {
 	      int ndfn=pp[n];
@@ -2072,16 +2072,16 @@ Serialize GenericMesh<T,B,V>::serialize() const
 /*    GenericMesh()
     : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
     vertices(0),elements(0),borderelements(0),bnormalv(0),
-    TheAdjacencesLink(0),BoundaryElementHeadLink(0),
-    ElementConteningVertex(0), gtree(0)
+    TheAdjacencesLink(nullptr),BoundaryElementHeadLink(nullptr),
+    ElementConteningVertex(nullptr), gtree(0)
     {}
  */
     template<typename T,typename B,typename V>
     GenericMesh<T,B,V>::GenericMesh(const  Serialize &serialized)
     : nt(0),nv(0),nbe(0),nadjnomanifold(0), mes(0.),mesb(0.) ,
     vertices(0),elements(0),borderelements(0),bnormalv(0),
-    TheAdjacencesLink(0),BoundaryElementHeadLink(0),
-    ElementConteningVertex(0), gtree(0),gdfb(0)
+    TheAdjacencesLink(nullptr),BoundaryElementHeadLink(nullptr),
+    ElementConteningVertex(nullptr), gtree(nullptr),gdfb(nullptr)
 
     {
 	const int nve = T::nv;

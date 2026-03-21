@@ -241,8 +241,8 @@ class MeshPointBase { public:
      P.x=doublenotset;
      P.y=doublenotset;
      P.z=doublenotset;
-     T=0;
-     Th=0;
+     T=nullptr;
+     Th=nullptr;
      label =notaregion;
      region = notaregion;
      VF=0;  
@@ -257,8 +257,8 @@ class MeshPointBase { public:
      P.x=x;
      P.y=y;
      P.z=z;
-     T=0;
-     Th=0;
+     T=nullptr;
+     Th=nullptr;
      label =0;
      region = notaregion;
      t=f=e=v=-1;

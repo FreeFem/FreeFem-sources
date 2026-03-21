@@ -14410,7 +14410,6 @@ template class Call_FormLinear<v_fes>;
 template class Call_FormLinear<v_fes3>;
 template class Call_FormLinear<v_fesS>;
 template class Call_FormLinear<v_fesL>;
-template class Call_FormLinear<vect_generic_v_fes>; // Morice: added vector FESpace (composite FESpace)
 
 template class Call_FormBilinear<v_fes,v_fes>;
 template class Call_FormBilinear<v_fes3,v_fes3>;

@@ -77,7 +77,7 @@ int mymain(int argc, char **argv) {
   verbosity = 9;
   set_new_handler(&NewHandler);
   char *fmeshback = "1.mesh";
-  char *fmetrix = 0;
+  char *fmetrix = nullptr;
   // ostream *f_metr(&cout);
   if (argc >= 2) fmeshback = argv[1];
   if (argc >= 3) fmetrix = argv[2];

@@ -100,7 +100,7 @@ namespace bamg {
     MeshIstream(const char *file_name)
       : in(*new ifstream(file_name)), CurrentFile(file_name), LineNumber(1), LineError(0) {
       if (!in) {
-        cerr << " Error Opening file " << file_name, CurrentFile = 0;
+        cerr << " Error Opening file " << file_name, CurrentFile = nullptr;
         ShowIoErr(1);
       }
       if (verbosity > 4) cout << "    Openfile : " << file_name << endl;

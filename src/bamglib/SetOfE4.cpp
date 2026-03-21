@@ -43,7 +43,7 @@ namespace bamg {
   }
 
   Int4 SetOfEdges4::find(Int4 ii, Int4 jj) {
-    if (tete == 0) {
+    if (tete == nullptr) {
       cerr << "SetOfEdges4::find \nplus de tete de liste\n";
       MeshError(888);
     }
@@ -58,7 +58,7 @@ namespace bamg {
   }
 
   Int4 SetOfEdges4::add(Int4 ii, Int4 jj) {
-    if (tete == 0) {
+    if (tete == nullptr) {
       cerr << "SetOfEdges4::add\n plus de tete de liste \n" << endl;
       MeshError(888);
     }

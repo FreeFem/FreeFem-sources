@@ -140,15 +140,15 @@ long SaveHB(std::string *const &hb_filename, Matrice_Creuse< R > *const &sparse_
 
   // #data lines excluding header
   int totcrd = ptrcrd + indcrd + valcrd + rhscrd;
-  sprintf(buf, "%14d%14d%14d%14d%14d", totcrd, ptrcrd, indcrd, valcrd, rhscrd);
+  snprintf(buf, bufsize, "%14d%14d%14d%14d%14d", totcrd, ptrcrd, indcrd, valcrd, rhscrd);
   fout << buf << std::endl;
 
   // Line 3 : MXTYPE, NROW, NCOL, NNZERO, NELTVL
   const int neltvl = 0;    // #elemental matrix entries, assembled matrix=0
   if (isDouble)
-    sprintf(buf, "RUA           %14d%14d%14d%14d", N, N, nnzero, neltvl);    // double
+    snprintf(buf, bufsize, "RUA           %14d%14d%14d%14d", N, N, nnzero, neltvl);    // double
   else
-    sprintf(buf, "CUA           %14d%14d%14d%14d", N, N, nnzero, neltvl);    // complex<double>
+    snprintf(buf, bufsize, "CUA           %14d%14d%14d%14d", N, N, nnzero, neltvl);    // complex<double>
   fout << buf << std::endl;
 
   // Line 4

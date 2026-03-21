@@ -89,7 +89,7 @@ namespace {
       }
     }
     void init( ) {
-      v = 0;
+      v = nullptr;
       pTh.init( );
     }
     lgVertex(const Mesh *Th, long kk) : pTh(Th), v(&(*pTh)(kk)) {}
@@ -135,14 +135,14 @@ namespace {
     CountPointer< const Mesh > pTh;
     Triangle *k;
 
-    lgElement( ) : k(0) {}
+    lgElement( ) : k(nullptr) {}
     void Check( ) const {
       if (!k || !pTh) {
         ExecError("Unset Triangle,Sorry!");
       }
     }
     void init( ) {
-      k = 0;
+      k = nullptr;
       pTh.init( );
     }
     void destroy( ) { pTh.destroy( ); }
@@ -184,14 +184,14 @@ namespace {
     CountPointer< const Mesh > pTh;
     BoundaryEdge *k;
 
-    lgBoundaryEdge( ) : k(0) {}
+    lgBoundaryEdge( ) : k(nullptr) {}
     void Check( ) const {
       if (!k || !pTh) {
         ExecError("Unset BoundaryEdge,Sorry!");
       }
     }
     void init( ) {
-      k = 0;
+      k = nullptr;
       pTh.init( );
     }
     void destroy( ) { pTh.destroy( ); }
@@ -249,7 +249,7 @@ class generic_v_fes : public RefCounter {
   typedef void* FESpace;
 
   public:
-  virtual bool differentMesh(){ ffassert(0); return true; }; 
+  virtual bool differentMesh(){ ffassert(0); return true; } 
   
   // declaration avec les virtuelles pure
   // function for vect_generic_v_fes
@@ -283,13 +283,13 @@ class v_fes : public generic_v_fes{
   FESpace *update( );
 
   v_fes(int NN, const pmesh *t, Stack s, int n, Expression *p)
-    : N(NN), ppTh(t), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
   v_fes(int NN, const v_fes *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
 
   void destroy( ) {
-    ppTh = 0;
-    pVh = 0;
+    ppTh = nullptr;
+    pVh = nullptr;
     delete this;
   }
   virtual ~v_fes( ) {}
@@ -298,10 +298,10 @@ class v_fes : public generic_v_fes{
   virtual FESpace *buildupdate( ) = 0;
   
   // Added to return the pointer to FESpace 
-  const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void *getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
+  const void *getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
+  void *getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
+  void *getpVh()const{ return pVh; }         // Morice : get the pointer of FESpace
+  int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
 // 3D volume
@@ -328,20 +328,20 @@ class v_fes3 : public generic_v_fes {
   FESpace3 *update( );
 
   v_fes3(int NN, const pmesh3 *t, Stack s, int n, Expression *p)
-    : N(NN), ppTh(t), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
   v_fes3(int NN, const v_fes3 *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
 
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fes3( ) {}
   bool buildperiodic(Stack stack, KN< int > &ndfe);
-  virtual FESpace3 *buildupdate(KN< int > &ndfe) { return 0; }
-  virtual FESpace3 *buildupdate( ) { return 0; };
+  virtual FESpace3 *buildupdate(KN< int > &) { return nullptr; }
+  virtual FESpace3 *buildupdate( ) { return nullptr; }
 
-  const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
+  const void * getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
+  void * getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; }         // Morice : get the pointer of FESpace
+  int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
 // 3D surface
@@ -369,21 +369,21 @@ class v_fesS : public generic_v_fes {
   FESpaceS *update( );
 
   v_fesS(int NN, const pmeshS *t, Stack s, int n, Expression *p)    /// TODO
-    : N(NN), ppTh(t), pVh(0), stack(s), nbcperiodic(n), periodic(p) {
+    : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {
   }    // take a pmesh3 and use the pmeshS
   v_fesS(int NN, const v_fesS *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
 
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fesS( ) {}
   bool buildperiodic(Stack stack, KN< int > &ndfe);
-  virtual FESpaceS *buildupdate(KN< int > &ndfe) { return 0; }
-  virtual FESpaceS *buildupdate( ) { return 0; };
+  virtual FESpaceS *buildupdate(KN< int > &) { return nullptr; }
+  virtual FESpaceS *buildupdate( ) { return nullptr; }
 
-  const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
+  const void * getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
+  void * getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; }         // Morice : get the pointer of FESpac
+  int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
 // 3D curve
@@ -411,35 +411,35 @@ class v_fesL : public generic_v_fes {
   FESpaceL *update( );
 
   v_fesL(int NN, const pmeshL *t, Stack s, int n, Expression *p)    /// TODO
-    : N(NN), ppTh(t), pVh(0), stack(s), nbcperiodic(n), periodic(p) {
+    : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {
   }    // take a pmesh3 and use the pmeshS
   v_fesL(int NN, const v_fesL *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(0), stack(s), nbcperiodic(n), periodic(p) {}
+    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
 
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fesL( ) {}
   bool buildperiodic(Stack stack, KN< int > &ndfe);
-  virtual FESpaceL *buildupdate(KN< int > &ndfe) { return 0; }
-  virtual FESpaceL *buildupdate( ) { return 0; };
+  virtual FESpaceL *buildupdate(KN< int > &) { return nullptr; }
+  virtual FESpaceL *buildupdate( ) { return nullptr; }
 
-  const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
-  void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
-  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
-  int getN(){ return N;};                // Morice : get the number of item of the FESpace
+  const void *getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
+  void *getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; }         // Morice : get the pointer of FESpac
+  int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
 // 2d
 class pfes_tef : public v_fes {
  public:
   const TypeOfFE *tef;
-  pfes_tef(const pmesh *t, const TypeOfFE *tt, Stack s = NullStack, int n = 0, Expression *p = 0)
+  pfes_tef(const pmesh *t, const TypeOfFE *tt, Stack s = NullStack, int n = 0, Expression *p = nullptr)
     : v_fes(tt->N, t, s, n, p), tef(tt) {
     operator FESpace *( );
   }
   FESpace *buildupdate(int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) {
-    return *ppTh ? new FESpace(**ppTh, *tef, nbdfv, (int *)ndfv, nbdfe, (int *)ndfe) : 0;
+    return *ppTh ? new FESpace(**ppTh, *tef, nbdfv, (int *)ndfv, nbdfe, (int *)ndfe) : nullptr;
   }
-  FESpace *buildupdate( ) { return *ppTh ? new FESpace(**ppTh, *tef) : 0; }
+  FESpace *buildupdate( ) { return *ppTh ? new FESpace(**ppTh, *tef) : nullptr; }
 };
 
 class pfes_tefk : public v_fes {
@@ -447,19 +447,19 @@ class pfes_tefk : public v_fes {
   const TypeOfFE **tef;
   const int k;
   pfes_tefk(const pmesh *t, const TypeOfFE **tt, int kk, Stack s = NullStack, int n = 0,
-            Expression *p = 0)
+            Expression *p = nullptr)
     : v_fes(sum(tt, &Fem2D::TypeOfFE::N, kk), t, s, n, p), tef(tt), k(kk) {
     operator FESpace *( );
   }
   FESpace *buildupdate( ) {
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
     assert(tef);
-    return *ppTh ? new FESpace(**ppTh, tef, k) : 0;
+    return *ppTh ? new FESpace(**ppTh, tef, k) : nullptr;
   }
   virtual ~pfes_tefk( ) { delete[] tef; }
   FESpace *buildupdate(int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) {
     assert(tef);
-    return *ppTh ? new FESpace(**ppTh, tef, k, nbdfv, ndfv, nbdfe, ndfe) : 0;
+    return *ppTh ? new FESpace(**ppTh, tef, k, nbdfv, ndfv, nbdfe, ndfe) : nullptr;
   }
 };
 
@@ -467,14 +467,14 @@ class pfes_tefk : public v_fes {
 class pfes3_tef : public v_fes3 {
  public:
   const TypeOfFE3 *tef;
-  pfes3_tef(const pmesh3 *t, const TypeOfFE3 *tt, Stack s = NullStack, int n = 0, Expression *p = 0)
+  pfes3_tef(const pmesh3 *t, const TypeOfFE3 *tt, Stack s = NullStack, int n = 0, Expression *p = nullptr)
     : v_fes3(tt->N, t, s, n, p), tef(tt) {
     operator FESpace3 *( );
   }
   FESpace3 *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpace3(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpace3(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpace3 *buildupdate( ) { return *ppTh ? new FESpace3(**ppTh, *tef) : 0; }
+  FESpace3 *buildupdate( ) { return *ppTh ? new FESpace3(**ppTh, *tef) : nullptr; }
 };
 
 class pfes3_tefk : public v_fes3 {
@@ -491,7 +491,7 @@ class pfes3_tefk : public v_fes3 {
   }
 
   pfes3_tefk(const pmesh3 *t, const Fem2D::TypeOfFE3 **tt, int kk, Stack s = NullStack, int n = 0,
-             Expression *p = 0)
+             Expression *p = nullptr)
     : v_fes3(sum((const Fem2D::TypeOfFE3 **)tt, &Fem2D::TypeOfFE3::N, kk), t, s, n, p), tef(tt),
       k(kk), atef(kk, tt), tefs(atef)
 
@@ -502,11 +502,11 @@ class pfes3_tefk : public v_fes3 {
   FESpace3 *buildupdate( ) {
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
     // assert(tef);
-    return *ppTh ? new FESpace3(**ppTh, tefs) : 0;
+    return *ppTh ? new FESpace3(**ppTh, tefs) : nullptr;
   }
   virtual ~pfes3_tefk( ) { delete[] tef; }
   FESpace3 *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpace3(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpace3(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 
@@ -514,14 +514,14 @@ class pfes3_tefk : public v_fes3 {
 class pfesS_tef : public v_fesS {
  public:
   const TypeOfFES *tef;
-  pfesS_tef(const pmeshS *t, const TypeOfFES *tt, Stack s = NullStack, int n = 0, Expression *p = 0)
+  pfesS_tef(const pmeshS *t, const TypeOfFES *tt, Stack s = NullStack, int n = 0, Expression *p = nullptr)
     : v_fesS(tt->N, t, s, n, p), tef(tt) {
     operator FESpaceS *( );
   }
   FESpaceS *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceS(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpaceS(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpaceS *buildupdate( ) { return *ppTh ? new FESpaceS(**ppTh, *tef) : 0; }
+  FESpaceS *buildupdate( ) { return *ppTh ? new FESpaceS(**ppTh, *tef) : nullptr; }
 };
 
 class pfesS_tefk : public v_fesS {
@@ -538,7 +538,7 @@ class pfesS_tefk : public v_fesS {
   }
 
   pfesS_tefk(const pmeshS *t, const Fem2D::TypeOfFES **tt, int kk, Stack s = NullStack, int n = 0,
-             Expression *p = 0)
+             Expression *p = nullptr)
     : v_fesS(sum((const Fem2D::TypeOfFES **)tt, &Fem2D::TypeOfFES::N, kk), t, s, n, p), tef(tt),
       k(kk), atef(kk, tt), tefs(atef)
 
@@ -549,11 +549,11 @@ class pfesS_tefk : public v_fesS {
   FESpaceS *buildupdate( ) {
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
     // assert(tef);
-    return *ppTh ? new FESpaceS(**ppTh, tefs) : 0;
+    return *ppTh ? new FESpaceS(**ppTh, tefs) : nullptr;
   }
   virtual ~pfesS_tefk( ) { delete[] tef; }
   FESpaceS *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceS(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpaceS(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 
@@ -561,14 +561,14 @@ class pfesS_tefk : public v_fesS {
 class pfesL_tef : public v_fesL {
  public:
   const TypeOfFEL *tef;
-  pfesL_tef(const pmeshL *t, const TypeOfFEL *tt, Stack s = NullStack, int n = 0, Expression *p = 0)
+  pfesL_tef(const pmeshL *t, const TypeOfFEL *tt, Stack s = NullStack, int n = 0, Expression *p = nullptr)
     : v_fesL(tt->N, t, s, n, p), tef(tt) {
     operator FESpaceL *( );
   }
   FESpaceL *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceL(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpaceL(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpaceL *buildupdate( ) { return *ppTh ? new FESpaceL(**ppTh, *tef) : 0; }
+  FESpaceL *buildupdate( ) { return *ppTh ? new FESpaceL(**ppTh, *tef) : nullptr; }
 };
 
 class pfesL_tefk : public v_fesL {
@@ -585,7 +585,7 @@ class pfesL_tefk : public v_fesL {
   }
 
   pfesL_tefk(const pmeshL *t, const Fem2D::TypeOfFEL **tt, int kk, Stack s = NullStack, int n = 0,
-             Expression *p = 0)
+             Expression *p = nullptr)
     : v_fesL(sum((const Fem2D::TypeOfFEL **)tt, &Fem2D::TypeOfFEL::N, kk), t, s, n, p), tef(tt),
       k(kk), atef(kk, tt), tefs(atef)
 
@@ -596,11 +596,11 @@ class pfesL_tefk : public v_fesL {
   FESpaceL *buildupdate( ) {
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
     // assert(tef);
-    return *ppTh ? new FESpaceL(**ppTh, tefs) : 0;
+    return *ppTh ? new FESpaceL(**ppTh, tefs) : nullptr;
   }
   virtual ~pfesL_tefk( ) { delete[] tef; }
   FESpaceL *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceL(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : 0;
+    return *ppTh ? new FESpaceL(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 /*
@@ -831,12 +831,12 @@ class pfes_fes : public v_fes {
  public:
   pfes *Vh;
   int n;
-  pfes_fes(pfes *Vhh, int nn, Stack s = NullStack, int n = 0, Expression *p = 0)
+  pfes_fes(pfes *Vhh, int nn, Stack s = NullStack, int n = 0, Expression *p = nullptr)
     : v_fes((**Vhh).N * nn, static_cast< const v_fes * >(*Vhh), s, n, p), Vh(Vhh), n(nn) {
     operator FESpace *( );
-  };
+  }
   FESpace *buildupdate( ) { return new FESpace(*(FESpace *)**Vh, n); }
-  FESpace *buildupdate(int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) {
+  FESpace *buildupdate(int &, KN< int > &, int &, KN< int > &) {
     InternalError(" No way to define a periodic BC in this case: tensorisation of FEspace ");
     //  return  new FESpace(***Vh,n,nbdfv,ndfv,nbdfe,ndfe);
   }
@@ -853,7 +853,7 @@ class FEcomp {
   friend class FEbase< K, v_fes >;
   FEbase< K, v_fes > *base;
   int comp;
-  FEcomp(FEbase< K, v_fes > *b, int c) : base(b), comp(c){};
+  FEcomp(FEbase< K, v_fes > *b, int c) : base(b), comp(c){}
 
  private:    // rule of programming
   FEcomp(const FEcomp &);
@@ -920,6 +920,7 @@ class FEbaseArrayKn {
  public:    // for eigen value
   int N;
   FEbaseArrayKn(int NN) : N(NN) {}
+  virtual ~FEbaseArrayKn() = default;
   virtual void set(int i, KN_< K >) = 0;
   virtual KN< K > *get(int i) const = 0;    // for P. Jolivet
   virtual void resize(int i) = 0;           // for P. Jolivet
@@ -1074,7 +1075,7 @@ class interpolate_f_X_1 : public OneOperator {
 
 inline FESpace *v_fes::update( ) {
   assert(dHat == 2);
-  if (!*ppTh) return 0;
+  if (!*ppTh) return nullptr;
   if (nbcperiodic) {
     assert(periodic);
     const Mesh &Th(**ppTh);
@@ -1089,7 +1090,7 @@ inline FESpace *v_fes::update( ) {
 
 inline FESpace3 *v_fes3::update( ) {
   assert(dHat == 3);
-  if (!*ppTh) return 0;
+  if (!*ppTh) return nullptr;
   if (nbcperiodic) {
     assert(periodic);
     KN< int > ndfe;
@@ -1101,7 +1102,7 @@ inline FESpace3 *v_fes3::update( ) {
 
 inline FESpaceS *v_fesS::update( ) {
   assert(dHat == 2);
-  if (!*ppTh) return 0;
+  if (!*ppTh) return nullptr;
   if (nbcperiodic) {
     assert(periodic);
     KN< int > ndfe;
@@ -1113,7 +1114,7 @@ inline FESpaceS *v_fesS::update( ) {
 
 inline FESpaceL *v_fesL::update( ) {
   assert(dHat == 1);
-  if (!*ppTh) return 0;
+  if (!*ppTh) return nullptr;
   if (nbcperiodic) {
     assert(periodic);
     KN< int > ndfe;
@@ -1149,7 +1150,7 @@ class TabFuncArg {
   TabFuncArg(Stack ss, int n) : s(ss), nb(n), e(new Expression[n]) {}
   void operator=(int j) {
     ffassert(j == 0);
-    for (int i = 0; i < nb; i++) e[i] = 0;
+    for (int i = 0; i < nb; i++) e[i] = nullptr;
   }    // resert
   Expression &operator[](int i) { return e[i]; }
   ~TabFuncArg( ) { delete[] e; }
@@ -1200,7 +1201,7 @@ inline ostream &ShowBound(const KN< R > &y, ostream &f) {
   return f;
 }
 template<>
-inline ostream &ShowBound< Complex >(const KN< Complex > &y, ostream &f) {
+inline ostream &ShowBound< Complex >(const KN< Complex > &, ostream &f) {
   f << "  -- vector function's bound : (no complex Value) ";
   return f;
 }
@@ -1367,8 +1368,8 @@ struct FFset3 {
   typedef CC C;
   typedef Expression MC;
   static Expression Clone(Expression e) { return e; }
-  static bool Check(MC l) { return true; }
-  static void f(KN< K > *x, MC a, A pp, Stack stack) {
+  static bool Check(MC) { return true; }
+  static void f(KN< K > *x, MC a, A, Stack stack) {
     CC at = GetAny< C >((*a)(stack));
     *x = at;
   }
@@ -1384,8 +1385,8 @@ struct FFset3call {
   typedef CC C;
   typedef Expression MC;
   static Expression Clone(Expression e) { return e; }
-  static bool Check(MC l) { return true; }
-  static void f(KN< K > *x, MC a, A pp, Stack stack) {
+  static bool Check(MC) { return true; }
+  static void f(KN< K > *x, MC a, A, Stack stack) {
     CC at = GetAny< C >((*a)(stack));
     at.call(*x);
   }

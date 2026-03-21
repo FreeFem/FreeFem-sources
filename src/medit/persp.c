@@ -57,7 +57,7 @@ void setPersp(pScene sc, pPersp p, int pmode) {
 
   /* new fovy */
   tgalpha = tan(p->fovy * DTOR);
-  rapy = fabs(p->rubfy - p->rubiy) / (float)sc->par.ys;
+  rapy = abs(p->rubfy - p->rubiy) / (float)sc->par.ys;
 
   if (pmode == 1)
     p->fovy = atan(tgalpha * rapy) * RTOD;

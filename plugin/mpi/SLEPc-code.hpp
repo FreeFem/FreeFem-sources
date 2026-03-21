@@ -21,14 +21,14 @@ using User = typename std::conditional<!std::is_same<SType, NEP>::value, _n_User
 template<class Type, class K, class SType>
 static PetscErrorCode MatMult_User(Mat A, Vec x, Vec y);
 template<class K, typename std::enable_if<std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value>::type* = nullptr>
-void copy(K* pt, PetscInt n, PetscScalar* xr, PetscScalar* xi) { }
+void copy(K*, PetscInt, PetscScalar*, PetscScalar*) { }
 template<class K, typename std::enable_if<!std::is_same<K, double>::value && std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void copy(K* pt, PetscInt n, PetscScalar* xr, PetscScalar* xi) {
     for(int i = 0; i < n; ++i)
         pt[i] = K(xr[i], xi[i]);
 }
 template<class SType, class K, typename std::enable_if<!std::is_same<SType, SVD>::value && (std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value)>::type* = nullptr>
-void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
+void assign(K* pt, PetscScalar& kr, PetscScalar&) {
     *pt = kr;
 }
 template<class SType, class K, typename std::enable_if<!std::is_same<SType, SVD>::value && (!std::is_same<K, double>::value && std::is_same<PetscScalar, double>::value)>::type* = nullptr>
@@ -36,9 +36,9 @@ void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
     *pt = K(kr, ki);
 }
 template<class SType, class K, typename std::enable_if<std::is_same<SType, SVD>::value>::type* = nullptr>
-void assign(K* pt, PetscScalar& kr, PetscScalar& ki) { }
+void assign(K*, PetscScalar&, PetscScalar&) { }
 template<class K, typename std::enable_if<(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)>::type* = nullptr>
-void distributedVec(PetscInt* num, PetscInt first, PetscInt last, K* const in, PetscScalar* pt, PetscInt n) { }
+void distributedVec(PetscInt*, PetscInt, PetscInt, K* const, PetscScalar*, PetscInt) { }
 template<class K, typename std::enable_if<!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)>::type* = nullptr>
 void distributedVec(PetscInt* num, PetscInt first, PetscInt last, K* const in, PetscScalar* pt, PetscInt n) {
     HPDDM::Subdomain<K>::template distributedVec<0>(num, first, last, in, pt, n, 1);
@@ -57,7 +57,7 @@ class eigensolver : public OneOperator {
                 typedef typename RNM_VirtualMatrix<PetscScalar>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
                     RNM_VirtualMatrix<PetscScalar>(n), stack(stk), x(n), c_x(CPValue(x)),
-                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) { }
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : nullptr) { }
                 ~MatF_O() {
                     delete mat;
                     Expression zzz = c_x;
@@ -79,7 +79,7 @@ class eigensolver : public OneOperator {
                 Expression mat;
                 ScalarF_O(Stack stk, const OneOperator* op)
                     : stack(stk), x(0), c_x(CPValue(x)),
-                    mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) {}
+                    mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : nullptr) {}
                 ~ScalarF_O( ) {
                     delete mat;
                     Expression zzz = c_x;
@@ -104,7 +104,7 @@ class eigensolver : public OneOperator {
                 static const int n_name_param = 13;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_eigensolver(const basicAC_F0& args, int d) : A(0), B(0), codeA(0), codeB(0), c(d) {
+                E_eigensolver(const basicAC_F0& args, int d) : A(nullptr), B(nullptr), codeA(nullptr), codeB(nullptr), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     if(c != 4) {
                         A = to<Type*>(args[0]);
@@ -167,7 +167,7 @@ struct _m_User {
     typename eigensolver<Type, K, NEP>::ScalarF_O* F;
     typename eigensolver<Type, K, NEP>::ScalarF_O* J;
 };
-PetscErrorCode FormFun(NEP nep, PetscScalar lambda, Mat F, Mat P, void* ctx) {
+PetscErrorCode FormFun(NEP, PetscScalar lambda, Mat, Mat, void* ctx) {
     User<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>* user;
 
     PetscFunctionBeginUser;
@@ -178,7 +178,7 @@ PetscErrorCode FormFun(NEP nep, PetscScalar lambda, Mat F, Mat P, void* ctx) {
     f->apply(lambda, &ret);
     PetscFunctionReturn(PetscErrorCode(ret));
 }
-PetscErrorCode FormJac(NEP nep, PetscScalar lambda, Mat J, void* ctx) {
+PetscErrorCode FormJac(NEP, PetscScalar lambda, Mat, void* ctx) {
     User<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>* user;
 
     PetscFunctionBeginUser;
@@ -295,10 +295,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PetscBool isFieldSplit;
                     PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
                     if(isFieldSplit) {
-                        KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
-                        KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
-                        KN<Matrice_Creuse<upscaled_type<PetscScalar>>>* mS = nargs[11] ? GetAny<KN<Matrice_Creuse<upscaled_type<PetscScalar>>>*>((*nargs[11])(stack)) : 0;
-                        KN<double>* pL = nargs[12] ? GetAny<KN<double>*>((*nargs[12])(stack)) : 0;
+                        KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : nullptr;
+                        KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : nullptr;
+                        KN<Matrice_Creuse<upscaled_type<PetscScalar>>>* mS = nargs[11] ? GetAny<KN<Matrice_Creuse<upscaled_type<PetscScalar>>>*>((*nargs[11])(stack)) : nullptr;
+                        KN<double>* pL = nargs[12] ? GetAny<KN<double>*>((*nargs[12])(stack)) : nullptr;
                         STGetKSP(st, &ksp);
                         KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                         setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
@@ -649,7 +649,7 @@ static void Init() {
         PetscInitialized(&isInitialized);
         if(!isInitialized && mpirank == 0)
             std::cout << "PetscInitialize has not been called, do not forget to load PETSc before loading SLEPc" << std::endl;
-        SlepcInitialize(&argc, &argv, 0, "");
+        SlepcInitialize(&argc, &argv, nullptr, "");
         delete [] argv;
         ff_atend(SLEPc::finalizeSLEPc);
         SLEPc::addSLEPc<PetscScalar>();

@@ -83,13 +83,13 @@ template<class T>
 class CountPointer: private baseCountPointer {
  T * c;
  public: 
- CountPointer() : c(0) {}
+ CountPointer() : c(nullptr) {}
  CountPointer( T * a,bool mmaster=false) :c(a) { if(!mmaster) add(c);} 
  CountPointer(  T & a) :c(&a) { add(c);}
  CountPointer(const CountPointer & a) :c(a.c) { add(c);}
- ~CountPointer()  { destroyPtr(c);c=0;}
+ ~CountPointer()  { destroyPtr(c);c=nullptr;}
  //void destroy() const { destroyPtr(c);}
- void destroy()  { destroyPtr(c);c=0;}
+ void destroy()  { destroyPtr(c);c=nullptr;}
  operator  T * ()   const { return c;}
  operator   T & () const  {return *c;}
   T& operator*() const {return *c;}
@@ -109,7 +109,7 @@ class CountPointer: private baseCountPointer {
                 add(c);               
               }} 
 //  for the compile time               
- void init() {c=0;} // 
+ void init() {c=nullptr;} // 
  void master(T *t) {
      destroyPtr(c); 
      c=t;}

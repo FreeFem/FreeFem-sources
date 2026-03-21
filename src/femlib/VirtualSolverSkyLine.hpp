@@ -149,7 +149,7 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
             if(name.length()  <=2) return 3;
             else if( name[0] =='C')  return 1 + ( (name[1]) != 'H');
             else return 3; }
-        VirtualSolverSkyLine(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+        VirtualSolverSkyLine(HMat  &AA, const Data_Sparse_Solver & ds,Stack )
         :typesolver(ttypesolver(ds.solver)),A(&AA),SL(0),cs(0),cn(0),p(0),v(0),
         tol_pivot(ds.tol_pivot<0 ?  1e-15 :ds.tol_pivot) , verb(ds.verb)  {
             if( verb>3) cout << "   -- SkyLineMatrix: "<<typesolver << " " <<ds.solver<<    endl;

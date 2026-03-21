@@ -42,7 +42,7 @@ public:
     
     :   lga(llga),a(new R[lga]),
         ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize),
-        onFace(false),lnki(0),lnkj(0),nik(0),nikk(0),njk(0),njkk(0),optim(ooptim)
+        onFace(false),lnki(0),lnkj(0),nik(nullptr),nikk(nullptr),njk(nullptr),njkk(nullptr),optim(ooptim)
         {}
        
 
@@ -56,7 +56,7 @@ public:
     ni(nni),nj(nni),n(0),m(0),mtype(t),data(datasize*(lk?2:1)) ,
        onFace(lk!=0),
        lnki(lk),lnkj(lk),
-       nik(lk? new int[lk*2]:0),
+       nik(lk? new int[lk*2]:nullptr),
        nikk(nik+lk),
        njk(nik),
        njkk(nik+lk),
@@ -72,9 +72,9 @@ public:
     ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize*(lki+lkj?2:1)) ,
     onFace(lki+lkj),
     lnki(lki),lnkj(lkj),
-    nik(lki? new int[lki*2]:0),
+    nik(lki? new int[lki*2]:nullptr),
     nikk(nik+lki),
-    njk(lkj? new int[lkj*2]:0),
+    njk(lkj? new int[lkj*2]:nullptr),
     njkk(njk+lkj),
     optim(ooptim)
     {  ffassert(lki>=0);}// non teste ??? .... F. hecht ...
@@ -89,10 +89,10 @@ public:
      }
       
   virtual R & operator() (int i,int j) =0;
-    virtual void call(int ,int ie,int label,void * data,void *Q=0) =0;  //
+    virtual void call(int ,int ie,int label,void * data,void *Q=nullptr) =0;  //
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaire & operator()(int k,int ie,int label,void * s=0,void *B=0) {
+  MatriceElementaire & operator()(int k,int ie,int label,void * s=nullptr,void *B=nullptr) {
     call(k,ie,label,s,B);
     return *this;}
 };
@@ -176,7 +176,7 @@ public:
   ~MatriceElementaireFES() {}
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0,void *Q=0) {
+  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=nullptr,void *Q=nullptr) {
     this->call(k,ie,label,s,Q);
     return *this;}
 };
@@ -206,7 +206,7 @@ public:
   void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *,Rd *) ;
     void call(int k,int ie,int label,void *,void *B);
   
-  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0,Rd *Q=0)
+  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=nullptr,Rd *Q=nullptr)
   {call(k,ie,label,stack,Q);return *this;}
   MatriceElementairePleine(const FESpace & VVh,
                            const QFElement & fit=*QFElement::Default,
@@ -282,8 +282,8 @@ public:
 	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
        fit,fie,optim),
        element(0),mortar(0) {}
-  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0,Rd *B=0)
-  {this->call(k,ie,label,stack,B);return *this;};
+  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=nullptr,Rd *B=nullptr)
+  {this->call(k,ie,label,stack,B);return *this;}
 };
 
 

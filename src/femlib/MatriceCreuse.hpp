@@ -58,7 +58,7 @@ const double  EPSILON=1e-20;
 using Fem2D::onWhatIsEdge;
 
 //#define APROGRAMMER(a) {cerr << "A PROGRAMMER "  #a << endl; exit (1) ;}
-#define ERREUR(a,b) {cerr << "ERROR " #a<< b <<endl; throw(ErrorExec("FATAL ERROR in " __FILE__  "\n" #a  " line: ",__LINE__)) ;}
+#define ERREUR(a,b) do {cerr << "ERROR " #a<< b <<endl; throw(ErrorExec("FATAL ERROR in " __FILE__  "\n" #a  " line: ",__LINE__)); } while(0)
 
 template<class TypeIndex=int,class TypeScalar=double> class VirtualMatrix;
 template<class TypeIndex,class TypeScalaire> class HashMatrix ;
@@ -106,7 +106,7 @@ template <typename Z,typename R>  class HashMatrix;
 
 
 
-template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
+template<class R> class StopGC { public: virtual  bool Stop(int, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
 template<class R,class M,class P,class S >// S=StopGC<Real>
 int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
@@ -242,7 +242,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 template <class R>
 class MatriceIdentite:public  RNM_VirtualMatrix<R> { public:
  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
-    MatriceIdentite(int n) :RNM_VirtualMatrix<R>(n) {};
+    MatriceIdentite(int n) :RNM_VirtualMatrix<R>(n) {}
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const {
      ffassert(x.N()==Ax.N());
    Ax+=x; }
@@ -252,8 +252,8 @@ class MatriceIdentite:public  RNM_VirtualMatrix<R> { public:
      void Solve( KN_<R> & y ,const KN_<R> & x) const { y=x; }
       bool WithSolver() const {return true;}
    typename  RNM_VirtualMatrix<R>::plusAx operator*(const KN<R> &  x) const {return typename RNM_VirtualMatrix<R>::plusAx(this,x);}
-  bool ChecknbLine(int n) const { return true;}
-  bool ChecknbColumn(int m) const { return true;}
+  bool ChecknbLine(int) const { return true;}
+  bool ChecknbColumn(int) const { return true;}
 
 };
 

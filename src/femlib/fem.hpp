@@ -130,8 +130,8 @@ namespace Fem2D {
     friend class Mesh;
     Rd *normal; // pointer on exterior normal to fitler start point
     public:
-      TVertex() : Rd(), Label(), normal(0) {};
-      TVertex(Rd P, int r=0) : Rd(P), Label(r), normal(0) {}
+      TVertex() : Rd(), Label(), normal(nullptr) {}
+      TVertex(Rd P, int r=0) : Rd(P), Label(r), normal(nullptr) {}
       bool ninside(const Rd & P) const { return normal? (Rd(*this, P), *normal) <= 0 : true; }
       void SetNormal(Rd *&n, const Rd & N){
         if (normal) {
@@ -276,7 +276,7 @@ namespace Fem2D {
       static const int NbE = 3; //
       R area;
       typedef R2 RdHat;
-      TTriangle(){};  // constructor empty for array
+      TTriangle(){}  // constructor empty for array
 
       Vertex & operator[](int i) const { // to see triangle as a array of vertex
         return *vertices[i];
@@ -328,7 +328,7 @@ namespace Fem2D {
       R h() const { return sqrt(Max(lenEdge2(0), lenEdge2(1), lenEdge2(2))); }
       R h_min() const { return sqrt(Min(lenEdge2(0), lenEdge2(1), lenEdge2(2))); }
 
-      SortedTriplet what(int i, Vertex *v0, TTriangle * t0) {
+      SortedTriplet what(int i, Vertex *v0, TTriangle *) {
         if (i < 0) ffassert(i >= 0);
         else if (i < 3) return SortedTriplet(vertices[i] - v0);
         else if ((i -= 3) < 3) return SortedTriplet(&Edge(i, 0) - v0, &Edge(i, 1) - v0);
@@ -398,7 +398,7 @@ namespace Fem2D {
       }
 
       bool in(const Vertex * pv) const { return pv == vertices[0] || pv == vertices[1]; }
-      TBoundaryEdge(){}; // constructor empty for array
+      TBoundaryEdge(){} // constructor empty for array
       void Draw() const;
       Vertex & operator[](int i) const { return *vertices[i]; }
       R length() const { return Norme2(R2(*vertices[0], *vertices[1])); }
@@ -407,7 +407,7 @@ namespace Fem2D {
           vertices[i] = v0 + r[vertices[i] - v0];
       }
 
-      SortedTriplet what(int i, Vertex *v0, TBoundaryEdge *t0) {
+      SortedTriplet what(int i, Vertex *v0, TBoundaryEdge *) {
         if (i < 0) ffassert(i >= 0);
         else if (i < 2) return SortedTriplet(vertices[i] - v0);
         else if (i == 0) return SortedTriplet(vertices[0] - v0, vertices[1] - v0);
@@ -427,7 +427,7 @@ namespace Fem2D {
       Mesh *Th;
       int nleft, nright;
       int *left, *right;
-      TMortar() : Th(0), nleft(0), nright(0), left(0), right(0) {}
+      TMortar() : Th(nullptr), nleft(0), nright(0), left(nullptr), right(nullptr) {}
       void Draw() const;
     public:
       int NbLeft() const{ return nleft; }
@@ -506,8 +506,8 @@ namespace Fem2D {
       R2 *bnormalv; // boundary vertex normal
       Triangle &operator[](int i) const { throwassert(i >= 0 && i < nt); return triangles[i]; }
       Vertex &operator()(int i) const { throwassert(i >= 0 && i < nv); return vertices[i]; }
-      Mesh(const char *filename) :dfb(0) { read(filename); } // read on a file
-      Mesh(const string s):dfb(0) { read(s.c_str()); }
+      Mesh(const char *filename) :dfb(nullptr) { read(filename); } // read on a file
+      Mesh(const string s):dfb(nullptr) { read(s.c_str()); }
       Mesh( const Serialize &);
       Mesh(int nbv, R2 *P);
 
@@ -587,14 +587,14 @@ namespace Fem2D {
 
       Triangle *Find(const R2 &P) const;
 
-      const Triangle *Find(R2 P, R2 &Phat, bool &outside, const Triangle *tstart=0) const;
+      const Triangle *Find(R2 P, R2 &Phat, bool &outside, const Triangle *tstart=nullptr) const;
 
       BoundaryEdge *TheBoundaryEdge(int i, int j) const {
         int p2;
         for (int p = BoundaryAdjacencesHead[i]; p >= 0; p = BoundaryAdjacencesLink[p])
           if (bedges[p2 = p/2].in(vertices+j)) return bedges + p2;
 
-        return 0;
+        return nullptr;
       }
 
       int NumberOfTheBoundaryEdge(int i, int j) const {
@@ -691,7 +691,7 @@ namespace Fem2D {
     }
   }
 
-  inline int numSubTVertex(int N, int i, int j) { // i, j barycentrix coordinates * N in the reference element
+  inline int numSubTVertex(int, int i, int j) { // i, j barycentrix coordinates * N in the reference element
     i = i + j; // numerotation / diag
     // i, j
     assert(j <= i && 0 <= j);

@@ -68,11 +68,11 @@ template<class I,class R>
    
    LinearComb(): v(),
 		 where_in_stack_opt(),mesh_indep_stack_opt(),
-		 optiexp0(0),optiexpK(0),isoptimize(false) {}
+		 optiexp0(nullptr),optiexpK(nullptr),isoptimize(false) {}
    
    LinearComb(const I& i,const R& r) :v(1),
 				      where_in_stack_opt(),mesh_indep_stack_opt(),
-				      optiexp0(),optiexpK(),isoptimize(false) 
+				      optiexp0(nullptr),optiexpK(nullptr),isoptimize(false) 
    {
      v[0]=make_pair<I,R>((I)i,(R)r);
    }
@@ -122,7 +122,7 @@ template<class I,class R>
      optiexpK=l.optiexpK;
      isoptimize=l.isoptimize; 
      }
-   const I * simple() const { if (v.size()==1) return & v.begin()->first;else return  0;}     
+   const I * simple() const { if (v.size()==1) return & v.begin()->first;else return  nullptr;}     
    void  add(const I& i,const R &r)  { 
      for (iterator k=v.begin();k!=v.end();k++)
        if (k->first == i) {k->second += r;return ;}

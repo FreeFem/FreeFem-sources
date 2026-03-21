@@ -122,7 +122,7 @@ namespace bamg {
 
         nbiv = nbv;
         for (i = 0; i < nbv; i++) {
-          ordre[i] = 0;
+          ordre[i] = nullptr;
           f_in >> vertices[i].r.x >> vertices[i].r.y >> vertices[i].ReferenceNumber;
           vertices[i].DirOfSearch = NoDirOfSearch;
           vertices[i].m = M1;
@@ -159,7 +159,7 @@ namespace bamg {
         {
           int err = 0;
           for (int i = 0; i < nbv; ++i) {
-            if (ordre[i] == 0) {
+            if (ordre[i] == nullptr) {
               cerr << " Err mesh vertices " << i + 1 << " is not in a  triangle " << endl;
               err++;
             }
@@ -234,7 +234,7 @@ namespace bamg {
         if (verbosity > 5)
           cout << "     Record Edges: Nb of Edge " << nbe << " edges " << edges << endl;
         assert(edges);
-        Real8* len = 0;
+        Real8* len = nullptr;
         if (!hvertices) {
           len = new Real8[nbv];
           for (i = 0; i < nbv; i++) len[i] = 0;
@@ -248,8 +248,8 @@ namespace bamg {
           i2--;
           edges[i].v[0] = vertices + i1;
           edges[i].v[1] = vertices + i2;
-          edges[i].adj[0] = 0;
-          edges[i].adj[1] = 0;
+          edges[i].adj[0] = nullptr;
+          edges[i].adj[1] = nullptr;
 
           R2 x12 = vertices[i2].r - vertices[i1].r;
           Real8 l12 = sqrt((x12, x12));
@@ -695,7 +695,7 @@ namespace bamg {
     edges = new Edge[nbe];
     for (i = 0; i < nbv; i++) {
       f_in >> vertices[i].r.x >> vertices[i].r.y >> vertices[i].ReferenceNumber;
-      vertices[i].on = 0;
+      vertices[i].on = nullptr;
       vertices[i].m = M1;
       // if(vertices[i].ReferenceNumber>NbRef)	NbRef=vertices[i].ReferenceNumber;
     }
@@ -711,10 +711,10 @@ namespace bamg {
       edges[i].v[0] = vertices + i1 - 1;
       edges[i].v[1] = vertices + i2 - 1;
         if(verbosity>199) cout << " Read_msh egde: "<< i1 << " "<< i2 << " "<< r << endl; 
-      edges[i].adj[0] = 0;
-      edges[i].adj[1] = 0;
+      edges[i].adj[0] = nullptr;
+      edges[i].adj[1] = nullptr;
       edges[i].ref = r;
-      edges[i].on = 0;
+      edges[i].on = nullptr;
     }
   }
 
@@ -965,7 +965,7 @@ namespace bamg {
           if (verbosity > 5) cout << "     Record Edges: Nb of Edge " << nbe << endl;
           assert(edges);
           assert(nbv > 0);
-          Real8* len = 0;
+          Real8* len = nullptr;
           if (!hvertices) {
             len = new Real8[nbv];
             for (i = 0; i < nbv; i++) len[i] = 0;
@@ -983,7 +983,7 @@ namespace bamg {
             edges[i].tg[0] = zero2;
             edges[i].tg[1] = zero2;
             edges[i].SensAdj[0] = edges[i].SensAdj[1] = -1;
-            edges[i].Adj[0] = edges[i].Adj[1] = 0;
+            edges[i].Adj[0] = edges[i].Adj[1] = nullptr;
             edges[i].flag = 0;
             if (!hvertices) {
               vertices[i1].color++;

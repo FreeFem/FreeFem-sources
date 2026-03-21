@@ -44,7 +44,7 @@ public:
   
   R x,y,z;
  
-  R3 () :x(0),y(0),z(0) {};
+  R3 () :x(0),y(0),z(0) {}
   R3 (R a,R b,R c):x(a),y(b),z(c)  {}
   R3 (const R * a):x(a[0]),y(a[1]) ,z(a[2]) {}
 

@@ -114,7 +114,7 @@ typedef pair<aType,  E_F0  *>  Type_Expr ;// to store the type and the expressio
 
  int  FindType(const char * name) ; 
   void lgerror (const char* s) ;  
- void CompileError(string msg="",aType r=0);
+ void CompileError(string msg="",aType r=nullptr);
  void ExecError(string msg="");
  
 struct UnId {
@@ -126,13 +126,13 @@ struct UnId {
   bool ref; // a ref or non
   bool compo_begin; // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
   bool compo_end;  // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice (chevron dans problem)
-  UnId() :id(0),r(0),e(0),array(0),re(0),ref(false),compo_begin(false),compo_end(false) {}
-  UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false), compo_begin(false), compo_end(false) {}
+  UnId() :id(nullptr),r(nullptr),e(nullptr),array(nullptr),re(nullptr),ref(false),compo_begin(false),compo_end(false) {}
+  UnId(const char * idd) :id(idd),r(nullptr),e(nullptr),array(nullptr),re(nullptr),ref(false), compo_begin(false), compo_end(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  
-  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false),compo_begin(cc_b),compo_end(cc_e) { }
+  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(nullptr),r(nullptr),e(nullptr),array(d?new deque<UnId>(*d):nullptr),re(nullptr),ref(false),compo_begin(cc_b),compo_end(cc_e) { }
   UnId(const UnId & u) : 
     id(u.id),r(u.r),e(u.e),
-    array(u.array?new deque<UnId>(*u.array):0),
+    array(u.array?new deque<UnId>(*u.array):nullptr),
     re(u.re),ref(u.ref),compo_begin(u.compo_begin),compo_end(u.compo_end) {}
    // Modif 24032005 
   void  operator= (const UnId & u) {
@@ -144,7 +144,7 @@ struct UnId {
     compo_begin=u.compo_begin;
     compo_end=u.compo_end;
     if(array) delete array;
-    array=0;
+    array=nullptr;
     if(u.array) array= new deque<UnId>(*u.array);
   }
     
@@ -225,9 +225,9 @@ class TableOfIdentifier: public CodeAlloc {
   C_F0 Find(Key,const basicAC_F0 &) const ; 
   
   const Type_Expr & New(Key k,const Type_Expr &  v,bool del=true);
-  void Add(Key k,Key op,OneOperator *p0,OneOperator *p1=0,
-      OneOperator *p2=0,OneOperator *p3=0,OneOperator *p4=0,
-      OneOperator *p5=0,OneOperator *p6=0)  ;
+  void Add(Key k,Key op,OneOperator *p0,OneOperator *p1=nullptr,
+      OneOperator *p2=nullptr,OneOperator *p3=nullptr,OneOperator *p4=nullptr,
+      OneOperator *p5=nullptr,OneOperator *p6=nullptr)  ;
   void clear(); 
 template<class T>         
   C_F0 NewVar(Key k,aType t,size_t & top,const C_F0 &i) ;
@@ -280,7 +280,7 @@ class basicForEachType : public CodeAlloc {
    //  bool To(const basicForEachType * t) const { throwassert(t && this);return un_ptr_type == this ? t->un_ptr_type == this :  t == this;}
      virtual C_F0 CastTo(const C_F0 & e) const ; 
      virtual void SetArgs(const ListOfId *lid) const ;// { cout << "SetArgs::\n " ;throwassert(lid==0 || lid->size()==0);}
-     aType right() const {return un_ptr_type;};
+     aType right() const {return un_ptr_type;}
      Expression RightValueExpr(Expression f) const; 
  //    Type_Expr NewVar(Key k,aType t,size_t & top,const C_F0 &i);
      virtual  C_F0 Initialization(const Type_Expr & e) const ;
@@ -292,8 +292,8 @@ class basicForEachType : public CodeAlloc {
 
    protected: 
      basicForEachType(const type_info  & k ,const size_t ,
-                            const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
-                            Function1 iv=0,Function1 id=0, Function1 dreturn=0) ;
+                            const E_F1_funcT_Type * p=nullptr,basicForEachType *rr=nullptr,
+                            Function1 iv=nullptr,Function1 id=nullptr, Function1 dreturn=nullptr) ;
 /*    inline basicForEachType(const type_info  & k ,const type_info  & kf ,const size_t ,
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
                             Function1 iv=0,Function1 id=0) ;*/
@@ -319,13 +319,13 @@ public:
    C_F0  Find(const char * k,const basicAC_F0 & args) const; // {return ti->Find(k);}
    void  New(Key k,Type_Expr  v,bool del=true){ti.New(k,v,del);}
   
-  void Add(Key k,Key op,OneOperator *p0,OneOperator *p1=0,
-      OneOperator *p2=0,OneOperator *p3=0,OneOperator *p4=0,
-      OneOperator *p5=0,OneOperator *p6=0)  
+  void Add(Key k,Key op,OneOperator *p0,OneOperator *p1=nullptr,
+      OneOperator *p2=nullptr,OneOperator *p3=nullptr,OneOperator *p4=nullptr,
+      OneOperator *p5=nullptr,OneOperator *p6=nullptr)  
      {ti.Add(k,op,p0,p1,p2,p3,p4,p5,p6);}     
  
- 	void AddCast(CastFunc f1,CastFunc f2=0,CastFunc f3=0,CastFunc f4=0,
- 	             CastFunc f5=0,CastFunc f6=0,CastFunc f7=0,CastFunc f8=0);
+ 	void AddCast(CastFunc f1,CastFunc f2=nullptr,CastFunc f3=nullptr,CastFunc f4=nullptr,
+ 	             CastFunc f5=nullptr,CastFunc f6=nullptr,CastFunc f7=nullptr,CastFunc f8=nullptr);
     ostream & ShowTable(ostream & f) const { f << ti; return f;}
     
   //  basicForEachType * funct_type;
@@ -334,7 +334,7 @@ public:
     // Add FH: for implicite loop FH. Jan 2016 
     // type for i, type for j, type valeur
     basicForEachType *typei,*typej,*typev;
-    void SetTypeLoop(basicForEachType *v,basicForEachType *i=0,basicForEachType *j=0)
+    void SetTypeLoop(basicForEachType *v,basicForEachType *i=nullptr,basicForEachType *j=nullptr)
     { typev=v; typei=i;typej=j;}
     
 };
@@ -352,7 +352,7 @@ inline basicForEachType * atype() {
 template<typename T>
 inline basicForEachType * atype0() {
     map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
-    if (ir == map_type.end()) return  0;
+    if (ir == map_type.end()) return  nullptr;
     return ir->second;}
 
 
@@ -396,11 +396,11 @@ class E_F0 :public CodeAlloc
    // virtual E_F0 * destroy(Stack ) const {return 0;}
   //  virtual const E_F0 * Parameter(Stack ) const {return this;}
     virtual size_t nbitem() const {return 1;}
-    virtual KN<size_t> componentNbitem() const { ffassert(0);};
+    virtual KN<size_t> componentNbitem() const { ffassert(0);}
     virtual bool EvaluableWithOutStack() const {return false;} // 
     virtual bool MeshIndependent() const {return true;} // 
     virtual bool Zero() const {return false;} //
-    virtual E_F0 * right_E_F0() const { return 0;}
+    virtual E_F0 * right_E_F0() const { return nullptr;}
     virtual bool ReadOnly() const { return true;} // the expression do not change the memory     
     virtual ~E_F0() {}
     virtual int compare (const E_F0 *t) const { int r= (t==this) ? 0 : ( ( this<t) ?-1 : 1);
@@ -408,7 +408,7 @@ class E_F0 :public CodeAlloc
      return r;} // to give a order in instuction 
     virtual int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;  // build optimisation
     virtual AnyType operator()(Stack stack,AnyType *)  const { return operator()(stack);}  // call optim code
-    virtual  operator aType ()  const { assert(0);return 0;}   // the type of the expression
+    virtual  operator aType ()  const { assert(0);return nullptr;}   // the type of the expression
     virtual ostream & dump(ostream &f) const  { f << ' ' << typeid(*this).name() << ' ' << this << ' '  ;return f; }
     // for OPTIMIZATION
     
@@ -460,7 +460,7 @@ class  ArrayOfaType : public CodeAlloc{
    public:
  //  ArrayOfaType() :n(0),t(0),ellipse(false) {}
    explicit ArrayOfaType(bool ell=false) 
-       :n(0),t(0),ellipse(ell) {}
+       :n(0),t(nullptr),ellipse(ell) {}
    
    explicit ArrayOfaType(const aType & a,bool ell=false) 
        :n(1),t(tt),ellipse(ell)  {t[0]=a;}
@@ -506,7 +506,7 @@ class  ArrayOfaType : public CodeAlloc{
    ArrayOfaType(const basicAC_F0 & ) ;
    ArrayOfaType(const ArrayOfaType & ); // 
    ArrayOfaType(const ListOfId * l);
-   ~ArrayOfaType() { if(t && t != tt) delete [] t;t=0;n=0;}
+   ~ArrayOfaType() { if(t && t != tt) delete [] t;t=nullptr;n=0;}
    bool WithOutCast( const ArrayOfaType & a) const ;  
    bool WithCast( const ArrayOfaType & a,int nbcast=100000) const ;  // return the number of cast 
    // exactly comparaison 
@@ -567,7 +567,7 @@ class  OneOperator : public ArrayOfaType {
     //: r(rr),ArrayOfaType(l),next(0),pref(0) {throwassert(rr );} 
     
     typedef pair<const OneOperator *,int> pair_find;
-    void operator+=(OneOperator &a){throwassert(a.next==0);a.next=next;next=&a;} 
+    void operator+=(OneOperator &a){throwassert(a.next==nullptr);a.next=next;next=&a;} 
     //  a way to make none recurve delete  good   
     virtual ~OneOperator();
     pair_find Find(const ArrayOfaType & at) const ;
@@ -581,7 +581,7 @@ class  OneOperator : public ArrayOfaType {
     // <<OneOperator_code_decl>>
     virtual E_F0 * code(const basicAC_F0 &) const =0; 
     virtual C_F0  code2(const basicAC_F0 &a) const ; // {return code(code(a),r);}	
-    const OneOperator * Simple() const { return next||n?0:this;}
+    const OneOperator * Simple() const { return next||n?nullptr:this;}
     friend ostream & operator<<(ostream & f,const OneOperator & a);
     
 };
@@ -610,7 +610,7 @@ private:
    mutable maptype m; //  all polymorphisme of the Identifier
    Expression e; // default expression
 public:    
-  Polymorphic() : m(),e(0) {}
+  Polymorphic() : m(),e(nullptr) {}
   
 //  by default Empty and do nothing      
  virtual AnyType operator()(Stack ) const  { return Nothing;}
@@ -619,13 +619,13 @@ public:
  const  OneOperator * Find(const char *op, const ArrayOfaType &at) const;
  const  OneOperator * FindWithOutCast(const char *op,const  ArrayOfaType &at) const;
  void Show(const char *op,const ArrayOfaType & at,ostream &f=cerr)const ; 
- void  Add(const char * op,OneOperator * p0  ,OneOperator * p1=0,OneOperator * p2=0,
-                           OneOperator * p3=0,OneOperator * p4=0,OneOperator * p5=0,
-                           OneOperator * p6=0,OneOperator * p7=0,OneOperator * p8=0,
-                           OneOperator * p9=0,OneOperator * pa=0,OneOperator * pb=0,
-                           OneOperator * pc=0,OneOperator * pd=0,OneOperator * pe=0
+ void  Add(const char * op,OneOperator * p0  ,OneOperator * p1=nullptr,OneOperator * p2=nullptr,
+                           OneOperator * p3=nullptr,OneOperator * p4=nullptr,OneOperator * p5=nullptr,
+                           OneOperator * p6=nullptr,OneOperator * p7=nullptr,OneOperator * p8=nullptr,
+                           OneOperator * p9=nullptr,OneOperator * pa=nullptr,OneOperator * pb=nullptr,
+                           OneOperator * pc=nullptr,OneOperator * pd=nullptr,OneOperator * pe=nullptr
                            ) const
-      {Addp(op,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb,pc,pd,pe,0);}
+      {Addp(op,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb,pc,pd,pe,nullptr);}
  void Add(const char * op,OneOperator ** pp) const ;      
 private:
   void Addp(const char * op,OneOperator * pp,...) const ;
@@ -644,8 +644,9 @@ protected:
   
 public: 
   //  the constructeur 
-  C_F0() :f(0),r(0) {}
+  C_F0() :f(nullptr),r(nullptr) {}
   C_F0(const C_F0 & c):f(c.f),r(c.r)   {}
+  C_F0& operator=(const C_F0&) = default;
   C_F0(const C_F0 & a,const C_F0 & b); // concatenation 
 
   /// cf [[Type_Expr]]
@@ -711,7 +712,7 @@ public:
 private:
   friend class Block;	 
   friend class TableOfIdentifier; 
-  C_F0( Expression ff ): f(ff),r(0) {}
+  C_F0( Expression ff ): f(ff),r(nullptr) {}
 };
 
 
@@ -726,12 +727,12 @@ class CListOfInst;
  
 //  warning ------------------
 class ForTypeVoid:  public basicForEachType{public:
-    ForTypeVoid():basicForEachType(typeid(void),0,0,0,0,0) {}
+    ForTypeVoid():basicForEachType(typeid(void),0,nullptr,nullptr,nullptr,nullptr) {}
 };
 
 template<class T> 
 class ForEachType:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) {
+    ForEachType(Function1 iv=nullptr,Function1 id=nullptr,Function1 OOnReturn=nullptr):basicForEachType(typeid(T),sizeof(T),nullptr,nullptr,iv,id,OOnReturn) {
      if (sizeof(T) > sizeof(AnyTypeWithOutCheck) )
       {
         cout << " Sorry the " <<typeid(T).name() << " is too large  ( " << sizeof(T) 
@@ -742,7 +743,7 @@ class ForEachType:  public basicForEachType{public:
 };
 template<class T> 
 class ForEachType<T*>:  public basicForEachType{public:// coorection july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) {
+    ForEachType(Function1 iv=nullptr,Function1 id=nullptr,Function1 OOnReturn=nullptr):basicForEachType(typeid(T),sizeof(T),nullptr,nullptr,iv,id,OOnReturn) {
 	//T i= 0.0;
     }
 };
@@ -755,14 +756,14 @@ template<class A>  AnyType Destroy(Stack,const AnyType &a) ;
 template<class T,class PT=T*> 
 class ForEachTypePtr:  public basicForEachType { public:
     ForEachTypePtr();
-    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
+    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=nullptr);         
     ForEachTypePtr(Function1 dl);
 };
 
 template<class T> 
 class ForEachTypePtr<T*,T**>:  public basicForEachType { public:
-    ForEachTypePtr(T* bb=0,Function1 onreturn=0);
-    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
+    ForEachTypePtr(T* bb=nullptr,Function1 onreturn=nullptr);
+    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=nullptr);         
     ForEachTypePtr(Function1 dl);
 };
 
@@ -816,14 +817,14 @@ template<class A> AnyType Initialize(Stack,const AnyType &x){
   return  SetPtrAny(a);
 }
 
-template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
+template<class A> AnyType InitializePtr(Stack,const AnyType &x){
   A * a=PGetAny<A>(x);
   SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
-  *a=0;
+  *a=nullptr;
   return  x;
 }
 
-template<class A> AnyType InitializeDef(Stack stack,const AnyType &x){
+template<class A> AnyType InitializeDef(Stack,const AnyType &x){
     A * a=PGetAny<A>(x);
     SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
     *a=A();
@@ -873,7 +874,7 @@ template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
    //  delete *a; 
 
   return  Nothing; 
-};
+}
 
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
@@ -882,18 +883,18 @@ template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
     delete *a; 
 
   return  Nothing; 
-};
+}
 
 template<> AnyType inline DestroyPtr<string *>(Stack,const AnyType &x) {
   string **  a=PGetAny<string*>(x);
  SHOWVERB( cout << "DestroyPtr " << typeid(string*).name() << *a  << endl);
   freestring(*a);
   return  Nothing; 
-};
+}
 
 
 
-template<class A> AnyType Initialize(Stack,const AnyType &x,const AnyType &y){
+template<class A> AnyType Initialize(Stack,const AnyType &x,const AnyType &){
  A * a=PGetAny<A>(x);
  A *b=new A(GetAny<A>(x));// 
   memcpy(a,b,sizeof(A));// bitcopy
@@ -931,7 +932,7 @@ template<class R,class A>
   typedef  R (*func)(A) ; 
   func f;
   E_F1_F(func ff) : f(ff) {}
-  AnyType operator()(Stack s,AnyType & a)  const 
+  AnyType operator()(Stack,AnyType & a)  const 
     {return SetAny<R>(f(GetAny<A>(a)));}  
 };
 
@@ -940,7 +941,7 @@ template<class R,class A0,class A1>
   typedef  R (*func)(const  A0 &,const  A1&) ; 
   func f;
   E_F2_F(func ff) : f(ff) {}
-  AnyType operator()(Stack s,AnyType & a0,AnyType & a1)  const 
+  AnyType operator()(Stack,AnyType & a0,AnyType & a1)  const 
     {return SetAny<R>(f(GetAny<A0>(a0),GetAny<A1>(a1)));}  
 };
 
@@ -1292,7 +1293,7 @@ template<class R> class EConstant:public E_F0
  { 
   const R v;
   public:
-  AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<R>(v);}
+  AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/ return SetAny<R>(v);}
   EConstant(const R & o):v(o) { /*cout << "New constant " << o << endl;*/}
   bool EvaluableWithOutStack() const {return true;} //   
   operator aType () const { return atype<R>();}
@@ -1410,9 +1411,9 @@ class CC_F0 {
   Expression f; // [[Expression]]
   aType r;
 public:
-  void operator=(const C_F0& c) { f=c.f;r=c.r;;} 
+  void operator=(const C_F0& c) { f=c.f;r=c.r;} 
   void operator=(const AC_F0& a) ; //{ f=new E_Array(a); f= atype<E_Array>();};
-  void operator=(long ) {f=0;r=0;}
+  void operator=(long ) {f=nullptr;r=nullptr;}
   void operator=(const CListOfInst& c);//{ C_FO cc=c;f=cc.f;r=cc.r}
   operator C_F0 () const {return C_F0(f,r);}
   bool Empty() const {return !f || f->Empty();}
@@ -1435,8 +1436,8 @@ class ListOfInst :
 
 public:
    
-  ListOfInst():n(0),list(0),linenumber(0),lsldel(0),nx(10),atclose(0){}
-  ListOfInst(int nn):n(0),list(0),linenumber(0),lsldel(0),nx(nn?nn:10),atclose(0) {}
+  ListOfInst():n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(10),atclose(nullptr){}
+  ListOfInst(int nn):n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(nn?nn:10),atclose(nullptr) {}
   void Add(const C_F0 & ins); 
 
   /// <<ListOfInst::operator()>> implemented at [[file:AFunction2.cpp::ListOfInst::operator()]]
@@ -1455,11 +1456,11 @@ public:
   ~ListOfInst(){
    // cout << " ----- ~ListOfInst " << endl;
     if(list) delete [] list;
-    list=0;
+    list=nullptr;
     if(linenumber)  delete[] linenumber;
     if(lsldel)      delete[] lsldel;
-    linenumber=0;
-    lsldel=0;
+    linenumber=nullptr;
+    lsldel=nullptr;
   }
 };
 
@@ -1524,12 +1525,12 @@ inline C_F0 toLong(const C_F0 & a)    {return ATYPE(long)->CastTo(a);}
 inline C_F0 toDouble(const C_F0 & a)  {return ATYPE(double)->CastTo(a);}
 inline C_F0 toComplex(const C_F0 & a)  {return ATYPE(Complex)->CastTo(a);}
 */
-inline C_F0 While(C_F0 test,C_F0 ins) {return C_F0(new E_F0_CFunc2(FWhile,to<bool>(test),ins),0);}
-inline C_F0 For(C_F0 i0,C_F0 i1,C_F0 i2,C_F0 ins) {return C_F0(new E_F0_CFunc4(FFor,i0,to<bool>(i1),i2,ins),0);}
-inline C_F0 Try(C_F0 i0,C_F0 i1,C_F0 i2)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,i2,0),0);}
-inline C_F0 Try(C_F0 i0,C_F0 i1)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,0,0),0);}
-inline C_F0 FIf(C_F0 i0,C_F0 i1,C_F0 i2) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,i2,0),0);}
-inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,0,0),0);}
+inline C_F0 While(C_F0 test,C_F0 ins) {return C_F0(new E_F0_CFunc2(FWhile,to<bool>(test),ins),nullptr);}
+inline C_F0 For(C_F0 i0,C_F0 i1,C_F0 i2,C_F0 ins) {return C_F0(new E_F0_CFunc4(FFor,i0,to<bool>(i1),i2,ins),nullptr);}
+inline C_F0 Try(C_F0 i0,C_F0 i1,C_F0 i2)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,i2,nullptr),nullptr);}
+inline C_F0 Try(C_F0 i0,C_F0 i1)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,nullptr,nullptr),nullptr);}
+inline C_F0 FIf(C_F0 i0,C_F0 i1,C_F0 i2) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,i2,nullptr),nullptr);}
+inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,nullptr,nullptr),nullptr);}
 //inline  C_F0 C_F0::PtrValue() const{ 
 //   if (!(r && r->un_ptr)) { cerr << "PtrValue: Not a Left value " << *r << endl;CompileError();} 
 //   return C_F0(new  E_F0_Func1(r->un_ptr->f,f),r->un_ptr->r);}
@@ -1548,9 +1549,9 @@ class basicAC_F0 {
   typedef maptype::iterator iterator;
   typedef maptype::const_iterator const_iterator;
   maptype * named_parameter;
- basicAC_F0 & operator=(int i) {throwassert(i==0);named_parameter=0,nb=0;return *this;} // pas de parametres
- basicAC_F0 & operator=(C_F0 & c) {named_parameter=0;nb=1;a=&c;return *this;}
- basicAC_F0 & operator=(pair<int,C_F0*> p)  {named_parameter=0;nb=p.first;a=p.second;return *this;} 
+ basicAC_F0 & operator=(int i) {throwassert(i==0);named_parameter=nullptr,nb=0;return *this;} // pas de parametres
+ basicAC_F0 & operator=(C_F0 & c) {named_parameter=nullptr;nb=1;a=&c;return *this;}
+ basicAC_F0 & operator=(pair<int,C_F0*> p)  {named_parameter=nullptr;nb=p.first;a=p.second;return *this;} 
  const C_F0 & operator [] (int i) const {throwassert(a && i<nb);return a[i];}
  int size() const {return nb;}
  C_F0 * ptr() const  {return a;}
@@ -1566,7 +1567,7 @@ class basicAC_F0 {
   const type_info * type;
  } ;
  
-  void SetNameParam(int n=0,name_and_type *l=0 , Expression * e=0) const ;
+  void SetNameParam(int n=0,name_and_type *l=nullptr , Expression * e=nullptr) const ;
 };
 
 /// <<AC_F0>> array of parameters for FF language operators. uses [[basicAC_F0]]
@@ -1578,11 +1579,11 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
  //  no constructor in this class (this class is in a union )
   public:
   AC_F0 & operator=(pair<const char *,const C_F0> p) {
-    named_parameter=0; a=new C_F0[MaxSize]; nb=0;Add(p.first,p.second);return *this;}
+    named_parameter=nullptr; a=new C_F0[MaxSize]; nb=0;Add(p.first,p.second);return *this;}
   AC_F0 & operator+=(pair<const char *,const C_F0> p) {Add(p.first,p.second);return *this;} 
 
-  AC_F0 & operator=(long k) {throwassert(k==0);named_parameter=0;a=new C_F0[MaxSize]; nb=0;return *this;}     
-  AC_F0 & operator=(const C_F0& c) {named_parameter=0; a=new C_F0[MaxSize]; nb=0;a[nb++]=c;return *this;} 
+  AC_F0 & operator=(long k) {throwassert(k==0);named_parameter=nullptr;a=new C_F0[MaxSize]; nb=0;return *this;}     
+  AC_F0 & operator=(const C_F0& c) {named_parameter=nullptr; a=new C_F0[MaxSize]; nb=0;a[nb++]=c;return *this;} 
   AC_F0 & operator+=(const C_F0& c) { 
        if ( ! (a&& nb<MaxSize))
          CompileError("Sorry  number of parameters > 1024");
@@ -1622,7 +1623,7 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
           delete named_parameter;
         if (a)
            delete []  a;
-        a=0;named_parameter=0;}
+        a=nullptr;named_parameter=nullptr;}
   
 }; 
 
@@ -1633,7 +1634,7 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
  template<class... T, typename = AllC_F0<T...>>
  basicAC_F0_wa(T... a) : basicAC_F0_wa({std::forward<T>(a)...}) { }
  basicAC_F0_wa(const std::initializer_list<C_F0>& e) {
-   named_parameter=0;
+   named_parameter=nullptr;
    nb = e.size();
    a = new C_F0[nb];
    int i = 0;
@@ -1642,20 +1643,20 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
  }
 
  basicAC_F0_wa(C_F0 e,const basicAC_F0 & b) { 
-   named_parameter=0;
+   named_parameter=nullptr;
    if (b.named_parameter) named_parameter = new maptype(*b.named_parameter);
    nb=1+b.size();
    a= new C_F0[nb];
    a[0]=e;
    for (int i=1;i<nb;i++) a[i]=b[i-1];}
     ~basicAC_F0_wa(){delete [] a;
-        a=0;
+        a=nullptr;
         delete named_parameter;
-        named_parameter=0;}
+        named_parameter=nullptr;}
  
 
  basicAC_F0_wa(const basicAC_F0 & b) { 
-   named_parameter=0;
+   named_parameter=nullptr;
    if (b.named_parameter) named_parameter = new maptype(*b.named_parameter);
    nb=b.size();
    a= new C_F0[nb];
@@ -1722,7 +1723,7 @@ class TransE_Array:  public E_F0 {  public:
     size_t nbitem() const {return v->size();}
     bool MeshIndependent(){return v->MeshIndependent();}
     TransE_Array(const E_Array * e): v(e) {ffassert(e);}
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
 };
 
 // fin nov 2007
@@ -1764,7 +1765,7 @@ class E_BorderN :public E_F0mps { public:
         else CompileError(" Number of element of a border ( longn , int array, [ ] array ");
         return -1; // bug
     }
-    E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=0) ;
+    E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=nullptr) ;
     E_BorderN(const E_BorderN & bb,const E_BorderN * nx)
     : b(bb.b),cas(bb.cas),n(bb.n),next(nx)
     {
@@ -1794,7 +1795,7 @@ class E_BorderN :public E_F0mps { public:
   operator aType () const { return atype<const  E_BorderN *>();}         
     int size() const { int k=0;for(const E_BorderN  *pp=this;pp; pp=pp->next) k++; return k;}  
    E_BorderN * operator+( const E_BorderN & bb)  const 
-   { throwassert(bb.next==0);
+   { throwassert(bb.next==nullptr);
      return new E_BorderN(bb,this);}
 
 static C_F0 to(int cas, C_F0 nn)
@@ -1870,7 +1871,7 @@ class E_Border  :public Polymorphic  {  public:
   basicAC_F0_wa * tab;
   long label;
   E_Border(const E_Array * a) : 
-    xvar(0),xfrom(0),xto(0),xcode(0),xindex(0), tab(a? a->v:0) ,label(++Count)
+    xvar(nullptr),xfrom(nullptr),xto(nullptr),xcode(nullptr),xindex(nullptr), tab(a? a->v:nullptr) ,label(++Count)
   {
     assert(tab); 
     Add("(",new OneOperator_borderN(this));
@@ -1884,9 +1885,9 @@ class E_Border  :public Polymorphic  {  public:
     xfrom(to<double>(aa[1])),
     xto(to<double>(aa[2])),
     xcode(aa[aa.size()-1].LeftValue()),
-    xindex( (aa.size() > 4) ? (Expression) to<long*>(aa[3]) : 0 ),
+    xindex( (aa.size() > 4) ? (Expression) to<long*>(aa[3]) : nullptr ),
     //xindex( to<long*>(aa[3])  ),
-    tab(0),
+    tab(nullptr),
     label(++Count)
     {
     Add("(",new OneOperator_borderN(this));
@@ -1903,12 +1904,12 @@ inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)
 
 inline  double E_BorderN::from(Stack stack) const {return b->xfrom ? GetAny<double>((*b->xfrom)(stack)): double(0.0);}
 inline  double  E_BorderN::to(Stack stack) const {return b->xto? GetAny<double>((*b->xto)(stack)): b->length(stack) ;}
-inline  double *  E_BorderN::var(Stack stack) const {return b->xvar ? GetAny<double*>((*b->xvar)(stack)): (double*) 0 ;}
-inline  long *  E_BorderN::index(Stack stack) const {return b->xindex ? GetAny<long*>((*b->xindex)(stack)): (long*) 0 ;}
+inline  double *  E_BorderN::var(Stack stack) const {return b->xvar ? GetAny<double*>((*b->xvar)(stack)): nullptr ;}
+inline  long *  E_BorderN::index(Stack stack) const {return b->xindex ? GetAny<long*>((*b->xindex)(stack)): nullptr ;}
 inline  void  E_BorderN::code(Stack stack)const {(*b->xcode)(stack);}
 inline  long  E_BorderN::label()const {return b->label;}
 
-inline ArrayOfaType::ArrayOfaType(const basicAC_F0 & aa) : n(aa.size()),t(n ? (n<=4 ? tt : new aType[n]):0),ellipse(false) { 
+inline ArrayOfaType::ArrayOfaType(const basicAC_F0 & aa) : n(aa.size()),t(n ? (n<=4 ? tt : new aType[n]):nullptr),ellipse(false) { 
    for (int i=0;i<n;i++) t[i]=aa[i].left();}
    
 inline ArrayOfaType::ArrayOfaType(const ArrayOfaType & aa) : n(aa.n),t(n<=4?tt:new aType[n]),ellipse(aa.ellipse) { 
@@ -2000,10 +2001,10 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top)
        return t->Initialization(New(k,NewVariable<T>(t,top))); }
 
 // save a expression 
-inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) 
+inline  C_F0 TableOfIdentifier::NewID(aType,Key k, C_F0 & c,size_t &, bool del ) 
    {  // Add an expression in the list; 
       //(Par exemple: Uh ux; Maintenant on ajoute [[ux]] à la table des identifiants ou table des variables).
-     New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
+     New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return C_F0(); }
  //  { return r->Initialization(New(k,r->SetParam(c,ListOfId(),top),del));}
 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del) 
@@ -2171,7 +2172,7 @@ public:
       top=align8(top);
      size_t r=top;  top+=ssize ;topmax=Max(topmax,top);
      return r;}
-   Block(Block * f=0);
+   Block(Block * f=nullptr);
 /*   :fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
     {     
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
@@ -2557,7 +2558,7 @@ public:
 };
 
 struct evalE_F2 {
-   static AnyType eval(Stack s,const E_F0 * ab,const E_F0 * a,const E_F0 * b, bool & meshidenp) 
+   static AnyType eval(Stack s,const E_F0 * ab,const E_F0 *,const E_F0 *, bool & meshidenp) 
    {
        return ab->E_F0::eval(s,meshidenp); 
    }
@@ -2568,11 +2569,11 @@ template<typename A,typename B>
 class  OneBinaryOperatorBug : public OneOperator{
     typedef  bool R;
 public:
-    E_F0 * code(const basicAC_F0 & args) const
+    E_F0 * code(const basicAC_F0 &) const
     {  //cout << "A op B \n" ;
         cout << " Error expression impossible between "<< typeid(A).name() << " ,  "<<typeid(B).name() <<endl;
         CompileError( "  Expression must return bad type!!!");
-        return  0;}
+        return  nullptr;}
     OneBinaryOperatorBug():
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()])
     {pref = 100;}
@@ -3005,7 +3006,7 @@ template<class T,class PT>
          
 
 template<class T> 
- ForEachTypePtr<T*,T**>::ForEachTypePtr(T* unused,Function1 OOnReturn): 
+ ForEachTypePtr<T*,T**>::ForEachTypePtr(T*,Function1 OOnReturn): 
          basicForEachType(typeid(T**),sizeof(T**),
 //         new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
@@ -3073,7 +3074,7 @@ void CheckDclTypeEmpty() {
 // Add the << T >> and << PT >> in the map_type.
 // The map_type contains the different <<aType>> in Freefem that can be verified.
 template<typename T,typename PT>
-void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
+void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=nullptr,Function1 pOnReturn=nullptr)
    {
     CheckDclTypeEmpty<T>();
     CheckDclTypeEmpty<PT>();
@@ -3085,7 +3086,7 @@ void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function
 // Add the << T >> and << T* >>in the map_type.
 // The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
-void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
+void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=nullptr,Function1 pOnReturn=nullptr)
 {
     CheckDclTypeEmpty<T>();
     CheckDclTypeEmpty<T*>();
@@ -3134,7 +3135,7 @@ template<class T>
 // Add the class T in the map_type.
 // The map_type contains the different <<aType>> in Freefem that can be verified.
 template<class T>
-  aType Dcl_Type (Function1 iv=0,Function1 id=0,Function1 Onreturn=0)
+  aType Dcl_Type (Function1 iv=nullptr,Function1 id=nullptr,Function1 Onreturn=nullptr)
    {
      if (sizeof(T) >sizeof(AnyData)) {
        cerr << " the type   " << typeid(T).name() << " is too large " << sizeof(AnyData) <<  endl;
@@ -3146,9 +3147,9 @@ template<class T>
    }
 
 template<class T>
-  void Add(const char * k,const char * op,OneOperator *p0,OneOperator *p1=0,
-      OneOperator *p2=0,OneOperator *p3=0,OneOperator *p4=0,
-      OneOperator *p5=0,OneOperator *p6=0)  
+  void Add(const char * k,const char * op,OneOperator *p0,OneOperator *p1=nullptr,
+      OneOperator *p2=nullptr,OneOperator *p3=nullptr,OneOperator *p4=nullptr,
+      OneOperator *p5=nullptr,OneOperator *p6=nullptr)  
      {atype<T>()->Add(k,op,p0,p1,p2,p3,p4,p5,p6);}     
 
 inline C_F0 operator *(const C_F0 &a,const C_F0 &b)
@@ -3168,7 +3169,7 @@ inline C_F0 &operator +=(C_F0 &a,const C_F0 &b)
 inline  void CC_F0::operator=(const CListOfInst& c) 
   { C_F0 cc=c;f=cc.f;r=cc.r;}
 inline   CListOfInst &  CListOfInst::operator+=(const CC_F0 & a)
-  { if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
+  { if( !a.Empty()){ f->Add(a);r=a.left();}return *this;} 
   
 inline Type_Expr basicForEachType::SetParam(const C_F0 & ,const ListOfId * ,size_t & ) const
      { cerr << " int basicForEachType " << name() << endl; 
@@ -3249,14 +3250,14 @@ inline Expression basicForEachType::OnReturn(Expression f) const {
     else if(DoOnReturn== NotReturnOfthisType )
 	CompileError("Problem when returning this type (sorry work in progress FH!) ", this);
     else return new  E_F0_Func1(DoOnReturn,f);
-    return 0; 
+    return nullptr; 
 }
 
 
-inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Array>();};
+inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Array>();}
 
-inline  UnId::UnId(const char * idd,const C_F0 & ee,aType rr=0,bool reff=false) 
-  :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff), compo_begin(false), compo_end(false){};
+inline  UnId::UnId(const char * idd,const C_F0 & ee,aType rr=nullptr,bool reff=false) 
+  :id(idd),r(rr),e(ee),array(nullptr),re(ee.left()) ,ref(reff), compo_begin(false), compo_end(false){}
 
 
 class E_exception : public exception { public:
@@ -3274,7 +3275,7 @@ class E_exception : public exception { public:
 class E_throw : public E_F0mps { public:
    E_exception::CODE_exception kind;    
    Expression ret; // return value
-   E_throw(E_exception::CODE_exception c,Expression e=0) :kind(c),ret(e) {}
+   E_throw(E_exception::CODE_exception c,Expression e=nullptr) :kind(c),ret(e) {}
    AnyType operator()(Stack s)  const { 
      (ret ? throw(E_exception(kind,(*ret)(s)))
           : throw(E_exception(kind)));
@@ -3337,13 +3338,13 @@ class Routine: public OneOperator{  public:
 
 class TypeLineFunction: public ForEachType<C_F0> {
   public:
-  TypeLineFunction() : ForEachType<C_F0>(0,0) {}
+  TypeLineFunction() : ForEachType<C_F0>(nullptr,nullptr) {}
   
   void SetArgs(const ListOfId *lid) const {
      if (lid) CompileError("No Argument in line function");
       } 
      
-  Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const 
+  Type_Expr SetParam(const C_F0 & c,const ListOfId *,size_t &) const 
     {  return Type_Expr(c.left(),c.LeftValue());  } 
     
   C_F0 Initialization(const Type_Expr & ) const 
@@ -3405,7 +3406,7 @@ public:
   virtual size_t nbitem() const {  return NBbitem;}
   virtual bool EvaluableWithOutStack() const {return false;} // 
   virtual bool MeshIndependent() const {return false;} // 
-  virtual E_F0 * right_E_F0() const { return 0;}
+  virtual E_F0 * right_E_F0() const { return nullptr;}
   virtual ~E_F0_Optimize() {}
   // virtual int compare (const E_F0 *t) const { return t-this;} // to give a order in instuction 
   virtual  operator aType ()  const { return  *(l.back().first);}   // the type of the expression  
@@ -3445,7 +3446,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
 extern vector<pair<const E_Routine*,int> > * debugstack;
 
 struct NothingType {  // a type to do nothing 
- NothingType() {};
+ NothingType() {}
 };
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
@@ -3497,7 +3498,7 @@ public:
     typedef Expression Exp;
     C_F0 t;
     Exp v,i,j;
-    PolymorphicLoop(C_F0 tt,AC_F0 &args) : t(tt),v(0),i(0), j(0){
+    PolymorphicLoop(C_F0 tt,AC_F0 &args) : t(tt),v(nullptr),i(nullptr), j(nullptr){
         if(verbosity>1000)
         cout << "PolymorphicLoop  args " << args.size()  << endl;
         if(args.size()>1) v=args[1];  // v
@@ -3520,11 +3521,11 @@ class ForAllLoopOpBase :  public E_F0mps { public:
     Expression et,ecode;
     const PolymorphicLoop *epl;
     ForAllLoopOpBase( basicForEachType * ret,const basicAC_F0 & args)
-    : et(ret->CastTo(args[0])), ecode(args[2]),epl(0)
+    : et(ret->CastTo(args[0])), ecode(args[2]),epl(nullptr)
     {
       //  if(args.size() > 3) efin=args[3];
         epl = dynamic_cast<const PolymorphicLoop *>((Expression) args[1]);
-        assert(epl!=0);
+        assert(epl!=nullptr);
     }
     AnyType tab(Stack s) const { return  (*et)(s);}
     AnyType v(Stack s)   const { return epl->fv(s);}

@@ -59,7 +59,7 @@ struct DataSeg1  {
   } 
   typedef R0 RdHatBord;
   typedef R1 RdHat;
-  static RdHat PBord(const int * nvb,const RdHatBord & P)  { return R1(*nvb) ;}  
+  static RdHat PBord(const int * nvb,const RdHatBord &)  { return R1(*nvb) ;}  
   //  static const int (* const nvface)[3];// = nvfaceTria  ;
   //static const int (* const nvedge)[2];// = nvedgeTrai;
 
@@ -75,12 +75,12 @@ struct DataPoint1  {
   static const int NbOfVertexOnHyperFace =1;
   typedef Vertex1 V;
   typedef  V::Rd Rd;
-  static R mesure(  V * pv[NbOfVertices]  ) {    
+  static R mesure(  V *[NbOfVertices]  ) {    
     return 1.;
   }
   typedef R0 RdHatBord;
   typedef R0 RdHat;
-  static RdHat PBord(const int * nvb,const RdHatBord & P)  { return R0() ;}  
+  static RdHat PBord(const int *,const RdHatBord &)  { return R0() ;}  
 
 };
 
@@ -88,7 +88,7 @@ struct DataPoint1  {
 
 class Seg1: public GenericElement<DataSeg1>  {
 public: 
-  Seg1() {}; // constructor empty for array
+  Seg1() {} // constructor empty for array
 
 
   R1 H(int i) const { ASSERTION(i>=0 && i <1);
@@ -106,7 +106,7 @@ public:
 
 class BoundaryPoint1: public GenericElement<DataPoint1>  {
 public: 
-  BoundaryPoint1() {}; // constructor empty for array
+  BoundaryPoint1() {} // constructor empty for array
 
 
 };
@@ -121,6 +121,11 @@ public:
    Mesh1(const Mesh1 &); // pas de construction par copie
    void operator=(const Mesh1 &);// pas affectation par copy 
 };
+
+  template<> const int (* const GenericElement<DataSeg1>::nvface)[3];
+  template<> const int (* const GenericElement<DataSeg1>::nvedge)[2];
+  template<> const int (* const GenericElement<DataSeg1>::nvadj)[1];
+  template<> const int  GenericElement<DataSeg1>::nitemdim[4];
 }
 #endif
  

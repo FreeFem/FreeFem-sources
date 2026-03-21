@@ -72,7 +72,7 @@ class AnyTypeWithCheck  {
  public:
     const basicForEachType *ktype; 
 //    friend ostream & operator<<(ostream &f,const AnyTypeWithCheck &p);  
-    AnyTypeWithCheck(): ktype(0){}
+    AnyTypeWithCheck(): ktype(nullptr){}
     AnyTypeWithCheck(long ll)   {l=ll;ktype=map_type[typeid(long).name()];}
     AnyTypeWithCheck(double dd) {r=dd;ktype=map_type[typeid(double).name()];}
     AnyTypeWithCheck(bool bb ) {b=bb;ktype=map_type[typeid(bool).name()];}

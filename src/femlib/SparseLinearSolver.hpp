@@ -71,7 +71,7 @@ struct TheFFSolver {
     }
     
     template<class VS>
-    static void addsolver (const char* name,int pp,int ts,const  VS* pvs,int sp=0)
+    static void addsolver (const char* name,int pp,int,const  VS*,int sp=0)
     {
         string sn(name);
         OneFFSlverVS<VS> pv=0;
@@ -98,7 +98,7 @@ template<class TS> void addsolver(const char *nm,int p,int setsp=0)
     typedef typename  TS::INDEX ZZ;
     typedef typename  TS::SCALAR KK;
     int ots=TS::orTypeSol;
-    TheFFSolver<ZZ,KK>::addsolver(nm,p,ots, (TS*) 0,setsp); // trick (TS*) 0 to call the corre ct case ..
+    TheFFSolver<ZZ,KK>::addsolver(nm,p,ots, static_cast<TS*>(nullptr),setsp); // trick static_cast<TS*>(nullptr) to call the corre ct case ..
 }
 
 template<class Z,class K> void changesolver(const string & n,const string & f)

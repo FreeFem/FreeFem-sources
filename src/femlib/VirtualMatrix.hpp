@@ -22,7 +22,7 @@ public:
     ERRORFunc ERRORHandle;
     class VSolver {public:
         virtual R* solve(R *x,R*b,int N=0,int trans=0) =0;
-        virtual void factorize(int st){ if(verbosity>4)  cout << " ** warning no factorisation" << st << endl;};
+        virtual void factorize(int st){ if(verbosity>4)  cout << " ** warning no factorisation" << st << endl;}
         virtual ~VSolver(){}
         int count;
         VSolver(): count(0) {}
@@ -53,9 +53,9 @@ public:
     {  if(vsolver) return vsolver->solve(x,b,N,transpo);
         else
         ERROR(1,"VirtualMatrix:: no solver ?????");
-        return 0;
+        return nullptr;
     }
-  virtual R* addMatMul(R *x,R*Ax,bool Transpose,I sx=1,I sAx=1) const  {  ERROR(1,"VirtualMatrix:: no AddMatMul ?????"); return 0;}
+  virtual R* addMatMul(R *,R*,bool,I=1,I=1) const  {  ERROR(1,"VirtualMatrix:: no AddMatMul ?????"); return nullptr;}
   R* addMatMul(R *x,R*Ax) const {  return addMatMul(x,Ax,0); }
   R* addMatTransMul(R *x,R*Atx) const {  return addMatMul(x,Atx,1); }
   R* MatMul(R *x,R*Ax) const { return addMatMul(x, Set2Const(n,Ax)); }
@@ -68,7 +68,7 @@ public:
         if(A.vsolver) SetSolver(vsolver->copyptr(),A.delvsolver);
         else SetSolver(0);
     }
-  void SetSolver(VSolver *f=0, bool del = true)  {
+  void SetSolver(VSolver *f=nullptr, bool del = true)  {
       if(verbosity>4)  cout<< " ## SetSolver "<< this << " " << vsolver <<" "<<  f << endl;
       if(vsolver && delvsolver)
            vsolver->destroy();
@@ -93,28 +93,28 @@ public:
         if(vsolver && delvsolver)  vsolver->destroy();//   Warning the solver is del afer the Matrix
     } // clean solver
     
-    virtual size_t size() const {return 0; };
+    virtual size_t size() const {return 0; }
     virtual VirtualMatrix  & operator +=(MatriceElementaire<R> & ){AFAIRE("VirtualMatrix::+=");}
-    virtual void operator=(const R & v){AFAIRE("VirtualMatrix::=v");} // Mise a zero
+    virtual void operator=(const R &){AFAIRE("VirtualMatrix::=");} // Mise a zero
     virtual ostream& dump (ostream&)  const {cout << mpirank << " BUG virtualmatrix " << this << endl; AFAIRE("VirtualMatrix::dump");}
-    virtual R & diag(I i){AFAIRE("VirtualMatrix::diab");}
-    virtual void SetBC(I i,double tgv){AFAIRE("VirtualMatrix::setbc");}
-    virtual R & operator()(I i,I j){AFAIRE("VirtualMatrix::()(i,j)");}
-    virtual R * pij(I i,I j) const {AFAIRE("VirtualMatrix::pij");} // Add FH
+    virtual R & diag(I){AFAIRE("VirtualMatrix::diab");}
+    virtual void SetBC(I,double){AFAIRE("VirtualMatrix::setbc");}
+    virtual R & operator()(I,I){AFAIRE("VirtualMatrix::()(i,j)");}
+    virtual R * pij(I,I) const {AFAIRE("VirtualMatrix::pij");} // Add FH
 
-    virtual HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not
-    virtual bool addMatTo(R coef,HashMatrix<I,R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
-    {AFAIRE("VirtualMatrix::addMatTo");};
-    virtual R pscal(const KN_<R> & x,const KN_<R> & y) {AFAIRE("VirtualMatrix::pscal");} ; // produit scalaire
-    virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {AFAIRE("VirtualMatrix::psor");}
-    virtual void setdiag(const KN_<R> & x){AFAIRE("VirtualMatrix::setdiag");} ;
-    virtual void getdiag( KN_<R> & x) const {AFAIRE("VirtualMatrix::getdiag");}
-    virtual I NbCoef() const {return 0;};
-    virtual void setcoef(const KN_<R> & x){AFAIRE("VirtualMatrix::setcoef");}
-    virtual void getcoef( KN_<R> & x) const {AFAIRE("VirtualMatrix::getcoef");}
+    virtual HashMatrix<I, R> *toMatriceMorse(bool=false,bool=false) const {return nullptr;} // not
+    virtual bool addMatTo(R,HashMatrix<I,R> &,bool=false,int=0,int=0,bool=false,double=0.,const bool=false)
+    {AFAIRE("VirtualMatrix::addMatTo");}
+    virtual R pscal(const KN_<R> &,const KN_<R> &) {AFAIRE("VirtualMatrix::pscal");} // produit scalaire
+    virtual double psor(KN_<R> &,const  KN_<R> &,const  KN_<R> & , double) {AFAIRE("VirtualMatrix::psor");}
+    virtual void setdiag(const KN_<R> &){AFAIRE("VirtualMatrix::setdiag");}
+    virtual void getdiag( KN_<R> &) const {AFAIRE("VirtualMatrix::getdiag");}
+    virtual I NbCoef() const {return 0;}
+    virtual void setcoef(const KN_<R> &){AFAIRE("VirtualMatrix::setcoef");}
+    virtual void getcoef( KN_<R> &) const {AFAIRE("VirtualMatrix::getcoef");}
     virtual bool sym() const {return false;}
  
-    virtual  void  resize(I n,I m)  {AFAIRE("VirtualMatrix::resize");}
+    virtual  void  resize(I,I)  {AFAIRE("VirtualMatrix::resize");}
     virtual void clear()
     { I NN=this->N, MM=this->M;
         resize(0,0);

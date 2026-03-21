@@ -39,7 +39,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
     KN<double>* in = GetAny<KN<double>*>((*interface)(stack));
     KN<KN<long> >* out = GetAny<KN<KN<long> >*>((*outInterface)(stack));
     KN<Matrice_Creuse<double> >* interpolation = GetAny<KN<Matrice_Creuse<double> >*>((*restriction)(stack));
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
+    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : nullptr;
     unsigned short n = out->operator[](0).n;
     MPI_Request* rq = new MPI_Request[2 * n];
     std::vector<unsigned char*> send(n);
@@ -165,7 +165,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         // cout << mpirank << " <=> " << arrayNeighbor->operator[](i) << " : " << out->operator[](i).n << endl;
     }
     delete [] rq;
-    KN<long>* interfaceNb = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
+    KN<long>* interfaceNb = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) nullptr;
     if(interfaceNb) {
         std::vector<unsigned int> vec;
         vec.reserve(in->n);
@@ -269,9 +269,9 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     if(ptR) {
         KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
-        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : nullptr);
     }
-    FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
+    FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : nullptr;
     if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];
         *ev = new K[deflation->N * deflation->get(0)->n];
@@ -320,12 +320,12 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     pcommworld ptComm = GetAny<pcommworld>((*comm)(stack));
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
-    FEbaseArrayKn<K>* R = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : 0;
-    Pair<K>* pair = nargs[3] ? GetAny<Pair<K>*>((*nargs[3])(stack)) : 0;
+    FEbaseArrayKn<K>* R = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : nullptr;
+    Pair<K>* pair = nargs[3] ? GetAny<Pair<K>*>((*nargs[3])(stack)) : nullptr;
     unsigned short nu = R ? static_cast<unsigned short>(R->N) : 0;
     HPDDM::Option& opt = *HPDDM::Option::get();
     HPDDM::underlying_type<K> threshold = opt.val("geneo_threshold", 0.0);
-    KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+    KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : nullptr;
     std::pair<MPI_Request, const K*>* ret = nullptr;
     bool adaptive = opt.set("geneo_nu") || threshold > 0.0;
     if(!adaptive)
@@ -437,7 +437,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptX->n != ptRHS->n)
         return 0L;
     HPDDM::Option& opt = *HPDDM::Option::get();
-    KN<double>* timing = nargs[0] ? GetAny<KN<double>*>((*nargs[0])(stack)) : 0;
+    KN<double>* timing = nargs[0] ? GetAny<KN<double>*>((*nargs[0])(stack)) : nullptr;
     bool excluded = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(excluded)
         opt["level_2_exclude"];
@@ -506,10 +506,10 @@ class renumber : public OneOperator {
     AnyType renumber_Op<Type, K>::operator()(Stack stack) const {
         Type* ptA = GetAny<Type*>((*A)(stack));
         KN<long>* ptInterface = GetAny<KN<long>*>((*interface)(stack));
-        FEbaseArrayKn<K>* deflation = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : 0;
-        KN<K>* ptEffort = nargs[1] ? GetAny<KN<K>*>((*nargs[1])(stack)) : 0;
-        KN<K>* rho = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : 0;
-        KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
+        FEbaseArrayKn<K>* deflation = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : nullptr;
+        KN<K>* ptEffort = nargs[1] ? GetAny<KN<K>*>((*nargs[1])(stack)) : nullptr;
+        KN<K>* rho = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : nullptr;
+        KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : nullptr;
         double t = MPI_Wtime();
         K** ev;
         if(deflation && deflation->N > 0) {

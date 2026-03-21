@@ -44,16 +44,16 @@ KN< R > *partmetis( KN< R > *const &part, const FESPACE * pVh, long const &lpart
       idx_t ncommon = 1;
 #ifdef METIS_VER_MAJOR
       if (NO == 0) {
-          METIS_PartMeshNodal(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &nparts, 0, 0, &edgecut,
+          METIS_PartMeshNodal(&nt, &nv, eptr, (idx_t *)elmnts, nullptr, nullptr, &nparts, nullptr, nullptr, &edgecut,
                   (idx_t *)epart, (idx_t *)npart);
       } else {
-          METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
+          METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, nullptr, nullptr, &ncommon, &nparts, nullptr, nullptr, &edgecut,
                   (idx_t *)epart, (idx_t *)npart);
       }
 
       if (verbosity) {
           printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
-                  libmetis__ComputeElementBalance(nt, nparts, epart), NO);
+                  static_cast<double>(libmetis__ComputeElementBalance(nt, nparts, epart)), NO);
       }
 
 #else
@@ -65,7 +65,7 @@ KN< R > *partmetis( KN< R > *const &part, const FESPACE * pVh, long const &lpart
 
       if (verbosity) {
           printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve,
-                  ComputeElementBalance(nt, nparts, epart), NO);
+                  static_cast<double>(ComputeElementBalance(nt, nparts, epart)), NO);
       }
 
 #endif
@@ -106,7 +106,7 @@ public:
     virtual void factorization() = 0;
     virtual void solve(htool::MatrixView<K>) = 0;
 
-    virtual ~HMatrixVirt() {};
+    virtual ~HMatrixVirt() {}
 };
 
 
@@ -116,7 +116,7 @@ private:
     std::shared_ptr<htool::Cluster<double>>  target_cluster;
     std::shared_ptr<htool::Cluster<double>>  source_cluster;
     htool::DefaultApproximationBuilder<K> distributed_operator_holder;
-    htool::HMatrix<K>* Hfact = 0;
+    htool::HMatrix<K>* Hfact = nullptr;
 
 public:
     htool::HMatrix<K>& H;
@@ -200,7 +200,7 @@ public:
         else
             htool::lu_solve('N',H,b);
     }
-    ~HMatrixImpl() {if (Hfact) {delete Hfact; Hfact=0;}}
+    ~HMatrixImpl() {if (Hfact) {delete Hfact; Hfact=nullptr;}}
 };
 
 
@@ -422,7 +422,7 @@ std::shared_ptr<htool::Cluster<double>> build_clustering(int n, const FESPACE * 
 template <class R>
 void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,
                 std::shared_ptr<htool::Cluster<double>> t, std::shared_ptr<htool::Cluster<double>> s,
-                vector<double> &pt,vector<double> &ps,MPI_Comm comm) {
+                vector<double> &,vector<double> &,MPI_Comm comm) {
 
     int sizeWorld;
     MPI_Comm_size(comm, &sizeWorld);
@@ -729,17 +729,16 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     }
 }
 
-template<> void creationHMatrixtoBEMForm<double, MeshS, FESpaceS, FESpaceS>(const FESpaceS * Uh, const FESpaceS * Vh, const int & VFBEM, 
-                             const std::list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<double> **Hmat){
+template<> void creationHMatrixtoBEMForm<double, MeshS, FESpaceS, FESpaceS>(const FESpaceS *, const FESpaceS *, const int &, 
+                             const std::list<C_F0> &, Stack, const Data_Bem_Solver &, HMatrixVirt<double> **){
                                  cerr << "we can't use bemtool with Real type." << endl;
                                  ffassert(0);
                              }
 
-template<> void creationHMatrixtoBEMForm<double, MeshL, FESpaceL, FESpaceL>(const FESpaceL * Uh, const FESpaceL * Vh, const int & VFBEM, 
-                             const std::list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<double> **Hmat){
+template<> void creationHMatrixtoBEMForm<double, MeshL, FESpaceL, FESpaceL>(const FESpaceL *, const FESpaceL *, const int &, 
+                             const std::list<C_F0> &, Stack, const Data_Bem_Solver &, HMatrixVirt<double> **){
                                  cerr << "we can't use bemtool with Real type." << endl;
                                  ffassert(0);
                              }
 
 #endif
-;

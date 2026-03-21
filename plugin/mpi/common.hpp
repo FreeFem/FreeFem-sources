@@ -19,7 +19,7 @@ class pwr {
         const typename std::conditional<trans == 'T', std::string*, long>::type c;
         static constexpr char tr = trans;
         mutable bool conjugate;
-        pwr(Stack s, Op* const& d, const typename std::conditional<trans == 'T', std::string*, long>::type e) : A(d), c(e), conjugate(false) { }
+        pwr(Stack, Op* const& d, const typename std::conditional<trans == 'T', std::string*, long>::type e) : A(d), c(e), conjugate(false) { }
         operator Op* () const { return A; }
 };
 template<class RR, class AA = RR, class BB = AA>
@@ -28,27 +28,27 @@ using first_argument_type  = AA;
 using second_argument_type = BB;
 using result_type          = RR;
 template<class V, class T>
-static T check(T* t, typename std::enable_if<T::tr == 'H'>::type* = 0) {
+static T check(T* t, typename std::enable_if<T::tr == 'H'>::type* = nullptr) {
     t->conjugate = true;
     if(t->c != -1)
         CompileError("A'^p, the p must be a constant == -1, sorry");
     return *t;
 }
 template<class V, class T>
-static T check(T* t, typename std::enable_if<T::tr == 'N'>::type* = 0) {
+static T check(T* t, typename std::enable_if<T::tr == 'N'>::type* = nullptr) {
     if(t->c != -1)
         CompileError("A^p, the p must be a constant == -1 or == \"-T\" or == \"-H\", sorry");
     return *t;
 }
 template<class V, class T>
-static T check(T* t, typename std::enable_if<T::tr == 'T'>::type* = 0) {
+static T check(T* t, typename std::enable_if<T::tr == 'T'>::type* = nullptr) {
     if(t->c->compare("-H") == 0)
         t->conjugate = true;
     if(t->c->compare("-T") != 0 && !t->conjugate)
         CompileError("A^p, the p must be a constant == -1 or == \"-T\" or == \"-H\", sorry");
     return *t;
 }
-static RR f(Stack stack, const AA& a, const BB& b) {
+static RR f(Stack, const AA& a, const BB& b) {
     ffassert(a);
     check<BB>(&a);
     RR p(a, b);

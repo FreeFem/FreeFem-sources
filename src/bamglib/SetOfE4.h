@@ -52,7 +52,7 @@ namespace bamg {
       delete[] Edges;
     }
     Int4 add(Int4 ii, Int4 jj);
-    Int4 addtrie(Int4 ii, Int4 jj, int *orient = 0) {
+    Int4 addtrie(Int4 ii, Int4 jj, int *orient = nullptr) {
       if (orient) *orient = ii <= jj ? 1 : -1;
       return ii <= jj ? add(ii, jj) : add(jj, ii);
     }

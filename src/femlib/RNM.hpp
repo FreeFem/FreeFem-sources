@@ -59,13 +59,13 @@ inline void Check_Kn(const char * str,const char * file,int line)
 }
 
 #define K_bigassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
-#define RNM_FATAL_ERROR(i) Check_Kn(i,__FILE__,__LINE__);
+#define RNM_FATAL_ERROR(i) Check_Kn(i,__FILE__,__LINE__)
 #ifdef CHECK_KN
 
-#define K_throwassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
+#define K_throwassert(i)  do { if (!(i)) Check_Kn(#i,__FILE__,__LINE__); } while(0)
 
 #else
-#define K_throwassert(i)
+#define K_throwassert(i)  do {} while(0)
 #endif
 // version du 29 fev 2000
 //  correction   for (... lj++,ui++  qui apelle le produit scalaire
@@ -223,7 +223,7 @@ template<class R,typename A,typename B,typename BB> class F_KN_;
 typedef void (* TypeofInternalErrorRoutine)(const char *) ;
 static TypeofInternalErrorRoutine &InternalErrorRoutinePtr()
 {
-  static TypeofInternalErrorRoutine routine=0;
+  static TypeofInternalErrorRoutine routine=nullptr;
   return routine;
 }
 
@@ -262,8 +262,8 @@ struct  RNM_VirtualMatrix { public:
   virtual bool ChecknbLine  (Z n) const= 0;
   virtual bool ChecknbColumn  (Z m) const =0;
 #else
-  virtual bool ChecknbLine  (Z n) const {return true;}
-  virtual bool ChecknbColumn  (Z m) const {return true;}
+  virtual bool ChecknbLine  (Z) const {return true;}
+  virtual bool ChecknbColumn  (Z) const {return true;}
 #endif
   struct  plusAx { const RNM_VirtualMatrix * A; const KN_<R>   x;
    plusAx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y)
@@ -357,7 +357,7 @@ class ShapeOfArray{ protected:
 // to set Diag matrix ..
 struct  Eye{ int n, m;
     Eye(long nn) : n(nn),m(nn) {}
-    Eye(long nn,int mm) : n(nn),m(nn) {}
+    Eye(long nn,int mm) : n(nn),m(mm) {}
 };
 inline Eye fEye(long n){ return Eye(n);}
 inline Eye fEye(long  n,long m){ return Eye(n,m);}
@@ -875,7 +875,7 @@ class KNMK_: public KN_<R> {
     : KN_<R>(u,s),shapei(si),shapej(sj),shapek(sk){}
 
   KNMK_(R* u,long n,long m,long k)
-    : KN_<R>(u, ShapeOfArray(n*m*k)),shapei(n,1,n),shapej(m,n,1),shapek(k,n*m,n*m){};
+    : KN_<R>(u, ShapeOfArray(n*m*k)),shapei(n,1,n),shapej(m,n,1),shapek(k,n*m,n*m){}
 
 //  KNMK_(const KN_<R> & u,long n,long m,long k)
 //   : KN_<R>(ShapeOfArray(n*m*k)),shapei(n,1,n),shapekj(m,n,1),u),
@@ -966,7 +966,7 @@ class KN :public KN_<R> { public:
   typedef R K;
 
  // explicit  KN(const R & u):KN_<R>(new R(uu),1,0) {}
-  KN() : KN_<R>(0,0) {}
+  KN() : KN_<R>(nullptr,0) {}
   KN(long nn) : KN_<R>(new R[nn],nn)         {}
   KN(long nn, R * p) : KN_<R>(new R[nn],nn)
     { KN_<R>::operator=(KN_<R>(p,nn));}
@@ -1052,7 +1052,7 @@ class KN :public KN_<R> { public:
    KN& operator =(const typename RNM_VirtualMatrix<R>::solveAxeqb & Ab)
         { if(this->unset()) {this->set(new R[Ab.b.N()],Ab.b.N()); KN_<R>::operator=(R());} KN_<R>::operator=(Ab);return *this;}
     KN& operator =(const typename RNM_VirtualMatrix<R>::solveAtxeqb & Ab)
-    { if(this->unset()) {this->set(new R[Ab.b.N()],Ab.b.N()); ; KN_<R>::operator=(R());} KN_<R>::operator=(Ab);return *this;}
+    { if(this->unset()) {this->set(new R[Ab.b.N()],Ab.b.N()); KN_<R>::operator=(R());} KN_<R>::operator=(Ab);return *this;}
   KN& operator +=(const typename  RNM_VirtualMatrix<R>::plusAx & Ax)
   { if(this->unset()  && Ax.A->N) {
         this->set(new R[Ax.A->N],Ax.A->N);
@@ -1186,7 +1186,7 @@ class KN :public KN_<R> { public:
 //    operator KN<const_R> const & ()  const
 //          { return (const KN<const_R>& ) *this;}
     void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn]();}
-  void init() {this->n=0;this->step=1;this->next=-1;this->v=0;}
+  void init() {this->n=0;this->step=1;this->next=-1;this->v=nullptr;}
   void init(const KN_<R> & a){init(a.N()); operator=(a);}
   void resize(long nn) {
     if ( nn != this->n)
@@ -1200,7 +1200,7 @@ class KN :public KN_<R> { public:
          for(long i=0,j=0;j<no;i++,j+=so)
            this->v[i]=vo[j];
         delete [] vo;} }//  mars 2010
-  void destroy(){/*assert(this->next<0);*/  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}//  mars 2010
+  void destroy(){/*assert(this->next<0);*/  if(this->next++ ==-1) {delete [] this->v; this->v=nullptr;this->n=0;}}//  mars 2010
   void increment() {/*assert(this->next<0);*/  this->next--;}
 };
 
@@ -1209,7 +1209,7 @@ class KN :public KN_<R> { public:
 
 template<class R>
 class KNM: public KNM_<R>{ public:
-  KNM() :KNM_<R>(0,0,0){}
+  KNM() :KNM_<R>(nullptr,0,0){}
   KNM(long nn,long mm)
         :KNM_<R>(new R[nn*mm],nn,mm){}
    KNM(const KNM<R> & u)  // PB si stepi ou stepj nulle
@@ -1222,6 +1222,8 @@ class KNM: public KNM_<R>{ public:
   ~KNM(){delete [] this->v;}
 
    KNM& operator=(const KNM_<const_R> & u)
+    { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator=(u);return *this;}
+   KNM& operator=(const KNM<R>& u)
     { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator=(u);return *this;}
    KNM& operator=(const_R a)
     { if(this->unset()) RNM_FATAL_ERROR(" KNM operator=(double)"); KNM_<R>::operator=(a);return *this;}
@@ -1276,7 +1278,7 @@ class KNM: public KNM_<R>{ public:
 //          { return *(const KNM<const_R>*) this;}
 
     void init() { //  add mars 2010 ...
-	this->n=0;this->step=1;this->next=-1;this->v=0;
+	this->n=0;this->step=1;this->next=-1;this->v=nullptr;
 	this->shapei.init(0);
 	this->shapej.init(0);}
 
@@ -1312,7 +1314,7 @@ class KNM: public KNM_<R>{ public:
      }
 
   }
-  void destroy(){/*assert((bool)(this->next<0)); */ if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+  void destroy(){/*assert((bool)(this->next<0)); */ if(this->next++ ==-1) {delete [] this->v; this->v=nullptr;this->n=0;}}
   void increment() {/*assert((bool)(this->next<0)); */ this->next--;}
 
 //  void destroy(){delete [] this->v;this->n=0 ;}

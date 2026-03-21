@@ -190,7 +190,7 @@ static void *new_void(int n, size_t size);
 /* ---------------- Functions: cmaes_t --------------------- */
 /* --------------------------------------------------------- */
 static char *getTimeStr(void) {
-  time_t tm = time(0);
+  time_t tm = time(nullptr);
   static char s[33];
 
   /* get time */
@@ -201,7 +201,7 @@ static char *getTimeStr(void) {
 
 char *cmaes_SayHello(cmaes_t *t) {
   /* write initial message */
-  sprintf(t->sOutString,
+  snprintf(t->sOutString, sizeof(t->sOutString),
           "(%d,%d)-CMA-ES(mu_eff=%.1f), Ver=\"%s\", dimension=%d, diagonalIterations=%ld, "
           "randomSeed=%d (%s)",
           t->sp.mu, t->sp.lambda, t->sp.mueff, t->version, t->sp.N, (long)t->sp.diagonalCov,
@@ -363,8 +363,8 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   double d;
   FILE *fp = fopen(filename, "r");
 
-  if (fp == 0) {
-    ERRORMESSAGE("cmaes_resume_distribution(): could not open '", filename, "'", 0);
+  if (fp == nullptr) {
+    ERRORMESSAGE("cmaes_resume_distribution(): could not open '", filename, "'", nullptr);
     return;
   }
 
@@ -391,7 +391,7 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
 
   while (i < n) {
     if ((res = fscanf(fp, " resume %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): Unexpected error, bug", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): Unexpected error, bug", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -401,13 +401,13 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   }
 
   if (d != t->sp.N) {
-    FATAL("cmaes_resume_distribution(): Dimension numbers do not match", 0, 0, 0);
+    FATAL("cmaes_resume_distribution(): Dimension numbers do not match", nullptr, nullptr, nullptr);
   }
 
   /* find next "xmean" entry */
   while (1) {
     if ((res = fscanf(fp, " xmean %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): 'xmean' not found", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): 'xmean' not found", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -425,13 +425,13 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   }
 
   if (res != t->sp.N) {
-    FATAL("cmaes_resume_distribution(): xmean: dimensions differ", 0, 0, 0);
+    FATAL("cmaes_resume_distribution(): xmean: dimensions differ", nullptr, nullptr, nullptr);
   }
 
   /* find next "path for sigma" entry */
   while (1) {
     if ((res = fscanf(fp, " path for sigma %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): 'path for sigma' not found", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): 'path for sigma' not found", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -449,13 +449,13 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   }
 
   if (res != t->sp.N) {
-    FATAL("cmaes_resume_distribution(): ps: dimensions differ", 0, 0, 0);
+    FATAL("cmaes_resume_distribution(): ps: dimensions differ", nullptr, nullptr, nullptr);
   }
 
   /* find next "path for C" entry */
   while (1) {
     if ((res = fscanf(fp, " path for C %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): 'path for C' not found", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): 'path for C' not found", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -473,13 +473,13 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   }
 
   if (res != t->sp.N) {
-    FATAL("cmaes_resume_distribution(): pc: dimensions differ", 0, 0, 0);
+    FATAL("cmaes_resume_distribution(): pc: dimensions differ", nullptr, nullptr, nullptr);
   }
 
   /* find next "sigma" entry */
   while (1) {
     if ((res = fscanf(fp, " sigma %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): 'sigma' not found", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): 'sigma' not found", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -493,7 +493,7 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   /* find next entry "covariance matrix" */
   while (1) {
     if ((res = fscanf(fp, " covariance matrix %lg", &d)) == EOF) {
-      FATAL("cmaes_resume_distribution(): 'covariance matrix' not found", 0, 0, 0);
+      FATAL("cmaes_resume_distribution(): 'covariance matrix' not found", nullptr, nullptr, nullptr);
     } else if (res == 0) {
       ret = fscanf(fp, " %*s");
       if (ret == EOF) printf("fscanf error\n");
@@ -513,7 +513,7 @@ void cmaes_resume_distribution(cmaes_t *t, char *filename) {
   }
 
   if (res != (t->sp.N * t->sp.N + t->sp.N) / 2) {
-    FATAL("cmaes_resume_distribution(): C: dimensions differ", 0, 0, 0);
+    FATAL("cmaes_resume_distribution(): C: dimensions differ", nullptr, nullptr, nullptr);
   }
 
   t->flgIniphase = 0;
@@ -570,10 +570,10 @@ double const *cmaes_SetMean(cmaes_t *t, const double *xmean) {
 
   if (t->state >= 1 && t->state < 3) {
     FATAL("cmaes_SetMean: mean cannot be set inbetween the calls of ",
-          "SamplePopulation and UpdateDistribution", 0, 0);
+          "SamplePopulation and UpdateDistribution", nullptr, nullptr);
   }
 
-  if (xmean != 0 && xmean != t->rgxmean) {
+  if (xmean != nullptr && xmean != t->rgxmean) {
     for (i = 0; i < N; ++i) {
       t->rgxmean[i] = xmean[i];
     }
@@ -649,8 +649,8 @@ double const *cmaes_ReSampleSingle_old(cmaes_t *t, double *rgx) {
   int i, j, N = t->sp.N;
   double sum;
 
-  if (rgx == 0) {
-    FATAL("cmaes_ReSampleSingle(): Missing input double *x", 0, 0, 0);
+  if (rgx == nullptr) {
+    FATAL("cmaes_ReSampleSingle(): Missing input double *x", nullptr, nullptr, nullptr);
   }
 
   for (i = 0; i < N; ++i) {
@@ -678,8 +678,8 @@ double *const *cmaes_ReSampleSingle(cmaes_t *t, int iindex) {
   static char s[99];
 
   if (iindex < 0 || iindex >= t->sp.lambda) {
-    sprintf(s, "index==%d must be between 0 and %d", iindex, t->sp.lambda);
-    FATAL("cmaes_ReSampleSingle(): Population member ", s, 0, 0);
+    snprintf(s, sizeof(s), "index==%d must be between 0 and %d", iindex, t->sp.lambda);
+    FATAL("cmaes_ReSampleSingle(): Population member ", s, nullptr, nullptr);
   }
 
   rgx = t->rgrgx[iindex];
@@ -706,7 +706,7 @@ double *cmaes_SampleSingleInto(cmaes_t *t, double *rgx) {
   int i, j, N = t->sp.N;
   double sum;
 
-  if (rgx == 0) {
+  if (rgx == nullptr) {
     rgx = new_double(N);
   }
 
@@ -732,12 +732,12 @@ double *cmaes_PerturbSolutionInto(cmaes_t *t, double *rgx, double const *xmean, 
   int i, j, N = t->sp.N;
   double sum;
 
-  if (rgx == 0) {
+  if (rgx == nullptr) {
     rgx = new_double(N);
   }
 
-  if (xmean == 0) {
-    FATAL("cmaes_PerturbSolutionInto(): xmean was not given", 0, 0, 0);
+  if (xmean == nullptr) {
+    FATAL("cmaes_PerturbSolutionInto(): xmean was not given", nullptr, nullptr, nullptr);
   }
 
   for (i = 0; i < N; ++i) {
@@ -766,17 +766,17 @@ double *cmaes_UpdateDistribution(cmaes_t *t, const double *rgFunVal) {
 
   if (t->state == 3) {
     FATAL("cmaes_UpdateDistribution(): You need to call \n",
-          "SamplePopulation() before update can take place.", 0, 0);
+          "SamplePopulation() before update can take place.", nullptr, nullptr);
   }
 
-  if (rgFunVal == 0) {
-    FATAL("cmaes_UpdateDistribution(): ", "Fitness function value array input is missing.", 0, 0);
+  if (rgFunVal == nullptr) {
+    FATAL("cmaes_UpdateDistribution(): ", "Fitness function value array input is missing.", nullptr, nullptr);
   }
 
   if (t->state == 1) { /* function values are delivered here */
     t->countevals += t->sp.lambda;
   } else {
-    ERRORMESSAGE("cmaes_UpdateDistribution(): unexpected state", 0, 0, 0);
+    ERRORMESSAGE("cmaes_UpdateDistribution(): unexpected state", nullptr, nullptr, nullptr);
   }
 
   /* assign function values */
@@ -791,7 +791,7 @@ double *cmaes_UpdateDistribution(cmaes_t *t, const double *rgFunVal) {
   if (t->rgFuncValue[t->index[0]] == t->rgFuncValue[t->index[(int)t->sp.lambda / 2]]) {
     t->sigma *= exp(0.2 + t->sp.cs / t->sp.damps);
     ERRORMESSAGE("Warning: sigma increased due to equal function values\n",
-                 "   Reconsider the formulation of the objective function", 0, 0);
+                 "   Reconsider the formulation of the objective function", nullptr, nullptr);
   }
 
   /* update function value history */
@@ -986,7 +986,7 @@ static void TestMinStdDevs(cmaes_t *t) {
   /* increases sigma */
   int i, N = t->sp.N;
 
-  if (t->sp.rgDiffMinChange == 0) {
+  if (t->sp.rgDiffMinChange == nullptr) {
     return;
   }
 
@@ -1009,13 +1009,13 @@ void cmaes_WriteToFileAW(cmaes_t *t, const char *key, const char *name, const ch
   const char *s = "tmpcmaes.dat";
   FILE *fp;
 
-  if (name == 0) {
+  if (name == nullptr) {
     name = s;
   }
 
   fp = fopen(name, appendwrite);
 
-  if (fp == 0) {
+  if (fp == nullptr) {
     ERRORMESSAGE("cmaes_WriteToFile(): could not open '", name, "' with flag ", appendwrite);
     return;
   }
@@ -1043,7 +1043,7 @@ void cmaes_WriteToFilePtr(cmaes_t *t, const char *key, FILE *fp) {
   char const *keyend;
   const char *s = "few";
 
-  if (key == 0) {
+  if (key == nullptr) {
     key = s;
   }
 
@@ -1428,7 +1428,7 @@ void cmaes_WriteToFilePtr(cmaes_t *t, const char *key, FILE *fp) {
     }
 
     if (strncmp(key, "all", 3) == 0) {
-      time_t ti = time(0);
+      time_t ti = time(nullptr);
       fprintf(fp, "\n# --------- %s\n", asctime(localtime(&ti)));
       fprintf(fp, " N %d\n", N);
       fprintf(fp, " seed %d\n", t->sp.seed);
@@ -1510,7 +1510,7 @@ void cmaes_WriteToFilePtr(cmaes_t *t, const char *key, FILE *fp) {
     if (*key == '\0') {
       break;
     } else if (*key != '+') { /* last key was not recognized */
-      ERRORMESSAGE("cmaes_t:WriteToFilePtr(): unrecognized key '", key, "'", 0);
+      ERRORMESSAGE("cmaes_t:WriteToFilePtr(): unrecognized key '", key, "'", nullptr);
 
       while (*key != '+' && *key != '\0' && key < keyend) {
         ++key;
@@ -1523,7 +1523,7 @@ void cmaes_WriteToFilePtr(cmaes_t *t, const char *key, FILE *fp) {
   } /* while key < keyend */
 
   if (key > keyend) {
-    FATAL("cmaes_t:WriteToFilePtr(): BUG regarding key sequence", 0, 0, 0);
+    FATAL("cmaes_t:WriteToFilePtr(): BUG regarding key sequence", nullptr, nullptr, nullptr);
   }
 } /* WriteToFilePtr */
 
@@ -1567,7 +1567,7 @@ double cmaes_Get(cmaes_t *t, char const *s) {
     return t->sigma;
   }
 
-  FATAL("cmaes_Get(cmaes_t, char const * s): No match found for s='", s, "'", 0);
+  FATAL("cmaes_Get(cmaes_t, char const * s): No match found for s='", s, "'", nullptr);
   return 0;
 } /* cmaes_Get() */
 
@@ -1576,7 +1576,7 @@ double *cmaes_GetInto(cmaes_t *t, char const *s, double *res) {
   int i, N = t->sp.N;
   double const *res0 = cmaes_GetPtr(t, s);
 
-  if (res == 0) {
+  if (res == nullptr) {
     res = new_double(N);
   }
 
@@ -1588,7 +1588,7 @@ double *cmaes_GetInto(cmaes_t *t, char const *s, double *res) {
 }
 
 /* --------------------------------------------------------- */
-double *cmaes_GetNew(cmaes_t *t, char const *s) { return cmaes_GetInto(t, s, 0); }
+double *cmaes_GetNew(cmaes_t *t, char const *s) { return cmaes_GetInto(t, s, nullptr); }
 
 /* --------------------------------------------------------- */
 const double *cmaes_GetPtr(cmaes_t *t, char const *s) {
@@ -1627,7 +1627,7 @@ const double *cmaes_GetPtr(cmaes_t *t, char const *s) {
     return t->rgxmean;
   }
 
-  return 0;
+  return nullptr;
 }
 
 /* --------------------------------------------------------- */
@@ -1648,7 +1648,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
   /* function value reached */
   if ((t->gen > 1 || t->state > 1) && t->sp.stStopFitness.flg &&
       t->rgFuncValue[t->index[0]] <= t->sp.stStopFitness.val) {
-    cp += sprintf(cp, "Fitness: function value %7.2e <= stopFitness (%7.2e)\n",
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "Fitness: function value %7.2e <= stopFitness (%7.2e)\n",
                   t->rgFuncValue[t->index[0]], t->sp.stStopFitness.val);
   }
 
@@ -1659,7 +1659,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
                  rgdouMin(t->rgFuncValue, t->sp.lambda));
 
   if (t->gen > 0 && range <= t->sp.stopTolFun) {
-    cp += sprintf(cp, "TolFun: function value differences %7.2e < stopTolFun=%7.2e\n", range,
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "TolFun: function value differences %7.2e < stopTolFun=%7.2e\n", range,
                   t->sp.stopTolFun);
   }
 
@@ -1668,7 +1668,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
     range = rgdouMax(t->arFuncValueHist, (int)*(t->arFuncValueHist - 1)) -
             rgdouMin(t->arFuncValueHist, (int)*(t->arFuncValueHist - 1));
     if (range <= t->sp.stopTolFunHist) {
-      cp += sprintf(cp, "TolFunHist: history of function value changes %7.2e stopTolFunHist=%7.2e",
+      cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "TolFunHist: history of function value changes %7.2e stopTolFunHist=%7.2e",
                     range, t->sp.stopTolFunHist);
     }
   }
@@ -1680,7 +1680,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
   }
 
   if (cTemp == 2 * N) {
-    cp += sprintf(cp, "TolX: object variable changes below %7.2e \n", t->sp.stopTolX);
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "TolX: object variable changes below %7.2e \n", t->sp.stopTolX);
   }
 
   /* TolUpX */
@@ -1691,7 +1691,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
   }
 
   if (i < N) {
-    cp += sprintf(cp,
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp),
                   "TolUpX: standard deviation increased by more than %7.2e, larger initial "
                   "standard deviation recommended \n",
                   t->sp.stopTolUpXFactor);
@@ -1699,7 +1699,7 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
 
   /* Condition of C greater than dMaxSignifKond */
   if (t->maxEW >= t->minEW * t->dMaxSignifKond) {
-    cp += sprintf(cp,
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp),
                   "ConditionNumber: maximal condition number %7.2e reached. "
                   "maxEW=%7.2e,minEW=%7.2e,maxdiagC=%7.2e,mindiagC=%7.2e\n",
                   t->dMaxSignifKond, t->maxEW, t->minEW, t->maxdiagC, t->mindiagC);
@@ -1718,8 +1718,8 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
       }
 
       if (iKoo == N) {
-        cp += sprintf(
-          cp, "NoEffectAxis: standard deviation 0.1*%7.2e in principal axis %d without effect\n",
+        cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp),
+          "NoEffectAxis: standard deviation 0.1*%7.2e in principal axis %d without effect\n",
           fac / 0.1, iAchse);
         break;
       } /* if (iKoo == N) */
@@ -1729,8 +1729,8 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
   /* Component of xmean is not changed anymore */
   for (iKoo = 0; iKoo < N; ++iKoo) {
     if (t->rgxmean[iKoo] == t->rgxmean[iKoo] + 0.2 * t->sigma * sqrt(t->C[iKoo][iKoo])) {
-      cp += sprintf(
-        cp, "NoEffectCoordinate: standard deviation 0.2*%7.2e in coordinate %d without effect\n",
+      cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp),
+        "NoEffectCoordinate: standard deviation 0.2*%7.2e in coordinate %d without effect\n",
         t->sigma * sqrt(t->C[iKoo][iKoo]), iKoo);
       break;
     }
@@ -1739,28 +1739,28 @@ const char *cmaes_TestForTermination(cmaes_t *t) {
   /* if (flg) t->sigma *= exp(0.05+t->sp.cs/t->sp.damps); */
 
   if (t->countevals >= t->sp.stopMaxFunEvals) {
-    cp += sprintf(cp, "MaxFunEvals: conducted function evaluations %.0f >= %g\n", t->countevals,
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "MaxFunEvals: conducted function evaluations %.0f >= %g\n", t->countevals,
                   t->sp.stopMaxFunEvals);
   }
 
   if (t->gen >= t->sp.stopMaxIter) {
-    cp += sprintf(cp, "MaxIter: number of iterations %.0f >= %g\n", t->gen, t->sp.stopMaxIter);
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "MaxIter: number of iterations %.0f >= %g\n", t->gen, t->sp.stopMaxIter);
   }
 
   if (t->flgStop) {
-    cp += sprintf(cp, "Manual: stop signal read\n");
+    cp += snprintf(cp, (int)(sTestOutString + sizeof(sTestOutString) - cp), "Manual: stop signal read\n");
   }
 
 
   if (cp - sTestOutString > 320) {
-    ERRORMESSAGE("Bug in cmaes_t:Test(): sTestOutString too short", 0, 0, 0);
+    ERRORMESSAGE("Bug in cmaes_t:Test(): sTestOutString too short", nullptr, nullptr, nullptr);
   }
 
   if (cp != sTestOutString) {
     return sTestOutString;
   }
 
-  return 0;
+  return nullptr;
 } /* cmaes_Test() */
 
 /* --------------------------------------------------------- */
@@ -1768,12 +1768,12 @@ void cmaes_ReadSignals(cmaes_t *t, char const *filename) {
   const char *s = "signals.par";
   FILE *fp;
 
-  if (filename == 0) {
+  if (filename == nullptr) {
     filename = s;
   }
 
   fp = fopen(filename, "r");
-  if (fp == 0) {
+  if (fp == nullptr) {
     return;
   }
 
@@ -1795,11 +1795,11 @@ void cmaes_ReadFromFilePtr(cmaes_t *t, FILE *fp) {
   static long maxdiffitertowrite; /* to prevent long gaps at the beginning */
   int flgprinted = 0;
   int flgwritten = 0;
-  double deltaprinttime = time(0) - t->printtime; /* using clock instead might not be a good */
-  double deltawritetime = time(0) - t->writetime; /* idea as disc time is not CPU time? */
+  double deltaprinttime = time(nullptr) - t->printtime; /* using clock instead might not be a good */
+  double deltawritetime = time(nullptr) - t->writetime; /* idea as disc time is not CPU time? */
   double deltaprinttimefirst =
-    t->firstprinttime ? time(0) - t->firstprinttime : 0; /* time is in seconds!? */
-  double deltawritetimefirst = t->firstwritetime ? time(0) - t->firstwritetime : 0;
+    t->firstprinttime ? time(nullptr) - t->firstprinttime : 0; /* time is in seconds!? */
+  double deltawritetimefirst = t->firstwritetime ? time(nullptr) - t->firstwritetime : 0;
 
   if (countiterlastwritten > t->gen) { /* probably restarted */
     maxdiffitertowrite = 0;
@@ -1816,11 +1816,11 @@ void cmaes_ReadFromFilePtr(cmaes_t *t, FILE *fp) {
   strcpy(sin2, "tmpcmaes.dat");
 
   if (cmaes_TestForTermination(t)) {
-    deltaprinttime = time(0); /* forces printing */
-    deltawritetime = time(0);
+    deltaprinttime = time(nullptr); /* forces printing */
+    deltawritetime = time(nullptr);
   }
 
-  while (fgets(s, sizeof(s), fp) != 0) {
+  while (fgets(s, sizeof(s), fp) != nullptr) {
     if (s[0] == '#' || s[0] == '%') { /* skip comments  */
       continue;
     }
@@ -1937,19 +1937,19 @@ void cmaes_ReadFromFilePtr(cmaes_t *t, FILE *fp) {
   }            /* while not EOF of signals.par */
 
   if (t->writetime == 0) {
-    t->firstwritetime = time(0);
+    t->firstwritetime = time(nullptr);
   }
 
   if (t->printtime == 0) {
-    t->firstprinttime = time(0);
+    t->firstprinttime = time(nullptr);
   }
 
   if (flgprinted) {
-    t->printtime = time(0);
+    t->printtime = time(nullptr);
   }
 
   if (flgwritten) {
-    t->writetime = time(0);
+    t->writetime = time(nullptr);
     if (t->gen - countiterlastwritten > maxdiffitertowrite) {
       ++maxdiffitertowrite; /* smooth prolongation of writing gaps/intervals */
     }
@@ -1987,15 +1987,15 @@ static int Check_Eigen(int N, double **C, double *diag, double **Q) {
       /* check here, is the normalization the right one? */
       if (fabs(cc - C[i > j ? i : j][i > j ? j : i]) / sqrt(C[i][i] * C[j][j]) > 1e-10 &&
           fabs(cc - C[i > j ? i : j][i > j ? j : i]) > 3e-14) {
-        sprintf(s, "%d %d: %.17e %.17e, %e", i, j, cc, C[i > j ? i : j][i > j ? j : i],
+        snprintf(s, sizeof(s), "%d %d: %.17e %.17e, %e", i, j, cc, C[i > j ? i : j][i > j ? j : i],
                 cc - C[i > j ? i : j][i > j ? j : i]);
-        ERRORMESSAGE("cmaes_t:Eigen(): imprecise result detected ", s, 0, 0);
+        ERRORMESSAGE("cmaes_t:Eigen(): imprecise result detected ", s, nullptr, nullptr);
         ++res;
       }
 
       if (fabs(dd - (i == j)) > 1e-10) {
-        sprintf(s, "%d %d %.17e ", i, j, dd);
-        ERRORMESSAGE("cmaes_t:Eigen(): imprecise result detected (Q not orthog.)", s, 0, 0);
+        snprintf(s, sizeof(s), "%d %d %.17e ", i, j, dd);
+        ERRORMESSAGE("cmaes_t:Eigen(): imprecise result detected (Q not orthog.)", s, nullptr, nullptr);
         ++res;
       }
     }
@@ -2089,8 +2089,8 @@ static void Eigen(int N, double **C, double *diag, double **Q, double *rgtmp) {
    */
   int i, j;
 
-  if (rgtmp == 0) { /* was OK in former versions */
-    FATAL("cmaes_t:Eigen(): input parameter double *rgtmp must be non-0", 0, 0, 0);
+  if (rgtmp == nullptr) { /* was OK in former versions */
+    FATAL("cmaes_t:Eigen(): input parameter double *rgtmp must be non-nullptr", nullptr, nullptr, nullptr);
   }
 
   /* copy C to Q */
@@ -2475,7 +2475,7 @@ void timings_start(timings_t *t) {
   t->lasttictoctime = 0;
   t->istic = 0;
   t->lastclock = clock( );
-  t->lasttime = time(0);
+  t->lasttime = time(nullptr);
   t->lastdiff = 0;
   t->tictoczwischensumme = 0;
   t->isstarted = 1;
@@ -2490,11 +2490,11 @@ double timings_update(timings_t *t) {
   time_t lt = t->lasttime;   /* measure time in s */
 
   if (t->isstarted != 1) {
-    FATAL("timings_started() must be called before using timings... functions", 0, 0, 0);
+    FATAL("timings_started() must be called before using timings... functions", nullptr, nullptr, nullptr);
   }
 
   t->lastclock = clock( ); /* measures at most 2147 seconds, where 1s = 1e6 CLOCKS_PER_SEC */
-  t->lasttime = time(0);
+  t->lasttime = time(nullptr);
 
   diffc = (double)(t->lastclock - lc) / CLOCKS_PER_SEC; /* is presumably in [-21??, 21??] */
   difft = difftime(t->lasttime, lt);                    /* is presumably an integer */
@@ -2507,7 +2507,7 @@ double timings_update(timings_t *t) {
   }
 
   if (t->lastdiff < 0) {
-    FATAL("BUG in time measurement", 0, 0, 0);
+    FATAL("BUG in time measurement", nullptr, nullptr, nullptr);
   }
 
   t->totaltime += t->lastdiff;
@@ -2522,7 +2522,7 @@ double timings_update(timings_t *t) {
 
 void timings_tic(timings_t *t) {
   if (t->istic) { /* message not necessary ? */
-    ERRORMESSAGE("Warning: timings_tic called twice without toc", 0, 0, 0);
+    ERRORMESSAGE("Warning: timings_tic called twice without toc", nullptr, nullptr, nullptr);
     return;
   }
 
@@ -2532,7 +2532,7 @@ void timings_tic(timings_t *t) {
 
 double timings_toc(timings_t *t) {
   if (!t->istic) {
-    ERRORMESSAGE("Warning: timings_toc called without tic", 0, 0, 0);
+    ERRORMESSAGE("Warning: timings_toc called without tic", nullptr, nullptr, nullptr);
     return -1;
   }
 
@@ -2565,14 +2565,14 @@ long random_init(random_t *t, long unsigned inseed) {
   t->rgrand = (long *)new_void(32, sizeof(long));
   if (inseed < 1) {
     while ((long)(cloc - clock( )) == 0) {
-      ; /* TODO: remove this for time critical applications? */
+ /* TODO: remove this for time critical applications? */
     }
 
-    inseed = (long unsigned)abs((long)(100L * time(0) + clock( )));
+    inseed = (long unsigned)abs((long)(100L * time(nullptr) + clock( )));
   }
 
   return random_Start(t, inseed);
-  ;
+
 }
 
 void random_exit(random_t *t) { free(t->rgrand); }
@@ -2723,11 +2723,11 @@ void readpara_init(readpara_t *t, int dim, int inseed, const double *inxstart,
 
   t->N = dim;
   t->seed = (unsigned)inseed;
-  t->xstart = 0;
-  t->typicalX = 0;
+  t->xstart = nullptr;
+  t->typicalX = nullptr;
   t->typicalXcase = 0;
-  t->rgInitialStds = 0;
-  t->rgDiffMinChange = 0;
+  t->rgInitialStds = nullptr;
+  t->rgDiffMinChange = nullptr;
   t->stopMaxFunEvals = -1;
   t->stopMaxIter = -1;
   t->facmaxeval = 1;
@@ -2740,7 +2740,7 @@ void readpara_init(readpara_t *t, int dim, int inseed, const double *inxstart,
   t->lambda = lambda;
   t->mu = -1;
   t->mucov = -1;
-  t->weights = 0;
+  t->weights = nullptr;
   strcpy(t->weigkey, "log");
 
   t->cs = -1;
@@ -2767,25 +2767,25 @@ void readpara_init(readpara_t *t, int dim, int inseed, const double *inxstart,
   N = t->N;
   if (N == 0) {
     FATAL("readpara_readpara_t(): problem dimension N undefined.\n",
-          "  (no default value available).", 0, 0);
+          "  (no default value available).", nullptr, nullptr);
   }
 
-  if (t->xstart == 0 && inxstart == 0 && t->typicalX == 0) {
+  if (t->xstart == nullptr && inxstart == nullptr && t->typicalX == nullptr) {
     ERRORMESSAGE("Warning: initialX undefined. typicalX = 0.5...0.5 used.", "", "", "");
     printf("\nWarning: initialX undefined. typicalX = 0.5...0.5 used.\n");
   }
 
-  if (t->rgInitialStds == 0 && inrgsigma == 0) {
+  if (t->rgInitialStds == nullptr && inrgsigma == nullptr) {
     /* FATAL("initialStandardDeviations undefined","","",""); */
     ERRORMESSAGE("Warning: initialStandardDeviations undefined. 0.3...0.3 used.", "", "", "");
     printf("\nWarning: initialStandardDeviations. 0.3...0.3 used.\n");
   }
 
-  if (t->xstart == 0) {
+  if (t->xstart == nullptr) {
     t->xstart = new_double(N);
 
     /* put inxstart into xstart */
-    if (inxstart != 0) {
+    if (inxstart != nullptr) {
       for (i = 0; i < N; ++i) {
         t->xstart[i] = inxstart[i];
       }
@@ -2795,16 +2795,16 @@ void readpara_init(readpara_t *t, int dim, int inseed, const double *inxstart,
       t->typicalXcase = 1;
 
       for (i = 0; i < N; ++i) {
-        t->xstart[i] = (t->typicalX == 0) ? 0.5 : t->typicalX[i];
+        t->xstart[i] = (t->typicalX == nullptr) ? 0.5 : t->typicalX[i];
       }
     }
   } /* xstart == 0 */
 
-  if (t->rgInitialStds == 0) {
+  if (t->rgInitialStds == nullptr) {
     t->rgInitialStds = new_double(N);
 
     for (i = 0; i < N; ++i) {
-      t->rgInitialStds[i] = (inrgsigma == 0) ? 0.3 : inrgsigma[i];
+      t->rgInitialStds[i] = (inrgsigma == nullptr) ? 0.3 : inrgsigma[i];
     }
   }
 
@@ -2817,23 +2817,23 @@ void readpara_init(readpara_t *t, int dim, int inseed, const double *inxstart,
 /* --------------------------------------------------------- */
 /* --------------------------------------------------------- */
 void readpara_exit(readpara_t *t) {
-  if (t->xstart != 0) { /* not really necessary */
+  if (t->xstart != nullptr) { /* not really necessary */
     free(t->xstart);
   }
 
-  if (t->typicalX != 0) {
+  if (t->typicalX != nullptr) {
     free(t->typicalX);
   }
 
-  if (t->rgInitialStds != 0) {
+  if (t->rgInitialStds != nullptr) {
     free(t->rgInitialStds);
   }
 
-  if (t->rgDiffMinChange != 0) {
+  if (t->rgDiffMinChange != nullptr) {
     free(t->rgDiffMinChange);
   }
 
-  if (t->weights != 0) {
+  if (t->weights != nullptr) {
     free(t->weights);
   }
 
@@ -2853,20 +2853,20 @@ void readpara_ReadFromFile(readpara_t *t, const char *filename) {
   int size;
   FILE *fp;
 
-  if (filename == 0) {
+  if (filename == nullptr) {
     filename = ss;
   }
 
   fp = fopen(filename, "r");
-  if (fp == 0) {
-    ERRORMESSAGE("cmaes_ReadFromFile(): could not open '", filename, "'", 0);
+  if (fp == nullptr) {
+    ERRORMESSAGE("cmaes_ReadFromFile(): could not open '", filename, "'", nullptr);
     return;
   }
 
   for (ipara = 0; ipara < t->n1para; ++ipara) {
     rewind(fp);
 
-    while (fgets(s, sizeof(s), fp) != 0) { /* skip comments  */
+    while (fgets(s, sizeof(s), fp) != nullptr) { /* skip comments  */
       if (s[0] == '#' || s[0] == '%') {
         continue;
       }
@@ -2882,13 +2882,13 @@ void readpara_ReadFromFile(readpara_t *t, const char *filename) {
   } /* for */
 
   if (t->N <= 0) {
-    FATAL("readpara_ReadFromFile(): No valid dimension N", 0, 0, 0);
+    FATAL("readpara_ReadFromFile(): No valid dimension N", nullptr, nullptr, nullptr);
   }
 
   for (ipara = 0; ipara < t->n2para; ++ipara) {
     rewind(fp);
 
-    while (fgets(s, sizeof(s), fp) != 0) { /* read one line */
+    while (fgets(s, sizeof(s), fp) != nullptr) { /* read one line */
       /* skip comments  */
       if (s[0] == '#' || s[0] == '%') {
         continue;
@@ -2905,7 +2905,7 @@ void readpara_ReadFromFile(readpara_t *t, const char *filename) {
           }
 
           if (i < size && i < t->N) {
-            ERRORMESSAGE("readpara_ReadFromFile ", filename, ": ", 0);
+            ERRORMESSAGE("readpara_ReadFromFile ", filename, ": ", nullptr);
             FATAL("'", t->rgskeyar[ipara], "' not enough values found.\n",
                   "   Remove all comments between numbers.");
           }
@@ -2927,11 +2927,11 @@ void readpara_ReadFromFile(readpara_t *t, const char *filename) {
 void readpara_WriteToFile(readpara_t *t, const char *filenamedest, const char *filenamesource) {
   int ipara, i;
   size_t len;
-  time_t ti = time(0);
+  time_t ti = time(nullptr);
   FILE *fp = fopen(filenamedest, "a");
 
-  if (fp == 0) {
-    ERRORMESSAGE("cmaes_WriteToFile(): could not open '", filenamedest, "'", 0);
+  if (fp == nullptr) {
+    ERRORMESSAGE("cmaes_WriteToFile(): could not open '", filenamedest, "'", nullptr);
     return;
   }
 
@@ -2943,7 +2943,7 @@ void readpara_WriteToFile(readpara_t *t, const char *filenamedest, const char *f
   }
 
   for (ipara = 0; ipara < t->n2para; ++ipara) {
-    if (*t->rgp2adr[ipara] == 0) {
+    if (*t->rgp2adr[ipara] == nullptr) {
       continue;
     }
 
@@ -2995,10 +2995,10 @@ void readpara_SupplementDefaults(readpara_t *t) {
 
   if (t->seed < 1) {
     while ((int)(cloc - clock( )) == 0) {
-      ; /* TODO: remove this for time critical applications!? */
+ /* TODO: remove this for time critical applications!? */
     }
 
-    t->seed = (unsigned int)abs((long)(100L * time(0) + clock( )));
+    t->seed = (unsigned int)abs((long)(100L * time(nullptr) + clock( )));
   }
 
   if (t->stStopFitness.flg == -1) {
@@ -3014,7 +3014,7 @@ void readpara_SupplementDefaults(readpara_t *t) {
     readpara_SetWeights(t, t->weigkey);
   }
 
-  if (t->weights == 0) {
+  if (t->weights == nullptr) {
     readpara_SetWeights(t, t->weigkey);
   }
 
@@ -3086,7 +3086,7 @@ void readpara_SetWeights(readpara_t *t, const char *mode) {
   double s1, s2;
   int i;
 
-  if (t->weights != 0) {
+  if (t->weights != nullptr) {
     free(t->weights);
   }
 
@@ -3123,7 +3123,7 @@ void readpara_SetWeights(readpara_t *t, const char *mode) {
 
   if (t->mu < 1 || t->mu > t->lambda ||
       (t->mu == t->lambda && t->weights[0] == t->weights[t->mu - 1])) {
-    FATAL("readpara_SetWeights(): invalid setting of mu or lambda", 0, 0, 0);
+    FATAL("readpara_SetWeights(): invalid setting of mu or lambda", nullptr, nullptr, nullptr);
   }
 } /* readpara_SetWeights() */
 
@@ -3225,9 +3225,9 @@ static void *new_void(int n, size_t size) {
   static char s[70];
   void *p = calloc((unsigned)n, size);
 
-  if (p == 0) {
-    sprintf(s, "new_void(): calloc(%ld,%ld) failed", (long)n, (long)size);
-    FATAL(s, 0, 0, 0);
+  if (p == nullptr) {
+    snprintf(s, sizeof(s), "new_void(): calloc(%ld,%ld) failed", (long)n, (long)size);
+    FATAL(s, nullptr, nullptr, nullptr);
   }
 
   return p;
@@ -3239,9 +3239,9 @@ static double *new_double(int n) {
   static char s[170];
   double *p = (double *)calloc((unsigned)n, sizeof(double));
 
-  if (p == 0) {
-    sprintf(s, "new_double(): calloc(%ld,%ld) failed", (long)n, (long)sizeof(double));
-    FATAL(s, 0, 0, 0);
+  if (p == nullptr) {
+    snprintf(s, sizeof(s), "new_double(): calloc(%ld,%ld) failed", (long)n, (long)sizeof(double));
+    FATAL(s, nullptr, nullptr, nullptr);
   }
 
   return p;
@@ -3252,10 +3252,10 @@ static double *new_double(int n) {
 
 /* ========================================================= */
 void cmaes_FATAL(char const *s1, char const *s2, char const *s3, char const *s4) {
-  time_t t = time(0);
+  time_t t = time(nullptr);
 
   ERRORMESSAGE(s1, s2, s3, s4);
-  ERRORMESSAGE("*** Exiting cmaes_t ***", 0, 0, 0);
+  ERRORMESSAGE("*** Exiting cmaes_t ***", nullptr, nullptr, nullptr);
   printf("\n -- %s %s\n", asctime(localtime(&t)), s2 ? szCat(s1, s2, s3, s4) : s1);
   printf(" *** CMA-ES ABORTED, see errcmaes.err *** \n");
   fflush(stdout);
@@ -3273,7 +3273,7 @@ void ERRORMESSAGE(char const *s1, char const *s2, char const *s3, char const *s4
   /*  static char szBuf[700];  desirable but needs additional input argument
    *  sprintf(szBuf, "%f:%f", gen, gen*lambda);
    */
-  time_t t = time(0);
+  time_t t = time(nullptr);
   FILE *fp = fopen("errcmaes.err", "a");
   if (!fp) {
     printf("\nFATAL ERROR: %s\n", s2 ? szCat(s1, s2, s3, s4) : s1);
@@ -3293,7 +3293,7 @@ char *szCat(const char *sz1, const char *sz2, const char *sz3, const char *sz4) 
   static char szBuf[700];
 
   if (!sz1) {
-    FATAL("szCat() : Invalid Arguments", 0, 0, 0);
+    FATAL("szCat() : Invalid Arguments", nullptr, nullptr, nullptr);
   }
 
   strncpy((char *)szBuf, sz1, (unsigned)intMin((int)strlen(sz1), 698));

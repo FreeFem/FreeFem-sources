@@ -84,7 +84,7 @@ namespace Fem2D {
 	}
 	typedef R1 RdHat;
 	typedef R0 RdHatBord;
-	static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}  
+	static RdHat PBord(const int * nvb,const RdHatBord &)  { return RdHat(*nvb) ;}  
 	
 	//static const int (* const nvface)[3];// = nvfaceSeg ;
 	//static const int (* const nvedge)[2];//  = nvedgeSeg;
@@ -96,7 +96,7 @@ namespace Fem2D {
     class Triangle2: public GenericElement<DataTriangle2>  
   {
   public: 
-      Triangle2() {}; // constructor empty for array
+      Triangle2() {} // constructor empty for array
       
       
       R2 H(int i) const { ASSERTION(i>=0 && i <3);
@@ -116,7 +116,7 @@ namespace Fem2D {
     class BoundaryEdge2: public GenericElement<DataSeg2>  
   {
   public: 
-      BoundaryEdge2() {}; // constructor empty for array
+      BoundaryEdge2() {} // constructor empty for array
       
       
   };
@@ -140,6 +140,11 @@ namespace Fem2D {
 	Mesh2(const Mesh2 &); // pas de construction par copie
 	void operator=(const Mesh2 &);// pas affectation par copy 
     };
+
+  template<> const int (* const GenericElement<DataTriangle2>::nvface)[3];
+  template<> const int (* const GenericElement<DataTriangle2>::nvedge)[2];
+  template<> const int (* const GenericElement<DataTriangle2>::nvadj)[2];
+  template<> const int  GenericElement<DataTriangle2>::nitemdim[4];
     
 }
 

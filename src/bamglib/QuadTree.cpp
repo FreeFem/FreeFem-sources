@@ -130,7 +130,7 @@ namespace bamg {
     Icoor1 iplus(i < MaxISize ? (i < 0 ? 0 : i) : MaxISize - 1);
     Icoor1 jplus(j < MaxISize ? (j < 0 ? 0 : j) : MaxISize - 1);
 
-    Vertex *vn = 0;
+    Vertex *vn = nullptr;
 
     // init for optimisation ---
     b = root;
@@ -143,7 +143,7 @@ namespace bamg {
       Icoor1 hb2 = hb >> 1;
       int k = IJ(iplus, jplus, hb2);    // QuadTreeBox number of size hb2 contening i;j
       QuadTreeBox *b0 = b->b[k];
-      if ((b0 == 0) || (b0->n == 0)) break;    // null box or empty   => break
+      if ((b0 == nullptr) || (b0->n == 0)) break;    // null box or empty   => break
       NbQuadTreeBoxSearch++;
       b = b0;
       i0 += I_IJ(k, hb2);    // i orign of QuadTreeBox
@@ -228,7 +228,7 @@ namespace bamg {
 
     //  Vertex *vn=0;
 
-    if (!root->n) return 0;    // empty tree
+    if (!root->n) return nullptr;    // empty tree
 
     // general case -----
     pb[0] = root;
@@ -280,7 +280,7 @@ namespace bamg {
       hb <<= 1;    // mul by 2
     } while (l--);
 
-    return 0;
+    return nullptr;
   }
 
   void QuadTree::Add(Vertex &w) {
@@ -309,7 +309,7 @@ namespace bamg {
       v4[2] = b->v[2];
       v4[3] = b->v[3];
       b->n = -b->n;                                 // mark is pointer QuadTreeBox
-      b->b[0] = b->b[1] = b->b[2] = b->b[3] = 0;    // set empty QuadTreeBox ptr
+      b->b[0] = b->b[1] = b->b[2] = b->b[3] = nullptr;    // set empty QuadTreeBox ptr
       l >>= 1;                                      // div the size by 2
       for (int k = 0; k < 4; k++)    // for the 4 vertices find the sub QuadTreeBox ij
       {
@@ -341,7 +341,7 @@ namespace bamg {
   }
 
   QuadTree::QuadTree( )
-    : lenStorageQuadTreeBox(100), th(0), NbQuadTreeBox(0), NbVertices(0), NbQuadTreeBoxSearch(0),
+    : lenStorageQuadTreeBox(100), th(nullptr), NbQuadTreeBox(0), NbVertices(0), NbQuadTreeBoxSearch(0),
       NbVerticesSearch(0) {
     sb = new StorageQuadTreeBox(lenStorageQuadTreeBox);
     root = NewQuadTreeBox( );
@@ -350,7 +350,7 @@ namespace bamg {
     len = ll;
     n = nn;
     b = new QuadTreeBox[ll];
-    for (int i = 0; i < ll; i++) b[i].n = 0, b[i].b[0] = b[i].b[1] = b[i].b[2] = b[i].b[3] = 0;
+    for (int i = 0; i < ll; i++) b[i].n = 0, b[i].b[0] = b[i].b[1] = b[i].b[2] = b[i].b[3] = nullptr;
     bc = b;
     be = b + ll;
     assert(b);
@@ -358,7 +358,7 @@ namespace bamg {
 
   QuadTree::~QuadTree( ) {
     delete sb;
-    root = 0;
+    root = nullptr;
   }
 
   ostream &operator<<(ostream &f, const QuadTree &qt) {
@@ -383,7 +383,7 @@ namespace bamg {
     Icoor1 iplus(i < MaxISize ? (i < 0 ? 0 : i) : MaxISize - 1);
     Icoor1 jplus(j < MaxISize ? (j < 0 ? 0 : j) : MaxISize - 1);
 
-    Vertex *vn = 0;
+    Vertex *vn = nullptr;
 
     // init for optimisation ---
     b = root;
@@ -396,7 +396,7 @@ namespace bamg {
       Icoor1 hb2 = hb >> 1;
       int k = IJ(iplus, jplus, hb2);    // QuadTreeBox number of size hb2 contening i;j
       QuadTreeBox *b0 = b->b[k];
-      if ((b0 == 0) || (b0->n == 0)) break;    // null box or empty   => break
+      if ((b0 == nullptr) || (b0->n == 0)) break;    // null box or empty   => break
       NbQuadTreeBoxSearch++;
       b = b0;
       i0 += I_IJ(k, hb2);    // i orign of QuadTreeBox

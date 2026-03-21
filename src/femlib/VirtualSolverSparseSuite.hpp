@@ -121,7 +121,7 @@ public:
     mutable int status;
 
     VirtualSolverUMFPACK(HMat  *AA):A(AA) {}
-    void dosolver(K *x,K*b,int N,int trans) {assert(0);}
+    void dosolver(K *,K*,int,int) {assert(0);}
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverUMFPACK(){}
@@ -147,10 +147,10 @@ public:
     mutable int status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
-    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack )
                         // int strategy=-1,
                         // double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0), verb(ds.verb)
+    :A(&AA),Symbolic(nullptr),Numeric(nullptr),Ai(nullptr),Ap(nullptr),Ax(nullptr),cs(0),cn(0), verb(ds.verb)
     {
          if(verb>2 || verbosity> 9) cout << " build solver UMFPACK double/int " << endl;
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
@@ -228,9 +228,9 @@ public:
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
 
-    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack stack )//int strategy=-1,
+    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack )//int strategy=-1,
                        //  double tol_pivot=-1.,double tol_pivot_sym=-1., long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
+    :A(&AA),Symbolic(nullptr),Numeric(nullptr),Ai(nullptr),Ap(nullptr),Ax(nullptr),cs(0),cn(0),verb(ds.verb)
     {
         if(verb>2 || verbosity> 9) cout << " build solver UMFPACK complex/int " << endl;
 
@@ -251,8 +251,8 @@ public:
          if(verb>2 || verbosity> 9) cout << "dosolver UMFPACK complex/int "<< N << " " << trans << endl;
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
-            double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
-            status= umfpack_zi_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
+            double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=nullptr;
+            status= umfpack_zi_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, nullptr, nullptr) ;
             CheckUmfpackStatus(status);
         }
 
@@ -268,16 +268,16 @@ public:
     void fac_symbolic(){
         A->CSC(Ap,Ai,Ac);
         Ax= (double *) (void *) Ac;
-        Az=0;
+        Az=nullptr;
          if(verb>2 || verbosity> 9) cout << "fac_symbolic UMFPACK C:  nnz= "  << A->nnz << endl;
         if(Symbolic)  umfpack_zi_free_symbolic (&Symbolic) ;
-        status = umfpack_zi_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
+        status = umfpack_zi_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, nullptr, nullptr) ;
         CheckUmfpackStatus(status);
     }
     void fac_numeric(){
         if(Numeric)   umfpack_zi_free_numeric (&Numeric) ;
          if(verb>2 || verbosity> 9) cout << "fac_numeric UMFPACK C:  nnz= "  << A->nnz << endl;
-        status = umfpack_zi_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
+        status = umfpack_zi_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, nullptr, nullptr) ;
         CheckUmfpackStatus(status);
 
     }
@@ -316,8 +316,8 @@ public:
 
     mutable int status;
 
-    VirtualSolverCHOLMOD(HMat  *AA, const Data_Sparse_Solver & ds,Stack stack ):A(AA) {}
-    void dosolver(K *x,K*b,int N,int trans) {assert(0);}
+    VirtualSolverCHOLMOD(HMat  *AA, const Data_Sparse_Solver &,Stack ):A(AA) {}
+    void dosolver(K *,K*,int,int) {assert(0);}
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverCHOLMOD(){}
@@ -353,14 +353,14 @@ public:
         X.nzmax=n*m;
         X.d=n;
         X.x = p;
-        X.z=0;
+        X.z=nullptr;
         X.xtype=CHOLMOD_REAL;
         X.dtype=CHOLMOD_DOUBLE;
     }
 
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack stack )
-      :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack )
+      :HA(&HAA),n(HAA.n),L(nullptr),A(&AA),Ai(nullptr),Ap(nullptr),Ax(nullptr),Ywork(nullptr),Ework(nullptr),cs(0),cn(0),verb(ds.verb)
     {
 
         cholmod_start (&c) ;
@@ -369,11 +369,11 @@ public:
         AA.nrow=n;
         AA.ncol=n;
         AA.nzmax=HA->nnz;
-        AA.p=0;
-        AA.i=0;
-        AA.nz=0;
-        AA.x =0;
-        AA.z=0;
+        AA.p=nullptr;
+        AA.i=nullptr;
+        AA.nz=nullptr;
+        AA.x =nullptr;
+        AA.z=nullptr;
         AA.stype=1;// U
         AA.itype=CHOLMOD_INT;
         AA.xtype=CHOLMOD_REAL;
@@ -461,13 +461,13 @@ public:
         X.nzmax=n*m;
         X.d=n;
         X.x = p;
-        X.z=0;
+        X.z=nullptr;
         X.xtype=xtype;// a complex matrix (ANSI C99 compatible)
         X.dtype=dtype;
     }
 
-    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack stack )
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack )
+    :HA(&HAA),n(HAA.n),L(nullptr),A(&AA),Ai(nullptr),Ap(nullptr),Ax(nullptr),Ywork(nullptr),Ework(nullptr),cs(0),cn(0),verb(ds.verb)
     {
 
         cholmod_start (&c) ;
@@ -476,11 +476,11 @@ public:
         AA.nrow=n;
         AA.ncol=n;
         AA.nzmax=HA->nnz;
-        AA.p=0;
-        AA.i=0;
-        AA.nz=0;
-        AA.x =0;
-        AA.z=0;
+        AA.p=nullptr;
+        AA.i=nullptr;
+        AA.nz=nullptr;
+        AA.x =nullptr;
+        AA.z=nullptr;
         AA.stype=1;// U
         AA.itype=CHOLMOD_INT;
         AA.xtype=xtype;
@@ -490,7 +490,7 @@ public:
 
     }
 
-    void dosolver(K *x,K*b,int N,int trans)
+    void dosolver(K *x,K*b,int N,int)
     {
          if(verb>2 || verbosity> 9) cout << " -- dosolver CHOLMoD Complex "<< endl;
         cholmod_dense XX,*X=&XX,B;
@@ -549,8 +549,8 @@ public:
     mutable long status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
-    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack )
+    :A(&AA),Symbolic(nullptr),Numeric(nullptr),Ai(nullptr),Ap(nullptr),Ax(nullptr),cs(0),cn(0),verb(ds.verb)
     {
         if(verb>2 || verbosity> 9) cout << " -- build solver UMFPACK double/long " << endl;
        for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
@@ -631,8 +631,8 @@ public:
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
 
-    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack stack )
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack )
+    :A(&AA),Symbolic(nullptr),Numeric(nullptr),Ai(nullptr),Ap(nullptr),Ax(nullptr),cs(0),cn(0),verb(ds.verb)
     {
         if(verb>2 || verbosity> 9) cout << " -- build solver UMFPACK complex/long " << endl;
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
@@ -653,8 +653,8 @@ public:
 
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
-            double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
-            status= umfpack_zl_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
+            double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=nullptr;
+            status= umfpack_zl_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, nullptr, nullptr) ;
             CheckUmfpackStatus(status);
             //if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
         }
@@ -671,11 +671,11 @@ public:
     void fac_symbolic(){
         A->CSC(Ap,Ai,Ac);
         Ax= (double *) (void *) Ac;
-        Az=0;
+        Az=nullptr;
         if(verb>2 || verbosity> 9) cout << " fac_symbolic UMFPACK C/long " << endl;
 
         if(Symbolic)  umfpack_zl_free_symbolic (&Symbolic) ;
-        status = umfpack_zl_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
+        status = umfpack_zl_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, nullptr, nullptr) ;
         CheckUmfpackStatus(status);
         //if(status) cout << " Error umpfack umfpack_zl_symbolic  status  " << status << endl;
     }
@@ -683,7 +683,7 @@ public:
         if(Numeric)   umfpack_zl_free_numeric (&Numeric) ;
         if(verb>2 || verbosity> 9) cout << " fac_numeric UMFPACK C/long " << endl;
 
-        status = umfpack_zl_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
+        status = umfpack_zl_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, nullptr, nullptr) ;
         CheckUmfpackStatus(status);//if(status) cout << " Error umpfack umfpack_zl_numeric  status  " << status << endl;
 
     }
@@ -723,14 +723,14 @@ public:
         X.nzmax=n*m;
         X.d=n;
         X.x = p;
-        X.z=0;
+        X.z=nullptr;
         X.xtype=CHOLMOD_REAL;
         X.dtype=CHOLMOD_DOUBLE;
     }
 
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack stack )
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack )
+    :HA(&HAA),n(HAA.n),L(nullptr),A(&AA),Ai(nullptr),Ap(nullptr),Ax(nullptr),Ywork(nullptr),Ework(nullptr),cs(0),cn(0),verb(ds.verb)
     {
 
         cholmod_start (&c) ;
@@ -739,11 +739,11 @@ public:
         AA.nrow=n;
         AA.ncol=n;
         AA.nzmax=HA->nnz;
-        AA.p=0;
-        AA.i=0;
-        AA.nz=0;
-        AA.x =0;
-        AA.z=0;
+        AA.p=nullptr;
+        AA.i=nullptr;
+        AA.nz=nullptr;
+        AA.x =nullptr;
+        AA.z=nullptr;
         AA.stype=1;// U
         AA.itype=CHOLMOD_LONG;
         AA.xtype=CHOLMOD_REAL;
@@ -753,7 +753,7 @@ public:
 
     }
 
-    void dosolver(K *x,K*b,int N,int trans)
+    void dosolver(K *x,K*b,int N,int)
     {
         cholmod_dense XX,*X=&XX,B;
         set_cholmod_dense(*X,x,N);
@@ -828,13 +828,13 @@ public:
         X.nzmax=n*m;
         X.d=n;
         X.x = p;
-        X.z=0;
+        X.z=nullptr;
         X.xtype=xtype;// a complex matrix (ANSI C99 compatible)
         X.dtype=dtype;
     }
 
-    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack stack )
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
+    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack )
+    :HA(&HAA),n(HAA.n),L(nullptr),A(&AA),Ai(nullptr),Ap(nullptr),Ax(nullptr),Ywork(nullptr),Ework(nullptr),cs(0),cn(0),verb(ds.verb)
     {
         cholmod_start (&c) ;
         c.error_handler = &handler_ff_cholmod ;
@@ -842,11 +842,11 @@ public:
         AA.nrow=n;
         AA.ncol=n;
         AA.nzmax=HA->nnz;
-        AA.p=0;
-        AA.i=0;
-        AA.nz=0;
-        AA.x =0;
-        AA.z=0;
+        AA.p=nullptr;
+        AA.i=nullptr;
+        AA.nz=nullptr;
+        AA.x =nullptr;
+        AA.z=nullptr;
         AA.stype=1;// U
         AA.itype=CHOLMOD_LONG;
         AA.xtype=xtype;
@@ -858,7 +858,7 @@ public:
     void fac_init(){
 
     }
-    void dosolver(K *x,K*b,int N,int trans)
+    void dosolver(K *x,K*b,int N,int)
     {
          if(verb>2 || verbosity> 9)  cout << " dosolver CHOLMoD Complex "<< endl;
         cholmod_dense XX,*X=&XX,B;

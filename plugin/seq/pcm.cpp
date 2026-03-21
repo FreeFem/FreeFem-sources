@@ -56,7 +56,7 @@ PCM::PCM(int w, int h) {
   image = new pcm_complex[pixels];
 }
 
-PCM::PCM(const char *filename) : image(0) { Load(filename); }
+PCM::PCM(const char *filename) : image(nullptr) { Load(filename); }
 
 void PCM::CalcMax( ) {
   unsigned long p;
@@ -236,7 +236,7 @@ void PCM::Save(const char *filename) {
   CalcMax( );
 
   char header[100];
-  sprintf(header, "PC\n%d %d\n%f\n", width, height, max);
+  snprintf(header, sizeof(header), "PC\n%d %d\n%f\n", width, height, max);
   output_stream.write(header, strlen(header));
 
   void (*endian_filter)(float *);

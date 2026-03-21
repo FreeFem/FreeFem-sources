@@ -83,7 +83,7 @@ struct DataTet  {
 
 class Triangle3: public GenericElement<DataTriangle3>  {
 public: 
-  Triangle3() {}; // constructor empty for array
+  Triangle3() {} // constructor empty for array
 
   Rd Edge(int i) const {ASSERTION(i>=0 && i <3);
     return Rd(this->at((i+1)%3),this->at((i+2)%3));}// opposite edge vertex i
@@ -105,7 +105,7 @@ public:
 
 class Tet: public GenericElement<DataTet>  {
 public: 
-  Tet() {}; // constructor empty for array
+  Tet() {} // constructor empty for array
 
   
   R3 H(int i) const 
@@ -142,7 +142,7 @@ template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
  
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
-  Mesh3():meshS(0){} 
+  Mesh3():meshS(nullptr){} 
   Mesh3(const string, double ridgeangledetection=8.*atan(1.)/9.);
   Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
   //Mesh3(const string, const long); // Add J. Morice 11/10
@@ -183,6 +183,18 @@ private:
 // for the caracteristic method.
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt);
   int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt,R3 &offset);
+
+  template<> const int (* const GenericElement<DataTriangle3>::nvface)[3];
+  template<> const int (* const GenericElement<DataTriangle3>::nvedge)[2];
+  template<> const int (* const GenericElement<DataTriangle3>::nvadj)[2];
+  template<> const int  GenericElement<DataTriangle3>::nitemdim[4];
+  template<> const int (* const GenericElement<DataTriangle3>::onWhatBorder)[7];
+
+  template<> const int (* const GenericElement<DataTet>::nvface)[3];
+  template<> const int (* const GenericElement<DataTet>::nvedge)[2];
+  template<> const int (* const GenericElement<DataTet>::nvadj)[3];
+  template<> const int  GenericElement<DataTet>::nitemdim[4];
+  template<> const int (* const GenericElement<DataTet>::onWhatBorder)[15];
 
 } 
 #endif

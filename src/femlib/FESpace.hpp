@@ -69,7 +69,7 @@ inline int FindIn(int v,int *a,int n)
   for (int i=0;i<n;i++)
     if( v==a[i]) return i;
   return -1;
-};
+}
 
 
 //  Methode boeuf 
@@ -130,14 +130,14 @@ class ConstructDataFElement {
   int NbOfNode;
   int Nproduit;
   ConstructDataFElement(const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace,*/
-  const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
-  int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);
+  const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=nullptr,
+  int nbdfv=0,const int *ndfv=nullptr,int nbdfe=0,const int *ndfe=nullptr);
   ConstructDataFElement(const ConstructDataFElement *,int k);
   ConstructDataFElement(const FESpace ** l,int k,const  KN<const TypeOfFE *> & TFEs) ;
   void renum(const long *r,int l)  ; 
   ~ConstructDataFElement();
- void Make(const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace*/const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
-   int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);
+ void Make(const Mesh &Th,/*int NbDfOnSommet,int ndfonEdge,int ndfonFace*/const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=nullptr,
+   int nbdfv=0,const int *ndfv=nullptr,int nbdfe=0,const int *ndfe=nullptr);
 private:
     static int *NewCounter() { int * p=new int; *p=0;return p;}// add the build thecounter. 
 };
@@ -199,7 +199,7 @@ class TypeOfFE { public:
  
    const KN<IPJ > & Ph_ijalpha() const {return pij_alpha;} // la struct de la matrice
    const KN<R2> & Pi_h_R2() const { return P_Pi_h;}   // les points
-   virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+   virtual void Pi_h_alpha(const baseFElement &,KN_<double> & v) const
      {  assert(coef_Pi_h_alpha);
         v=KN_<double>(coef_Pi_h_alpha,pij_alpha.N());}
 
@@ -240,7 +240,7 @@ class TypeOfFE { public:
     fromDF(data+4*NbDoF),
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(t.pij_alpha.N()*k),P_Pi_h(t.P_Pi_h),
-    coef_Pi_h_alpha(0),
+    coef_Pi_h_alpha(nullptr),
     Sub_ToFE(nb_sub_fem),
     fromASubFE(data1+0*NbDoF),
       fromASubDF(data1+1*NbDoF),
@@ -285,7 +285,7 @@ class TypeOfFE { public:
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(Makepij_alpha(t,k)),
     P_Pi_h(MakeP_Pi_h(t,k)),
-    coef_Pi_h_alpha(0),
+    coef_Pi_h_alpha(nullptr),
     Sub_ToFE(nb_sub_fem),
     fromASubFE(data1+0*NbDoF),
       fromASubDF(data1+1*NbDoF),
@@ -301,7 +301,7 @@ class TypeOfFE { public:
     throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
 
   TypeOfFE(const int i,const int j,const int k,const int NN,const  int  *   data,int nsub,int nbsubfem,
-    int kPi,int npPi,double * coef_Pi_h_a=0) 
+    int kPi,int npPi,double * coef_Pi_h_a=nullptr) 
    : NbDoF(3*(i+j)+k),
      NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
      NbNodeOnEdge(NbNodebyWhat(data,NbDoF,3)),
@@ -342,7 +342,7 @@ class TypeOfFE { public:
       throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
       
   TypeOfFE(const int nbdf,const int NN,const  int  *   data,int nsub,int nbsubfem,
-    int kPi,int npPi,double * coef_Pi_h_a=0) 
+    int kPi,int npPi,double * coef_Pi_h_a=nullptr) 
    : 
      NbDoF(nbdf),
      NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
@@ -442,7 +442,7 @@ class TypeOfMortar {
   protected:
   const int ndfonVertex, ndfonEdge , N;
   public: 
-    TypeOfMortar (int i,int j): ndfonVertex(i),ndfonEdge(j),N(1){};
+    TypeOfMortar (int i,int j): ndfonVertex(i),ndfonEdge(j),N(1){}
    
   virtual  ~TypeOfMortar(){}
      
@@ -540,7 +540,7 @@ class aSubFMortar { public:
  // int *whatnode[2];
   R (**f)(const FESpace *,const aSubFMortar * ,R); // array of function of mul on aSubMortar 
   R lg1(){throwassert(a<b);return b-a;}  
-  aSubFMortar():DfNumberOFmul(0),Nbmul(0),f(0){}
+  aSubFMortar():DfNumberOFmul(nullptr),Nbmul(0),f(nullptr){}
  
   R2 operator()(const Mesh & Th,R x,int side) const
    {
@@ -671,9 +671,9 @@ extern TypeOfFE & P1ncLagrange;
   FESpace(const Mesh & TTh) 
     :
     Th(TTh),
-    ptrTFE(0),
+    ptrTFE(nullptr),
     TFE(1,0,&P1Lagrange),
-    cdef(0),
+    cdef(nullptr),
     cmesh(TTh),
     N(1),
     Nproduit(1),
@@ -682,10 +682,10 @@ extern TypeOfFE & P1ncLagrange;
     NbOfNodes(TTh.nv),
     nb_sub_fem(TFE[0]->nb_sub_fem),
     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
-    NodesOfElement(0),
-    FirstNodeOfElement(0),
-    FirstDfOfNodeData(0),
-    tom(0),
+    NodesOfElement(nullptr),
+    FirstNodeOfElement(nullptr),
+    FirstDfOfNodeData(nullptr),
+    tom(nullptr),
     MaxNbNodePerElement(3),
     MaxNbDFPerElement(3*Nproduit)
     {    if(!lockOrientation) {
@@ -697,12 +697,12 @@ extern TypeOfFE & P1ncLagrange;
   int FirstDFOfNode(int i) const {return FirstDfOfNodeData ? FirstDfOfNodeData[i] : i*Nproduit;}
   int LastDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1] : (i+1)*Nproduit;}
   int NbDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1]-FirstDfOfNodeData[i] : Nproduit;}
-  int MaximalNbOfNodes() const {return MaxNbNodePerElement;};
-  int MaximalNbOfDF() const {return MaxNbDFPerElement;};
+  int MaximalNbOfNodes() const {return MaxNbNodePerElement;}
+  int MaximalNbOfDF() const {return MaxNbDFPerElement;}
   const int * PtrFirstNodeOfElement(int k) const {
       return NodesOfElement 
                ? NodesOfElement + (FirstNodeOfElement ? FirstNodeOfElement[k] : k*MaxNbNodePerElement)                 
-               : 0;}   
+               : nullptr;}   
                
   int SizeToStoreAllNodeofElement() const {  
        return  FirstNodeOfElement 
@@ -717,10 +717,10 @@ extern TypeOfFE & P1ncLagrange;
       
     FESpace(const FESpace &,int k );
     FESpace(const FESpace **,int k ); 
-    FESpace(const Mesh & TTh,const TypeOfFE **,int k,int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0 );//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
+    FESpace(const Mesh & TTh,const TypeOfFE **,int k,int nbdfv=0,const int *ndfv=nullptr,int nbdfe=0,const int *ndfe=nullptr );//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
  
     FESpace(const Mesh & TTh,const TypeOfFE & ,
-    int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
+    int nbdfv=0,const int *ndfv=nullptr,int nbdfe=0,const int *ndfe=nullptr);//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
     
     FESpace(const Mesh & TTh,const TypeOfFE &,const TypeOfMortar & );//int NbDfOnSommet,int ndfonEdge,int ndfonFace,int NN=1); 
   ~FESpace();    
@@ -733,15 +733,15 @@ extern TypeOfFE & P1ncLagrange;
   int  operator()(int k,int i) const { //  the node i of element k
      return NodesOfElement ?  *(PtrFirstNodeOfElement(k) + i)  : Th(k,i)  ;}
   
-  void Draw(const KN_<R>& U,const KN_<R>& Viso,int j=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
-  void Drawfill(const KN_<R>& U,const KN_<R>& Viso,int j=0,double rapz=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
+  void Draw(const KN_<R>& U,const KN_<R>& Viso,int j=0,float *colors=nullptr,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
+  void Drawfill(const KN_<R>& U,const KN_<R>& Viso,int j=0,double rapz=1,float *colors=nullptr,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
   
   template<class R> 
   KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const   ; 
   template<class R> 
   KN<R>  newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int IV,int & lg,int & nsb) const   ; 
-    void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
-  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
+    void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=nullptr,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
+  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=nullptr,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
   R2 MinMax(const KN_<R>& U,const KN_<R>& V,int j0,int j1,bool bb=true) const ;
   R2 MinMax(const KN_<R>& U,int j0, bool bb=true) const ;
  // void destroy() {RefCounter::destroy();}
@@ -802,7 +802,7 @@ void operator=(  KN_<R> & u,const FElementGlobalToLocal & x)
 inline  int FMortar::NbDoF(int i) const {
    int node = p[i];
    return  Vh.LastDFOfNode(node)-Vh.FirstDFOfNode(node);
-};  // number of DF 
+}  // number of DF 
 inline  int FMortar::NbDoF() const { return tom->NbDoF(Vh.Th,M);}
 //inline  int FMortar::NbOfNodes()const {return }
 inline  int FMortar::NodeOfDF(int i) const { return tom->NodeOfDF(Vh,M,i);}

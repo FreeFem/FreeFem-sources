@@ -424,7 +424,7 @@ namespace bamg {
 
   void Triangles::Write_am_fmt(ostream &f) const {
     Int4 i, j;
-    assert(this && nbt);
+    assert(nbt);
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     f.precision(17);
@@ -448,7 +448,7 @@ namespace bamg {
   void Triangles::Write_am(ostream &ff) const {
     OFortranUnFormattedFile f(ff);
     Int4 i, j;
-    assert(this && nbt);
+    assert(nbt);
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     f.Record( );
@@ -474,7 +474,7 @@ namespace bamg {
   void Triangles::Write_ftq(ostream &f) const {
 
     Int4 i;
-    assert(this && nbt);
+    assert(nbt);
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     f.precision(17);
@@ -509,7 +509,7 @@ namespace bamg {
   }
   void Triangles::Write_msh(ostream &f) const {
     Int4 i;
-    assert(this && nbt);
+    assert(nbt);
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     f.precision(17);
@@ -533,7 +533,7 @@ namespace bamg {
   void Triangles::Write_hdf5(const char *f) const {
 #ifdef HAVE_HDF5
     Int4 i;
-    assert(this && nbt);
+    assert(nbt);
     Int4 *reft = new Int4[nbt];
     Int4 nbInT = ConsRefTriangle(reft);
     float coord[nbv][2];
@@ -574,7 +574,7 @@ namespace bamg {
   //-----------------------------ajout format hdf5-----------------------------//
 
   void Triangles::Write_amdba(ostream &f) const {
-    assert(this && nbt);
+    assert(nbt);
 
     Int4 i, j;
     Int4 *reft = new Int4[nbt];

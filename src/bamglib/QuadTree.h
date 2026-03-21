@@ -55,7 +55,7 @@ namespace bamg {
       QuadTreeBox *b, *bc, *be;
       long len;
       StorageQuadTreeBox *n;    // next StorageQuadTreeBox
-      StorageQuadTreeBox(long, StorageQuadTreeBox * = 0);
+      StorageQuadTreeBox(long, StorageQuadTreeBox * = nullptr);
       ~StorageQuadTreeBox( ) {    // cout <<  "~StorageQuadTreeBox " << this << " n " << n << " b "
                                   // << b << endl;
         if (n) delete n;

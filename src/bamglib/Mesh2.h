@@ -130,7 +130,7 @@ namespace bamg {
   class ErrorMesh : public Error {
    public:
     const Triangles *Th;
-    ErrorMesh(const char *Text, int l, const Triangles *TTh = 0, const char *t2 = "")
+    ErrorMesh(const char *Text, int l, const Triangles *TTh = nullptr, const char *t2 = "")
       : Error(MESH_ERROR, "Meshing error: ", Text, "\n number : ", l, ", ", t2), Th(TTh) {}
   };
 #endif
@@ -140,7 +140,7 @@ namespace bamg {
     Icoor1 dir;
 
    public:
-    Direction( ) : dir(MaxICoor){};    //  no direction set
+    Direction( ) : dir(MaxICoor){}    //  no direction set
     Direction(Icoor1 i, Icoor1 j) {
       Icoor2 n2 = 2 * (Abs(i) + Abs(j));
       Icoor2 r = MaxICoor * (Icoor2)i;
@@ -223,8 +223,8 @@ namespace bamg {
     Triangle *t;    // le triangle
     int a;          // le numero de l arete
 
-    TriangleAdjacent(Triangle *tt, int aa) : t(tt), a(aa & 3){};
-    TriangleAdjacent( ){};
+    TriangleAdjacent(Triangle *tt, int aa) : t(tt), a(aa & 3){}
+    TriangleAdjacent( ){}
 
     operator Triangle *( ) const { return t; }
     operator Triangle &( ) const { return *t; }
@@ -258,15 +258,15 @@ namespace bamg {
     Vertex *v[2];
     Int4 ref;
     GeometricalEdge *on;
-    Vertex &operator[](int i) { return *v[i]; };
-    Vertex *operator( )(int i) { return v[i]; };
+    Vertex &operator[](int i) { return *v[i]; }
+    Vertex *operator( )(int i) { return v[i]; }
 
     void ReNumbering(Vertex *vb, Vertex *ve, Int4 *renu) {
       if (v[0] >= vb && v[0] < ve) v[0] = vb + renu[v[0] - vb];
       if (v[1] >= vb && v[1] < ve) v[1] = vb + renu[v[1] - vb];
     }
 
-    const Vertex &operator[](int i) const { return *v[i]; };
+    const Vertex &operator[](int i) const { return *v[i]; }
     R2 operator( )(double t) const;    // return the point
     //                                on the curve edge a t in [0:1]
     Edge *adj[2];    // the 2 adj edges if on the same curve
@@ -302,7 +302,7 @@ namespace bamg {
       t = v.t;
       vint = v.vint;
     }
-    GeometricalVertex( ) : cas(0), link(this){};
+    GeometricalVertex( ) : cas(0), link(this){}
     GeometricalVertex *The( ) {
       assert(link);
       return link;
@@ -334,9 +334,9 @@ namespace bamg {
 
     // end of data
 
-    GeometricalVertex &operator[](int i) { return *v[i]; };
-    const GeometricalVertex &operator[](int i) const { return *v[i]; };
-    GeometricalVertex *operator( )(int i) { return v[i]; };
+    GeometricalVertex &operator[](int i) { return *v[i]; }
+    const GeometricalVertex &operator[](int i) const { return *v[i]; }
+    GeometricalVertex *operator( )(int i) { return v[i]; }
     // inline void Set(const Geometry &,Int4,Geometry &);
 
     R2 F(Real8 theta) const;                 // parametrization of the curve edge
@@ -374,7 +374,7 @@ namespace bamg {
     Curve *next;                 // next curve equi to this
     bool master;                 // true => of equi curve point on this curve
     inline void Set(const Curve &rec, const Geometry &Th, Geometry &ThNew);
-    Curve( ) : be(0), ee(0), kb(0), ke(0), next(0), master(true) {}
+    Curve( ) : be(nullptr), ee(nullptr), kb(0), ke(0), next(nullptr), master(true) {}
     void Reverse( ) {
       Exchange(be, ee);
       Exchange(kb, ke);
@@ -422,16 +422,16 @@ namespace bamg {
       if (ns[2] >= vb && ns[2] < ve) ns[2] = vb + renu[ns[2] - vb];
     }
 
-    const Vertex &operator[](int i) const { return *ns[i]; };
-    Vertex &operator[](int i) { return *ns[i]; };
+    const Vertex &operator[](int i) const { return *ns[i]; }
+    Vertex &operator[](int i) { return *ns[i]; }
 
-    const Vertex *operator( )(int i) const { return ns[i]; };
-    Vertex *&operator( )(int i) { return ns[i]; };
+    const Vertex *operator( )(int i) const { return ns[i]; }
+    Vertex *&operator( )(int i) { return ns[i]; }
 
     TriangleAdjacent Adj(int i) const    // triangle adjacent + arete
     {
       return TriangleAdjacent(at[i], aa[i] & 3);
-    };
+    }
 
     Triangle *TriangleAdj(int i) const { return at[i & 3]; }    // triangle adjacent + arete
     Int1 NuEdgeTriangleAdj(int i) const {
@@ -564,10 +564,10 @@ namespace bamg {
         MaxNbSeg(m), lSegsI(new SegInterpolation[m]) {
       if (verbosity > 9)
         cout << "      construct ListofIntersectionTriangles" << MaxSize << " " << MaxNbSeg << endl;
-    };
+    }
     ~ListofIntersectionTriangles( ) {
-      if (lIntTria) delete[] lIntTria, lIntTria = 0;
-      if (lSegsI) delete[] lSegsI, lSegsI = 0;
+      if (lIntTria) delete[] lIntTria, lIntTria = nullptr;
+      if (lSegsI) delete[] lSegsI, lSegsI = nullptr;
     }
     void init( ) {
       state = 0;
@@ -646,7 +646,7 @@ namespace bamg {
     inline void Set(const VertexOnGeom &, const Triangles &, Triangles &);
     int OnGeomVertex( ) const { return abscisse < 0; }
     int OnGeomEdge( ) const { return abscisse >= 0; }
-    VertexOnGeom( ) : mv(0), abscisse(0) { gv = 0; }
+    VertexOnGeom( ) : mv(nullptr), abscisse(0) { gv = nullptr; }
     VertexOnGeom(Vertex &m, GeometricalVertex &g) : mv(&m), abscisse(-1) { gv = &g; }
     //  cout << "        mv = " <<mv << " gv = "  << gv << endl;}
     VertexOnGeom(Vertex &m, GeometricalEdge &g, Real8 s) : mv(&m), abscisse(s) { ge = &g; }
@@ -674,7 +674,7 @@ namespace bamg {
    public:
     Vertex *v, *bv;
     VertexOnVertex(Vertex *w, Vertex *bw) : v(w), bv(bw) {}
-    VertexOnVertex( ){};
+    VertexOnVertex( ){}
     inline void Set(const Triangles &, Int4, Triangles &);
     void SetOnBTh( ) {
       v->onbv = bv;
@@ -715,8 +715,8 @@ namespace bamg {
       int i;             //  edge number of in triangle
       Edge *edge;        // the  2 edge
       Vertex *New[2];    // new vertex number
-      CrackedTriangle( ) : t(0), i(0), edge(0) { New[0] = New[1] = 0; }
-      CrackedTriangle(Edge *a) : t(0), i(0), edge(a) { New[0] = New[1] = 0; }
+      CrackedTriangle( ) : t(nullptr), i(0), edge(nullptr) { New[0] = New[1] = nullptr; }
+      CrackedTriangle(Edge *a) : t(nullptr), i(0), edge(a) { New[0] = New[1] = nullptr; }
       void Crack( ) {
         Triangle &T(*t);
         int i0 = VerticesOfTriangularEdge[i][0];
@@ -747,8 +747,8 @@ namespace bamg {
    public:
     CrackedTriangle a, b;
     CrackedEdge( ) : a( ), b( ) {}
-    CrackedEdge(Edge *start, Int4 i, Int4 j) : a(start + i), b(start + j){};
-    CrackedEdge(Edge *e0, Edge *e1) : a(e0), b(e1){};
+    CrackedEdge(Edge *start, Int4 i, Int4 j) : a(start + i), b(start + j){}
+    CrackedEdge(Edge *e0, Edge *e1) : a(e0), b(e1){}
 
     void Crack( ) {
       a.Crack( );
@@ -856,30 +856,30 @@ namespace bamg {
         throw;
       }
     }
-    Triangles(Triangles &, Geometry *pGh = 0, Triangles *pBTh = 0,
+    Triangles(Triangles &, Geometry *pGh = nullptr, Triangles *pBTh = nullptr,
               Int4 nbvxx = 0);    // COPY OPERATEUR
     //  Triangles(Triangles &){ cerr << " BUG call copy opretor of Triangles" <<
     //  endl;MeshError(111);}
     Triangles(const Triangles &, const int *flag, const int *bb);    // truncature
 
-    void SetIntCoor(const char *from = 0);
+    void SetIntCoor(const char *from = nullptr);
 
     // void  RandomInit();
     // void  CubeInit(int ,int);
 
     Real8 MinimalHmin( ) const { return 2.0 / coefIcoor; }
     Real8 MaximalHmax( ) const { return Max(pmax.x - pmin.x, pmax.y - pmin.y); }
-    const Vertex &operator[](Int4 i) const { return vertices[i]; };
-    Vertex &operator[](Int4 i) { return vertices[i]; };
-    const Triangle &operator( )(Int4 i) const { return triangles[i]; };
-    Triangle &operator( )(Int4 i) { return triangles[i]; };
+    const Vertex &operator[](Int4 i) const { return vertices[i]; }
+    Vertex &operator[](Int4 i) { return vertices[i]; }
+    const Triangle &operator( )(Int4 i) const { return triangles[i]; }
+    Triangle &operator( )(Int4 i) { return triangles[i]; }
     I2 toI2(const R2 &P) const {
       return I2((Icoor1)(coefIcoor * (P.x - pmin.x)), (Icoor1)(coefIcoor * (P.y - pmin.y)));
     }
     R2 toR2(const I2 &P) const {
       return R2((double)P.x / coefIcoor + pmin.x, (double)P.y / coefIcoor + pmin.y);
     }
-    void Add(Vertex &s, Triangle *t, Icoor2 * = 0);
+    void Add(Vertex &s, Triangle *t, Icoor2 * = nullptr);
     void Insert( );
     //  void InsertOld();
     void ForceBoundary( );
@@ -929,7 +929,7 @@ namespace bamg {
     }
 
     Vertex *NearestVertex(Icoor1 i, Icoor1 j);
-    Triangle *FindTriangleContening(const I2 &, Icoor2[3], Triangle *tstart = 0) const;
+    Triangle *FindTriangleContening(const I2 &, Icoor2[3], Triangle *tstart = nullptr) const;
     void Write(const char *filename, const TypeFileMesh type = AutoMesh) const;
     void Write_am_fmt(ostream &) const;
     void Write_am(ostream &) const;
@@ -971,7 +971,7 @@ namespace bamg {
 #endif
     friend ostream &operator<<(ostream &f, const Triangles &Th);
     void Write(const char *filename);
-    void ConsGeometry(Real8 = -1.0, int *equiedges = 0);    // construct a geometry if no geo
+    void ConsGeometry(Real8 = -1.0, int *equiedges = nullptr);    // construct a geometry if no geo
     void FillHoleInMesh( );
     int CrackMesh( );
 
@@ -979,7 +979,7 @@ namespace bamg {
     void GeomToTriangles1(Int4 nbvx,
                           int KeepBackVertices = 1);    // the  real constructor mesh adaption
     void GeomToTriangles0(Int4 nbvx);                   // the  real constructor mesh generator
-    void PreInit(Int4, char * = 0);
+    void PreInit(Int4, char * = nullptr);
     //
     void Write_nop5(OFortranUnFormattedFile *f, Int4 &lnop5, Int4 &nef, Int4 &lgpdn,
                     Int4 ndsr) const;
@@ -1006,7 +1006,7 @@ namespace bamg {
     QuadTree *quadtree;
     GeometricalSubDomain *subdomains;
     Curve *curves;
-    ~Geometry( );
+    ~Geometry( ) noexcept(false);
     Geometry(const Geometry &Gh);              // Copy  Operator
     Geometry(int nbg, const Geometry **ag);    // intersection operator
 
@@ -1036,10 +1036,10 @@ namespace bamg {
     }
 
     void ReadMetric(const char *, Real8 hmin, Real8 hmax, Real8 coef);
-    const GeometricalVertex &operator[](Int4 i) const { return vertices[i]; };
-    GeometricalVertex &operator[](Int4 i) { return vertices[i]; };
-    const GeometricalEdge &operator( )(Int4 i) const { return edges[i]; };
-    GeometricalEdge &operator( )(Int4 i) { return edges[i]; };
+    const GeometricalVertex &operator[](Int4 i) const { return vertices[i]; }
+    GeometricalVertex &operator[](Int4 i) { return vertices[i]; }
+    const GeometricalEdge &operator( )(Int4 i) const { return edges[i]; }
+    GeometricalEdge &operator( )(Int4 i) { return edges[i]; }
     Int4 Number(const GeometricalVertex &t) const { return &t - vertices; }
     Int4 Number(const GeometricalVertex *t) const { return t - vertices; }
     Int4 Number(const GeometricalEdge &t) const { return &t - edges; }
@@ -1082,7 +1082,7 @@ namespace bamg {
 
   inline Triangle *Triangle::Quadrangle(Vertex *&v0, Vertex *&v1, Vertex *&v2, Vertex *&v3) const {
     // return the other triangle of the quad if a quad or 0 if not a quat
-    Triangle *t = 0;
+    Triangle *t = nullptr;
     if (link) {
       int a = -1;
       if (aa[0] & 16) a = 0;
@@ -1204,7 +1204,7 @@ namespace bamg {
     Int4 i;
     for (i = 0; i < nbv; i++) {
       vertices[i].vint = 0;
-      vertices[i].t = 0;
+      vertices[i].t = nullptr;
     }
     for (i = 0; i < nbt; i++) triangles[i].SetTriangleContainingTheVertex( );
   }
@@ -1216,12 +1216,12 @@ namespace bamg {
   }
 
   inline void Triangles::SetVertexFieldOn( ) {
-    for (Int4 i = 0; i < nbv; i++) vertices[i].on = 0;
+    for (Int4 i = 0; i < nbv; i++) vertices[i].on = nullptr;
     for (Int4 j = 0; j < NbVerticesOnGeomVertex; j++) VerticesOnGeomVertex[j].SetOn( );
     for (Int4 k = 0; k < NbVerticesOnGeomEdge; k++) VerticesOnGeomEdge[k].SetOn( );
   }
   inline void Triangles::SetVertexFieldOnBTh( ) {
-    for (Int4 i = 0; i < nbv; i++) vertices[i].on = 0;
+    for (Int4 i = 0; i < nbv; i++) vertices[i].on = nullptr;
     for (Int4 j = 0; j < NbVertexOnBThVertex; j++) VertexOnBThVertex[j].SetOnBTh( );
     for (Int4 k = 0; k < NbVertexOnBThEdge; k++) VertexOnBThEdge[k].SetOnBTh( );
   }
@@ -1299,7 +1299,7 @@ namespace bamg {
     ns[0] = v + i;
     ns[1] = v + j;
     ns[2] = v + k;
-    at[0] = at[1] = at[2] = 0;
+    at[0] = at[1] = at[2] = nullptr;
     aa[0] = aa[1] = aa[2] = 0;
     det = 0;
   }
@@ -1308,14 +1308,14 @@ namespace bamg {
     ns[0] = v0;
     ns[1] = v1;
     ns[2] = v2;
-    at[0] = at[1] = at[2] = 0;
+    at[0] = at[1] = at[2] = nullptr;
     aa[0] = aa[1] = aa[2] = 0;
     if (v0)
       det = 0;
     else {
       det = -1;
       link = NULL;
-    };
+    }
   }
 
   inline Real8 Triangle::qualite( ) { return det < 0 ? -1 : bamg::qualite(*ns[0], *ns[1], *ns[2]); }
@@ -1325,7 +1325,7 @@ namespace bamg {
     if (t && (vint >= 0) && (vint < 3)) {
       ret = t->Optim(vint, koption);
       if (!i) {
-        t = 0;    // for no future optime
+        t = nullptr;    // for no future optime
         vint = 0;
       }
     }
@@ -1369,7 +1369,7 @@ namespace bamg {
       --ta;
     } while (t != (Triangle *)ta);
     assert(0);
-    return TriangleAdjacent(0, 0);    // error
+    return TriangleAdjacent(nullptr, 0);    // error
   }
 
   inline Vertex *TheVertex(Vertex *a)    // give a unique vertex with smallest number

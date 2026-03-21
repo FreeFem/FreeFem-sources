@@ -84,7 +84,7 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
   fp = fopen(data, "rb");
   if (!fp) {
     fprintf(stderr, "%s UNABLE TO OPEN FILE %s.\n", DISP_ERROR, data);
-    return 0;
+    return nullptr;
   }
 
   if (!quiet) fprintf(stdout, "%s Opening %s\n", DISP_INFO, data);
@@ -92,14 +92,14 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
   if (!fgets(buff, sizeof(buff), fp)) {
     fprintf(stderr, "%s INVALID HEADER.\n", DISP_ERROR);
     fclose(fp);
-    return 0;
+    return nullptr;
   }
 
   /* check header file */
   if (buff[0] != 'P') {
     fprintf(stderr, "%s INVALID IMAGE FORMAT (MUST BE 'PX').\n", DISP_ERROR);
     fclose(fp);
-    return 0;
+    return nullptr;
   }
 
   switch (buff[1]) {
@@ -121,7 +121,7 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
     default:
       fprintf(stderr, "%s INVALID IMAGE FORMAT (MUST BE 'PX').\n", DISP_ERROR);
       fclose(fp);
-      return 0;
+      return nullptr;
   }
 
   /* allocate memory to store image */
@@ -154,14 +154,14 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
     fprintf(stderr, "%s ERROR LOADING IMAGE.\n", DISP_ERROR);
     free(result);
     fclose(fp);
-    return 0;
+    return nullptr;
   }
 
   if (fscanf(fp, "%d", &maxval) != 1) {
     fprintf(stderr, "%s INVALID IMAGE SIZE.\n", DISP_ERROR);
     free(result);
     fclose(fp);
-    return 0;
+    return nullptr;
   }
 
   /* strip line */
@@ -197,7 +197,7 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
           free(result->data);
           free(result);
           fclose(fp);
-          return 0;
+          return nullptr;
         }
         result->data[i] = (ubyte)r;
       }
@@ -211,7 +211,7 @@ PPMimage *load_PPM(const char *imgName, ubyte quiet) {
         free(result->data);
         free(result);
         fclose(fp);
-        return 0;
+        return nullptr;
       }
       break;
   }
@@ -323,7 +323,7 @@ pPPMimage diff_PPM(pPPMimage bits, pPPMimage img) {
   diff = (PPMimage *)malloc(sizeof(PPMimage));
   if (!diff) {
     fprintf(stderr, "%s Sorry, not enough memory. Bye.\n", DISP_ERROR);
-    return 0;
+    return nullptr;
   }
 
   diff->sizeX = bits->sizeX;
@@ -332,7 +332,7 @@ pPPMimage diff_PPM(pPPMimage bits, pPPMimage img) {
   if (!diff->data) {
     fprintf(stderr, "%s Sorry, not enough memory. Bye.\n", DISP_ERROR);
     free(diff);
-    return 0;
+    return nullptr;
   }
 
   dmax = 0;
@@ -423,7 +423,7 @@ KNM< double > *readPPM(const pstring &imgName) {
   if (!image) {
     cerr << DISP_ERROR << " Error loadPPM image " << *imgName << endl;
     CompileError((string)DISP_ERROR + " Error loadPPM image ");
-    return 0;
+    return nullptr;
   }
 
   if (verbosity)
@@ -434,7 +434,7 @@ KNM< double > *readPPM(const pstring &imgName) {
   if (!imageArray) {
     cerr << DISP_ERROR << " Error convert PPM image to array - " << *imgName << endl;
     CompileError((string)DISP_ERROR + " Error convert PPM image to array - " + *imgName);
-    return 0;
+    return nullptr;
   }
 
   freePPMimage(image);
@@ -486,28 +486,28 @@ pRnm diffPPM(pRnm const &img1, pRnm const &img2) {
   if (!image1) {
     cerr << DISP_ERROR << " Error convert array to PPM image" << endl;
     CompileError((string)DISP_ERROR + " Error convert array to PPM image");
-    return 0;
+    return nullptr;
   }
 
   image2 = Rnm2PPMimage(img2);
   if (!image2) {
     cerr << DISP_ERROR << " Error convert array to PPM image" << endl;
     CompileError((string)DISP_ERROR + " Error convert array to PPM image");
-    return 0;
+    return nullptr;
   }
 
   imageDiff = diff_PPM(image1, image2);
   if (!imageDiff) {
     cerr << DISP_ERROR << " Error image difference - " << endl;
     CompileError((string)DISP_ERROR + " Error image difference");
-    return 0;
+    return nullptr;
   }
 
   imgDiff = PPMimage2Rnm(imageDiff);
   if (!image2) {
     cerr << DISP_ERROR << " Error convert PPM image to array" << endl;
     CompileError((string)DISP_ERROR + " Error convert PPM image to array");
-    return 0;
+    return nullptr;
   }
 
   freePPMimage(image1);
@@ -532,7 +532,7 @@ pRnm PPMimage2Rnm(pPPMimage const &img) {
   if (!array) {
     cerr << DISP_ERROR << " Error allocate memory" << endl;
     CompileError((string)DISP_ERROR + " Error allocate memory");
-    return 0;
+    return nullptr;
   }
 
   n = (int)img->sizeX;
@@ -548,7 +548,7 @@ pRnm PPMimage2Rnm(pPPMimage const &img) {
   if (k != n * m) {
     cerr << DISP_ERROR << " PPM image to array error" << endl;
     CompileError((string)DISP_ERROR + " PPM image to array error");
-    return 0;
+    return nullptr;
   }
 
   return array;
@@ -570,7 +570,7 @@ pPPMimage Rnm2PPMimage(pRnm const &array) {
   if (!image) {
     cerr << DISP_ERROR << " Error allocate memory" << endl;
     CompileError((string)DISP_ERROR + " Error allocate memory");
-    return 0;
+    return nullptr;
   }
 
   n = (short)array->N( );
@@ -582,7 +582,7 @@ pPPMimage Rnm2PPMimage(pRnm const &array) {
   if (!image->data) {
     cerr << DISP_ERROR << " Error allocate memory" << endl;
     CompileError((string)DISP_ERROR + " Error allocate memory");
-    return 0;
+    return nullptr;
   }
 
   k = 0;
@@ -594,7 +594,7 @@ pPPMimage Rnm2PPMimage(pRnm const &array) {
   if (k != n * m) {
     cerr << DISP_ERROR << " Array to PPM image error" << endl;
     CompileError((string)DISP_ERROR + " Array to PPM image error");
-    return 0;
+    return nullptr;
   }
 
   return image;

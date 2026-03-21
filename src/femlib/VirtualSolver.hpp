@@ -73,9 +73,9 @@ struct Data_Sparse_Solver {
     long *getnbiter;
     Data_Sparse_Solver()
     :
-    einitmat(0),
+    einitmat(nullptr),
     solver(""),
-    precon(0),
+    precon(nullptr),
     NbSpace(1000),
     strategy(0),
     tgv(ff_tgv),
@@ -83,16 +83,16 @@ struct Data_Sparse_Solver {
     tol_pivot(-1),
     tol_pivot_sym(-1),
     itmax(0),
-     smap(0) ,
-    commworld(0),
+     smap(nullptr) ,
+    commworld(nullptr),
     master(0),
-    rinfo(0),
-    info(0),
-    kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0),
+    rinfo(nullptr),
+    info(nullptr),
+    kerneln(nullptr), kernelt(nullptr), kerneldim(nullptr),verb(verbosity) ,x0(true),veps(nullptr),
     rightprecon(true),
     sym(0),
     positive(false),
-    getnbiter(0) // add Mars 201
+    getnbiter(nullptr) // add Mars 201
     {epsilon=1e-6;}
     void Update(Stack s)
     {
@@ -134,8 +134,8 @@ struct Data_Sparse_Solver {
         {
             k++;
             assert(k<20);
-            if( mds==0) mds = Set_mds();
-            if( what==0 ) break;
+            if( mds==nullptr) mds = Set_mds();
+            if( what==nullptr ) break;
             IMDS iw = mds->find(what);
             if(iw == mds->end()) {break;}
             int cas = iw->second;
@@ -222,7 +222,7 @@ public:
         if(codeininew != codeini) state=0; // redo init
         else if(codesymnew != codesym) state=1; // redo init
         else if(codenumnew != codenum) state=2; // redo init
-    };
+    }
     void factorize(int st)
     {
         UpdateState();

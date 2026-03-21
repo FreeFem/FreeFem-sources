@@ -125,11 +125,6 @@ extern long verbosity;
 extern FILE *ThePlotStream;    //  Add for new plot. FH oct 2008
 void init_lgmesh( );
 
-namespace FreeFempp {
-  template< class R >
-  TypeVarForm< R > *TypeVarForm< R >::Global;
-}
-
 basicAC_F0::name_and_type OpCall_FormBilinear_np::name_param[] = {
   {"bmat", &typeid(Matrice_Creuse< R > *)}, LIST_NAME_PARM_MAT,
   // param for bem solver

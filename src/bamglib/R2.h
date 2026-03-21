@@ -38,7 +38,7 @@ namespace bamg {
 
    public:
     R x, y;
-    P2( ) : x(0), y(0){};
+    P2( ) : x(0), y(0){}
     P2(R a, R b) : x(a), y(b) {}
     P2(P2 A, P2 B) : x(B.x - A.x), y(B.y - A.y) {}
     P2< R, RR > operator+(const P2< R, RR >& cc) const { return P2< R, RR >(x + cc.x, y + cc.y); }
@@ -104,7 +104,7 @@ namespace bamg {
     P2xP2< R, RR > inv( ) const {
       RR d = (*this).det( );
       return P2xP2< R, RR >((R)(y.y / d), (R)(-x.y / d), (R)(-y.x / d), (R)(x.x / d));
-    };
+    }
     P2xP2< R, RR > t( ) { return P2xP2< R, RR >(x.x, y.x, x.y, y.y); }    // transposer
     P2< R, RR > tx( ) { return P2< R, RR >(x.x, y.x); }
     P2< R, RR > ty( ) { return P2< R, RR >(x.y, y.y); }

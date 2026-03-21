@@ -140,23 +140,23 @@ int main(int argc, char **argv) {
   double maxsubdiv = boundmaxsubdiv;
   double omega = 1.8;
   int NbSmooth = 3;
-  double *solMbb = 0, *solMBB = 0;
-  int *typesolsBB = 0;
+  double *solMbb = nullptr, *solMBB = nullptr;
+  int *typesolsBB = nullptr;
   Int4 nbsolbb = 0, lsolbb = 0;
   Int4 nbsolBB = 0, lsolBB = 0;
   int SplitEdgeWith2Boundary = 0;
   int rbbeqMbb = 0, rBBeqMBB = 0;
   int ChoiseHessien = 0;
   double power = 1;
-  Triangles *Thr = 0, *Thb = 0;
+  Triangles *Thr = nullptr, *Thb = nullptr;
 
-  char *fgeom = 0, *fmeshback = 0, *fmeshout = 0, *fmeshr = 0, *fmetrix = 0, *famfmt = 0, *fmsh = 0,
-       *fnopo = 0, *fftq = 0, *fam = 0, *famdba = 0, *rbb = 0, *rBB = 0, *wbb = 0, *wBB = 0,
-       *fMbb = 0, *foM = 0, *fMBB = 0;
+  char *fgeom = nullptr, *fmeshback = nullptr, *fmeshout = nullptr, *fmeshr = nullptr, *fmetrix = nullptr, *famfmt = nullptr, *fmsh = nullptr,
+       *fnopo = nullptr, *fftq = nullptr, *fam = nullptr, *famdba = nullptr, *rbb = nullptr, *rBB = nullptr, *wbb = nullptr, *wBB = nullptr,
+       *fMbb = nullptr, *foM = nullptr, *fMBB = nullptr;
   verbosity = 2;
   char *datargv[128];
   int datargc = 1;
-  datargv[0] = datargv[1] = 0;    // for create a error if no parameter
+  datargv[0] = datargv[1] = nullptr;    // for create a error if no parameter
   const char *datafile = argc == 2 ? argv[1] : "DATA_bamg";
 
   atexit(forDebug);
@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
       exit(3);
     }
   // some verification
-  NoMeshReconstruction = fmeshr != 0;
+  NoMeshReconstruction = fmeshr != nullptr;
   if (!fmeshback) fmeshback = fmeshr;
   fileout = fmeshout || fam || fnopo || fftq || fam || famdba || famfmt || wbb || wBB;
   if (!fileout && !foM) {
@@ -560,9 +560,9 @@ int main(int argc, char **argv) {
         MeshError(99);
       }
       assert(lsolbb == BTh.nbv);
-      BTh.IntersectConsMetric(solMbb, nbsolbb, 0, hmin, hmax, sqrt(err) * coef, 1e30,
+      BTh.IntersectConsMetric(solMbb, nbsolbb, nullptr, hmin, hmax, sqrt(err) * coef, 1e30,
                               AbsError ? 0.0 : CutOff, nbjacoby, Rescaling, power, ChoiseHessien);
-      if (!rbbeqMbb) delete[] solMbb, solMbb = 0;
+      if (!rbbeqMbb) delete[] solMbb, solMbb = nullptr;
     }
     if (fMBB) {
       solMBB = ReadBBFile(fMBB, nbsolBB, lsolBB, typesolsBB, 2, 2);
@@ -572,9 +572,9 @@ int main(int argc, char **argv) {
         MeshError(99);
       }
       assert(lsolBB == BTh.nbv);
-      BTh.IntersectConsMetric(solMBB, nbsolBB, 0, hmin, hmax, sqrt(err) * coef, 1e30,
+      BTh.IntersectConsMetric(solMBB, nbsolBB, nullptr, hmin, hmax, sqrt(err) * coef, 1e30,
                               AbsError ? 0.0 : CutOff, nbjacoby, Rescaling, ChoiseHessien);
-      if (!rBBeqMBB) delete[] solMBB, solMBB = 0;
+      if (!rBBeqMBB) delete[] solMBB, solMBB = nullptr;
     }
 
     BTh.IntersectGeomMetric(errg, iso);
@@ -592,12 +592,13 @@ int main(int argc, char **argv) {
     }
 
     if (fileout) {
-      if (NoMeshReconstruction)
+      if (NoMeshReconstruction) {
         if ((fmeshback == fmeshr) || (!strcmp(fmeshback, fmeshr)))
-          Thr = &BTh, Thb = 0;    // back and r mesh are the same
+          Thr = &BTh, Thb = nullptr;    // back and r mesh are the same
         else
           Thr = new Triangles(fmeshr, cutoffradian), Thb = &BTh;    // read the new
 
+      }
       Triangles &Th(*(NoMeshReconstruction
                         ? new Triangles(*Thr, &Thr->Gh, Thb,
                                         nbvx)    // copy the mesh + free space to modification
@@ -644,8 +645,8 @@ int main(int argc, char **argv) {
         const int dim = 2;
         // optimisation read only si rbb != fMbb
 
-        double *solbb = 0;
-        double *solBB = 0;
+        double *solbb = nullptr;
+        double *solBB = nullptr;
 
         if (rbb) solbb = rbbeqMbb ? solMbb : ReadbbFile(rbb, nbsolbb, lsolbb, 2, 2);
         if (rBB) solBB = rBBeqMBB ? solMBB : ReadBBFile(rBB, nbsolBB, lsolBB, typesolsBB, 2, 2);
@@ -657,8 +658,8 @@ int main(int argc, char **argv) {
           exit(2);
         }
 
-        ofstream *fbb = wbb ? new ofstream(wbb) : 0;
-        ofstream *fBB = wBB ? new ofstream(wBB) : 0;
+        ofstream *fbb = wbb ? new ofstream(wbb) : nullptr;
+        ofstream *fBB = wBB ? new ofstream(wBB) : nullptr;
         Int4 nbfieldBB = 0, nbfieldbb = nbsolbb;
         if (fbb) *fbb << dim << " " << nbsolbb << " " << Th.nbv << " " << 2 << endl;
         if (fBB) {

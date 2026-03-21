@@ -35,11 +35,11 @@ public:
     }
     ~BemKernel() {}
     
-    BemKernel(const BemKernel &Bk) {
-        for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=Bk.coeffcombi[i]; } } ;
+    BemKernel(const BemKernel &Bk) : RefCounter() {
+        for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=Bk.coeffcombi[i]; } }
     // alpha * ker
-    BemKernel(Stack s,const BemKernel &Bk, Complex alpha) {
-        for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=alpha*Bk.coeffcombi[i]; } } ;
+    BemKernel(Stack,const BemKernel &Bk, Complex alpha) {
+        for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=alpha*Bk.coeffcombi[i]; } }
        
     
 private:
@@ -55,12 +55,12 @@ typedef  const BemKernel fkernel;
 typedef  const BemPotential fpotential;
 
 template<class bemtoolmesh>
-void Mesh2Bemtool(const Fem2D::Mesh3 &Th, bemtool::Geometry &node, bemtoolmesh &mesh ) {
+void Mesh2Bemtool(const Fem2D::Mesh3 &, bemtool::Geometry &, bemtoolmesh & ) {
     assert(0);
 }
 
 template<class bemtoolmesh>
-void Mesh2Bemtool(const Fem2D::Mesh &Th, bemtool::Geometry &node, bemtoolmesh &mesh ) {
+void Mesh2Bemtool(const Fem2D::Mesh &, bemtool::Geometry &, bemtoolmesh & ) {
     assert(0);
 }
 
@@ -144,7 +144,7 @@ public:
     
     CPartBemDI(const basicAC_F0 & args,typeofkind b=int1dx1d,int ddim=3, int ddimHat=1) // always ddim=3d
     :kind(b),d(ddim),dHat(ddimHat),
-    Th(0), what(args.size()-1), whatis(args.size()-1)
+    Th(nullptr), what(args.size()-1), whatis(args.size()-1)
     
     {
         args.SetNameParam(n_name_param,name_param,nargs);
@@ -197,8 +197,8 @@ public:
     //CBemDomainOfIntegration();
     CBemDomainOfIntegration(const basicAC_F0 & args_t, int ddim=3, int ddimHat=1) // always ddim=3d
     :d_s(0),dHat_s(0),d_t(ddim),dHat_t(ddimHat),
-    Th_s(0), what_s(0), whatis_s(0),
-    Th_t(0), what_t(args_t.size()-1), whatis_t(args_t.size()-1)
+    Th_s(nullptr), what_s(0), whatis_s(0),
+    Th_t(nullptr), what_t(args_t.size()-1), whatis_t(args_t.size()-1)
     
     {
         args_t.SetNameParam(n_name_param,name_param,nargs_t);
@@ -333,7 +333,7 @@ public:
     listBemKernel(Stack s,BemKernel const*bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bk);}
     listBemKernel(Stack s,BemKernel const*const bka,BemKernel const* const bkb) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bka);lbk->push_back(bkb);}
     listBemKernel(Stack s,const listBemKernel &l,BemKernel const*const bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>(*l.lbk))) { lbk->push_back(bk);}
-    listBemKernel(){};
+    listBemKernel(){}
 };
 
 
@@ -353,7 +353,7 @@ struct Op_setBemKernel {
     using first_argument_type  = AA;
     using second_argument_type = BB;
     using result_type          = RR;
-    static RR f(Stack stack, const AA & a,const BB & b)
+    static RR f(Stack, const AA & a,const BB & b)
     {
         ffassert(a);
         const pBemKernel p=new BemKernel(*b);
@@ -371,7 +371,7 @@ struct Op_setCombBemKernel {
     using first_argument_type  = AA;
     using second_argument_type = BB;
     using result_type          = RR;
-    static RR f(Stack stack, const AA & a,const BB & b)
+    static RR f(Stack, const AA & a,const BB & b)
     {
         ffassert(a);
         const pBemKernel p=combKernel(b);
@@ -490,7 +490,7 @@ public:
         aType r=atype<const BemKernel *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
 
 };
 
@@ -615,7 +615,7 @@ public:
         aType r=atype<const BemPotential *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
 
 };
 
@@ -666,7 +666,7 @@ class FoperatorKBEM : public E_F0mps { public:
     //int nb_component_FEspace_inc; 
     //int nb_component_FEspace_test;
     
-    FoperatorKBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
+    FoperatorKBEM(const basicAC_F0 & args) :fi(nullptr),ft(nullptr),kbem(nullptr) {
         aType t_a = atype< E_Array >( );
         ffassert(args.size()==3);
  
@@ -736,7 +736,7 @@ class BemKFormBilinear : public BemFormBilinear { public:
         b= new FoperatorKBEM(*Kb);
         ffassert(di && Kb);
         type=1;
-    };
+    }
     
     void checkNbItemFEspaceInconnuAndTest(const int & nbitem_inconnu, const int & nbitem_test ){
         // check the size of the FEspace 
@@ -775,15 +775,15 @@ class BemKFormBilinear : public BemFormBilinear { public:
 
 class TypeFormBEM: public ForEachType<const BemFormBilinear*> {
 public:
-    TypeFormBEM() : ForEachType<const BemFormBilinear*>(0,0) {}
+    TypeFormBEM() : ForEachType<const BemFormBilinear*>(nullptr,nullptr) {}
     void SetArgs(const ListOfId *lid) const {
         SetArgsFormLinear(lid,2);    }
     
-    Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const
+    Type_Expr SetParam(const C_F0 & c,const ListOfId *,size_t &) const
     { return Type_Expr(this,CastTo(c));}
     
     
-    C_F0 Initialization(const Type_Expr & e) const
+    C_F0 Initialization(const Type_Expr &) const
     {
         return C_F0(); }
     Type_Expr construct(const Type_Expr & e) const
@@ -804,7 +804,7 @@ public:
         aType r=atype<const FoperatorKBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
     
 };
 
@@ -820,7 +820,7 @@ public:
         aType r=atype<const FoperatorKBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
     
 };
 
@@ -841,7 +841,7 @@ class FoperatorPBEM : public E_F0mps { public:
     //int nb_component_FEspace_inc;
     //int nb_component_FEspace_test;
     
-    FoperatorPBEM(const basicAC_F0 & args) :fi(0),ft(0),pot(0) {
+    FoperatorPBEM(const basicAC_F0 & args) :fi(nullptr),ft(nullptr),pot(nullptr) {
         aType t_a = atype< E_Array >( );
         ffassert(args.size()==3);
         
@@ -945,7 +945,7 @@ public:
         aType r=atype<const FoperatorPBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
     
 };
 
@@ -961,25 +961,25 @@ public:
         aType r=atype<const FoperatorPBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    AnyType operator()(Stack)  const {ffassert(0);return 0L;}
     
 };
 
 
 
 //// end type BEM kernel / potential
-int typeVFBEM(const list<C_F0> & largs, Stack stack)
+int typeVFBEM(const list<C_F0> & largs, Stack)
 {
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
     
-    int VVFBEM =-1, ik=-1;;
+    int VVFBEM =-1, ik=-1;
     for (ii=ib;ii != ie;ii++) {
         Expression e=ii->LeftValue();
         aType r = ii->left();
         
         if (r==atype<const  BemFormBilinear *>()) {
             
-            BemFormBilinear * bb= GetAny<BemFormBilinear *>((*e)(0));
+            BemFormBilinear * bb= GetAny<BemFormBilinear *>((*e)(nullptr));
             VVFBEM = bb->type;
         }
         ffassert(ik);
@@ -1186,7 +1186,7 @@ bemtool::PotKernelEnum whatTypeEnum(BemPotential *P) {
 
 template <class K, typename PX, typename PY, class TMesh, class SMesh,
     typename std::enable_if<!std::is_same<PX, PY>::value, int>::type = 0>
-void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<PX>& dofX, bemtool::Dof<PY>& dofY, Complex alpha) {
+void ff_BIO_Generator(htool::VirtualGenerator<K>*&, BemKernel *, bemtool::Dof<PX>&, bemtool::Dof<PY>&, Complex) {
     cerr << "Cannot define a BIO with different types of source and target dofs" << endl;
     assert(0);
 }
@@ -1195,7 +1195,7 @@ template <class K, typename P, typename PY, class TMesh, class MMesh,
     typename std::enable_if<std::is_same<P, PY>::value, int>::type = 0>
 void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<P>& dofX, bemtool::Dof<PY>& dofY, Complex alpha) {
     
-    bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
+    bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
     double kappaIm1 = typeKernel->wavenum[0].imag(), kappaIm2 = typeKernel->wavenum[1].imag();
     
@@ -1493,7 +1493,7 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
 }
 
 template <class K, class mesh>
-void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
+void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*&, BemKernel *, bemtool::Dof<bemtool::RT0_2D>&, Complex) {
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
     return;
 }
@@ -1501,7 +1501,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
 template <class K>
 void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
 
-    bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
+    bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
     double kappaIm1 = typeKernel->wavenum[0].imag(), kappaIm2 = typeKernel->wavenum[1].imag();
 
@@ -1533,7 +1533,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
 }
 
 template <class R, typename P, typename MeshBemtool, class MMesh>
-void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output) {
+void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &, bemtool::Geometry &node_output) {
     
     bemtool::PotKernelEnum pot = whatTypeEnum(typePot);
     double kappaRe = typePot->wavenum.real(),kappaIm = typePot->wavenum.imag();
@@ -1581,13 +1581,13 @@ void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typeP
 }
 
 template <class R, typename P, typename MeshBemtool >
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output ){
+void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*&,BemPotential *, bemtool::Dof<P> &, MeshBemtool &, bemtool::Geometry & ){
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
     return;
 }
 
 template <class R, typename P>
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, bemtool::Mesh2D &mesh, bemtool::Geometry &node_output ) {
+void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, bemtool::Mesh2D &, bemtool::Geometry &node_output ) {
     
     bemtool::PotKernelEnum pot = whatTypeEnum(typePot);
     double kappaRe = typePot->wavenum.real(),kappaIm = typePot->wavenum.imag();

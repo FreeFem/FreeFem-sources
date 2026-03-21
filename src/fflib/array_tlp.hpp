@@ -222,7 +222,7 @@ inline   bool exist_element( MyMap<String,K> *  const  &  a,string*  const   & b
 template<>
 inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,string*  const   & b)
  { string** ret=  &((*a)[*b]); // correction FH feb 2004
-    if( *ret ==0) *ret = newstring(""); //  string vide ???
+    if( *ret ==nullptr) *ret = newstring(""); //  string vide ???
      // cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
     // delete b;  modif mars 2006 auto del ptr
     return ret;}
@@ -277,7 +277,7 @@ KN_<K> fSubArraypbi( KNM<K> *const & a,const SubArray & b,const long &i)
 
 
 template<class A>
-A fSubArrayc(const A & a,const char & b)
+A fSubArrayc(const A & a,const char &)
  { return a;}
 
 template<class RR,class A,class B,class C>
@@ -312,7 +312,7 @@ struct check_get_element_lineorcol
 template<class A,class B>
 struct check_get_element_lineorcol<A,B, char>
 {
-    static  void check(const A &  a,const B & b,const char & c){
+    static  void check(const A &  a,const B & b,const char &){
         if( (b<0 || a->N() <= b))
             ExecError("Out of bound");
     }
@@ -320,7 +320,7 @@ struct check_get_element_lineorcol<A,B, char>
 template<class A,class B>
 struct check_get_element_lineorcol<A, char,B>
 {
-    static  void check(const A &  a,const char & b,const B & c){
+    static  void check(const A &  a,const char &,const B & c){
         if( (c<0 || a->M() <= c))
             ExecError("Out of bound");
     }
@@ -474,7 +474,7 @@ public:
         p =a;
         return *a;}
 
-    static KN_<RR> &set(KN_<RR> & a,KN<RR> *& p,int n){p=0;return a;}
+    static KN_<RR> &set(KN_<RR> & a,KN<RR> *& p,int){p=0;return a;}
 
     CODE(Expression a,const E_Array & tt)
       : a0(a),N(tt.size()),
@@ -985,7 +985,7 @@ void ArrayDCL()
     // make_pair(atype<string*>(),atype<KN_<K> >())
     //  real[string][int]
     map_type_of_map[make_pair(TypeArray(atype<K>(),atype<string*>()),atype<long >())]=atype<MyMapofArray*>();
-    ;// map of   tableau
+    // map of   tableau
   /*
     atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
     TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
@@ -1139,7 +1139,7 @@ struct SetArray2{
 
 template<class K>
 struct SetArray3: public ternary_function<K,K,K,SetArray<K> > {
-  static SetArray<K> f(Stack s,const K & a,const K &b,const K & c)  {
+  static SetArray<K> f(Stack,const K & a,const K &b,const K & c)  {
     // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
     long n= long(1+abs((c-a)/b));
     if(verbosity>100)
@@ -1170,7 +1170,7 @@ template<class R,class A>  R  set_array_( R const & a,const A & b){
 return a;}
 // xxxxxxxxxxx
 template<class K>  KNM<K> * set_initmat_t(KNM<K> * a,Transpose<KNM<K> * > b ){
-    ConjKNM_<K>  tb=b.t->t(); ;
+    ConjKNM_<K>  tb=b.t->t();
      a->init(tb.N(),tb.M());
     *a=tb;
     return a;}
@@ -1180,16 +1180,16 @@ template<class K>  KNM<K> * set_initmat(KNM<K> * a,KNM<K> *  b ){
     *a=*b;
     return a;}
 template<class K>  KNM<K> * set_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){
-    ConjKNM_<K>  tb=b.t->t(); ;
+    ConjKNM_<K>  tb=b.t->t();
     a->resize(tb.N(),tb.M());// correction mars 2013
     *a=tb;
     return a;}
 template<class K>  KNM<K> * addto_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){
-    ConjKNM_<K>  tb=b.t->t(); ;
+    ConjKNM_<K>  tb=b.t->t();
     *a+=tb;
     return a;}
 template<class K>  KNM<K> * subto_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){
-    ConjKNM_<K>  tb=b.t->t(); ;
+    ConjKNM_<K>  tb=b.t->t();
     *a-=tb;
     return a;}
 template<class K>  KNM<K> * set_mat(KNM<K> * a,KNM<K> *  b ){
@@ -1403,7 +1403,7 @@ class E_ForAllLoopMapSI
                 }
 
                 
-                *i=0;
+                *i=nullptr;
             }
       //  data->end(s);
         return Nothing  ;

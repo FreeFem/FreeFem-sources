@@ -1,4 +1,4 @@
-#include "petsc.h"
+#include <petsc.h>
 
 #include "PETSc.hpp"
 #include "compositeFESpace.hpp"
@@ -29,7 +29,7 @@ struct HtoolCtx {
 };
 
 template<typename P, typename MeshBemtool>
-static PetscErrorCode GenEntriesFromCtx(PetscInt sdim,PetscInt M,PetscInt N, const PetscInt *const J, const PetscInt *const K, PetscScalar* ptr,void *ctx) {
+static PetscErrorCode GenEntriesFromCtx(PetscInt,PetscInt M,PetscInt N, const PetscInt *const J, const PetscInt *const K, PetscScalar* ptr,void *ctx) {
     PetscFunctionBeginUser;
     HtoolCtx<P,MeshBemtool>* user = reinterpret_cast<HtoolCtx<P,MeshBemtool>*>(ctx);
     user->generator->copy_submatrix(M,N,J,K,ptr);
@@ -61,7 +61,7 @@ htool::VirtualGenerator<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
 }
 
 template<class Matrix, template<typename P, typename MeshBemtool> class Gen, typename P, typename MeshBemtool, class R = PetscScalar, typename std::enable_if< std::is_same< Matrix, Dmat >::value >::type* = nullptr>
-void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vector<double> &p1,vector<double> &p2,MPI_Comm comm,int dim,bool sym = false) {
+void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vector<double> &p1,vector<double> &p2,MPI_Comm,int,bool sym = false) {
     PetscInt m, M;
     KSPDestroy(&A->_ksp);
     if(A->_vS) {
@@ -99,7 +99,7 @@ void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vecto
 }
 
 template<class fes1, class fes2, typename std::enable_if< (fes1::FESpace::Mesh::RdHat::d >= 3) || std::is_same<typename fes1::FESpace::Mesh, Mesh>::value >::type* = nullptr >
-void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& PVh, bool same, int VFBEM, Stack stack, const list<C_F0>& bargs, const Data_Sparse_Solver& ds, Dmat* B) {
+void varfBem(const typename fes1::FESpace*&, const typename fes2::FESpace*&, bool, int VFBEM, Stack, const list<C_F0>&, const Data_Sparse_Solver&, Dmat*) {
     ffassert(VFBEM == -1);
 }
 
@@ -223,11 +223,9 @@ template<class fes1, class fes2, typename std::enable_if< (fes1::FESpace::Mesh::
 void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& PVh, bool same, int VFBEM, Stack stack, const list<C_F0>& bargs, const Data_Sparse_Solver& ds, Dmat* B) {
     if (VFBEM == 1)
         ffassert(same);
-    typedef typename fes1::pfes pfes1;
     typedef typename fes1::FESpace FESpace1;
     typedef typename FESpace1::Mesh Mesh1;
 
-    typedef typename fes2::pfes pfes2;
     typedef typename fes2::FESpace FESpace2;
     typedef typename FESpace2::Mesh Mesh2;
 
@@ -384,16 +382,14 @@ namespace PETSc {
     ffassert(pUh == pVh);
   }
   template<class fes1, class fes2, typename std::enable_if< !std::is_same< fes1, fes2 >::value >::type* = nullptr >
-  void assert_ptr(fes1* pUh, fes2* pVh) { }
+  void assert_ptr(fes1*, fes2*) { }
   template<class K, class MMesh, class fes1, class fes2>
   AnyType varfToMat<K, MMesh, fes1, fes2>::Op::operator()(Stack stack) const {
     typedef typename fes1::pfes pfes1;
     typedef typename fes1::FESpace FESpace1;
-    typedef typename FESpace1::Mesh Mesh1;
 
     typedef typename fes2::pfes pfes2;
     typedef typename fes2::FESpace FESpace2;
-    typedef typename FESpace2::Mesh Mesh2;
 
     ffassert(b && b->nargs);
     pfes1* pUh = GetAny<pfes1*>((*b->euh)(stack));
@@ -433,8 +429,8 @@ namespace PETSc {
             else
               A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
           }
-          if(AssembleVarForm<upscaled_type<K>, MatriceCreuse<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, b->largs))
-            AssembleBC<upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          if(AssembleVarForm<upscaled_type<K>, MatriceCreuse<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, nullptr, b->largs))
+            AssembleBC<upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, nullptr, nullptr, b->largs, ds.tgv);
           }
         else
           A.A.master(new MatriceMorse<upscaled_type<K>>(PVh ? Vh.NbOfDF : 0, PUh ? Uh.NbOfDF : 0, 0, 0));
@@ -444,10 +440,10 @@ namespace PETSc {
         MatriceMap<upscaled_type<K>>& D = *pMA;
         bool bc = false;
         if (PUh && PVh)
-          bc = AssembleVarForm<upscaled_type<K>, MatriceMap<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, &D, 0, b->largs);
+          bc = AssembleVarForm<upscaled_type<K>, MatriceMap<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, &D, nullptr, b->largs);
         A.A.master(pMA);
         if(bc)
-          AssembleBC<upscaled_type<K>>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          AssembleBC<upscaled_type<K>>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, nullptr, nullptr, b->largs, ds.tgv);
       }
       changeOperatorSimple(&B, &A);
       if(B._A)
@@ -736,7 +732,7 @@ namespace PETSc {
       static const int n_name_param = 2;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
-      changeOperator_Op(const basicAC_F0& args, int d) : A(0), B(0), c(d) {
+      changeOperator_Op(const basicAC_F0& args, int d) : A(nullptr), B(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< Type* >(args[0]);
         if (c == 0)
@@ -1275,7 +1271,7 @@ namespace PETSc {
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       initCSRfromDMatrix_Op(const basicAC_F0& args, int d)
-        : A(0), B(0), K(0), codeA(nullptr), c(d) {
+        : A(nullptr), B(nullptr), K(nullptr), codeA(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
@@ -1327,7 +1323,7 @@ namespace PETSc {
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       initRectangularCSRfromDMatrix_Op(const basicAC_F0& args, int d)
-        : A(0), B(0), C(0), K(0), codeA(nullptr), c(d) {
+        : A(nullptr), B(nullptr), C(nullptr), K(nullptr), codeA(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
@@ -1644,7 +1640,7 @@ namespace PETSc {
       static const int n_name_param = 6;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
-      E_initCSR(const basicAC_F0& args, int d) : A(0), K(0), R(0), D(0), c(d) {
+      E_initCSR(const basicAC_F0& args, int d) : A(nullptr), K(nullptr), R(nullptr), D(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         if (c == 1 || c == 3 || c == 4)
@@ -1753,7 +1749,7 @@ namespace PETSc {
       }
       else
         dof = GetAny< long >((*K)(stack));
-      MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
+      MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : nullptr;
       if ((c == 2 && mA->n != mA->m) || c == 4) {
         ptA->_first = 0;
         ptA->_cfirst = 0;
@@ -1815,7 +1811,7 @@ namespace PETSc {
           else
             dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
           Matrice_Creuse< double >* pList =
-            nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
+            nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : nullptr;
           HPDDM::MatrixCSR< void >* dL = nullptr;
           int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
           KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
@@ -1913,7 +1909,7 @@ namespace PETSc {
           if (r == atype< long >( ) && e->EvaluableWithOutStack( )) {
             long c = GetAny< long >((*e)(NullStack));
             if (c == 0) {
-              e_M[i][j] = 0;
+              e_M[i][j] = nullptr;
               t_M[i][j] = 0;
             } else if (atype< PetscScalar >( )->CastingFrom(r)) {
               e_M[i][j] = to< PetscScalar >(c_M);
@@ -2127,7 +2123,7 @@ namespace PETSc {
       static const int n_name_param = 22;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
-      setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
+      setOptions_Op(const basicAC_F0& args, int d) : A(nullptr), P(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (c == 0)
           A = to< Type* >(args[0]);
@@ -2237,7 +2233,7 @@ namespace PETSc {
   }
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value || std::is_same< T, KN< long > >::value >::type* =
                        nullptr >
-  void resize(T* v, int n, int m) {
+  void resize(T* v, int n, int) {
     v->resize(n);
   }
   template< class T, typename std::enable_if< std::is_same< T, KNM< PetscScalar > >::value || std::is_same< T, KNM< long > >::value >::type* =
@@ -2248,7 +2244,7 @@ namespace PETSc {
   template< class T, typename std::enable_if<
                        !std::is_same< T, KN< PetscScalar > >::value && !std::is_same< T, KNM< PetscScalar > >::value &&
                        !std::is_same< T, KN< long > >::value && !std::is_same< T, KNM< long > >::value>::type* = nullptr >
-  void resize(T* v, int n, int m) {}
+  void resize(T*, int, int) {}
   template< class T, typename std::enable_if< std::is_same< T, KN< upscaled_type<PetscScalar> > >::value || std::is_same< T, KN< long > >::value >::type* =
                        nullptr >
   void init_KN_or_KNM(T* v, T* w) {
@@ -2438,7 +2434,7 @@ namespace PETSc {
   template< class, class Container, char N = 'N' >
   static PetscErrorCode Op_User(Container, Vec, Vec);
   template< class Type >
-  PetscErrorCode Monitor(KSP ksp, PetscInt it, PetscReal rnorm, void* ctx) {
+  PetscErrorCode Monitor(KSP, PetscInt it, PetscReal rnorm, void* ctx) {
     PetscFunctionBeginUser;
     typename LinearSolver< Type >::MonF_O* mat =
       reinterpret_cast< typename LinearSolver< Type >::MonF_O* >(ctx);
@@ -2463,7 +2459,7 @@ namespace PETSc {
     }
     else
       ptA = GetAny< Type* >((*A)(stack));
-    ptParent = nargs[7] ? GetAny< Type* >((*nargs[7])(stack)) : 0;
+    ptParent = nargs[7] ? GetAny< Type* >((*nargs[7])(stack)) : nullptr;
     if (ptParent && ptParent->_ksp) {
       KSP* subksp;
       PetscInt n;
@@ -2645,12 +2641,12 @@ namespace PETSc {
         PetscBool isFieldSplit;
         PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
         if (isFieldSplit) {
-          KN< double >* fields = nargs[2] ? GetAny< KN< double >* >((*nargs[2])(stack)) : 0;
-          KN< String >* names = nargs[3] ? GetAny< KN< String >* >((*nargs[3])(stack)) : 0;
+          KN< double >* fields = nargs[2] ? GetAny< KN< double >* >((*nargs[2])(stack)) : nullptr;
+          KN< String >* names = nargs[3] ? GetAny< KN< String >* >((*nargs[3])(stack)) : nullptr;
           KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* mS =
-            nargs[5] ? GetAny< KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : 0;
-          KN< double >* pL = nargs[6] ? GetAny< KN< double >* >((*nargs[6])(stack)) : 0;
-          KN< Dmat >* mdS = nargs[11] ? GetAny< KN< Dmat >* >((*nargs[11])(stack)) : 0;
+            nargs[5] ? GetAny< KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : nullptr;
+          KN< double >* pL = nargs[6] ? GetAny< KN< double >* >((*nargs[6])(stack)) : nullptr;
+          KN< Dmat >* mdS = nargs[11] ? GetAny< KN< Dmat >* >((*nargs[11])(stack)) : nullptr;
           if (mdS)
             setFieldSplitPC(ptA, ksp, fields, names, mdS);
           else
@@ -2662,11 +2658,11 @@ namespace PETSc {
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
           FEbaseArrayKn< upscaled_type<PetscScalar> >* ptNS =
-            nargs[1] ? GetAny< FEbaseArrayKn< upscaled_type<PetscScalar> >* >((*nargs[1])(stack)) : 0;
+            nargs[1] ? GetAny< FEbaseArrayKn< upscaled_type<PetscScalar> >* >((*nargs[1])(stack)) : nullptr;
           KNM< upscaled_type<PetscScalar> >* ptPETScNS =
-            nargs[8] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : 0;
+            nargs[8] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : nullptr;
           KNM< upscaled_type<PetscScalar> >* ptPETScTNS =
-            nargs[21] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[21])(stack)) : 0;
+            nargs[21] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[21])(stack)) : nullptr;
           int dim = ptNS ? ptNS->N : 0;
           int dimPETSc = ptPETScNS ? ptPETScNS->M( ) : 0;
           int dimPETScT = ptPETScTNS ? ptPETScTNS->N( ) : 0;
@@ -3104,7 +3100,7 @@ namespace PETSc {
     return 0L;
   }
   template< class Type, unsigned short O, typename std::enable_if<std::is_same<Type, KNM<PetscScalar>>::value>::type* = nullptr >
-  AnyType view_dispatched(Type* const& ptA, std::string const& o, std::string* const& type, std::string* const& name, MPI_Comm const& comm) {
+  AnyType view_dispatched(Type* const& ptA, std::string const&, std::string* const& type, std::string* const& name, MPI_Comm const& comm) {
     bool pop = false;
     PetscViewer viewer = NULL;
     Mat A;
@@ -3189,7 +3185,7 @@ namespace PETSc {
       static const int n_name_param = 2;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
-      changeNumbering_Op(const basicAC_F0& args, int d) : A(0), in(0), out(0), c(d) {
+      changeNumbering_Op(const basicAC_F0& args, int d) : A(nullptr), in(nullptr), out(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (c != 2) {
           if (c == 1) {
@@ -3608,7 +3604,7 @@ namespace PETSc {
       Expression mat, matT;
       MatF_O(int n, Stack stk, const OneOperator* op, int m = -1, const OneOperator* opT = nullptr)
         : RNM_VirtualMatrix< PetscScalar >(n, m), stack(stk), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0), matT(opT ? CastTo< Kn_ >(C_F0(opT->code(basicAC_F0_wa(c_x)), (aType)*opT)) : 0) {}
+          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : nullptr), matT(opT ? CastTo< Kn_ >(C_F0(opT->code(basicAC_F0_wa(c_x)), (aType)*opT)) : nullptr) {}
       ~MatF_O( ) {
         delete matT;
         delete mat;
@@ -3642,7 +3638,7 @@ namespace PETSc {
       Expression mat;
       MonF_O(Stack stk, const OneOperator* op)
         : stack(stk), s(0), c_s(CPValue(s)), t(0), c_t(CPValue(t)),
-          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_s, c_t})), (aType)*op)) : 0) {
+          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_s, c_t})), (aType)*op)) : nullptr) {
       }
       ~MonF_O( ) {
         delete mat;
@@ -3671,7 +3667,7 @@ namespace PETSc {
       static const int n_name_param = 2;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
-      E_LinearSolver(const basicAC_F0& args, int d) : A(0), x(0), y(0), codeA(0), codeC(0), c(d) {
+      E_LinearSolver(const basicAC_F0& args, int d) : A(nullptr), x(nullptr), y(nullptr), codeA(nullptr), codeC(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (c != 2 && c != 6) {
           if (c == 1) {
@@ -4156,10 +4152,10 @@ namespace PETSc {
       Expression mat;
       VecF_O(int n, Stack stk, const OneOperator* op)
         : stack(stk), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) {}
+          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : nullptr) {}
       VecF_O(int n, Stack stk, const OneOperator* op, int)
         : stack(stk), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< PetscReal >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) {}
+          mat(op ? CastTo< PetscReal >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : nullptr) {}
       VecF_O(int n, Stack stk, const OneOperator* op, int, int ni, int ne)
         : stack(stk), x(n), c_x(CPValue(x)), x_e(std::max(0, ne)), c_x_e( ), x_i(std::max(0, ni)),
           c_x_i( ), mat( ) {
@@ -4236,7 +4232,7 @@ namespace PETSc {
         : stack(stk), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)), x_t(n), c_x_t(CPValue(x_t)),
           a(0), c_a(CPValue(a)),
           mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_t, c_x, c_x_t, c_a})), (aType)*op))
-                 : 0) {}
+                 : nullptr) {}
       ~IVecF_O( ) {
         delete mat;
         Expression zzz = c_t;
@@ -4271,10 +4267,10 @@ namespace PETSc {
       IMatF_O(int n, Stack stk, const OneOperator* op)
         : stack(stk), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)), x_t(n), c_x_t(CPValue(x_t)),
           mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa({c_t, c_x, c_x_t})), (aType)*op))
-                 : 0) {}
+                 : nullptr) {}
       IMatF_O(int n, Stack stk, const OneOperator* op, int)
         : stack(stk), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa({c_t, c_x})), (aType)*op)) : 0) {}
+          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa({c_t, c_x})), (aType)*op)) : nullptr) {}
       ~IMatF_O( ) {
         delete mat;
         Expression zzz = c_t;
@@ -4312,7 +4308,7 @@ namespace PETSc {
       Expression mat;
       IMonF_O(int n, Stack stk, const OneOperator* op)
         : stack(stk), s(0), c_s(CPValue(s)), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_s, c_t, c_x})), (aType)*op)) : 0) {
+          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_s, c_t, c_x})), (aType)*op)) : nullptr) {
       }
       ~IMonF_O( ) {
         delete mat;
@@ -4355,7 +4351,7 @@ namespace PETSc {
           c_dx(CPValue(dx)),
           mat(op ? CastTo< long >(C_F0(
                      op->code(basicAC_F0_wa({c_it, c_xnorm, c_gnorm, c_f, c_x, c_dx})), (aType)*op))
-                 : 0) {}
+                 : nullptr) {}
       ~IConvF_O( ) {
         delete mat;
         Expression zzz = c_it;
@@ -4399,7 +4395,7 @@ namespace PETSc {
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       E_NonlinearSolver(const basicAC_F0& args, int d)
-        : A(0), J(0), r(0), x(0), codeJ(0), codeR(0), codeRHS(0), c(d) {
+        : A(nullptr), J(nullptr), r(nullptr), x(nullptr), codeJ(nullptr), codeR(nullptr), codeRHS(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< Type* >(args[0]);
         const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[1].LeftValue( ));
@@ -4476,7 +4472,7 @@ namespace PETSc {
     {"convergence", &typeid(Polymorphic*)}
   };
   template< class Type >
-  PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
+  PetscErrorCode FormJacobian(SNES, Vec x, Mat, Mat, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
 
@@ -4538,7 +4534,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type, int I >
-  PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
+  PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
 
@@ -4578,7 +4574,7 @@ namespace PETSc {
     PetscFunctionReturn(PetscErrorCode(ret));
   }
   template< class Type, int I >
-  PetscErrorCode FormConstraintsTao(Tao obj, Vec x, Vec c, void* ctx) {
+  PetscErrorCode FormConstraintsTao(Tao, Vec x, Vec c, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
     PetscScalar* out;
@@ -4598,7 +4594,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class PType, class Type >
-  PetscErrorCode FormFunction(PType obj, Vec x, Vec f, void* ctx) {
+  PetscErrorCode FormFunction(PType, Vec x, Vec f, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
     PetscScalar* out;
@@ -4617,7 +4613,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
-  PetscErrorCode FormObjectiveRoutine(Tao tao, Vec x, PetscReal* f, void* ctx) {
+  PetscErrorCode FormObjectiveRoutine(Tao, Vec x, PetscReal* f, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
 
@@ -4632,7 +4628,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
-  PetscErrorCode FormIJacobian(TS ts, PetscReal t, Vec u, Vec u_t, PetscReal a, Mat J, Mat B,
+  PetscErrorCode FormIJacobian(TS, PetscReal t, Vec u, Vec u_t, PetscReal a, Mat, Mat,
                                void* ctx) {
     User< Type >* user;
     const PetscScalar *in, *in_t;
@@ -4651,7 +4647,7 @@ namespace PETSc {
     PetscFunctionReturn(PetscErrorCode(ret));
   }
   template< class Type >
-  PetscErrorCode FormIFunction(TS ts, PetscReal t, Vec u, Vec u_t, Vec F, void* ctx) {
+  PetscErrorCode FormIFunction(TS, PetscReal t, Vec u, Vec u_t, Vec F, void* ctx) {
     User< Type >* user;
     const PetscScalar *in, *in_t;
     PetscScalar* out;
@@ -4673,7 +4669,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
-  PetscErrorCode FormRHSFunction(TS ts, PetscReal t, Vec u, Vec F, void* ctx) {
+  PetscErrorCode FormRHSFunction(TS, PetscReal t, Vec u, Vec F, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
     PetscScalar* out;
@@ -4692,7 +4688,7 @@ namespace PETSc {
     PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
-  PetscErrorCode Monitor(TS ts, PetscInt step, PetscReal time, Vec u, void* ctx) {
+  PetscErrorCode Monitor(TS, PetscInt step, PetscReal time, Vec u, void* ctx) {
     User< Type >* user;
     const PetscScalar* in;
 
@@ -5362,7 +5358,7 @@ namespace PETSc {
             u->operator[](i) = p[i];
         }
       }
-    };
+    }
     static U inv(U Ax, InvPETSc< T, U, K, trans > A) {
       A.solve(Ax);
       return Ax;
@@ -5865,7 +5861,7 @@ namespace PETSc {
       Expression A;
       Expression B;
       const int c;
-      DMPlexToFF_Op(const basicAC_F0& args, int d) : A(0), B(0), c(d) {
+      DMPlexToFF_Op(const basicAC_F0& args, int d) : A(nullptr), B(nullptr), c(d) {
         B = to<DMPlex*>(args[1]);
         if(c == 0)
             A = to< Mesh const** >(args[0]);
@@ -6153,7 +6149,7 @@ namespace PETSc {
      public:
       Expression A;
       Expression B;
-      buildSolution_Op(const basicAC_F0& args) : A(0), B(0) {
+      buildSolution_Op(const basicAC_F0& args) : A(nullptr), B(nullptr) {
         A = to<Dmat*>(args[0]);
         B = to<KN<upscaled_type<PetscScalar>>*>(args[1]);
       }
@@ -6279,7 +6275,7 @@ namespace PETSc {
     { return  new Op(to<PETSc::DistributedCSR< HpddmType >*>(args[0]),args[1],init); }
     OpMatrixtoBilinearFormVGPETSc(int initt=0) :
       OneOperator(atype<PETSc::DistributedCSR< HpddmType >*>(),atype<PETSc::DistributedCSR< HpddmType >*>(),atype<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
-      init(initt){};
+      init(initt){}
 
   };
 
@@ -6729,7 +6725,7 @@ namespace PETSc {
                                                           0, 0, (*pUh)->vect[i], (*pVh)->vect[j],
                                                           true, false, ds.sym, ds.tgv, ds.commworld,
                                                           b_largs_zz, stack,
-                                                          0, 0, Afem.pHM());
+                                                          nullptr, nullptr, Afem.pHM());
 
             nsparseblocks++;
           }
@@ -6794,7 +6790,7 @@ static void Init_PETSc( ) {
   int argc = pkarg->n;
   char** argv = new char*[argc];
   for (int i = 0; i < argc; ++i) argv[i] = const_cast< char* >((*(*pkarg)[i].getap( ))->c_str( ));
-  PetscInitialize(&argc, &argv, 0, "");
+  PetscInitialize(&argc, &argv, nullptr, "");
   PetscSysInitializePackage( );
   MatInitializePackage( );
 #ifndef HPDDM_SLEPC

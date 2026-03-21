@@ -55,8 +55,8 @@ class CMAES //Abstract class, because the fitness function prototype may differ 
 {
 	public:
 		//typedef double (*FFT)(double const *); //Fitness Function Type
-		CMAES() : pop(0),fitvals(0),evo() {}
-		CMAES(int d,double *xstart,double *stddev,long seed,int lambda,const char *ipf="initials.par") : pop(0),fitvals(0),evo()
+		CMAES() : pop(nullptr),fitvals(nullptr),evo() {}
+		CMAES(int d,double *xstart,double *stddev,long seed,int lambda,const char *ipf="initials.par") : pop(nullptr),fitvals(nullptr),evo()
 		{
 			fitvals = init(d,xstart,stddev,seed,lambda,ipf);
 			cout << SayHello() << endl;
@@ -175,7 +175,7 @@ class OptimCMA_ES : public OneOperator
 					: CMAES(d,xstart.n ? xstart:0,stddev,seed,lambda,"non"),x(&xstart),fit(&_ff) {}*/
 
 				CMA_ES_MPI(ffcalfunc &_ff,Rn &xstart,const Rn &stddev,long seed,int lambda,MPI_Comm *_com)
-					: CMAES(),x(0),fit(&_ff),com(_com),myid(0),nproc(1),my_number_of_fitness_eval(0),index(0)
+					: CMAES(),x(nullptr),fit(&_ff),com(_com),myid(0),nproc(1),my_number_of_fitness_eval(0),index(nullptr)
 				{
 					MPI_Comm_size(*com,&nproc);
 					MPI_Comm_rank(*com,&myid);
@@ -191,7 +191,7 @@ class OptimCMA_ES : public OneOperator
 					if(myid==0) cout << SayHello() << endl;
 				}
 				CMA_ES_MPI(ffcalfunc &_ff,Rn &xstart,const Rn &stddev,long seed,int lambda,MPI_Comm *_com,const char *ifname)
-					: CMAES(),x(0),fit(&_ff),com(_com),myid(0),nproc(1),my_number_of_fitness_eval(0),index(0)
+					: CMAES(),x(nullptr),fit(&_ff),com(_com),myid(0),nproc(1),my_number_of_fitness_eval(0),index(nullptr)
 				{
 					MPI_Comm_size(*com,&nproc);
 					MPI_Comm_rank(*com,&myid);
@@ -209,7 +209,7 @@ class OptimCMA_ES : public OneOperator
 				~CMA_ES_MPI()
 				{
 					if(index) delete [] index;
-					index=0;
+					index=nullptr;
 				}
 
 				void PopEval()
@@ -274,7 +274,7 @@ class OptimCMA_ES : public OneOperator
 					inittheparam = currentblock->NewVar<LocalVariable>("the parameter",atype<KN<R> *>(),X_n);
 					theparam = currentblock->Find("the parameter"); //  the expression for the parameter
 					args.SetNameParam(n_name_param,name_param,nargs);
-					const  Polymorphic * opJ=0;
+					const  Polymorphic * opJ=nullptr;
 					if (nbj>0)
 					{
 						opJ=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
@@ -302,7 +302,7 @@ class OptimCMA_ES : public OneOperator
 					double stopTolX = arg(5,stack,0.);
 					double stopTolUpXFactor = arg(6,stack,1.E3);
 					long popsize = arg(7,stack,4 + (long) floor(3*log(n)));
-					pcommworld vcommworld=0;
+					pcommworld vcommworld=nullptr;
 					if (nargs[8]) vcommworld = GetAny<pcommworld>((*nargs[8])(stack));
 
 					MPI_Comm mpiCommWorld = MPI_COMM_WORLD;
@@ -323,7 +323,7 @@ class OptimCMA_ES : public OneOperator
 
 					//cout << endl << "nbr de proc : " << nproc << " -- myid=" << myid << " -- world id=" << wr <<  endl;
 
-					CMA_ES_MPI *optim=0;
+					CMA_ES_MPI *optim=nullptr;
 					if(nargs[9]) optim = new CMA_ES_MPI(ffJ,x,initialStdDevs,seed,popsize,commworld,(GetAny<string*>((*nargs[9])(stack)))->c_str());
 					else optim = new CMA_ES_MPI(ffJ,x,initialStdDevs,seed,popsize,commworld);
 					if(!nargs[9])

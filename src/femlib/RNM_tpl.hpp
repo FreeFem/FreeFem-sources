@@ -49,10 +49,10 @@ namespace RNM  {
 
 template <class T> inline double norm(const T & x){return std::norm(x);}
 inline double norm(double x){return x*x;} 
-inline double norm(float x){return x*x;}
+inline double norm(float x){return (double)x*(double)x;}
 inline long norm(long x){return x*x;}
 inline int norm(int x){return x*x;}
-template <class T> inline bool verysmall(const T & t){ return false;}
+template <class T> inline bool verysmall(const T &){ return false;}
 template <> inline bool verysmall<double>(const double & t){ return abs(t)< 1e-305 ? 1: false;}
 template <> inline bool verysmall<complex<double> >(const complex<double> & t)
     {return verysmall(t.real() )|| verysmall(t.imag() );}
@@ -94,7 +94,7 @@ inline ostream & operator<<(ostream & f,const ShapeOfArray & s)
      f << ",";
      if(prec<i10) f.precision(prec);
      return f;
-  };
+  }
 
 
 template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
@@ -107,7 +107,7 @@ template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
         f   << setw(3) << RNM::removeeps(v[i]) << ((i % 5) == 4 ? "\n\t" : "\t");
     if(prec<i10) f.precision(prec); 
     return f;
-  };
+  }
 
 template<class R> istream & operator>>(istream & f, KN_<R> & v)
  {
@@ -158,7 +158,7 @@ template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
     if(prec<i10) f.precision(prec);
   return f;
     
-   };
+   }
 
 template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
   { //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v  
@@ -179,7 +179,7 @@ template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
     if(prec<i10) f.precision(prec);
     return f;
     
-  };
+  }
 
 template<class R>
  R  KN_<R>::operator,(const KN_<const_R> & u) const {
