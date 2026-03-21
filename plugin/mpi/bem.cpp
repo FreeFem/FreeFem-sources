@@ -12,10 +12,33 @@
 
 // include the bemtool library .... path define in where library
 //#include <bemtool/operator/block_op.hpp>
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wunused-parameter"
+  #pragma clang diagnostic ignored "-Wextra-semi"
+  #pragma clang diagnostic ignored "-Wextra-semi-stmt"
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #pragma clang diagnostic ignored "-Wvla-cxx-extension"
+  #pragma clang diagnostic ignored "-Wundef"
+  #pragma clang diagnostic ignored "-Wdouble-promotion"
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+  #pragma GCC diagnostic ignored "-Wextra-semi"
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #pragma GCC diagnostic ignored "-Wvla"
+  #pragma GCC diagnostic ignored "-Wundef"
+  #pragma GCC diagnostic ignored "-Wdouble-promotion"
+#endif
 #include <bemtool/tools.hpp>
 #include <bemtool/fem/dof.hpp>
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
+#if defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#endif
 #include "PlotStream.hpp"
 
 #include "common.hpp"

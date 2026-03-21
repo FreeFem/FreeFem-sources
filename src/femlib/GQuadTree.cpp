@@ -774,6 +774,12 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     return -1;
   } 
   
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
+#endif
   template<class Mesh>
   const typename  Mesh::Element * Find(const Mesh & Th,
 				       GTree<typename Mesh::Vertex> *quadtree,
@@ -1126,6 +1132,11 @@ RESTART:
   }
   /*==============================PICHON=================*/
 }
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic pop
+#endif
+#endif
 
 
 // Instantiation  manuel des templates

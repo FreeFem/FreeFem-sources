@@ -39,7 +39,19 @@
 #include  <iostream>
 using namespace std;
 #include "ff++.hpp"
-#include "mpi.h"
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+#include <mpi.h>
+#if defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#endif
 #include "cmaes_interface.h"
 
 

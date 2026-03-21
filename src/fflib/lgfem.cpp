@@ -2084,6 +2084,12 @@ AnyType pfer2R(Stack s, const AnyType &a) {
   return SetAny< R >(rr);
 }
 
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
+#endif
 template< class R >
 AnyType set_fe(Stack s, Expression ppfe, Expression e) {
   long kkff = Mesh::kfind, kkth = Mesh::kthrough;
@@ -2176,6 +2182,11 @@ AnyType set_fe(Stack s, Expression ppfe, Expression e) {
                         << double(kkth) / Max< double >(1., kkff) << " change " << change << endl;
   return SetAny< FEbase< R, v_fes > * >(&fe);
 }
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic pop
+#endif
+#endif
 AnyType set_feoX_1(Stack s, Expression ppfeX_1, Expression e) {    // inutile
                                                                    // meme chose que  v(X1,X2);
   StackOfPtr2Free *sptr = WhereStackOfPtr2Free(s);

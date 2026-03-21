@@ -28,7 +28,19 @@
 // F. Hecht  december 2011
 // ----------------------------
 // file to add MUMPS sequentiel interface for sparce linear solver with dynamic load.
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
 #include <mpi.h>
+#if defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#endif
 #ifdef _WIN32
 __declspec(dllexport) int toto;
 MPI_Fint* _imp__MPI_F_STATUS_IGNORE;

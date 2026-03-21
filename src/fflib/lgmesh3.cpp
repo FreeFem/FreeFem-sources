@@ -1700,6 +1700,12 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 }
 */
 
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
+#endif
 template<class R, class v_fes>
 AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 {
@@ -1798,7 +1804,11 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
       << " " << kkth << "/" << kkff << " =  " << double(kkth)/Max<double>(1.,kkff) << endl;
   return SetAny<FEbase<R,v_fes>*>(&fe); 
 }
-
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
+#pragma clang diagnostic pop
+#endif
+#endif
 
 
 
