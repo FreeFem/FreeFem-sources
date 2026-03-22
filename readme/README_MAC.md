@@ -87,7 +87,7 @@ or the develop version
 	```bash
 	cd ff++ 
 	autoreconf -i 
-	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran CXXFLAGS=-Wno-undefined-var-template --enable-maintainer-mode
+	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran --enable-maintainer-mode
 	make
 	sudo make install
     ```
@@ -97,7 +97,7 @@ or the develop version
 ```bash
 	cd ff++ 
 	autoreconf -i 
-	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran CXXFLAGS=-Wno-undefined-var-template --enable-maintainer-mode
+	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran --enable-maintainer-mode
     cd 3rdparty/ff-petsc
 	make 
 ```
