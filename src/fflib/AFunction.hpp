@@ -812,7 +812,7 @@ template<class A>
 template<class A> AnyType Initialize(Stack,const AnyType &x){
   A * a=PGetAny<A>(x);
   A *b=new A;// 
-  memcpy(a,b,sizeof(A));// bitcopy
+  memcpy((void*)a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 
   return  SetPtrAny(a);
 }

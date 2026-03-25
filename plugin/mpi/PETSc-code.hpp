@@ -1,5 +1,10 @@
 #include <petsc.h>
 
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wunused-value"
+#endif
+
 #include "PETSc.hpp"
 #include "compositeFESpace.hpp"
 
@@ -6905,4 +6910,8 @@ static void Init_PETSc( ) {
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
+#endif
+
+#if defined(__clang__)
+  #pragma clang diagnostic pop
 #endif

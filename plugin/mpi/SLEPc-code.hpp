@@ -9,7 +9,12 @@
 
 #ifdef WITH_SLEPC
 
-#include "slepc.h"
+#include <slepc.h>
+
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wunused-value"
+#endif
 
 namespace SLEPc {
 template<class Type, class K>
@@ -670,4 +675,8 @@ static void Init() {
 static void Init() {
      Init_PETSc();
 }
+#endif
+
+#if defined(__clang__)
+  #pragma clang diagnostic pop
 #endif

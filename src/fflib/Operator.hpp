@@ -201,7 +201,7 @@ struct Op2_padd {
   using second_argument_type = B;
   using result_type          = R*;
   static R * f(Stack s,const A & a,const B & b)  { 
-   R* r= Add2StackOfPtr2Free(s, a || b ? new R ((a ? *a : nullptr) + (b ? *b : nullptr)) : nullptr);
+   R* r= Add2StackOfPtr2Free(s, a || b ? new R ((a ? *a : R()) + (b ? *b : R())) : nullptr);
   // delete a,delete b;
   return r;} }; 
 
