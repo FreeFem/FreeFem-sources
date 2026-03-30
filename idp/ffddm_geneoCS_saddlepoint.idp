@@ -99,7 +99,9 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   int printRank = mpiSize(pr#prfe#prmesh#commddm);
   if(pr#prfe#Dk[i].n > 0)
     printRank = mpiRank(pr#prfe#prmesh#commddm);
-  mpiReduce(printRank, printRank, processor(0), mpiMIN);
+  int tmp = 0;
+  mpiReduce(printRank, tmp, processor(0), mpiMIN);
+  printRank = tmp;
   broadcast(processor(0), printRank);
 
   if (pr#prfe#Dk[i].n > 0) {
