@@ -80,7 +80,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download --disable-superlu --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 3
