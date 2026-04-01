@@ -233,9 +233,6 @@ echo2 find $dirpkg/$prefix -name '*.dylib'
 echo2 .. $changedylibgfortran  $dirlibgfortrannew  
 find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
  $changedylibgfortran  $dirlibgfortrannew `cat $tmpdylib`
- for i in `cat $tmpdylib`; do
-   $dirscript/rm_double_rpath_dylib $i
-done
  ## verification 
  echo2 dylib to brew in installation for debug !!!! 
  cat $tmpdylib| xargs otool -L | egrep -i 'brew|/opt/' ||echo2 OK 
