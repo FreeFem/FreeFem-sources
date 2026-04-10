@@ -207,7 +207,7 @@ public:
 struct Data_Bem_Solver
 : public Data_Sparse_Solver {
     double eta;
-    int maxleafsize,mintargetdepth,minsourcedepth;
+    int maxleafsize,mintargetdepth,minsourcedepth,qforder;
     string compressor, initialclustering, clusteringdirections;
     bool recompress, adaptiveclustering, hluinplace;
        
@@ -222,7 +222,8 @@ struct Data_Bem_Solver
        initialclustering("default"),
        clusteringdirections(!ff_htoolClusteringdirections?"pca":"boundingbox"),
        adaptiveclustering(ff_htoolAdaptiveclustering),
-       hluinplace(false)
+       hluinplace(false),
+       qforder(12)
     
         {epsilon=ff_htoolEpsilon;}
      
@@ -318,6 +319,7 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.clusteringdirections = *GetAny<string*>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.adaptiveclustering = GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.hluinplace = GetAny<bool>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.qforder = GetAny<int>((*nargs[kk])(stack));
         ffassert(++kk == n_name_param);
     }   
 }
@@ -489,6 +491,8 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     // compression infogfg
     
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
+
+    int qforder = ds.qforder;
     
     // source/target meshes
     const SMesh & ThU =Uh->Th; // line
@@ -645,34 +649,34 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         if (SP0) {
             bemtool::Dof<P0> dof(mesh);
             if (samemesh)
-                ff_BIO_Generator<R,P0,P0,SMesh,SMesh>(generator,Ker,dof,dof,alpha);
+                ff_BIO_Generator<R,P0,P0,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
                 bemtool::Dof<P0X> dofX(meshX);
-                ff_BIO_Generator<R,P0X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha);
+                ff_BIO_Generator<R,P0X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
             }
         }
         else if (SP1) {
             bemtool::Dof<P1> dof(mesh,true);
             if (samemesh)
-                ff_BIO_Generator<R,P1,P1,SMesh,SMesh>(generator,Ker,dof,dof,alpha);
+                ff_BIO_Generator<R,P1,P1,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
                 bemtool::Dof<P1X> dofX(meshX,true);
-                ff_BIO_Generator<R,P1X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha);
+                ff_BIO_Generator<R,P1X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
             }
         }
         else if (SP2) {
             bemtool::Dof<P2> dof(mesh,true);
             if (samemesh)
-                ff_BIO_Generator<R,P2,P2,SMesh,SMesh>(generator,Ker,dof,dof,alpha);
+                ff_BIO_Generator<R,P2,P2,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
                 bemtool::Dof<P2X> dofX(meshX,true);
-                ff_BIO_Generator<R,P2X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha);
+                ff_BIO_Generator<R,P2X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
             }
         }
         else if (SRT0 && SRdHat::d == 2) {
             // BemKernel->typeKernel[0] == 6 :: MA_SL
             bemtool::Dof<bemtool::RT0_2D> dof(mesh);
-            ff_BIO_Generator_Maxwell<R>(generator,Ker,dof,alpha);
+            ff_BIO_Generator_Maxwell<R>(generator,Ker,dof,alpha,qforder);
         }
         else
             ffassert(0);

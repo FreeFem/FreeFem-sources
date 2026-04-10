@@ -129,7 +129,7 @@ void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack
         pair<BemKernel*, std::complex<double>> kernel = getBemKernel(stack, bargs);
         BemKernel *Ker = kernel.first;
         std::complex<double> alpha = kernel.second;
-        ff_BIO_Generator_Maxwell<PetscScalar>(ctx->generator,Ker,*ctx->dof,alpha);
+        ff_BIO_Generator_Maxwell<PetscScalar>(ctx->generator,Ker,*ctx->dof,alpha,12);
     }
     else if (VFBEM == 2) {
         BemPotential *Pot = getBemPotential(stack, bargs);
@@ -182,7 +182,7 @@ void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack
         pair<BemKernel*, std::complex<double>> kernel = getBemKernel(stack, bargs);
         BemKernel *Ker = kernel.first;
         std::complex<double> alpha = kernel.second;
-        ff_BIO_Generator<PetscScalar,P,Mesh1>(ctx->generator,Ker,*ctx->dof,alpha);
+        ff_BIO_Generator<PetscScalar,P,Mesh1>(ctx->generator,Ker,*ctx->dof,alpha,12);
     }
     else if (VFBEM == 2) {
         BemPotential *Pot = getBemPotential(stack, bargs);
