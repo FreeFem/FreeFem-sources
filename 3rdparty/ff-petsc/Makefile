@@ -99,9 +99,6 @@ ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
 PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
-ifeq ($(DARWIN),Darwin)
-PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi
-endif
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
 endif
