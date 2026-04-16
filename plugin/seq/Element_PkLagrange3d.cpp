@@ -5,13 +5,13 @@ namespace Fem2D {
     typedef Mesh3 Mesh;
     typedef Mesh3::Element Element;
     typedef GFElement< Mesh3 > FElement;
-    int kp;      // PK
-    int ndof;    //= (kp + 3) * (kp + 2) * (kp + 1) / 6;
-    int dfon[4];
-   vector< vector< int > > nl;    //[20][3] for P3; // returns the lambdas used for polynomial
-   vector< vector< int > > cl;    //[20][3];  //  polynomial form = prod 1/cp (nl-cl)
-   vector< int > cp;              //[20]; //  polynomial factors
-   vector< vector< int > > pp;    //[20][4];  //bary. coordinates
+    int kp;                        // PK
+    int ndof;                      //= (kp + 3) * (kp + 2) * (kp + 1) / 6;
+    int dfon[4];                   // Topological info
+    vector< vector< int > > nl;    //[20][3] for P3; // returns the lambdas used for polynomial
+    vector< vector< int > > cl;    //[20][3]for P3;  //  polynomial form = prod 1/cp (nl-cl)
+    vector< int > cp;              //[20]for P3; //  polynomial factors
+    vector< vector< int > > pp;    //[20][4] for P3;  //bary. coordinates
     static const int d = Mesh::Rd::d;
     TypeOfFE_PKLagrange_3d(int PK);    // constructor
     void FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
@@ -20,6 +20,7 @@ namespace Fem2D {
 
    private:
     static int *Preparedfon(int PK) {
+      // Fct needed in the parent class constructor
       static int locdfon[4];
       // Fill data
       locdfon[0] = 1;                                     // 1 dof per vertice
@@ -31,21 +32,26 @@ namespace Fem2D {
   };
 
   TypeOfFE_PKLagrange_3d::TypeOfFE_PKLagrange_3d(int PK) : GTypeOfFE< Mesh >(Preparedfon(PK), 1, PK, false, false) {
-    kp = PK;
-    ndof = (PK + 1) * (PK + 2) * (PK + 3) / 6;
-    nl.resize(ndof, vector< int >(PK));    
-    cl.resize(ndof, vector< int >(PK));   
-    pp.resize(ndof, vector< int >(4));
+    kp = PK;                                      // order
+    ndof = (PK + 1) * (PK + 2) * (PK + 3) / 6;    // # dofs
+    nl.resize(ndof, vector< int >(PK));           // nl cl and cp desribe the shape fcts
+    cl.resize(ndof, vector< int >(PK));
     cp.resize(ndof);
-    // Filling dfon explicitly 
+
+    pp.resize(ndof, vector< int >(4));    // barycoordinates
+
+    // Filling dfon explicitly
     dfon[0] = 1;                                     // 1 dof per vertice
     dfon[1] = PK - 1;                                // dof per edge
     dfon[2] = (PK - 1) * (PK - 2) / 2;               // dof on the surface
     dfon[3] = (PK - 1) * (PK - 2) * (PK - 3) / 6;    // dof in the volume*/
-    // Fill nl cl cp pp 
-    BasisFctPK3D(PK, nl, cl, cp,pp);
+
+    // Fill nl cl cp pp
+    BasisFctPK3D(PK, nl, cl, cp, pp);
+
     // Fill pp
-    //pp = generate_barycoordinates(PK);
+    // pp = generate_barycoordinates(PK);
+
     typedef Element E;
     int n = this->NbDoF;
     bool dd = verbosity > 5;
@@ -79,88 +85,36 @@ namespace Fem2D {
   // Adapted only to P4 de REF
   void TypeOfFE_PKLagrange_3d::OrientDoFOfFace(int odf, const Element &K, int f, int *pp, int inv) const {
     const int doff = odf + 4 * dfon[0] + 6 * dfon[1] + f * dfon[2];    // first dof of face f 4 vertices + 6 edges+ x* number face
-    int np = K.facePermutation(f);
+
+    int np = K.facePermutation(f);    // Returns first vertice of the face and the orientation
     int i = np / 2, j = np % (2) ? 2 : 1;
     int i0 = i, i1 = (i + j) % 3, i2 = (i + j + j) % 3;
-    /*if (inv) {
-      pp[doff + i0] = doff + 0;
-      pp[doff + i1] = doff + 1;
-      pp[doff + i2] = doff + 2;
-
-
-    } else {
-      pp[doff + 0] = doff + i0;
-      pp[doff + 1] = doff + i1;
-      pp[doff + 2] = doff + i2;
-    }*/
-    /*cout<<"f="<< f << " Nvface " <<(K.nvface[f][0])<<(K.nvface[f][1])<<(K.nvface[f][2])<<endl;
-    cout<<"Np: "<<np<<" i "<<i<<" j "<<j<<endl;
-    cout<<"i0: "<<i0<<" i1 "<<i1<<" i2 "<<i2<<endl;*/
-
-
-    // position de chaque sommet{s,a,s,a,a,s}
-    int spos[3]={0,kp-3,dfon[2]-1};
-    /*int apos[1][3][3] = {{        // positions des arete
-        {-1,  1,  3},   // arete 0-1 → pos1, arete 0-2 : pos3
-        { 1, -1,  4},   // arete 1-0 → pos1, arete 1-2 : pos4
-        { 3,  4, -1}    // arete 2-0 → pos3, arete 2-1 : pos4
-    }};*/
-   /*int apos[2][3][3] = {
-   {
-     {-1,  1,  4},
-     { 2, -1,  6},
-     { 7,  8, -1}},
- 
-     {
-     {-1,  2,  7},
-     { 1, -1,  8},
-     { 4,  6, -1}}
-
-  };*/
-  /*auto apos=permutationslist ( kp);
-  if (kp==7) apos[apos.size()-1]={{-1,10,7},{10,-1,6},{7,6,-1}};
-  for (int i0=0; i0<3; i0++){
-  for (int i1=0; i1<3; i1++){
-  for (int i2=0; i2<3; i2++)
-  if((i0!=i1) && (i0!=i2) && (i1!=i2)){*/
-
-
-//
-  ////apos[3]={{-1,8,12},{8,-1,13},{12,13,-1}};
-  //  cout<<spos[i0]<<" | "<<spos[0]<<endl;
-  //  cout<<spos[i1]<<" | "<<spos[1]<<endl;
-  //  cout<<spos[i2]<<" | "<<spos[2]<<endl<<endl;
-//
-  // for (int k =0;k<2;k++){
-  //      cout<<apos[k][i0][i1]<<" | "<<apos[k][0][1]<<endl;
-  //      cout<<apos[k][i0][i2]<<" | "<<apos[k][0][2]<<endl;
-  //      cout<<apos[k][i1][i2]<<" | "<<apos[k][1][2]<<endl;
-  //        cout<<endl;
-  //  }
-  //exit(0);
-  //*/
-  
+    // position of the internel vertices of the faces
+    int spos[3] = {0, kp - 3, dfon[2] - 1};
     if (inv) {
-        std::vector<int> permut={i0,i1,i2};
-        permut[i0]=0;
-        permut[i1]=1;
-        permut[i2]=2;
+      std::vector< int > permut(3, 0);    //={i0,i1,i2};
+      permut[i0] = 0;
+      permut[i1] = 1;
+      permut[i2] = 2;
 
-        //cout<<"I's "<<i0<<i1<<i2<<endl; 
-        for (int i=0;i<=kp-3;i++){
-            for (int j=0;j<=kp-3-i;j++){
-              int k=(kp-3-j-i);
-             std::vector<int> barcoord={i,j,k};
-            int oldnumdof=numerotationLocIntern( kp,  barcoord[0] ,  barcoord[1], barcoord[2])   ;
-            int newnumdof= numerotationPermutation( kp,barcoord, permut);
-            //cout<<" doff perm: "<<oldnumdof <<" | "<<newnumdof<<endl;
-            pp[ doff+ newnumdof ]= doff + oldnumdof;
-            }}
-        
-    } 
-    //}}}
-    
-    //exit(0);
+      // cout<<"I's "<<i0<<i1<<i2<<endl;
+      //  The internal dofs of the face
+      //  can be seen as a (kp-3) 2d element
+      //  Dofs are numberer diagonally
+      //  The loops handles the dofs to be permuted
+      //  using basy coordinates and the face orientation
+
+      for (int i = 0; i <= kp - 3; i++) {
+        for (int j = 0; j <= kp - 3 - i; j++) {
+          int k = (kp - 3 - j - i);
+          std::vector< int > barcoord = {i, j, k};
+          int oldnumdof = numerotationLocIntern(kp, barcoord[0], barcoord[1], barcoord[2]);
+          int newnumdof = numerotationPermutation(kp, barcoord, permut);
+          // cout<<" doff perm: "<<oldnumdof <<" | "<<newnumdof<<endl;
+          pp[doff + newnumdof] = doff + oldnumdof;
+        }
+      }
+    }
     // This was used for the old version of the P4 (We don't need it)
     /*else {
         pp[doff + spos[0]] = doff + spos[i0];
@@ -172,10 +126,7 @@ namespace Fem2D {
         pp[doff + apos[1][2]] = doff + apos[i1][i2];
         }
     }*/
-
   }
-
-
 
   void TypeOfFE_PKLagrange_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M, int ocoef, int odf, int *nump) const {
     //  faux nump don la numerotation des p -> local
@@ -188,9 +139,9 @@ namespace Fem2D {
     int n = this->NbDoF;
     int *p = M.p;
 
-     for (int i = 0; i < n; ++i) {
-       M.p[i] = i;
-     }
+    for (int i = 0; i < n; ++i) {
+      M.p[i] = i;
+    }
 
     if (verbosity > 9) {
       cout << " PK  set:" << odf << " : ";
@@ -199,8 +150,8 @@ namespace Fem2D {
     // int dof = 4+odf;
     int dof = odf;
 
-    int nbrPermAxis = (kp % 2) ? (kp - 1) : (kp - 2);    // Number of permutation per edge
-    vector< pair< int, int > > ExId = ExchangeidxVector3D(kp); // indices to exchange
+    int nbrPermAxis = (kp % 2) ? (kp - 1) : (kp - 2);             // Number of permutation per edge
+    vector< pair< int, int > > ExId = ExchangeidxVector3D(kp);    // indices to exchange
 
     for (int e = 0; e < 6; ++e) {
       int oe = K.EdgeOrientation(e);
@@ -244,7 +195,7 @@ namespace Fem2D {
     ld[2] *= R(kp);
     ld[3] *= R(kp);
 
-    vector< int > p(ndof, 0); 
+    vector< int > p(ndof, 0);
     for (int cpt = 0; cpt < p.size( ); cpt++) p[cpt] = cpt;
     {
       // int dof = 4;
@@ -260,7 +211,7 @@ namespace Fem2D {
 
         dof += kp - 1;
       }
-      
+
       if (dfon[2] > 1) {
         for (int f = 0; f < 4; ++f) OrientDoFOfFace(0, K, f, p.data( ), 1);
       }
@@ -338,9 +289,6 @@ namespace Fem2D {
     }
   }
 
-
-
-
 #include "Element_PkL.hpp"
   // if you need to add a newFE (higher order $ORDER for instance)
   // you can simply do it by following the steps:
@@ -377,7 +325,7 @@ namespace Fem2D {
 
   static TypeOfFE_PKLagrange_3d PKLagrangeP11(11);
   GTypeOfFE< Mesh3 > &Elm_PKL11_3d(PKLagrangeP11);
-  
+
   static void init( ) {
     AddNewFE3("PKLP33d", &Elm_PKL3_3d);
     AddNewFE3("PKLP43d", &Elm_PKL4_3d);
@@ -388,7 +336,6 @@ namespace Fem2D {
     AddNewFE3("PKLP93d", &Elm_PKL9_3d);
     AddNewFE3("PKLP103d", &Elm_PKL10_3d);
     AddNewFE3("PKLP113d", &Elm_PKL11_3d);
-
   }
 }    // namespace Fem2D
 LOADFUNC(Fem2D::init);
