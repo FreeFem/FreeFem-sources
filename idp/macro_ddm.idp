@@ -136,6 +136,9 @@ IFMACRO(!privateCreateMat)
     intersection[0].resize(0);
     PhGlobalPrivate supp;
     VhGlobalPrivate suppSmooth;
+IFMACRO(privateDmesh#N2O)
+    int[int] n2oSplitPrivate(0);
+ENDIFMACRO
     {
         int constant = rank;
         for[i, value : supp[]] value = abs(part[][i] - constant) < 0.1;
@@ -151,7 +154,12 @@ IFMACRO(!privateCreateMat)
         Unique(part[], intersection[0], remove = constant);
         if(suppSmooth[].max < 0.01) intersection[0].resize(0);
         if(s > 1 && level <= 1) {
+IFMACRO(!privateDmesh#N2O)
             globalName = trunc(globalName, suppSmooth > 0.001, split = s);
+ENDIFMACRO
+IFMACRO(privateDmesh#N2O)
+            globalName = trunc(globalName, suppSmooth > 0.001, split = s, new2old = n2oSplitPrivate);
+ENDIFMACRO
             supp = abs(part - constant) < 0.1;
             suppSmooth = 0;
             AddLayers(VhGlobalPrivate, supp[], 2 * overlap, suppSmooth[]);
@@ -216,6 +224,13 @@ IFMACRO(!privateDmesh#CartesianPartitioning)
         privateDmesh#N2O = new;
         n2oNeighbor.resize(backup.n);
         n2oNeighbor = backup;
+        if(n2oSplitPrivate.n > 0) {
+            int nSplitPrivate = 1;
+            while(nSplitPrivate < n2oSplitPrivate.n && n2oSplitPrivate[nSplitPrivate] == n2oSplitPrivate[0])
+                nSplitPrivate++;
+            for[m, val : privateDmesh#N2O]
+                val = n2oSplitPrivate[val] * nSplitPrivate + val % nSplitPrivate;
+        }
     }
 ENDIFMACRO
 ENDIFMACRO
@@ -733,9 +748,6 @@ NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
 NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
 IFMACRO(ThName#N2O)
 NewMacro privateDmesh#N2O()ThName#N2O EndMacro
-IFMACRO(ThName#RefinementFactor)
-exit(10); /* not currently implemented */
-ENDIFMACRO
 IFMACRO(ThName#Periodicity)
 if(mpirank == 0) cout << "Deprecated \"" << Stringification(ThName) << "Periodicity\" macro, switch to: \n  NewMacro " << Stringification(ThName) << "Periodic() EndMacro" << endl; /* TODO FIXME: remove at some point (deprecated since January 2026) */
 ENDIFMACRO
