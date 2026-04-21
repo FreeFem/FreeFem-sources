@@ -2051,18 +2051,17 @@ ENDIFMACRO
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
             if(recvTh[index].nt) {
-                fespace PhRestrictionPrivate(recvTh[index], P0);
-                matrix R = interpolate(PhRestrictionPrivate, PhExchangePrivate);
-                if(R.nnz != R.n) {
-                    R.thresholding(1.0e-2);
-                    assert(R.nnz == R.n);
-                }
+                fespace VhRestrictionPrivate(recvTh[index], Pk);
+                VhRestrictionPrivate<PetscScalar> def(uLocal);
+                uLocal[] = exchangeU[index];
+                matrix R = interpolate(VhExchangePrivate, VhRestrictionPrivate, inside = 1);
                 int[int] I, J;
                 real[int] C;
                 [I, J, C] = R;
-                fespace VhRestrictionPrivate(recvTh[index], Pk);
-                int[int] restriction = restrict(VhRestrictionPrivate, VhExchangePrivate, J);
-                uExchange[](restriction) += exchangeU[index];
+                I.resize(R.nnz);
+                J.resize(R.nnz);
+                PetscScalar[int] gathered = exchangeU[index](J);
+                uExchange[](I) += gathered;
             }
         }
     }
@@ -2075,7 +2074,7 @@ IFMACRO(transfer#Q)
     matrix<PetscScalar> locPetscScalar = loc;
     if(VhExchangePrivate.ndof) constructor(P, uANew, uA, locPetscScalar, numbering = uExchange[]);
     else {
-        real[int] empty;
+        PetscScalar[int] empty;
         constructor(P, uANew, uA, locPetscScalar, numbering = empty);
     }
 ENDIFMACRO

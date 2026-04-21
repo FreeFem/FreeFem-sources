@@ -5681,6 +5681,8 @@ namespace PETSc {
     Global.Add("GlobalNumbering", "(",
                new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::globalNumbering< Dmat >));
     Global.Add("GlobalNumbering", "(",
+               new OneOperator2_< long, Dmat*, KN< std::complex<double> >* >(PETSc::globalNumbering< Dmat >));
+    Global.Add("GlobalNumbering", "(",
                new OneOperator2_< long, Dbddc*, KN< long >* >(PETSc::globalNumbering< Dbddc >));
     Global.Add("ParMmgCommunicators", "(",
                new OneOperator4_< long, Dmat*, KN< double >*, KN< long >*, KN< KN< long >>*>(PETSc::ParMmgCommunicators< Dmat >));
