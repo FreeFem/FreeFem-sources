@@ -1,19 +1,13 @@
 load "Element_P1nc_3d"
+{ // 3d 
 mesh3 Th=cube(10,10,10);
 macro grad(u) [dx(u),dy(u),dz(u)]//
-
+func f = x+2*y+3*z;
 fespace Vh(Th,P1nc3d);
 fespace Wh(Th,P0face3d);
 cout << " Vh ndof "<< Vh.ndof <<  " == " << Wh.ndof << endl;
 Vh u,v;
-Vh X,Y,Z;
-/*X = x;
-Y = y;
-Z = z;
-cout << X << endl; 
-cout << Y << endl; 
-cout << Z << endl; */
-func f = x+2*y+3*z;
+
 
 u = f;
 cout << " err L1 : " <<  int3d(Th)( abs(f-u)) << endl;
@@ -24,3 +18,25 @@ int[int] labs = labels(Th);
 solve Pb(u,v)= int3d(Th)(grad(u)'*grad(v))- int3d(Th)(v)+ on(labs,u=0);
 plot(u,wait=1);
 cout << " u max "<< u[] .max << endl;
+}
+
+{ // Surf. 
+meshS Th=square3(10,10);
+macro grad(u) [dx(u),dy(u),dz(u)]//
+func f = x+ 2*y;
+fespace Vh(Th,P1ncS);
+fespace Wh(Th,P0edgeS);
+cout << " Vh ndof "<< Vh.ndof <<  " == " << Wh.ndof << endl;
+Vh u,v;
+
+
+u = f;
+cout << "2Surf err L1 : " <<  int2d(Th)( abs(f-u)) << endl;
+plot(u,wait=1);
+
+
+int[int] labs = labels(Th);
+solve Pb(u,v)= int2d(Th)(grad(u)'*grad(v))- int2d(Th)(v)+ on(labs,u=0);
+plot(u,wait=1);
+cout << " u max "<< u[].max << endl;
+}

@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Element P1nc3d  (crouzeix Raviart)  in plugin Element_P1nc_3d 
+- Element P1nc3d  (crouzeix Raviart)  in plugin Element_P1nc_3d in 3d and in Surface (meshS)
   and the test is testFE-P1nc3d.edp
 
 ### Changed
