@@ -26,7 +26,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
--
+- Element P1nc3d  (crouzeix Raviart)  in plugin Element_P1nc_3d 
+  and the test is testFE-P1nc3d.edp
 
 ### Changed
 -
@@ -38,7 +39,8 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+- correction of finite Element  P4 in 3d (Thank of A. Chabib and P-H Tournier)
+   See  plugin Element_P4, test exemples/plugin/testFE-P4.edp
 
 ## [4.16]
 

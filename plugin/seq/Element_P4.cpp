@@ -35,9 +35,9 @@
 //
 /// ---------------------------------------------------------------
 namespace Fem2D {
-  // ------ P4  Hierarchical (just remove P1 node of the P2 finite element)  --------
-  class TypeOfFE_P4Lagrange : public TypeOfFE {
-   public:
+// ------ P4  Hierarchical (just remove P1 node of the P2 finite element)  --------
+class TypeOfFE_P4Lagrange : public TypeOfFE {
+public:
     static const int k = 4;
     static const int ndf = (k + 2) * (k + 1) / 2;
     static int Data[];
@@ -48,71 +48,71 @@ namespace Fem2D {
     static const int il[15];
     static const int jl[15];
     static const int kl[15];
-
+    
     TypeOfFE_P4Lagrange( ) : TypeOfFE(3 + 3 * 3 + 3, 1, Data, 4, 1, 15 + 6, 15, 0) {
-      static const R2 Pt[15] = {R2(0 / 4., 0 / 4.), R2(4 / 4., 0 / 4.), R2(0 / 4., 4 / 4.),
-                                R2(3 / 4., 1 / 4.), R2(2 / 4., 2 / 4.), R2(1 / 4., 3 / 4.),
-                                R2(0 / 4., 3 / 4.), R2(0 / 4., 2 / 4.), R2(0 / 4., 1 / 4.),
-                                R2(1 / 4., 0 / 4.), R2(2 / 4., 0 / 4.), R2(3 / 4., 0 / 4.),
-                                R2(1 / 4., 2 / 4.), R2(2 / 4., 1 / 4.), R2(1 / 4., 1 / 4.)};
-
-      // 3,4,5, 6,7,8, 9,10,11,
-      int other[15] = {0, 1, 2, 5, 4, 3, 8, 7, 6, 11, 10, 9, 12, 13, 14};
-      int kk = 0;
-
-      for (int i = 0; i < NbDoF; i++) {
-        pij_alpha[kk++] = IPJ(i, i, 0);
-        if (other[i] != i) {
-          pij_alpha[kk++] = IPJ(i, other[i], 0);
+        static const R2 Pt[15] = {R2(0 / 4., 0 / 4.), R2(4 / 4., 0 / 4.), R2(0 / 4., 4 / 4.),
+            R2(3 / 4., 1 / 4.), R2(2 / 4., 2 / 4.), R2(1 / 4., 3 / 4.),
+            R2(0 / 4., 3 / 4.), R2(0 / 4., 2 / 4.), R2(0 / 4., 1 / 4.),
+            R2(1 / 4., 0 / 4.), R2(2 / 4., 0 / 4.), R2(3 / 4., 0 / 4.),
+            R2(1 / 4., 2 / 4.), R2(2 / 4., 1 / 4.), R2(1 / 4., 1 / 4.)};
+        
+        // 3,4,5, 6,7,8, 9,10,11,
+        int other[15] = {0, 1, 2, 5, 4, 3, 8, 7, 6, 11, 10, 9, 12, 13, 14};
+        int kk = 0;
+        
+        for (int i = 0; i < NbDoF; i++) {
+            pij_alpha[kk++] = IPJ(i, i, 0);
+            if (other[i] != i) {
+                pij_alpha[kk++] = IPJ(i, other[i], 0);
+            }
+            
+            P_Pi_h[i] = Pt[i];
         }
-
-        P_Pi_h[i] = Pt[i];
-      }
-
-      assert(P_Pi_h.N( ) == NbDoF);
-      assert(pij_alpha.N( ) == kk);
+        
+        assert(P_Pi_h.N( ) == NbDoF);
+        assert(pij_alpha.N( ) == kk);
     }
-
+    
     void FB(const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat,
             RNMK_ &val) const;
     void Pi_h_alpha(const baseFElement &K, KN_< double > &v) const {
-      for (int i = 0; i < 15 + 6; ++i) {
-        v[i] = 1;
-      }
-
-      int e0 = K.EdgeOrientation(0);
-      int e1 = K.EdgeOrientation(1);
-      int e2 = K.EdgeOrientation(2);
-      int ooo[6] = {e0, e0, e1, e1, e2, e2};
-      /*   3,4
-       *   5,
-       *   6,7
-       *   8,9,
-       *   10,
-       *   11,12,
-       *   13,14,
-       *   15
-       *   16,17
-       */
-      int iii[6] = {3, 6, 8, 11, 13, 16};
-      int jjj[6] = {};
-
-      for (int i = 0; i < 6; ++i) {
-        jjj[i] = iii[i] + 1;    // si orient = -1
-      }
-
-      for (int i = 0; i < 6; ++i) {
-        if (ooo[i] == 1) {
-          v[jjj[i]] = 0;
-        } else {
-          v[iii[i]] = 0;
+        for (int i = 0; i < 15 + 6; ++i) {
+            v[i] = 1;
         }
-      }
+        
+        int e0 = K.EdgeOrientation(0);
+        int e1 = K.EdgeOrientation(1);
+        int e2 = K.EdgeOrientation(2);
+        int ooo[6] = {e0, e0, e1, e1, e2, e2};
+        /*   3,4
+         *   5,
+         *   6,7
+         *   8,9,
+         *   10,
+         *   11,12,
+         *   13,14,
+         *   15
+         *   16,17
+         */
+        int iii[6] = {3, 6, 8, 11, 13, 16};
+        int jjj[6] = {};
+        
+        for (int i = 0; i < 6; ++i) {
+            jjj[i] = iii[i] + 1;    // si orient = -1
+        }
+        
+        for (int i = 0; i < 6; ++i) {
+            if (ooo[i] == 1) {
+                v[jjj[i]] = 0;
+            } else {
+                v[iii[i]] = 0;
+            }
+        }
     }
-  };
+};
 
-  // on what     nu df on node node of df
-  int TypeOfFE_P4Lagrange::Data[] = {
+// on what     nu df on node node of df
+int TypeOfFE_P4Lagrange::Data[] = {
     0, 1, 2, 3, 3, 3, 4, 4, 4, 5, 5,  5,  6,  6,  6,    // the support number  of the node of the df
     0, 0, 0, 0, 1, 2, 0, 1, 2, 0, 1,  2,  0,  1,  2,    // the number of the df on  the node
     0, 1, 2, 3, 3, 3, 4, 4, 4, 5, 5,  5,  6,  6,  6,    // the node of the df
@@ -120,12 +120,12 @@ namespace Fem2D {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,    // which are de df on sub FE
     0,    // for each compontant $j=0,N-1$ it give the sub FE associated
     0, 15};
-  void TypeOfFE_P4Lagrange::FB(const bool *whatd, const Mesh &, const Triangle &K,
-                               const RdHat &PHat, RNMK_ &val) const {
+void TypeOfFE_P4Lagrange::FB(const bool *whatd, const Mesh &, const Triangle &K,
+                             const RdHat &PHat, RNMK_ &val) const {
     R2 A(K[0]), B(K[1]), C(K[2]);
     R l0 = 1. - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
     R L[3] = {l0 * k, l1 * k, l2 * k};
-
+    
     throwassert(val.N( ) >= 10);
     throwassert(val.M( ) == 1);
     // Attention il faut renumeroter les fonction de bases
@@ -134,100 +134,100 @@ namespace Fem2D {
     // donc p est la perumation
     // echange de numerotation si les arete sont dans le mauvais sens
     int p[15] = {};
-
+    
     for (int i = 0; i < 15; ++i) {
-      p[i] = i;
+        p[i] = i;
     }
-
+    
     if (K.EdgeOrientation(0) < 0) {
-      Exchange(p[3], p[5]);    // 3,4
+        Exchange(p[3], p[5]);    // 3,4
     }
-
+    
     if (K.EdgeOrientation(1) < 0) {
-      Exchange(p[6], p[8]);    // 5,6
+        Exchange(p[6], p[8]);    // 5,6
     }
-
+    
     if (K.EdgeOrientation(2) < 0) {
-      Exchange(p[9], p[11]);    // 7,8
+        Exchange(p[9], p[11]);    // 7,8
     }
-
+    
     val = 0;
     /*
      * //  les fonction de base du Pk Lagrange sont
      */
-
+    
     if (whatd[op_id]) {
-      RN_ f0(val('.', 0, op_id));
-
-      for (int df = 0; df < ndf; df++) {
-        int pdf = p[df];
-        R f = 1. / ff[df];
-
-        for (int i = 0; i < k; ++i) {
-          f *= L[nn[df][i]] - aa[df][i];
+        RN_ f0(val('.', 0, op_id));
+        
+        for (int df = 0; df < ndf; df++) {
+            int pdf = p[df];
+            R f = 1. / ff[df];
+            
+            for (int i = 0; i < k; ++i) {
+                f *= L[nn[df][i]] - aa[df][i];
+            }
+            
+            f0[pdf] = f;
         }
-
-        f0[pdf] = f;
-      }
     }
-
+    
     if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {
-      R2 D[] = {K.H(0) * k, K.H(1) * k, K.H(2) * k};
-      if (whatd[op_dx] || whatd[op_dy]) {
-        for (int df = 0; df < ndf; df++) {
-          int pdf = p[df];
-          R fx = 0., fy = 0., f = 1. / ff[df];
-
-          for (int i = 0; i < k; ++i) {
-            int n = nn[df][i];
-            R Ln = L[n] - aa[df][i];
-            fx = fx * Ln + f * D[n].x;
-            fy = fy * Ln + f * D[n].y;
-            f = f * Ln;
-          }
-
-          if (whatd[op_dx]) {
-            val(pdf, 0, op_dx) = fx;
-          }
-
-          if (whatd[op_dy]) {
-            val(pdf, 0, op_dy) = fy;
-          }
+        R2 D[] = {K.H(0) * k, K.H(1) * k, K.H(2) * k};
+        if (whatd[op_dx] || whatd[op_dy]) {
+            for (int df = 0; df < ndf; df++) {
+                int pdf = p[df];
+                R fx = 0., fy = 0., f = 1. / ff[df];
+                
+                for (int i = 0; i < k; ++i) {
+                    int n = nn[df][i];
+                    R Ln = L[n] - aa[df][i];
+                    fx = fx * Ln + f * D[n].x;
+                    fy = fy * Ln + f * D[n].y;
+                    f = f * Ln;
+                }
+                
+                if (whatd[op_dx]) {
+                    val(pdf, 0, op_dx) = fx;
+                }
+                
+                if (whatd[op_dy]) {
+                    val(pdf, 0, op_dy) = fy;
+                }
+            }
         }
-      }
-
-      if (whatd[op_dyy] || whatd[op_dxy] || whatd[op_dxx]) {
-        for (int df = 0; df < ndf; df++) {
-          int pdf = p[df];
-          R fx = 0., fy = 0., f = 1. / ff[df];
-          R fxx = 0., fyy = 0., fxy = 0.;
-
-          for (int i = 0; i < k; ++i) {
-            int n = nn[df][i];
-            R Ln = L[n] - aa[df][i];
-            fxx = fxx * Ln + 2. * fx * D[n].x;
-            fyy = fyy * Ln + 2. * fy * D[n].y;
-            fxy = fxy * Ln + fx * D[n].y + fy * D[n].x;
-            fx = fx * Ln + f * D[n].x;
-            fy = fy * Ln + f * D[n].y;
-            f = f * Ln;
-          }
-
-          if (whatd[op_dxx]) {
-            val(pdf, 0, op_dxx) = fxx;
-          }
-
-          if (whatd[op_dyy]) {
-            val(pdf, 0, op_dyy) = fyy;
-          }
-
-          if (whatd[op_dxy]) {
-            val(pdf, 0, op_dxy) = fxy;
-          }
+        
+        if (whatd[op_dyy] || whatd[op_dxy] || whatd[op_dxx]) {
+            for (int df = 0; df < ndf; df++) {
+                int pdf = p[df];
+                R fx = 0., fy = 0., f = 1. / ff[df];
+                R fxx = 0., fyy = 0., fxy = 0.;
+                
+                for (int i = 0; i < k; ++i) {
+                    int n = nn[df][i];
+                    R Ln = L[n] - aa[df][i];
+                    fxx = fxx * Ln + 2. * fx * D[n].x;
+                    fyy = fyy * Ln + 2. * fy * D[n].y;
+                    fxy = fxy * Ln + fx * D[n].y + fy * D[n].x;
+                    fx = fx * Ln + f * D[n].x;
+                    fy = fy * Ln + f * D[n].y;
+                    f = f * Ln;
+                }
+                
+                if (whatd[op_dxx]) {
+                    val(pdf, 0, op_dxx) = fxx;
+                }
+                
+                if (whatd[op_dyy]) {
+                    val(pdf, 0, op_dyy) = fyy;
+                }
+                
+                if (whatd[op_dxy]) {
+                    val(pdf, 0, op_dxy) = fxy;
+                }
+            }
         }
-      }
     }
-  }
+}
 
 
 #include "Element_PkL.hpp" // for Pk_L
@@ -274,154 +274,138 @@ public:
             pp[doff+0] = doff+i0;
             pp[doff+1] = doff+i1;
             pp[doff+2] = doff+i2;
-
+            
         }
-/*        static int count = 0;
-        if( count++ < 8)
-        cout << " OrientDoFOfFace " << np << " " << inv << " f " << " " << f << " ::::" << i0 << i1 << i2 << " : " << pp[doff+0] << " " << pp[doff+1] << " " << pp[doff+2] << endl;*/
+        /*        static int count = 0;
+         if( count++ < 8)
+         cout << " OrientDoFOfFace " << np << " " << inv << " f " << " " << f << " ::::" << i0 << i1 << i2 << " : " << pp[doff+0] << " " << pp[doff+1] << " " << pp[doff+2] << endl;*/
     }
- 
+    
 };
 
-int  TypeOfFE_P4_3d::pp[35][4] = {
-  {4, 0, 0, 0},
-   {0, 4, 0, 0},
-   {0, 0, 4, 0},
-   {0, 0, 0, 4},
-    
-   {1, 3, 0, 0},
-   {2, 2, 0, 0},
-   {3, 1, 0, 0},
-    
-   {1, 0, 3, 0},
-   {2, 0, 2, 0},
-   {3, 0, 1, 0},
-    
-   {1, 0, 0, 3},
-   {2, 0, 0, 2},
-   {3, 0, 0, 1},
-    
-   {0, 1, 3, 0},
-   {0, 2, 2, 0},
-   {0, 3, 1, 0},
-    
-   {0, 1, 0, 3},
-   {0, 2, 0, 2},
-   {0, 3, 0, 1},
-    
-   {0, 0, 1, 3},
-   {0, 0, 2, 2},
-   {0, 0, 3, 1},
-    
-   {0, 2, 1, 1},
-   {0, 1, 2, 1},
-   {0, 1, 1, 2},
-    
-   {1, 0, 1, 2},
-   {1, 0, 2, 1},
-   {2, 0, 1, 1},
-    
-   {2, 1, 0, 1},
-   {1, 2, 0, 1},
-  {1, 1, 0, 2},
-    
-   {1, 1, 2, 0},
-   {1, 2, 1, 0},
-   {2, 1, 1, 0},
-    
-   {1, 1, 1, 1}};
-
+int  TypeOfFE_P4_3d::pp[35][4] = // correction Ahmed Chabib
+{
+{4 , 0 , 0 , 0},
+{0 , 4 , 0 , 0},
+{0 , 0 , 4 , 0},
+{0 , 0 , 0 , 4},
+{1 , 3 , 0 , 0},
+{2 , 2 , 0 , 0},
+{3 , 1 , 0 , 0},
+{1 , 0 , 3 , 0},
+{2 , 0 , 2 , 0},
+{3 , 0 , 1 , 0},
+{1 , 0 , 0 , 3},
+{2 , 0 , 0 , 2},
+{3 , 0 , 0 , 1},
+{0 , 1 , 3 , 0},
+{0 , 2 , 2 , 0},
+{0 , 3 , 1 , 0},
+{0 , 1 , 0 , 3},
+{0 , 2 , 0 , 2},
+{0 , 3 , 0 , 1},
+{0 , 0 , 1 , 3},
+{0 , 0 , 2 , 2},
+{0 , 0 , 3 , 1},
+{0 , 1 , 1 , 2},
+{0 , 1 , 2 , 1},
+{0 , 2 , 1 , 1},
+{2 , 0 , 1 , 1},
+{1 , 0 , 2 , 1},
+{1 , 0 , 1 , 2},
+{1 , 1 , 0 , 2},
+{1 , 2 , 0 , 1},
+{2 , 1 , 0 , 1},
+{2 , 1 , 1 , 0},
+{1 , 2 , 1 , 0},
+{1 , 1 , 2 , 0},
+{1 , 1 , 1 , 1}
+};
 
 
 int  TypeOfFE_P4_3d::nl[35][4] = {
-  {0, 0, 0, 0},
-   {1, 1, 1, 1},
-   {2, 2, 2, 2},
-   {3, 3, 3, 3},
-   {0, 1, 1, 1},
-   {0, 0, 1, 1},
-   {0, 0, 0, 1},
-   {0, 2, 2, 2},
-   {0, 0, 2, 2},
-   {0, 0, 0, 2},
-
-  {0, 3, 3, 3},
-   {0, 0, 3, 3},
-   {0, 0, 0, 3},
-   {1, 2, 2, 2},
-   {1, 1, 2, 2},
-   {1, 1, 1, 2},
-   {1, 3, 3, 3},
-   {1, 1, 3, 3},
-   {1, 1, 1, 3},
-   {2, 3, 3, 3},
-
-   {2, 2, 3, 3},
-   {2, 2, 2, 3},
-   {1, 1, 2, 3},
-   {1, 2, 2, 3},
-   {1, 2, 3, 3},
-   {0, 2, 3, 3},
-   {0, 2, 2, 3},
-   {0, 0, 2, 3},
-   {0, 0, 1, 3},
-   {0, 1, 1, 3},
-
-   {0, 1, 3, 3},
-   {0, 1, 2, 2},
-   {0, 1, 1, 2},
-   {0, 0, 1, 2},
-   {0, 1, 2, 3}};
-
+{0 , 0 , 0 , 0},
+{1 , 1 , 1 , 1},
+{2 , 2 , 2 , 2},
+{3 , 3 , 3 , 3},
+{0 , 1 , 1 , 1},
+{0 , 0 , 1 , 1},
+{0 , 0 , 0 , 1},
+{0 , 2 , 2 , 2},
+{0 , 0 , 2 , 2},
+{0 , 0 , 0 , 2},
+{0 , 3 , 3 , 3},
+{0 , 0 , 3 , 3},
+{0 , 0 , 0 , 3},
+{1 , 2 , 2 , 2},
+{1 , 1 , 2 , 2},
+{1 , 1 , 1 , 2},
+{1 , 3 , 3 , 3},
+{1 , 1 , 3 , 3},
+{1 , 1 , 1 , 3},
+{2 , 3 , 3 , 3},
+{2 , 2 , 3 , 3},
+{2 , 2 , 2 , 3},
+{1 , 2 , 3 , 3},
+{1 , 2 , 2 , 3},
+{1 , 1 , 2 , 3},
+{0 , 0 , 2 , 3},
+{0 , 2 , 2 , 3},
+{0 , 2 , 3 , 3},
+{0 , 1 , 3 , 3},
+{0 , 1 , 1 , 3},
+{0 , 0 , 1 , 3},
+{0 , 0 , 1 , 2},
+{0 , 1 , 1 , 2},
+{0 , 1 , 2 , 2},
+{0 , 1 , 2 , 3}
+};
 
 
 int  TypeOfFE_P4_3d::cl[35][4] = {
-  {0, 1, 2, 3},
-   {0, 1, 2, 3},
-   {0, 1, 2, 3},
-   {0, 1, 2, 3},
-   {0, 0, 1, 2},
-   {0, 1, 0, 1},
-   {0, 1, 2, 0},
-   {0, 0, 1, 2},
-   {0, 1, 0, 1},
-   {0, 1, 2, 0},
-
-  {0, 0, 1, 2},
-   {0, 1, 0, 1},
-   {0, 1, 2, 0},
-   {0, 0, 1, 2},
-   {0, 1, 0, 1},
-   {0, 1, 2, 0},
-   {0, 0, 1, 2},
-   {0, 1, 0, 1},
-   {0, 1, 2, 0},
-   {0, 0, 1, 2},
-
-  {0, 1, 0, 1},
-   {0, 1, 2, 0},
-   {0, 1, 0, 0},
-   {0, 0, 1, 0},
-   {0, 0, 0, 1},
-   {0, 0, 0, 1},
-   {0, 0, 1, 0},
-   {0, 1, 0, 0},
-   {0, 1, 0, 0},
-   {0, 0, 1, 0},
-
-  {0, 0, 0, 1},
-   {0, 0, 0, 1},
-   {0, 0, 1, 0},
-   {0, 1, 0, 0},
-   {0, 0, 0, 0}};
-
+    {0 , 1 , 2 , 3},
+    {0 , 1 , 2 , 3},
+    {0 , 1 , 2 , 3},
+    {0 , 1 , 2 , 3},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 1 , 2},
+    {0 , 1 , 0 , 1},
+    {0 , 1 , 2 , 0},
+    {0 , 0 , 0 , 1},
+    {0 , 0 , 1 , 0},
+    {0 , 1 , 0 , 0},
+    {0 , 1 , 0 , 0},
+    {0 , 0 , 1 , 0},
+    {0 , 0 , 0 , 1},
+    {0 , 0 , 0 , 1},
+    {0 , 0 , 1 , 0},
+    {0 , 1 , 0 , 0},
+    {0 , 1 , 0 , 0},
+    {0 , 0 , 1 , 0},
+    {0 , 0 , 0 , 1},
+    {0 , 0 , 0 , 0}
+};
 
 
 int  TypeOfFE_P4_3d::cp[35] = {
 24, 24, 24, 24, 6, 4, 6, 6, 4, 6, 6, 4, 6, 6, 4, 6, 6, 4, 6, 6, 4, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1};
 int TypeOfFE_P4_3d::dfon[] = {1, 3, 3, 1};    // 2 dofs on each edge, 2 dofs on each face
 
-TypeOfFE_P4_3d::TypeOfFE_P4_3d( ) : GTypeOfFE< Mesh >(TypeOfFE_P4_3d::dfon, 1, 3, false, false)
+TypeOfFE_P4_3d::TypeOfFE_P4_3d( ) : GTypeOfFE< Mesh >(TypeOfFE_P4_3d::dfon, 1, 4, false, false)// Ahmed Chabib
 {
     typedef Element E;
     int n = this->NbDoF;
@@ -466,9 +450,9 @@ void TypeOfFE_P4_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< 
     int n = this->NbDoF;
     int *p = M.p;
     
-    //  for (int i = 0; i < n; ++i) {
-    //    M.p[i] = i;
-    //  }
+      for (int i = 0; i < n; ++i) {
+         M.p[i] = i;
+      }
     
     if (verbosity > 9) {
         cout << " P4  set:" << odf << " : ";
@@ -492,7 +476,7 @@ void TypeOfFE_P4_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< 
         dof += 3;
     }
     for (int f = 0; f < 4; ++f)
-        OrientDoFOfFace(odf,K,f,p,1);
+        OrientDoFOfFace(odf,K,f,p,0);
 
     if (verbosity > 99) {
         cout << " " << M.p << endl;  ;
@@ -533,7 +517,7 @@ void TypeOfFE_P4_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element
             dof += 3;
         }
         for (int f = 0; f < 4; ++f)
-          OrientDoFOfFace(0,K,f,p,0);
+          OrientDoFOfFace(0,K,f,p,1);// correction Ahmef 0->1
 
     }
     //    static int ddd = 100;
