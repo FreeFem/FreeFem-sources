@@ -253,7 +253,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 
   PMMG_Init_parMesh(PMMG_ARG_start,
                     PMMG_ARG_ppParMesh,&mesh,
-                    PMMG_ARG_pMesh,PMMG_ARG_pMet,
+                    PMMG_ARG_pMesh,PMMG_ARG_pMet,PMMG_ARG_pLs,
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
@@ -333,6 +333,8 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     }
   }
 
+  long iso=0L;
+
   int i=2;
   if (!verbosity) {
     PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       -1);
@@ -344,7 +346,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_debug,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgDebug,      arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off debug mode */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_angle,         arg(i,stack,false)); i++;   /*!< [1/0], Turn on/off angle detection */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_iso,           arg(i,stack,false)); i++;   /*!< [1/0], Level-set meshing */
+  if (nargs[i]) {iso = arg(i,stack,false); PMMG_Set_iparameter(mesh,PMMG_IPARAM_iso,iso);} i++; /*!< [1/0], Level-set meshing */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_lag,           arg(i,stack,0L));    i++;   /*!< [-1/0/1/2], Lagrangian option */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_opnbdy,        arg(i,stack,false)); i++;   /*!< [0/1], Enable preservation of open boundaries */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optim,         arg(i,stack,false)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
@@ -401,7 +403,19 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     }
   }
 
-  int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
+  if(myrank == root || communicators != NULL) {
+    if (pmetric && pmetric->N( ) > 0) {
+      if (iso) {
+        MMG5_pSol tmp = mesh->listgrp[0].ls;
+        mesh->listgrp[0].ls  = mesh->listgrp[0].met;
+        mesh->listgrp[0].met = tmp;
+      }
+    }
+  }
+
+  int ier = communicators == NULL
+    ? (iso ? PMMG_parmmg_centralized(mesh) : PMMG_parmmglib_centralized(mesh))
+    : (iso ? PMMG_parmmg_distributed(mesh) : PMMG_parmmglib_distributed(mesh));
   if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
   KN< long > *pneighbors = nullptr;
   if (nargs[35]) {
