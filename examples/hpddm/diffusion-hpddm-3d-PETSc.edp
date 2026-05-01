@@ -46,7 +46,7 @@ Wh Rb[1];
 Rb[0] = 1;
 // all in one; see at the end of the script the meaning of the parameters
 set(A, sparams = " -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_sub_pc_factor_mat_solver_type mumps -pc_hpddm_has_neumann -pc_hpddm_define_subdomains " +
-                 " -pc_hpddm_levels_1_sub_mat_mumps_cntl_4 0.1 -pc_hpddm_levels_1_eps_use_inertia -pc_hpddm_levels_1_eps_threshold 0.5 -pc_hpddm_levels_1_st_share_sub_ksp " +
+                 " -pc_hpddm_levels_1_sub_mat_mumps_cntl_4 0.1 -pc_hpddm_levels_1_eps_use_inertia -pc_hpddm_levels_1_eps_threshold_absolute 0.5 -pc_hpddm_levels_1_st_share_sub_ksp " +
                  " -ksp_type gmres -ksp_pc_side right -ksp_monitor", nearnullspace = Rb);
 u[] = A^-1 * rhs[];
 
