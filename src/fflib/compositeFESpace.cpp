@@ -73,6 +73,11 @@ using namespace std;
   #pragma GCC diagnostic pop
 #endif
 
+static inline bool isBemFormBilinearType(const aType r) {
+  static const aType bemFormBilinearType = atype0<const BemFormBilinear *>();
+  return (bemFormBilinearType != nullptr) && (r == bemFormBilinearType);
+}
+
 #endif
 #endif
 
@@ -318,7 +323,7 @@ list<C_F0>  creationLargsForCompositeFESpace( const list<C_F0> & largs, const in
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
+    else if (isBemFormBilinearType(r)){
       BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
       ffassert(bbtmp);
       int VVFBEM = bbtmp->type;
@@ -480,7 +485,7 @@ KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, 
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
+    else if (isBemFormBilinearType(r)){
       BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
       int VVFBEM = bbtmp->type;
 
@@ -715,7 +720,7 @@ void changeComponentFormCompositeFESpace( const KN<int> &localIndexInTheBlockUh,
           // ******************************************
           // Case BemKFormBilinear (KERNEL FORM ONLY)
           // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
+          else if (isBemFormBilinearType(r)){
             BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
             int VVFBEM = bbtmp->type;
 
@@ -871,7 +876,7 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
           // ******************************************
           // Case BemKFormBilinear (KERNEL FORM ONLY)
           // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
+          else if (isBemFormBilinearType(r)){
             BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
             int VVFBEM = bbtmp->type;
 
@@ -1080,7 +1085,7 @@ void listOfComponentBilinearForm(const list<C_F0> & largs){
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
+    else if (isBemFormBilinearType(r)){
       BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
       int VVFBEM = bbtmp->type;
       cout << " read index term = "<< count_integral << " VVFBEM=" << VVFBEM << endl;
@@ -1170,7 +1175,7 @@ int haveBemSubMatrixBlock(const list<C_F0> & largs, int Uh_NbItem, int Vh_NbItem
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    if (r==atype<const BemFormBilinear *>() ){
+    if (isBemFormBilinearType(r)){
       haveBemFormBilinear = true;
       nbBEM++;
     }
@@ -1279,7 +1284,7 @@ void separateFEMpartBemPart(const list<C_F0> & largs, list<C_F0> &largs_FEM, lis
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    if (r==atype<const BemFormBilinear *>() ){
+    if (isBemFormBilinearType(r)){
       BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
       ffassert(bbtmp);
       int VVFBEM = bbtmp->type;
@@ -1468,7 +1473,7 @@ void deleteNewLargs(list<C_F0> &newlargs){
     // ******************************************
     // Case BemKFormBilinear (KERNEL FORM ONLY)
     // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
+    else if (isBemFormBilinearType(r)){
       BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
       ffassert(bbtmp);
       int VVFBEM = bbtmp->type;
