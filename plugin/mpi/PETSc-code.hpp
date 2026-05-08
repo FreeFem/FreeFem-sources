@@ -2097,6 +2097,27 @@ namespace PETSc {
           }
         }
       }
+      auto maybeCreateDense = [&](int i, int j) {
+        int t = t_M[i][j];
+        if ((t != 0 && t != 7) || a[i * M + j]) return;
+        bool rowHasMat = false, colHasMat = false;
+        for (int k = 0; k < M && !rowHasMat; ++k)
+          rowHasMat = static_cast<bool>(a[i * M + k]);
+        for (int k = 0; k < N && !colHasMat; ++k)
+          colHasMat = static_cast<bool>(a[k * M + j]);
+        if (!rowHasMat || !colHasMat) {
+          MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD,
+              PETSC_DECIDE, PETSC_DECIDE,
+              1, 1, NULL,
+              a + i * M + j);
+        }
+      };
+      for (int i = std::min(N, M) - 1; i >= 0; --i)
+        maybeCreateDense(i, i);
+      for (int i = N - 1; i >= 0; --i)
+        for (int j = M - 1; j >= 0; --j)
+          if (i != j)
+            maybeCreateDense(i, j);
       Result sparse_mat = GetAny< Result >((*emat)(s));
       if (sparse_mat->_petsc) sparse_mat->dtor( );
       MatCreateNest(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
