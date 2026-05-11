@@ -2058,7 +2058,7 @@ fi
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
 
-AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday mallinfo mstats)
+AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday mallinfo2 mallinfo mstats)
 AC_CHECK_FUNCS(srandomdev)
 
 

@@ -84,6 +84,10 @@ long storageused()
     struct mstats mem1;
     mem1 = mstats();
     return mem1.bytes_used;
+#elif HAVE_MALLINFO2
+    struct mallinfo2 mem1;
+    mem1=mallinfo2();
+    return static_cast<long>(mem1.uordblks);
 #elif HAVE_MALLINFO
     struct mallinfo mem1;
     mem1=mallinfo();
@@ -99,6 +103,10 @@ long storagetotal()
     struct mstats mem1;
     mem1 = mstats();
     return mem1.bytes_total;
+#elif HAVE_MALLINFO2
+    struct mallinfo2 mem1;
+    mem1=mallinfo2();
+    return static_cast<long>(mem1.keepcost);
 #elif HAVE_MALLINFO
     struct mallinfo mem1;
     mem1=mallinfo();
