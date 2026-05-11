@@ -1063,11 +1063,13 @@ namespace PETSc {
       }
       if (!isType) {
         Mat backup = ptA->_petsc;
-        MatGetType(ptA->_petsc, &type);
-        PetscStrcmp(type, MATNEST, &isType);
-        if(isType) {
-          delete [] reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(ptA->_exchange);
-          ptA->_exchange = nullptr;
+        if (ptA->_petsc) {
+          MatGetType(ptA->_petsc, &type);
+          PetscStrcmp(type, MATNEST, &isType);
+          if (isType) {
+            delete [] reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(ptA->_exchange);
+            ptA->_exchange = nullptr;
+          }
         }
         ptA->_petsc = nullptr;
         ptA->dtor( );
