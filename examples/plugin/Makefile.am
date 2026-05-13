@@ -245,7 +245,7 @@ TESTS = $(TESTS_OTHER) \
 	$(TESTS_SUPERLU) \
 	$(TESTS_TETGEN) \
 	$(TESTS_UMFPACK)
-	
+
 LIST_CONDITIONAL =	$(TESTS_OTHER) \
 	$(CONDITIONAL_FFTW3) \
 	$(CONDITIONAL_FORTRAN) \
@@ -263,10 +263,6 @@ LIST_CONDITIONAL =	$(TESTS_OTHER) \
 	$(CONDITIONAL_SUPERLU) \
 	$(CONDITIONAL_TETGEN) \
 	$(CONDITIONAL_UMFPACK)
-
-# all test can fail must but clean ????  FH...
-
-XFAIL_TESTS = $(TESTS)
 
 EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.pgm
 

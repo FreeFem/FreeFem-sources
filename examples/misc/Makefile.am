@@ -40,8 +40,6 @@ TESTS=aaa-adp.edp aadaptation.edp \
 	teste.edp testFE.edp \
 	wafer-heating-laser-axi.edp  torture-search2d.edp \
 	lap3-cpu.edp bug-macro-on-win32.edp
-# if .. no arpack or too long
-XFAIL_TESTS=NSP1P1.edp
 
 EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp torture.msh speedtest.sh
 

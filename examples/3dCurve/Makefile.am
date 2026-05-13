@@ -36,8 +36,6 @@ TESTS_OTHER = buildParametricMeshL.edp \
 	periodicL.edp \
 	border.edp Connectivite-L.edp \
 	LapDG2-1d.edp 
-	
-	
 
 TESTS_ARPACK = QMoscillator-new1d.edp
 
@@ -50,9 +48,6 @@ endif ARPACK
 
 LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(CONDITIONAL_ARPACK)
-
-
-XFAIL_TESTS = $(TESTS)
 
 EXTRA_DIST = *.edp all.edp
 
