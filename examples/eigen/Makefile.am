@@ -52,8 +52,6 @@ TESTS =	$(TESTS_ARPACK)
 
 LIST_CONDITIONAL = $(CONDITIONAL_ARPACK)
 
-XFAIL_TESTS = LapnosymEigenValue.edp
-
 EXTRA_DIST = *.edp all.edp
 
 all.edp:

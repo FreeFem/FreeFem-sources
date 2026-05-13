@@ -58,9 +58,6 @@ LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(CONDITIONAL_TETGEN) \
 	$(CONDITIONAL_MMG)
 
-XFAIL_TESTS = buildMeshSfromMesh3.edp \
-	Laplace3dSP2.edp
-
 EXTRA_DIST = *.edp all.edp
 
 all.edp: Makefile

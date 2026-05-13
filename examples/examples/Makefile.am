@@ -57,14 +57,9 @@ endif ARPACK
 
 TESTS = $(TESTS_OTHER) \
 	$(TESTS_ARPACK)
-	
+
 LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(TESTS_ARPACK)
-
-
-
-# if .. no arpack or too long
-XFAIL_TESTS = NSprojection.md
 
 EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp
 
