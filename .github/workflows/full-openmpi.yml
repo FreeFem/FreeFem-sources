@@ -44,8 +44,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.versions  || '[22.04, 24.04]') }}
-        build-type: ${{ fromJson(inputs.build-types  || '["debug", "release"]') }}
+        version:  ${{ fromJson(inputs.versions || '[22.04, 24.04]') }}
+        build-type: ${{ fromJson(inputs.build-types || '["debug", "release"]') }}
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
             - ${{ github.workflow }}
@@ -82,6 +82,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "image=$ImageOS" >> $GITHUB_OUTPUT
           echo "home=$HOME" >> $GITHUB_OUTPUT
+
+      - name: Prepare PETSc cache directory permissions
+        run: |
+          sudo mkdir -p "${INSTALL_DIR}/ff-petsc"
+          sudo chown -R "$USER:$USER" "${INSTALL_DIR}/ff-petsc"
 
       - name: Cache PETSc installation
         id: cache-petsc
