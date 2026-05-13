@@ -787,6 +787,7 @@ bool mylex::SetMacro(int &ret)
             {
                 linenumber++;
                 nl=1;
+                i = '\n'; // normalize CR/CRLF to LF so stored body always uses '\n'
             }
             else if(isalpha(i) && isalpha(ii) )  //  Modif F.H
             {
@@ -1031,6 +1032,7 @@ bool mylex::IFMacro(int &ret)
             {
                 linenumber++;
                 nl=1;
+                i = '\n'; // normalize CR/CRLF to LF so stored body always uses '\n'
             }
             //
             else if(isalpha(i) && isalpha(ii) )  //  Modif F.H
