@@ -531,6 +531,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
     }
 
   double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
+  eps = Min(eps, diameter*1e-4);
   Gh->coefIcoor= (MaxICoor)/diameter;
   Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
@@ -937,6 +938,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
     }
 
   double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
+  eps = Min(eps, diameter*1e-4);
   Gh->coefIcoor= (MaxICoor)/diameter;
   Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
