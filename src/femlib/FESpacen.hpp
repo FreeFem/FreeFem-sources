@@ -734,6 +734,7 @@ public:
   void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=nullptr) const;
   void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const; // no change by deflaut 
   void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const ;
+  R operator()(const GFElement<Mesh> & K,const RdHat & PHat,const KN_<R> & u,int componante,int op) const;
   ~GTypeOfFESum(){}
 } ;
 
@@ -761,6 +762,25 @@ void GTypeOfFESum<Mesh>::FB(const What_d whatd,const Mesh & Th,const Element & K
 } 
 
 
+template<class Mesh>
+R GTypeOfFESum<Mesh>::operator()(const GFElement<Mesh> & K,const RdHat & PHat,const KN_<R> & u,int componante,int op) const
+{
+    ffassert(0 <= componante && componante < this->N);
+    int isub = 0;
+    while (isub + 1 < NN.N() && componante >= NN[isub + 1]) ++isub;
+    ffassert(isub < k);
+    const GTypeOfFE<Mesh> & te = *teb[isub];
+    const int nbf = te.NbDoF;
+    const int ncomp = te.N;
+    const int loccomp = componante - NN[isub];
+    ffassert(0 <= loccomp && loccomp < ncomp);
+    KNMK<R> fb(nbf, ncomp, last_operatortype);
+    KN<R> fk(nbf);
+    const int dof0 = DF[isub];
+    for (int i = 0; i < nbf; ++i) fk[i] = u[K(dof0 + i)];
+    te.FB(1 << op, K.Vh.Th, K.T, PHat, fb);
+    return (fb('.', loccomp, op), fk);
+}
 
 template<class RdHat>
 template<class Mesh>
