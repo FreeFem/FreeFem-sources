@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: htool [mkl|blas] mpi pthread bemtool boost [metis]
+//ff-c++-LIBRARY-dep: htooldev [mkl|blas] mpi pthread bemtool boost [metis]
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -1006,7 +1006,7 @@ AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
     std::shared_ptr<Cluster<double>> t, s;
     s = build_clustering(m, Uh, ps, ds, comm);
     t = build_clustering(n, Vh, pt, ds, comm);
-    buildHmat(Hmat, *generator, ds, t, s, pt, ps, comm);
+    buildHmat(Hmat, *generator, ds, t, Vh, s, Uh, pt, ps, comm);
 
     return Hmat;
 }
@@ -1162,4 +1162,3 @@ static void Init_Bem() {
 }
 
 LOADFUNC(Init_Bem)
-

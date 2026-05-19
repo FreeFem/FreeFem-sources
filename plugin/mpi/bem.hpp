@@ -5,6 +5,7 @@
 #include <htool/matrix/matrix_view.hpp>
 #include <htool/distributed_operator/linalg.hpp>
 #include <htool/hmatrix/lrmat/recompressed_low_rank_generator.hpp>
+#include <htool/hmatrix/lrmat/interpolation.hpp>
 
 #if defined(WITH_metis)
 extern "C" {
@@ -421,21 +422,104 @@ std::shared_ptr<htool::Cluster<double>> build_clustering(int n, const FESPACE * 
     return cluster;
 }
 
-template <class R>
+template <class R, class FESpaceT, class FESpaceS>
 void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,
-                std::shared_ptr<htool::Cluster<double>> t, std::shared_ptr<htool::Cluster<double>> s,
+                std::shared_ptr<htool::Cluster<double>> t, FESpaceT* Vh, std::shared_ptr<htool::Cluster<double>> s, FESpaceS* Uh,
                 vector<double> &,vector<double> &,MPI_Comm comm) {
 
     int sizeWorld;
     MPI_Comm_size(comm, &sizeWorld);
     auto hmatrix_builder = htool::HMatrixTreeBuilder<R, double>(data.epsilon, data.eta, data.sym?'S':'N',data.sym?'U':'N', -1);
     std::shared_ptr<htool::VirtualInternalLowRankGenerator<R>> LowRankGenerator = nullptr;
+    std::vector<double> target_points,source_points;
     if (data.compressor=="" || data.compressor == "partialACA")
         LowRankGenerator = std::make_shared<htool::partialACA<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else if (data.compressor == "fullACA")
         LowRankGenerator = std::make_shared<htool::fullACA<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else if (data.compressor == "SVD")
         LowRankGenerator = std::make_shared<htool::SVD<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
+    else if (data.compressor == "HCA"){
+        typedef typename FESpaceT::Mesh MeshT;
+        typedef typename FESpaceT::FElement FElementT;
+        typedef typename MeshT::Element ElementT;
+        typedef typename FESpaceT::Rd RdT;
+        typedef typename ElementT::RdHat RdHatT;
+
+        typedef typename FESpaceS::Mesh MeshS;
+        typedef typename FESpaceS::FElement FElementS;
+        typedef typename MeshS::Element ElementS;
+        typedef typename FESpaceS::Rd RdS;
+        typedef typename ElementS::RdHat RdHatS;
+
+        const MeshT& ThT=Vh->Th;
+        const MeshS& ThS=Uh->Th;
+
+
+        auto kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
+            for (int i = 0; i < Nx; i++) {
+                for (int j = 0; j < Ny; j++) {
+                    mat[i + j * Nx] = 1. / (4 * M_PI * std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); })));
+                }
+            }
+        };
+        auto basis_function = [](
+            std::vector<std::array<double, 3>>,
+            int,
+            std::array<double, 3>){
+                return R(1);
+            };
+        std::map<int, std::vector<int>> target_dofs_to_elements;
+        int target_number_of_dofs_per_element=(*Vh)[0].NbDoF();
+        for (int e=0;e<ThT.nt;e++){
+            FElementT KV((*Vh)[e]);
+            for (int d=0;d<target_number_of_dofs_per_element;d++){
+                target_dofs_to_elements[KV(d)].push_back(e);
+            }
+        }
+        std::vector<int>target_elements_to_points(ThT.nt*(RdHatT::d+1));
+        for (int e=0;e<ThT.nt;e++){
+            for (int p=0;p<RdHatT::d+1;p++){
+                target_elements_to_points[e*(RdHatT::d+1)+p]=ThT(e)[p];
+            }
+        }
+
+        int target_number_of_points_per_element=RdHatT::d+1;
+        target_points.resize(ThT.nv*3);
+        for (int p=0;p<ThT.nv;p++){
+            Fem2D::R3 pp = ThT.vertices[p];
+            target_points[p+0]=pp[0];
+            target_points[p+1]=pp[1];
+            target_points[p+2]=pp[2];
+        }
+        int target_size=ThT.nv;
+        int target_quadrature_order=10;
+        std::map<int, std::vector<int>> source_dofs_to_elements;
+        int source_number_of_dofs_per_element=(*Uh)[0].NbDoF(); 
+        for (int e=0;e<ThS.nt;e++){
+            FElementS KU((*Uh)[e]);
+            for (int d=0;d<source_number_of_dofs_per_element;d++){
+                source_dofs_to_elements[KU(d)].push_back(e);
+            }
+        }
+        std::vector<int>source_elements_to_points(ThS.nt*(RdHatS::d+1));
+        for (int e=0;e<ThS.nt;e++){
+            for (int p=0;p<RdHatS::d+1;p++){
+                source_elements_to_points[e*(RdHatS::d+1)+p]=ThS(e)[p];
+            }
+        }
+        int source_number_of_points_per_element=RdHatS::d+1; 
+        source_points.resize(ThS.nv*3);
+        for (int p=0;p<ThS.nv;p++){
+            Fem2D::R3 pp = ThS.vertices[p];
+            source_points[p+0]=pp[0];
+            source_points[p+1]=pp[1];
+            source_points[p+2]=pp[2];
+        }
+        int source_size=ThS.nv;
+        int source_quadrature_order=10;
+        LowRankGenerator = std::make_shared<htool::BEMHCA<R,double,3>>(kernel, basis_function, target_dofs_to_elements, target_number_of_dofs_per_element, target_elements_to_points.data(),  target_number_of_points_per_element, target_points.data(),  target_size, t->get_permutation().data(), target_quadrature_order, basis_function, source_dofs_to_elements, source_number_of_dofs_per_element, source_elements_to_points.data(), source_number_of_points_per_element, source_points.data(), source_size,s->get_permutation().data(), source_quadrature_order);
+    }
+    //   BEMHCA(kernel_type kernel, basis_function_type target_basis_function, std::map<int, std::vector<int>> target_dofs_to_elements, int target_number_of_dofs_per_element, const int *target_elements_to_points, int target_number_of_points_per_element, CoordinatePrecision *target_points, int target_size, const int *target_permutation, int target_quadrature_order, basis_function_type source_basis_function, std::map<int, std::vector<int>> source_dofs_to_elements, int source_number_of_dofs_per_element, int *source_elements_to_points, int source_number_of_points_per_element, CoordinatePrecision *source_points, int source_size, const int *source_permutation, int source_quadrature_order)
     else {
         cerr << "Error: unknown htool compressor \""+data.compressor+"\"" << endl;
         ffassert(0);
@@ -682,7 +766,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             ffassert(0);
 
         // build the Hmat
-        buildHmat(Hmat, generator, ds, t, s, pt, ps, comm);
+        buildHmat(Hmat, generator, ds, t, Vh, s, Uh, pt, ps, comm);
 
         delete generator;
     }
@@ -727,7 +811,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         else
             ffassert(0);
 
-        buildHmat(Hmat, generator, ds, t, s, pt, ps, comm);
+        buildHmat(Hmat, generator, ds, t, Vh, s, Uh, pt, ps, comm);
 
         delete generator;
     }
