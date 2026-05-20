@@ -80,6 +80,9 @@
 #define MU_SLEPC
 #elif defined(HAVE_LIBARPACK)
 #define MU_ARPACK
+#else
+#undef HPDDM_INEXACT_COARSE_OPERATOR
+#define HPDDM_INEXACT_COARSE_OPERATOR 0
 #endif
 #endif
 #endif
