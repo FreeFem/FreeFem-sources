@@ -6,6 +6,7 @@
 #include <htool/distributed_operator/linalg.hpp>
 #include <htool/hmatrix/lrmat/recompressed_low_rank_generator.hpp>
 #include <htool/hmatrix/lrmat/interpolation.hpp>
+#include <type_traits>
 
 #if defined(WITH_metis)
 extern "C" {
@@ -432,6 +433,8 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
     auto hmatrix_builder = htool::HMatrixTreeBuilder<R, double>(data.epsilon, data.eta, data.sym?'S':'N',data.sym?'U':'N', -1);
     std::shared_ptr<htool::VirtualInternalLowRankGenerator<R>> LowRankGenerator = nullptr;
     std::vector<double> target_points,source_points;
+    std::vector<int> target_elements_to_points,source_elements_to_points;
+    std::map<int, std::vector<int>> target_dofs_to_elements,source_dofs_to_elements;
     if (data.compressor=="" || data.compressor == "partialACA")
         LowRankGenerator = std::make_shared<htool::partialACA<R>>(*generatorP, t->get_permutation().data(), s->get_permutation().data());
     else if (data.compressor == "fullACA")
@@ -454,66 +457,87 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
         const MeshT& ThT=Vh->Th;
         const MeshS& ThS=Uh->Th;
 
-
-        auto kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
+        double frequency=0.3e+9;
+        // auto kernel = std::function([](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) ->void {});
+        auto kernel = std::function<void(std::array<double,3>*,
+                       int,
+                       std::array<double,3>*,
+                       int,
+                       R*)>();
+        if constexpr (std::is_same<R, double>()) {
+            kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
+                for (int i = 0; i < Nx; i++) {
+                    for (int j = 0; j < Ny; j++) {
+                        double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
+                        mat[i + j * Nx] = 1. / (4 * M_PI * r);
+                    }
+                }
+            };
+        }
+        else{
+            kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
+            double frequency=0.3e+9;
             for (int i = 0; i < Nx; i++) {
                 for (int j = 0; j < Ny; j++) {
-                    mat[i + j * Nx] = 1. / (4 * M_PI * std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); })));
+                    double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
+                    mat[i + j * Nx] = std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r);
                 }
             }
         };
+        }
+        
         auto basis_function = [](
             std::vector<std::array<double, 3>>,
             int,
             std::array<double, 3>){
                 return R(1);
             };
-        std::map<int, std::vector<int>> target_dofs_to_elements;
         int target_number_of_dofs_per_element=(*Vh)[0].NbDoF();
         for (int e=0;e<ThT.nt;e++){
             FElementT KV((*Vh)[e]);
             for (int d=0;d<target_number_of_dofs_per_element;d++){
                 target_dofs_to_elements[KV(d)].push_back(e);
+                target_dofs_to_elements[KV(d)].push_back(d);
             }
         }
-        std::vector<int>target_elements_to_points(ThT.nt*(RdHatT::d+1));
+        int target_number_of_points_per_element=RdHatT::d+1;
+        target_elements_to_points.resize(ThT.nt*target_number_of_points_per_element);
         for (int e=0;e<ThT.nt;e++){
             for (int p=0;p<RdHatT::d+1;p++){
-                target_elements_to_points[e*(RdHatT::d+1)+p]=ThT(e)[p];
+                target_elements_to_points[e*target_number_of_points_per_element+p]=ThT(ThT[e][p]);
             }
         }
 
-        int target_number_of_points_per_element=RdHatT::d+1;
         target_points.resize(ThT.nv*3);
         for (int p=0;p<ThT.nv;p++){
             Fem2D::R3 pp = ThT.vertices[p];
-            target_points[p+0]=pp[0];
-            target_points[p+1]=pp[1];
-            target_points[p+2]=pp[2];
+            target_points[3*p+0]=pp[0];
+            target_points[3*p+1]=pp[1];
+            target_points[3*p+2]=pp[2];
         }
         int target_size=ThT.nv;
         int target_quadrature_order=10;
-        std::map<int, std::vector<int>> source_dofs_to_elements;
         int source_number_of_dofs_per_element=(*Uh)[0].NbDoF(); 
         for (int e=0;e<ThS.nt;e++){
             FElementS KU((*Uh)[e]);
             for (int d=0;d<source_number_of_dofs_per_element;d++){
                 source_dofs_to_elements[KU(d)].push_back(e);
-            }
-        }
-        std::vector<int>source_elements_to_points(ThS.nt*(RdHatS::d+1));
-        for (int e=0;e<ThS.nt;e++){
-            for (int p=0;p<RdHatS::d+1;p++){
-                source_elements_to_points[e*(RdHatS::d+1)+p]=ThS(e)[p];
+                source_dofs_to_elements[KU(d)].push_back(d);
             }
         }
         int source_number_of_points_per_element=RdHatS::d+1; 
+        source_elements_to_points.resize(ThS.nt*source_number_of_points_per_element);
+        for (int e=0;e<ThS.nt;e++){
+            for (int p=0;p<RdHatS::d+1;p++){
+                source_elements_to_points[e*source_number_of_points_per_element+p]=ThS(ThS[e][p]);
+            }
+        }
         source_points.resize(ThS.nv*3);
         for (int p=0;p<ThS.nv;p++){
             Fem2D::R3 pp = ThS.vertices[p];
-            source_points[p+0]=pp[0];
-            source_points[p+1]=pp[1];
-            source_points[p+2]=pp[2];
+            source_points[3*p+0]=pp[0];
+            source_points[3*p+1]=pp[1];
+            source_points[3*p+2]=pp[2];
         }
         int source_size=ThS.nv;
         int source_quadrature_order=10;
