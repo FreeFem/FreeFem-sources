@@ -575,9 +575,7 @@ ff_mingw=no
 ff_fpic=yes
 case $ff_uname in
     CYGWIN*)
-	ff_fpic=no
-	#    ff_nocygwin=-mno-cygwin
-	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
+	ff_fpic=no;;
     MINGW*|MSYS_NT*)
         enable_cygwindll=no;;
 
@@ -616,20 +614,12 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		# FFCS does not use the Cygwin MinGW compilers any more
 		if test $enable_ffcs = no
 		then
-		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
-		    FFLAGS="$FFLAGS $ff_nocygwin"
-		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                    AC_COMPILE_IFELSE([AC_LANG_SOURCE([int a;])],[],
-			[ff_nocygwin="";
-			    AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
-			    ])
-		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
-		    FFLAGS="$FFLAGS $ff_nocygwin"
-		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-		    CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
+		    CXXFLAGS="$CXXFLAGS -I/usr/include/mingw"
+		    CFLAGS="$CFLAGS -I/usr/include/mingw"
+		    CNOFLAGS="$CNOFLAGS -I/usr/include/mingw"
 		fi
 
-		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
+		LIBS="$LIBS -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
 
 		# FFCS uses a specific compiler, so we specify its libraries explicitely
@@ -639,8 +629,8 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexec.exe`
 		    if test "$enable_fortran" != no -a "$with_flib" != no ;   then
 			case "$F77" in
-	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran -lquadmath";;
-	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;
+	 		    *gfortran) FLIBS="-lgfortran -lquadmath";;
+	 		    *g77) FLIBS="-lg2c";;
 			    *)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
 			esac
 		    fi
