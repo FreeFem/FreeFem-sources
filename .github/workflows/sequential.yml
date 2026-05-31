@@ -98,6 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
+        - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
     name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
