@@ -9816,6 +9816,177 @@ class OrientNormal : public OneOperator {
   }
 };
 
+template <class Mesh>
+class DistributeMesh_Op : public E_F0mps {
+public:
+	Expression eTh;
+	static const int n_name_param = 8;
+	static basicAC_F0::name_and_type name_param[];
+	Expression nargs[n_name_param], xx, yy, zz;
+
+	KN_< long > arg(int i, int ii, Stack stack, KN_< long > a) const {
+		ffassert(!(nargs[i] && nargs[ii]));
+		i = nargs[i] ? i : ii;
+		return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
+	}
+	double arg(int i, Stack stack, double a) const { return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a; }
+
+	long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
+
+	bool arg(int i, Stack stack, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
+
+public:
+	DistributeMesh_Op(const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
+	: eTh(tth),xx(xxx), yy(yyy), zz(zzz)  {
+
+		args.SetNameParam(n_name_param, name_param, nargs);
+		const E_Array *a1 = 0;
+		if (nargs[0])
+			a1 = dynamic_cast< const E_Array * >(nargs[0]);
+
+		if (a1) {
+		xx = to< double >((*a1)[0]);
+		if(a1->size()>1) yy = to< double >((*a1)[1]);
+		if(a1->size()>2) zz = to< double >((*a1)[2]);
+	}
+}
+
+AnyType operator( )(Stack stack) const;
+};
+
+template <class Mesh>
+basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
+{"transfo", &typeid(E_Array)},       // 0
+{"refedge", &typeid(KN_< long >)},
+{"label", &typeid(KN_< long >)},
+{"cleanmesh", &typeid(bool)},
+{"removeduplicate", &typeid(bool)},
+{"precismesh", &typeid(double)},
+{"orientation", &typeid(long)},
+{"ridgeangle", &typeid(double)}
+};
+
+template <class Mesh>
+class DistributeMesh : public OneOperator {
+public:
+	int cas;
+
+	DistributeMesh( ) : OneOperator(atype< const DistributedMesh<Mesh>* >( ), atype< const Mesh* >( )) , cas(0) {}
+
+	DistributeMesh(int) : OneOperator(atype< const DistributedMesh<Mesh>* >( ), atype< const Mesh* >( ) , atype< E_Array >( )), cas(1) {}
+
+	E_F0 *code(const basicAC_F0 &args) const {
+		if (cas == 0) {
+			return new DistributeMesh_Op<Mesh>(args, t[0]->CastTo(args[0]));
+		} else if (cas == 1) {
+			const E_Array *a = dynamic_cast< const E_Array * >(args[1].LeftValue( ));
+			ffassert(a);
+			Expression X = to< double >((*a)[0]);
+			Expression Y=0 ; if(a->size( )>1) Y=to< double >((*a)[1]);
+			Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
+			return new DistributeMesh_Op<Mesh>(args, t[0]->CastTo(args[0]), X, Y, Z);
+		}
+		CompileError("DistributeMesh case unknown  ");
+		return 0;
+	}
+};
+
+template <class Mesh>
+AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
+  Mesh &Th = *pTh;
+  MeshPoint *mpp(MeshPointStack(stack));
+  ffassert(pTh);
+
+  double precis_mesh(arg(5, stack, 1e-7));
+  long orientation(arg(6, stack, 1L));
+  bool cleanmesh(arg(7, stack, true));
+  bool removeduplicate(arg(8, stack, false));
+  bool rebuildboundary = false;
+
+  typedef typename Mesh::Element T;
+  typedef typename Mesh::BorderElement B;
+  typedef typename Mesh::Vertex V;
+
+  int nbv=Th.nv;
+  int nbt=Th.nt;
+  int neb=Th.nbe;
+
+  int *split = new int[nbt];
+  for (int i=0; i<nbt; i++)
+    split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
+
+  Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);
+
+  delete[] split;
+
+  Tht->BuildGTree( );
+  //Add2StackOfPtr2FreeRC(stack, T_Th);
+  DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(Tht);
+
+  return DTh;
+
+/*
+  V *v= new V[nbv];
+  T *t= new T[nbt];
+  B *b= new B[neb];
+  V *vv=v;
+  for (int i=0;i<nbv;i++) {
+    vv->x=Th(i).x;
+    vv->y=Th(i).y;
+    vv->lab = Th(i).lab;
+    vv++;
+  }
+
+  // copy elements
+  for (int it = 0; it < Th.nt; ++it) {
+    const T &K = (Th[it]);
+    int iv[T::nea];
+    for (int i = 0; i < T::nea; i++) iv[i] = Th.operator( )(K[i]);
+    // cp element
+    t[it].set(v, iv, K.lab);
+  }
+  // copy border elements
+  for (int ibe = 0; ibe < Th.nbe; ++ibe) {
+    const B &K(Th.be(ibe));
+    int iv[B::nea];
+    for (int i = 0; i < B::nea; i++) iv[i] = Th.operator( )(K[i]);
+    // cp border element
+    b[ibe].set(v, iv, K.lab);
+  }
+
+  Mesh * T_Th = new Mesh(nbv,nbt,neb,v,t,b,cleanmesh, removeduplicate,
+                          rebuildboundary, orientation, precis_mesh);
+
+	T_Th->BuildGTree( );
+	//Add2StackOfPtr2FreeRC(stack, T_Th);
+  DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(T_Th);
+
+	*mp = mps;
+	return DTh;
+*/
+
+}
+
+template< class K >
+AnyType AddIncrement(Stack stack, const AnyType &a) {
+  K m = GetAny< K >(a);
+  m->increment( );
+  Add2StackOfPtr2FreeRC(stack, m);
+  if (verbosity > 1) cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
+  return a;
+}
+
+template<class Mesh>
+const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh)
+{ throwassert(DTh && *DTh) ;
+    const Mesh *Th = (**DTh).LocalMesh;
+    cout << Th << endl;
+    if (Th==nullptr) cout << "The distributed mesh is empty !" << endl;
+    return Th;
+}
+
 #ifndef WITH_NO_INIT
 
 // <<dynamic_loading>>
@@ -9936,7 +10107,14 @@ static void Load_Init_msh3( ) {
    
   Global.Add("rebuildBorder", "(", new RebuildBorder<MeshS>);
   Global.Add("rebuildBorder", "(", new RebuildBorder<MeshL>);
-      
+
+  TheOperators->Add("<-", new OneOperator2_<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_copy_incr));
+  TheOperators->Add("=", new OneOperator2<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_eqdestroy_incr));
+
+  Add<const DistributedMesh<MeshS>**>("local",".",new OneOperator1s_<const MeshS* ,const DistributedMesh<MeshS>**>(get_localmesh<MeshS>));
+
+  Global.Add("distribute", "(", new DistributeMesh<MeshS>);
+  Global.Add("distribute", "(", new DistributeMesh<MeshS>(1));
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from

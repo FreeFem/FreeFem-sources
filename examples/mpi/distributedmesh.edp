@@ -1,0 +1,35 @@
+// NBPROC 4
+// PARAM -wg -ns
+
+load "msh3"
+load "medit"
+
+meshS Th = square3(20,20);
+
+DmeshS DTh = distribute(Th);
+
+fespace Uh(DTh,[P0]);
+
+Uh u = mpirank;
+plot(u);
+
+plot(DTh.local);
+
+meshS[int] Thtab(mpisize);
+Thtab[mpirank] = DTh.local;
+
+meshS Thi;
+fespace Uhi(Thi,P0);
+
+Uhi[int] ui(mpisize);
+
+for (int i=0; i<mpisize; i++) {
+	broadcast(processor(i),Thtab[i]);
+	Thi = Thtab[i];
+	ui[i] = 0;
+	if (mpirank == i) ui[i][] = u[];
+	broadcast(processor(i),ui[i][]);
+	//ui[i] = i;
+}
+
+plot(ui,fill=1);

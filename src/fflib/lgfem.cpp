@@ -64,6 +64,7 @@
 #include "AddNewFE.h"
 #include "array_resize.hpp"
 #include "PlotStream.hpp"
+#include "DistributedMesh.hpp"
 
 using namespace std;
 
@@ -1565,6 +1566,104 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
   }
   OpMake_pfes( )
     : OneOperator(atype< pfes * >( ), atype< pfes * >( ), atype< const Mesh ** >( ),
+                  atype< E_Array >( )) {}
+};
+
+typedef TypeOfFE TypeOfFE2;
+template< class pfes, class Mesh, class TypeOfFE, class pfes_tefk >
+struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
+  struct Op : public E_F0mps {
+   public:
+    Expression eppDTh;
+    Expression eppfes;
+    const E_Array &atef;
+    int nb;
+    int nbcperiodic;
+    Expression *periodic;
+    KN< int > tedim;
+    Op(Expression ppfes, Expression ppDTh, const E_Array &aatef, int nbp, Expression *pr,
+       KN< int > &ttedim)
+      : eppDTh(ppDTh), eppfes(ppfes), atef(aatef), nbcperiodic(nbp), periodic(pr), tedim(ttedim) {}
+    ~Op( ) {
+      if (periodic) delete[] periodic;
+    }
+    AnyType operator( )(Stack s) const {
+      aType pt_tfe = atype0< TypeOfFE ** >( );
+      aType t_tfe = atype< TypeOfFE * >( );
+      aType t_tfe2 = atype< TypeOfFE2 * >( );
+
+      const int d = Mesh::Rd::d;
+      const int dHat = Mesh::RdHat::d;
+      const  int dHatfe = TypeOfFE::RdHat::d;
+      const int dfe = TypeOfFE::RdHat::d;
+
+      DistributedMesh<Mesh> **ppDTh = GetAny<  DistributedMesh<Mesh> ** >((*eppDTh)(s));
+      Mesh *  *ppTh = &((**ppDTh).LocalMesh);
+      AnyType r = (*eppfes)(s);
+      const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
+      for (int i = 0; i < atef.size( ); i++) {
+         // verif  type atef[i]  coorection mars 2022 ..
+         aType  ttfe =atef[i].left();
+         ffassert( ttfe == t_tfe ||ttfe == t_tfe2 || ttfe == pt_tfe ) ;
+         if(verbosity>9) cout << "OpMake_Dpfes_np :: " << i << " " << (tedim[i] == dHat && d==dfe) << " " << tedim[i]
+                                                                        << dHat << d << dfe
+                << " " << typeid(TypeOfFE).name() << endl;
+
+        if (ttfe == t_tfe) // good  type no converstion
+          tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
+        else  if (ttfe == pt_tfe) // good  type no converstion
+          tef[i] = *GetAny< TypeOfFE ** >(atef[i].eval(s));
+        else if (tedim[i] == 2 && d==3 && dHat == 3)
+          tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
+        else if (tedim[i] == 2 && d==3 && dHat == 2)
+          tef[i] = GetAny< TypeOfFE * >(TypeOfFESto2(s, atef[i].eval(s)));
+        else if (tedim[i] == 2 && d==3 && dHat == 1)
+          tef[i] = GetAny< TypeOfFE * >(TypeOfFELto2(s, atef[i].eval(s)));
+        else
+          ffassert(0);
+        }
+
+      pfes *ppfes = GetAny< pfes * >(r);
+      bool same = true;
+      for (int i = 1; i < atef.size( ); i++) same &= atef[i].LeftValue( ) == atef[1].LeftValue( );
+      *ppfes = new pfes_tefk(ppTh, tef, atef.size( ), s, nbcperiodic, periodic);
+      return r;
+    }
+  };
+
+  E_F0 *code(const basicAC_F0 &args) const {
+    int nbcperiodic = 0;
+    Expression *periodic = 0;
+    Expression nargs[n_name_param];
+
+    args.SetNameParam(n_name_param, name_param, nargs);
+      const int d = TypeOfFE::RdHat::d;
+    GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
+    aType t_tfe = atype< TypeOfFE * >( );
+    aType pt_tfe = atype0< TypeOfFE ** >( );
+    aType t_tfe2 = atype< TypeOfFE2 * >( );
+    ffassert(d>0 && d < 4);
+    char  cdim[10];
+      snprintf(cdim,10,"%dd",d);
+    string sdim = cdim ;
+    const E_Array *a2(dynamic_cast< const E_Array * >(args[2].LeftValue( )));
+    ffassert(a2);
+    int N = a2->size( );
+    ;
+    if (!N) CompileError(sdim + " We wait an array of Type of Element ");
+    KN< int > tedim(N);
+    for (int i = 0; i < N; i++)
+      if ((*a2)[i].left( ) == t_tfe ||(*a2)[i].left( ) == pt_tfe )
+        tedim[i] = d;
+      else if ((*a2)[i].left( ) == t_tfe2)
+        tedim[i] = 2;
+      else
+        CompileError(sdim + " We wait an array of  Type of Element ");
+    //    ffassert(0);
+    return new Op(args[0], args[1], *a2, nbcperiodic, periodic, tedim);
+  }
+  OpMake_Dpfes( )
+    : OneOperator(atype< pfes * >( ), atype< pfes * >( ), atype< const DistributedMesh<Mesh> ** >( ),
                   atype< E_Array >( )) {}
 };
 
@@ -6419,6 +6518,10 @@ void init_lgfem( ) {
   Global.New(sparsesolver.c_str( ), CConstant< string * >(&sparsesolver));
   Global.New(sparsesolverSym.c_str( ), CConstant< string * >(&sparsesolverSym));
 
+  Dcl_TypeandPtr< const DistributedMesh<MeshS>* >(0, 0, ::InitializePtr< const DistributedMesh<MeshS>* >, ::DestroyPtr< const DistributedMesh<MeshS>* >,
+                           AddIncrement< const DistributedMesh<MeshS>* >, NotReturnOfthisType);
+  zzzfff->Add("DmeshS", atype< const DistributedMesh<MeshS>** >( ));
+
   // old --
   //  init FESpace
   TheOperators->Add(
@@ -6430,7 +6533,9 @@ void init_lgfem( ) {
     new OpMake_pfes< pfes, Mesh, TypeOfFE, pfes_tefk >,
     new OpMake_pfes< pfes3, Mesh3, TypeOfFE3, pfes3_tefk >,
     new OpMake_pfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >,    // add for 3D surface  FEspace
-    new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >);
+    new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >,
+    new OpMake_Dpfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >
+  );
   TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp,2));
 
   Add< MeshPoint * >("P", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::P));
@@ -7557,6 +7662,8 @@ aType typeFESpace(const basicAC_F0 &args) {
   aType t_mS = atype< pmeshS * >( );
   aType t_mL = atype< pmeshL * >( );
 
+  aType t_mDS = atype< const DistributedMesh<MeshS>* * >( );
+
   aType t_tfe = atype< TypeOfFE * >( );
   aType t_tfe3 = atype< TypeOfFE3 * >( );
   aType t_tfeS = atype< TypeOfFES * >( );
@@ -7627,6 +7734,10 @@ aType typeFESpace(const basicAC_F0 &args) {
         ffassert(dm == 5 || dm < 0);
         dm = 5;
       }
+      else if (tl == t_mDS) {
+        ffassert(dm == 104 || dm < 0);
+        dm = 104;
+      }
       // array
       else if (tl == t_a) {
         const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
@@ -7650,6 +7761,8 @@ aType typeFESpace(const basicAC_F0 &args) {
       ret = atfs[2];    // 3D fespace (surface)
     else if (dm == 5)
       ret = atfs[3];    // 3D fespace (curve)
+    else if (dm == 104)
+      ret = atfs[2];
     else {
       cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :" << dm << " type FE " << id + 2 << endl;
       ffassert(0);

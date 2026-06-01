@@ -51,6 +51,7 @@ using namespace std;
 #include "libmeshb7.h"
 #include "lgfem.hpp"
 #include "lgmesh3.hpp"
+#include "DistributedMesh.hpp"
 
 #include "problem.hpp"
 
