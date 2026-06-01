@@ -71,17 +71,6 @@ struct PARDISO_STRUC_TRAIT< Complex > {
   static const char * name(){return "complex";}
 };
 
-void mkl_csrcsc(MKL_INT *job, MKL_INT *n, Complex *Acsr, MKL_INT *AJ0, MKL_INT *AI0, Complex *Acsc,
-                MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info) {
-  mkl_zcsrcsc(job, n, reinterpret_cast< MKL_Complex16 * >(Acsr), AJ0, AI0,
-              reinterpret_cast< MKL_Complex16 * >(Acsc), AJ1, AI1, info);
-}
-
-void mkl_csrcsc(MKL_INT *job, MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc,
-                MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info) {
-  mkl_dcsrcsc(job, n, Acsr, AJ0, AI0, Acsc, AJ1, AI1, info);
-}
-
 template< class R >
 class SolverPardiso : public VirtualSolver< int, R > {
  private:
