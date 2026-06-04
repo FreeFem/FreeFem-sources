@@ -40,6 +40,7 @@ func Pk = P2;
 
     }
     macro ThUserPartitioning()part// EOM
+    macro ThOverlap()getARGV("-overlap", 1)// EOM
     DmeshCreate(Th);
     MatCreate(Th, A, Pk);
 }
