@@ -1569,7 +1569,6 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
                   atype< E_Array >( )) {}
 };
 
-typedef TypeOfFE TypeOfFE2;
 template< class pfes, class Mesh, class TypeOfFE, class pfes_tefk >
 struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
   struct Op : public E_F0mps {
@@ -1577,7 +1576,7 @@ struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
     Expression eppDTh;
     Expression eppfes;
     const E_Array &atef;
-    int nb;
+//    int nb;
     int nbcperiodic;
     Expression *periodic;
     KN< int > tedim;
@@ -1594,7 +1593,7 @@ struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
 
       const int d = Mesh::Rd::d;
       const int dHat = Mesh::RdHat::d;
-      const  int dHatfe = TypeOfFE::RdHat::d;
+//      const  int dHatfe = TypeOfFE::RdHat::d;
       const int dfe = TypeOfFE::RdHat::d;
 
       DistributedMesh<Mesh> **ppDTh = GetAny<  DistributedMesh<Mesh> ** >((*eppDTh)(s));
@@ -1649,7 +1648,7 @@ struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
     const E_Array *a2(dynamic_cast< const E_Array * >(args[2].LeftValue( )));
     ffassert(a2);
     int N = a2->size( );
-    ;
+
     if (!N) CompileError(sdim + " We wait an array of Type of Element ");
     KN< int > tedim(N);
     for (int i = 0; i < N; i++)

@@ -59,6 +59,7 @@ using namespace std;
 #include "splitsimplex.hpp"    // [[file:../src/femlib/splitsimplex.hpp]]
 #include "renumb.hpp"
 #include <cmath>
+#include "metis.h"
 
 namespace std
 {
@@ -9913,9 +9914,30 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   int nbt=Th.nt;
   int neb=Th.nbe;
 
-  int *split = new int[nbt];
+  /*int *split = new int[nbt];
   for (int i=0; i<nbt; i++)
     split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
+*/
+  int *split = new int[nbt];
+  if (mpisize > 1) {
+    idx_t nt = nbt, nv = nbv;
+    idx_t nve = Mesh::RdHat::d + 1;
+    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), epart(nt), npart(nv);
+    for (idx_t k = 0, i = 0; k < nt; ++k) {
+      eptr[k] = i;
+      for (idx_t j = 0; j < nve; j++)
+        elmnts[i++] = Th(k, j);
+      eptr[k + 1] = i;
+    }
+    idx_t nparts = mpisize, edgecut, ncommon = 1;
+    METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
+                       (idx_t *)epart, (idx_t *)npart);
+    for (int i = 0; i < nbt; i++)
+      split[i] = (epart[i] == mpirank) ? 1 : 0;
+  } else {
+    for (int i = 0; i < nbt; i++)
+      split[i] = 1;
+  }
 
   Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);
 
@@ -9968,7 +9990,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 */
 
 }
-
+/*
 template< class K >
 AnyType AddIncrement(Stack stack, const AnyType &a) {
   K m = GetAny< K >(a);
@@ -9977,12 +9999,12 @@ AnyType AddIncrement(Stack stack, const AnyType &a) {
   if (verbosity > 1) cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
   return a;
 }
-
+*/
 template<class Mesh>
 const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh)
 { throwassert(DTh && *DTh) ;
     const Mesh *Th = (**DTh).LocalMesh;
-    cout << Th << endl;
+    //cout << Th << endl;
     if (Th==nullptr) cout << "The distributed mesh is empty !" << endl;
     return Th;
 }

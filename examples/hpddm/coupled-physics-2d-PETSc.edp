@@ -1,0 +1,151 @@
+//  created with md2edp examples/hpddm/coupled-physics-2d-PETSc.md
+include "getARGV.idp"
+load "PETSc"
+// Controlling the number of dof's
+int nn = getARGV("-n", 200);
+// domain 1
+func Pku1 = P1; func Pkp1 = P1;
+// domain 2
+func Pku2 = P1; func Pkp2 = P1;
+// alpha
+real tmp1 = pow(pi/2,2) + 1;
+real tmp2 = pow((nn-1)*pi, 2) + 1;
+real tmp3 = tmp1*tmp2;
+real alpha = pow(tmp3, 0.25);
+border star(t=0, 2*pi){
+    x = 1.0*(1 + 0.3*sin(5*t))*cos(t);
+    y = 1.0*(1 + 0.3*sin(5*t))*sin(t);
+}
+mesh Th = buildmesh(star(nn));
+mesh Th1 = trunc(Th, x<=0, split=1, label=123);
+mesh Th2 = trunc(Th, x>=0, split=1, label=123);
+int[int] labs = [123];
+meshL ThI1 = extract(Th1, label=labs);
+meshL ThI2 = extract(Th2, label=labs);
+Mat L11, L22;
+Mat C11, C22;
+Mat interpI12, interpI21;
+
+fespace Ph1(Th1, P0);
+fespace Ph2(Th2, P0);
+Ph1 part1;
+Ph2 part2;
+{
+    macro dimension()2// EOM
+    macro meshtype()V// EOM
+    macro partitioner()metis//
+    include "macro_ddm.idp"
+    partitionerSeq(part1[], Th1, mpisize);
+    partitionerSeq(part2[], Th2, mpisize);
+    partitionerPar(part1[], Th1, mpiCommWorld, mpisize);
+    partitionerPar(part2[], Th2, mpiCommWorld, mpisize);
+    macro Th1UserPartitioning()part1[]// EOM
+    macro Th2UserPartitioning()part2[]// EOM
+    MatCreate(Th1, L11, Pku1);
+    MatCreate(Th2, L22, Pku2);
+}
+fespace PhI1(ThI1, P0);
+fespace PhI2(ThI2, P0);
+PhI1 partI1 = part1;
+PhI2 partI2 = part2;
+int[int] labs1 = labels(Th1);
+int[int] labs2 = labels(Th2);
+int hasI1 = 0, hasI2 = 0;
+for(int i = 0; i < labs1.n; i++) if(labs1[i] == 123) hasI1 = 1;
+for(int i = 0; i < labs2.n; i++) if(labs2[i] == 123) hasI2 = 1;
+{
+    macro dimension()3// EOM
+    macro meshtype()L// EOM
+    include "macro_ddm.idp"
+    macro ThI1UserPartitioning()partI1[]// EOM
+    macro ThI2UserPartitioning()partI2[]// EOM
+    MatCreate(ThI1, C11, Pkp1);
+    MatCreate(ThI2, C22, Pkp2);
+    MatInterpolate(ThI1, Pkp1, C11, ThI2, Pkp2, C22, interpI21);
+    MatInterpolate(ThI2, Pkp2, C22, ThI1, Pkp1, C11, interpI12);
+}
+fespace Vh1(Th1, Pku1);
+fespace Vh2(Th2, Pku2);
+fespace VhI1(ThI1, Pkp1);
+fespace VhI2(ThI2, Pkp2);
+func f = x^2*y*100;
+macro grad(u) [dx(u),dy(u)] // EOM
+varf ProbL1(u, v) =  int2d(Th1)(grad(u)'*grad(v) + 1e-1*u*v) - int2d(Th1)(f * v);
+varf ProbB1(u, v) =  int1d(ThI1)(u*v);
+varf ProbC1(u, v) = -int1d(ThI1)(1./alpha * u*v);
+varf ProbL2(u, v) =  int2d(Th2)(grad(u)'*grad(v) + 1e-1*u*v) - int2d(Th2)(f * v);
+varf ProbB2(u, v) =  int1d(ThI2)(u*v);
+varf ProbC2(u, v) = -int1d(ThI2)(1./alpha * u*v);
+real[int] rhs(Vh1.ndof + Vh2.ndof + VhI1.ndof + VhI2.ndof);
+rhs = 0;
+rhs(0:Vh1.ndof-1) = ProbL1(0,Vh1);
+rhs(Vh1.ndof+VhI1.ndof:Vh1.ndof+VhI1.ndof+Vh2.ndof-1) = ProbL2(0,Vh2);
+// L11 and L22
+matrix mL11 = ProbL1(Vh1, Vh1, solver=GMRES);
+matrix mL22 = ProbL2(Vh2, Vh2, solver=GMRES);
+L11 = mL11;
+L22 = mL22;
+// B11 and B22
+matrix mB11(Vh1.ndof, VhI1.ndof);
+matrix mB22(Vh2.ndof, VhI2.ndof);
+if(hasI1) mB11 = ProbB1(VhI1, Vh1, solver=GMRES);
+if(hasI2) mB22 = ProbB2(VhI2, Vh2, solver=GMRES);
+Mat B11(L11, C11);
+Mat B22(L22, C22);
+B11 = mB11;
+B22 = mB22;
+// C11 and C22
+matrix mC11(VhI1.ndof,VhI1.ndof);
+matrix mC22(VhI2.ndof,VhI2.ndof);
+if(hasI1) mC11 = ProbC1(VhI1, VhI1, solver=GMRES);
+if(hasI2) mC22 = ProbC2(VhI2, VhI2, solver=GMRES);
+C11 = mC11;
+C22 = mC22;
+// BT12 and BT21
+matrix mB12(Vh1.ndof, VhI1.ndof), mB21(Vh2.ndof, VhI2.ndof);
+if(hasI1) mB12 = ProbB1(VhI1, Vh1, solver=GMRES);
+if(hasI2) mB21 = ProbB2(VhI2, Vh2, solver=GMRES);
+matrix mBT21 = -mB21';
+matrix mBT12 = -mB12';
+Mat BT12(C11, L11);
+Mat BT21(C22, L22);
+BT12 = mBT12;
+BT21 = mBT21;
+// C12 and C21
+matrix mC12(VhI1.ndof,VhI1.ndof), mC21(VhI2.ndof, VhI2.ndof);
+if(hasI1) mC12 = ProbC1(VhI1, VhI1, solver=GMRES);
+if(hasI2) mC21 = ProbC2(VhI2, VhI2, solver=GMRES);
+Mat C12(C11, C11);
+Mat C21(C22, C22);
+C12 = mC12;
+C21 = mC21;
+Mat A = [[     L11      ,      B11     ,       0       ,       0      ],
+         [     B11'     ,      C11     , interpI12*BT21, interpI12*C21],
+         [      0       ,       0      ,      L22      ,      B22     ],
+         [interpI21*BT12, interpI21*C12,      B22'     ,      C22     ]];
+set(A, sparams=" -ksp_type fgmres" +
+               " -ksp_pc_side right" +
+               " -pc_type fieldsplit" +
+               " -pc_fieldsplit_type additive" +
+               " -pc_fieldsplit_0_fields 0,1" +
+               " -pc_fieldsplit_1_fields 2,3" +
+               " -fieldsplit_0_ksp_type preonly" +
+               " -fieldsplit_0_pc_type lu" +
+               " -fieldsplit_1_ksp_type preonly" +
+               " -fieldsplit_1_pc_type lu" +
+               " -ksp_max_it 100" +
+               " -ksp_gmres_restart 100" +
+               " -ksp_monitor_true_residual" +
+               " -ksp_converged_reason" +
+               " -ksp_gmres_modifiedgramschmidt");
+real[int] sol = A^-1 * rhs;
+macro dimension()2// EOM
+macro meshtype()V// EOM
+include "macro_ddm.idp"
+macro def(u)u//
+Vh1 u1;
+Vh2 u2;
+u1[] = sol(0:Vh1.ndof-1);
+u2[] = sol(Vh1.ndof+VhI1.ndof:Vh1.ndof+VhI1.ndof+Vh2.ndof-1);
+plotMPI(Th1, u1, Pku1, def, real, cmm="Global velocity (u1)");
+plotMPI(Th2, u2, Pku2, def, real, cmm="Global velocity (u2)");

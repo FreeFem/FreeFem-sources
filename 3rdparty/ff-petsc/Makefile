@@ -58,7 +58,7 @@ PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-gsl-dir=$(DIR_INSTALL_REAL)
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
-		--download-superlu --download-suitesparse --download-tetgen \
+		--download-cmake --download-superlu --download-suitesparse --download-tetgen \
 		--download-gsl=https://mirrors.kernel.org/gnu/gsl/gsl-2.8.tar.gz
 ifneq ($(TOOL_DYLIB_mmg),)
 PETSC_DOWNLOAD += --download-mmg

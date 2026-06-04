@@ -384,6 +384,9 @@ py-compile
 texinfo.tex
 md2edp
 md2edp.dSYM
+## Tracking files
+.clangd/
+compile_commands.json
 # Local Variables:
 # mode:conf
 # ispell-local-dictionary:"british"
