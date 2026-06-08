@@ -1,11 +1,13 @@
 // NBPROC 4
-// PARAM -wg -ns
-
+// PARAM -wg -ns -ffddm_overlap 2
+macro dimension 3S//
+include "ffddm.idp"
 load "medit"
 
 meshS Th = square3(20,20);
 
-DmeshS DTh = distribute(Th);
+DmeshS DTh = distribute(Th, overlap=ffddmoverlap);
+ffddmbuildDmesh(M,Th,mpiCommWorld);
 
 fespace Uh(DTh,[P0]);
 
@@ -16,7 +18,7 @@ plot(DTh.local);
 
 meshS[int] Thtab(mpisize);
 Thtab[mpirank] = DTh.local;
-
+assert(Thtab[mpirank].nt==MThi.nt);
 meshS Thi;
 fespace Uhi(Thi,P0);
 
