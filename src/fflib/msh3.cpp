@@ -38,7 +38,6 @@
 // Th3_t->BuildjElementConteningVertex();
 // is now in the constructor of Mesh3 to be consistante.
 //
-
 #ifndef WITH_NO_INIT    // cf [[WITH_NO_INIT]]
 #include "ff++.hpp"
 #endif
@@ -9864,7 +9863,8 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"removeduplicate", &typeid(bool)},
 {"precismesh", &typeid(double)},
 {"orientation", &typeid(long)},
-{"ridgeangle", &typeid(double)}
+{"ridgeangle", &typeid(double)},
+{"overlap", &typeid(long)}
 };
 
 template <class Mesh>
@@ -9902,8 +9902,9 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
-  bool cleanmesh(arg(7, stack, true));
-  bool removeduplicate(arg(8, stack, false));
+  bool cleanmesh(arg(3, stack, true));
+  bool removeduplicate(arg(4, stack, false));
+  long sizeoverlaps(arg(8, stack, 1L));
   bool rebuildboundary = false;
 
   typedef typename Mesh::Element T;
@@ -9913,16 +9914,16 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   int nbv=Th.nv;
   int nbt=Th.nt;
   int neb=Th.nbe;
+  const int nve = Mesh::Element::nv;
 
   /*int *split = new int[nbt];
   for (int i=0; i<nbt; i++)
     split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
 */
-  int *split = new int[nbt];
+  KN<idx_t> epart(nbt, 0);
   if (mpisize > 1) {
     idx_t nt = nbt, nv = nbv;
-    idx_t nve = Mesh::RdHat::d + 1;
-    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), epart(nt), npart(nv);
+    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv);
     for (idx_t k = 0, i = 0; k < nt; ++k) {
       eptr[k] = i;
       for (idx_t j = 0; j < nve; j++)
@@ -9932,22 +9933,167 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     idx_t nparts = mpisize, edgecut, ncommon = 1;
     METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
                        (idx_t *)epart, (idx_t *)npart);
-    for (int i = 0; i < nbt; i++)
-      split[i] = (epart[i] == mpirank) ? 1 : 0;
-  } else {
-    for (int i = 0; i < nbt; i++)
-      split[i] = 1;
   }
 
-  Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);
+  KN<int> globalPartition(nbt);
+  for (int k = 0; k<nbt; ++k){
+    globalPartition[k] = (int)epart[k];
+  }
 
-  delete[] split;
+  KN<double> supp(nbt, 0.0);
+  for (int k = 0; k<nbt;++k){
+    supp[k] = (globalPartition[k] == (int)mpirank) ? 1.0 : 0.0;
+  }
+  KN<double> suppSmooth(nbv, 0.0);
+  long nlayers = (sizeoverlaps == 0 ? 1L : 0) + (sizeoverlaps * 2L);
 
-  Tht->BuildGTree( );
-  //Add2StackOfPtr2FreeRC(stack, T_Th);
-  DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(Tht);
+  AddLayers(&Th, &supp, nlayers, &suppSmooth);
+
+  KN<int> isNeighbor((int)mpisize, 0);
+  for (int k = 0; k < nbt; ++k){
+    for (int i = 0; i < nve; ++i){
+      if (suppSmooth[Th(k,i)] > 0.001) {
+        isNeighbor[globalPartition[k]] = 1;
+        break;
+      }
+    }
+  }
+  isNeighbor[(int)mpirank] = 0;
+
+  int numNeighbors = 0;
+  for (int r = 0; r < (int)mpisize; ++r){
+    if (isNeighbor[r]) numNeighbors++;
+  }
+
+  KN<int> neighborRanks(numNeighbors);
+  int j = 0;
+  for (int r = 0; r < (int)mpisize; ++r){
+    if (isNeighbor[r]) neighborRanks[j++] = r;
+  }
+
+  // Truncation including the neighbours
+  int interfaceLabel = 10;
+  int borderLabel = 1100;
+
+  KN<int> splitCore(nbt, 0);
+  KN<int> vertexTag(nbv, 0);
+
+  // Barycentric average by lambda
+  auto baryAvg = [&](int k) -> double {
+    double s = 0;
+    for (int i = 0; i < Mesh::Element::nv; ++i){
+      s += suppSmooth[Th(k,i)];
+    }
+    return s/Mesh::Element::nv;
+  };
+
+  for (int k = 0; k < nbt; ++k){
+    bool keep;
+    if (sizeoverlaps == 0){
+      keep = (globalPartition[k] == (int)mpirank);
+    }
+    else {
+      double avg = baryAvg(k);
+      keep = (avg > 0.501);
+    }
+    if (keep) {
+      splitCore[k] = 1;
+      for (int i = 0; i < Mesh::Element::nv; ++i){
+        vertexTag[Th(k,i)] = 1;
+      }
+    }
+  }
+
+  // Map local to global vertex number
+  int numLocalVtx = 0;
+  KN<int> localToGlobalVertex(nbv);
+  for (int v = 0; v < nbv; ++v){
+    if (vertexTag[v]) localToGlobalVertex[numLocalVtx++] = v;
+  }
+  localToGlobalVertex.resize(numLocalVtx);
+  
+  // Appel à truncmesh
+  Mesh* LocalMesh = truncmesh(Th, 1, (int*)splitCore, false, interfaceLabel, precis_mesh, orientation, cleanmesh, removeduplicate);
+  LocalMesh->BuildGTree();
+  ffassert(localToGlobalVertex.n == LocalMesh->nv);
+
+  // Building splitBorder and BorderMesh
+  KN<int> splitBorder(nbt, 0);
+
+  if (sizeoverlaps > 0){
+    double threshold = (sizeoverlaps - 0.999)/(2.0*sizeoverlaps);
+    for (int k = 0; k < nbt; ++k){
+      double avg = baryAvg(k);
+      if (avg > threshold && avg < 0.501) splitBorder[k] = 1;
+    }
+  }
+
+  Mesh* BorderMesh = truncmesh(Th, 1, (int*)splitBorder, false, borderLabel, precis_mesh, orientation, cleanmesh, removeduplicate);
+  BorderMesh->BuildGTree();
+
+  // Partition of Unity (PoU)
+  std::vector<KN<double>> intersectionSupport(neighborRanks.n);
+  for (int j = 0; j < neighborRanks.n; ++j) {
+    intersectionSupport[j]=KN<double>(LocalMesh->nv, 0.0);
+  }
+
+  KN<double> khi(nbv);
+  for (int v = 0; v < nbv; ++v){
+    khi[v] = (sizeoverlaps > 0) ? std::max(2.0*suppSmooth[v] -1.0, 0.0) : 1.0;
+  }
+
+  // Normalisation PoU
+  KN<double> sumPou = khi;
+  
+  for (int j = 0; j <neighborRanks.n; ++j){
+    KN<double> supp_j(nbt, 0.0);
+    for (int k = 0; k < nbt; ++k){
+      supp_j[k] = (globalPartition[k] ==neighborRanks[j]) ? 1.0 : 0.0;
+    }
+
+    KN<double> phi_j(nbv, 0.0);
+    AddLayers(&Th, &supp_j, sizeoverlaps, &phi_j);
+
+    for (int v = 0; v < nbv; ++v) sumPou[v] += phi_j[v];
+
+    for (int lv = 0; lv < LocalMesh->nv; ++lv){
+      intersectionSupport[j][lv] = phi_j[localToGlobalVertex[lv]];
+    }
+  }
+
+  for (int v = 0; v < nbv; ++v){
+    if (sumPou[v] > 1e-15) khi[v]/=sumPou[v];
+  }
+
+  KN<double> pouLocal(LocalMesh->nv);
+  for (int lv = 0; lv < LocalMesh->nv; ++lv){
+    pouLocal[lv] = khi[localToGlobalVertex[lv]];
+  }
+
+  // DistributedMesh assembly
+  DistributedMesh<Mesh>* DTh = new DistributedMesh<Mesh>();
+
+  DTh->LocalMesh = LocalMesh;
+  DTh->BorderMesh = BorderMesh;
+  DTh->overlap = (int)sizeoverlaps;
+  DTh->interfaceLabel = interfaceLabel;
+  DTh->neighborRanks = neighborRanks;
+  DTh->partitionOfUnity = pouLocal;
+  DTh->intersectionSupport = intersectionSupport;
+  DTh->localToGLobalVertex = localToGlobalVertex;
+  DTh->globalPartition = globalPartition;
 
   return DTh;
+
+ // Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);
+
+
+  //Tht->BuildGTree( );
+  //Add2StackOfPtr2FreeRC(stack, T_Th);
+  //DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(Tht);
+
+  //return DTh;
+  return nullptr;
 
 /*
   V *v= new V[nbv];
