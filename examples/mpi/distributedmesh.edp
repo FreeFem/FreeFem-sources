@@ -1,7 +1,6 @@
 // NBPROC 4
 // PARAM -wg -ns
 
-load "msh3"
 load "medit"
 
 meshS Th = square3(20,20);
