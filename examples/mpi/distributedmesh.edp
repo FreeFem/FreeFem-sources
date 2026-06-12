@@ -1,18 +1,72 @@
 // NBPROC 4
-// PARAM -wg -ns -ffddm_overlap 2
-macro dimension 3S//
+// PARAM -wg -ns -ffddm_overlap 1
+//macro dimension 3S//
 include "ffddm.idp"
 load "medit"
+load "PETSc"
 
 meshS Th = square3(20,20);
+/*
+{
+cout << mpisize << endl;
+NewMacro dimension()3 EndMacro
+NewMacro meshtype()S EndMacro
+include  "macro_ddm.idp"
+Mat A;
+MatCreate(Th, A, P1);
+cout << Th.nt << endl;
+PetscMemoryGetCurrentUsage();
+exit(0);
+
+}
+
+*/
 
 DmeshS DTh = distribute(Th, overlap=ffddmoverlap);
-ffddmbuildDmesh(M,Th,mpiCommWorld);
+//ffddmbuildDmesh(M,Th,mpiCommWorld);
+meshS ThLocal = DTh.local;
+fespace Uh(ThLocal,P1);
+fespace Uh0(ThLocal, P0);
+fespace Uh2(ThLocal, P2);
 
-fespace Uh(DTh,[P0]);
+// Test identité P1
+real[int] DP1 = interpolatePoU(DTh, Uh);
+real[int] diff = DP1 - DTh.D;
+cout << "[" << mpirank << "] P1 diff = " << diff.linfty << " (attendu: 0)" << endl;
 
+// Test projection sur P0
+real[int] DP0 = interpolatePoU(DTh, Uh0);
+cout << "[" << mpirank << "] P0 : n=" << DP0.n << " (attendu =" << ThLocal.nt << ")" << "min = " << DP0.min << " max = " << DP0.max << endl;
+
+// Plot PoU et interpolation
+Uh Dfunc;
+Dfunc[] = DTh.D;
+plot(Dfunc, fill=1, value=1, cmm="Partition of UNity -rank" + mpirank);
+
+
+Uh0 DinterpP0;
+DinterpP0[] = interpolatePoU(DTh, Uh0);
+plot(DinterpP0, fill=1, value=1, cmm="PoU interpolee P0");
+
+
+// Test P2
+Uh2 DinterpP2;
+DinterpP2[] = interpolatePoU(DTh, Uh2);
+plot(DinterpP2, fill=1, value=1, cmm="PoU interpolee P2 - rank " + mpirank);
+cout << "[" << mpirank << "] P2 : n=" << DinterpP2[].n
+     << " (== Uh2.ndof=" << Uh2.ndof << ")"
+     << " min=" << DinterpP2[].min << " max=" << DinterpP2[].max << endl;
+
+/*
 Uh u = mpirank;
 plot(u);
+*/
+/*
+varf a(u,v) = int2d(Th)(u*v);
+Mat A;
+A = a(Uh,Uh);
+*/
+/*
 
 plot(DTh.local);
 
@@ -34,3 +88,30 @@ for (int i=0; i<mpisize; i++) {
 }
 
 plot(ui,fill=1);
+
+real[int] Test = DTh.D;
+MVhiP1 DffddmFunc = MDP1[mpirank];
+real[int] DffddmVals = DffddmFunc[];
+real[int] diff = Test - DffddmVals;
+cout << "[" << mpirank << "] max diff = " << diff.linfty << endl;
+cout << "[" << mpirank << "] max Dcpp = " << Test.max << endl;
+cout << "[" << mpirank << "] max Dffddm = " << DffddmVals.max << endl;
+
+
+// Comparaison sommet par sommet
+meshS ThLocal = DTh.local;
+fespace VhLocal(ThLocal, P1);
+VhLocal Xlocal = x, Ylocal = y, Zlocal = z;
+
+MVhiP1 Xffddm = x, Yffddm = y, Zffddm = z;
+
+real[int] diffX = Xlocal[] - Xffddm[];
+real[int] diffY = Ylocal[] - Yffddm[];
+real[int] diffZ = Zlocal[] - Zffddm[];
+
+cout << "[" << mpirank << "] coord diff:"
+     << " x=" << diffX.linfty
+     << " y=" << diffY.linfty
+     << " z=" << diffZ.linfty << endl;
+
+*/
