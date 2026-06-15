@@ -61,11 +61,12 @@ cout << "[" << mpirank << "] P2 : n=" << DinterpP2[].n
 Uh u = mpirank;
 plot(u);
 */
-/*
-varf a(u,v) = int2d(Th)(u*v);
+
+varf a(u,v) = int2d(ThLocal)(u*v);
 Mat A;
+MatCreate(ThLocal, A, P1);
 A = a(Uh,Uh);
-*/
+
 /*
 
 plot(DTh.local);
