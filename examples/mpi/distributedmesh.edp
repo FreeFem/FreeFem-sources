@@ -1,118 +1,84 @@
 // NBPROC 4
 // PARAM -wg -ns -ffddm_overlap 1
-//macro dimension 3S//
 include "ffddm.idp"
-load "medit"
 load "PETSc"
 
-meshS Th = square3(20,20);
-/*
-{
-cout << mpisize << endl;
-NewMacro dimension()3 EndMacro
-NewMacro meshtype()S EndMacro
-include  "macro_ddm.idp"
-Mat A;
-MatCreate(Th, A, P1);
-cout << Th.nt << endl;
-PetscMemoryGetCurrentUsage();
-exit(0);
+meshS Th = square3(20, 20);
 
-}
-
-*/
-
-DmeshS DTh = distribute(Th, overlap=ffddmoverlap);
-//ffddmbuildDmesh(M,Th,mpiCommWorld);
+DmeshS DTh = distribute(Th, overlap = ffddmoverlap);
 meshS ThLocal = DTh.local;
-fespace Uh(ThLocal,P1);
-fespace Uh0(ThLocal, P0);
-fespace Uh2(ThLocal, P2);
 
-// Test identité P1
-real[int] DP1 = interpolatePoU(DTh, Uh);
-real[int] diff = DP1 - DTh.D;
-cout << "[" << mpirank << "] P1 diff = " << diff.linfty << " (attendu: 0)" << endl;
+fespace Uh(ThLocal, P1);              // fespace standard pour le rhs
+fespace Udh(DTh, P1); // v_dfesS, construit sur DTh.LocalMesh
 
-// Test projection sur P0
-real[int] DP0 = interpolatePoU(DTh, Uh0);
-cout << "[" << mpirank << "] P0 : n=" << DP0.n << " (attendu =" << ThLocal.nt << ")" << "min = " << DP0.min << " max = " << DP0.max << endl;
+// ===== Construction minimale (c==1) : structure distribuée seule, matrice vide =====
+real[int] Dvec = DTh.D;
+Mat A(Udh.ndof, DTh.intersection, Dvec); // structure seule, matrice vide
 
-// Plot PoU et interpolation
-Uh Dfunc;
-Dfunc[] = DTh.D;
-plot(Dfunc, fill=1, value=1, cmm="Partition of UNity -rank" + mpirank);
+// Remplissage de la matrice
+func f = 1.0;
+varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+               + int2d(ThLocal)(f*v)
+               + on(1, 2, 3, 4, u = 0);    
 
 
-Uh0 DinterpP0;
-DinterpP0[] = interpolatePoU(DTh, Uh0);
-plot(DinterpP0, fill=1, value=1, cmm="PoU interpolee P0");
+A = vPb(Udh, Udh);                          
+real[int] rhs = vPb(0, Uh);              
+
+// Résolution distribuée
+set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-4 -ksp_converged_reason");
+real[int] u = A^-1 * rhs;
+
+// Check validation
+// ---- C.1 : bijection loc2glob (champ analytique, sans solveur) ----
+int[int] l2g = DTh.loc2glob;                 // KN<long> : sommet local -> sommet global
+fespace UhGlob(Th, P1);                       // maillage GLOBAL (Th existe sur chaque rang)
+UhGlob gglob = x + 2*y + 3*z;                 // champ connu, non trivial
+Uh      gloc = x + 2*y + 3*z;                 // même champ sur ThLocal (Uh standard)
+
+real errBij = 0;
+for (int i = 0; i < gloc.n; ++i)
+  errBij = max(errBij, abs(gloc[][i] - gglob[][l2g[i]]));
+cout << "[" << mpirank << "] C.1 |loc2glob bijection|_inf = " << errBij << endl;
 
 
-// Test P2
-Uh2 DinterpP2;
-DinterpP2[] = interpolatePoU(DTh, Uh2);
-plot(DinterpP2, fill=1, value=1, cmm="PoU interpolee P2 - rank " + mpirank);
-cout << "[" << mpirank << "] P2 : n=" << DinterpP2[].n
-     << " (== Uh2.ndof=" << Uh2.ndof << ")"
-     << " min=" << DinterpP2[].min << " max=" << DinterpP2[].max << endl;
 
-/*
-Uh u = mpirank;
-plot(u);
-*/
 
-varf a(u,v) = int2d(ThLocal)(u*v);
-Mat A;
-MatCreate(ThLocal, A, P1);
-A = a(Uh,Uh);
+// ---- C.3 : résolution de référence sur le maillage global ----
+varf vPbGlob(u, v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+                   + int2d(Th)(f*v)
+                   + on(1, 2, 3, 4, u = 0);   // MÊMES labels physiques que la varf locale
+matrix AGlob       = vPbGlob(UhGlob, UhGlob, solver = UMFPACK);  // séquentiel, par-process
+real[int] rhsGlob  = vPbGlob(0, UhGlob);
+real[int] uglob    = AGlob^-1 * rhsGlob;
 
-/*
+// ---- C.4 : solution distribuée vs solution globale ----
+real errSol = 0;
+for (int i = 0; i < u.n; ++i)
+  errSol = max(errSol, abs(u[i] - uglob[l2g[i]]));
+cout << "[" << mpirank << "] C.4 |u_loc - u_glob[l2g]|_inf = " << errSol << endl;
 
-plot(DTh.local);
+// Test sous domaine ou domaine global le soucis
+real[int] ug(u.n);
+for (int i = 0; i < u.n; ++i) ug[i] = uglob[l2g[i]];
+cout << "[" << mpirank << "] u_loc:[" << u.min << "," << u.max << "]"
+     << "  uglob[l2g]:[" << ug.min << "," << ug.max << "]" << endl;
 
-meshS[int] Thtab(mpisize);
-Thtab[mpirank] = DTh.local;
-assert(Thtab[mpirank].nt==MThi.nt);
-meshS Thi;
-fespace Uhi(Thi,P0);
 
-Uhi[int] ui(mpisize);
+// ---- C.5 : agrégation et verdict ----
+real[int] Au = A * u;
+real eRes = 0;
+for (int i = 0; i < Au.n; ++i) eRes = max(eRes, abs(Au[i] - uglob[l2g[i]]));
+real errResG;
+mpiAllReduce(eRes, errResG, mpiCommWorld, mpiMAX);   // eRes est une variable, pas une expression
 
-for (int i=0; i<mpisize; i++) {
-	broadcast(processor(i),Thtab[i]);
-	Thi = Thtab[i];
-	ui[i] = 0;
-	if (mpirank == i) ui[i][] = u[];
-	broadcast(processor(i),ui[i][]);
-	//ui[i] = i;
+real errBijG, errSolG;
+mpiAllReduce(errBij,        errBijG, mpiCommWorld, mpiMAX);
+mpiAllReduce(errSol,        errSolG, mpiCommWorld, mpiMAX);
+if (mpirank == 0) {
+  cout << "==== VALIDATION ====" << endl;
+  cout << " C.1 bijection : " << errBijG << "  (attendu ~1e-12)" << endl;
+  cout << " C.2 residu    : " << errResG << "  (attendu ~rtol*|rhs|)" << endl;
+  cout << " C.4 vs global : " << errSolG << "  (attendu ~1e-6)" << endl;
+  cout << ((errBijG < 1e-8 && errSolG < 1e-4) ? " => PASS" : " => FAIL") << endl;
 }
-
-plot(ui,fill=1);
-
-real[int] Test = DTh.D;
-MVhiP1 DffddmFunc = MDP1[mpirank];
-real[int] DffddmVals = DffddmFunc[];
-real[int] diff = Test - DffddmVals;
-cout << "[" << mpirank << "] max diff = " << diff.linfty << endl;
-cout << "[" << mpirank << "] max Dcpp = " << Test.max << endl;
-cout << "[" << mpirank << "] max Dffddm = " << DffddmVals.max << endl;
-
-
-// Comparaison sommet par sommet
-meshS ThLocal = DTh.local;
-fespace VhLocal(ThLocal, P1);
-VhLocal Xlocal = x, Ylocal = y, Zlocal = z;
-
-MVhiP1 Xffddm = x, Yffddm = y, Zffddm = z;
-
-real[int] diffX = Xlocal[] - Xffddm[];
-real[int] diffY = Ylocal[] - Yffddm[];
-real[int] diffZ = Zlocal[] - Zffddm[];
-
-cout << "[" << mpirank << "] coord diff:"
-     << " x=" << diffX.linfty
-     << " y=" << diffY.linfty
-     << " z=" << diffZ.linfty << endl;
-
-*/
