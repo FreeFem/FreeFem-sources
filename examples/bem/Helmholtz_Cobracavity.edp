@@ -52,62 +52,89 @@ Th3 = buildBdMesh(Th3);
 
 meshS ThS = Th3.Gamma;
 ThS = trunc(ThS, region==labmetal);
-
 plot(ThS);
+// meshS ThS1 = trunc(ThS,(nuTriangle==27) );
+// // meshS ThS2 = trunc(ThS,(nuTriangle==100));
 
-fespace Uh(ThS,P1);
+// // meshS ThS1 = trunc(ThS,(nuTriangle==27));
+// meshS ThS2 = trunc(ThS,(nuTriangle==1000));
+// ThS=square3(1,1,[x/10.99,y/10.99,z/10.99]);
+// ThS1 = trunc(ThS,(nuTriangle==0));
+// // ThS2 = movemesh(ThS1,[x+100,y,z]);
+// plot(ThS1,ThS2);
+
+fespace Uh(ThS,P0);
+// fespace Uh1(ThS1,P1);
+// fespace Uh2(ThS2,P1);
 
 cout << "ndof = " << Uh.ndof << endl;
 
 //BemKernel ker("SL",k=k);
+// varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v)) ;  
 varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v)) ;  
-HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,maxleafsize=10);
-//HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,maxleafsize=10);
+// HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,maxleafsize=1,compressor="partialACA",qforder=3);
+for (int i=0;i<2;i++){
+    string compressor = "HCA";
+    if (i==1)
+    compressor = "partialACA";
+    HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-4,maxleafsize=100,compressor=compressor,qforder=3);
+    // //HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,maxleafsize=10);
+    // complex[int,int] Hdense(Uh1.ndof,Uh2.ndof);
+    // Hdense= H;
+    // cout << Hdense<<endl;
+    // H = vk(Uh1,Uh2,eta=-10,eps=1e-2,maxleafsize=1,compressor="partialACA",qforder=3);
+    // Hdense= H;
+    // cout << Hdense<<endl;
+    // H = vk(Uh1,Uh2,eta=10,eps=1e-2,maxleafsize=1,compressor="partialACA",qforder=3);
+    // Hdense= H;
+    // cout << Hdense<<endl;
+    // exit(0);
 
-if (mpirank == 0) cout << H.infos << endl;
-display(H);
+    if (mpirank == 0) cout << H.infos << endl;
+    display(H);
 
-Uh<complex> u, b, uinc = -finc;
+    Uh<complex> u, b, uinc = -finc;
 
-varf vmass(u,v) = int2d(ThS)(u*v);
-matrix<complex> M = vmass(Uh,Uh,solver=CG);
+    varf vmass(u,v) = int2d(ThS)(u*v);
+    matrix<complex> M = vmass(Uh,Uh,solver=CG);
 
-b[] = M*uinc[];
+    b[] = M*uinc[];
 
-u[] = H^-1*b[];
+    u[] = H^-1*b[];
 
-// output visu
-distx = 2*lambda;
-disty = distx;
-distz = distx;
+    // output visu
+    distx = 2*lambda;
+    disty = distx;
+    distz = distx;
 
-int np = 100;
-meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3+2*distx)*x
-                               -distx,
-                               (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
-                               +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
-                               width/2]);
+    int np = 100;
+    meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3+2*distx)*x
+                                -distx,
+                                (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
+                                +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
+                                width/2]);
 
-fespace UhOut(ThOut,P1);
+    fespace UhOut(ThOut,P1);
 
-//BemPotential Pot("SL",k=k);
-varf vp(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k),u,v)) ;  
-HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,maxleafsize=10);
+    //BemPotential Pot("SL",k=k);
+    varf vp(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k),u,v)) ;  
+    HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,maxleafsize=10);
 
-//HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,maxleafsize=10);
+    //HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,maxleafsize=10);
 
 
-if (mpirank == 0) cout << B.infos << endl;
-display(B);
+    if (mpirank == 0) cout << B.infos << endl;
+    display(B);
 
-UhOut<complex> v, vinc;
+    UhOut<complex> v, vinc;
 
-vinc = finc;
+    vinc = finc;
 
-v[] = B*u[];
+    v[] = B*u[];
 
-v[] += vinc[];
+    v[] += vinc[];
 
-UhOut vr = real(v);
+    UhOut vr = real(v);
 
-plot(vr, dim=2, fill=1, value=1, nbiso=20);
+    plot(vr, dim=2, fill=1, value=1, nbiso=20);
+}

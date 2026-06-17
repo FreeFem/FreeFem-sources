@@ -457,40 +457,59 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
         const MeshT& ThT=Vh->Th;
         const MeshS& ThS=Uh->Th;
 
-        double frequency=0.3e+9;
-        // auto kernel = std::function([](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) ->void {});
-        auto kernel = std::function<void(std::array<double,3>*,
-                       int,
-                       std::array<double,3>*,
-                       int,
-                       R*)>();
-        if constexpr (std::is_same<R, double>()) {
-            kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
-                for (int i = 0; i < Nx; i++) {
-                    for (int j = 0; j < Ny; j++) {
-                        double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
-                        mat[i + j * Nx] = 1. / (4 * M_PI * r);
-                    }
-                }
-            };
-        }
-        else{
-            kernel = [](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) {
-            double frequency=0.3e+9;
-            for (int i = 0; i < Nx; i++) {
-                for (int j = 0; j < Ny; j++) {
-                    double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
-                    mat[i + j * Nx] = std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r);
-                }
-            }
-        };
-        }
+        double frequency=3.0e+9;
         
-        auto basis_function = [](
-            std::vector<std::array<double, 3>>,
+        
+        // auto kernel = std::function([](std::array<double, 3> *target_points, int Nx, std::array<double, 3> *source_points, int Ny, R *mat) ->void {});
+        auto kernel = std::function<void(std::array<double,RdHatT::d+1>*,
             int,
-            std::array<double, 3>){
-                return R(1);
+            std::array<double,RdHatT::d+1>*,
+            int,
+            R*)>();
+            if constexpr (std::is_same<R, double>()) {
+                kernel = [](std::array<double, RdHatT::d+1> *target_points, int Nx, std::array<double, RdHatT::d+1> *source_points, int Ny, R *mat) {
+                    for (int i = 0; i < Nx; i++) {
+                        for (int j = 0; j < Ny; j++) {
+                            double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
+                            mat[i + j * Nx] = 1. / (4 * M_PI * r);
+                        }
+                    }
+                };
+            }
+            else{
+                kernel = [](std::array<double, RdHatT::d+1> *target_points, int Nx, std::array<double, RdHatT::d+1> *source_points, int Ny, R *mat) {
+                    double frequency=3.0e+9;
+                    for (int i = 0; i < Nx; i++) {
+                        for (int j = 0; j < Ny; j++) {
+                            double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
+                            // mat[i + j * Nx] = R(1./ (4 * M_PI * r));
+                            mat[i + j * Nx] = R(std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r));
+                            // mat[i + j * Nx] = R(cos( 2*pi*frequency/299792458.*r) / (4 * M_PI * r));
+
+                            // std::cout <<r<<" "<<2*pi*frequency/299792458.<<" "<<std::complex<double>(0,1)* 2*pi*frequency/299792458.*r<<" "<<std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r)<<"\n";
+                            // exit(0);
+                            // exp(iu*kappa*r)/(4*pi*r);
+                            
+                        }
+                    }
+                };
+            }
+            
+        using basis_function_type = typename BEMHCA<R, double, RdHatT::d>::basis_function_type;
+        basis_function_type target_basis_function = [&Vh](
+            int element_index,
+            int dof_local_index,
+            std::vector<double> quad_point){
+                What_d what_d=1<<0;
+                RdHatT ff_quad_point;
+                for (int d=0;d<RdHatT::d;d++){
+                    ff_quad_point[d]=quad_point[d];
+                }
+                std::vector<double> tmp_result((*Vh)[0].NbDoF());
+                KNMK_<double> result(tmp_result.data(),(*Vh)[0].NbDoF(),1,1);
+                (*Vh)[0].tfe->FB(what_d,Vh->Th,Vh->Th[element_index],ff_quad_point,result);
+                // std::cout <<"target "<< R(result(dof_local_index,0,0))<<"\n";
+                return R(result(dof_local_index,0,0));
             };
         int target_number_of_dofs_per_element=(*Vh)[0].NbDoF();
         for (int e=0;e<ThT.nt;e++){
@@ -516,7 +535,7 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
             target_points[3*p+2]=pp[2];
         }
         int target_size=ThT.nv;
-        int target_quadrature_order=10;
+        int target_quadrature_order=20;
         int source_number_of_dofs_per_element=(*Uh)[0].NbDoF(); 
         for (int e=0;e<ThS.nt;e++){
             FElementS KU((*Uh)[e]);
@@ -525,6 +544,22 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
                 source_dofs_to_elements[KU(d)].push_back(d);
             }
         }
+
+        basis_function_type source_basis_function = [&Uh](
+            int element_index,
+            int dof_local_index,
+            std::vector<double> quad_point){
+                What_d what_d=1<<0;
+                RdHatS ff_quad_point;
+                for (int d=0;d<RdHatS::d;d++){
+                    ff_quad_point[d]=quad_point[d];
+                }
+                std::vector<double> tmp_result((*Uh)[0].NbDoF());
+                KNMK_<double> result(tmp_result.data(),(*Uh)[0].NbDoF(),1,1);
+                (*Uh)[0].tfe->FB(what_d,Uh->Th,Uh->Th[element_index],ff_quad_point,result);
+                // std::cout <<"source "<< R(result(dof_local_index,0,0))<<"\n";
+                return R(result(dof_local_index,0,0));
+            };
         int source_number_of_points_per_element=RdHatS::d+1; 
         source_elements_to_points.resize(ThS.nt*source_number_of_points_per_element);
         for (int e=0;e<ThS.nt;e++){
@@ -540,8 +575,9 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
             source_points[3*p+2]=pp[2];
         }
         int source_size=ThS.nv;
-        int source_quadrature_order=10;
-        LowRankGenerator = std::make_shared<htool::BEMHCA<R,double,3>>(kernel, basis_function, target_dofs_to_elements, target_number_of_dofs_per_element, target_elements_to_points.data(),  target_number_of_points_per_element, target_points.data(),  target_size, t->get_permutation().data(), target_quadrature_order, basis_function, source_dofs_to_elements, source_number_of_dofs_per_element, source_elements_to_points.data(), source_number_of_points_per_element, source_points.data(), source_size,s->get_permutation().data(), source_quadrature_order);
+        int source_quadrature_order=20;
+        LowRankGenerator = std::make_shared<htool::BEMHCA<R,double,RdHatT::d+1>>(kernel, target_basis_function, target_dofs_to_elements, target_number_of_dofs_per_element, target_elements_to_points.data(),  target_number_of_points_per_element, target_points.data(),  target_size, t->get_permutation().data(), target_quadrature_order, source_basis_function, source_dofs_to_elements, source_number_of_dofs_per_element, source_elements_to_points.data(), source_number_of_points_per_element, source_points.data(), source_size,s->get_permutation().data(), source_quadrature_order);
+        // LowRankGenerator->check_size=false;
     }
     //   BEMHCA(kernel_type kernel, basis_function_type target_basis_function, std::map<int, std::vector<int>> target_dofs_to_elements, int target_number_of_dofs_per_element, const int *target_elements_to_points, int target_number_of_points_per_element, CoordinatePrecision *target_points, int target_size, const int *target_permutation, int target_quadrature_order, basis_function_type source_basis_function, std::map<int, std::vector<int>> source_dofs_to_elements, int source_number_of_dofs_per_element, int *source_elements_to_points, int source_number_of_points_per_element, CoordinatePrecision *source_points, int source_size, const int *source_permutation, int source_quadrature_order)
     else {

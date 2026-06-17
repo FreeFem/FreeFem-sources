@@ -1,0 +1,155 @@
+//ff-mpirun -np 4 Helmholtz_Cobracavity.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM
+
+load "bem"
+
+include "getARGV.idp"
+
+include "cobrameshcavity.idp"
+
+real sec1 = 0.01;
+real angle = 2*pi*35/360;
+real radius = 0.186;
+real sec2 = 0.08;
+real sec3 = 0.1;
+real height = 0.084;
+real width = 0.11;
+
+int npangler = 4;
+int npangleR = radius/(radius-height)*npangler;
+
+real c0= 299792458;
+real f = getARGV("-frequency",3.e+9);
+complex k = 2*pi*f/c0;
+real lambda = c0/f;
+cout <<k<<"\n";
+
+real distx = 0.2*lambda;
+real disty = distx;
+real distz = distx;
+
+int labextxm = 11, labextxM = 12, labextym = 13, labextyM = 14, labextzm = 15, labextzM = 16;
+int regint = 4, regext = 5;
+
+int labtomerge = 7;
+
+int labmetal = 1;
+int labi = 2; // label in : entrance (n=(-1,0,0))
+int labo = labmetal; // label out
+// Cavity: labo is also a metallic border
+
+// incident wave
+real[int] dir=[1,0,0];
+func finc = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
+
+int nloc = 10.*sec3/lambda;
+
+mesh3 Th3;
+buildcobramesh(Th3);
+Th3 = buildBdMesh(Th3);
+
+meshS ThS = Th3.Gamma;
+ThS = trunc(ThS, region==labmetal);
+
+// Test 1
+// meshS ThS1 = trunc(ThS,(nuTriangle==27) );
+// meshS ThS2 = trunc(ThS,(nuTriangle==100));
+
+// meshS ThS1 = trunc(ThS,(nuTriangle==27));
+// meshS ThS2 = trunc(ThS,(nuTriangle==1000));
+
+// // Ttest 1
+// ThS=square3(1,1);
+// ThS1 = trunc(ThS,(nuTriangle==0));
+// ThS2 = movemesh(ThS1,[x+5,y,z]);
+// plot(ThS1,ThS2);
+// fespace Uh1(ThS1,P0);
+// fespace Uh2(ThS2,P0);
+// varf vk(u,v)=int2dx2d(ThS1)(ThS1)(BEM(BemKernel("SL",k=k),u,v)) ;  
+// HMatrix<complex> H = vk(Uh1,Uh2,eta=10,eps=1e-4,maxleafsize=1,compressor="HCA",qforder=3);
+// complex[int,int] Hdense(Uh2.ndof,Uh1.ndof),Hcompress(Uh2.ndof,Uh1.ndof);
+// Hcompress= H;
+// H = vk(Uh1,Uh2,eta=-10,eps=1e-2,maxleafsize=1,compressor="partialACA",qforder=3);
+// Hdense= H;
+// cout << Hcompress<<endl;
+// cout << Hdense<<endl;
+// Hcompress-= Hdense;
+// cout << Hcompress<<endl;
+// cout<<"error "<<Hcompress.linfty/Hdense.linfty<<endl;
+
+// Test 2
+// for (int i=0;i<ThS.nt-1;i+=10){
+//     cout << i<<"\n";
+//     for (int j=0;j<ThS.nt-1;j++){
+//         meshS ThS1 = trunc(ThS,(nuTriangle==i) ||(nuTriangle==i+1) );
+//         meshS ThS2 = trunc(ThS,(nuTriangle==j) || (nuTriangle==j+1));
+
+//         // // meshS ThS1 = trunc(ThS,(nuTriangle==27));
+//         // meshS ThS2 = trunc(ThS,(nuTriangle==1000));
+//         // ThS=square3(1,1,[x/10.99,y/10.99,z/10.99]);
+//         // ThS1 = trunc(ThS,(nuTriangle==0));
+//         // // ThS2 = movemesh(ThS1,[x+100,y,z]);
+//         plot(ThS1,ThS2);
+
+//         // fespace Uh(ThS,P1);
+//         fespace Uh1(ThS1,P0);
+//         fespace Uh2(ThS2,P0);
+
+//         varf vk(u,v)=int2dx2d(ThS1)(ThS1)(BEM(BemKernel("SL",k=k),u,v)) ;  
+//         HMatrix<complex> H = vk(Uh1,Uh2,eta=10,eps=1e-2,maxleafsize=1,compressor="HCA",qforder=3);
+//         complex[int,int] Hdense(Uh2.ndof,Uh1.ndof),Hcompress(Uh2.ndof,Uh1.ndof);
+//         Hcompress= H;
+//         H = vk(Uh1,Uh2,eta=-10,eps=1e-2,maxleafsize=1,compressor="partialACA",qforder=3);
+//         Hdense= H;
+//         Hcompress-= Hdense;
+//         if (Hcompress.linfty>1e-10)
+//             cout<<i<<" "<<j<<" "<<Hcompress.linfty/Hdense.linfty<<endl;
+
+//     }
+// }
+
+
+// Test 3
+real[int] bb(6);
+boundingbox(ThS,bb);
+meshS ThS1 = trunc(ThS,x<bb[0]+0.05 );
+meshS ThS2 = trunc(ThS,x>bb[1]-0.05);
+
+// // meshS ThS1 = trunc(ThS,(nuTriangle==27));
+// meshS ThS2 = trunc(ThS,(nuTriangle==1000));
+// ThS=square3(1,1,[x/10.99,y/10.99,z/10.99]);
+// ThS1 = trunc(ThS,(nuTriangle==0));
+// // ThS2 = movemesh(ThS1,[x+100,y,z]);
+plot(ThS1,ThS2);
+
+// fespace Uh(ThS,P1);
+fespace Uh1(ThS1,P0);
+fespace Uh2(ThS2,P0);
+
+varf vk(u,v)=int2dx2d(ThS1)(ThS1)(BEM(BemKernel("SL",k=k),u,v)) ;  
+HMatrix<complex> H = vk(Uh1,Uh2,eta=10,eps=1e-10,maxleafsize=10,compressor="HCA",qforder=3);
+if (mpirank == 0) cout << H.infos << endl;
+    display(H);
+complex[int,int] Hdense(Uh2.ndof,Uh1.ndof),Hcompress(Uh2.ndof,Uh1.ndof);
+Hcompress= H;
+HMatrix<complex> Hmatdense = vk(Uh1,Uh2,eta=-10,eps=1e-4,maxleafsize=100,compressor="partialACA",qforder=3);
+if (mpirank == 0) cout << Hmatdense.infos << endl;
+    display(Hmatdense);
+Hdense= Hmatdense;
+// cout <<Hdense.linfty/Hcompress.linfty<<"\n";
+// Hcompress*=Hdense.linfty/Hcompress.linfty;
+// matrix<complex> toto =Hcompress;
+// display(toto);
+// toto =Hdense;
+// display(toto);
+cout<<"norm "<<Hcompress.linfty<<" "<<Hdense.linfty<<endl;
+Hcompress-= Hdense;
+// toto =Hcompress;
+// Hcompress/=Hdense.linfty;
+// cout << Hcompress<<endl;
+// display(toto);
+// if (Hcompress.linfty>1e-10)
+cout<<"error "<<Hcompress.linfty/Hdense.linfty<<endl;

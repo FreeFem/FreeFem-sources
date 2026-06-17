@@ -1082,20 +1082,20 @@ static void Init_Bem() {
     // bem integration space/target space must be review Axel 08/2020    
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > );
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > );
+    // TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > (1) );
+    // TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > );
        
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > );
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > );
+    // TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > (1) );
+    // TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > );
+    // TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > (1) );
+    // TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > );
 
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > (1));
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > );
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesL > (1));
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesL > );
+    // TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > (1));
+    // TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > );
+    // TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesL > (1));
+    // TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesL > );
 
     // operation on BemKernel
     Dcl_Type<listBemKernel> ();
@@ -1151,14 +1151,14 @@ static void Init_Bem() {
 
     AddHMatrixUser<double,v_fesL, v_fesL>();
     AddHMatrixUser<double,v_fesS, v_fesS>();
-    AddHMatrixUser<double,v_fes3, v_fes3>();
+    // AddHMatrixUser<double,v_fes3, v_fes3>();
     AddHMatrixUser<std::complex<double>,v_fesL, v_fesL>();
     AddHMatrixUser<std::complex<double>,v_fesS, v_fesS>();
-    AddHMatrixUser<std::complex<double>,v_fes3, v_fes3>();
-    AddHMatrixUser<double,v_fesL, v_fesS>();
-    AddHMatrixUser<double,v_fesS, v_fes3>();
-    AddHMatrixUser<std::complex<double>,v_fesL, v_fesS>();
-    AddHMatrixUser<std::complex<double>,v_fesS, v_fes3>();
+    // AddHMatrixUser<std::complex<double>,v_fes3, v_fes3>();
+    // AddHMatrixUser<double,v_fesL, v_fesS>();
+    // AddHMatrixUser<double,v_fesS, v_fes3>();
+    // AddHMatrixUser<std::complex<double>,v_fesL, v_fesS>();
+    // AddHMatrixUser<std::complex<double>,v_fesS, v_fes3>();
 }
 
 LOADFUNC(Init_Bem)
