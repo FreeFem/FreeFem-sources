@@ -6,18 +6,20 @@ class DistributedMesh : public RefCounter {
 public: 
   Mesh * LocalMesh;
   Mesh* BorderMesh;
+  const Mesh* GlobalMesh = nullptr;
 
   int overlap;
   int interfaceLabel;
 
   KN<int> neighborRanks;
   KN<double> partitionOfUnity;
-  KN<int> localToGLobalVertex;
-  std::vector<KN<double>> intersectionSupport;
+  KN<int> localToGlobalVertex;
+  KN<int> localToGlobalElement; // n2o (LocalMesh -> Th)
   KN<int> globalPartition;
+  KN<KN<long>> dofIntersection; // [0]: rangs, [1+j]: indices
 
   DistributedMesh() : LocalMesh(nullptr), BorderMesh(nullptr), overlap(0), interfaceLabel(10),
-  neighborRanks(0), partitionOfUnity(0), localToGLobalVertex(0), globalPartition(0) {}
+  neighborRanks(), partitionOfUnity(), localToGlobalVertex(), globalPartition() {}
 //  DistributedMesh(Mesh * locmesh) : LocalMesh(locmesh) {}
   ~DistributedMesh() {
     if (LocalMesh) LocalMesh->destroy();
@@ -28,3 +30,11 @@ private:
   DistributedMesh(const DistributedMesh &); // pas de construction par copie
    void operator=(const DistributedMesh &);// pas affectation par copy
 };
+
+// Helpers géométriques (liens géométrie (msh3.cpp) - FESpace (lgmat.cpp))
+template<class Mesh>
+KN<int> keptGlobalElements(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, int rank);
+
+// Sous maillage d'intersections
+template<class Mesh>
+Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o);

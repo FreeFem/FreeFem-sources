@@ -38,6 +38,7 @@
 // Th3_t->BuildjElementConteningVertex();
 // is now in the constructor of Mesh3 to be consistante.
 //
+#include "RNM.hpp"
 #ifndef WITH_NO_INIT    // cf [[WITH_NO_INIT]]
 #include "ff++.hpp"
 #endif
@@ -9820,7 +9821,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 8;
+	static const int n_name_param = 9;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9867,6 +9868,56 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"overlap", &typeid(long)}
 };
 
+template<class Mesh>
+KN<int> keptGlobalElements(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, int rank){
+  const int nbt = Th.nt, nbv = Th.nv, nve = Mesh::Element::nv;
+  KN<double> supp(nbt, 0.0), suppSmooth(nbv, 0.0);
+  for (int k = 0; k<nbt; ++k) supp[k] = (globalPartition[k] == rank) ? 1.0 : 0.0;
+  long nlayers = (sizeoverlaps == 0 ? 1L : 0) + sizeoverlaps*2L;
+  AddLayers(&Th, &supp, nlayers, &suppSmooth);
+  KN<int> keep(nbt, 0);
+  for (int k = 0; k<nbt; ++k) {
+    if (sizeoverlaps ==0) keep[k] = (globalPartition[k]==rank);
+    else {
+      double avg = 0;
+      for (int i = 0; i < nve; ++i) avg += suppSmooth[Th(k,i)];
+      keep[k] = (avg/nve > 0.501);
+    }
+  }
+  return keep;
+}
+
+template<class Mesh>
+KN<int> n2oFromSplit(const Mesh& parent, const Mesh& sub, const KN<int>& splitMask) {
+  KN<int> n2o(sub.nt);
+  int c = 0;
+  for (int k = 0; k < parent.nt; ++k) if (splitMask[k]) n2o[c++] = k;
+  ffassert(c == sub.nt);
+  for (int kc = 0; kc < sub.nt; ++kc) {
+    typename Mesh::Rd gc, gp;
+    gc = (sub[kc][0] +sub[kc][1] + sub[kc][2])/3.;
+    gp = (parent[n2o[kc]][0] + parent[n2o[kc]][1] + parent[n2o[kc]][2])/3.;
+    ffassert((gc-gp).norme() < 1e-8);
+  }
+  return n2o;
+}
+
+template<class Mesh>
+Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o){
+  KN<int> keptByJ = keptGlobalElements(*D.GlobalMesh, D.globalPartition, (long)D.overlap, D.neighborRanks[j]);
+  KN<int> splitInter(D.LocalMesh->nt,0);
+  for (int k = 0; k < D.LocalMesh->nt; ++k){
+    splitInter[k] = keptByJ[D.localToGlobalElement[k]];
+  }
+  Mesh* Wh = truncmesh(*D.LocalMesh, 1, (int*)splitInter, false, 9999, 1e-7, 1L, true, false);
+  Wh->BuildGTree();
+  n2o = n2oFromSplit(*D.LocalMesh, *Wh, splitInter);
+  return Wh;
+}
+
+template MeshS* buildIntersectionSubmesh<MeshS>(const DistributedMesh<MeshS>&, int, KN<int>&);
+
+
 template <class Mesh>
 class DistributeMesh : public OneOperator {
 public:
@@ -9894,10 +9945,8 @@ public:
 
 template <class Mesh>
 AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
-  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
   Mesh &Th = *pTh;
-  MeshPoint *mpp(MeshPointStack(stack));
   ffassert(pTh);
 
   double precis_mesh(arg(5, stack, 1e-7));
@@ -9905,15 +9954,9 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   bool cleanmesh(arg(3, stack, true));
   bool removeduplicate(arg(4, stack, false));
   long sizeoverlaps(arg(8, stack, 1L));
-  bool rebuildboundary = false;
-
-  typedef typename Mesh::Element T;
-  typedef typename Mesh::BorderElement B;
-  typedef typename Mesh::Vertex V;
 
   int nbv=Th.nv;
   int nbt=Th.nt;
-  int neb=Th.nbe;
   const int nve = Mesh::Element::nv;
 
   /*int *split = new int[nbt];
@@ -9952,7 +9995,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   KN<int> isNeighbor((int)mpisize, 0);
   for (int k = 0; k < nbt; ++k){
     for (int i = 0; i < nve; ++i){
-      if (suppSmooth[Th(k,i)] > 0.001) {
+      if (suppSmooth[Th(k,i)] > 0.001 && suppSmooth[Th(k,i)] < 0.999) {
         isNeighbor[globalPartition[k]] = 1;
         break;
       }
@@ -9987,6 +10030,8 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     return s/Mesh::Element::nv;
   };
 
+  KN<int> localToGlobalElement(nbt);
+  int numLocalElt = 0;
   for (int k = 0; k < nbt; ++k){
     bool keep;
     if (sizeoverlaps == 0){
@@ -9998,11 +10043,13 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
     if (keep) {
       splitCore[k] = 1;
+      localToGlobalElement[numLocalElt++] = k;
       for (int i = 0; i < Mesh::Element::nv; ++i){
         vertexTag[Th(k,i)] = 1;
       }
     }
   }
+  localToGlobalElement.resize(numLocalElt);
 
   // Map local to global vertex number
   int numLocalVtx = 0;
@@ -10045,6 +10092,11 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   // Normalisation PoU
   KN<double> sumPou = khi;
   
+  KN<KN<long>> dofIntersection(1+neighborRanks.n);
+  dofIntersection[0].resize(neighborRanks.n);
+  for (int j = 0; j < neighborRanks.n; ++j){
+    dofIntersection[0][j] = (long)neighborRanks[j];
+  }
   for (int j = 0; j <neighborRanks.n; ++j){
     KN<double> supp_j(nbt, 0.0);
     for (int k = 0; k < nbt; ++k){
@@ -10058,6 +10110,29 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
     for (int lv = 0; lv < LocalMesh->nv; ++lv){
       intersectionSupport[j][lv] = phi_j[localToGlobalVertex[lv]];
+    }
+
+    KN<int> mark(LocalMesh->nv, 0);
+    for (int k = 0; k < LocalMesh->nt; ++k){
+      double s = 0;
+      for (int i = 0; i < nve; ++i){
+        s += intersectionSupport[j][(*LocalMesh)(k,i)];
+      }
+      if (s/nve > 1e-6){
+        for (int i = 0; i < nve; ++i) mark[(*LocalMesh)(k,i)] = 1;
+      }
+    }
+    int c = 0;
+    for (int v = 0; v < LocalMesh->nv; ++v){
+      if (mark[v]){
+        ++c;
+      }
+    }
+    dofIntersection[1+j].resize(c);
+    for (int v = 0, cc = 0; v < LocalMesh->nv; ++v){
+      if (mark[v]){
+        dofIntersection[1+j][cc++] = v;
+      }
     }
   }
 
@@ -10075,13 +10150,19 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   DTh->LocalMesh = LocalMesh;
   DTh->BorderMesh = BorderMesh;
+  DTh->GlobalMesh = &Th;
+  DTh->localToGlobalElement = localToGlobalElement;
   DTh->overlap = (int)sizeoverlaps;
   DTh->interfaceLabel = interfaceLabel;
   DTh->neighborRanks = neighborRanks;
   DTh->partitionOfUnity = pouLocal;
-  DTh->intersectionSupport = intersectionSupport;
-  DTh->localToGLobalVertex = localToGlobalVertex;
+  DTh->dofIntersection.resize(dofIntersection.n);
+  for (int i = 0; i < dofIntersection.n; ++i)
+    DTh->dofIntersection[i] = dofIntersection[i];
+  DTh->localToGlobalVertex = localToGlobalVertex;
   DTh->globalPartition = globalPartition;
+
+  ffassert(localToGlobalElement.n == LocalMesh->nt);
 
   return DTh;
 
@@ -10091,9 +10172,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   //Tht->BuildGTree( );
   //Add2StackOfPtr2FreeRC(stack, T_Th);
   //DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(Tht);
-
-  //return DTh;
-  return nullptr;
 
 /*
   V *v= new V[nbv];
@@ -10150,9 +10228,36 @@ template<class Mesh>
 const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh)
 { throwassert(DTh && *DTh) ;
     const Mesh *Th = (**DTh).LocalMesh;
-    //cout << Th << endl;
-    if (Th==nullptr) cout << "The distributed mesh is empty !" << endl;
+    throwassert(Th);
     return Th;
+}
+
+template<class Mesh>
+KN<double>* get_localD(Stack stack, const DistributedMesh<Mesh>** const & DTh)
+{
+  throwassert(DTh && *DTh);
+  KN<double>* D = new KN<double>((**DTh).partitionOfUnity);
+  Add2StackOfPtr2Free(stack, D);
+  return D;
+}
+
+template<class Mesh>
+KN<KN<long>>* get_intersection(Stack stack, const DistributedMesh<Mesh>** const & DTh){
+  throwassert(DTh && *DTh);
+  KN<KN<long>>* r = new KN<KN<long>>((**DTh).dofIntersection);
+  Add2StackOfPtr2Free(stack, r);
+  return r;
+}
+
+template<class Mesh>
+KN<long>* get_loc2glob(Stack stack, const DistributedMesh<Mesh>** const & DTh){
+  throwassert(DTh && *DTh);
+  KN<long>* r = new KN<long>((**DTh).localToGlobalVertex.n);
+  for (int i = 0; i< r->n; ++i){
+    (*r)[i] = (**DTh).localToGlobalVertex[i];
+  }
+  Add2StackOfPtr2Free(stack, r);
+  return r;
 }
 
 #ifndef WITH_NO_INIT
@@ -10280,6 +10385,10 @@ static void Load_Init_msh3( ) {
   TheOperators->Add("=", new OneOperator2<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_eqdestroy_incr));
 
   Add<const DistributedMesh<MeshS>**>("local",".",new OneOperator1s_<const MeshS* ,const DistributedMesh<MeshS>**>(get_localmesh<MeshS>));
+  Add<const DistributedMesh<MeshS>**>("D",".",new OneOperator1s_<KN<double>* ,const DistributedMesh<MeshS>**>(get_localD<MeshS>));
+  Add<const DistributedMesh<MeshS>**>("intersection", ".", new OneOperator1s_<KN<KN<long>>*, const DistributedMesh<MeshS>**>(get_intersection<MeshS>));
+  Add<const DistributedMesh<MeshS>**>("loc2glob", ".", new OneOperator1s_<KN<long>*, const DistributedMesh<MeshS>**>(get_loc2glob<MeshS>));
+
 
   Global.Add("distribute", "(", new DistributeMesh<MeshS>);
   Global.Add("distribute", "(", new DistributeMesh<MeshS>(1));

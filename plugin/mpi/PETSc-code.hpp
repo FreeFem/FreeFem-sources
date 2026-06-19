@@ -6882,6 +6882,7 @@ static void Init_PETSc( ) {
          new PETSc::varfToMat< PetscScalar, Mesh , v_fes , v_fes  >,
          new PETSc::varfToMat< PetscScalar, Mesh3, v_fes3, v_fes3 >,
          new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fesS >,
+         new PETSc::varfToMat< PetscScalar, MeshS, v_dfesS, v_dfesS >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesL >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fes  >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesS >,

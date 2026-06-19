@@ -82,10 +82,10 @@ void reverseChangeComponentFormCompositeFESpace(const KN<int>  &beginBlockUh, co
 template<class FESpaceT1,class FESpaceT2>
 MatriceMorse<R> * buildInterpolationMatrixT(const FESpaceT1 & Uh,const FESpaceT2 & Vh,void *data);
 
-/*
-template< >
-MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & Uh,const FESpace & Vh,void *data);
-*/
+
+//template< >
+//MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & Uh,const FESpace & Vh,void *data);
+
 
 template< class R, class FESpaceT1, class FESpaceT2 >
 Matrice_Creuse<R> *  buildMatrixInterpolationForCompositeFESpace(const FESpaceT1 * Uh ,const FESpaceT2 * Vh);

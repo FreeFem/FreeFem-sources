@@ -384,6 +384,10 @@ bool  v_fesL::buildperiodic(Stack stack, KN<int> & ndfe) {
     
 }
 
+bool v_dfesS::buildperiodic(Stack stack, KN<int>& ndfe) {
+    return BuildPeriodic2(nbcperiodic, periodic, **ppTh, stack, ndfe);
+}
+
 template<class Mesh> 
 class GlgVertex {
 public:
@@ -2198,6 +2202,42 @@ pmeshS pVhS_Th(pfesS * p)
 { throwassert(p && *p);
     FESpaceS *fes=**p; ;  return &fes->Th ;}
 
+//3D surface distributed
+long pVhdS_ndof(pdfesS * p)
+{ throwassert(p && *p);
+    FESpaceS *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
+long pVhdS_nt(pdfesS * p)
+{ throwassert(p && *p);
+    FESpaceS *fes=**p; ;  return fes->NbOfElements ;}
+long pVhdS_ndofK(pdfesS * p)
+{ throwassert(p && *p);
+    FESpaceS *fes=**p;   return (*fes)[0].NbDoF() ;}
+pmeshS pVhdS_Th(pdfesS * p)
+{ throwassert(p && *p);
+    FESpaceS *fes=**p; ;  return &fes->Th ;}
+
+KN<double>* pVhdS_D(Stack stack, pdfesS* const& p) {
+  throwassert(p);
+  v_dfesS* f = *p;
+  FESpaceS* fes = **p;          // déclenche operator FESpaceS*() => buildDistributedDofData
+  (void)fes;
+  KN<double>* r = new KN<double>(f->Ddof);
+  Add2StackOfPtr2Free(stack, r); return r;
+}
+KN<KN<long>>* pVhdS_intersection(Stack stack, pdfesS* const& p) {
+  throwassert(p);
+  v_dfesS* f = *p; FESpaceS* fes = **p; (void)fes;
+  KN<KN<long>>* r = new KN<KN<long>>(f->dofIntersectionDof);
+  Add2StackOfPtr2Free(stack, r); return r;
+}
+KN<long>* pVhdS_loc2glob(Stack stack, pdfesS* const& p) {
+  throwassert(p);
+  v_dfesS* f = *p; FESpaceS* fes = **p; (void)fes;
+  KN<long>* r = new KN<long>(f->loc2globDof);
+  Add2StackOfPtr2Free(stack, r); return r;
+}
+
+
 //3D curve
 long pVhL_ndof(pfesL * p)
 { throwassert(p && *p);
@@ -3260,17 +3300,7 @@ TheOperators->Add("=",
  Global.Add("dzz","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dzz,v_fesL>));
  Global.Add("dxz","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dxz,v_fesL>));
  Global.Add("dyz","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dyz,v_fesL>));
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+     
  // 3d volume
  Global.Add("int3d","(",new OneOperatorCode<CDomainOfIntegration3d>);
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationBorder3d>);
@@ -3312,6 +3342,16 @@ TheOperators->Add("=",
  Add<pfesS*>("nt",".",new OneOperator1<long,pfesS*>(pVhS_nt));
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
  Add<pfesS*>("Th",".",new OneOperator1<pmeshS,pfesS*>(pVhS_Th));//ADD JUIN 2021 FH.
+
+
+// 3D surface distributed
+Add<pdfesS*>("ndof", ".", new OneOperator1<long,   pdfesS*>(pVhdS_ndof));
+Add<pdfesS*>("nt",   ".", new OneOperator1<long,   pdfesS*>(pVhdS_nt));
+Add<pdfesS*>("ndofK",".", new OneOperator1<long,   pdfesS*>(pVhdS_ndofK));
+Add<pdfesS*>("Th",   ".", new OneOperator1<pmeshS, pdfesS*>(pVhdS_Th));
+Add<pdfesS*>("D",            ".", new OneOperator1s_<KN<double>*,   pdfesS*>(pVhdS_D));
+Add<pdfesS*>("intersection", ".", new OneOperator1s_<KN<KN<long>>*,pdfesS*>(pVhdS_intersection));
+Add<pdfesS*>("loc2glob",     ".", new OneOperator1s_<KN<long>*,    pdfesS*>(pVhdS_loc2glob));
 
 // Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
  
