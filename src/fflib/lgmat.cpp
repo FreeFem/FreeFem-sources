@@ -481,7 +481,7 @@ class MatrixInterpolation : public OneOperator { public:
 	   return  new Op(args,t[0]->CastTo(args[0]),
 			  t[1]->CastTo(args[1]),
 			  t[2]->CastTo(args[2]),
-			  t[2]->CastTo(args[3])
+			  t[3]->CastTo(args[3])
 			  );
        else CompileError("Bug in MatrixInterpolation code nb != 2 or 3 ????? bizarre" );
        return 0;
@@ -1331,6 +1331,85 @@ MatriceMorse<R> * buildInterpolationMatrixT<FESpace,FESpace3>(const FESpace & Uh
      return funcBuildInterpolationMatrix2T(Uh,Vh,data);
 }
 
+template<class Mesh>
+KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>& Uh_target){
+    // If target is P1, no need of interpolation
+    if (Uh_target.TFE[0] == &DataFE<Mesh>::P1){
+        return DTh.partitionOfUnity;
+    }
+    // Build P1 state on LocalMesh & target space
+    typedef GFESpace<Mesh> FESpaceSD;
+    FESpaceSD Vh_P1(*DTh.LocalMesh, DataFE<Mesh>::P1);
+    FESpaceSD Uh_scalar(*DTh.LocalMesh, *Uh_target.TFE[0]);
+
+    // Build the interpolation matrix (scalar)
+    MatriceMorse<R>* M = buildInterpolationMatrixT<FESpaceSD,FESpaceSD>(Uh_scalar, Vh_P1 , nullptr);
+
+    KN<double> pou_scalar(Uh_scalar.NbOfDF, 0.0);
+    M->addMatMul(const_cast<double*>((const double*)DTh.partitionOfUnity),(double*)pou_scalar);
+    delete M;
+
+
+    // Extend to vector components
+    int N = Uh_target.N;
+    KN<double> result(Uh_target.NbOfDF);
+    for (int k = 0; k < Uh_scalar.NbOfDF; ++k){
+        for (int d = Uh_target.FirstDFOfNode(k); d < Uh_target.LastDFOfNode(k); ++d){
+            result[d] = pou_scalar[k];
+        }
+    }
+    return result;
+}
+
+static KN<double>* interpolatePoU_wrapper(Stack stack, const DistributedMesh<MeshS>** const& ppDTh, pfesS const& pUh){
+    FESpaceS* Uh_space = *pUh;
+    KN<double>* result = new KN<double>(interpolatePoU(**ppDTh, *Uh_space));
+    Add2StackOfPtr2Free(stack, result);
+    return result;
+}
+
+template<class Mesh>
+KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o){
+    KN<long> inj(Wh.NbOfDF, -1L);
+    for (int kc = 0; kc < Wh.NbOfElements; ++kc){
+        int kf = n2o[kc];
+        GFElement<Mesh> KC(&Wh, kc), KF(&Vhi, kf);
+        ffassert(KC.NbDoF() == KF.NbDoF());
+        for (int df = 0; df < KC.NbDoF(); ++df) inj[KC(df)] = KF(df);
+    }
+    ffassert(inj.min() != -1);
+    return inj;
+}
+
+template<class Mesh>
+KN<KN<long>> buildDofIntersection(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
+    const int nN = D.neighborRanks.n;
+    KN<KN<long>> dofI(1 + nN);
+    dofI[0].resize(nN);
+    for (int j = 0; j < nN; ++j) dofI[0][j] = D.neighborRanks[j];
+
+    for (int j = 0; j < nN; ++j){
+        KN<int> n2o;
+        Mesh* WhMesh = buildIntersectionSubmesh(D, j, n2o);
+        GFESpace<Mesh> Wh(*WhMesh, *Vhi.TFE[0]);
+        dofI[1+j] = restrictDOF(Wh, Vhi, n2o);
+        WhMesh->destroy();
+    }
+    return dofI;
+}
+
+template<class Mesh>
+KN<long> buildLoc2globDof(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
+    GFESpace<Mesh> Vhglob(*D.GlobalMesh, *Vhi.TFE[0]);
+    return restrictDOF(Vhi, Vhglob, D.localToGlobalElement);
+}
+
+void v_dfesS::buildDistributedDofData(FESpaceS& Vhi){
+    if (!DTh) return;
+    dofIntersectionDof = buildDofIntersection(*DTh, Vhi);
+    loc2globDof = buildLoc2globDof(*DTh, Vhi);
+    Ddof = interpolatePoU(*DTh, Vhi);
+}
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
 {
@@ -3927,6 +4006,8 @@ void  init_lgmat()
   Global.Add("restrict","(",new RestrictArray<pfes3>);// FH Jan 2014
   Global.Add("restrict","(",new RestrictArray<pfesS>);// PHT Apr 2019
   Global.Add("restrict","(",new RestrictArray<pfesL>);
+
+  Global.Add("interpolatePoU", "(",new OneOperator2s_<KN<double>*, const DistributedMesh<MeshS>**,pfesS>(interpolatePoU_wrapper));
 
   TheOperators->Add("=",
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,1>),

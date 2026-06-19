@@ -14409,10 +14409,12 @@ namespace Fem2D {
 template class Call_FormLinear<v_fes>;
 template class Call_FormLinear<v_fes3>;
 template class Call_FormLinear<v_fesS>;
+template class Call_FormLinear<v_dfesS>; // 3D surface distributed
 template class Call_FormLinear<v_fesL>;
 
 template class Call_FormBilinear<v_fes,v_fes>;
 template class Call_FormBilinear<v_fes3,v_fes3>;
+template class Call_FormBilinear<v_dfesS, v_dfesS>; // 3D surface distributed
 template class Call_FormBilinear<v_fesS,v_fesS>;
 template class Call_FormBilinear<v_fesL,v_fesL>;
 

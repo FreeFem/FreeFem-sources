@@ -607,10 +607,21 @@ int mylex::scan(int lvl)
             // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
             // Morice (june :: 2022)- Added VGFESPACE : Vector generic FESpace             -->  pvectgenericfes
             //                      - Added GFESPACE  : generic FESpace  ( A enlever ???)  -->  pgenericfes
+            /*
             int feid3[8]  = { ID,FESPACE1,FESPACE,FESPACE3,FESPACES,FESPACEL,VGFESPACE,GFESPACE};
 
             ffassert ( ft >= 0 && ft <= 7 );
             ret =  feid3[ft];
+            */
+            // std::map to add extra types (e.g. distributed with extra 0: 4 3D surface -> 40 3D surface distributed, etc)
+            static const std::map<int, int> feid_map = {
+                {0, ID},       {1, FESPACE1}, {2, FESPACE},   {3, FESPACE3},
+                {4, FESPACES}, {5, FESPACEL}, {6, VGFESPACE},  {7, GFESPACE},
+                {40, FESPACEDS}
+            };
+            auto it = feid_map.find(ft);
+            ffassert(it != feid_map.end());
+            ret = it->second;
             plglval->str = newcopy(buf);
         }
     }
