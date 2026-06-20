@@ -39,6 +39,7 @@
 // is now in the constructor of Mesh3 to be consistante.
 //
 #include "RNM.hpp"
+#include "error.hpp"
 #ifndef WITH_NO_INIT    // cf [[WITH_NO_INIT]]
 #include "ff++.hpp"
 #endif
@@ -5618,8 +5619,6 @@ MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMort
     
     return Tht;
 }
-
-      
       
       
 AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
@@ -9868,21 +9867,28 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"overlap", &typeid(long)}
 };
 
+inline long overlapLayers(long s) {
+  return (s == 0 ? 1L : 0L) + 2L*s;
+}
+
+template<class Mesh>
+inline bool keepElt(const KN<double>& suppSmooth, const Mesh& Th, int k, long s, const KN<int>& gpart, int rank){
+  if (s == 0) return gpart[k] == rank;
+  const int nve = Mesh::Element::nv;
+  double avg = 0;
+  for (int i = 0; i < nve; ++i) avg += suppSmooth[Th(k,i)];
+  return avg/nve > 0.501;
+}
+
 template<class Mesh>
 KN<int> keptGlobalElements(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, int rank){
-  const int nbt = Th.nt, nbv = Th.nv, nve = Mesh::Element::nv;
+  const int nbt = Th.nt, nbv = Th.nv;
   KN<double> supp(nbt, 0.0), suppSmooth(nbv, 0.0);
   for (int k = 0; k<nbt; ++k) supp[k] = (globalPartition[k] == rank) ? 1.0 : 0.0;
-  long nlayers = (sizeoverlaps == 0 ? 1L : 0) + sizeoverlaps*2L;
-  AddLayers(&Th, &supp, nlayers, &suppSmooth);
+  AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
   KN<int> keep(nbt, 0);
   for (int k = 0; k<nbt; ++k) {
-    if (sizeoverlaps ==0) keep[k] = (globalPartition[k]==rank);
-    else {
-      double avg = 0;
-      for (int i = 0; i < nve; ++i) avg += suppSmooth[Th(k,i)];
-      keep[k] = (avg/nve > 0.501);
-    }
+    keep[k] = keepElt(suppSmooth, Th, k, sizeoverlaps, globalPartition, rank);
   }
   return keep;
 }
@@ -9988,9 +9994,8 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     supp[k] = (globalPartition[k] == (int)mpirank) ? 1.0 : 0.0;
   }
   KN<double> suppSmooth(nbv, 0.0);
-  long nlayers = (sizeoverlaps == 0 ? 1L : 0) + (sizeoverlaps * 2L);
-
-  AddLayers(&Th, &supp, nlayers, &suppSmooth);
+  
+  AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
 
   KN<int> isNeighbor((int)mpisize, 0);
   for (int k = 0; k < nbt; ++k){
@@ -10033,14 +10038,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   KN<int> localToGlobalElement(nbt);
   int numLocalElt = 0;
   for (int k = 0; k < nbt; ++k){
-    bool keep;
-    if (sizeoverlaps == 0){
-      keep = (globalPartition[k] == (int)mpirank);
-    }
-    else {
-      double avg = baryAvg(k);
-      keep = (avg > 0.501);
-    }
+    bool keep = keepElt(suppSmooth, Th, k, sizeoverlaps, globalPartition, (int)mpirank);
     if (keep) {
       splitCore[k] = 1;
       localToGlobalElement[numLocalElt++] = k;
