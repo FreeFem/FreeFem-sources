@@ -74,8 +74,54 @@ Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathemat
 
 ## For developers
 
-All development efforts take place in the _develop_ branch (or in feature branches: feature-cmake, geneo4PETSc, ... for specific projects)
+All development efforts take place in the `develop` branch (or in feature branches for specific projects)
 
-**Do not commit on master branch!**
+**Do not commit on `master` branch!**
 
-Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
+## FreeFEM basic compilation and installation procedure
+
+Automatic configuration:
+
+```bash
+autoreconf -i
+```
+
+Configuration:
+
+```bash
+./configure --enable-download --enable-optim
+```
+
+If you do not have administrator rights or do not want FreeFEM files scattered around on your machine, please use the `--prefix` option, e.g.:
+
+```bash
+./configure --enable-download --enable-optim --prefix=${HOME}/FreeFem-install
+```
+
+Download:
+
+```bash
+./3rdparty/getall -a
+```
+
+PETSc (not mandatory but highly recommended, may require `sudo` depending on where it is being installed):
+
+```bash
+cd 3rdparty/ff-petsc
+make petsc-slepc
+cd -
+./reconfigure
+```
+
+Make:
+
+```bash
+make -j2
+make check
+```
+
+Install (not mandatory, may require `sudo` depending on where it is being installed):
+
+```bash
+(sudo) make install
+```
