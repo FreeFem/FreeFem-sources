@@ -25,6 +25,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "AFunction.hpp"
+#include "FESpacen.hpp"
 #ifndef REMOVE_CODE
  // to do  F. HECHT
 #ifdef __MWERKS__
@@ -1337,10 +1339,22 @@ KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>
     if (Uh_target.TFE[0] == &DataFE<Mesh>::P1){
         return DTh.partitionOfUnity;
     }
+    const GTypeOfFE<Mesh>* topFE = Uh_target.TFE[0];
+    const GTypeOfFESum<Mesh>* sumFE = dynamic_cast<const GTypeOfFESum<Mesh>*>(topFE);
+    const GTypeOfFE<Mesh>* scalarFE = sumFE ? sumFE->teb[0] : topFE;
+
+    if (sumFE){
+        for (int i = 1; i < sumFE->k;++i){
+            if (sumFE->teb[i] != sumFE->teb[0]){
+                ExecError("interpolatePoU: composite/mixed FE space not supported (use homogeneous [Pk,...,Pk])");
+            }
+        }
+    }
+
     // Build P1 state on LocalMesh & target space
     typedef GFESpace<Mesh> FESpaceSD;
     FESpaceSD Vh_P1(*DTh.LocalMesh, DataFE<Mesh>::P1);
-    FESpaceSD Uh_scalar(*DTh.LocalMesh, *Uh_target.TFE[0]);
+    FESpaceSD Uh_scalar(*DTh.LocalMesh, *scalarFE);
 
     // Build the interpolation matrix (scalar)
     MatriceMorse<R>* M = buildInterpolationMatrixT<FESpaceSD,FESpaceSD>(Uh_scalar, Vh_P1 , nullptr);
@@ -1349,16 +1363,25 @@ KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>
     M->addMatMul(const_cast<double*>((const double*)DTh.partitionOfUnity),(double*)pou_scalar);
     delete M;
 
-
+    if (Uh_target.N == 1){
+        return pou_scalar;          // pou_scalar EST déjà le résultat
+    }
     // Extend to vector components
-    int N = Uh_target.N;
+    ffassert(Uh_scalar.NbOfNodes == Uh_target.NbOfNodes);
     KN<double> result(Uh_target.NbOfDF);
-    for (int k = 0; k < Uh_scalar.NbOfDF; ++k){
-        for (int d = Uh_target.FirstDFOfNode(k); d < Uh_target.LastDFOfNode(k); ++d){
-            result[d] = pou_scalar[k];
-        }
+    for (int n = 0; n < Uh_target.NbOfNodes; ++n) {
+        int sf = Uh_scalar.FirstDFOfNode(n);            // DDL scalaires du nœud n : [sf, sf+m)
+        int m  = Uh_scalar.LastDFOfNode(n) - sf;
+        int tf = Uh_target.FirstDFOfNode(n);            // DDL vectoriels du nœud n : [tf, tf+tm)
+        int tm = Uh_target.LastDFOfNode(n) - tf;
+        ffassert(tm % m == 0);
+        int Nc = tm / m;                                // nb de composantes
+        for (int c = 0; c < Nc; ++c)
+        for (int j = 0; j < m; ++j)
+            result[tf + c*m + j] = pou_scalar[sf + j];
     }
     return result;
+
 }
 
 static KN<double>* interpolatePoU_wrapper(Stack stack, const DistributedMesh<MeshS>** const& ppDTh, pfesS const& pUh){

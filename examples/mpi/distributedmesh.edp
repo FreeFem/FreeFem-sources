@@ -1,4 +1,4 @@
-// NBPROC 4
+// NBPROC 2
 // PARAM -wg -ns -ffddm_overlap 1
 include "ffddm.idp"
 load "PETSc"
@@ -12,8 +12,8 @@ fespace Uh(ThLocal, P1);              // fespace standard pour le rhs
 fespace Udh(DTh, P1); // v_dfesS, construit sur DTh.LocalMesh
 
 // ===== Construction minimale (c==1) : structure distribuée seule, matrice vide =====
-real[int] Dvec = DTh.D;
-Mat A(Udh.ndof, DTh.intersection, Dvec); // structure seule, matrice vide
+real[int] Dvec = Udh.D;
+Mat A(Udh.ndof, Udh.intersection, Dvec); // structure seule, matrice vide
 
 // Remplissage de la matrice
 func f = 1.0;
@@ -31,10 +31,18 @@ real[int] u = A^-1 * rhs;
 
 // Check validation
 // ---- C.1 : bijection loc2glob (champ analytique, sans solveur) ----
-int[int] l2g = DTh.loc2glob;                 // KN<long> : sommet local -> sommet global
+int[int] l2g = Udh.loc2glob;                 // KN<long> : sommet local -> sommet global
 fespace UhGlob(Th, P1);                       // maillage GLOBAL (Th existe sur chaque rang)
 UhGlob gglob = x + 2*y + 3*z;                 // champ connu, non trivial
 Uh      gloc = x + 2*y + 3*z;                 // même champ sur ThLocal (Uh standard)
+
+real[int]  Dref  = DTh.D;
+int[int]   l2gref = DTh.loc2glob;
+assert(Udh.D.n == Dref.n);
+for (int i=0;i<Dref.n;++i) assert(abs(Udh.D[i]-Dref[i]) < 1e-12);
+assert(Udh.loc2glob.n == l2gref.n);
+for (int i=0;i<l2gref.n;++i) assert(Udh.loc2glob[i] == l2gref[i]);
+
 
 real errBij = 0;
 for (int i = 0; i < gloc.n; ++i)
