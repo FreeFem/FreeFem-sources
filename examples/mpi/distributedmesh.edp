@@ -1,84 +1,81 @@
 // NBPROC 2
 // PARAM -wg -ns -ffddm_overlap 1
-include "ffddm.idp"
+
+macro Pk()P2//EOM            // ordre EF testé : P1, P2 ou P3 (load "Element_P3" si P3)
+
+include "ffddm.idp"          // fournit ffddmoverlap (= -ffddm_overlap)
 load "PETSc"
 
 meshS Th = square3(20, 20);
-
 DmeshS DTh = distribute(Th, overlap = ffddmoverlap);
 meshS ThLocal = DTh.local;
 
-fespace Uh(ThLocal, P1);              // fespace standard pour le rhs
-fespace Udh(DTh, P1); // v_dfesS, construit sur DTh.LocalMesh
+fespace Uh(ThLocal, Pk);
+fespace Udh(DTh, Pk);
+fespace UhGlob(Th, Pk);
 
-// ===== Construction minimale (c==1) : structure distribuée seule, matrice vide =====
-real[int] Dvec = Udh.D;
-Mat A(Udh.ndof, Udh.intersection, Dvec); // structure seule, matrice vide
+real[int] D    = Udh.D;            // partition de l'unite : D[i] in [0,1], somme inter-rangs = 1
+int[int]  l2g  = Udh.loc2glob;     // numerotation : DDL local -> DDL global
 
-// Remplissage de la matrice
+assert(D.n == Udh.ndof && l2g.n == Udh.ndof);
+
+if (mpirank == 0)
+  cout << "ndof local (rang 0) = " << Udh.ndof << endl;
+
+
+Mat A(Udh.ndof, Udh.intersection, D);
 func f = 1.0;
 varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
                + int2d(ThLocal)(f*v)
-               + on(1, 2, 3, 4, u = 0);    
+               + on(1, 2, 3, 4, u = 0);
 
+A = vPb(Udh, Udh);                 // remplit les valeurs locales dans la structure distribuee
+real[int] rhs = vPb(0, Uh);        // second membre, sur le fespace local standard
 
-A = vPb(Udh, Udh);                          
-real[int] rhs = vPb(0, Uh);              
-
-// Résolution distribuée
-set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-4 -ksp_converged_reason");
+set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-6 -ksp_converged_reason -ksp_monitor");
 real[int] u = A^-1 * rhs;
 
-// Check validation
-// ---- C.1 : bijection loc2glob (champ analytique, sans solveur) ----
-int[int] l2g = Udh.loc2glob;                 // KN<long> : sommet local -> sommet global
-fespace UhGlob(Th, P1);                       // maillage GLOBAL (Th existe sur chaque rang)
-UhGlob gglob = x + 2*y + 3*z;                 // champ connu, non trivial
-Uh      gloc = x + 2*y + 3*z;                 // même champ sur ThLocal (Uh standard)
 
+// ---- V1 : bijection loc2glob (champ analytique connu) ----------------------
+func fa = x + 2*y + 3*z + x*y;
+UhGlob gglob = fa;
+Uh     gloc  = fa;
 real errBij = 0;
 for (int i = 0; i < gloc.n; ++i)
   errBij = max(errBij, abs(gloc[][i] - gglob[][l2g[i]]));
-cout << "[" << mpirank << "] C.1 |loc2glob bijection|_inf = " << errBij << endl;
 
+// ---- V2 : partition de l'unite (recollement global = somme ponderee) -------
+//    Pour un champ global g, on doit avoir  Sum_rangs ( D * g[l2g] ) = g
+real[int] dloc(Udh.ndof);
+for (int i = 0; i < Udh.ndof; ++i) dloc[i] = D[i] * gglob[][l2g[i]];
+real[int] acc(UhGlob.ndof); acc = 0;
+for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += dloc[i];
+real[int] accG(UhGlob.ndof);
+mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+real errPoU = 0;
+for (int i = 0; i < UhGlob.ndof; ++i) errPoU = max(errPoU, abs(accG[i] - gglob[][i]));
 
-
-
-// ---- C.3 : résolution de référence sur le maillage global ----
+// ---- V3 : solution distribuee vs solution globale de reference -------------
 varf vPbGlob(u, v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
                    + int2d(Th)(f*v)
-                   + on(1, 2, 3, 4, u = 0);   // MÊMES labels physiques que la varf locale
-matrix AGlob       = vPbGlob(UhGlob, UhGlob, solver = UMFPACK);  // séquentiel, par-process
-real[int] rhsGlob  = vPbGlob(0, UhGlob);
-real[int] uglob    = AGlob^-1 * rhsGlob;
-
-// ---- C.4 : solution distribuée vs solution globale ----
+                   + on(1, 2, 3, 4, u = 0);
+matrix AGlob      = vPbGlob(UhGlob, UhGlob, solver = UMFPACK);
+real[int] rhsGlob = vPbGlob(0, UhGlob);
+real[int] uglob   = AGlob^-1 * rhsGlob;
 real errSol = 0;
 for (int i = 0; i < u.n; ++i)
   errSol = max(errSol, abs(u[i] - uglob[l2g[i]]));
-cout << "[" << mpirank << "] C.4 |u_loc - u_glob[l2g]|_inf = " << errSol << endl;
 
-// Test sous domaine ou domaine global le soucis
-real[int] ug(u.n);
-for (int i = 0; i < u.n; ++i) ug[i] = uglob[l2g[i]];
-cout << "[" << mpirank << "] u_loc:[" << u.min << "," << u.max << "]"
-     << "  uglob[l2g]:[" << ug.min << "," << ug.max << "]" << endl;
-
-
-// ---- C.5 : agrégation et verdict ----
-real[int] Au = A * u;
-real eRes = 0;
-for (int i = 0; i < Au.n; ++i) eRes = max(eRes, abs(Au[i] - uglob[l2g[i]]));
-real errResG;
-mpiAllReduce(eRes, errResG, mpiCommWorld, mpiMAX);   // eRes est une variable, pas une expression
-
-real errBijG, errSolG;
-mpiAllReduce(errBij,        errBijG, mpiCommWorld, mpiMAX);
-mpiAllReduce(errSol,        errSolG, mpiCommWorld, mpiMAX);
+// ---- Agregation et verdict -------------------------------------------------
+real eBij, ePoU, eSol;
+mpiAllReduce(errBij, eBij, mpiCommWorld, mpiMAX);
+mpiAllReduce(errPoU, ePoU, mpiCommWorld, mpiMAX);
+mpiAllReduce(errSol, eSol, mpiCommWorld, mpiMAX);
 if (mpirank == 0) {
-  cout << "==== VALIDATION ====" << endl;
-  cout << " C.1 bijection : " << errBijG << "  (attendu ~1e-12)" << endl;
-  cout << " C.2 residu    : " << errResG << "  (attendu ~rtol*|rhs|)" << endl;
-  cout << " C.4 vs global : " << errSolG << "  (attendu ~1e-6)" << endl;
-  cout << ((errBijG < 1e-8 && errSolG < 1e-4) ? " => PASS" : " => FAIL") << endl;
+  cout << "==== SYNTHESE DistributedMesh (np=" << mpisize
+       << ", overlap=" << ffddmoverlap << ", Pk) ====" << endl;
+  cout << " V1 bijection loc2glob : " << eBij << "  (attendu ~1e-12)" << endl;
+  cout << " V2 partition de l'unite: " << ePoU << "  (attendu ~1e-12)" << endl;
+  cout << " V3 distribue vs global : " << eSol << "  (attendu ~1e-6)"  << endl;
+  cout << ((eBij < 1e-8 && ePoU < 1e-8 && eSol < 1e-5) ? " => PASS" : " => FAIL") << endl;
 }
