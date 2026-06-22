@@ -1,0 +1,48 @@
+// NBPROC 2
+// PARAM -wg -ns -ffddm_overlap 1
+// Pour [P3,P3,P3] : decommente le load et mets Pkv = [P3,P3,P3]
+//load "Element_P3"
+macro Pkv()[P2,P2,P2]//EOM     // [P2,P2,P2] ou [P3,P3,P3]
+
+include "ffddm.idp"
+load "PETSc"
+
+meshS Th = square3(20, 20);
+DmeshS DTh = distribute(Th, overlap = ffddmoverlap);
+meshS ThLocal = DTh.local;
+
+fespace Uh(ThLocal, Pkv);
+fespace Udh(DTh, Pkv);
+fespace UhGlob(Th, Pkv);
+
+real[int] Dvec = Udh.D;
+int[int]  l2g  = Udh.loc2glob;
+assert(Dvec.n == Udh.ndof && l2g.n == Udh.ndof);   // PoU couvre tous les ddl vectoriels
+
+Uh     [g1,g2,g3] = [x + 2*y, y - z, x*z];
+UhGlob [G1,G2,G3] = [x + 2*y, y - z, x*z];
+
+// ---- T1 : bijection ----
+real errBij = 0;
+for (int i = 0; i < g1[].n; ++i)
+  errBij = max(errBij, abs(g1[][i] - G1[][l2g[i]]));
+
+// ---- T2 : partition de l'unite (juge l'entrelacement) ----
+real[int] dloc(Udh.ndof);
+for (int i = 0; i < Udh.ndof; ++i) dloc[i] = Dvec[i] * G1[][l2g[i]];
+real[int] acc(UhGlob.ndof); acc = 0;
+for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += dloc[i];
+real[int] accG(UhGlob.ndof);
+mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+real errPoU = 0;
+for (int i = 0; i < UhGlob.ndof; ++i) errPoU = max(errPoU, abs(accG[i] - G1[][i]));
+
+real eBij, ePoU;
+mpiAllReduce(errBij, eBij, mpiCommWorld, mpiMAX);
+mpiAllReduce(errPoU, ePoU, mpiCommWorld, mpiMAX);
+if (mpirank == 0) {
+  cout << "==== VECTORIEL (np=" << mpisize << ", overlap=" << ffddmoverlap << ") ====" << endl;
+  cout << " T1 bijection      : " << eBij << endl;
+  cout << " T2 partition unite: " << ePoU << endl;
+  cout << ((eBij < 1e-8 && ePoU < 1e-8) ? " => PASS" : " => FAIL") << endl;
+}
