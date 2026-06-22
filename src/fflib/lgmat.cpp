@@ -1384,13 +1384,6 @@ KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>
 
 }
 
-static KN<double>* interpolatePoU_wrapper(Stack stack, const DistributedMesh<MeshS>** const& ppDTh, pfesS const& pUh){
-    FESpaceS* Uh_space = *pUh;
-    KN<double>* result = new KN<double>(interpolatePoU(**ppDTh, *Uh_space));
-    Add2StackOfPtr2Free(stack, result);
-    return result;
-}
-
 template<class Mesh>
 KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o){
     KN<long> inj(Wh.NbOfDF, -1L);
@@ -4030,7 +4023,6 @@ void  init_lgmat()
   Global.Add("restrict","(",new RestrictArray<pfesS>);// PHT Apr 2019
   Global.Add("restrict","(",new RestrictArray<pfesL>);
 
-  Global.Add("interpolatePoU", "(",new OneOperator2s_<KN<double>*, const DistributedMesh<MeshS>**,pfesS>(interpolatePoU_wrapper));
 
   TheOperators->Add("=",
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,1>),
