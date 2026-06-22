@@ -10077,10 +10077,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   BorderMesh->BuildGTree();
 
   // Partition of Unity (PoU)
-  std::vector<KN<double>> intersectionSupport(neighborRanks.n);
-  for (int j = 0; j < neighborRanks.n; ++j) {
-    intersectionSupport[j]=KN<double>(LocalMesh->nv, 0.0);
-  }
 
   KN<double> khi(nbv);
   for (int v = 0; v < nbv; ++v){
@@ -10090,11 +10086,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   // Normalisation PoU
   KN<double> sumPou = khi;
   
-  KN<KN<long>> dofIntersection(1+neighborRanks.n);
-  dofIntersection[0].resize(neighborRanks.n);
-  for (int j = 0; j < neighborRanks.n; ++j){
-    dofIntersection[0][j] = (long)neighborRanks[j];
-  }
   for (int j = 0; j <neighborRanks.n; ++j){
     KN<double> supp_j(nbt, 0.0);
     for (int k = 0; k < nbt; ++k){
@@ -10105,33 +10096,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     AddLayers(&Th, &supp_j, sizeoverlaps, &phi_j);
 
     for (int v = 0; v < nbv; ++v) sumPou[v] += phi_j[v];
-
-    for (int lv = 0; lv < LocalMesh->nv; ++lv){
-      intersectionSupport[j][lv] = phi_j[localToGlobalVertex[lv]];
-    }
-
-    KN<int> mark(LocalMesh->nv, 0);
-    for (int k = 0; k < LocalMesh->nt; ++k){
-      double s = 0;
-      for (int i = 0; i < nve; ++i){
-        s += intersectionSupport[j][(*LocalMesh)(k,i)];
-      }
-      if (s/nve > 1e-6){
-        for (int i = 0; i < nve; ++i) mark[(*LocalMesh)(k,i)] = 1;
-      }
-    }
-    int c = 0;
-    for (int v = 0; v < LocalMesh->nv; ++v){
-      if (mark[v]){
-        ++c;
-      }
-    }
-    dofIntersection[1+j].resize(c);
-    for (int v = 0, cc = 0; v < LocalMesh->nv; ++v){
-      if (mark[v]){
-        dofIntersection[1+j][cc++] = v;
-      }
-    }
   }
 
   for (int v = 0; v < nbv; ++v){
@@ -10154,10 +10118,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   DTh->interfaceLabel = interfaceLabel;
   DTh->neighborRanks = neighborRanks;
   DTh->partitionOfUnity = pouLocal;
-  DTh->dofIntersection.resize(dofIntersection.n);
-  for (int i = 0; i < dofIntersection.n; ++i)
-    DTh->dofIntersection[i] = dofIntersection[i];
-  DTh->localToGlobalVertex = localToGlobalVertex;
   DTh->globalPartition = globalPartition;
 
   ffassert(localToGlobalElement.n == LocalMesh->nt);
@@ -10230,33 +10190,6 @@ const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh
     return Th;
 }
 
-template<class Mesh>
-KN<double>* get_localD(Stack stack, const DistributedMesh<Mesh>** const & DTh)
-{
-  throwassert(DTh && *DTh);
-  KN<double>* D = new KN<double>((**DTh).partitionOfUnity);
-  Add2StackOfPtr2Free(stack, D);
-  return D;
-}
-
-template<class Mesh>
-KN<KN<long>>* get_intersection(Stack stack, const DistributedMesh<Mesh>** const & DTh){
-  throwassert(DTh && *DTh);
-  KN<KN<long>>* r = new KN<KN<long>>((**DTh).dofIntersection);
-  Add2StackOfPtr2Free(stack, r);
-  return r;
-}
-
-template<class Mesh>
-KN<long>* get_loc2glob(Stack stack, const DistributedMesh<Mesh>** const & DTh){
-  throwassert(DTh && *DTh);
-  KN<long>* r = new KN<long>((**DTh).localToGlobalVertex.n);
-  for (int i = 0; i< r->n; ++i){
-    (*r)[i] = (**DTh).localToGlobalVertex[i];
-  }
-  Add2StackOfPtr2Free(stack, r);
-  return r;
-}
 
 #ifndef WITH_NO_INIT
 
@@ -10383,10 +10316,6 @@ static void Load_Init_msh3( ) {
   TheOperators->Add("=", new OneOperator2<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_eqdestroy_incr));
 
   Add<const DistributedMesh<MeshS>**>("local",".",new OneOperator1s_<const MeshS* ,const DistributedMesh<MeshS>**>(get_localmesh<MeshS>));
-  Add<const DistributedMesh<MeshS>**>("D",".",new OneOperator1s_<KN<double>* ,const DistributedMesh<MeshS>**>(get_localD<MeshS>));
-  Add<const DistributedMesh<MeshS>**>("intersection", ".", new OneOperator1s_<KN<KN<long>>*, const DistributedMesh<MeshS>**>(get_intersection<MeshS>));
-  Add<const DistributedMesh<MeshS>**>("loc2glob", ".", new OneOperator1s_<KN<long>*, const DistributedMesh<MeshS>**>(get_loc2glob<MeshS>));
-
 
   Global.Add("distribute", "(", new DistributeMesh<MeshS>);
   Global.Add("distribute", "(", new DistributeMesh<MeshS>(1));

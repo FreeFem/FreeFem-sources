@@ -13,13 +13,11 @@ public:
 
   KN<int> neighborRanks;
   KN<double> partitionOfUnity;
-  KN<int> localToGlobalVertex;
   KN<int> localToGlobalElement; // n2o (LocalMesh -> Th)
   KN<int> globalPartition;
-  KN<KN<long>> dofIntersection; // [0]: rangs, [1+j]: indices
-
+  
   DistributedMesh() : LocalMesh(nullptr), BorderMesh(nullptr), overlap(0), interfaceLabel(10),
-  neighborRanks(), partitionOfUnity(), localToGlobalVertex(), globalPartition() {}
+  neighborRanks(), partitionOfUnity(), globalPartition() {}
 //  DistributedMesh(Mesh * locmesh) : LocalMesh(locmesh) {}
   ~DistributedMesh() {
     if (LocalMesh) LocalMesh->destroy();
