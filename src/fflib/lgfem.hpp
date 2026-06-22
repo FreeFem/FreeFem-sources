@@ -415,7 +415,7 @@ class v_dfesS : public generic_v_fes {
 
   operator FESpaceS *( ) {
     throwassert(dHat == 2);
-    if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpaceS >(update( ), true);
+    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpaceS >(update( ), true); dofDataBuilt = false; }
     if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
     return pVh;
   }
