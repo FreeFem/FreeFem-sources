@@ -617,7 +617,7 @@ int mylex::scan(int lvl)
             static const std::map<int, int> feid_map = {
                 {0, ID},       {1, FESPACE1}, {2, FESPACE},   {3, FESPACE3},
                 {4, FESPACES}, {5, FESPACEL}, {6, VGFESPACE},  {7, GFESPACE},
-                {40, FESPACEDS}
+                {40, FESPACEDS}, {30, FESPACED3}, {50, FESPACEDL}
             };
             auto it = feid_map.find(ft);
             ffassert(it != feid_map.end());
