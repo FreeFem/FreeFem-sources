@@ -26,6 +26,9 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "FESpacen.hpp"
+#include "MeshSn.hpp"
+#include "throwassert.hpp"
 #ifdef __MWERKS__
 #pragma optimization_level 0
 #endif
@@ -1850,17 +1853,20 @@ class OP_MakePtrL {
   }
 };
 
-class OP_MakeDPtrS {
+template<class Mesh, class TypeOfFE, class pdfes_tefType>
+class OP_MakeDPtr {
  public:
   class Op : public E_F0mps {
    public:
     static const int n_name_param = 1;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
-    typedef pdfesS *R;
-    typedef pdfesS *A;
-    typedef const DistributedMesh<MeshS> **B;
-    typedef TypeOfFES *C;
+
+    typedef v_dfes<Mesh>* pdfesT;
+    typedef pdfesT *R;
+    typedef pdfesT *A;
+    typedef const DistributedMesh<Mesh> **B;
+    typedef TypeOfFE *C;
     Expression a, b, c;
     int nbcperiodic;
     Expression *periodic;
@@ -1870,16 +1876,16 @@ class OP_MakeDPtrS {
       A p   = GetAny<A>((*a)(s));
       B dth = GetAny<B>((*b)(s));
       C tef = GetAny<C>((*c)(s));
-      const pmeshS *ppTh = &((**dth).LocalMesh);
-      *p = new pdfesS_tef(ppTh, tef, *dth, s, nbcperiodic, periodic);
+      const Mesh* const *ppTh = &((**dth).LocalMesh);
+      *p = new pdfes_tefType(ppTh, tef, *dth, s, nbcperiodic, periodic);
       return SetAny<R>(p);
     }
   };
 
-  typedef Op::R Result;
+  typedef typename Op::R Result;
   static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
   static ArrayOfaType typeargs() {
-    return ArrayOfaType(atype<Op::A>(), atype<Op::B>(), atype<Op::C>(), false);
+    return ArrayOfaType(atype<typename Op::A>(), atype<typename Op::B>(), atype<typename Op::C>(), false);
   }
 };
 
@@ -1939,15 +1945,19 @@ OP_MakePtrS::Op::Op(const basicAC_F0 &args)
   GetPeriodic(2, nargs[0], nbcperiodic, periodic);
 }
 
-basicAC_F0::name_and_type OP_MakeDPtrS::Op::name_param[] = {"periodic", &typeid(E_Array)};
+template<class Mesh, class TypeOfFE, class pdfes_tefType>
+basicAC_F0::name_and_type OP_MakeDPtr<Mesh, TypeOfFE, pdfes_tefType>::Op::name_param[] = {"periodic", &typeid(E_Array)};
 
-OP_MakeDPtrS::Op::Op(const basicAC_F0 &args)
+template<class Mesh, class TypeOfFE, class pdfes_tefType>
+OP_MakeDPtr<Mesh, TypeOfFE, pdfes_tefType>::Op::Op(const basicAC_F0 &args)
   : a(to<A>(args[0])), b(to<B>(args[1])), c(to<C>(args[2])) {
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
-  GetPeriodic(2, nargs[0], nbcperiodic, periodic);  // dHat=2 pour surface
+  GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);  // dHat=2 pour surface
 }
+
+typedef OP_MakeDPtr<MeshS, TypeOfFES, pdfesS_tef> OP_MakeDPtrS;
 
 
 // 3D curve
@@ -6392,8 +6402,15 @@ void init_lgfem( ) {
   map_type[typeid(pdfesS).name( )] = new ForEachType< pdfesS >( );                  // 3D surface distributed
   map_type[typeid(pdfesS *).name( )] = new ForEachTypePtrfspace< pdfesS, 40 >( );    // 3D surface distributed
 
+  map_type[typeid(pdfes3).name( )]   = new ForEachType< pdfes3 >( );                  // 3D volume distributed
+  map_type[typeid(pdfes3 *).name( )] = new ForEachTypePtrfspace< pdfes3, 30 >( );     // 3D volume distributed
+
   map_type[typeid(pfesL).name( )] = new ForEachType< pfesL >( );                  // 3D curve
   map_type[typeid(pfesL *).name( )] = new ForEachTypePtrfspace< pfesL, 5 >( );    // 3D curve
+
+  map_type[typeid(pdfesL).name()]   = new ForEachType<pdfesL>();
+  map_type[typeid(pdfesL *).name()] = new ForEachTypePtrfspace<pdfesL, 50>();
+
 
   //
   Dcl_Type< const QuadratureFormular * >( );
@@ -6450,13 +6467,18 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormBilinear<v_fes, v_fes > * >( );     // to set Matrix
   Dcl_Type< const Call_FormLinear< v_fes3 > * >( );      //   to set Vector 3D volume
   Dcl_Type< const Call_FormBilinear<v_fes3, v_fes3 > * >( );    // to set Matrix 3D volume
+  Dcl_Type< const Call_FormLinear< v_dfes3 > * >( ); // to set Vector 3D volume distributed
+  Dcl_Type< const Call_FormBilinear<v_dfes3, v_dfes3> * >( ); // to set Matrix 3D volume distributed
   Dcl_Type< const Call_FormLinear< v_fesS > * >( );      //   to set Vector 3D surface
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fesS > * >( );    // to set Matrix 3D surface
   Dcl_Type< const Call_FormLinear< v_dfesS > * >( );            // to set Vector 3D surface distributed
   Dcl_Type< const Call_FormBilinear<v_dfesS, v_dfesS> * >( );   // to set Matrix 3D surface distributed
   Dcl_Type< const Call_FormLinear< v_fesL > * >( );      //   to set Vector 3D curve
   Dcl_Type< const Call_FormBilinear<v_fesL, v_fesL > * >( );    // to set Matrix 3D curve
-  
+  Dcl_Type<const Call_FormLinear<v_dfesL>*>();
+  Dcl_Type<const Call_FormBilinear<v_dfesL, v_dfesL>*>();
+
+
   Dcl_Type< const Call_FormBilinear<v_fesL, v_fes> * >( );   // 3D curve / 2D on meshL
   Dcl_Type< const Call_FormBilinear<v_fes, v_fesL> * >( );   // 2D / 3D curve on meshL
   Dcl_Type< const Call_FormBilinear<v_fesS, v_fes3> * >( );   // 3D Surf / 3D volume on meshS
@@ -6572,22 +6594,36 @@ void init_lgfem( ) {
                            AddIncrement< const DistributedMesh<MeshS>* >, NotReturnOfthisType);
   zzzfff->Add("DmeshS", atype< const DistributedMesh<MeshS>** >( ));
 
+  Dcl_TypeandPtr< const DistributedMesh<Mesh3>* >(0, 0, ::InitializePtr< const DistributedMesh<Mesh3>* >, ::DestroyPtr< const DistributedMesh<Mesh3>* >,
+                          AddIncrement< const DistributedMesh<Mesh3>* >, NotReturnOfthisType);
+  zzzfff->Add("Dmesh3", atype< const DistributedMesh<Mesh3>** >( ));
+
+  Dcl_TypeandPtr<const DistributedMesh<MeshL>*>(0, 0, ::InitializePtr<const DistributedMesh<MeshL>*>, ::DestroyPtr<const DistributedMesh<MeshL>*>,
+                           AddIncrement<const DistributedMesh<MeshL>*>, NotReturnOfthisType);
+  zzzfff->Add("DmeshL", atype<const DistributedMesh<MeshL>**>());
+
   // old --
   //  init FESpace
   TheOperators->Add(
     "<-", new OneOperator2_< pfes *, pfes *, pmesh * >(&MakePtr2),
-    //new OneOperatorCode< OP_MakePtrGeneric >, // Morice
     new OpMake_pvectgenericfes,
     new OneOperatorCode< OP_MakePtr2 >, new OneOperatorCode< OP_MakePtr3 >,
     new OneOperatorCode< OP_MakePtrS >, new OneOperatorCode< OP_MakePtrL >,
     new OneOperatorCode<OP_MakeDPtrS>,
+    new OneOperatorCode< OP_MakeDPtr<Mesh3, TypeOfFE3, pdfes3_tef>>,
+    new OneOperatorCode< OP_MakeDPtr<MeshL, TypeOfFEL, pdfesL_tef>>,
     new OpMake_pfes< pfes, Mesh, TypeOfFE, pfes_tefk >,
     new OpMake_pfes< pfes3, Mesh3, TypeOfFE3, pfes3_tefk >,
-    new OpMake_pfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >,    // add for 3D surface  FEspace
-    new OpMake_Dpfes< pdfesS, MeshS, TypeOfFES, pdfesS_tefk >, // 3D surface distributed
-    new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >
-    //new OpMake_Dpfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >
-  );
+    new OpMake_pfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >,
+    new OpMake_Dpfes< pdfesS, MeshS, TypeOfFES, pdfesS_tefk >,
+    new OpMake_Dpfes< pdfes3, Mesh3, TypeOfFE3, pdfes3_tefk >,
+    new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >       // 15ᵉ opérateur → 16 args ✓
+    );
+  TheOperators->Add(
+    "<-",
+    new OpMake_Dpfes< pdfesL, MeshL, TypeOfFEL, pdfesL_tefk >    // sorti dans un 2ᵉ appel
+    );
+
   TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp,2));
 
   Add< MeshPoint * >("P", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::P));
@@ -7063,6 +7099,10 @@ void init_lgfem( ) {
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fes3 >);    // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fes3 >);       // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes3, v_fes3 >);      // 3D volume
+  Add<const FormBilinear*>("(", "", new OpCall_FormBilinear<FormBilinear, v_dfes3, v_dfes3>);
+  Add<const FormBilinear*>("(", "", new OpCall_FormLinear2<FormBilinear, v_dfes3>);
+  Add<const C_args*>("(", "", new OpCall_FormBilinear<C_args, v_dfes3, v_dfes3>);
+
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fesS >);    // 3D surface
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesS, v_fesS >);    // 3D surface
@@ -7079,6 +7119,10 @@ void init_lgfem( ) {
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);       // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL, v_fesL >);      // 3D curve
+  Add<const FormBilinear*>("(", "", new OpCall_FormBilinear<FormBilinear, v_dfesL, v_dfesL>);
+  Add<const FormBilinear*>("(", "", new OpCall_FormLinear2<FormBilinear, v_dfesL>);
+  Add<const C_args*>("(", "", new OpCall_FormBilinear<C_args, v_dfesL, v_dfesL>);
+
   
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL, v_fes >); // 3D curve / 2D on meshL
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes, v_fesL>); // 2D / 3D curve on meshL
@@ -7585,12 +7629,16 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
     return NewFEvariableT< v_fes, 2 >(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 3)
     return NewFEvariableT< v_fes3, 3 >(pids, currentblock, fespacetype, init, cplx, dim);
+  else if (dim == 30)
+    return NewFEvariableT<v_dfes3, 30>(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 4)
     return NewFEvariableT< v_fesS, 4 >(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 40)
     return NewFEvariableT< v_dfesS, 40 >(pids, currentblock, fespacetype, init, cplx, dim);
   else if (dim == 5)
     return NewFEvariableT< v_fesL, 5 >(pids, currentblock, fespacetype, init, cplx, dim);
+  else if (dim == 50)
+  return NewFEvariableT<v_dfesL, 50>(pids, currentblock, fespacetype, init, cplx, dim);
   //else if (dim == 6)
   //  return NewVecFEvariableT(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non testee
   //else if (dim == 7)
@@ -7721,6 +7769,8 @@ aType typeFESpace(const basicAC_F0 &args) {
   aType t_mL = atype< pmeshL * >( );
 
   aType t_mDS = atype< const DistributedMesh<MeshS>* * >( );
+  aType t_mD3 = atype< const DistributedMesh<Mesh3>* * >( );
+  aType t_mDL = atype<const DistributedMesh<MeshL>* *>();
 
   aType t_tfe = atype< TypeOfFE * >( );
   aType t_tfe3 = atype< TypeOfFE3 * >( );
@@ -7796,6 +7846,14 @@ aType typeFESpace(const basicAC_F0 &args) {
         ffassert(dm == 40 || dm < 0);
         dm = 40;
       }
+      else if (tl == t_mD3) {
+        ffassert(dm == 30 || dm < 0);
+        dm = 30;
+      }
+      else if (tl == t_mDL) { 
+        ffassert(dm == 50 || dm < 0); 
+        dm = 50; 
+      }
       // array
       else if (tl == t_a) {
         const E_Array &ea = *dynamic_cast< const E_Array * >(args[i].LeftValue( ));
@@ -7821,6 +7879,10 @@ aType typeFESpace(const basicAC_F0 &args) {
       ret = atfs[3];    // 3D fespace (curve)
     else if (dm == 40)
       ret = atype<pdfesS*>(); // 3D fespace (surface distributed)
+    else if (dm == 30)
+      ret = atype<pdfes3*>(); // 3D fespace (volume distributed)
+    else if (dm == 50) 
+      ret = atype<pdfesL*>();
     else {
       cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :" << dm << " type FE " << id + 2 << endl;
       ffassert(0);

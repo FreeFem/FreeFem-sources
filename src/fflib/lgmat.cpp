@@ -1420,12 +1420,16 @@ KN<long> buildLoc2globDof(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
     return restrictDOF(Vhi, Vhglob, D.localToGlobalElement);
 }
 
-void v_dfesS::buildDistributedDofData(FESpaceS& Vhi){
+template<class Mesh>
+void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
     dofIntersectionDof = buildDofIntersection(*DTh, Vhi);
     loc2globDof = buildLoc2globDof(*DTh, Vhi);
     Ddof = interpolatePoU(*DTh, Vhi);
 }
+template void v_dfes<MeshS>::buildDistributedDofData(GFESpace<MeshS>&);
+template void v_dfes<Mesh3>::buildDistributedDofData(GFESpace<Mesh3>&);
+template void v_dfes<MeshL>::buildDistributedDofData(GFESpace<MeshL>&);
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
 {

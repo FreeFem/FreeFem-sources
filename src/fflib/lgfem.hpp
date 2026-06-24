@@ -44,7 +44,7 @@ class vect_generic_v_fes;  // J. Morice : Added in 06/22
 class v_fes;
 class v_fes3;
 class v_fesS;
-class v_dfesS;
+template<class M> class v_dfes;
 class v_fesL;
 
 typedef generic_v_fes *pgenericfes;           // J. Morice : Added in 06/22
@@ -53,7 +53,6 @@ typedef vect_generic_v_fes *pvectgenericfes;  // J. Morice : Added in 06/22
 typedef v_fes *pfes;
 typedef v_fes3 *pfes3;
 typedef v_fesS *pfesS;
-typedef v_dfesS *pdfesS;
 typedef v_fesL *pfesL;
 
 //typedef v_fesVect *pfesVect; // J. Morice
@@ -390,11 +389,12 @@ class v_fesS : public generic_v_fes {
 
 // 3D surface distribué
 template<class M> class DistributedMesh;
-class v_dfesS : public generic_v_fes {
+template<class Mesh> class v_dfes : public generic_v_fes {
  public:
-  typedef pdfesS pfes;
-  typedef FESpaceS FESpace;
-  const DistributedMesh<MeshS>* DTh = nullptr;
+  typedef v_dfes<Mesh>* pfes;
+  typedef GFESpace<Mesh> FESpace;
+  typedef const Mesh* pmeshT;
+  const DistributedMesh<Mesh>* DTh = nullptr;
   bool dofDataBuilt = false;
 
   // Results DDL
@@ -402,37 +402,49 @@ class v_dfesS : public generic_v_fes {
   KN<double> Ddof;
   KN<long> loc2globDof;
 
-  static const int dHat = 2, d = 3;
+  static const int dHat = Mesh::RdHat::d, d = Mesh::Rd::d;
   const int N;
-  const pmeshS *ppTh;    // adr du maillage
+  const pmeshT *ppTh;    // adr du maillage
 
-  CountPointer< FESpaceS > pVh;
+  CountPointer< FESpace > pVh;
 
   Stack stack;    // the stack is use whith periodique expression
 
   int nbcperiodic;
   Expression *periodic;
 
-  operator FESpaceS *( ) {
-    throwassert(dHat == 2);
-    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpaceS >(update( ), true); dofDataBuilt = false; }
+  operator FESpace *( ) {
+    throwassert(dHat == Mesh::RdHat::d);
+    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; }
     if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
     return pVh;
   }
-  FESpaceS *update( );
+  
+  FESpace *update( ){
+    assert(dHat == Mesh::RdHat::d);
+    if (!*ppTh) return nullptr;
+    if (nbcperiodic) {
+      assert(periodic);
+      KN< int > ndfe;
+      bool ret = buildperiodic(stack, ndfe);
+      return ret ? buildupdate(ndfe) : buildupdate();
+    } else {
+    return buildupdate();
+    }
+  }
 
-  v_dfesS(int NN, const pmeshS *t, const DistributedMesh<MeshS>* dth, Stack s, int n, Expression *p)    /// TODO
+  v_dfes(int NN, const pmeshT *t, const DistributedMesh<Mesh>* dth, Stack s, int n, Expression *p)    /// TODO
     : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(dth) {
   }    // take a pmesh3 and use the pmeshS
-  v_dfesS(int NN, const v_dfesS *f, Stack s, int n, Expression *p)
+  v_dfes(int NN, const v_dfes *f, Stack s, int n, Expression *p)
     : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(f->DTh) {}
 
-  void buildDistributedDofData(FESpaceS& Vhi);
+  void buildDistributedDofData(FESpace& Vhi);
   // void destroy(){ ppTh=0;pVh=0; delete this;}
-  virtual ~v_dfesS( ) {}
+  virtual ~v_dfes( ) {}
   bool buildperiodic(Stack stack, KN< int > &ndfe);
-  virtual FESpaceS *buildupdate(KN< int > &) { return nullptr; }
-  virtual FESpaceS *buildupdate( ) { return nullptr; }
+  virtual FESpace *buildupdate(KN< int > &) { return nullptr; }
+  virtual FESpace *buildupdate( ) { return nullptr; }
 
   const void * getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
   void * getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
@@ -613,52 +625,72 @@ class pfesS_tefk : public v_fesS {
 };
 
 // 3D surface distributed
-class pdfesS_tef : public v_dfesS {
+template<class Mesh, class TypeOfFE>
+class pdfes_tef : public v_dfes<Mesh> {
  public:
-  const TypeOfFES *tef;
-  pdfesS_tef(const pmeshS *t, const TypeOfFES *tt, const DistributedMesh<MeshS>* dth = nullptr, Stack s = NullStack, int n = 0, Expression *p = nullptr)
-    : v_dfesS(tt->N, t, dth, s, n, p), tef(tt) {
-    operator FESpaceS *( );
+  typedef const Mesh* pmeshT;
+  typedef GFESpace<Mesh> FESpace;
+  const TypeOfFE *tef;
+
+  pdfes_tef(const pmeshT *t, const TypeOfFE *tt, const DistributedMesh<Mesh>* dth = nullptr, Stack s = NullStack, int n = 0, Expression *p = nullptr)
+    : v_dfes<Mesh>(tt->N, t, dth, s, n, p), tef(tt) {
+    this->operator FESpace *( );
   }
-  FESpaceS *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceS(**ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
+  FESpace *buildupdate(KN< int > &ndfe) {
+    return *this->ppTh ? new FESpace(**this->ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpaceS *buildupdate( ) { return *ppTh ? new FESpaceS(**ppTh, *tef) : nullptr; }
+  FESpace *buildupdate( ) { return *this->ppTh ? new FESpace(**this->ppTh, *tef) : nullptr; }
 };
 
-class pdfesS_tefk : public v_dfesS {
+template<class Mesh, class TypeOfFE>
+class pdfes_tefk : public v_dfes<Mesh> {
  public:
-  const TypeOfFES **tef;
+  typedef const Mesh* pmeshT;
+  typedef GFESpace<Mesh> FESpace;
+  const TypeOfFE **tef;
   const int k;
-  KN< GTypeOfFE< MeshS > const * > atef;
-  GTypeOfFESum< MeshS > tefs;
+  KN< GTypeOfFE< Mesh > const * > atef;
+  GTypeOfFESum< Mesh > tefs;
 
-  static int sum(const Fem2D::TypeOfFES **l, int const Fem2D::TypeOfFES::*p, int n) {
+  static int sum(const TypeOfFE **l, int const TypeOfFE::*p, int n) {
     int r = 0;
     for (int i = 0; i < n; i++) r += l[i]->*p;
     return r;
   }
 
-  pdfesS_tefk(const pmeshS *t, const Fem2D::TypeOfFES **tt, int kk, const DistributedMesh<MeshS>* dth = nullptr, Stack s = NullStack, int n = 0,
+  pdfes_tefk(const pmeshT *t, const TypeOfFE **tt, int kk, const DistributedMesh<Mesh>* dth = nullptr, Stack s = NullStack, int n = 0,
              Expression *p = nullptr)
-    : v_dfesS(sum((const Fem2D::TypeOfFES **)tt, &Fem2D::TypeOfFES::N, kk), t, dth, s, n, p), tef(tt),
+    : v_dfes<Mesh>(sum(tt, &TypeOfFE::N, kk), t, dth, s, n, p), tef(tt),
       k(kk), atef(kk, tt), tefs(atef)
 
   {
-    // cout << "pfes_tefk const" << tef << " " << this << endl;
-    operator FESpaceS *( );
+    this->operator FESpace *( );
   }
-  FESpaceS *buildupdate( ) {
-    // cout << "pdfes_tefk upd:" << tef << " " << this <<  endl;
-    // assert(tef);
-    return *ppTh ? new FESpaceS(**ppTh, tefs) : nullptr;
+  FESpace *buildupdate( ) {
+    return *this->ppTh ? new FESpace(**this->ppTh, tefs) : nullptr;
   }
-  virtual ~pdfesS_tefk( ) { delete[] tef; }
-  FESpaceS *buildupdate(KN< int > &ndfe) {
-    return *ppTh ? new FESpaceS(**ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
+  virtual ~pdfes_tefk( ) { delete[] tef; }
+  FESpace *buildupdate(KN< int > &ndfe) {
+    return *this->ppTh ? new FESpace(**this->ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 
+typedef v_dfes<MeshS>                  v_dfesS;
+typedef v_dfes<MeshS>*                 pdfesS;
+typedef pdfes_tef<MeshS, TypeOfFES>    pdfesS_tef;
+typedef pdfes_tefk<MeshS, TypeOfFES>   pdfesS_tefk;
+typedef v_dfes<Mesh3> v_dfes3;
+typedef v_dfes<Mesh3>* pdfes3;
+typedef pdfes_tef<Mesh3, TypeOfFE3> pdfes3_tef;
+typedef pdfes_tefk<Mesh3, TypeOfFE3> pdfes3_tefk;
+typedef v_dfes<MeshL>                 v_dfesL;
+typedef v_dfes<MeshL>*                pdfesL;
+typedef pdfes_tef<MeshL, TypeOfFEL>   pdfesL_tef;
+typedef pdfes_tefk<MeshL, TypeOfFEL>  pdfesL_tefk;
+
+template<> bool v_dfes<MeshS>::buildperiodic(Stack, KN<int>&);
+template<> bool v_dfes<Mesh3>::buildperiodic(Stack, KN<int>&);
+template<> bool v_dfes<MeshL>::buildperiodic(Stack, KN<int>&);
 
 // 3D curve
 class pfesL_tef : public v_fesL {
@@ -1204,18 +1236,6 @@ inline FESpace3 *v_fes3::update( ) {
 }
 
 inline FESpaceS *v_fesS::update( ) {
-  assert(dHat == 2);
-  if (!*ppTh) return nullptr;
-  if (nbcperiodic) {
-    assert(periodic);
-    KN< int > ndfe;
-    bool ret = buildperiodic(stack, ndfe);
-    return ret ? buildupdate(ndfe) : buildupdate( );
-  } else
-    return buildupdate( );
-}
-
-inline FESpaceS *v_dfesS::update( ) {
   assert(dHat == 2);
   if (!*ppTh) return nullptr;
   if (nbcperiodic) {

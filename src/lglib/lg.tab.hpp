@@ -89,20 +89,22 @@ extern int lgdebug;
     FESPACE = 295,
     FESPACE1 = 296,
     FESPACE3 = 297,
-    FESPACES = 298,
-    FESPACEDS = 299,
-    FESPACEL = 300,
-    VGFESPACE = 301,
-    GFESPACE = 302,
-    PLUSEQ = 303,
-    MOINSEQ = 304,
-    MULEQ = 305,
-    DIVEQ = 306,
-    DOTMULEQ = 307,
-    DOTDIVEQ = 308,
-    ARROW = 309,
-    BORDER = 310,
-    SOLVE = 311
+    FESPACED3 = 298,
+    FESPACES = 299,
+    FESPACEDS = 300,
+    FESPACEL = 301,
+    FESPACEDL = 302,
+    VGFESPACE = 303,
+    GFESPACE = 304,
+    PLUSEQ = 305,
+    MOINSEQ = 306,
+    MULEQ = 307,
+    DIVEQ = 308,
+    DOTMULEQ = 309,
+    DOTDIVEQ = 310,
+    ARROW = 311,
+    BORDER = 312,
+    SOLVE = 313
   };
 #endif
 
@@ -144,7 +146,7 @@ union YYSTYPE
 
  vectorOfInst * endb;
 
-#line 148 "lg.tab.hpp"
+#line 150 "lg.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

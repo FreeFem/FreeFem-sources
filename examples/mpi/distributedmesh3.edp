@@ -1,0 +1,76 @@
+// NBPROC 2
+// PARAM -wg -ns -ffddm_overlap 1
+
+macro Pk()P2//EOM
+
+include "ffddm.idp"
+load "PETSc"
+
+mesh3 Th = cube(10, 10, 10);
+Dmesh3 DTh = distribute(Th, overlap = ffddmoverlap);
+mesh3 ThLocal = DTh.local;
+
+fespace Uh(ThLocal, Pk);
+fespace Udh(DTh, Pk);
+fespace UhGlob(Th, Pk);
+
+real[int] D   = Udh.D;
+int[int]  l2g = Udh.loc2glob;
+assert(D.n == Udh.ndof && l2g.n == Udh.ndof);
+
+if (mpirank == 0) cout << "ndof local (rang 0) = " << Udh.ndof << endl;
+
+Mat A(Udh.ndof, Udh.intersection, D);
+func f = 1.0;
+varf vPb(u, v) = int3d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+               + int3d(ThLocal)(f*v)
+               + on(1, 2, 3, 4, 5, 6, u = 0);          // cube : 6 faces
+
+A = vPb(Udh, Udh);
+real[int] rhs = vPb(0, Uh);
+
+set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-6 -ksp_converged_reason -ksp_monitor");
+real[int] u = A^-1 * rhs;
+
+// ---- V1 : bijection loc2glob ----
+func fa = x + 2*y + 3*z + x*y;
+UhGlob gglob = fa;
+Uh     gloc  = fa;
+real errBij = 0;
+for (int i = 0; i < gloc.n; ++i)
+  errBij = max(errBij, abs(gloc[][i] - gglob[][l2g[i]]));
+
+// ---- V2 : partition de l'unite ----
+real[int] dloc(Udh.ndof);
+for (int i = 0; i < Udh.ndof; ++i) dloc[i] = D[i] * gglob[][l2g[i]];
+real[int] acc(UhGlob.ndof); acc = 0;
+for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += dloc[i];
+real[int] accG(UhGlob.ndof);
+mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+real errPoU = 0;
+for (int i = 0; i < UhGlob.ndof; ++i) errPoU = max(errPoU, abs(accG[i] - gglob[][i]));
+
+// ---- V3 : distribue vs global ----
+varf vPbGlob(u, v) = int3d(Th)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+                   + int3d(Th)(f*v)
+                   + on(1, 2, 3, 4, 5, 6, u = 0);
+matrix AGlob      = vPbGlob(UhGlob, UhGlob, solver = UMFPACK);
+real[int] rhsGlob = vPbGlob(0, UhGlob);
+real[int] uglob   = AGlob^-1 * rhsGlob;
+real errSol = 0;
+for (int i = 0; i < u.n; ++i)
+  errSol = max(errSol, abs(u[i] - uglob[l2g[i]]));
+
+// ---- Synthese ----
+real eBij, ePoU, eSol;
+mpiAllReduce(errBij, eBij, mpiCommWorld, mpiMAX);
+mpiAllReduce(errPoU, ePoU, mpiCommWorld, mpiMAX);
+mpiAllReduce(errSol, eSol, mpiCommWorld, mpiMAX);
+if (mpirank == 0) {
+  cout << "==== SYNTHESE DistributedMesh3 (np=" << mpisize
+       << ", overlap=" << ffddmoverlap << ", Pk) ====" << endl;
+  cout << " V1 bijection loc2glob : " << eBij << endl;
+  cout << " V2 partition de l'unite: " << ePoU << endl;
+  cout << " V3 distribue vs global : " << eSol << endl;
+  cout << ((eBij < 1e-8 && ePoU < 1e-8 && eSol < 1e-5) ? " => PASS" : " => FAIL") << endl;
+}
