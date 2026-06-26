@@ -10193,6 +10193,17 @@ const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh
     return Th;
 }
 
+// Enregistre <- / = / local / distributed pour Distributed Meshh
+template<class Mesh>
+static void registerDistributedMeshOps() {
+  typedef const DistributedMesh<Mesh>* DM;
+  TheOperators->Add("<-", new OneOperator2_<DM*, DM*, DM>(&set_copy_incr));
+  TheOperators->Add("=", new OneOperator2<DM*, DM*, DM>(&set_eqdestroy_incr));
+  Add<DM*>("local", ".", new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
+  Global.Add("distribute", "(", new DistributeMesh<Mesh>);
+  Global.Add("distribute", "(", new DistributeMesh<Mesh>(1));
+}
+
 
 #ifndef WITH_NO_INIT
 
@@ -10315,23 +10326,9 @@ static void Load_Init_msh3( ) {
   Global.Add("rebuildBorder", "(", new RebuildBorder<MeshS>);
   Global.Add("rebuildBorder", "(", new RebuildBorder<MeshL>);
 
-  TheOperators->Add("<-", new OneOperator2_<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_copy_incr));
-  TheOperators->Add("=", new OneOperator2<const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>**,const DistributedMesh<MeshS>* >(&set_eqdestroy_incr));
-  TheOperators->Add("<-", new OneOperator2_<const DistributedMesh<Mesh3>**,const DistributedMesh<Mesh3>**,const DistributedMesh<Mesh3>* >(&set_copy_incr));
-  TheOperators->Add("=",  new OneOperator2 <const DistributedMesh<Mesh3>**,const DistributedMesh<Mesh3>**,const DistributedMesh<Mesh3>* >(&set_eqdestroy_incr));
-  TheOperators->Add("<-", new OneOperator2_<const DistributedMesh<MeshL>**,const DistributedMesh<MeshL>**,const DistributedMesh<MeshL>*>(&set_copy_incr));
-  TheOperators->Add("=",  new OneOperator2 <const DistributedMesh<MeshL>**,const DistributedMesh<MeshL>**,const DistributedMesh<MeshL>*>(&set_eqdestroy_incr));
-
-  Add<const DistributedMesh<MeshS>**>("local",".",new OneOperator1s_<const MeshS* ,const DistributedMesh<MeshS>**>(get_localmesh<MeshS>));
-  Add<const DistributedMesh<Mesh3>**>("local",".",new OneOperator1s_<const Mesh3*,const DistributedMesh<Mesh3>**>(get_localmesh<Mesh3>));
-  Add<const DistributedMesh<MeshL>**>("local",".",new OneOperator1s_<const MeshL*,const DistributedMesh<MeshL>**>(get_localmesh<MeshL>));
-
-  Global.Add("distribute", "(", new DistributeMesh<MeshS>);
-  Global.Add("distribute", "(", new DistributeMesh<MeshS>(1));
-  Global.Add("distribute", "(", new DistributeMesh<Mesh3>);
-  Global.Add("distribute", "(", new DistributeMesh<Mesh3>(1));
-  Global.Add("distribute", "(", new DistributeMesh<MeshL>);
-  Global.Add("distribute", "(", new DistributeMesh<MeshL>(1));
+  registerDistributedMeshOps<MeshS>();
+  registerDistributedMeshOps<Mesh3>();
+  registerDistributedMeshOps<MeshL>();
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from

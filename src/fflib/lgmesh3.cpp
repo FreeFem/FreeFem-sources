@@ -2266,6 +2266,20 @@ KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
   Add2StackOfPtr2Free(stack, r); return r;
 }
 
+template<class Mesh>
+static void addDistributedFespaceOps(){
+  typedef v_dfes<Mesh>* pdfesT;
+  typedef const Mesh* pmeshT;
+
+  Add<pdfesT*>("ndof",".", new OneOperator1 <long, pdfesT*>(pVhd_ndof<Mesh>));
+  Add<pdfesT*>("nt",".", new OneOperator1 <long, pdfesT*>(pVhd_nt<Mesh>));
+  Add<pdfesT*>("ndofK",".", new OneOperator1 <long, pdfesT*>(pVhd_ndofK<Mesh>));
+  Add<pdfesT*>("Th",".", new OneOperator1 <pmeshT, pdfesT*>(pVhd_Th<Mesh>));
+  Add<pdfesT*>("D",".", new OneOperator1s_<KN<double>*, pdfesT*>(pVhd_D<Mesh>));
+  Add<pdfesT*>("intersection",".", new OneOperator1s_<KN<KN<long>>*, pdfesT*>(pVhd_intersection<Mesh>));
+  Add<pdfesT*>("loc2glob",".", new OneOperator1s_<KN<long>*, pdfesT*>(pVhd_loc2glob<Mesh>));
+}
+
 //3D curve
 long pVhL_ndof(pfesL * p)
 { throwassert(p && *p);
@@ -3371,36 +3385,11 @@ TheOperators->Add("=",
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
  Add<pfesS*>("Th",".",new OneOperator1<pmeshS,pfesS*>(pVhS_Th));//ADD JUIN 2021 FH.
 
+// fespaces distribués: accesseurs
+addDistributedFespaceOps<MeshS>();
+addDistributedFespaceOps<Mesh3>();
+addDistributedFespaceOps<MeshL>();
 
-// 3D surface distributed
-Add<pdfesS*>("ndof", ".", new OneOperator1<long,   pdfesS*>(pVhd_ndof<MeshS>));
-Add<pdfesS*>("nt",   ".", new OneOperator1<long,   pdfesS*>(pVhd_nt<MeshS>));
-Add<pdfesS*>("ndofK",".", new OneOperator1<long,   pdfesS*>(pVhd_ndofK<MeshS>));
-Add<pdfesS*>("Th",   ".", new OneOperator1<pmeshS, pdfesS*>(pVhd_Th<MeshS>));
-Add<pdfesS*>("D",            ".", new OneOperator1s_<KN<double>*,   pdfesS*>(pVhd_D<MeshS>));
-Add<pdfesS*>("intersection", ".", new OneOperator1s_<KN<KN<long>>*,pdfesS*>(pVhd_intersection<MeshS>));
-Add<pdfesS*>("loc2glob",     ".", new OneOperator1s_<KN<long>*,    pdfesS*>(pVhd_loc2glob<MeshS>));
-
-// 3D distributed
-Add<pdfes3*>("ndof",        ".", new OneOperator1<long,   pdfes3*>(pVhd_ndof<Mesh3>));
-Add<pdfes3*>("nt",          ".", new OneOperator1<long,   pdfes3*>(pVhd_nt<Mesh3>));
-Add<pdfes3*>("ndofK",       ".", new OneOperator1<long,   pdfes3*>(pVhd_ndofK<Mesh3>));
-Add<pdfes3*>("Th",          ".", new OneOperator1<pmesh3, pdfes3*>(pVhd_Th<Mesh3>));
-Add<pdfes3*>("D",            ".", new OneOperator1s_<KN<double>*,   pdfes3*>(pVhd_D<Mesh3>));
-Add<pdfes3*>("intersection", ".", new OneOperator1s_<KN<KN<long>>*,pdfes3*>(pVhd_intersection<Mesh3>));
-Add<pdfes3*>("loc2glob",     ".", new OneOperator1s_<KN<long>*,    pdfes3*>(pVhd_loc2glob<Mesh3>));
-
-// 3D curve distributed
-Add<pdfesL*>("ndof",        ".", new OneOperator1<long,   pdfesL*>(pVhd_ndof<MeshL>));
-Add<pdfesL*>("nt",          ".", new OneOperator1<long,   pdfesL*>(pVhd_nt<MeshL>));
-Add<pdfesL*>("ndofK",       ".", new OneOperator1<long,   pdfesL*>(pVhd_ndofK<MeshL>));
-Add<pdfesL*>("Th",          ".", new OneOperator1<pmeshL, pdfesL*>(pVhd_Th<MeshL>));
-Add<pdfesL*>("D",            ".", new OneOperator1s_<KN<double>*,   pdfesL*>(pVhd_D<MeshL>));
-Add<pdfesL*>("intersection", ".", new OneOperator1s_<KN<KN<long>>*,pdfesL*>(pVhd_intersection<MeshL>));
-Add<pdfesL*>("loc2glob",     ".", new OneOperator1s_<KN<long>*,    pdfesL*>(pVhd_loc2glob<MeshL>));
-
-// Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
- 
 // 3d curve FE
 Add<pfLr>("n",".",new OneOperator1<long,pfLr>(pfLr_nbdf<R>));
 Add<pfLc>("n",".",new OneOperator1<long,pfLc>(pfLr_nbdf<Complex>));
