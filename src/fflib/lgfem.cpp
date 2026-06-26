@@ -1954,7 +1954,7 @@ OP_MakeDPtr<Mesh, TypeOfFE, pdfes_tefType>::Op::Op(const basicAC_F0 &args)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
-  GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);  // dHat=2 pour surface
+  GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
 }
 
 typedef OP_MakeDPtr<MeshS, TypeOfFES, pdfesS_tef> OP_MakeDPtrS;

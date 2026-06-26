@@ -30,6 +30,7 @@
 #include "array_resize.hpp"
 #include "AFunction_ext.hpp"
 #include "PlotStream.hpp"
+#include "throwassert.hpp"
 
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
@@ -2226,18 +2227,19 @@ template<class Mesh>
 long pVhd_nt(v_dfes<Mesh>** p) {
   throwassert(p && *p);
   GFESpace<Mesh>* fes = **p;
-  return fes->NbOfElements;
+  return fes ? fes->NbOfElements : 0;
 }
 template<class Mesh>
 long pVhd_ndofK(v_dfes<Mesh>** p) {
   throwassert(p && *p);
   GFESpace<Mesh>* fes = **p;
-  return (*fes)[0].NbDoF();
+  return fes ? (*fes)[0].NbDoF() : 0;
 }
 template<class Mesh>
 const Mesh* pVhd_Th(v_dfes<Mesh>** p) {
   throwassert(p && *p);
   GFESpace<Mesh>* fes = **p;
+  throwassert(fes);
   return &fes->Th;
 }
 
@@ -2263,43 +2265,6 @@ KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
   KN<long>* r = new KN<long>(f->loc2globDof);
   Add2StackOfPtr2Free(stack, r); return r;
 }
-
-/*
-//3D surface distributed
-long pVhdS_ndof(pdfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
-long pVhdS_nt(pdfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes->NbOfElements ;}
-long pVhdS_ndofK(pdfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p;   return (*fes)[0].NbDoF() ;}
-pmeshS pVhdS_Th(pdfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return &fes->Th ;}
-
-KN<double>* pVhdS_D(Stack stack, pdfesS* const& p) {
-  throwassert(p);
-  v_dfesS* f = *p;
-  FESpaceS* fes = **p;          // déclenche operator FESpaceS*() => buildDistributedDofData
-  (void)fes;
-  KN<double>* r = new KN<double>(f->Ddof);
-  Add2StackOfPtr2Free(stack, r); return r;
-}
-KN<KN<long>>* pVhdS_intersection(Stack stack, pdfesS* const& p) {
-  throwassert(p);
-  v_dfesS* f = *p; FESpaceS* fes = **p; (void)fes;
-  KN<KN<long>>* r = new KN<KN<long>>(f->dofIntersectionDof);
-  Add2StackOfPtr2Free(stack, r); return r;
-}
-KN<long>* pVhdS_loc2glob(Stack stack, pdfesS* const& p) {
-  throwassert(p);
-  v_dfesS* f = *p; FESpaceS* fes = **p; (void)fes;
-  KN<long>* r = new KN<long>(f->loc2globDof);
-  Add2StackOfPtr2Free(stack, r); return r;
-}
-*/
 
 //3D curve
 long pVhL_ndof(pfesL * p)
