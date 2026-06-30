@@ -170,10 +170,10 @@ download('parmmg','https://github.com/MmgTools/ParMmg/archive/v1.5.0.zip',
         'https://github.com/MmgTools',
         'parmmg.zip',
 	'52b82cd18108c3fdfd229ac0158ef187');
-download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.25.2.tar.gz',
+download('PETSc','https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.25.3.tar.gz',
 	'https://web.cels.anl.gov/projects/petsc/download/release-snapshots',
-	'petsc-3.25.2.tar.gz',
-	'83da8964e5a2ab02ce2261d02510ee70');
+	'petsc-3.25.3.tar.gz',
+	'c2e2d88ad5b6f7b03c9bb4a3263c9724');
 
 download('htool','https://github.com/htool-ddm/htool/archive/d7c0fa8b42c461446b92a4891dea78532eeea6b5.zip',
 		'https://github.com/htool-ddm/',
@@ -276,7 +276,7 @@ sub downloadone{
 	# check if resulting package contents are valid
 	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){
-		print "Download failed (MD5 check $md5check ) from $url of $pkg\n";
+		print "Download failed (MD5 check $md5check) from $url of $pkg\n";
                 my $url="https://www.ljll.fr/hecht/pkg/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
