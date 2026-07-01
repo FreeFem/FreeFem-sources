@@ -1,0 +1,42 @@
+load "qf11to25"
+load "Element_PkLagrange"
+
+include "getARGV.idp"
+
+real k = getARGV("-waven",10);
+real c = 1;
+real s = 0; 
+func f =exp(1i*k*(x*c+y*s));
+
+func Gxm = -1i*k*c*exp(1i*k*(x*c+y*s));
+func GxM = -Gxm;
+
+func Gym = -1i*k*s*exp(1i*k*(x*c+y*s));
+func GyM = -Gym;
+
+real lambda = 2*pi/k;
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+
+NewMacro Verfimacro(PK)
+    int npplo = 4;
+    mesh Th = square(npplo/lambda,npplo/lambda);
+    fespace Uh(Th,PK);
+    Uh <complex> u,v;
+    solve pph(u,v) =
+        int2d(Th,qft=qf25pT)(-(k^2)*u*v+Grad(u)'*Grad(v))+
+        int1d(Th, 1,2,3,4,qforder=21)( (1i*k*u)  * v )
+                +int1d(Th, 1,qforder=21)( (-(1i*k*f) - Gym) * v )
+                +int1d(Th, 2,qforder=21)( (-(1i*k*f) - GxM) * v )
+                +int1d(Th, 3,qforder=21)( (-(1i*k*f) - GyM) * v )
+                +int1d(Th, 4,qforder=21)( (-(1i*k*f) - Gxm) * v );
+    real Err = abs(sqrt( int2d(Th,qft=qf25pT)(u-f)^2));
+    Uh ur = real (u);
+    Uh VisERr = abs(real(f)-ur);
+    plot (ur,fill=1,value=1);
+    //plot (VisERr,fill=1,value=1);
+
+    cout<<"Error(relative) = "<<Err/abs(sqrt(int2d(Th,qft=qf25pT)(f)^2))<<endl;
+EndMacro
+
+Verfimacro(P6);

@@ -107,7 +107,10 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	MatrixMarket.edp \
 	plotPDF-sample.edp \
 	Stokes-P2pnc3d.edp \
-	RT0dc.edp testFE-P1nc3d.edp
+	RT0dc.edp testFE-P1nc3d.edp \
+	test_GrundmannMoller.edp \
+	test_PKLagrange.edp \
+	convergence_PkLagrange3d.edp
 
 TESTS_FFTW3 = dfft.edp dfft-3d.edp
 

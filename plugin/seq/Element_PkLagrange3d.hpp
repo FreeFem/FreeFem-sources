@@ -1,16 +1,4 @@
 #include <iostream>
-#include "ff++.hpp"
-#include "AddNewFE.h"
-#include "utils_PKLagrange.hpp"
-
-long factorial(long n) {
-  if (n <= 1) return 1;
-  long result = 1;
-  for (long i = 2; i <= n; ++i) {
-    result *= i;
-  }
-  return result;
-}
 
 vector< vector< int > > generate_barycoordinates(int Pk) {
   int ndof = (Pk + 1) * (Pk + 2) * (Pk + 3) / 6;
