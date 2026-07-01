@@ -12,7 +12,7 @@ func f = sin(pi*x)*sin(pi*y)*sin(pi*z);
 
 macro Grad(u) [dx(u),dy(u), dz(u)] // EOM
 
-int qorder = 10;
+int qorder = 9;
 
 //macro mqf()qforder=qorder//
 macro mqf()qfV=GMQuadrature3D(qorder)//
