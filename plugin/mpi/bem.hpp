@@ -497,12 +497,18 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     // source/target meshes
     const SMesh & ThU =Uh->Th; // line
     const TMesh & ThV =Vh->Th; // colunm
-    bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
- 
-    bemtool::Geometry node; bemtool::Geometry nodeX; MeshBemtool mesh; MeshBemtoolX meshX;
+    bool samemesh = ((void*)&Uh->Th == (void*)&Vh->Th);
+    bool samespace = samemesh && ((void*)Uh == (void*)Vh);
+
+    bemtool::Geometry node; bemtool::Geometry nodeX; MeshBemtool mesh; MeshBemtoolX meshV;
+    MeshBemtoolX* meshX;
     Mesh2Bemtool(ThU, node, mesh);
-    if (!samemesh && (VFBEM==1))
-        Mesh2Bemtool(ThV, nodeX, meshX);
+    if (!samemesh) {
+        Mesh2Bemtool(ThV, nodeX, meshV);
+        meshX = &meshV;
+    }
+    else
+        meshX = (MeshBemtoolX*)&mesh;
 
     vector<double> pt(3*n);
     vector<double> ps(3*m);
@@ -524,6 +530,14 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     bool SP1 = (Snbv == 1) && (Snbe == 0) && (Snbt == 0);
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
     bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
+
+    int Tnbv = Vh->TFE[0]->ndfonVertex;
+    int Tnbe = Vh->TFE[0]->ndfonEdge;
+    int Tnbt = Vh->TFE[0]->ndfonFace;
+    bool TP0 = TRdHat::d == 1 ? (Tnbv == 0) && (Tnbe == 1) && (Tnbt == 0) : (Tnbv == 0) && (Tnbe == 0) && (Tnbt == 1);
+    bool TP1 = (Tnbv == 1) && (Tnbe == 0) && (Tnbt == 0);
+    bool TP2 = (Tnbv == 1) && (Tnbe == 1) && (Tnbt == 0);
+    bool TRT0 = (TRdHat::d == 2) && (Tnbv == 0) && (Tnbe == 1) && (Tnbt == 0);
 
     if (SP2) {
         bemtool::Dof<P2> dof(mesh,true);
@@ -563,55 +577,95 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     std::shared_ptr<htool::Cluster<double>> t, s;
     s = build_clustering(m, Uh, ps, ds, comm);
 
-    if(!samemesh) {
-        if( Vh->TFE[0]->N == 1){
-            // case the target FE is scalar
-            for (int i=0; i<n; i++) {
-                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
-                    pp = ThV.vertices[i];
-                else if (Vh->MaxNbNodePerElement == 1)
-                    pp = ThV[i](pbt);
-                else {
-                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
-                    ffassert(0);
-                }
-                pt[3*i+0] = pp.x;
-                pt[3*i+1] = pp.y;
-                pt[3*i+2] = pp.z;
-            }
-        }
-        else{
-            // hack for Maxwell case to have one Hmatrix to avoid one Hmatrix by direction
-            ffassert(SRT0 && SRdHat::d == 2 && VFBEM==2);
-
-            // Dans un espace vectoriel, [P1,P1,P1] pour les targets, on a:
-            //        n correspond au nombre de dof du FEM space
-            // Or dans ce cas, on veut que n = mesh_Target.nv
-            // 
-            // ==> on n'a pas besoin de resize les points p2
-            int nnn= Vh->TFE[0]->N; // the size of the vector FESpace. For [P1,P1,P1], nnn=3;
-
-            int nDofScalar = n/nnn; // computation of the dof of one component
-
-            for (int i=0; i<nDofScalar; i++) {
-                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
-                    pp = ThV.vertices[i];
-                else if (Vh->MaxNbNodePerElement == 1)
-                    pp = ThV[i](pbt);
-                else {
-                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
-                    ffassert(0);
-                }
-
-                for(int iii=0; iii<nnn; iii++){
-                    ffassert( nnn*3*i+3*iii+2 < nnn*3*n );
-                    pt[nnn*3*i+3*iii+0] = pp.x;
-                    pt[nnn*3*i+3*iii+1] = pp.y;
-                    pt[nnn*3*i+3*iii+2] = pp.z;
+    if(!samespace) {
+        if (VFBEM==1) {  // BIO
+            if (TP2) {
+                bemtool::Dof<P2X> dof(*meshX,true);
+                for (int i=0; i<n; i++) {
+                    const std::vector<bemtool::N2>& jj = dof.ToElt(i);
+                    p = dof(jj[0][0])[jj[0][1]];
+                    pt[3*i+0] = p[0];
+                    pt[3*i+1] = p[1];
+                    pt[3*i+2] = p[2];
                 }
             }
+            else if (TRT0) {
+                bemtool::Dof<bemtool::RT0_2D> dof(*meshX);
+                for (int i=0; i<n; i++) {
+                    const std::vector<bemtool::N2>& jj = dof.ToElt(i);
+                    p = dof(jj[0][0])[jj[0][1]];
+                    pt[3*i+0] = p[0];
+                    pt[3*i+1] = p[1];
+                    pt[3*i+2] = p[2];
+                }
+            }
+            else {
+                for (int i=0; i<n; i++) {
+                    if (TP1)
+                        pp = ThV.vertices[i];
+                    else if (TP0)
+                        pp = ThV[i](pbt);
+                    else {
+                        if (mpirank == 0) std::cerr << "ff-BemTool error: only P0, P1 and P2 discretizations are available for now." << std::endl;
+                        ffassert(0);
+                    }
+                    pt[3*i+0] = pp.x;
+                    pt[3*i+1] = pp.y;
+                    pt[3*i+2] = pp.z;
+                }
+            }
+            t = build_clustering(n, Vh, pt, ds, comm);
         }
-        t = build_clustering(n, Vh, pt, ds, comm);
+        else {  // POT
+            if( Vh->TFE[0]->N == 1){
+                // case the target FE is scalar
+                for (int i=0; i<n; i++) {
+                    if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                        pp = ThV.vertices[i];
+                    else if (Vh->MaxNbNodePerElement == 1)
+                        pp = ThV[i](pbt);
+                    else {
+                        if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                        ffassert(0);
+                    }
+                    pt[3*i+0] = pp.x;
+                    pt[3*i+1] = pp.y;
+                    pt[3*i+2] = pp.z;
+                }
+            }
+            else{
+                // hack for Maxwell case to have one Hmatrix to avoid one Hmatrix by direction
+                ffassert(SRT0 && SRdHat::d == 2 && VFBEM==2);
+
+                // Dans un espace vectoriel, [P1,P1,P1] pour les targets, on a:
+                //        n correspond au nombre de dof du FEM space
+                // Or dans ce cas, on veut que n = mesh_Target.nv
+                //
+                // ==> on n'a pas besoin de resize les points p2
+                int nnn= Vh->TFE[0]->N; // the size of the vector FESpace. For [P1,P1,P1], nnn=3;
+
+                int nDofScalar = n/nnn; // computation of the dof of one component
+
+                for (int i=0; i<nDofScalar; i++) {
+                    if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                        pp = ThV.vertices[i];
+                    else if (Vh->MaxNbNodePerElement == 1)
+                        pp = ThV[i](pbt);
+                    else {
+                        if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                        ffassert(0);
+                    }
+
+                    for(int iii=0; iii<nnn; iii++){
+                        ffassert( nnn*3*i+3*iii+2 < nnn*3*n );
+                        pt[nnn*3*i+3*iii+0] = pp.x;
+                        pt[nnn*3*i+3*iii+1] = pp.y;
+                        pt[nnn*3*i+3*iii+2] = pp.z;
+                    }
+                }
+            }
+            t = build_clustering(n, Vh, pt, ds, comm);
+        }
     }
     else{
         pt=ps;
@@ -648,29 +702,62 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
 
         if (SP0) {
             bemtool::Dof<P0> dof(mesh);
-            if (samemesh)
+            if (samespace)
                 ff_BIO_Generator<R,P0,P0,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
-                bemtool::Dof<P0X> dofX(meshX);
-                ff_BIO_Generator<R,P0X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                if (TP0) {
+                    bemtool::Dof<P0X> dofX(*meshX);
+                    ff_BIO_Generator<R,P0X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP1) {
+                    bemtool::Dof<P1X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P1X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP2) {
+                    bemtool::Dof<P2X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P2X,P0,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else ffassert(0);
             }
         }
         else if (SP1) {
             bemtool::Dof<P1> dof(mesh,true);
-            if (samemesh)
+            if (samespace)
                 ff_BIO_Generator<R,P1,P1,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
-                bemtool::Dof<P1X> dofX(meshX,true);
-                ff_BIO_Generator<R,P1X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                if (TP0) {
+                    bemtool::Dof<P0X> dofX(*meshX);
+                    ff_BIO_Generator<R,P0X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP1) {
+                    bemtool::Dof<P1X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P1X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP2) {
+                    bemtool::Dof<P2X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P2X,P1,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else ffassert(0);
             }
         }
         else if (SP2) {
             bemtool::Dof<P2> dof(mesh,true);
-            if (samemesh)
+            if (samespace)
                 ff_BIO_Generator<R,P2,P2,SMesh,SMesh>(generator,Ker,dof,dof,alpha,qforder);
             else {
-                bemtool::Dof<P2X> dofX(meshX,true);
-                ff_BIO_Generator<R,P2X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                if (TP0) {
+                    bemtool::Dof<P0X> dofX(*meshX);
+                    ff_BIO_Generator<R,P0X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP1) {
+                    bemtool::Dof<P1X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P1X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else if (TP2) {
+                    bemtool::Dof<P2X> dofX(*meshX,true);
+                    ff_BIO_Generator<R,P2X,P2,TMesh,SMesh>(generator,Ker,dofX,dof,alpha,qforder);
+                }
+                else ffassert(0);
             }
         }
         else if (SRT0 && SRdHat::d == 2) {
