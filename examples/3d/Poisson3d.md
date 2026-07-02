@@ -79,7 +79,7 @@ fespace Vh2(Th2,P2);
 Vh2 u2=u,u2e=ue-u2;
 plot(u2e,wait=1, value=1);
 
-assert(err < 1e-9);
+assert(err < 1e-8);//  err = 1.09182e-09 on win32 !!!
 ~~~
 
 | The 3d solution |

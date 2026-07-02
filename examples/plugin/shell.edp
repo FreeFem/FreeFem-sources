@@ -2,6 +2,13 @@ load "shell"
 cout << "pwd = " << getcwd()<< endl;// add version 4.9.1
 Directory  c=".";
 string ttoto="/tmp/toto";
+string TMP="/tmp";
+string sep="/";
+if (onWIN32) {  // modif FH 2/07/25 
+	ttoto="C:\\Temp\toto";
+    TMP="C:\\Temp";
+	sep="\\";
+}
 while(1)
 {
 	string n=readdir(c);
@@ -16,7 +23,7 @@ cout << " FF_TOTO  " << getenv("FF_TOTO") << endl;
 string pwd=getenv("PWD");
 verbosity=3;
 cout << " FILE: " <<FILE << endl;
-cpfile(FILE,"/tmp");
+cpfile(FILE,TMP);
 cout << "basename " << basename(pwd) << endl; 
 cout << "dirname " << dirname(pwd) << endl; 
 cout << isdir(ttoto) << endl; 
@@ -26,7 +33,7 @@ if (isdir(ttoto)<0 )
 if  (mkdir(ttoto)==0)
 {
 	cout << " ls : " ;
-	Directory dtoto = "/tmp/toto";
+	Directory dtoto = TMP+sep+"toto";
 	while(1)
 	{
 		string n=readdir(dtoto);
