@@ -1187,7 +1187,7 @@ bemtool::PotKernelEnum whatTypeEnum(BemPotential *P) {
 template <class K, typename PX, typename PY, class TMesh, class SMesh,
     typename std::enable_if<!std::is_same<TMesh, SMesh>::value, int>::type = 0>
 void ff_BIO_Generator(htool::VirtualGenerator<K>*&, BemKernel *, bemtool::Dof<PX>&, bemtool::Dof<PY>&, Complex, int) {
-    cerr << "Cannot define a BIO with different types of source and target dofs" << endl;
+    cerr << "Cannot define a BIO with different types of source and target meshes" << endl;
     assert(0);
 }
 

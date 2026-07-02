@@ -503,7 +503,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     bemtool::Geometry node; bemtool::Geometry nodeX; MeshBemtool mesh; MeshBemtoolX meshV;
     MeshBemtoolX* meshX;
     Mesh2Bemtool(ThU, node, mesh);
-    if (!samemesh) {
+    if (!samemesh && (VFBEM==1))
         Mesh2Bemtool(ThV, nodeX, meshV);
         meshX = &meshV;
     }
