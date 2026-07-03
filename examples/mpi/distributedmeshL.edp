@@ -1,6 +1,7 @@
 // NBPROC 2
 // PARAM -wg -ns -ffddm_overlap 1
-macro Pk()P2//EOM
+load "Element_P3"
+macro Pk()P3//EOM
 include "ffddm.idp"
 load "PETSc"
 
