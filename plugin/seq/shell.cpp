@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <strings.h>
+#include <vector>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -142,12 +143,18 @@ inline AnyType CloseDir(Stack, const AnyType &x) {
 
 #ifdef _WIN32
 string *ffgetenv(Stack s, string *const &k) {
-  const int LEN = 4096;
-  char envv[LEN];
+  DWORD len = GetEnvironmentVariable(k->c_str( ), nullptr, 0);
 
-  GetEnvironmentVariable(k->c_str( ), envv, LEN);
+  if (len == 0) {
+    return Add2StackOfPtr2Free(s, new string(""));
+  }
 
-  return Add2StackOfPtr2Free(s, new string(envv));
+  std::vector< char > envv(len);
+  if (GetEnvironmentVariable(k->c_str( ), envv.data( ), len) == 0) {
+    return Add2StackOfPtr2Free(s, new string(""));
+  }
+
+  return Add2StackOfPtr2Free(s, new string(envv.data( )));
 }
 
 long ffsetenv(string *const &k, string *const &v) {
@@ -196,8 +203,8 @@ long ffunsetenv(string *const &k) {
 
 string *ff_getcwd(Stack s) {
     char * buf  = getcwd(0,0);
-    string * cwd= new string(buf);
-    free(buf);
+    string * cwd= new string(buf ? buf : "");
+    if (buf) free(buf);
   return Add2StackOfPtr2Free(s, cwd);
 }
 
