@@ -49,7 +49,7 @@ int * FillDataLagrange(int k) {
     */
     int ndof = (k + 1) * (k + 2) * 0.5;
     //Data.resize(5 * ndof + 3, 0);
-    int *Data = new int [5 * ndof + 3];
+    int *Data = new int [5 * ndof + 3]();
 
     // First row(the support number  of the node of the df)
     // Data[0]=0;

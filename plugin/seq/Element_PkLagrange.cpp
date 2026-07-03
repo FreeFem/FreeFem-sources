@@ -516,11 +516,9 @@ static TypeOfFE_PkLagrange PKLagrange5(5);
 static TypeOfFE_PkLagrange PKLagrange6(6);
 static TypeOfFE_PkLagrange PKLagrange7(7);
 static TypeOfFE_PkLagrange PKLagrange8(8);
-/*
 static TypeOfFE_PkLagrange PKLagrange9(9);
 static TypeOfFE_PkLagrange PKLagrange10(10);
 static TypeOfFE_PkLagrange PKLagrange11(11);
-*/
 
 #include "Element_PkL.hpp"
   // if you need to add a newFE (higher order $ORDER for instance)
@@ -572,14 +570,12 @@ static void init() {
     static ListOfTFE FE_PK7("P7", &PKLagrange7);
     AddNewFE("P8", &PKLagrange8);
     static ListOfTFE FE_PK8("P8", &PKLagrange8);
-    /*
     AddNewFE("P9", &PKLagrange9);
     static ListOfTFE FE_PK9("P9", &PKLagrange9);
     AddNewFE("P10", &PKLagrange10);
     static ListOfTFE FE_PK10("P10", &PKLagrange10);
     AddNewFE("P11", &PKLagrange11);
     static ListOfTFE FE_PK11("P11", &PKLagrange11);
-    */
 
     /*
     AddNewFE3("P33d",  &Elm_PKL3_3d,  "P3");
@@ -589,9 +585,9 @@ static void init() {
     AddNewFE3("P63d",  &Elm_PKL6_3d,  "P6");
     AddNewFE3("P73d",  &Elm_PKL7_3d,  "P7");
     AddNewFE3("P83d",  &Elm_PKL8_3d,  "P8");
-    AddNewFE3("P93d",  &Elm_PKL9_3d);
-    AddNewFE3("P103d", &Elm_PKL10_3d);
-    AddNewFE3("P113d", &Elm_PKL11_3d);
+    AddNewFE3("P93d",  &Elm_PKL9_3d,  "P9");
+    AddNewFE3("P103d", &Elm_PKL10_3d, "P10");
+    AddNewFE3("P113d", &Elm_PKL11_3d, "P11");
 }
 
 } // namespace Fem2D
