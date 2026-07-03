@@ -150,11 +150,12 @@ string *ffgetenv(Stack s, string *const &k) {
   }
 
   std::vector< char > envv(len);
-  if (GetEnvironmentVariable(k->c_str( ), envv.data( ), len) == 0) {
+  DWORD copied = GetEnvironmentVariable(k->c_str( ), envv.data( ), len);
+  if (copied == 0 || copied >= len) {
     return Add2StackOfPtr2Free(s, new string(""));
   }
 
-  return Add2StackOfPtr2Free(s, new string(envv.data( )));
+  return Add2StackOfPtr2Free(s, new string(envv.data( ), copied));
 }
 
 long ffsetenv(string *const &k, string *const &v) {
