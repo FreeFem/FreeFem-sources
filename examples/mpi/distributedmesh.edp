@@ -23,13 +23,13 @@ if (mpirank == 0)
   cout << "ndof local (rang 0) = " << Udh.ndof << endl;
 
 
-Mat A(Udh.ndof, Udh.intersection, D);
+//Mat A(Udh.ndof, Udh.intersection, D);
 func f = 1.0;
 varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
                + int2d(ThLocal)(f*v)
                + on(1, 2, 3, 4, u = 0);
 
-A = vPb(Udh, Udh);                 // remplit les valeurs locales dans la structure distribuee
+Mat A = vPb(Udh, Udh);                 // remplit les valeurs locales dans la structure distribuee
 real[int] rhs = vPb(0, Uh);        // second membre, sur le fespace local standard
 
 set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-6 -ksp_converged_reason -ksp_monitor");
