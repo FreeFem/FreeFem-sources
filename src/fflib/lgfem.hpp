@@ -387,7 +387,7 @@ class v_fesS : public generic_v_fes {
   int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
-// 3D surface distribué
+// FE space distribué
 template<class M> class DistributedMesh;
 template<class Mesh> class v_dfes : public generic_v_fes {
  public:
