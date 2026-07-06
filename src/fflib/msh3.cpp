@@ -9820,7 +9820,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 9;
+	static const int n_name_param = 10;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9864,7 +9864,8 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"precismesh", &typeid(double)},
 {"orientation", &typeid(long)},
 {"ridgeangle", &typeid(double)},
-{"overlap", &typeid(long)}
+{"overlap", &typeid(long)},
+{"partition", &typeid(KN_< long >)}
 };
 
 inline long overlapLayers(long s) {
@@ -9972,10 +9973,18 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   for (int i=0; i<nbt; i++)
     split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
 */
-  KN<idx_t> epart(nbt, 0);
-  if (mpisize > 1) {
+  KN<int> globalPartition(nbt);
+
+  if (nargs[9]) {
+    KN_<long> userpart = GetAny< KN_< long > >((*nargs[9])(stack));
+    if (userpart.N() != nbt){
+      ExecError("distribute: partition[] requires Th.nt values");
+    }
+    for (int k = 0; k < nbt; ++k) globalPartition[k] = (int)userpart[k];
+  }
+  else if (mpisize > 1) {
     idx_t nt = nbt, nv = nbv;
-    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv);
+    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv), epart(nt, 0);
     for (idx_t k = 0, i = 0; k < nt; ++k) {
       eptr[k] = i;
       for (idx_t j = 0; j < nve; j++)
@@ -9985,11 +9994,10 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     idx_t nparts = mpisize, edgecut, ncommon = 1;
     METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
                        (idx_t *)epart, (idx_t *)npart);
+    for (int k = 0; k < nbt; ++k) globalPartition[k] = (int)epart[k];
   }
-
-  KN<int> globalPartition(nbt);
-  for (int k = 0; k<nbt; ++k){
-    globalPartition[k] = (int)epart[k];
+  else {
+    globalPartition = 0;
   }
 
   KN<double> supp(nbt, 0.0);
