@@ -388,6 +388,43 @@ namespace PETSc {
   }
   template<class fes1, class fes2, typename std::enable_if< !std::is_same< fes1, fes2 >::value >::type* = nullptr >
   void assert_ptr(fes1*, fes2*) { }
+
+  template<bool C, class HpddmType>
+  void buildDistributedShell(
+    DistributedCSR<HpddmType>*, int, KN<KN<long>>*,
+    KN<typename std::conditional<std::is_same<HpddmType,HpSchwarz<PetscScalar>>::value,
+                                 double, long>::type>*,
+    MatriceMorse<upscaled_type<PetscScalar>>*, int, PetscInt, MPI_Comm*,
+    Matrice_Creuse<double>*, int, PetscBool, bool,
+    Matrice_Creuse<upscaled_type<PetscScalar>>*);
+
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
+    if (B._A) return;
+    v_dfes<MMesh>* f = *pUh;
+    buildDistributedShell< false, HpSchwarz<PetscScalar> >(
+      &B,
+      1,
+      &f->dofIntersectionDof,
+      &f->Ddof,
+      nullptr,
+      ndof,
+      (PetscInt) f->N,
+      ds.commworld ? static_cast<MPI_Comm*>(ds.commworld) : nullptr,
+      nullptr,
+      0,
+      ds.sym ? PETSC_TRUE : PETSC_FALSE,
+      false,
+      nullptr
+    );
+  }
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh>>::value>::type
+  buildShellIfNeeded(Dmat &B, typename fes1::pfes*, int, Data_Sparse_Solver&) {}
+
   template<class K, class MMesh, class fes1, class fes2>
   AnyType varfToMat<K, MMesh, fes1, fes2>::Op::operator()(Stack stack) const {
     typedef typename fes1::pfes pfes1;
@@ -413,6 +450,9 @@ namespace PETSc {
     Dmat& B(*GetAny<Dmat*>((*a)(stack)));
     const FESpace1& Uh = *PUh;
     const FESpace2& Vh = *PVh;
+
+    buildShellIfNeeded<MMesh, fes1>(B, pUh, Uh.NbOfDF, ds);
+
     bool same = isSameMesh(b->largs, PUh ? &Uh.Th : nullptr, PVh ? &Vh.Th : nullptr, stack);
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
     int VFBEM = typeVFBEM(b->largs, stack);
@@ -1715,6 +1755,84 @@ namespace PETSc {
     {"symmetric", &typeid(bool)},
     {"restriction", &typeid(Matrice_Creuse< double >*)},
     {"level", &typeid(long)}};
+
+  template<bool C, class HpddmType>
+  void buildDistributedShell(
+    DistributedCSR<HpddmType>* ptA,
+    int c,                                                  // discriminant 
+    KN<KN<long>>* ptR,                                      // intersection   
+    KN<typename std::conditional<std::is_same<HpddmType,HpSchwarz<PetscScalar>>::value,
+                                 double, long>::type>* ptD, // partition unité D 
+    MatriceMorse<upscaled_type<PetscScalar>>* mA,           
+    int dof,                                                // ndof 
+    PetscInt bs,
+    MPI_Comm* comm,
+    Matrice_Creuse<double>* pList,                          // = nargs[4] "restriction"
+    int level,                                              // = nargs[5] "level"
+    PetscBool symmetric,                                    // = nargs[3] "symmetric"
+    bool clean,                                             // = nargs[2] "clean"
+    Matrice_Creuse<upscaled_type<PetscScalar>>* pK
+  ){
+    KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                   double, long >::type >* empty = nullptr;
+            ptA->_A = new HpddmType;
+        if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
+          HPDDM::MatrixCSR< PetscScalar >* dA;
+          if (mA)
+            dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+          else
+            dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
+          HPDDM::MatrixCSR< void >* dL = nullptr;
+          KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
+                                  ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
+                                                  1 + (level + 1) * ptR->operator[](0).n - 1))
+                                  : KN< KN< long > >( ));
+          if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
+              (mA || (c != 0 && c != 2))) {
+            int n = 0;
+            ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2]( );
+            ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >( );
+            ptA->_exchange[0]->initialize(
+              dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )),
+              sub, comm);
+            ptA->_exchange[0]->setBuffer( );
+            if (pList->A) {
+              MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
+              mList->CSR( );
+              ffassert(mList->n == mList->nnz);
+              ffassert(mList->m == (mA ? mA->n : dof));
+              n = mList->n;
+              dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
+              ptA->_D = new KN<PetscReal>(n);
+              for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
+            } else {
+              dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
+              empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                       double, long >::type >(0);
+            }
+          }
+          ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
+            dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )), sub,
+            comm, dL);
+          delete dL;
+          ptA->_num = new PetscInt[ptA->_A->getMatrix( )->HPDDM_n];
+          if (!C && (c == 2 || c == 3)) {
+              long long global;
+              ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, global);
+          }
+          initPETScStructure<C>(ptA, bs, symmetric, empty ? empty : ptD);
+          delete empty;
+          if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
+            mA->p = ptA->_A->getMatrix( )->HPDDM_ia;
+          }
+          if (clean) {
+            if (ptR) ptR->resize(0);
+            if (c == 0 || c == 2) pK->destroy( );
+          }
+        }
+  }
+  
+
   template< class HpddmType, bool C >
   AnyType initCSR< HpddmType, C >::E_initCSR::operator( )(Stack stack) const {
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
@@ -1812,7 +1930,7 @@ namespace PETSc {
               dA.HPDDM_ja[i] -= cbegin;
         }
       }
-      else {
+      else {/*
         ptA->_A = new HpddmType;
         if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
           HPDDM::MatrixCSR< PetscScalar >* dA;
@@ -1871,7 +1989,15 @@ namespace PETSc {
             if (ptR) ptR->resize(0);
             if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
           }
-        }
+        }*/
+        buildDistributedShell<C, HpddmType>(
+        ptA, c, ptR, ptD, mA, dof, bs, comm,
+        nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : nullptr,       
+        nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0,                         
+        nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE,
+        nargs[2] && GetAny< bool >((*nargs[2])(stack)),
+        (c == 0 || c == 2)
+          ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
       }
     }
     return ptA;
@@ -6877,6 +7003,11 @@ static void Init_PETSc( ) {
   TheOperators->Add(
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
   TheOperators->Add("<-", new PETSc::OpMatrixtoBilinearFormVGPETSc< HpSchwarz< PetscScalar> >(1));
+  TheOperators->Add(
+    "<-", new PETSc::varfToMat< PetscScalar, Mesh3, v_dfes3, v_dfes3>,
+    new PETSc::varfToMat< PetscScalar, MeshS, v_dfesS, v_dfesS>,
+    new PETSc::varfToMat< PetscScalar, MeshL, v_dfesL, v_dfesL>
+  );
   TheOperators->Add(
     "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
          new PETSc::varfToMat< PetscScalar, Mesh , v_fes , v_fes  >,
