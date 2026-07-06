@@ -1,0 +1,85 @@
+// NBPROC 4
+// PARAM -wg -ns -ffddm_overlap 1
+// Test de distribute(..., partition = part) : partition fournie par l'utilisateur
+load "Element_P3"
+macro Pk()P3//EOM
+include "ffddm.idp"
+load "PETSc"
+
+meshL Th = segment(80);
+
+// ---------------------------------------------------------------------------
+// 1) Partition DETERMINISTE, identique sur tous les rangs
+//    (chaque rang detient le maillage global replique => meme calcul partout).
+//    Bloc contigu : element k -> rang  min(mpisize-1, k*mpisize/Th.nt)
+// ---------------------------------------------------------------------------
+int[int] part(Th.nt);
+for (int k = 0; k < Th.nt; ++k)
+  part[k] = min(mpisize - 1, k * mpisize / Th.nt);
+
+// Pour tester scotch / metis / parmetis a la place, remplacer le bloc ci-dessus
+// par (la partition doit etre IDENTIQUE sur tous les rangs) :
+//   load "scotch"   scotch(part, Th, mpisize);
+//   load "metis"    metisdual(part, Th, mpisize);
+//   load "parmetis" parmetis(part, Th, mpisize);   // deja distribue + Allreduce
+
+// ---------------------------------------------------------------------------
+// 2) La partition est-elle HONOREE ?  (overlap = 0)
+//    local.nt du rang r == nombre d'elements part[k]==r ; somme == Th.nt
+// ---------------------------------------------------------------------------
+int expected = 0;
+for (int k = 0; k < Th.nt; ++k) if (part[k] == mpirank) expected++;
+
+DmeshL DTh0 = distribute(Th, overlap = 0, partition = part);
+meshL L0 = DTh0.local;
+
+real okCountL = (L0.nt == expected) ? 1 : 0, okCountG;
+mpiAllReduce(okCountL, okCountG, mpiCommWorld, mpiMIN);          // 1 partout => OK
+
+real ntlocR = L0.nt, ntsumR;
+mpiAllReduce(ntlocR, ntsumR, mpiCommWorld, mpiSUM);
+int okCover = (ntsumR == Th.nt) ? 1 : 0;                        // recouvrement disjoint
+
+// ---------------------------------------------------------------------------
+// 3) Bout-en-bout : resolution distribuee AVEC la partition fournie,
+//    comparee a la resolution globale de reference (overlap = ffddmoverlap)
+// ---------------------------------------------------------------------------
+DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partition = part);
+meshL ThLocal = DTh.local;
+
+fespace Uh(ThLocal, Pk);
+fespace Udh(DTh, Pk);
+fespace UhGlob(Th, Pk);
+
+real[int] D   = Udh.D;
+int[int]  l2g = Udh.loc2glob;
+
+Mat A(Udh.ndof, Udh.intersection, D);
+func f = 1.0;
+varf vPb(u, v) = int1d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+               + int1d(ThLocal)(f*v)
+               + on(1, 2, u = 0);
+A = vPb(Udh, Udh);
+real[int] rhs = vPb(0, Uh);
+set(A, sparams = "-ksp_type gmres -pc_type asm -ksp_rtol 1e-8 -ksp_converged_reason");
+real[int] u = A^-1 * rhs;
+
+varf vPbGlob(u, v) = int1d(Th)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+                   + int1d(Th)(f*v) + on(1, 2, u = 0);
+matrix AGlob      = vPbGlob(UhGlob, UhGlob, solver = UMFPACK);
+real[int] rhsGlob = vPbGlob(0, UhGlob);
+real[int] uglob   = AGlob^-1 * rhsGlob;
+
+real errSol = 0;
+for (int i = 0; i < u.n; ++i) errSol = max(errSol, abs(u[i] - uglob[l2g[i]]));
+real eSol;
+mpiAllReduce(errSol, eSol, mpiCommWorld, mpiMAX);
+
+// ---------------------------------------------------------------------------
+if (mpirank == 0) {
+  cout << "==== TEST partition utilisateur (np=" << mpisize << ") ====" << endl;
+  cout << " partition honoree (local.nt == attendu) : " << (okCountG == 1 ? "OK" : "FAIL") << endl;
+  cout << " couverture disjointe (somme == Th.nt)    : " << (okCover  == 1 ? "OK" : "FAIL") << endl;
+  cout << " solution distribuee vs globale (errSol)  : " << eSol << endl;
+  cout << ((okCountG == 1 && okCover == 1 && eSol < 1e-5) ? " => PASS" : " => FAIL") << endl;
+}
