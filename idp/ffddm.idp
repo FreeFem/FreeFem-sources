@@ -42,7 +42,7 @@ int pr#bCM = 0;
 
 string pr#corr = "none";
 
-matrix<pr#prfe#K> pr#E;
+pr#Tmatrix<pr#prfe#K> pr#E;
 pr#prfe#K[int,int] pr#E0(1,1);
 matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
 real pr#regularizeE = 0;

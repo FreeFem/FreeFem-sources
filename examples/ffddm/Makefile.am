@@ -48,7 +48,7 @@ TESTS_METIS_HPDDM = Maxwell_Cobracavity.edp
 
 TESTS_BEM_HPDDM = Helmholtz_Cobracavity_BEM.edp Helmholtz_circle_BEM.edp Helmholtz-2d-FEM-BEM-coupling.edp Helmholtz-2d-interfaceBCs-comp.edp
 
-TESTS_PETSC_HPDDM = Helmholtz-2d-all.edp
+TESTS_PETSC_HPDDM = Helmholtz-2d-all.edp Helmholtz_circle_BEM_geneo.edp
 
 if MPI
 if HPDDM

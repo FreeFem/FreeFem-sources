@@ -8,12 +8,8 @@ load "bem"
 
 include "getARGV.idp"
 
-include "cobrameshcavity.idp"
-
 macro dimension 3L//
-
 include "ffddm.idp"
-load "bem"
 
 complex k = 10;
 
@@ -47,8 +43,7 @@ varf varfName(u,v) =
 
 ffddmsetupOperatorBem(H, H, Varf)
 
-if (mpirank == 0)
-  cout << HAglobal.infos << endl;
+if (mpirank == 0) cout << HAglobal.infos << endl;
 display(HAglobal);
 
 ffddmsetupPrecond(H, Varf)
@@ -97,4 +92,3 @@ v[] += vinc[];
 UhOut vr = abs(v);
 
 plot(vr, dim=2, fill=1, value=1, nbiso=20);
-
