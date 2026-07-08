@@ -468,7 +468,8 @@ void TypeOfFE_PKLagrange_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3:
     }
 
     if (whatd & (Fop_D1 | Fop_D2)) {
-      R3 Dld[4], Df[ndof];
+      R3 Dld[4];
+      vector<R3> Df(ndof);
       K.Gradlambda(Dld);
       Dld[0] *= R(kp);
       Dld[1] *= R(kp);

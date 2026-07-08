@@ -19,7 +19,7 @@ cout.precision(20);
 cout << "Result 1D:" << integral1D << endl;
 cout.precision(20);
 cout << "Error 1D:" << abs(integral1D - 1. / (kk + 1)) << endl;
-cout << "kk= " << kk << " |intergral 1D=" << integral1D << " |Exact 1D=" << 1. / (kk + 1) << endl;
+cout << "kk= " << kk << " |integral 1D=" << integral1D << " |Exact 1D=" << 1. / (kk + 1) << endl;
 
 cout << "--------------------2D--------------------\n";
 mesh Th2D = square(10,10);
@@ -31,7 +31,7 @@ cout.precision(20);
 cout << "Result 2D: " << Val2Dex << endl;
 cout.precision(20);
 cout << "Error: 2D: " << abs(Val2Dex - Val2Dapp) << endl;
-cout << "kk= " << kk << " |intergral 2D= " << Val2Dapp << " |Exact 2D =" << Val2Dex << endl;
+cout << "kk= " << kk << " |integral 2D= " << Val2Dapp << " |Exact 2D =" << Val2Dex << endl;
 
 cout << "--------------------3D--------------------\n";
 func f3D = x ^ kk + y ^ kk + z ^ kk;
@@ -42,4 +42,4 @@ cout.precision(20);
 cout << "Result 3D: " << Val3Dex << endl;
 cout.precision(20);
 cout << "Error: 3D: " << abs(Val3Dex - Val3Dapp) << endl;
-cout << "kk= " << kk << " |intergral 3D= " << Val3Dapp << " |Exact 3D =" << Val3Dex << endl;
+cout << "kk= " << kk << " |integral 3D= " << Val3Dapp << " |Exact 3D =" << Val3Dex << endl;
