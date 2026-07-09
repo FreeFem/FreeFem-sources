@@ -2003,6 +2003,16 @@ else
     AC_MSG_NOTICE([ -- NO UMFPACK (ff_wget = $ff_wget)])
 fi
 
+if test "$ff_scotch_ok" = yes; then
+  AC_SUBST(SCOTCHMETISLIBS, "-lscotchmetisv5 $ff_SCOTCH_LIB") 
+  AC_SUBST(SCOTCH_CORE_CPPFLAGS, "-DFF_WITH_SCOTCHMETIS")
+else
+  AC_SUBST(SCOTCHMETISLIBS, "")
+  AC_SUBST(SCOTCH_CORE_CPPFLAGS, "")
+fi
+
+
+
 AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 
 # If times() and sysconf() are not here, UMFPACK should know

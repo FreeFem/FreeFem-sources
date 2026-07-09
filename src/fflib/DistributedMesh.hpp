@@ -1,5 +1,10 @@
 #include <vector>
 #include "RNM.hpp"
+#include <string>
+#ifndef FF_PCOMMWORLD_TYPEDEF
+#define FF_PCOMMWORLD_TYPEDEF
+typedef void* pcommworld;
+#endif
 
 template <class Mesh>
 class DistributedMesh : public RefCounter {
@@ -36,3 +41,7 @@ KN<int> keptGlobalElements(const Mesh& Th, const KN<int>& globalPartition, long 
 // Sous maillage d'intersections
 template<class Mesh>
 Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o);
+
+// Partition globale
+template<class Mesh>
+void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr);
