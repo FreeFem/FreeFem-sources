@@ -1,0 +1,201 @@
+// NBPROC 4
+// PARAM -wg -ns -ffddm_overlap 1
+
+// =====================================================================
+//  Test multi-configurations de distribute(..., partitioner=...)
+//  metis / scotch / partition-utilisateur, sur meshL (1D), meshS (surface)
+//  et mesh3 (3D).
+//
+//  Lancer :
+//    ff-mpirun -np 2 test_distribute_multi.edp -ns
+//    ff-mpirun -np 4 test_distribute_multi.edp -ns
+//  (relancer -np 4 plusieurs fois => resultats stables = determinisme OK)
+//
+//  IMPORTANT : ne PAS inclure ffddm.idp — il definit une macro 'partitioner'
+//  qui entrerait en collision avec l'argument nomme partitioner=.
+// =====================================================================
+load "Element_P3"
+load "PETSc"
+
+macro Pk()P3//EOM
+
+int npass = 0, ntot = 0;
+string kspp = "-ksp_type gmres -pc_type asm -ksp_rtol 1e-8";
+
+// -------- validation courbe/1D (meshL) --------
+macro CHECKL(DTh, Th, tag) {
+  meshL ThLocal = DTh.local;
+  fespace Uh(ThLocal, Pk);
+  fespace Udh(DTh, Pk);
+  fespace UhGlob(Th, Pk);
+  real[int] D = Udh.D;
+  int[int]  l2g = Udh.loc2glob;
+  Mat A(Udh.ndof, Udh.intersection, D);
+  func f = 1.0;
+  varf vPb(u, v) = int1d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
+                 + int1d(ThLocal)(f*v) + on(1, 2, u = 0);
+  A = vPb(Udh, Udh);
+  real[int] rhs = vPb(0, Uh);
+  set(A, sparams = kspp);
+  real[int] uu = A^-1 * rhs;
+  func fa = x + 2*y + 3*z + x*y;
+  UhGlob gg = fa;  Uh gl = fa;
+  real eBij = 0;
+  for (int i = 0; i < gl.n; ++i) eBij = max(eBij, abs(gl[][i] - gg[][l2g[i]]));
+  real[int] acc(UhGlob.ndof); acc = 0;
+  for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
+  real[int] accG(UhGlob.ndof);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  real ePoU = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
+  varf vG(u, v) = int1d(Th)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + int1d(Th)(f*v) + on(1,2,u=0);
+  matrix AG = vG(UhGlob, UhGlob, solver = UMFPACK);
+  real[int] rG = vG(0, UhGlob);
+  real[int] ug = AG^-1 * rG;
+  real eSol = 0;
+  for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
+  real b, p, s;
+  mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
+  mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+// -------- validation volume/3D (mesh3) --------
+macro CHECK3(DTh, Th, tag) {
+  mesh3 ThLocal = DTh.local;
+  fespace Uh(ThLocal, P1);
+  fespace Udh(DTh, P1);
+  fespace UhGlob(Th, P1);
+  real[int] D = Udh.D;
+  int[int]  l2g = Udh.loc2glob;
+  Mat A(Udh.ndof, Udh.intersection, D);
+  func f = 1.0;
+  varf vPb(u, v) = int3d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
+                 + int3d(ThLocal)(f*v) + on(1,2,3,4,5,6, u = 0);
+  A = vPb(Udh, Udh);
+  real[int] rhs = vPb(0, Uh);
+  set(A, sparams = kspp);
+  real[int] uu = A^-1 * rhs;
+  func fa = x + 2*y + 3*z + x*y;
+  UhGlob gg = fa;  Uh gl = fa;
+  real eBij = 0;
+  for (int i = 0; i < gl.n; ++i) eBij = max(eBij, abs(gl[][i] - gg[][l2g[i]]));
+  real[int] acc(UhGlob.ndof); acc = 0;
+  for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
+  real[int] accG(UhGlob.ndof);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  real ePoU = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
+  varf vG(u, v) = int3d(Th)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + int3d(Th)(f*v) + on(1,2,3,4,5,6,u=0);
+  matrix AG = vG(UhGlob, UhGlob, solver = UMFPACK);
+  real[int] rG = vG(0, UhGlob);
+  real[int] ug = AG^-1 * rG;
+  real eSol = 0;
+  for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
+  real b, p, s;
+  mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
+  mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+// -------- validation surface/2D-dans-3D (meshS) --------
+macro CHECKS(DTh, Th, tag) {
+  meshS ThLocal = DTh.local;
+  fespace Uh(ThLocal, P1);
+  fespace Udh(DTh, P1);
+  fespace UhGlob(Th, P1);
+  real[int] D = Udh.D;
+  int[int]  l2g = Udh.loc2glob;
+  Mat A(Udh.ndof, Udh.intersection, D);
+  func f = 1.0;
+  varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
+                 + int2d(ThLocal)(f*v) + on(1,2,3,4, u = 0);
+  A = vPb(Udh, Udh);
+  real[int] rhs = vPb(0, Uh);
+  set(A, sparams = kspp);
+  real[int] uu = A^-1 * rhs;
+  func fa = x + 2*y + 3*z + x*y;
+  UhGlob gg = fa;  Uh gl = fa;
+  real eBij = 0;
+  for (int i = 0; i < gl.n; ++i) eBij = max(eBij, abs(gl[][i] - gg[][l2g[i]]));
+  real[int] acc(UhGlob.ndof); acc = 0;
+  for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
+  real[int] accG(UhGlob.ndof);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  real ePoU = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
+  varf vG(u, v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + int2d(Th)(f*v) + on(1,2,3,4,u=0);
+  matrix AG = vG(UhGlob, UhGlob, solver = UMFPACK);
+  real[int] rG = vG(0, UhGlob);
+  real[int] ug = AG^-1 * rG;
+  real eSol = 0;
+  for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
+  real b, p, s;
+  mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
+  mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+if (mpirank == 0)
+  cout << "===== distribute() multi-config  (np=" << mpisize << ") =====" << endl;
+
+// ---------- meshL : metis vs scotch ----------
+{ meshL Th = segment(80);
+  DmeshL DTh = distribute(Th, overlap = 1, partitioner = "metis");
+  CHECKL(DTh, Th, "meshL / metis") }
+
+{ meshL Th = segment(80);
+  DmeshL DTh = distribute(Th, overlap = 1, partitioner = "scotch");
+  CHECKL(DTh, Th, "meshL / scotch") }
+
+// ---------- meshL : partition utilisateur (decoupage contigu) ----------
+{ meshL Th = segment(80);
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  DmeshL DTh = distribute(Th, overlap = 1, partition = part);
+  CHECKL(DTh, Th, "meshL / partition=user") }
+
+// ---------- mesh3 : metis vs scotch ----------
+{ mesh3 Th = cube(8, 8, 8);
+  Dmesh3 DTh = distribute(Th, overlap = 1, partitioner = "metis");
+  CHECK3(DTh, Th, "mesh3 / metis") }
+
+{ mesh3 Th = cube(8, 8, 8);
+  Dmesh3 DTh = distribute(Th, overlap = 1, partitioner = "scotch");
+  CHECK3(DTh, Th, "mesh3 / scotch") }
+
+// ---------- meshS : metis vs scotch ----------
+{ meshS Th = square3(16, 16);
+  DmeshS DTh = distribute(Th, overlap = 1, partitioner = "metis");
+  CHECKS(DTh, Th, "meshS / metis") }
+
+{ meshS Th = square3(16, 16);
+  DmeshS DTh = distribute(Th, overlap = 1, partitioner = "scotch");
+  CHECKS(DTh, Th, "meshS / scotch") }
+
+// ---------- meshS : partition utilisateur (decoupage contigu) ----------
+{ meshS Th = square3(16, 16);
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  DmeshS DTh = distribute(Th, overlap = 1, partition = part);
+  CHECKS(DTh, Th, "meshS / partition=user") }
+
+if (mpirank == 0) {
+  cout << "===== BILAN : " << npass << " / " << ntot << " PASS =====" << endl;
+  cout << (npass == ntot ? "  >>> ALL PASS" : "  >>> DES ECHECS") << endl;
+}

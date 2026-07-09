@@ -42,14 +42,15 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../lglib/mymain.cpp \
 	../lglib/lg.tab.cpp \
 	/compositeFESpace.cpp \
+	/distributeMesh.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
-LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@
+LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCHMETISLIBS@
 
 ff_bem_include = @HTOOL_INCLUDE_DIR@ -I$(srcdir)/../../3rdparty/include/BemTool/ -I$(srcdir)/../../3rdparty/boost/include -I../../plugin/mpi
 
 AM_CXXFLAGS = -DPARALLELE -DHAVE_ZLIB
-AM_CPPFLAGS = -DPARALLELE -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib -I$(srcdir)/../bamglib/ @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) $(ff_bem_include)
+AM_CPPFLAGS = -DPARALLELE -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib -I$(srcdir)/../bamglib/ @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) $(ff_bem_include) $(SCOTCH_CORE_CPPFLAGS)
 ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x ff-mpirun
@@ -62,4 +63,7 @@ ffapi.cpp: ../fflib/ffapi.cpp
 	cp $^ .
 
 compositeFESpace.cpp: ../fflib/compositeFESpace.cpp
+	cp $^ .
+
+distributeMesh.cpp: ../fflib/distributeMesh.cpp
 	cp $^ .

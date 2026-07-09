@@ -60,7 +60,6 @@ using namespace std;
 #include "splitsimplex.hpp"    // [[file:../src/femlib/splitsimplex.hpp]]
 #include "renumb.hpp"
 #include <cmath>
-#include "metis.h"
 
 namespace std
 {
@@ -9820,7 +9819,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 10;
+	static const int n_name_param = 12;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9865,7 +9864,9 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"orientation", &typeid(long)},
 {"ridgeangle", &typeid(double)},
 {"overlap", &typeid(long)},
-{"partition", &typeid(KN_< long >)}
+{"partition", &typeid(KN_< long >)},
+{"partitioner", &typeid(string*)},
+{"comm", &typeid(pcommworld)}
 };
 
 inline long overlapLayers(long s) {
@@ -9973,32 +9974,24 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   for (int i=0; i<nbt; i++)
     split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
 */
+
   KN<int> globalPartition(nbt);
 
+  // User partition
   if (nargs[9]) {
-    KN_<long> userpart = GetAny< KN_< long > >((*nargs[9])(stack));
-    if (userpart.N() != nbt){
+    KN_<long> userpart = GetAny< KN_<long> >((*nargs[9])(stack));
+    if (userpart.N()!=nbt){
       ExecError("distribute: partition[] requires Th.nt values");
     }
     for (int k = 0; k < nbt; ++k) globalPartition[k] = (int)userpart[k];
   }
-  else if (mpisize > 1) {
-    idx_t nt = nbt, nv = nbv;
-    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv), epart(nt, 0);
-    for (idx_t k = 0, i = 0; k < nt; ++k) {
-      eptr[k] = i;
-      for (idx_t j = 0; j < nve; j++)
-        elmnts[i++] = Th(k, j);
-      eptr[k + 1] = i;
-    }
-    idx_t nparts = mpisize, edgecut, ncommon = 1;
-    METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0, &edgecut,
-                       (idx_t *)epart, (idx_t *)npart);
-    for (int k = 0; k < nbt; ++k) globalPartition[k] = (int)epart[k];
-  }
   else {
-    globalPartition = 0;
+    string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
+    std::string method = ppart ? *ppart : "metis";
+    pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
+    computeGlobalPartition(Th, globalPartition, method, comm); 
   }
+
 
   KN<double> supp(nbt, 0.0);
   for (int k = 0; k<nbt;++k){
@@ -10008,26 +10001,30 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   
   AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
 
-  KN<int> isNeighbor((int)mpisize, 0);
-  for (int k = 0; k < nbt; ++k){
-    for (int i = 0; i < nve; ++i){
-      if (suppSmooth[Th(k,i)] > 0.001 && suppSmooth[Th(k,i)] < 0.999) {
-        isNeighbor[globalPartition[k]] = 1;
-        break;
+  KN<int> neighborRanks;
+
+  if (mpisize > 1){
+    KN<int> isNeighbor((int)mpisize, 0);
+    for (int k = 0; k < nbt; ++k){
+      for (int i = 0; i < nve; ++i){
+        if (suppSmooth[Th(k,i)] > 0.001 && suppSmooth[Th(k,i)] < 0.999) {
+          isNeighbor[globalPartition[k]] = 1;
+          break;
+        }
       }
     }
-  }
-  isNeighbor[(int)mpirank] = 0;
+    isNeighbor[(int)mpirank] = 0;
 
-  int numNeighbors = 0;
-  for (int r = 0; r < (int)mpisize; ++r){
-    if (isNeighbor[r]) numNeighbors++;
-  }
+    int numNeighbors = 0;
+    for (int r = 0; r < (int)mpisize; ++r){
+      if (isNeighbor[r]) numNeighbors++;
+    }
 
-  KN<int> neighborRanks(numNeighbors);
-  int j = 0;
-  for (int r = 0; r < (int)mpisize; ++r){
-    if (isNeighbor[r]) neighborRanks[j++] = r;
+    neighborRanks.resize(numNeighbors);
+    int j = 0;
+    for (int r = 0; r < (int)mpisize; ++r){
+      if (isNeighbor[r]) neighborRanks[j++] = r;
+    }
   }
 
   // Truncation including the neighbours

@@ -6,7 +6,7 @@ include "ffddm.idp"
 load "PETSc"
 
 meshL Th = segment(80);
-DmeshL DTh = distribute(Th, overlap = ffddmoverlap);
+DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partitioner = "scotch");
 meshL ThLocal = DTh.local;
 
 fespace Uh(ThLocal, Pk);
