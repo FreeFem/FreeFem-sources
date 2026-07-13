@@ -22,10 +22,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.17]
 
 ### Added
-
 - Element P1nc3d  (crouzeix Raviart)  in plugin Element_P1nc_3d in 3d and in Surface (meshS)
   and the test is testFE-P1nc3d.edp
 
@@ -928,7 +927,8 @@ All notable changes to this project will be documented in this file.
 
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.16..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.17..develop
+[4.17]: https://github.com/FreeFem/FreeFem-sources/compare/v4.16..v4.17
 [4.16]: https://github.com/FreeFem/FreeFem-sources/compare/v4.15..v4.16
 [4.15]: https://github.com/FreeFem/FreeFem-sources/compare/v4.14..v4.15
 [4.14]: https://github.com/FreeFem/FreeFem-sources/compare/v4.13..v4.14
