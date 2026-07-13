@@ -1,0 +1,38 @@
+// for the make check:
+// PARAM -npmax 1
+
+load "qf11to25"
+load "GrundmannMoller"
+load "Element_PkLagrange"
+
+include "getARGV.idp"
+
+func uex = 1./(3*pi^2)*sin(pi*x)*sin(pi*y)*sin(pi*z);
+func f = sin(pi*x)*sin(pi*y)*sin(pi*z);
+
+macro Grad(u) [dx(u),dy(u), dz(u)] // EOM
+
+int qorder = 9;
+
+//macro mqf()qforder=qorder//
+macro mqf()qfV=GMQuadrature3D(qorder)//
+
+NewMacro MacroCvrgce (PK)
+for (int npts = 1; npts <= getARGV("-npmax",8); npts *= 2){
+    mesh3 ThG = cube(npts,npts,npts);
+
+    fespace UhG(ThG,PK);
+    UhG u,v;
+
+    solve pph(u,v) =
+        int3d(ThG,mqf)(Grad(u)'*Grad(v))-int3d(ThG,mqf)(f*v)
+        +on(1,2,3,4,5,6, u=0);
+
+    real Err= (sqrt(int3d(ThG,mqf)((u-uex)^2)));
+    real NormRef=(sqrt(int3d(ThG,mqf)((uex)^2)));
+    plot(u,cmm="u");
+    cout<<"Error= "<<Err/NormRef<<endl;
+}
+EndMacro
+
+MacroCvrgce (P5);
