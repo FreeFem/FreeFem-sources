@@ -100,7 +100,7 @@ jobs:
         id: flags
         run: |
           if [ "${{ matrix.build-type }}" = "debug" ]; then
-            echo "configure-flags=--enable-debug" >> $GITHUB_OUTPUT
+            echo "configure-flags=--enable-debug --enable-generic" >> $GITHUB_OUTPUT
           elif [ "${{ matrix.build-type }}" = "release" ]; then
             echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
           fi
