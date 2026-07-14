@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04]') }}
+        version: ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04, 26.04]') }}
     name: Ubuntu ${{ matrix.version }} - Check .deb
     runs-on: ubuntu-${{ matrix.version }}
     steps:

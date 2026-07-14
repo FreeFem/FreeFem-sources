@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [22.04, 24.04]
+        version: [22.04, 24.04, 26.04]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
