@@ -22,7 +22,7 @@ on:
         description: 'Ubuntu version as JSON array'
         required: false
         type: string
-        default: '[22.04, 24.04]'
+        default: '[22.04, 24.04, 26.04]'
       skip_check:
         required: false
         type: boolean
@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.versions || '[22.04, 24.04]') }}
+        version:  ${{ fromJson(inputs.versions || '[22.04, 24.04, 26.04]') }}
         build-type: ${{ fromJson(inputs.build-types || '["debug", "release"]') }}
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
