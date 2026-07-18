@@ -1,0 +1,181 @@
+name: Release Docker images
+
+on:
+  workflow_call:
+    inputs:
+      release_version:
+        description: 'FreeFEM release version'
+        required: true
+        type: string
+      docker_arch:
+        description: 'Docker architectures as a JSON array'
+        required: true
+        type: string
+      publish_latest:
+        description: 'Whether to publish the latest tag'
+        required: true
+        type: boolean
+
+jobs:
+  build_docker:
+    name: Build Docker image ${{ matrix.arch }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON(inputs.docker_arch) }}
+    permissions:
+      contents: read
+    env:
+      REGISTRY_IMAGE: docker.io/freefem/freefem
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate Docker labels
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=latest,enable=${{ inputs.publish_latest }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./etc/docker/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          build-args: |
+            FREEFEM_VERSION=${{ inputs.release_version }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=docker-${{ matrix.version }}-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-${{ matrix.version }}-${{ matrix.arch }},mode=max
+          provenance: mode=max
+          sbom: true
+
+      - name: Export Docker image
+        env:
+          ARCH: ${{ matrix.arch }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+          VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euxo pipefail
+          mkdir -p docker-assets
+          SOURCE_IMAGE="${REGISTRY_IMAGE}@${DIGEST}"
+          TAGGED_IMAGE="${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
+
+          docker pull --platform "linux/${ARCH}" "${SOURCE_IMAGE}"
+          docker image tag "${SOURCE_IMAGE}" "${TAGGED_IMAGE}"
+          docker image save "${TAGGED_IMAGE}" \
+            | gzip --best \
+            > "docker-assets/FreeFEM-${VERSION}-docker-linux-${ARCH}.tar.gz"
+
+      - name: Upload Docker release artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-image-${{ matrix.version }}-${{ matrix.arch }}
+          path: ./docker-assets/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+      - name: Export image digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euxo pipefail
+          mkdir -p "${RUNNER_TEMP}/digests"
+          touch "${RUNNER_TEMP}/digests/${DIGEST#sha256:}"
+
+      - name: Upload image digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-digest-${{ matrix.version }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish_docker:
+    name: Publish multi-platform Docker image
+    needs: build_docker
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      REGISTRY_IMAGE: docker.io/freefem/freefem
+    steps:
+      - name: Generate Docker tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=latest,enable=${{ inputs.publish_latest }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Download image digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: docker-digest-*
+          merge-multiple: true
+
+      - name: Create and push multi-platform manifest
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          DOCKER_ARCH: ${{ inputs.docker_arch }}
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+        run: |
+          set -euxo pipefail
+          shopt -s nullglob
+          digest_files=(*)
+          expected_digests=$(jq length <<< "${DOCKER_ARCH}")
+
+          if (( ${#digest_files[@]} != expected_digests )); then
+            echo "Expected ${expected_digests} image digests, found ${#digest_files[@]}" >&2
+            exit 1
+          fi
+
+          mapfile -t tags < <(jq -r '.tags[]' <<< "${DOCKER_METADATA_OUTPUT_JSON}")
+          tag_args=()
+          for tag in "${tags[@]}"; do
+            tag_args+=(--tag "${tag}")
+          done
+
+          digest_args=()
+          for digest in "${digest_files[@]}"; do
+            digest_args+=("${REGISTRY_IMAGE}@sha256:${digest}")
+          done
+
+          docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
+
+      - name: Verify multi-platform image
+        env:
+          DOCKER_ARCH: ${{ inputs.docker_arch }}
+        run: |
+          set -euxo pipefail
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
+          docker buildx imagetools inspect --raw "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}" \
+            | jq --exit-status --argjson expected "${DOCKER_ARCH}" \
+                '([.manifests[] | select(.platform.os == "linux") | .platform.architecture] | unique | sort) == ($expected | unique | sort)'
