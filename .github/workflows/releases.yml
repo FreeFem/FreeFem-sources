@@ -12,6 +12,7 @@ jobs:
       ff_version: ${{ steps.get_version.outputs.ff_version }}
       ubuntu_versions: ${{ steps.set_os_versions.outputs.ubuntu_versions }}
       windows_versions: ${{ steps.set_os_versions.outputs.windows_versions }}
+      docker_arch: ${{ steps.set_os_versions.outputs.docker_arch }}
       is_master: ${{ steps.check_branch.outputs.is_master }}
 
     steps:
@@ -29,6 +30,7 @@ jobs:
         run: |
           echo "ubuntu_versions=[22.04, 24.04, 26.04]" >> $GITHUB_OUTPUT
           echo "windows_versions=[2025]" >> $GITHUB_OUTPUT
+          echo 'docker_arch=["amd64", "arm64"]' >> $GITHUB_OUTPUT
 
       - name: Check if tag is on master
         id: check_branch
@@ -58,8 +60,17 @@ jobs:
       skip_check: true
       upload_build_artifacts: true
 
+  get_docker_images:
+    needs: set_versions
+    uses: ./.github/workflows/release_docker.yml
+    with:
+      release_version: ${{ needs.set_versions.outputs.ff_version }}
+      docker_arch: ${{ needs.set_versions.outputs.docker_arch }}
+      publish_latest: ${{ needs.set_versions.outputs.is_master == 'true' }}
+    secrets: inherit
+
   create_release:
-    needs: [set_versions, get_deb_packages, get_exe_packages]
+    needs: [set_versions, get_deb_packages, get_exe_packages, get_docker_images]
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create releases
@@ -68,6 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./release-assets
+          pattern: "!(docker-digest-*|install_tree*)"
           merge-multiple: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +90,7 @@ jobs:
           files: |
             ./release-assets/*.deb
             ./release-assets/*.exe
+            ./release-assets/*-docker-linux-*.tar.gz
           draft: false
           prerelease: ${{ needs.set_versions.outputs.is_master == 'false' }}
           tag_name: ${{ github.ref_name }}
