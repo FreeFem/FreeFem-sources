@@ -104,13 +104,18 @@ long ff_stat(string *c) {
 }
 
 long ff_isdir(string *c) {
-  struct stat buff;
-
-  if (0 == stat(c->c_str( ), &buff)) {
-    return (buff.st_mode & S_IFDIR) ? 1 : 0;
-  } else {
-    return -1;    // err
+#ifdef _WIN32
+  struct _stat64 buff;
+  if (0 == _stat64(c->c_str(), &buff)) {
+    return (buff.st_mode & _S_IFDIR) ? 1 : 0;
   }
+#else
+  struct stat buff;
+  if (0 == stat(c->c_str(), &buff)) {
+    return (buff.st_mode & S_IFDIR) ? 1 : 0;
+  }
+#endif
+  return -1;
 }
 
 DIR **OpenDir(DIR **pp, string *n) {
