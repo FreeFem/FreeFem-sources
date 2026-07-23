@@ -98,9 +98,13 @@ long ff_mkdir(string *c) {
 }
 
 long ff_stat(string *c) {
+#ifdef _WIN32
+  struct _stat64 buff;
+  return _stat64(c->c_str( ), &buff);
+#else
   struct stat buff;
-
   return stat(c->c_str( ), &buff);
+#endif
 }
 
 long ff_isdir(string *c) {
