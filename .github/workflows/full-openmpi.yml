@@ -13,7 +13,7 @@ on:
 
   workflow_call:
     inputs:
-      build-types:
+      build_types:
         description: 'Build types as JSON array'
         required: false
         type: string
@@ -45,9 +45,9 @@ jobs:
       fail-fast: false
       matrix:
         version:  ${{ fromJson(inputs.versions || '[22.04, 24.04, 26.04]') }}
-        build-type: ${{ fromJson(inputs.build-types || '["debug", "release"]') }}
+        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.build_type }} \
             - ${{ github.workflow }}
     env:
       INSTALL_DIR: /usr/local
@@ -65,9 +65,9 @@ jobs:
       - name: Set configure flags and variables
         id: flags
         run: |
-          if [ "${{ matrix.build-type }}" = "debug" ]; then
+          if [ "${{ matrix.build_type }}" = "debug" ]; then
             echo "configure-flags=--enable-debug --enable-generic" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.build-type }}" = "release" ]; then
+          elif [ "${{ matrix.build_type }}" = "release" ]; then
             echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
           fi
           echo "staging-dir=${{ github.workspace }}/install_staging" >> $GITHUB_OUTPUT

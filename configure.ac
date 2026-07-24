@@ -619,8 +619,8 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		    CNOFLAGS="$CNOFLAGS -I/usr/include/mingw"
 		    if test "$enable_debug" = yes;
 		    then
-		        # Increase the COFF relocation section size. Adress
-			# space isn't big enough otherwise.
+		        # Increase the COFF relocation section size. Address
+			# space isn't large enough otherwise.
 			# See: https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#coff-relocations-object-only
 		        CXXFLAGS="$CXXFLAGS -Wa,-mbig-obj"
 		    	CFLAGS="$CFLAGS -Wa,-mbig-obj"
