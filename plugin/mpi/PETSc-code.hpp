@@ -3110,6 +3110,19 @@ namespace PETSc {
           ptA->dtor( );
           MatCreate(comm, &ptA->_petsc);
           MatLoad(ptA->_petsc, viewer);
+          int size;
+          MPI_Comm_size(comm, &size);
+          if (size == 1) {
+            PetscInt m, n;
+            MatGetSize(ptA->_petsc, &m, &n);
+            ptA->_first = ptA->_cfirst = 0;
+            ptA->_last = m;
+            ptA->_clast = n;
+            ptA->_num = new PetscInt[m + n];
+            ptA->_cnum = ptA->_num + m;
+            std::iota(ptA->_num, ptA->_cnum, 0);
+            std::iota(ptA->_cnum, ptA->_cnum + n, 0);
+          }
       }
     }
     else {
