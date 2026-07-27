@@ -17,7 +17,7 @@ macro grad(u)[dx(u), dy(u) , dz(u)]// EOM
 func Pk = P1;
 
 mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10)); // global mesh
-Dmesh3 DTh = distribute(Th, overlap = 1, partitioner = "scotch");
+Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "scotch");
 mesh3 ThLocal = DTh.local;
 
 fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th

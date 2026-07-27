@@ -9865,7 +9865,7 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"ridgeangle", &typeid(double)},
 {"overlap", &typeid(long)},
 {"partition", &typeid(KN_< long >)},
-{"partitioner", &typeid(string*)},
+{"partmethod", &typeid(string*)},
 {"comm", &typeid(pcommworld)}
 };
 
