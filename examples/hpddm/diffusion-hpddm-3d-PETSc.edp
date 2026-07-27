@@ -3,6 +3,7 @@
 // Options for hpddm via PETSc are given in: https://petsc.org/release/manualpages/PC/PCHPDDM/
 // As far as PCHPDDM is concerned, this script implements the GenEO method with a fixed number of eigenvectors per subdomain for the construction of the coarse problem
 // NBPROC 4
+// PARAM -wg -ns
 // Authors: P. Jolivet, F. Nataf
 
 load "PETSc"

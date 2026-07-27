@@ -45,7 +45,7 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	/distributeMesh.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
-LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCHMETISLIBS@
+LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
 
 ff_bem_include = @HTOOL_INCLUDE_DIR@ -I$(srcdir)/../../3rdparty/include/BemTool/ -I$(srcdir)/../../3rdparty/boost/include -I../../plugin/mpi
 

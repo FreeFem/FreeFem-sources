@@ -1,12 +1,8 @@
 #include "ff++.hpp"
 #include "metis.h"
 
-#ifdef FF_WITH_SCOTCHMETIS
-extern "C" {
-    int  SCOTCH_METIS_PartMeshDual(idx_t*, idx_t*, idx_t*, idx_t*, idx_t*, idx_t*, idx_t*,
-                                 idx_t*, real_t*, idx_t*, idx_t*, idx_t*, idx_t*);
-    void SCOTCH_randomReset(void);
-}
+#ifdef FF_WITH_SCOTCH
+#include "PartitionScotch.hpp"
 #endif
 
 #ifdef PARALLELE
@@ -26,36 +22,39 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
         return;
     }
 
-    // Partition computed on rank 0
-    if (mpirank == 0) {
-    idx_t nt = nbt, nv = nbv;
-    KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv), epart(nt, 0);
-    for (idx_t k = 0, i = 0; k < nt; ++k) {
-      eptr[k] = i;
-      for (idx_t j = 0; j < nve; j++)
-        elmnts[i++] = Th(k, j);
-      eptr[k + 1] = i;
-    }
-    idx_t nparts = mpisize, edgecut, ncommon = 1;
-
-    if (method == "metis") {
-      METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0,
-                         &edgecut, (idx_t *)epart, (idx_t *)npart);
-    }
-    else if (method == "scotch") {
-      #ifdef FF_WITH_SCOTCHMETIS
-        SCOTCH_randomReset();
-        SCOTCH_METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0,
-                         &edgecut, (idx_t *)epart, (idx_t *)npart);
-      #else
-        ExecError("distribute: partitioner=\"scotch\" indisponible");
-      #endif
-    }
-    else {
+    if (method != "metis" && method != "scotch")
       ExecError("distribute: partitioner inconnu (attendu \"metis\" ou \"scotch\")");
+    if (mpisize >= nbt)
+      ExecError("distribute: mpisize doit etre strictement inferieur a Th.nt");
+
+    if (mpirank == 0) {
+      if (method == "metis") {
+        idx_t nt = nbt, nv = nbv;
+        KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv), epart(nt, 0);
+        for (idx_t k = 0, i = 0; k < nt; ++k) {
+          eptr[k] = i;
+          for (idx_t j = 0; j < nve; j++)
+            elmnts[i++] = Th(k, j);
+          eptr[k + 1] = i;
+        }
+        idx_t nparts = mpisize, edgecut, ncommon = 1;
+        METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0,
+                          &edgecut, (idx_t *)epart, (idx_t *)npart);
+        for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
+      }
+      else {  // "scotch"
+        #ifdef FF_WITH_SCOTCH
+        KN<SCOTCH_Num> epart(nbt);
+        SCOTCH_randomReset();
+        if (ffScotchPartFaceDual(Th, (SCOTCH_Num)mpisize, (SCOTCH_Num *)epart) != 0)
+          ExecError("distribute: echec du partitionnement Scotch");
+        for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
+        #else
+        ExecError("distribute: partitioner=\"scotch\" indisponible ; "
+                  "reconfigurer FreeFEM avec Scotch (cf. SCOTCH_CORE dans la sortie de configure)");
+        #endif
+      }
     }
-    for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
-  }
 
   // --- Broadcast depuis le rang 0 (uniquement en build MPI) ---
 #ifdef PARALLELE

@@ -56,4 +56,5 @@ SparseLinearSolver.cpp \
 SolverSkyLine.hpp \
 VirtualSolverSparseSuite.hpp \
 VirtualSolverSkyLine.hpp \
-DataFindBoundary.hpp
+DataFindBoundary.hpp \
+PartitionScotch.hpp

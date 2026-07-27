@@ -2004,12 +2004,26 @@ else
 fi
 
 if test "$ff_scotch_ok" = yes; then
-  AC_SUBST(SCOTCHMETISLIBS, "-lscotchmetisv5 $ff_SCOTCH_LIB") 
-  AC_SUBST(SCOTCH_CORE_CPPFLAGS, "-DFF_WITH_SCOTCHMETIS")
+  ff_save_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS $ff_SCOTCH_INCLUDE"
+  AC_CHECK_HEADER([scotch.h],
+                  [ff_scotch_h_ok=yes],
+                  [ff_scotch_h_ok=no],
+                  [[#include <stdio.h>
+#include <stdint.h>]])
+  CPPFLAGS="$ff_save_CPPFLAGS"
 else
-  AC_SUBST(SCOTCHMETISLIBS, "")
+  ff_scotch_h_ok=no
+fi
+
+if test "$ff_scotch_h_ok" = yes; then
+  AC_SUBST(SCOTCH_CORE_LIBS, "$ff_SCOTCH_LIB")
+  AC_SUBST(SCOTCH_CORE_CPPFLAGS, "-DFF_WITH_SCOTCH $ff_SCOTCH_INCLUDE")
+else
+  AC_SUBST(SCOTCH_CORE_LIBS, "")
   AC_SUBST(SCOTCH_CORE_CPPFLAGS, "")
 fi
+
 
 
 
@@ -2532,6 +2546,8 @@ test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps" && ff_mumps_=yes || ff_mum
 test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq" && ff_mumps_seq_=yes || ff_mumps_seq_=no
 test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis" && ff_parmetis_=yes || ff_parmetis_=no
 test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes || ff_scotch_=no
+test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes || ff_scotch_=no
+test "$ff_scotch_ok" = yes -a "$ff_scotch_h_ok" = yes && ff_scotch_core_=yes || ff_scotch_core_=no
 test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes || ff_tetgen_=no
 test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes || ff_umfpack_=no
 test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"  && ff_parmmg_=yes || ff_parmmg_=no
@@ -2572,6 +2588,7 @@ AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
 AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
 AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
 AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_" = yes])
+AM_CONDITIONAL([SCOTCH_CORE], [test "$ff_scotch_core_" = yes])
 AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
 AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
