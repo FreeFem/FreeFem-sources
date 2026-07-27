@@ -23,7 +23,7 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
     }
 
     if (method != "metis" && method != "scotch")
-      ExecError("distribute: partitioner inconnu (attendu \"metis\" ou \"scotch\")");
+      ExecError("distribute: partmethod inconnu (attendu \"metis\" ou \"scotch\")");
     if (mpisize >= nbt)
       ExecError("distribute: mpisize doit etre strictement inferieur a Th.nt");
 
@@ -50,7 +50,7 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
           ExecError("distribute: echec du partitionnement Scotch");
         for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
         #else
-        ExecError("distribute: partitioner=\"scotch\" indisponible ; "
+        ExecError("distribute: partmethod=\"scotch\" indisponible ; "
                   "reconfigurer FreeFEM avec Scotch (cf. SCOTCH_CORE dans la sortie de configure)");
         #endif
       }
