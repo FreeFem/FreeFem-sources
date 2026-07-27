@@ -48,8 +48,8 @@ ffglut_LIBS =
 
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp
 FreeFem___SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp
-FreeFem___LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCHMETISLIBS@
-FreeFem___nw_LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCHMETISLIBS@
+FreeFem___LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
+FreeFem___nw_LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 

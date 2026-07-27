@@ -10130,6 +10130,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   ffassert(localToGlobalElement.n == LocalMesh->nt);
 
+  Add2StackOfPtr2FreeRC(stack, DTh);
   return DTh;
 
  // Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);

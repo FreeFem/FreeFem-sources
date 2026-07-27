@@ -3,12 +3,13 @@
 // Options for hpddm via PETSc are given in: https://petsc.org/release/manualpages/PC/PCHPDDM/
 // As far as PCHPDDM is concerned, this script implements the GenEO method with a fixed number of eigenvectors per subdomain for the construction of the coarse problem
 // NBPROC 4
-// PARAM -wg -ns
+// PARAM -wg -ns -ffddm_overlap 1
 // Authors: P. Jolivet, F. Nataf
 
 load "PETSc"
+include "getARGV.idp"
 macro dimension()3// EOM
-include "macro_ddm.idp"
+
 
 tgv = -1;
 
@@ -16,16 +17,13 @@ macro grad(u)[dx(u), dy(u) , dz(u)]// EOM
 func Pk = P1;
 
 mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10)); // global mesh
-Mat A;
-macro ThRefinementFactor()getARGV("-split", 1)//
+Dmesh3 DTh = distribute(Th, overlap = 1, partitioner = "scotch");
+mesh3 ThLocal = DTh.local;
 
-// decompose and distribute the mesh Th, and allocates data structures for the communication of the distributed matrix A
-// after this line, Th refers to a local mesh: the one of the subdomain
-MatCreate(Th, A, Pk);
-
-fespace Wh(Th, Pk); // local finite element space on the local mesh Th
-varf vPb(u, v) = int3d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
-
+fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th
+fespace Wdh(DTh, Pk);
+varf vPb(u, v) = int3d(ThLocal)(grad(u)' * grad(v)) + int2d(ThLocal)(v) + on(1, u = 0.0);
+Mat A = vPb(Wdh,Wdh);
 Wh u, rhs, residual; // local solution, right-hand side, and final residual
 
 // local component of the global right-hand side
@@ -34,13 +32,10 @@ rhs[] = vPb(0, Wh);
 if(1) {
     // R_i sum R_j^T D_j rhs_j
     exchange(A, rhs[] , scaled = true);
-    plotD(Th, rhs, cmm = "Global right-hand side")
+    //plotD(Th, rhs, cmm = "Global right-hand side")
 }
 
-matrix Neumann = vPb(Wh, Wh); // local matrix with Neumann boundary condition on the interface of the subdomain
-// recall that A is a distributed matrix and Neumann is a local one
-// the following equal sign '=' means in fact that the entries of the distributed matrix A are filled with the entries of the local Neumann matrix, then A is ready for use
-A = Neumann;
+
 
 // near kernel of the operator (used only by PCGAMG)
 Wh Rb[1];
@@ -54,8 +49,8 @@ u[] = A^-1 * rhs[];
 residual[] = A * u[];
 residual[] -= rhs[];
 
-plotD(Th, residual, cmm = "Global Residual");
-plotD(Th, u, cmm = "Global Solution");
+//plotD(Th, residual, cmm = "Global Residual");
+//plotD(Th, u, cmm = "Global Solution");
 
 // meaning of some flags in sparams when using PCHPDDM (-pc_type hpddm on the command line)
 //  -pc_hpddm_levels_1_sub_pc_type lu                      - subdomain solver is an exact LU factorization
