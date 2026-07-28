@@ -2552,6 +2552,35 @@ test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes || ff_
 test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes || ff_umfpack_=no
 test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"  && ff_parmmg_=yes || ff_parmmg_=no
 
+if test "$ff_parmetis_" = yes -a "$enable_parmetis" != no -a "$ff_mpi" = yes; then
+  if test -n "$TOOL_COMPILE_parmetis"; then
+    ff_PARMETIS_LIB_CORE="-L$ac_pwd/3rdparty/lib -lparmetis -lmetis"
+    ff_PARMETIS_INC_CORE="-I$ac_pwd/3rdparty/include"
+  else
+    ff_PARMETIS_LIB_CORE="${ff_where_lib_parmetis:--lparmetis} ${ff_where_lib_metis:--lmetis}"
+    ff_PARMETIS_INC_CORE="$ff_where_inc_parmetis"
+  fi
+  ff_save_CXX="$CXX"; ff_save_CPPFLAGS="$CPPFLAGS"
+  CXX="$MPICXX"; CPPFLAGS="$CPPFLAGS $ff_PARMETIS_INC_CORE"
+  AC_LANG_PUSH([C++])
+  AC_CHECK_HEADER([parmetis.h], [ff_parmetis_core_=yes], [ff_parmetis_core_=no],
+                  [[#include <mpi.h>
+#include <stdint.h>]])
+  AC_LANG_POP([C++])
+  CXX="$ff_save_CXX"; CPPFLAGS="$ff_save_CPPFLAGS"
+else
+  ff_parmetis_core_=no
+fi
+
+if test "$ff_parmetis_core_" = yes; then
+  AC_SUBST(PARMETIS_CORE_LIBS, "$ff_PARMETIS_LIB_CORE")
+  AC_SUBST(PARMETIS_CORE_CPPFLAGS, "-DFF_WITH_PARMETIS $ff_PARMETIS_INC_CORE")
+else
+  AC_SUBST(PARMETIS_CORE_LIBS, "")
+  AC_SUBST(PARMETIS_CORE_CPPFLAGS, "")
+fi
+
+
 AC_SUBST(DOWNLOADCOMPILE,$DOWNLOADCOMPILE)
 AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
@@ -2774,6 +2803,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_])
   AC_MSG_NOTICE([ - NLOPT: $ff_nlopt_ok])
   AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_])
+  AC_MSG_NOTICE([ - PARMETIS_CORE: $ff_parmetis_core_])
   AC_MSG_NOTICE([ - PETSC: $ff_petsc_ok])
   AC_MSG_NOTICE([ - PETSCCOMPLEX: $ff_petsccomplex_ok])
   AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])

@@ -12,6 +12,7 @@
 #include <stdio.h>    
 #include <stdint.h>   
 #include <vector>
+#include "PartitionDual.hpp"
 #include <scotch.h>
 
 //   nparts : nombre de parties demande
@@ -23,31 +24,15 @@ int ffScotchPartFaceDual(const Mesh& Th, SCOTCH_Num nparts,
                          SCOTCH_Num* epart,
                          const long* weight = nullptr) {
   const int nt = Th.nt;
-  const int nve = Mesh::RdHat::d + 1;
 
   for (int k = 0; k < nt; ++k) epart[k] = 0;
   if (nparts <= 1 || nt <= 0) return 0;
 
-  const SCOTCH_Num baseval = 0;
+  const SCOTCH_Num baseval = 0;   // le helper produit des indices bruts : baseval doit rester 0
   const SCOTCH_Num vertnbr = nt;
-  std::vector<SCOTCH_Num> verttab(vertnbr + 1);
-  std::vector<SCOTCH_Num> edgevec;
-  edgevec.reserve((size_t)nve * (size_t)nt);
-
-  int cptNode = 0;
-  SCOTCH_Num accum = 0;
-  verttab[cptNode++] = baseval;
-  for (int it = 0; it < nt; ++it) {
-    for (int jt = 0; jt < nve; ++jt) {
-      int jtt = jt, itt = Th.ElementAdj(it, jtt);
-      if (itt != it && itt >= 0) {
-        ++accum;
-        edgevec.push_back(baseval + itt);
-      }
-    }
-    verttab[cptNode++] = accum;
-  }
-  const SCOTCH_Num edgenbr = accum;
+  std::vector<SCOTCH_Num> verttab, edgevec;
+  ffBuildFaceDualCSR<Mesh, SCOTCH_Num>(Th, 0, nt, verttab, edgevec);
+  const SCOTCH_Num edgenbr = (SCOTCH_Num)edgevec.size();
   SCOTCH_Num* edgetab = edgevec.empty() ? nullptr : edgevec.data();
 
   std::vector<SCOTCH_Num> velovec;

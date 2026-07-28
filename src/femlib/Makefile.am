@@ -57,4 +57,6 @@ SolverSkyLine.hpp \
 VirtualSolverSparseSuite.hpp \
 VirtualSolverSkyLine.hpp \
 DataFindBoundary.hpp \
+PartitionDual.hpp \
+ParitionParmetis.hpp \
 PartitionScotch.hpp
