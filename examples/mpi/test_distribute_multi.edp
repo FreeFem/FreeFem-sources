@@ -3,13 +3,21 @@
 
 // =====================================================================
 //  Test multi-configurations de distribute(..., partmethod=...)
-//  metis / scotch / partition-utilisateur, sur meshL (1D), meshS (surface)
-//  et mesh3 (3D).
+//  metis / scotch / parmetis / partition-utilisateur, sur meshL (1D),
+//  meshS (surface) et mesh3 (3D).
+//
+//  Suppose FreeFEM configure avec Scotch ET ParMETIS (cf. SCOTCH_CORE et
+//  PARMETIS_CORE dans la sortie de configure) : les cas correspondants ne
+//  sont pas gardes et leveraient une erreur sinon.
 //
 //  Lancer :
 //    ff-mpirun -np 2 test_distribute_multi.edp -ns
 //    ff-mpirun -np 4 test_distribute_multi.edp -ns
-//  (relancer -np 4 plusieurs fois => resultats stables = determinisme OK)
+//    ff-mpirun -np 3 test_distribute_multi.edp -ns   (tranches inegales)
+//  Les trois criteres sont invariants au partitionnement : V1 (bijection
+//  loc2glob) et V2 (partition de l'unite) doivent valoir exactement 0, V3
+//  (ecart a la solution globale) peut varier legerement d'un run a l'autre
+//  sans que ce soit un echec ; seuls les seuils comptent.
 // =====================================================================
 load "Element_P3"
 load "PETSc"
@@ -160,6 +168,10 @@ if (mpirank == 0)
   DmeshL DTh = distribute(Th, overlap = 1, partmethod = "scotch");
   CHECKL(DTh, Th, "meshL / scotch") }
 
+{ meshL Th = segment(80);
+  DmeshL DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+  CHECKL(DTh, Th, "meshL / parmetis") }
+
 // ---------- meshL : partition utilisateur (decoupage contigu) ----------
 { meshL Th = segment(80);
   int[int] part(Th.nt);
@@ -176,6 +188,10 @@ if (mpirank == 0)
   Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "scotch");
   CHECK3(DTh, Th, "mesh3 / scotch") }
 
+{ mesh3 Th = cube(8, 8, 8);
+  Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+  CHECK3(DTh, Th, "mesh3 / parmetis") }
+
 // ---------- meshS : metis vs scotch ----------
 { meshS Th = square3(16, 16);
   DmeshS DTh = distribute(Th, overlap = 1, partmethod = "metis");
@@ -184,6 +200,10 @@ if (mpirank == 0)
 { meshS Th = square3(16, 16);
   DmeshS DTh = distribute(Th, overlap = 1, partmethod = "scotch");
   CHECKS(DTh, Th, "meshS / scotch") }
+
+{ meshS Th = square3(16, 16);
+  DmeshS DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+  CHECKS(DTh, Th, "meshS / parmetis") }
 
 // ---------- meshS : partition utilisateur (decoupage contigu) ----------
 { meshS Th = square3(16, 16);

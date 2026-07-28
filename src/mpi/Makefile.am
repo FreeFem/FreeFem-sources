@@ -45,12 +45,12 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	/distributeMesh.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
-LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
+LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@ @PARMETIS_CORE_LIBS@
 
 ff_bem_include = @HTOOL_INCLUDE_DIR@ -I$(srcdir)/../../3rdparty/include/BemTool/ -I$(srcdir)/../../3rdparty/boost/include -I../../plugin/mpi
 
 AM_CXXFLAGS = -DPARALLELE -DHAVE_ZLIB
-AM_CPPFLAGS = -DPARALLELE -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib -I$(srcdir)/../bamglib/ @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) $(ff_bem_include) $(SCOTCH_CORE_CPPFLAGS)
+AM_CPPFLAGS = -DPARALLELE -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib -I$(srcdir)/../bamglib/ @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) $(ff_bem_include) $(SCOTCH_CORE_CPPFLAGS) $(PARMETIS_CORE_CPPFLAGS)
 ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x ff-mpirun

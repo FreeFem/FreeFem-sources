@@ -9,6 +9,11 @@
 #include <mpi.h>
 #endif
 
+#if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
+#include "PartitionParmetis.hpp"
+#endif
+
+
 extern long mpisize, mpirank;
 
 template<class Mesh>
@@ -22,10 +27,22 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
         return;
     }
 
-    if (method != "metis" && method != "scotch")
-      ExecError("distribute: partmethod inconnu (attendu \"metis\" ou \"scotch\")");
+    if (method != "metis" && method != "scotch" && method != "parmetis")
+      ExecError("distribute: partmethod inconnu (attendu \"metis\", \"scotch\" ou \"parmetis\")");
     if (mpisize >= nbt)
       ExecError("distribute: mpisize doit etre strictement inferieur a Th.nt");
+
+      if (method == "parmetis") {
+#if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
+        MPI_Comm cwp = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+        if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp) != 0)
+          ExecError("distribute: echec du partitionnement ParMETIS");
+        return;                 // tous les rangs ont part : pas de broadcast
+#else
+        ExecError("distribute: partmethod=\"parmetis\" indisponible ; reconfigurer "
+                "FreeFEM avec ParMETIS (cf. PARMETIS_CORE dans la sortie de configure)");
+#endif
+    }
 
     if (mpirank == 0) {
       if (method == "metis") {
