@@ -80,35 +80,35 @@ win32-dll-target: FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe launchff++.
 endif
 
 libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
-	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $^ -o $@ $(LDADD2)
+	$(CXX) -shared -Wl,--enable-auto-import $^ -o $@ $(LDADD2)
 
 parallelempi-empty.o:../mpi/parallelempi-empty.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 FreeFem++-nw.exe: ../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
-	$(CXX) $(GCCNOCYGWIN) libff.dll $^ -o $@ -lcomdlg32
+	$(CXX) libff.dll $^ -o $@ -lcomdlg32
 
 # ALH - 28/7/14 - the new automake default is to place the objects in
 # the same directory as the corresponding source file
 
 FreeFem++.exe: ../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
-	$(CXX) $(GCCNOCYGWIN) libff.dll $^ -o $@ -lcomdlg32
+	$(CXX) libff.dll $^ -o $@ -lcomdlg32
 
 ## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll ( J'ai compris)
 ## dur dur ...
 ## on mais init ffpt dans mymain.cpp
 FreeFem++-mpi.exe:	../Graphics/sansrgraph.o ../mpi/parallelempi.o ../lglib/mymain.o $(LIBS_FFmpi)
-	$(MPICXX) $(GCCNOCYGWIN) libff.dll $^ -o $@ -lcomdlg32 $(MPI_LIB)
+	$(MPICXX) libff.dll $^ -o $@ -lcomdlg32 $(MPI_LIB)
 bamg.exe: libff.dll $(LIBS_FF)
-	$(CXX) $(GCCNOCYGWIN) ../bamg/bamg.o -Wl,--enable-auto-import $^ -o $@
+	$(CXX) ../bamg/bamg.o -Wl,--enable-auto-import $^ -o $@
 cvmsh2.exe: $(LIBS_FF)
-	$(CXX) $(GCCNOCYGWIN) -Wl,--enable-auto-import ../bamg/cvmsh2.o $^ -o $@
+	$(CXX) -Wl,--enable-auto-import ../bamg/cvmsh2.o $^ -o $@
 drawbdmesh.exe:../std/Pcrgraph.o ../bamg/drawbdmesh.o $(LIBS_FF)
-	$(CXX) $(GCCNOCYGWIN) -mwindows -Wl,--enable-auto-import $^ -o $@
-launchff++.exe:launchff++.cpp
-	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe -lcomdlg32
+	$(CXX) -mwindows -Wl,--enable-auto-import $^ -o $@
+launchff++.exe: launchff++.cpp
+	$(CXX) launchff++.cpp -o launchff++.exe -lcomdlg32
 md2edp.exe:../../etc/tools/md2edp.cpp 
-	$(CXX) $(GCCNOCYGWIN) ../../etc/tools/md2edp.cpp  -o md2edp.exe -lcomdlg32
+	$(CXX) ../../etc/tools/md2edp.cpp  -o md2edp.exe -lcomdlg32
 ff-c++:../../plugin/seq/load.link.in
 	../../config.status --file=ff-c++:$<
 	chmod a+x ff-c++
