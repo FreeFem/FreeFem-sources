@@ -396,7 +396,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
   typedef const Mesh* pmeshT;
   const DistributedMesh<Mesh>* DTh = nullptr;
   bool dofDataBuilt = false;
-
+  bool loc2globBuilt = false;
   // Results DDL
   KN<KN<long>> dofIntersectionDof;
   KN<double> Ddof;
@@ -415,7 +415,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   operator FESpace *( ) {
     throwassert(dHat == Mesh::RdHat::d);
-    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; }
+    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; loc2globBuilt = false; }
     if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
     return pVh;
   }
@@ -440,6 +440,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
     : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(f->DTh) {}
 
   void buildDistributedDofData(FESpace& Vhi);
+  void buildLoc2globIfNeeded(FESpace& Vhi);
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_dfes( ) {}
   bool buildperiodic(Stack stack, KN< int > &ndfe);

@@ -38,6 +38,7 @@
 // Th3_t->BuildjElementConteningVertex();
 // is now in the constructor of Mesh3 to be consistante.
 //
+#include "AFunction.hpp"
 #include "RNM.hpp"
 #include "error.hpp"
 #ifndef WITH_NO_INIT    // cf [[WITH_NO_INIT]]
@@ -10206,6 +10207,7 @@ static void registerDistributedMeshOps() {
   TheOperators->Add("<-", new OneOperator2_<DM*, DM*, DM>(&set_copy_incr));
   TheOperators->Add("=", new OneOperator2<DM*, DM*, DM>(&set_eqdestroy_incr));
   Add<DM*>("local", ".", new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
+  atype<const Mesh*>()->AddCast(new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
   Global.Add("distribute", "(", new DistributeMesh<Mesh>);
   Global.Add("distribute", "(", new DistributeMesh<Mesh>(1));
 }

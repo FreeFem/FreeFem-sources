@@ -49,7 +49,7 @@ macro CHECKL(DTh, Th, tag) {
   for (int i = 0; i < gl.n; ++i) eBij = max(eBij, abs(gl[][i] - gg[][l2g[i]]));
   real[int] acc(UhGlob.ndof); acc = 0;
   for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
-  real[int] accG(UhGlob.ndof);
+  real[int] accG(UhGlob.ndof);for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
   mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
   real ePoU = 0;
   for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));

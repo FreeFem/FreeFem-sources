@@ -2261,7 +2261,8 @@ KN<KN<long>>* pVhd_intersection(Stack stack, v_dfes<Mesh>** const& p) {
 template<class Mesh>
 KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
   throwassert(p);
-  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p; (void)fes;
+  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p;
+  f->buildLoc2globIfNeeded(*fes);
   KN<long>* r = new KN<long>(f->loc2globDof);
   Add2StackOfPtr2Free(stack, r); return r;
 }
