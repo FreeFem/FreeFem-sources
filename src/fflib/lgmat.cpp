@@ -27,6 +27,7 @@
  */
 #include "AFunction.hpp"
 #include "FESpacen.hpp"
+#include "throwassert.hpp"
 #ifndef REMOVE_CODE
  // to do  F. HECHT
 #ifdef __MWERKS__
@@ -1428,6 +1429,14 @@ void v_dfes<Mesh>::buildLoc2globIfNeeded(GFESpace<Mesh>& Vhi){
 }
 
 template<class Mesh>
+void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
+    if (!DTh || numberingBuilt) return;
+    ffassert(dofDataBuilt);
+    numberingDof = distributedDofNumbering(DTh->comm, DTh->neighborRanks, dofIntersectionDof, Ddof, Vhi.NbOfDF, globalNdof);
+    numberingBuilt = true;
+}
+
+template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
     dofIntersectionDof = buildDofIntersection(*DTh, Vhi);
@@ -1439,6 +1448,9 @@ template void v_dfes<MeshL>::buildDistributedDofData(GFESpace<MeshL>&);
 template void v_dfes<MeshS>::buildLoc2globIfNeeded(GFESpace<MeshS>&);
 template void v_dfes<Mesh3>::buildLoc2globIfNeeded(GFESpace<Mesh3>&);
 template void v_dfes<MeshL>::buildLoc2globIfNeeded(GFESpace<MeshL>&);
+template void v_dfes<MeshS>::buildNumberingIfNeeded(GFESpace<MeshS>&);
+template void v_dfes<Mesh3>::buildNumberingIfNeeded(GFESpace<Mesh3>&);
+template void v_dfes<MeshL>::buildNumberingIfNeeded(GFESpace<MeshL>&);
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
 {

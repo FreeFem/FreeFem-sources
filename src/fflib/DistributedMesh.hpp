@@ -20,6 +20,8 @@ public:
   KN<double> partitionOfUnity;
   KN<int> localToGlobalElement; // n2o (LocalMesh -> Th)
   KN<int> globalPartition;
+
+  pcommworld comm = nullptr;
   
   DistributedMesh() : LocalMesh(nullptr), BorderMesh(nullptr), overlap(0), interfaceLabel(10),
   neighborRanks(), partitionOfUnity(), globalPartition() {}
@@ -45,3 +47,5 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
 // Partition globale
 template<class Mesh>
 void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr);
+
+KN<long> distributedDofNumbering(pcommworld comm, const KN<int>& neighborRanks, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof);

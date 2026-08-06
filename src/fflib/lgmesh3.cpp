@@ -26,10 +26,12 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "AFunction.hpp"
 #include "ff++.hpp"
 #include "array_resize.hpp"
 #include "AFunction_ext.hpp"
 #include "PlotStream.hpp"
+#include "ffstack.hpp"
 #include "throwassert.hpp"
 
 using Fem2D::Mesh;
@@ -2268,6 +2270,26 @@ KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
 }
 
 template<class Mesh>
+KN<long>* pVhd_numbering(Stack stack, v_dfes<Mesh>** const& p){
+  throwassert(p);
+  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p;
+  f->buildNumberingIfNeeded(*fes);
+  KN<long>* r = new KN<long>(f->numberingDof);
+  Add2StackOfPtr2Free(stack, r);
+  return r;
+}
+
+template<class Mesh>
+long pVhd_ndofglobal(v_dfes<Mesh>** p){
+  throwassert(p && *p);
+  v_dfes<Mesh>* f = *p;
+  GFESpace<Mesh>* fes = **p;
+  if (!fes) return 0;
+  f->buildNumberingIfNeeded(*fes);
+  return f->globalNdof;
+}
+
+template<class Mesh>
 static void addDistributedFespaceOps(){
   typedef v_dfes<Mesh>* pdfesT;
   typedef const Mesh* pmeshT;
@@ -2279,6 +2301,8 @@ static void addDistributedFespaceOps(){
   Add<pdfesT*>("D",".", new OneOperator1s_<KN<double>*, pdfesT*>(pVhd_D<Mesh>));
   Add<pdfesT*>("intersection",".", new OneOperator1s_<KN<KN<long>>*, pdfesT*>(pVhd_intersection<Mesh>));
   Add<pdfesT*>("loc2glob",".", new OneOperator1s_<KN<long>*, pdfesT*>(pVhd_loc2glob<Mesh>));
+  Add<pdfesT*>("numbering",".", new OneOperator1s_<KN<long>*,pdfesT*>(pVhd_numbering<Mesh>));
+  Add<pdfesT*>("ndofglobal",".", new OneOperator1<long, pdfesT*>(pVhd_ndofglobal<Mesh>));
 }
 
 //3D curve
