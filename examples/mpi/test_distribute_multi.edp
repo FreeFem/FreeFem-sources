@@ -14,10 +14,20 @@
 //    ff-mpirun -np 2 test_distribute_multi.edp -ns
 //    ff-mpirun -np 4 test_distribute_multi.edp -ns
 //    ff-mpirun -np 3 test_distribute_multi.edp -ns   (tranches inegales)
-//  Les trois criteres sont invariants au partitionnement : V1 (bijection
-//  loc2glob) et V2 (partition de l'unite) doivent valoir exactement 0, V3
-//  (ecart a la solution globale) peut varier legerement d'un run a l'autre
-//  sans que ce soit un echec ; seuls les seuils comptent.
+//  Les criteres sont invariants au partitionnement : V1 (bijection
+//  loc2glob), V2 (partition de l'unite), V4 (alignement PETSc) et V5
+//  (comptage global) doivent valoir exactement 0. V3 (ecart a la solution
+//  globale) peut varier legerement d'un run a l'autre sans que ce soit un
+//  echec ; seuls les seuils comptent.
+//
+//  V4 est le test D1 : Udh.numbering doit coincider composante par
+//  composante avec la numerotation que PETSc calcule via HPDDM. C'est le
+//  seul critere qui detecte une regle de propriete valide mais desalignee
+//  (departage des egalites inverse, ou ordre de numerotation different).
+//  GlobalNumbering est appele juste apres le constructeur de Mat, AVANT
+//  l'assemblage : apres "A = vPb(...)" il segfaute.
+//
+//  V5 : Udh.ndofglobal doit egaler UhGlob.ndof.
 // =====================================================================
 load "Element_P3"
 load "PETSc"
@@ -36,6 +46,9 @@ macro CHECKL(DTh, Th, tag) {
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
   Mat A(Udh.ndof, Udh.intersection, D);
+  int[int] pnum;
+  GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
+  int[int] gnum = Udh.numbering;
   func f = 1.0;
   varf vPb(u, v) = int1d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
                  + int1d(ThLocal)(f*v) + on(1, 2, u = 0);
@@ -59,14 +72,28 @@ macro CHECKL(DTh, Th, tag) {
   real[int] ug = AG^-1 * rG;
   real eSol = 0;
   for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
-  real b, p, s;
+  real eNum = 0;
+  int  nbad = 0;
+  if (pnum.n != gnum.n) nbad = 1;
+  else
+    for (int i = 0; i < gnum.n; ++i) {
+      real dd = pnum[i] - gnum[i];
+      eNum = max(eNum, abs(dd));
+    }
+  real eNG = abs(Udh.ndofglobal - UhGlob.ndof);
+  real b, p, s, n4, n5;
+  int nb;
   mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
   mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
   mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
+  mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "  V4=" << n4 << "  V5=" << n5
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
@@ -79,6 +106,9 @@ macro CHECK3(DTh, Th, tag) {
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
   Mat A(Udh.ndof, Udh.intersection, D);
+  int[int] pnum;
+  GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
+  int[int] gnum = Udh.numbering;
   func f = 1.0;
   varf vPb(u, v) = int3d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
                  + int3d(ThLocal)(f*v) + on(1,2,3,4,5,6, u = 0);
@@ -102,14 +132,28 @@ macro CHECK3(DTh, Th, tag) {
   real[int] ug = AG^-1 * rG;
   real eSol = 0;
   for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
-  real b, p, s;
+  real eNum = 0;
+  int  nbad = 0;
+  if (pnum.n != gnum.n) nbad = 1;
+  else
+    for (int i = 0; i < gnum.n; ++i) {
+      real dd = pnum[i] - gnum[i];
+      eNum = max(eNum, abs(dd));
+    }
+  real eNG = abs(Udh.ndofglobal - UhGlob.ndof);
+  real b, p, s, n4, n5;
+  int nb;
   mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
   mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
   mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
+  mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "  V4=" << n4 << "  V5=" << n5
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
@@ -122,6 +166,9 @@ macro CHECKS(DTh, Th, tag) {
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
   Mat A(Udh.ndof, Udh.intersection, D);
+  int[int] pnum;
+  GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
+  int[int] gnum = Udh.numbering;
   func f = 1.0;
   varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
                  + int2d(ThLocal)(f*v) + on(1,2,3,4, u = 0);
@@ -145,14 +192,28 @@ macro CHECKS(DTh, Th, tag) {
   real[int] ug = AG^-1 * rG;
   real eSol = 0;
   for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
-  real b, p, s;
+  real eNum = 0;
+  int  nbad = 0;
+  if (pnum.n != gnum.n) nbad = 1;
+  else
+    for (int i = 0; i < gnum.n; ++i) {
+      real dd = pnum[i] - gnum[i];
+      eNum = max(eNum, abs(dd));
+    }
+  real eNG = abs(Udh.ndofglobal - UhGlob.ndof);
+  real b, p, s, n4, n5;
+  int nb;
   mpiAllReduce(eBij, b, mpiCommWorld, mpiMAX);
   mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
   mpiAllReduce(eSol, s, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5);
+  mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
+  mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
+         << "  V4=" << n4 << "  V5=" << n5
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 

@@ -1,8 +1,38 @@
-// NBPROC 2
+// NBPROC 4
 // PARAM -wg -ns
 //
-// Comparaison du pic memoire avec et sans lecture de Udh.loc2glob.
-// Options : -size <n>  -l2g <0|1>  -solve <0|1>
+// Banc de validation de la numerotation distribuee (etape 1).
+//
+// Options
+//   -size <n>      nombre de segments du maillage global   (defaut 1000000)
+//   -ovl  <0|1|..> recouvrement passe a distribute()       (defaut 1)
+//   -part <nom>    metis | scotch | parmetis               (defaut metis)
+//   -l2g  <0|1>    lire Udh.loc2glob                       (defaut 0)
+//   -solve <0|1>   resoudre le probleme via PETSc          (defaut 0)
+//   -checkb2 <0|1> rejoue la regle de propriete du lot B2   (defaut 0)
+//   -checkbij <0|1> bijection de Udh.numbering              (defaut 0)
+//   -checkd  <0|1> D1 : alignement avec la numerotation PETSc (defaut 0)
+//   -checkd2 <0|1> D2 : invariant d'ordre vis-a-vis de Ddof  (defaut 0)
+//   -numfirst <0|1> D2 : lire .numbering avant (1) ou apres (0) la Mat
+//   -Dvec=1        bascule l'espace EF en [P2,P2] (voir plus bas)
+//
+// -checkb2 et -checkbij declarent un fespace global : a lancer sur un
+// petit -size. Les autres modes n'en construisent aucun.
+//
+// ATTENTION storageused() : cet arbre est en HAVE_MALLINFO (config.h:106),
+// donc mallinfo().uordblks, qui ignore les blocs mmap et sature a 2 Gio.
+// Les chiffres d_* sont qualitatifs ; la mesure, c'est le maxrss.
+//
+// -Dvec=1 bascule Pk en [P2,P2] pour exercer la branche N > 1 de
+// interpolatePoU. Dans ce mode les blocs a varf (-solve, -checkd2) sont
+// absents : ils supposent un Pk scalaire. -checkd et -checkbij marchent.
+
+IFMACRO(!vec)
+macro Pk()P2//EOM
+ENDIFMACRO
+IFMACRO(vec)
+macro Pk()[P2, P2]//EOM
+ENDIFMACRO
 
 load "PETSc"
 
@@ -14,15 +44,25 @@ func int argInt(string key, int def) {
 }
 
 int nseg    = argInt("-size",  1000000);
-int useL2G  = argInt("-l2g",   1);
+int ovl     = argInt("-ovl",   1);
+int useL2G  = argInt("-l2g",   0);
 int doSolve = argInt("-solve", 0);
+int chkB2   = argInt("-checkb2",  0);
+int chkBij  = argInt("-checkbij", 0);
+int chkD    = argInt("-checkd",   0);
+int chkD2   = argInt("-checkd2",  0);
+int numFirst= argInt("-numfirst", 1);
+
+// une func renvoyant une string ne survit pas au retour d'ARGV : boucle inline.
+string part = "metis";
+for (int i = 0; i < ARGV.n - 1; ++i) if (ARGV[i] == "-part") part = ARGV[i + 1];
 
 meshL Th = segment(nseg);
-DmeshL DTh = distribute(Th, overlap = 1, partmethod = "metis");
+DmeshL DTh = distribute(Th, overlap = ovl, partmethod = part);
 meshL ThLocal = DTh.local;
 
-fespace Uh(ThLocal, P2);
-fespace Udh(DTh, P2);
+fespace Uh(ThLocal, Pk);
+fespace Udh(DTh, Pk);
 
 int m0 = storageused();
 real[int] D = Udh.D;                  // 1er acces : buildDistributedDofData
@@ -36,10 +76,150 @@ if (useL2G) {
 int m2 = storageused();
 
 if (mpirank == 0)
-  cout << "CFG  size=" << nseg << "  l2g=" << useL2G << "  solve=" << doSolve << endl;
+  cout << "CFG  size=" << nseg << "  ovl=" << ovl << "  part=" << part
+       << "  l2g=" << useL2G << "  solve=" << doSolve << endl;
 cout << "MEM  rank=" << mpirank << "  ndofloc=" << Udh.ndof
      << "  d_dofdata=" << (m1 - m0) << "  d_l2g=" << (m2 - m1)
      << "  nl2g=" << nl2g << endl;
+
+// =====================================================================
+//  B2 : rejoue en FreeFem la regle de propriete, sur les memes donnees
+//       (.D et .intersection) que celles passees a distributedDofNumbering
+// =====================================================================
+if (chkB2) {
+  // int[int][int] n'a ni operateur = ni <- : on aplatit les listes de ddl.
+  int[int] nbr = Udh.intersection[0];   // rangs voisins
+  int nN = nbr.n;
+  int nloc = Udh.ndof;
+  real EPS = 1e-12;
+
+  int[int] off(nN + 1);
+  off[0] = 0;
+  for (int j = 0; j < nN; ++j) off[j+1] = off[j] + Udh.intersection[1+j].n;
+  int[int] flat(max(off[nN], 1));
+  for (int j = 0; j < nN; ++j) {
+    int[int] Lj = Udh.intersection[1+j];
+    for (int p = 0; p < Lj.n; ++p) flat[off[j] + p] = Lj[p];
+  }
+
+  // --- echange de D sur les intersections (= exchangeOnIntersections) ---
+  real[int][int] snd(nN);
+  real[int][int] rcv(nN);
+  for (int j = 0; j < nN; ++j) {
+    int nj = off[j+1] - off[j];
+    snd[j].resize(nj);
+    rcv[j].resize(nj);
+    for (int p = 0; p < nj; ++p) snd[j][p] = D[flat[off[j] + p]];
+  }
+  if (nN > 0) {
+    mpiRequest[int] rq(2*nN);
+    for (int j = 0; j < nN; ++j) Irecv(processor(nbr[j], mpiCommWorld, rq[2*j]),   rcv[j]);
+    for (int j = 0; j < nN; ++j) Isend(processor(nbr[j], mpiCommWorld, rq[2*j+1]), snd[j]);
+    mpiWaitAll(rq);
+  }
+
+  // --- V1 : precondition de B2, somme des PoU = 1 sur chaque ddl --------
+  real[int] sum(nloc);
+  sum = D;
+  for (int j = 0; j < nN; ++j)
+    for (int p = 0; p < off[j+1] - off[j]; ++p) sum[flat[off[j] + p]] += rcv[j][p];
+  real e1 = 0;
+  for (int d = 0; d < nloc; ++d) e1 = max(e1, abs(sum[d] - 1.0));
+  real V1; mpiAllReduce(e1, V1, mpiCommWorld, mpiMAX);
+
+  // --- regle de propriete du lot B2 -------------------------------------
+  int[int] owned(nloc);
+  owned = 1;
+  for (int j = 0; j < nN; ++j)
+    for (int p = 0; p < off[j+1] - off[j]; ++p) {
+      int  d = flat[off[j] + p];
+      real v = D[d] - rcv[j][p];
+      bool win = (v > EPS) || (abs(v) < EPS && mpirank > nbr[j]);
+      if (!win) owned[d] = 0;
+    }
+  int nOwned = 0;
+  for (int d = 0; d < nloc; ++d) nOwned += owned[d];
+  int nTot; mpiAllReduce(nOwned, nTot, mpiCommWorld, mpiSUM);
+
+  // --- V2 : chaque ddl global possede exactement une fois ---------------
+  fespace UhGlob(Th, Pk);
+  int[int] l2gc = Udh.loc2glob;
+  real[int] cnt(UhGlob.ndof), cntG(UhGlob.ndof);
+  cnt = 0;
+  for (int d = 0; d < nloc; ++d) if (owned[d]) cnt[l2gc[d]] += 1.0;
+  mpiAllReduce(cnt, cntG, mpiCommWorld, mpiSUM);
+  real V2 = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) V2 = max(V2, abs(cntG[i] - 1.0));
+
+  // --- V3 : le compte global tombe juste --------------------------------
+  int V3 = nTot - UhGlob.ndof;
+
+  cout << "B2   rank=" << mpirank << "  nvois=" << nN
+       << "  ndofloc=" << nloc << "  nOwned=" << nOwned << endl;
+  if (mpirank == 0) {
+    cout << "B2   V1(sum PoU-1)=" << V1
+         << "  V2(propriete unique)=" << V2
+         << "  V3(nTot-ndofglob)=" << V3
+         << "   => " << ((V1 < 1e-12 && V2 < 1e-12 && V3 == 0) ? "PASS" : "FAIL") << endl;
+    cout << "B2   ndofglob=" << UhGlob.ndof << "  nTot=" << nTot << endl;
+  }
+}
+
+IFMACRO(!vec)
+// =====================================================================
+//  D2 : invariant d'ordre.
+//
+//  buildShellIfNeeded passe &f->Ddof SANS COPIE (PETSc-code.hpp:411) et
+//  initPETScStructure appelle restriction(d) EN PLACE (ligne 521-526), qui
+//  transforme la PoU lisse en masque 0/1. La regle de B2 est censee etre
+//  idempotente sur ce masque : la numerotation doit donc etre la meme,
+//  qu'elle soit calculee avant ou apres la construction de la Mat.
+//
+//  Ce bloc doit etre le PREMIER a toucher .numbering, sinon le drapeau
+//  numberingBuilt rend la comparaison triviale. Ne pas le deplacer apres
+//  -solve, -checkd ou le bloc C.
+//
+//  Usage : deux runs identiques, l'un -numfirst 1, l'autre -numfirst 0.
+//          Les empreintes doivent coincider rang par rang.
+//
+//  ETAT AU MOMENT DE L'ECRITURE : ce mode SEGFAUTE, dans les deux sens de
+//  -numfirst. Tout acces a .numbering, a .D ou a GlobalNumbering APRES un
+//  assemblage "A = vPb(Udh, Udh)" plante. Idem pour -solve 1 des lors que
+//  le bloc C lit .numbering ensuite.
+//  Hypothese (non demontree) : buildShellIfNeeded passe &f->Ddof sans
+//  copie (PETSc-code.hpp:411), initPETScStructure appelle restriction(d)
+//  puis initialize(d) qui memorise le pointeur brut (ligne 521-531) ; la
+//  destruction du Dmat liberait alors le buffer possede par le v_dfes,
+//  d'ou un use-after-free au prochain acces. A instruire avant de pouvoir
+//  conclure sur l'invariant d'ordre : le defaut est dans le pont PETSc,
+//  pas dans distributedDofNumbering.
+// =====================================================================
+if (chkD2) {
+  int n2 = 0, mn = 0, mx = 0;
+  real s2 = 0;
+
+  if (numFirst) {
+    int[int] g = Udh.numbering;
+    n2 = g.n; mn = g.min; mx = g.max;
+    for (int i = 0; i < g.n; ++i) s2 += g[i];
+  }
+
+  {   // le one-liner est le seul chemin qui passe &f->Ddof a PETSc
+    varf vD(u, v) = int1d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+                  + int1d(ThLocal)(1.0*v) + on(1, 2, u = 0);
+    Mat A2 = vD(Udh, Udh);
+  }
+
+  if (!numFirst) {
+    int[int] g = Udh.numbering;
+    n2 = g.n; mn = g.min; mx = g.max;
+    for (int i = 0; i < g.n; ++i) s2 += g[i];
+  }
+
+  cout << "D2   rank=" << mpirank << " numfirst=" << numFirst
+       << " n=" << n2 << " min=" << mn << " max=" << mx
+       << " somme=" << s2 << endl;
+}
 
 if (doSolve) {
   func f = x;
@@ -51,4 +231,100 @@ if (doSolve) {
   real[int] uu = A^-1 * rhs;
   real nrm = uu.l2;
   if (mpirank == 0) cout << "SOL  |u|_2 = " << nrm << endl;
+}
+ENDIFMACRO
+
+// =====================================================================
+//  D1 : alignement avec la numerotation PETSc.
+//
+//  GlobalNumbering DOIT etre appele juste apres le constructeur de Mat,
+//  AVANT tout assemblage : apres un "A = vPb(...)" il segfaute (le Dmat
+//  garde un _petsc valide mais un _A HPDDM nul, et globalNumbering
+//  dereference A->_A->getDof(), PETSc-code.hpp:661).
+//
+//  Le test sur les tailles n'est pas superflu : globalNumbering fait un
+//  resize() puis ne copie QUE si _num est non nul, donc un _num nul
+//  donnerait un tableau non initialise et un ecart aleatoire.
+// =====================================================================
+if (chkD) {
+  Mat A(Udh.ndof, Udh.intersection, D);
+  int[int] pnum;
+  GlobalNumbering(A, pnum);
+  int[int] gnum = Udh.numbering;
+
+  real eNum = 0;
+  int  nbad = 0;
+  if (pnum.n != gnum.n) nbad = 1;
+  else
+    for (int i = 0; i < gnum.n; ++i) {
+      real dd = pnum[i] - gnum[i];
+      eNum = max(eNum, abs(dd));
+    }
+  real V; int nb;
+  mpiAllReduce(eNum, V,  mpiCommWorld, mpiMAX);
+  mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
+
+  cout << "D1   rank=" << mpirank << " nPETSc=" << pnum.n
+       << " nloc=" << gnum.n << " ecart=" << eNum << endl;
+  if (mpirank == 0)
+    cout << "D1   ecart=" << V << "  taille=" << nb
+         << "   => " << ((V < 1e-12 && nb == 0) ? "PASS" : "FAIL") << endl;
+}
+
+int[int] gnum = Udh.numbering;
+cout << "C  rank=" << mpirank << " ndofglobal=" << Udh.ndofglobal
+     << " min=" << gnum.min << " max=" << gnum.max << endl;
+
+// =====================================================================
+//  Bijection de Udh.numbering, avec Udh.loc2glob comme oracle d'identite
+// =====================================================================
+if (chkBij) {
+  int[int] l2g = Udh.loc2glob;
+  fespace UhGlob(Th, Pk);
+  int NG = UhGlob.ndof;               // nb de ddl globaux vu par Vhglob
+  int N  = Udh.ndofglobal;            // nb de ddl globaux vu par la numerotation
+  int nloc = Udh.ndof;
+
+  // V0 : les deux comptages doivent coincider
+  int V0 = N - NG;
+
+  // Pour chaque ddl global i, on collecte le numero que lui donne chaque
+  // rang qui le voit. Sentinelle basse pour le MAX, haute pour le MIN :
+  // un ddl vu par personne ressort avec amax=-1 et bmin=N, donc V4 != 0.
+  real bigN = N;
+  real[int] a(NG), b(NG), amax(NG), bmin(NG);
+  a = -1.0;
+  b = bigN;
+  for (int d = 0; d < nloc; ++d) {
+    a[l2g[d]] = gnum[d];
+    b[l2g[d]] = gnum[d];
+  }
+  mpiAllReduce(a, amax, mpiCommWorld, mpiMAX);
+  mpiAllReduce(b, bmin, mpiCommWorld, mpiMIN);
+
+  // V4 : tous les rangs qui voient un ddl lui donnent le meme numero
+  real V4 = 0;
+  for (int i = 0; i < NG; ++i) V4 = max(V4, abs(amax[i] - bmin[i]));
+
+  // V5 : la numerotation est une bijection [0,NG) -> [0,N)
+  real V5 = 0;
+  if (mpirank == 0) {
+    real[int] hist(N);
+    hist = 0;
+    real bad = 0;
+    for (int i = 0; i < NG; ++i) {
+      int g = lround(amax[i]);
+      if (g < 0 || g >= N) bad = 1;
+      else hist[g] += 1.0;
+    }
+    for (int g = 0; g < N; ++g) V5 = max(V5, abs(hist[g] - 1.0));
+    V5 = max(V5, bad);
+  }
+
+  if (mpirank == 0)
+    cout << "BIJ  NG=" << NG << " N=" << N
+         << "  V0(N-NG)=" << V0
+         << "  V4(coherence)=" << V4
+         << "  V5(bijection)=" << V5
+         << "   => " << ((V0 == 0 && V4 < 1e-12 && V5 < 1e-12) ? "PASS" : "FAIL") << endl;
 }

@@ -9977,7 +9977,8 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 */
 
   KN<int> globalPartition(nbt);
-
+  pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
+    
   // User partition
   if (nargs[9]) {
     KN_<long> userpart = GetAny< KN_<long> >((*nargs[9])(stack));
@@ -9989,7 +9990,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   else {
     string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
     std::string method = ppart ? *ppart : "metis";
-    pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
     computeGlobalPartition(Th, globalPartition, method, comm); 
   }
 
@@ -10127,6 +10127,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   DTh->interfaceLabel = interfaceLabel;
   DTh->neighborRanks = neighborRanks;
   DTh->partitionOfUnity = pouLocal;
+  DTh->comm = comm;
   DTh->globalPartition = globalPartition;
 
   ffassert(localToGlobalElement.n == LocalMesh->nt);
