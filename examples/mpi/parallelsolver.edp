@@ -1,0 +1,54 @@
+// NBPROC 2
+// PARAM -wg -ns
+//
+// Comparaison du pic memoire avec et sans lecture de Udh.loc2glob.
+// Options : -size <n>  -l2g <0|1>  -solve <0|1>
+
+load "PETSc"
+
+// getARGV n'est pas compile dans cet arbre : on lit ARGV directement.
+func int argInt(string key, int def) {
+  for (int i = 0; i < ARGV.n - 1; ++i)
+    if (ARGV[i] == key) return atoi(ARGV[i + 1]);
+  return def;
+}
+
+int nseg    = argInt("-size",  1000000);
+int useL2G  = argInt("-l2g",   1);
+int doSolve = argInt("-solve", 0);
+
+meshL Th = segment(nseg);
+DmeshL DTh = distribute(Th, overlap = 1, partmethod = "metis");
+meshL ThLocal = DTh.local;
+
+fespace Uh(ThLocal, P2);
+fespace Udh(DTh, P2);
+
+int m0 = storageused();
+real[int] D = Udh.D;                  // 1er acces : buildDistributedDofData
+int m1 = storageused();
+
+int nl2g = 0;
+if (useL2G) {
+  int[int] l2g = Udh.loc2glob;
+  nl2g = l2g.n;
+}
+int m2 = storageused();
+
+if (mpirank == 0)
+  cout << "CFG  size=" << nseg << "  l2g=" << useL2G << "  solve=" << doSolve << endl;
+cout << "MEM  rank=" << mpirank << "  ndofloc=" << Udh.ndof
+     << "  d_dofdata=" << (m1 - m0) << "  d_l2g=" << (m2 - m1)
+     << "  nl2g=" << nl2g << endl;
+
+if (doSolve) {
+  func f = x;
+  varf vPb(u, v) = int1d(ThLocal)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))
+                 + int1d(ThLocal)(f*v) + on(1, 2, u = 0);
+  Mat A = vPb(Udh, Udh);
+  real[int] rhs = vPb(0, Uh);
+  set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-8");
+  real[int] uu = A^-1 * rhs;
+  real nrm = uu.l2;
+  if (mpirank == 0) cout << "SOL  |u|_2 = " << nrm << endl;
+}
