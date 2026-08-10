@@ -108,24 +108,40 @@ static KN<long> trivialNumbering(int nLocDof, long& globalNdof){
 }
 
 #ifndef PARALLELE
-KN<long> distributedDofNumbering(pcommworld, const KN<int>&, const KN<KN<long> > &, const KN<double> &, int nLocDof, long &globalNdof)
+KN<long> distributedDofNumbering(pcommworld, const KN<KN<long> > &, const KN<double> &, int nLocDof, long &globalNdof)
 {
   return trivialNumbering(nLocDof, globalNdof);
 }
 #else
-KN<long> distributedDofNumbering(pcommworld comm, const KN<int>& neighborRanks, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
+KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
   if (mpisize <=1) return trivialNumbering(nLocDof, globalNdof);
 
   MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
-  const int nN = neighborRanks.n;
-  ffassert(dofI.n == 1 + nN);
+  const int nN = dofI.n - 1;
+  ffassert(dofI[0].n == nN);
+  KN<int> nbr(nN);
+  for (int j = 0; j < nN; ++j) nbr[j] = (int)dofI[0][j];
   int rank, size;
   MPI_Comm_rank(cw, &rank);
   MPI_Comm_size(cw, &size);
 
+  if (verbosity > 4) {
+    std::vector<MPI_Request> rq(2*nN);
+    std::vector<long> mine(nN), his(nN);
+    for (int j = 0; j < nN; ++j) mine[j] = dofI[1+j].n;
+    for (int j = 0; j < nN; ++j){
+      MPI_Irecv(&his[j],  1, MPI_LONG, nbr[j], 1000, cw, &rq[j]);
+      MPI_Isend(&mine[j], 1, MPI_LONG, nbr[j], 1000, cw, &rq[nN+j]);
+    }
+    MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
+    for (int j = 0; j < nN; ++j) ffassert(mine[j] == his[j]);
+    if (rank == 0) cout << "--distributedDofNumbering: intersections symetriques" << endl;
+  }
+
+
   std::vector<std::vector<double>> rcvD;
-  exchangeOnIntersections<double>(cw, neighborRanks, dofI, Ddof, MPI_DOUBLE, 1001, rcvD);
+  exchangeOnIntersections<double>(cw, nbr, dofI, Ddof, MPI_DOUBLE, 1001, rcvD);
 
   const double EPS = 1.0e-12; // HPDDM_EPS
   std::vector<char> owned(nLocDof, 1);
@@ -135,7 +151,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<int>& neighborRanks, 
     for (long p = 0; p <L.n; ++p){
       const long d = L[p];
       const double v = Ddof[d] - rcvD[j][p];
-      const bool win = (v > EPS) || (fabs(v) < EPS && rank > neighborRanks[j]);
+      const bool win = (v > EPS) || (fabs(v) < EPS && rank > nbr[j]);
       if (!win) owned[d] = 0;
     }
   }
@@ -169,7 +185,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<int>& neighborRanks, 
   for (int d = 0; d < nLocDof; ++d) if (owned[d]) num[d] = c++;
 
   std::vector<std::vector<long>> rcvN;
-  exchangeOnIntersections<long>(cw, neighborRanks, dofI, num, MPI_LONG, 1002, rcvN);
+  exchangeOnIntersections<long>(cw, nbr, dofI, num, MPI_LONG, 1002, rcvN);
 
   for (int j = 0; j < nN; ++j){
     const KN<long>& L = dofI[1+j];

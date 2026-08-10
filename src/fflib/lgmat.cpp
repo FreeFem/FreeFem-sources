@@ -27,6 +27,7 @@
  */
 #include "AFunction.hpp"
 #include "FESpacen.hpp"
+#include "lex.hpp"
 #include "throwassert.hpp"
 #ifndef REMOVE_CODE
  // to do  F. HECHT
@@ -1401,17 +1402,25 @@ KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const 
 template<class Mesh>
 KN<KN<long>> buildDofIntersection(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
     const int nN = D.neighborRanks.n;
-    KN<KN<long>> dofI(1 + nN);
-    dofI[0].resize(nN);
-    for (int j = 0; j < nN; ++j) dofI[0][j] = D.neighborRanks[j];
+    std::vector<int> keptRank; keptRank.reserve(nN);
+    std::vector<KN<long>> keptDof; keptDof.reserve(nN);
 
     for (int j = 0; j < nN; ++j){
         KN<int> n2o;
         Mesh* WhMesh = buildIntersectionSubmesh(D, j, n2o);
-        GFESpace<Mesh> Wh(*WhMesh, *Vhi.TFE[0]);
-        dofI[1+j] = restrictDOF(Wh, Vhi, n2o);
+        {
+            GFESpace<Mesh> Wh(*WhMesh, *Vhi.TFE[0]);
+            KN<long> L = restrictDOF(Wh, Vhi, n2o);
+            if (L.n > 0){ keptRank.push_back(D.neighborRanks[j]); keptDof.push_back(L); }
+        }
         WhMesh->destroy();
     }
+
+    const int nK = (int)keptRank.size();
+    KN<KN<long>> dofI(1 + nK);
+    dofI[0].resize(nK);
+    for (int j = 0; j < nK; ++j) dofI[0][j] = keptRank[j];
+    for (int j = 0; j < nK; ++j) dofI[1+j] = keptDof[j];
     return dofI;
 }
 
@@ -1432,13 +1441,16 @@ template<class Mesh>
 void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
     if (!DTh || numberingBuilt) return;
     ffassert(dofDataBuilt);
-    numberingDof = distributedDofNumbering(DTh->comm, DTh->neighborRanks, dofIntersectionDof, Ddof, Vhi.NbOfDF, globalNdof);
+    numberingDof = distributedDofNumbering(DTh->comm, dofIntersectionDof, Ddof, Vhi.NbOfDF, globalNdof);
     numberingBuilt = true;
 }
 
 template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
+    if (DTh->overlap == 0 && mpisize > 1){
+        ExecError("fespace distribute : overlap = 0 not supported.");
+    }
     dofIntersectionDof = buildDofIntersection(*DTh, Vhi);
     Ddof = interpolatePoU(*DTh, Vhi);
 }
