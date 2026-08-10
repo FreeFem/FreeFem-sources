@@ -1,5 +1,5 @@
-// NBPROC 8
-// PARAM -wg -ns -ffddm_overlap 1
+// NBPROC 3
+// PARAM -wg -ns
 
 // =====================================================================
 //  Test multi-configurations de distribute(..., partmethod=...)
@@ -11,7 +11,6 @@
 //  sont pas gardes et leveraient une erreur sinon.
 //
 //  Lancer :
-//    ff-mpirun -np 2 test_distribute_multi.edp -ns
 //    ff-mpirun -np 4 test_distribute_multi.edp -ns
 //    ff-mpirun -np 3 test_distribute_multi.edp -ns   (tranches inegales)
 //  Les criteres sont invariants au partitionnement : V1 (bijection
@@ -28,14 +27,65 @@
 //  l'assemblage : apres "A = vPb(...)" il segfaute.
 //
 //  V5 : Udh.ndofglobal doit egaler UhGlob.ndof.
+//
+//  NI / NE : nombre total d'intersections de ddl declarees, et combien
+//  d'entre elles ont une liste de ddl VIDE. NE > 0 mesure ce que couterait
+//  (ou rapporterait) une purge des voisins d'intersection vide.
+//
+//  W1..W5 (macro CHECKPOU) : exercent le chemin "shell", c'est-a-dire
+//  "Mat A = vPb(Udh, Udh)" SANS Mat construite au prealable. C'est le seul
+//  chemin ou buildShellIfNeeded cede un tampon du fespace a HPDDM ; les
+//  CHECK* ci-dessus passent tous par "Mat A(Udh.ndof, ...)" et sortent donc
+//  au "if (B._A) return;", ils ne le couvrent pas.
+//    W1 : Udh.D est la partition de l'unite FRACTIONNAIRE (nombre de ddl
+//         dans ]0,1[, somme sur les rangs). Doit etre > 0.
+//    W2 : Udh.D est inchange, bit a bit, par la construction de A. C'est le
+//         critere central : HPDDM::Schwarz::restriction() ecrase en place le
+//         tableau qu'on lui cede pour en faire le masque exclusif 0/1, et
+//         initialize() en garde le pointeur brut. Si le tampon cede est
+//         f->Ddof lui-meme, Udh.D change de valeur au milieu du script.
+//         Doit valoir exactement 0.
+//    W3 : A.D est bien ce masque exclusif (valeurs dans {0,1}) : la
+//         restriction a bien lieu, elle s'applique juste ailleurs.
+//    W4 : le chemin shell resout toujours juste (garde-fou sur la propriete
+//         du scaling cote Dmat, dont depend la numerotation globale).
+//    W5 : Udh.D relu APRES construction de A recompose encore exactement un
+//         champ global par somme ponderee inter-rangs.
+//
+//  Parametres de ligne de commande :
+//    -ov     recouvrement passe a distribute (defaut 1)
+//    -nseg   raffinement du segment  (defaut 80)
+//    -nc     raffinement du cube     (defaut 8)
+//    -nsq    raffinement du carre    (defaut 16)
+//    -case   0 = balayage standard (defaut)
+//            1 = partition construite "bande" : trois sous-domaines
+//                x<gauche | bande d'epaisseur -strip | x>droite,
+//                pour eprouver les contacts a distance 2. Exige -np 3.
+//    -strip  epaisseur de la bande en mailles, cas 1 (defaut 2)
 // =====================================================================
 load "Element_P3"
 load "PETSc"
+include "getARGV.idp"
 
 macro Pk()P3//EOM
 
 int npass = 0, ntot = 0;
 string kspp = "-ksp_type gmres -pc_type asm -ksp_rtol 1e-8";
+
+int ov    = getARGV("-ov", 1);
+int nseg  = getARGV("-nseg", 80);
+int nc    = getARGV("-nc", 8);
+int nsq   = getARGV("-nsq", 16);
+int cas   = getARGV("-case", 0);
+int strip = getARGV("-strip", 2);
+
+// -------- comptage des intersections (commun aux trois macros) --------
+macro COUNTI(Udh, nItot, nEtot) {
+  int nI = Udh.intersection[0].n, nEmpty = 0;
+  for (int j = 0; j < nI; ++j) if (Udh.intersection[1 + j].n == 0) nEmpty++;
+  mpiAllReduce(nI,     nItot, mpiCommWorld, mpiSUM);
+  mpiAllReduce(nEmpty, nEtot, mpiCommWorld, mpiSUM);
+}//EOM
 
 // -------- validation courbe/1D (meshL) --------
 macro CHECKL(DTh, Th, tag) {
@@ -45,6 +95,8 @@ macro CHECKL(DTh, Th, tag) {
   fespace UhGlob(Th, Pk);
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
+  int nItot = 0, nEtot = 0;
+  COUNTI(Udh, nItot, nEtot)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -94,6 +146,7 @@ macro CHECKL(DTh, Th, tag) {
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
          << "  V4=" << n4 << "  V5=" << n5
+         << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
@@ -105,6 +158,8 @@ macro CHECK3(DTh, Th, tag) {
   fespace UhGlob(Th, P1);
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
+  int nItot = 0, nEtot = 0;
+  COUNTI(Udh, nItot, nEtot)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -154,6 +209,7 @@ macro CHECK3(DTh, Th, tag) {
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
          << "  V4=" << n4 << "  V5=" << n5
+         << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
@@ -165,6 +221,8 @@ macro CHECKS(DTh, Th, tag) {
   fespace UhGlob(Th, P1);
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
+  int nItot = 0, nEtot = 0;
+  COUNTI(Udh, nItot, nEtot)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -214,64 +272,185 @@ macro CHECKS(DTh, Th, tag) {
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
          << "  V4=" << n4 << "  V5=" << n5
+         << "  NI=" << nItot << "  NE=" << nEtot
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+// -------- invariance de Udh.D sur le chemin "shell" (meshS) --------
+//  Le seul chemin qui passe par buildShellIfNeeded : "Mat A = vPb(...)"
+//  sans constructeur explicite. Voir W1..W5 dans l'entete.
+macro CHECKPOU(DTh, Th, tag) {
+  meshS ThLocal = DTh.local;
+  fespace Uh(ThLocal, P1);
+  fespace Udh(DTh, P1);
+  fespace UhGlob(Th, P1);
+  int[int] l2g = Udh.loc2glob;
+
+  /* W1 : avant toute Mat, Udh.D doit etre fractionnaire */
+  real[int] D0 = Udh.D;
+  real nfrac = 0;
+  for (int i = 0; i < D0.n; ++i)
+    if (D0[i] > 1e-12 && D0[i] < 1.0 - 1e-12) nfrac += 1;
+
+  func f = 1.0;
+  varf vPb(u, v) = int2d(ThLocal)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v))
+                 + int2d(ThLocal)(f*v) + on(1,2,3,4, u = 0);
+  Mat A = vPb(Udh, Udh);           /* chemin shell : aucune Mat construite avant */
+
+  /* W2 : Udh.D relu apres doit etre identique bit a bit */
+  real[int] D1 = Udh.D;
+  real eStable = 0;
+  if (D1.n != D0.n) eStable = 1;
+  else
+    for (int i = 0; i < D0.n; ++i) eStable = max(eStable, abs(D0[i] - D1[i]));
+
+  /* W3 : A.D est le masque exclusif 0/1 (lecture via .*= , seul motif expose) */
+  Uh dmask; dmask[] = 1.0; dmask[] .*= A.D;
+  real eMask = 0;
+  for (int i = 0; i < dmask.n; ++i)
+    eMask = max(eMask, min(abs(dmask[][i]), abs(dmask[][i] - 1.0)));
+
+  /* W4 : la resolution par ce chemin coincide avec le probleme global */
+  real[int] rhs = vPb(0, Uh);
+  set(A, sparams = kspp);
+  real[int] uu = A^-1 * rhs;
+  varf vG(u, v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + int2d(Th)(f*v) + on(1,2,3,4,u=0);
+  matrix AG = vG(UhGlob, UhGlob, solver = UMFPACK);
+  real[int] rG = vG(0, UhGlob);
+  real[int] ug = AG^-1 * rG;
+  real eSol = 0;
+  for (int i = 0; i < uu.n; ++i) eSol = max(eSol, abs(uu[i] - ug[l2g[i]]));
+
+  /* W5 : la PoU relue apres coup recompose encore un champ global */
+  func fa = x + 2*y + 3*z + x*y;
+  UhGlob gg = fa;
+  real[int] acc(UhGlob.ndof); acc = 0;
+  for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D1[i] * gg[][l2g[i]];
+  real[int] accG(UhGlob.ndof);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  real ePoU = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
+
+  real w1, w2, w3, w4, w5;
+  mpiAllReduce(nfrac,   w1, mpiCommWorld, mpiSUM);
+  mpiAllReduce(eStable, w2, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eMask,   w3, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eSol,    w4, mpiCommWorld, mpiMAX);
+  mpiAllReduce(ePoU,    w5, mpiCommWorld, mpiMAX);
+  /* w2 : egalite EXACTE voulue, D0 et D1 sont deux copies du meme tampon
+     sans aucune arithmetique entre les deux ; toute derive est une mutation.
+     w1 n'est exigible qu'a plusieurs rangs : sans voisin, la PoU vaut 1
+     partout et W2 passerait trivialement */
+  bool ok = ((mpisize == 1 || w1 > 0) && w2 == 0.0 && w3 < 1e-12 && w4 < 1e-5 && w5 < 1e-8);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  W1=" << w1 << "  W2=" << w2 << "  W3=" << w3
+         << "  W4=" << w4 << "  W5=" << w5
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
 if (mpirank == 0)
-  cout << "===== distribute() multi-config  (np=" << mpisize << ") =====" << endl;
+  cout << "===== distribute() multi-config  (np=" << mpisize
+       << "  overlap=" << ov << "  case=" << cas
+       << "  nseg=" << nseg << " nc=" << nc << " nsq=" << nsq << ") =====" << endl;
+
+if (cas == 0) {
 
 // ---------- meshL : metis vs scotch ----------
-{ meshL Th = segment(80);
-  DmeshL DTh = distribute(Th, overlap = 1, partmethod = "metis");
+{ meshL Th = segment(nseg);
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "metis");
   CHECKL(DTh, Th, "meshL / metis") }
 
-{ meshL Th = segment(80);
-  DmeshL DTh = distribute(Th, overlap = 1, partmethod = "scotch");
+{ meshL Th = segment(nseg);
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "scotch");
   CHECKL(DTh, Th, "meshL / scotch") }
 
-{ meshL Th = segment(80);
-  DmeshL DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+{ meshL Th = segment(nseg);
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
   CHECKL(DTh, Th, "meshL / parmetis") }
 
 // ---------- meshL : partition utilisateur (decoupage contigu) ----------
-{ meshL Th = segment(80);
+{ meshL Th = segment(nseg);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
-  DmeshL DTh = distribute(Th, overlap = 1, partition = part);
+  DmeshL DTh = distribute(Th, overlap = ov, partition = part);
   CHECKL(DTh, Th, "meshL / partition=user") }
 
 // ---------- mesh3 : metis vs scotch ----------
-{ mesh3 Th = cube(8, 8, 8);
-  Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "metis");
+{ mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis");
   CHECK3(DTh, Th, "mesh3 / metis") }
 
-{ mesh3 Th = cube(8, 8, 8);
-  Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "scotch");
+{ mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "scotch");
   CHECK3(DTh, Th, "mesh3 / scotch") }
 
-{ mesh3 Th = cube(8, 8, 8);
-  Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+{ mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
   CHECK3(DTh, Th, "mesh3 / parmetis") }
 
 // ---------- meshS : metis vs scotch ----------
-{ meshS Th = square3(16, 16);
-  DmeshS DTh = distribute(Th, overlap = 1, partmethod = "metis");
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
   CHECKS(DTh, Th, "meshS / metis") }
 
-{ meshS Th = square3(16, 16);
-  DmeshS DTh = distribute(Th, overlap = 1, partmethod = "scotch");
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "scotch");
   CHECKS(DTh, Th, "meshS / scotch") }
 
-{ meshS Th = square3(16, 16);
-  DmeshS DTh = distribute(Th, overlap = 1, partmethod = "parmetis");
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
   CHECKS(DTh, Th, "meshS / parmetis") }
 
 // ---------- meshS : partition utilisateur (decoupage contigu) ----------
-{ meshS Th = square3(16, 16);
+{ meshS Th = square3(nsq, nsq);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
-  DmeshS DTh = distribute(Th, overlap = 1, partition = part);
+  DmeshS DTh = distribute(Th, overlap = ov, partition = part);
   CHECKS(DTh, Th, "meshS / partition=user") }
+
+// ---------- chemin shell : invariance de Udh.D ----------
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  CHECKPOU(DTh, Th, "shell / Udh.D invariant / metis") }
+
+{ meshS Th = square3(nsq, nsq);
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  DmeshS DTh = distribute(Th, overlap = ov, partition = part);
+  CHECKPOU(DTh, Th, "shell / Udh.D invariant / partition=user") }
+
+}
+else {
+
+// ---------- cas 1 : bande construite, contacts a distance -strip ----------
+//  Trois sous-domaines empiles en x : 0 | 2 (bande de -strip mailles) | 1.
+//  Les rangs 0 et 1 sont separes par -strip mailles. A overlap = 1 :
+//    strip = 1 -> ils se touchent, tout doit passer ;
+//    strip = 2 -> leurs recouvrements ne partagent AUCUN element mais
+//                 partagent un plan de sommets : c'est le contact en coin ;
+//    strip = 3 -> ils ne partagent plus rien, tout doit passer.
+assert(mpisize == 3);
+{ mesh3 Th = cube(nc, nc, nc);
+  fespace Ph(Th, P0);
+  Ph px = x;                            /* P0 = valeur au barycentre */
+  int c0 = (nc - strip) / 2;
+  int[int] part(Th.nt);
+  int n0 = 0, n1 = 0, n2 = 0;
+  for (int k = 0; k < Th.nt; ++k) {
+    int ix = int(px[][k] * nc);
+    if (ix < c0)               { part[k] = 0; n0++; }
+    else if (ix < c0 + strip)  { part[k] = 2; n2++; }
+    else                       { part[k] = 1; n1++; }
+  }
+  if (mpirank == 0)
+    cout << "  bande : strip=" << strip << " mailles, tailles = "
+         << n0 << " / " << n2 << " / " << n1 << endl;
+  assert(n0 > 0 && n1 > 0 && n2 > 0);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partition = part);
+  CHECK3(DTh, Th, "mesh3 / bande strip=" + strip) }
+
+}
 
 if (mpirank == 0) {
   cout << "===== BILAN : " << npass << " / " << ntot << " PASS =====" << endl;

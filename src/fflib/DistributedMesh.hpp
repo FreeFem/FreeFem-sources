@@ -48,4 +48,4 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
 template<class Mesh>
 void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr);
 
-KN<long> distributedDofNumbering(pcommworld comm, const KN<int>& neighborRanks, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof);
+KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof);

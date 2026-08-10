@@ -404,11 +404,12 @@ namespace PETSc {
   buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
     if (B._A) return;
     v_dfes<MMesh>* f = *pUh;
-    buildDistributedShell< false, HpSchwarz<PetscScalar> >(
+    KN<double> Dscratch(f->Ddof);
+    buildDistributedShell< true, HpSchwarz<PetscScalar> >(
       &B,
       1,
       &f->dofIntersectionDof,
-      &f->Ddof,
+      &Dscratch,
       nullptr,
       ndof,
       (PetscInt) f->N,
