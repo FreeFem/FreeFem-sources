@@ -9958,8 +9958,15 @@ public:
 template <class Mesh>
 AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
-  Mesh &Th = *pTh;
+  pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
+  int localNt = (pTh) ? pTh->nt : 0;
+  int mode = detectDistributionMode(localNt, comm);
+
+  if (mode == DM_SCATTER){
+    ExecError("distribute: work in progress");
+  }
   ffassert(pTh);
+  Mesh &Th = *pTh;
 
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
@@ -9977,8 +9984,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 */
 
   KN<int> globalPartition(nbt);
-  pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
-    
+   
   // User partition
   if (nargs[9]) {
     KN_<long> userpart = GetAny< KN_<long> >((*nargs[9])(stack));
