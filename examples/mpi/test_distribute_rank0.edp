@@ -1,0 +1,173 @@
+// NBPROC 4
+// PARAM -ns
+
+// =====================================================================
+//  Commit 1 du mode scatter : validation du TRANSPORT de maillage,
+//  rang 0 -> tous les autres (sendMesh / recvMesh de distributeMesh.cpp).
+//
+//  PREREQUIS -- ce test appelle scatterMeshTest(), un binding TEMPORAIRE
+//  a enregistrer dans msh3.cpp le temps du commit 1 : il n'existe pas
+//  encore de point d'entree script vers sendMesh/recvMesh, et distribute()
+//  ne connait pas encore le mode scatter (commits 3 et 4).
+//
+//  Semantique attendue de scatterMeshTest(Th) :
+//    mpisize == 1 : renvoie Th
+//    rang 0       : sendMesh(Th, i, comm) pour i = 1..np-1, renvoie Th
+//    rangs != 0   : recvMesh(0, comm) et renvoient le maillage recu
+//  Le maillage n'est construit QUE sur le rang 0 ; les autres passent un
+//  maillage non initialise (pointeur nul), exactement comme le fera le
+//  mode scatter reel.
+//
+//  Ce que le test couvre -- les quatre blocs ecrits par serialize()
+//  (cf. GenericMesh::serialize, GenericMesh.hpp:2033) :
+//    S0  l'en-tete           : nv, nt, nbe
+//    S1  les sommets         : coordonnees ET labels
+//    S2  les elements        : labels
+//    S3  les elements de bord: labels
+//  plus measure / bordermeasure, qui sont RECALCULES par le constructeur
+//  de desrialisation et valident donc la reconstruction, pas seulement
+//  le transport.
+//
+//  Les signatures S1..S3 sont ponderees par l'indice (i+1) : elles sont
+//  donc sensibles a l'ORDRE, et pas seulement au contenu. C'est voulu --
+//  toute la suite du chantier repose sur le fait que la troncature et la
+//  serialisation preservent l'ordre des sommets et des elements.
+//
+//  T5 teste specifiquement l'option 2 (drapeau dans l'en-tete + appel de
+//  BuildMeshS cote receveur) : un mesh3 dont la source portait une surface
+//  attachee doit la retrouver apres transport. C'est le SEUL critere qui
+//  couvre ce mecanisme ; les blocs meshS et meshL l'exercent en negatif,
+//  hasAttached() y renvoyant toujours false.
+//
+//  Tous les criteres doivent valoir exactement 0 : les entiers et les
+//  coordonnees transitent par memcpy et font un aller-retour exact, et
+//  les mesures sont recalculees dans le meme ordre a partir des memes
+//  valeurs. Un ecart non nul, meme minuscule, est un bug.
+//
+//  Lancer :
+//    ff-mpirun -np 2 test_distribute_rank0.edp -ns
+//    ff-mpirun -np 4 test_distribute_rank0.edp -ns
+//    ff-mpirun -np 7 test_distribute_rank0.edp -ns   (np non diviseur)
+// =====================================================================
+include "getARGV.idp"
+
+int npass = 0, ntot = 0;
+
+int nseg = getARGV("-nseg", 40);
+int nsq  = getARGV("-nsq",  12);
+int nc   = getARGV("-nc",    6);
+
+// -------------------------------------------------------------------
+//  Signature complete d'un maillage : 8 reels resumant tout ce que
+//  serialize() met sur le fil, plus ce que la deserialisation recalcule.
+//  Fonctionne telle quelle sur meshL / meshS / mesh3 : les accesseurs
+//  .nv .nt .nbe .measure .bordermeasure, Th(i).x|y|z|label, Th[k].label
+//  et Th.be(b).label sont enregistres pour les trois types.
+// -------------------------------------------------------------------
+macro SIGNATURE(Th, sig) {
+  sig.resize(8);
+  sig = 0;
+  sig[0] = Th.nv;
+  sig[1] = Th.nt;
+  sig[2] = Th.nbe;
+  sig[3] = Th.measure;
+  sig[4] = Th.bordermeasure;
+  /* S1 : sommets, coordonnees + label, ponderes par le rang */
+  real sV = 0;
+  for (int i = 0; i < Th.nv; ++i)
+    sV += (i + 1.) * (Th(i).x + 2.*Th(i).y + 3.*Th(i).z + 5.*Th(i).label);
+  sig[5] = sV;
+  /* S2 : labels d'elements */
+  real sE = 0;
+  for (int k = 0; k < Th.nt; ++k) sE += (k + 1.) * Th[k].label;
+  sig[6] = sE;
+  /* S3 : labels d'elements de bord */
+  real sB = 0;
+  for (int b = 0; b < Th.nbe; ++b) sB += (b + 1.) * Th.be(b).label;
+  sig[7] = sB;
+} // EOM
+
+// -------------------------------------------------------------------
+//  Compare la signature locale a celle du rang 0, diffusee en reference.
+//  Sur le rang 0 l'ecart est trivialement nul ; ce sont les autres rangs
+//  qui portent l'information, d'ou le mpiAllReduce en max.
+// -------------------------------------------------------------------
+macro COMPARE(Th, tag) {
+  real[int] mine(8), ref(8);
+  SIGNATURE(Th, mine)
+  ref = mine;
+  broadcast(processor(0), ref);
+
+  real eCount = 0, eMes = 0, eSig = 0;
+  for (int i = 0; i <= 2; ++i) eCount = max(eCount, abs(mine[i] - ref[i]));
+  for (int i = 3; i <= 4; ++i) eMes   = max(eMes,   abs(mine[i] - ref[i]));
+  for (int i = 5; i <= 7; ++i) eSig   = max(eSig,   abs(mine[i] - ref[i]));
+
+  real g1, g2, g3;
+  mpiAllReduce(eCount, g1, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eMes,   g2, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eSig,   g3, mpiCommWorld, mpiMAX);
+
+  bool ok = (g1 == 0.0 && g2 == 0.0 && g3 == 0.0);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  T1=" << g1 << "  T2=" << g2 << "  T3=" << g3
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+} // EOM
+
+if (mpirank == 0)
+  cout << "===== transport rang0 -> tous  (np=" << mpisize
+       << "  nseg=" << nseg << " nsq=" << nsq << " nc=" << nc << ") =====" << endl;
+
+// ---------- meshL ----------
+{ meshL Th;
+  if (mpirank == 0) Th = segment(nseg);
+  Th = scatterMeshTest(Th);
+  COMPARE(Th, "meshL / segment") }
+
+// ---------- meshS ----------
+{ meshS Th;
+  if (mpirank == 0) Th = square3(nsq, nsq);
+  Th = scatterMeshTest(Th);
+  COMPARE(Th, "meshS / square3") }
+
+// ---------- mesh3, sans surface attachee ----------
+{ mesh3 Th;
+  if (mpirank == 0) Th = cube(nc, nc, nc);
+  Th = scatterMeshTest(Th);
+  COMPARE(Th, "mesh3 / cube") }
+
+// ---------- mesh3 AVEC surface attachee : test de l'option 2 ----------
+//  Le tampon reste en forme nue (serialize(), havebordermesh = 0) : la
+//  surface n'est PAS transportee. Seul un bit de l'en-tete voyage, et le
+//  receveur reconstruit par BuildMeshS() depuis les elements de bord du
+//  volume -- exactement ce que fait truncmesh (msh3.cpp:6505-6508).
+//  T4 verifie le volume, T5 la surface reconstruite.
+{ mesh3 Th;
+  if (mpirank == 0) { Th = cube(nc, nc, nc); Th = buildBdMesh(Th); }
+  Th = scatterMeshTest(Th);
+  COMPARE(Th, "mesh3 / cube + surface attachee")
+
+  meshS G = Th.Gamma;
+  real[int] mineG(8), refG(8);
+  SIGNATURE(G, mineG)
+  refG = mineG;
+  broadcast(processor(0), refG);
+  real eG = 0;
+  for (int i = 0; i < 8; ++i) eG = max(eG, abs(mineG[i] - refG[i]));
+  real gG;
+  mpiAllReduce(eG, gG, mpiCommWorld, mpiMAX);
+  /* garde-fou : une Gamma vide passerait le test par accident */
+  bool okG = (gG == 0.0 && G.nt > 0);
+  ntot++; if (okG) npass++;
+  if (mpirank == 0)
+    cout << "  [mesh3 / Gamma reconstruite]  T5=" << gG
+         << "  (Gamma.nt=" << G.nt << ")"
+         << "   => " << (okG ? "PASS" : "FAIL") << endl;
+}
+
+if (mpirank == 0) {
+  cout << "===== BILAN : " << npass << " / " << ntot << " PASS =====" << endl;
+  cout << (npass == ntot ? "  >>> ALL PASS" : "  >>> DES ECHECS") << endl;
+}
+assert(npass == ntot);
