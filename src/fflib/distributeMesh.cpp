@@ -15,6 +15,10 @@
 
 
 extern long mpisize, mpirank;
+static const size_t CHUNK = size_t(512) << 20;
+static const int TAG_SCATTER_HDR = 2000;
+static const int TAG_SCATTER_BUF = 2001;
+static const int TAG_SCATTER_PART = 2002;
 
 template<class Mesh>
 void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm){
@@ -97,6 +101,65 @@ static void exchangeOnIntersections(MPI_Comm cw, const KN<int>& nbr, const KN<KN
     MPI_Isend(snd[j].data(), (int)L.n, dt, nbr[j], tag, cw, &rq[nN+j]);
   }
   MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
+}
+
+static bool hasAttached(const Mesh3& Th) { return Th.meshS != nullptr; }
+static bool hasAttached(const MeshS&) { return false; }
+static bool hasAttached(const MeshL&) { return false; }
+static void rebuildAttached(Mesh3* Th, bool f) {if (f) Th->BuildMeshS();}
+static void rebuildAttached(MeshS*, bool) {}
+static void rebuildAttached(MeshL*, bool) {}
+
+template<class Mesh>
+void sendMesh(const Mesh& Th, int dest, pcommworld comm){
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  Serialize buf = Th.serialize();
+  long long hdr[2] = { (long long)buf.size(), hasAttached(Th) ? 1LL : 0LL};
+
+  MPI_Send(hdr, 2, MPI_LONG_LONG, dest, TAG_SCATTER_HDR, cw);
+
+  char* raw = (char*)buf;
+  size_t total = (size_t)hdr[0], off = 0;
+  while (off < total) {
+    int n = (int)std::min(CHUNK, total - off);
+    MPI_Send(raw+off, n, MPI_BYTE, dest, TAG_SCATTER_BUF, cw);
+    off +=n;
+  }
+}
+
+template<class Mesh>
+Mesh* recvMesh(int src, pcommworld comm){
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Status st;
+  long long hdr[2];
+  MPI_Recv(hdr, 2, MPI_LONG_LONG, src, TAG_SCATTER_HDR, cw, &st);
+  ffassert(hdr[0]>0);
+
+  Serialize buf((size_t)hdr[0], Fem2D::GenericMesh_magicmesh);
+  char* raw = (char*)buf;
+  size_t total = (size_t)hdr[0], off = 0;
+
+  while (off < total){
+    int n = (int)std::min(CHUNK, total-off);
+    MPI_Recv(raw+off, n, MPI_BYTE, src, TAG_SCATTER_BUF, cw, &st);
+    int got;
+    MPI_Get_count(&st, MPI_BYTE, &got);
+    off +=got;
+  }
+
+  Mesh* Th = new Mesh(buf);
+  rebuildAttached(Th, hdr[1] != 0);
+  return Th;
+}
+#else
+template<class Mesh>
+void sendMesh(const Mesh&, int, pcommworld){
+  ExecError("sendMesh is used only in a parallel setting.");
+}
+template<class Mesh>
+Mesh* recvMesh(int, pcommworld){
+  ExecError("recvMesh is used only in a parallel setting.");
+  return nullptr;
 }
 #endif
 
@@ -203,3 +266,10 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 template void computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld);
 template void computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld);
 template void computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld);
+
+template void sendMesh<MeshS>(const MeshS&, int, pcommworld);
+template MeshS* recvMesh<MeshS>(int, pcommworld);
+template void sendMesh<Mesh3>(const Mesh3&, int, pcommworld);
+template Mesh3* recvMesh<Mesh3>(int, pcommworld);
+template void sendMesh<MeshL>(const MeshL&, int, pcommworld);
+template MeshL* recvMesh<MeshL>(int, pcommworld);

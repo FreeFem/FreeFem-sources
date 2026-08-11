@@ -10201,6 +10201,19 @@ const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh
     return Th;
 }
 
+template<class Mesh>
+const Mesh* scatterMeshTest(Stack stack, const Mesh* const& pTh){
+  if (mpisize <= 1) return pTh;
+  if (mpirank == 0) {
+    ffassert(pTh);
+    for (int i = 1; i < (int)mpisize; ++i) sendMesh(*pTh, i, (pcommworld)nullptr);
+    return pTh;
+  }
+  Mesh* Th = recvMesh<Mesh>(0, (pcommworld)nullptr);
+  Add2StackOfPtr2FreeRC(stack, Th);
+  return Th;
+}
+
 // Enregistre <- / = / local / distributed pour Distributed Meshh
 template<class Mesh>
 static void registerDistributedMeshOps() {
@@ -10211,6 +10224,7 @@ static void registerDistributedMeshOps() {
   atype<const Mesh*>()->AddCast(new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
   Global.Add("distribute", "(", new DistributeMesh<Mesh>);
   Global.Add("distribute", "(", new DistributeMesh<Mesh>(1));
+  Global.Add("scatterMeshTest", "(", new OneOperator1s_<const Mesh*, const Mesh*>(scatterMeshTest<Mesh>));
 }
 
 
