@@ -6,6 +6,8 @@
 typedef void* pcommworld;
 #endif
 
+enum DistributionMode {DM_SCATTER = 0, DM_REPLICATED = 1 };
+
 template <class Mesh>
 class DistributedMesh : public RefCounter {
 public: 
@@ -47,6 +49,8 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
 // Partition globale
 template<class Mesh>
 void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr);
+
+int detectDistributionMode(int localNt, pcommworld comm);
 
 template<class Mesh>
 void sendMesh(const Mesh& Th, int dest, pcommworld comm);

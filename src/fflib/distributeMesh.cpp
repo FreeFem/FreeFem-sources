@@ -103,6 +103,35 @@ static void exchangeOnIntersections(MPI_Comm cw, const KN<int>& nbr, const KN<KN
   MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
 }
 
+int detectDistributionMode(int localNt, pcommworld comm)
+{
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  int size;
+  MPI_Comm_size(cw, &size);
+
+  int has = (localNt > 0) ? 1 : 0;
+  KN<int> hasMesh(size);
+  MPI_Allgather(&has, 1, MPI_INT, (int*)hasMesh, 1, MPI_INT, cw);
+
+  int nHas = hasMesh.sum();
+  if (nHas == size){
+    return DM_REPLICATED;
+  }
+  else if (nHas == 1 && hasMesh[0] == 1){
+    return DM_SCATTER;
+  }
+  else if (nHas == 0){
+    ExecError("distribute: no rank has a mesh");
+  }
+  else if (hasMesh[0] == 0){
+    ExecError("distribute: to use scatter mode, the global mesh must be built on rank 0");
+  }
+  else{
+    ExecError("distribute: mixed mode not supported: either all ranks have the global mesh, or only rank 0");
+  }
+  return DM_REPLICATED;
+}
+
 static bool hasAttached(const Mesh3& Th) { return Th.meshS != nullptr; }
 static bool hasAttached(const MeshS&) { return false; }
 static bool hasAttached(const MeshL&) { return false; }
@@ -152,6 +181,10 @@ Mesh* recvMesh(int src, pcommworld comm){
   return Th;
 }
 #else
+int detectDistributionMode(int, pcommworld){
+  return DM_REPLICATED;
+}
+
 template<class Mesh>
 void sendMesh(const Mesh&, int, pcommworld){
   ExecError("sendMesh is used only in a parallel setting.");
