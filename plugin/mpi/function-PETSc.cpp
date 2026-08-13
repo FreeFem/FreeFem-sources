@@ -1,4 +1,6 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: petsc mpi
+/* clang-format on */
 
 #include <ff++.hpp>
 #include <petsc.h>

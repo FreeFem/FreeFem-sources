@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: [slepccomplex petsccomplex|petsccomplex] [mkl|blas] [htool bemtool boost] hpddm mpi
 //ff-c++-cpp-dep:
+/* clang-format on */
 
 #define  PETScandSLEPc 1
 #if defined(__clang__)

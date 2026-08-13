@@ -26,8 +26,10 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* clang-format off */
 //ff-c++-LIBRARY-dep: mpi
 //ff-c++-cpp-dep: ../seq/cmaes.cpp -I../seq
+/* clang-format on */
 
 /*
 	This is a freefem interface of the Hansen's CMA-ES C optimizer.

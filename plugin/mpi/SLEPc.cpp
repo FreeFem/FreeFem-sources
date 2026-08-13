@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: cxx11
 //ff-c++-cpp-dep:
+/* clang-format on */
 
 #include "ff++.hpp"
 

@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: [slepc petsc|petsc] [mkl|blas] hpddm mpi
 //ff-c++-cpp-dep:
+/* clang-format on */
 #define  PETScandSLEPc 1
 #if defined(__clang__)
   #pragma clang diagnostic push

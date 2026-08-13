@@ -10,7 +10,9 @@
 // http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff
 //
 //----------------------------------------------------------------------
+/* clang-format off */
 //ff-c++-LIBRARY-dep: [zlib]
+/* clang-format on */
 
 // Usage:
 //
