@@ -307,7 +307,7 @@ class Adaptation :   public E_F0mps { public:
   Expression nargs[n_name_param];
   Expression getmesh;
   Expression em11,em22,em12;
-  int  typesol[100];
+  int typesol[1000];
   vector<Expression> sol;
   int nbcperiodic;
   Expression *periodic;
@@ -328,7 +328,7 @@ class Adaptation :   public E_F0mps { public:
       args.SetNameParam(n_name_param,name_param,nargs);
       getmesh=to<pmesh>(args[0]);
       int ksol=0;
-      ffassert(nbsol<100);
+      ffassert(nbsol<sizeof(typesol));
       for (int i=1;i<nbsol+1;i++)
          if (args[i].left()==atype<E_Array>())
           {
