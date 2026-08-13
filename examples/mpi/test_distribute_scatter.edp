@@ -1,0 +1,302 @@
+// NBPROC 3
+// PARAM -ns -part metis
+
+// =====================================================================
+//
+//  OPTIONS
+//    -ov     recouvrement passe a distribute            (defaut 1)
+//    -nseg   raffinement du segment  (meshL)            (defaut 40)
+//    -nsq    raffinement du carre    (meshS)            (defaut 12)
+//    -nc     raffinement du cube     (mesh3)            (defaut 5)
+//    -part   partitionneur : user | metis | scotch | all (defaut all)
+//    -case   0 = balayage standard                      (defaut 0)
+//            1 = partition "bande" : trois sous-domaines
+//                x<gauche | bande de -strip mailles | x>droite,
+//                pour eprouver les contacts a distance. Exige -np 3.
+//    -strip  epaisseur de la bande en mailles, cas 1    (defaut 2)
+//
+//  A LANCER
+//    ff-mpirun -np 2 test_distribute_scatter.edp -ns
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns
+//    ff-mpirun -np 4 test_distribute_scatter.edp -ns
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -ov 2
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 1 -nc 8
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 2 -nc 8
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 3 -nc 8
+// =====================================================================
+include "getARGV.idp"
+
+int npass = 0, ntot = 0;
+
+int    ov    = getARGV("-ov",    1);
+int    nseg  = getARGV("-nseg", 40);
+int    nsq   = getARGV("-nsq",  12);
+int    nc    = getARGV("-nc",    5);
+int    cas   = getARGV("-case",  0);
+int    strip = getARGV("-strip", 2);
+string pmeth = getARGV("-part", "all");
+
+bool doUser   = (pmeth == "user"   || pmeth == "all");
+bool doMetis  = (pmeth == "metis"  || pmeth == "all");
+bool doScotch = (pmeth == "scotch" || pmeth == "all");
+
+// -------------------------------------------------------------------
+//  Signature complete d'un maillage : 8 reels resumant tout ce que
+//  serialize() met sur le fil, plus ce que la deserialisation recalcule.
+//  Fonctionne telle quelle sur meshL / meshS / mesh3.
+//  Les blocs S1..S3 sont ponderes par l'indice : sensibles a l'ordre.
+// -------------------------------------------------------------------
+macro SIGNATURE(Th, sig) {
+  sig.resize(8);
+  sig = 0;
+  sig[0] = Th.nv;
+  sig[1] = Th.nt;
+  sig[2] = Th.nbe;
+  sig[3] = Th.measure;
+  sig[4] = Th.bordermeasure;
+  real sV = 0;
+  for (int i = 0; i < Th.nv; ++i)
+    sV += (i + 1.) * (Th(i).x + 2.*Th(i).y + 3.*Th(i).z + 5.*Th(i).label);
+  sig[5] = sV;
+  real sE = 0;
+  for (int k = 0; k < Th.nt; ++k) sE += (k + 1.) * Th[k].label;
+  sig[6] = sE;
+  real sB = 0;
+  for (int b = 0; b < Th.nbe; ++b) sB += (b + 1.) * Th.be(b).label;
+  sig[7] = sB;
+} // EOM
+
+// -------------------------------------------------------------------
+//  Compare un maillage distribue REPLIQUE (DA) a son homologue SCATTER
+//  (DB), pour un element fini donne. Tous les ecarts sont reduits en max
+//  sur les rangs : un seul rang fautif fait echouer le critere.
+// -------------------------------------------------------------------
+macro CMPPAIR(MTYPE, FEK, DA, DB, tag) {
+  /* --- S1 : maillages locaux --- */
+  MTYPE LA = DA.local;
+  MTYPE LB = DB.local;
+  real[int] sigA(8), sigB(8);
+  SIGNATURE(LA, sigA)
+  SIGNATURE(LB, sigB)
+  real e1 = 0;
+  for (int i = 0; i < 8; ++i) e1 = max(e1, abs(sigA[i] - sigB[i]));
+
+  fespace UA(DA, FEK);
+  fespace UB(DB, FEK);
+
+  /* --- S2 : nombre de ddl locaux --- */
+  real e2 = abs(1.0*(UA.ndof - UB.ndof));
+
+  /* --- S3 : partition de l'unite --- */
+  real e3 = 0;
+  {
+    real[int] dA = UA.D, dB = UB.D;
+    if (dA.n != dB.n) e3 = 1;
+    else for (int i = 0; i < dA.n; ++i) e3 = max(e3, abs(dA[i] - dB[i]));
+  }
+
+  /* --- S4 : intersections (voisins, longueurs, ddl) --- */
+  real e4 = 0;
+  {
+    int nA = UA.intersection[0].n, nB = UB.intersection[0].n;
+    if (nA != nB) e4 = 1;
+    else
+      for (int j = 0; j < nA; ++j) {
+        e4 = max(e4, abs(1.0*(UA.intersection[0][j] - UB.intersection[0][j])));
+        int lA = UA.intersection[1+j].n, lB = UB.intersection[1+j].n;
+        if (lA != lB) e4 = max(e4, 1.0);
+        else
+          for (int p = 0; p < lA; ++p)
+            e4 = max(e4, abs(1.0*(UA.intersection[1+j][p] - UB.intersection[1+j][p])));
+      }
+  }
+
+  /* --- S5 : numerotation globale des ddl --- */
+  real e5 = 0;
+  {
+    int[int] gA = UA.numbering, gB = UB.numbering;
+    if (gA.n != gB.n) e5 = 1;
+    else for (int i = 0; i < gA.n; ++i) e5 = max(e5, abs(1.0*(gA[i] - gB[i])));
+  }
+
+  /* --- S6 : nombre global de ddl --- */
+  real e6 = abs(1.0*(UA.ndofglobal - UB.ndofglobal));
+
+  real g1, g2, g3, g4, g5, g6;
+  mpiAllReduce(e1, g1, mpiCommWorld, mpiMAX);
+  mpiAllReduce(e2, g2, mpiCommWorld, mpiMAX);
+  mpiAllReduce(e3, g3, mpiCommWorld, mpiMAX);
+  mpiAllReduce(e4, g4, mpiCommWorld, mpiMAX);
+  mpiAllReduce(e5, g5, mpiCommWorld, mpiMAX);
+  mpiAllReduce(e6, g6, mpiCommWorld, mpiMAX);
+
+  bool ok = (g1 == 0.0 && g2 == 0.0 && g3 == 0.0
+          && g4 == 0.0 && g5 == 0.0 && g6 == 0.0);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  S1=" << g1 << " S2=" << g2 << " S3=" << g3
+         << " S4=" << g4 << " S5=" << g5 << " S6=" << g6
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+} // EOM
+
+// -------------------------------------------------------------------
+//  Une paire replique/scatter avec partition UTILISATEUR (deterministe).
+//  ThRep existe partout, ThSca sur le rang 0 seul. Le tableau part est
+//  bati depuis ThRep, donc identique sur tous les rangs ; distribute()
+//  ne le lira que sur le rang 0 en mode scatter.
+// -------------------------------------------------------------------
+macro PAIRUSER(MTYPE, DTYPE, ThRep, ThSca, tag) {
+  /* S0 : garde de setup -- sans elle on comparerait replique a replique */
+  int s0 = ((mpirank == 0 || ThSca.nt == 0) ? 0 : 1), g0;
+  mpiAllReduce(s0, g0, mpiCommWorld, mpiMAX);
+  ntot++;
+  if (g0 == 0) npass++;
+  else if (mpirank == 0)
+    cout << "  [" << tag << " / setup]  S0=" << g0 << "   => FAIL"
+         << "  (le maillage scatter n'est pas vide hors rang 0)" << endl;
+
+  int[int] part(ThRep.nt);
+  for (int k = 0; k < ThRep.nt; ++k) part[k] = k * mpisize / ThRep.nt;
+
+  DTYPE DA = distribute(ThRep, overlap = ov, partition = part);
+  DTYPE DB = distribute(ThSca, overlap = ov, partition = part);
+
+  CMPPAIR(MTYPE, P1, DA, DB, tag + " / user / P1")
+  CMPPAIR(MTYPE, P2, DA, DB, tag + " / user / P2")
+} // EOM
+
+// -------------------------------------------------------------------
+//  Une paire replique/scatter avec un partitionneur nomme.
+//  metis et scotch sont deterministes a maillage identique (scotch fait
+//  un SCOTCH_randomReset a chaque appel), donc les deux distribute()
+//  obtiennent la meme partition.
+//  parmetis est volontairement absent : il est refuse en mode scatter,
+//  puisqu'il exige le maillage global sur tous les rangs.
+// -------------------------------------------------------------------
+macro PAIRMETHOD(MTYPE, DTYPE, ThRep, ThSca, meth, tag) {
+  DTYPE DA = distribute(ThRep, overlap = ov, partmethod = meth);
+  DTYPE DB = distribute(ThSca, overlap = ov, partmethod = meth);
+  CMPPAIR(MTYPE, P1, DA, DB, tag + " / P1")
+  CMPPAIR(MTYPE, P2, DA, DB, tag + " / P2")
+} // EOM
+
+if (mpirank == 0)
+  cout << "===== scatter == replique ?  (np=" << mpisize
+       << "  overlap=" << ov << "  case=" << cas
+       << "  part=" << pmeth << ") =====" << endl;
+
+if (cas == 0) {
+
+  // ------------------------- meshL -------------------------
+  if (doUser) {
+    meshL ThR = segment(nseg);
+    meshL ThS; if (mpirank == 0) ThS = segment(nseg);
+    PAIRUSER(meshL, DmeshL, ThR, ThS, "meshL")
+  }
+  if (doMetis) {
+    meshL ThR = segment(nseg);
+    meshL ThS; if (mpirank == 0) ThS = segment(nseg);
+    PAIRMETHOD(meshL, DmeshL, ThR, ThS, "metis", "meshL / metis")
+  }
+  if (doScotch) {
+    meshL ThR = segment(nseg);
+    meshL ThS; if (mpirank == 0) ThS = segment(nseg);
+    PAIRMETHOD(meshL, DmeshL, ThR, ThS, "scotch", "meshL / scotch")
+  }
+
+  // ------------------------- meshS -------------------------
+  if (doUser) {
+    meshS ThR = square3(nsq, nsq);
+    meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+    PAIRUSER(meshS, DmeshS, ThR, ThS, "meshS")
+  }
+  if (doMetis) {
+    meshS ThR = square3(nsq, nsq);
+    meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+    PAIRMETHOD(meshS, DmeshS, ThR, ThS, "metis", "meshS / metis")
+  }
+  if (doScotch) {
+    meshS ThR = square3(nsq, nsq);
+    meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+    PAIRMETHOD(meshS, DmeshS, ThR, ThS, "scotch", "meshS / scotch")
+  }
+
+  // ------------------------- mesh3 -------------------------
+  if (doUser) {
+    mesh3 ThR = cube(nc, nc, nc);
+    mesh3 ThS; if (mpirank == 0) ThS = cube(nc, nc, nc);
+    PAIRUSER(mesh3, Dmesh3, ThR, ThS, "mesh3")
+  }
+  if (doMetis) {
+    mesh3 ThR = cube(nc, nc, nc);
+    mesh3 ThS; if (mpirank == 0) ThS = cube(nc, nc, nc);
+    PAIRMETHOD(mesh3, Dmesh3, ThR, ThS, "metis", "mesh3 / metis")
+  }
+  if (doScotch) {
+    mesh3 ThR = cube(nc, nc, nc);
+    mesh3 ThS; if (mpirank == 0) ThS = cube(nc, nc, nc);
+    PAIRMETHOD(mesh3, Dmesh3, ThR, ThS, "scotch", "mesh3 / scotch")
+  }
+
+  // -------- mesh3 portant une surface attachee (option 2) --------
+  //  Le tampon envoye reste en forme nue : seul un bit de l'en-tete
+  //  voyage, et le receveur reconstruit la surface par BuildMeshS()
+  //  depuis les elements de bord du volume. Le maillage local doit donc
+  //  etre identique a celui du mode replique, surface comprise.
+  if (doUser) {
+    mesh3 ThR = cube(nc, nc, nc);  ThR = buildBdMesh(ThR);
+    mesh3 ThS; if (mpirank == 0) { ThS = cube(nc, nc, nc); ThS = buildBdMesh(ThS); }
+    PAIRUSER(mesh3, Dmesh3, ThR, ThS, "mesh3+Gamma")
+  }
+
+}
+else {
+
+  // ---------- cas 1 : bande construite, contacts a distance -strip ----------
+  //  Trois sous-domaines empiles en x : 0 | 2 (bande de -strip mailles) | 1.
+  //  A overlap = 1 :
+  //    strip = 1 -> les rangs 0 et 1 se touchent ;
+  //    strip = 2 -> leurs recouvrements ne partagent AUCUN element mais
+  //                 partagent un plan de sommets : le contact en coin,
+  //                 c'est la configuration la plus exigeante pour la
+  //                 marge de 2*overlap couches du sous-maillage envoye ;
+  //    strip = 3 -> ils ne partagent plus rien.
+  assert(mpisize == 3);
+  assert(nc > strip + 1);
+
+  mesh3 ThR = cube(nc, nc, nc);
+  mesh3 ThS; if (mpirank == 0) ThS = cube(nc, nc, nc);
+
+  int s0 = ((mpirank == 0 || ThS.nt == 0) ? 0 : 1), g0;
+  mpiAllReduce(s0, g0, mpiCommWorld, mpiMAX);
+  ntot++; if (g0 == 0) npass++;
+
+  fespace Ph(ThR, P0);
+  Ph px = x;                            /* P0 = valeur au barycentre */
+  int c0 = (nc - strip) / 2;
+  int[int] part(ThR.nt);
+  int n0 = 0, n1 = 0, n2 = 0;
+  for (int k = 0; k < ThR.nt; ++k) {
+    int ix = int(px[][k] * nc);
+    if (ix < c0)              { part[k] = 0; n0++; }
+    else if (ix < c0 + strip) { part[k] = 2; n2++; }
+    else                      { part[k] = 1; n1++; }
+  }
+  if (mpirank == 0)
+    cout << "  bande : strip=" << strip << " mailles, tailles = "
+         << n0 << " / " << n2 << " / " << n1 << endl;
+  assert(n0 > 0 && n1 > 0 && n2 > 0);
+
+  Dmesh3 DA = distribute(ThR, overlap = ov, partition = part);
+  Dmesh3 DB = distribute(ThS, overlap = ov, partition = part);
+
+  CMPPAIR(mesh3, P1, DA, DB, "bande strip=" + strip + " / P1")
+  CMPPAIR(mesh3, P2, DA, DB, "bande strip=" + strip + " / P2")
+
+}
+
+if (mpirank == 0) {
+  cout << "===== BILAN : " << npass << " / " << ntot << " PASS =====" << endl;
+  cout << (npass == ntot ? "  >>> ALL PASS" : "  >>> DES ECHECS") << endl;
+}
+assert(npass == ntot);

@@ -41,6 +41,8 @@
 #include "AFunction.hpp"
 #include "RNM.hpp"
 #include "error.hpp"
+#include "lg.tab.hpp"
+#include "throwassert.hpp"
 #ifndef WITH_NO_INIT    // cf [[WITH_NO_INIT]]
 #include "ff++.hpp"
 #endif
@@ -9820,7 +9822,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 12;
+	static const int n_name_param = 13;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9867,7 +9869,8 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"overlap", &typeid(long)},
 {"partition", &typeid(KN_< long >)},
 {"partmethod", &typeid(string*)},
-{"comm", &typeid(pcommworld)}
+{"comm", &typeid(pcommworld)},
+{"scatter", &typeid(bool)}
 };
 
 inline long overlapLayers(long s) {
@@ -9913,8 +9916,54 @@ KN<int> n2oFromSplit(const Mesh& parent, const Mesh& sub, const KN<int>& splitMa
 }
 
 template<class Mesh>
+static void scatterGlobalMesh(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate, pcommworld comm){
+  int nbt = Th.nt;
+  int nbv = Th.nv;
+  int nve = Mesh::Element::nv;
+
+  for (int i = 1; i < mpisize; i++){
+    KN<double> supp(nbt, 0.0);
+    for (int k = 0; k < nbt; k++){
+      supp[k] = (globalPartition[k] == i) ? 1.0 : 0.0;
+    }
+    KN<double> phi(nbv, 0.0);
+    AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &phi);
+
+    KN<int> mask(nbt, 0);
+    for (int k = 0; k < nbt; ++k){
+      double m = 0.0;
+      for (int j = 0; j < nve; ++j){
+        m = max(m, phi[Th(k,j)]);
+      }
+      mask[k] = (m > 0.001) ? 1 : 0;
+    }
+
+    Mesh* Sub = truncmesh(Th, 1, (int*)mask, false, 9999, precis_mesh, orientation, cleanmesh, removeduplicate);
+    ffassert(Sub->nt > 0);
+    Sub->BuildGTree();
+    KN<int> n2o = n2oFromSplit(Th, *Sub, mask);
+
+    KN<int> parti(Sub->nt);
+    for (int kc = 0; kc < Sub->nt; kc++){
+      parti[kc] = globalPartition[n2o[kc]];
+    }
+
+    if (verbosity > 4) {
+      int nOwn = 0; for (int kc = 0; kc < Sub->nt; ++kc) if (parti[kc] == i) nOwn++;
+      int nRef = 0; for (int k = 0; k < nbt; ++k)        if (globalPartition[k] == i) nRef++;
+      cout << "--scatter -> rang " << i << " : nt=" << Sub->nt << " nv=" << Sub->nv
+          << "  partition i : " << nOwn << " / " << nRef << endl;
+    }
+
+    sendMesh(*Sub, i, comm);
+    sendPartition(parti, i, comm);
+    Sub->destroy();
+  }
+}
+
+template<class Mesh>
 Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o){
-  KN<int> keptByJ = keptGlobalElements(*D.GlobalMesh, D.globalPartition, (long)D.overlap, D.neighborRanks[j]);
+  KN<int> keptByJ = keptGlobalElements(*D.CoverMesh, D.globalPartition, (long)D.overlap, D.neighborRanks[j]);
   KN<int> splitInter(D.LocalMesh->nt,0);
   for (int k = 0; k < D.LocalMesh->nt; ++k){
     splitInter[k] = keptByJ[D.localToGlobalElement[k]];
@@ -9959,46 +10008,74 @@ template <class Mesh>
 AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
   pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
-  int localNt = (pTh) ? pTh->nt : 0;
-  int mode = detectDistributionMode(localNt, comm);
-
-  if (mode == DM_SCATTER){
-    ExecError("distribute: work in progress");
-  }
-  ffassert(pTh);
-  Mesh &Th = *pTh;
-
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
   bool cleanmesh(arg(3, stack, true));
   bool removeduplicate(arg(4, stack, false));
   long sizeoverlaps(arg(8, stack, 1L));
 
-  int nbv=Th.nv;
-  int nbt=Th.nt;
-  const int nve = Mesh::Element::nv;
+  string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
+  std::string method = ppart ? *ppart : "metis";
+  
+  int localNt = (pTh) ? pTh->nt : 0;
+  int mode = detectDistributionMode(localNt, comm);
 
-  /*int *split = new int[nbt];
-  for (int i=0; i<nbt; i++)
-    split[i] = (i >= mpirank*nbt/mpisize && i < (mpirank+1)*nbt/mpisize ? 1 : 0);
-*/
-
-  KN<int> globalPartition(nbt);
-   
-  // User partition
-  if (nargs[9]) {
-    KN_<long> userpart = GetAny< KN_<long> >((*nargs[9])(stack));
-    if (userpart.N()!=nbt){
-      ExecError("distribute: partition[] requires Th.nt values");
+  if (nargs[12]){
+    bool wanted = GetAny<bool>((*nargs[12])(stack));
+    if (wanted && mode != DM_SCATTER){
+      ExecError("distribute: user asked scatter = true but all ranks share the global mesh.");
     }
-    for (int k = 0; k < nbt; ++k) globalPartition[k] = (int)userpart[k];
-  }
-  else {
-    string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
-    std::string method = ppart ? *ppart : "metis";
-    computeGlobalPartition(Th, globalPartition, method, comm); 
+    if (!wanted && mode == DM_SCATTER){
+      ExecError("distribute: user asked scatter=false, but the mesh is present only on rank 0.");
+    }
   }
 
+  if (mode == DM_SCATTER && method == "parmetis"){
+  ExecError("distribute: partmethod= \"parmetis\" not supported with scatter mode");
+  }
+
+  const Mesh* pWork = nullptr;
+  const Mesh* trueGlobal = nullptr;
+  KN<int> globalPartition;
+  int bad = 0;
+
+  if (mode == DM_REPLICATED || mpirank == 0){
+    ffassert(pTh);
+    pWork = pTh;
+    if (mode == DM_REPLICATED) {trueGlobal = pTh;}
+    globalPartition.resize(pTh->nt);
+    if (nargs[9]){
+      KN_<long> userpart = GetAny<KN_<long>>((*nargs[9])(stack));
+      if (userpart.N() != pTh->nt){
+        bad = 1;
+      }
+      else {
+        for (int k = 0; k< globalPartition.n; k++){
+          globalPartition[k] = (int)userpart[k];
+        }
+      }
+    }
+    else {
+      computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED);
+    }
+  }
+
+  bad = agreeOnStatus(bad, comm);
+  if (bad) ExecError("distribute: partition[] requires Th.nt values");
+  if (mode == DM_SCATTER){
+    if (mpirank == 0){
+      scatterGlobalMesh(*pTh, globalPartition, sizeoverlaps, precis_mesh, orientation, cleanmesh, removeduplicate, comm);
+    }
+    else {
+      Mesh* recvd = recvMesh<Mesh>(0, comm);
+      globalPartition = recvPartition(recvd->nt, 0, comm);
+      pWork = recvd;
+    }
+  }
+
+  const Mesh &Th = *pWork;
+  int nbv = Th.nv, nbt = Th.nt;
+  const int nve = Mesh::Element::nv;
 
   KN<double> supp(nbt, 0.0);
   for (int k = 0; k<nbt;++k){
@@ -10122,12 +10199,15 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     pouLocal[lv] = khi[localToGlobalVertex[lv]];
   }
 
+  ffassert(localToGlobalElement.n == LocalMesh->nt);
   // DistributedMesh assembly
   DistributedMesh<Mesh>* DTh = new DistributedMesh<Mesh>();
 
   DTh->LocalMesh = LocalMesh;
   DTh->BorderMesh = BorderMesh;
-  DTh->GlobalMesh = &Th;
+  DTh->CoverMesh = pWork;
+  DTh->TrueGlobalMesh = trueGlobal;
+  DTh->ownsCoverMesh = (pWork != pTh);
   DTh->localToGlobalElement = localToGlobalElement;
   DTh->overlap = (int)sizeoverlaps;
   DTh->interfaceLabel = interfaceLabel;
@@ -10135,8 +10215,6 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   DTh->partitionOfUnity = pouLocal;
   DTh->comm = comm;
   DTh->globalPartition = globalPartition;
-
-  ffassert(localToGlobalElement.n == LocalMesh->nt);
 
   Add2StackOfPtr2FreeRC(stack, DTh);
   return DTh;
@@ -10207,19 +10285,6 @@ const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh
     return Th;
 }
 
-template<class Mesh>
-const Mesh* scatterMeshTest(Stack stack, const Mesh* const& pTh){
-  if (mpisize <= 1) return pTh;
-  if (mpirank == 0) {
-    ffassert(pTh);
-    for (int i = 1; i < (int)mpisize; ++i) sendMesh(*pTh, i, (pcommworld)nullptr);
-    return pTh;
-  }
-  Mesh* Th = recvMesh<Mesh>(0, (pcommworld)nullptr);
-  Add2StackOfPtr2FreeRC(stack, Th);
-  return Th;
-}
-
 // Enregistre <- / = / local / distributed pour Distributed Meshh
 template<class Mesh>
 static void registerDistributedMeshOps() {
@@ -10230,7 +10295,6 @@ static void registerDistributedMeshOps() {
   atype<const Mesh*>()->AddCast(new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
   Global.Add("distribute", "(", new DistributeMesh<Mesh>);
   Global.Add("distribute", "(", new DistributeMesh<Mesh>(1));
-  Global.Add("scatterMeshTest", "(", new OneOperator1s_<const Mesh*, const Mesh*>(scatterMeshTest<Mesh>));
 }
 
 

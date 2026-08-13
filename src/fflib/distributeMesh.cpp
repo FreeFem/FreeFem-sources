@@ -21,7 +21,7 @@ static const int TAG_SCATTER_BUF = 2001;
 static const int TAG_SCATTER_PART = 2002;
 
 template<class Mesh>
-void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm){
+void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast){
     const int nbt = Th.nt, nbv = Th.nv;
     const int nve = Mesh::Element::nv;
 
@@ -79,8 +79,10 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
 
   // --- Broadcast depuis le rang 0 (uniquement en build MPI) ---
 #ifdef PARALLELE
+if (broadcast){
   MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
   MPI_Bcast((int*)part, nbt, MPI_INT, 0, cw);
+}
 #endif
 }
 
@@ -109,6 +111,10 @@ int detectDistributionMode(int localNt, pcommworld comm)
   int size;
   MPI_Comm_size(cw, &size);
 
+  if (size != (int)mpisize){
+    ExecError("distribute: sub-communicator not yet supported hence comm must cover all ranks");
+  }
+
   int has = (localNt > 0) ? 1 : 0;
   KN<int> hasMesh(size);
   MPI_Allgather(&has, 1, MPI_INT, (int*)hasMesh, 1, MPI_INT, cw);
@@ -130,6 +136,13 @@ int detectDistributionMode(int localNt, pcommworld comm)
     ExecError("distribute: mixed mode not supported: either all ranks have the global mesh, or only rank 0");
   }
   return DM_REPLICATED;
+}
+
+int agreeOnStatus(int local, pcommworld comm){
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  int global = 0;
+  MPI_Allreduce(&local, &global, 1, MPI_INT, MPI_MAX, cw);
+  return global;
 }
 
 static bool hasAttached(const Mesh3& Th) { return Th.meshS != nullptr; }
@@ -180,9 +193,26 @@ Mesh* recvMesh(int src, pcommworld comm){
   rebuildAttached(Th, hdr[1] != 0);
   return Th;
 }
+
+void sendPartition(const KN<int>& part, int dest, pcommworld comm){
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Send((int*)part, part.n, MPI_INT, dest, TAG_SCATTER_PART, cw);
+}
+
+KN<int> recvPartition(int n, int src, pcommworld comm){
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  KN<int> partition(n);
+  MPI_Status st;
+  MPI_Recv((int*)partition, n, MPI_INT, src, TAG_SCATTER_PART, cw, &st);
+  return partition;
+}
 #else
 int detectDistributionMode(int, pcommworld){
   return DM_REPLICATED;
+}
+
+int agreeOnStatus(int local, pcommworld){
+  return local;
 }
 
 template<class Mesh>
@@ -193,6 +223,13 @@ template<class Mesh>
 Mesh* recvMesh(int, pcommworld){
   ExecError("recvMesh is used only in a parallel setting.");
   return nullptr;
+}
+void sendPartition(const KN<int>&, int, pcommworld){
+  ExecError("sendPartition is only used in a parallel setting");
+}
+KN<int> recvPartition(int, int, pcommworld){
+  ExecError("recvPartition is only used in a parallel setting");
+  return KN<int>(0);
 }
 #endif
 
@@ -296,9 +333,9 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 #endif
 
 // Instanciations explicites (miroir de registerDistributedMeshOps<MeshS/Mesh3/MeshL>)
-template void computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld);
-template void computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld);
-template void computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld);
+template void computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld, bool);
+template void computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld, bool);
+template void computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld, bool);
 
 template void sendMesh<MeshS>(const MeshS&, int, pcommworld);
 template MeshS* recvMesh<MeshS>(int, pcommworld);
