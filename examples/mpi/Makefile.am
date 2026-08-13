@@ -37,7 +37,8 @@ TESTS_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
 	DDM-Schwarz-Lap-3d.edp \
 	DDM-Schwarz-Stokes-2d.edp \
 	MPIGMRES2D.edp \
-	MPIGMRES3D.edp
+	MPIGMRES3D.edp \
+	test_distribute_scatter.edp
 
 TESTS_MPI_METIS_PARMETIS = parmetis-3d.edp \
 	parmetis.edp

@@ -13,7 +13,9 @@ class DistributedMesh : public RefCounter {
 public: 
   Mesh * LocalMesh;
   Mesh* BorderMesh;
-  const Mesh* GlobalMesh = nullptr;
+  const Mesh* CoverMesh = nullptr; // referent for truncated LocalMesh
+  const Mesh* TrueGlobalMesh = nullptr; // true global mesh; null in scatter mode
+  bool ownsCoverMesh = false;
 
   int overlap;
   int interfaceLabel;
@@ -31,6 +33,7 @@ public:
   ~DistributedMesh() {
     if (LocalMesh) LocalMesh->destroy();
     if (BorderMesh) BorderMesh->destroy();
+    if (ownsCoverMesh && CoverMesh) CoverMesh->destroy();
   }
 
 private:
@@ -48,14 +51,20 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
 
 // Partition globale
 template<class Mesh>
-void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr);
+void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true);
 
 int detectDistributionMode(int localNt, pcommworld comm);
+
+int agreeOnStatus(int local, pcommworld comm);
 
 template<class Mesh>
 void sendMesh(const Mesh& Th, int dest, pcommworld comm);
 
 template<class Mesh>
 Mesh* recvMesh(int src, pcommworld comm);
+
+void sendPartition(const KN<int>& part, int dest, pcommworld comm);
+
+KN<int> recvPartition(int n, int src, pcommworld comm);
 
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof);

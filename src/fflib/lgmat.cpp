@@ -1426,13 +1426,16 @@ KN<KN<long>> buildDofIntersection(const DistributedMesh<Mesh>& D, GFESpace<Mesh>
 
 template<class Mesh>
 KN<long> buildLoc2globDof(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
-    GFESpace<Mesh> Vhglob(*D.GlobalMesh, *Vhi.TFE[0]);
+    GFESpace<Mesh> Vhglob(*D.TrueGlobalMesh, *Vhi.TFE[0]);
     return restrictDOF(Vhi, Vhglob, D.localToGlobalElement);
 }
 
 template<class Mesh>
 void v_dfes<Mesh>::buildLoc2globIfNeeded(GFESpace<Mesh>& Vhi){
     if (!DTh || loc2globBuilt) return;
+    if (!DTh->TrueGlobalMesh){
+        ExecError("Udh.loc2glob : unavailable on distributed mesh (no global mesh in scatter mode)");
+    }
     loc2globDof = buildLoc2globDof(*DTh, Vhi);
     loc2globBuilt = true;
 }
