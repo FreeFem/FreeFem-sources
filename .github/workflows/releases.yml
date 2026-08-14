@@ -55,6 +55,7 @@ jobs:
     needs: set_versions
     uses: ./.github/workflows/full-msmpi.yml
     with:
+      release_version: ${{ needs.set_versions.outputs.ff_version }}
       windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
       build_types: '["release"]'
       skip_check: true
