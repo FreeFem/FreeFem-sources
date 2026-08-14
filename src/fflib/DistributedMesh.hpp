@@ -15,7 +15,6 @@ public:
   Mesh* BorderMesh;
   const Mesh* CoverMesh = nullptr; // referent for truncated LocalMesh
   const Mesh* TrueGlobalMesh = nullptr; // true global mesh; null in scatter mode
-  bool ownsCoverMesh = false;
 
   int overlap;
   int interfaceLabel;
@@ -30,10 +29,19 @@ public:
   DistributedMesh() : LocalMesh(nullptr), BorderMesh(nullptr), overlap(0), interfaceLabel(10),
   neighborRanks(), partitionOfUnity(), globalPartition() {}
 //  DistributedMesh(Mesh * locmesh) : LocalMesh(locmesh) {}
+  void setReferenceMeshes(const Mesh* cover, const Mesh* global){
+    if (cover) cover->increment();
+    if (global) global->increment();
+    if (CoverMesh) CoverMesh->destroy();
+    if (TrueGlobalMesh) TrueGlobalMesh->destroy();
+    CoverMesh = cover;
+    TrueGlobalMesh = global;
+  }
   ~DistributedMesh() {
     if (LocalMesh) LocalMesh->destroy();
     if (BorderMesh) BorderMesh->destroy();
-    if (ownsCoverMesh && CoverMesh) CoverMesh->destroy();
+    if (CoverMesh) CoverMesh->destroy();
+    if (TrueGlobalMesh) TrueGlobalMesh->destroy();
   }
 
 private:

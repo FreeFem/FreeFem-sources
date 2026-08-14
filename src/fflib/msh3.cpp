@@ -10068,6 +10068,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
     else {
       Mesh* recvd = recvMesh<Mesh>(0, comm);
+      Add2StackOfPtr2FreeRC(stack, recvd);
       globalPartition = recvPartition(recvd->nt, 0, comm);
       pWork = recvd;
     }
@@ -10205,9 +10206,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   DTh->LocalMesh = LocalMesh;
   DTh->BorderMesh = BorderMesh;
-  DTh->CoverMesh = pWork;
-  DTh->TrueGlobalMesh = trueGlobal;
-  DTh->ownsCoverMesh = (pWork != pTh);
+  DTh->setReferenceMeshes(pWork, trueGlobal);
   DTh->localToGlobalElement = localToGlobalElement;
   DTh->overlap = (int)sizeoverlaps;
   DTh->interfaceLabel = interfaceLabel;
