@@ -60,8 +60,8 @@ jobs:
             FREEFEM_VERSION=${{ inputs.release_version }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=docker-${{ matrix.version }}-${{ matrix.arch }}
-          cache-to: type=gha,scope=docker-${{ matrix.version }}-${{ matrix.arch }},mode=max
+          cache-from: type=gha,scope=docker-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-${{ matrix.arch }},mode=max
           provenance: mode=max
           sbom: true
 
@@ -85,7 +85,7 @@ jobs:
       - name: Upload Docker release artifact
         uses: actions/upload-artifact@v7
         with:
-          name: docker-image-${{ matrix.version }}-${{ matrix.arch }}
+          name: v${{ inputs.release_version }}-docker-image-${{ matrix.arch }}
           path: ./docker-assets/*
           if-no-files-found: error
           compression-level: 0
@@ -102,7 +102,7 @@ jobs:
       - name: Upload image digest
         uses: actions/upload-artifact@v7
         with:
-          name: docker-digest-${{ matrix.version }}-${{ matrix.arch }}
+          name: docker-digest-${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
