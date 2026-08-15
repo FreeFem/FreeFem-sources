@@ -1,15 +1,11 @@
-/* clang-format off */
 //ff-c++ -auto geophysics.cpp
 //ff-mpirun -np 4 Helmholtz-2d-marmousi.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
-/* clang-format on */
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
 // for the make check:
-/* clang-format off */
 // NBPROC 4
 // PARAM -raspart -ffddm_schwarz_method oras 
-/* clang-format on */
 
 macro dimension 2// EOM            // 2D or 3D
 
