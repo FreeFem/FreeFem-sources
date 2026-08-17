@@ -23,6 +23,12 @@
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 1 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 2 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 3 -nc 8
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -v 5
+//      -> active le bloc de diagnostic de distributedDofNumbering (garde par
+//         agreeOnStatus, car verbosity vaut 0 hors du rang 0) : controle de
+//         symetrie des intersections, residu de PoU calcule gratuitement en
+//         reutilisant l'echange deja fait, puis ffassert. Un run -v 5 qui
+//         bloque signale que le garde uniforme a disparu.
 // =====================================================================
 include "getARGV.idp"
 
@@ -70,6 +76,9 @@ macro SIGNATURE(Th, sig) {
 //  Compare un maillage distribue REPLIQUE (DA) a son homologue SCATTER
 //  (DB), pour un element fini donne. Tous les ecarts sont reduits en max
 //  sur les rangs : un seul rang fautif fait echouer le critere.
+//
+//  S1..S6 sont des criteres RELATIFS : ils n'affirment que "scatter ==
+//  replique". S7 est le seul critere ABSOLU -- voir son commentaire.
 // -------------------------------------------------------------------
 macro CMPPAIR(MTYPE, FEK, DA, DB, tag) {
   /* --- S1 : maillages locaux --- */
@@ -122,6 +131,17 @@ macro CMPPAIR(MTYPE, FEK, DA, DB, tag) {
   /* --- S6 : nombre global de ddl --- */
   real e6 = abs(1.0*(UA.ndofglobal - UB.ndofglobal));
 
+  /* --- S7 : la PoU somme bien a 1 le long des intersections declarees ---
+     S3 ne compare que replique et scatter l'un a l'autre : les deux
+     pourraient etre faux de la meme facon et S3 passerait quand meme. S7
+     est le seul critere ABSOLU de ce fichier, et le seul controle de PoU
+     possible en mode scatter, ou ni loc2glob ni le maillage global
+     n'existent (TrueGlobalMesh est nul). Il valide en meme temps
+     l'appariement positionnel des listes UA/UB.intersection[1+j], sur
+     lequel repose la numerotation globale lue en S5. Valeur deja reduite
+     en max sur les rangs par checkPoU : pas de mpiAllReduce ici. */
+  real g7 = max(UA.checkPoU, UB.checkPoU);
+
   real g1, g2, g3, g4, g5, g6;
   mpiAllReduce(e1, g1, mpiCommWorld, mpiMAX);
   mpiAllReduce(e2, g2, mpiCommWorld, mpiMAX);
@@ -131,11 +151,11 @@ macro CMPPAIR(MTYPE, FEK, DA, DB, tag) {
   mpiAllReduce(e6, g6, mpiCommWorld, mpiMAX);
 
   bool ok = (g1 == 0.0 && g2 == 0.0 && g3 == 0.0
-          && g4 == 0.0 && g5 == 0.0 && g6 == 0.0);
+          && g4 == 0.0 && g5 == 0.0 && g6 == 0.0 && g7 < 1e-8);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  S1=" << g1 << " S2=" << g2 << " S3=" << g3
-         << " S4=" << g4 << " S5=" << g5 << " S6=" << g6
+         << " S4=" << g4 << " S5=" << g5 << " S6=" << g6 << " S7=" << g7
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 } // EOM
 

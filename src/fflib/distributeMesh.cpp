@@ -19,6 +19,10 @@ static const size_t CHUNK = size_t(512) << 20;
 static const int TAG_SCATTER_HDR = 2000;
 static const int TAG_SCATTER_BUF = 2001;
 static const int TAG_SCATTER_PART = 2002;
+static const int TAG_POU_CHECK = 1003;
+static const int TAG_SYM_CHECK = 1004; 
+static const int TAG_DOF_POU = 1001;
+static const int TAG_DOF_NUM = 1002;
 
 template<class Mesh>
 void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast){
@@ -103,6 +107,19 @@ static void exchangeOnIntersections(MPI_Comm cw, const KN<int>& nbr, const KN<KN
     MPI_Isend(snd[j].data(), (int)L.n, dt, nbr[j], tag, cw, &rq[nN+j]);
   }
   MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
+}
+
+static double pouResidualLocal(const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, const std::vector<std::vector<double>>& rcvD){
+  std::vector<double> sum(nLocDof);
+  const int nN = dofI.n - 1;
+  for (int d = 0; d < nLocDof; ++d) sum[d] = Ddof[d];
+  for (int j = 0; j < nN; ++j){
+    const KN<long>& L = dofI[1+j];
+    for (long p = 0; p < L.n; ++p) sum[L[p]] += rcvD[j][p];
+  }
+  double e = 0.0;
+  for (int d = 0; d < nLocDof; ++d) e = std::max(e, fabs(sum[d] - 1.0));
+  return e;
 }
 
 int detectDistributionMode(int localNt, pcommworld comm)
@@ -245,6 +262,10 @@ KN<long> distributedDofNumbering(pcommworld, const KN<KN<long> > &, const KN<dou
 {
   return trivialNumbering(nLocDof, globalNdof);
 }
+
+double checkPartitionOfUnity(pcommworld, const KN<KN<long> >&, const KN<double>&, int){
+  return 0.0;
+}
 #else
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
@@ -259,13 +280,15 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
   MPI_Comm_rank(cw, &rank);
   MPI_Comm_size(cw, &size);
 
-  if (verbosity > 4) {
+  const bool dbg = (agreeOnStatus(verbosity > 4 ? 1 : 0, comm) != 0);
+
+  if (dbg) {
     std::vector<MPI_Request> rq(2*nN);
     std::vector<long> mine(nN), his(nN);
     for (int j = 0; j < nN; ++j) mine[j] = dofI[1+j].n;
     for (int j = 0; j < nN; ++j){
-      MPI_Irecv(&his[j],  1, MPI_LONG, nbr[j], 1000, cw, &rq[j]);
-      MPI_Isend(&mine[j], 1, MPI_LONG, nbr[j], 1000, cw, &rq[nN+j]);
+      MPI_Irecv(&his[j],  1, MPI_LONG, nbr[j], TAG_SYM_CHECK, cw, &rq[j]);
+      MPI_Isend(&mine[j], 1, MPI_LONG, nbr[j], TAG_SYM_CHECK, cw, &rq[nN+j]);
     }
     MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
     for (int j = 0; j < nN; ++j) ffassert(mine[j] == his[j]);
@@ -274,7 +297,15 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 
 
   std::vector<std::vector<double>> rcvD;
-  exchangeOnIntersections<double>(cw, nbr, dofI, Ddof, MPI_DOUBLE, 1001, rcvD);
+  exchangeOnIntersections<double>(cw, nbr, dofI, Ddof, MPI_DOUBLE, TAG_DOF_POU, rcvD);
+
+  if (dbg) {
+    const double e = pouResidualLocal(dofI, Ddof, nLocDof, rcvD);
+    double eg = 0.0;
+    MPI_Allreduce(&e, &eg, 1, MPI_DOUBLE, MPI_MAX, cw);
+    if (rank == 0) cout << "--distributedDofNumbering: max|sum PoU - 1| = " << eg << endl;
+    ffassert(eg < 1.0e-8);
+  }
 
   const double EPS = 1.0e-12; // HPDDM_EPS
   std::vector<char> owned(nLocDof, 1);
@@ -289,19 +320,6 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
     }
   }
 
-  if (verbosity > 4) {
-    std::vector<double> sum(nLocDof);
-    for (int d = 0; d < nLocDof; ++d) sum[d] = Ddof[d];
-    for (int j = 0; j < nN; ++j){
-      const KN<long>& L = dofI[1+j];
-      for (long p = 0; p < L.n; ++p) sum[L[p]] += rcvD[j][p];
-    }
-    double e = 0.0;
-    for (int d = 0; d < nLocDof; ++d) e = std::max(e, fabs(sum[d] - 1.0));
-    double eg = 0.0;
-    MPI_Reduce(&e, &eg, 1, MPI_DOUBLE, MPI_MAX, 0, cw);
-    if (rank == 0) cout << "--distributedDofNumbering: max|sum PoU - 1| = " << eg << endl;
-  }
   long nOwned = 0;
   for (int d = 0; d < nLocDof; ++d) if (owned[d]) ++nOwned;
 
@@ -318,7 +336,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
   for (int d = 0; d < nLocDof; ++d) if (owned[d]) num[d] = c++;
 
   std::vector<std::vector<long>> rcvN;
-  exchangeOnIntersections<long>(cw, nbr, dofI, num, MPI_LONG, 1002, rcvN);
+  exchangeOnIntersections<long>(cw, nbr, dofI, num, MPI_LONG, TAG_DOF_NUM, rcvN);
 
   for (int j = 0; j < nN; ++j){
     const KN<long>& L = dofI[1+j];
@@ -329,6 +347,26 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
   }
   if (nLocDof > 0) ffassert(num.min() >= 0);
   return num;
+}
+
+double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof){
+  if (mpisize <= 1) return 0.0;
+
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  const int nN = dofI.n-1;
+  ffassert(dofI[0].n == nN);
+  ffassert(Ddof.n == nLocDof);
+  KN<int> nbr(nN);
+  for (int j = 0; j < nN; ++j) nbr[j] = (int)dofI[0][j];
+
+  std::vector<std::vector<double>> rcvD;
+  exchangeOnIntersections<double>(cw, nbr, dofI, Ddof, MPI_DOUBLE, TAG_POU_CHECK, rcvD);
+
+  const double e = pouResidualLocal(dofI, Ddof, nLocDof, rcvD);
+
+  double eg = 0.0;
+  MPI_Allreduce(&e, &eg, 1, MPI_DOUBLE, MPI_MAX, cw);
+  return eg;
 }
 #endif
 

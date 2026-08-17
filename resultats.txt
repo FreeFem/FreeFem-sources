@@ -1,0 +1,29 @@
+=== scatter (S7 = seul controle de PoU possible en mode scatter) ===
+test_distribute_scatter np=2                                   OK    20 criteres
+test_distribute_scatter np=3                                   OK    20 criteres
+test_distribute_scatter np=4                                   OK    20 criteres
+test_distribute_scatter np=3 -ov 2                             TIMEOUT (blocage : collectif non uniforme ?)  -> /tmp/ff-dtest-hafLQK/test_distribute_scatter_np_3__ov_2_.log
+test_distribute_scatter np=3 -case 1 -strip 1 -nc 8            OK    2 criteres
+test_distribute_scatter np=3 -case 1 -strip 2 -nc 8            OK    2 criteres
+test_distribute_scatter np=3 -case 1 -strip 3 -nc 8            OK    2 criteres
+test_distribute_scatter np=3 -v 5                              OK    20 criteres
+=== multi (V6, W6, X1) -- exige Scotch ET ParMETIS ===
+test_distribute_multi np=3 -wg                                 OK    14 criteres
+test_distribute_multi np=4 -wg                                 OK    14 criteres
+test_distribute_multi np=3 -wg -ov 2                           OK    14 criteres
+test_distribute_multi np=3 -wg -case 1 -strip 1 -nc 8          OK    1 criteres
+test_distribute_multi np=3 -wg -case 1 -strip 2 -nc 8          OK    1 criteres
+test_distribute_multi np=3 -wg -case 1 -strip 3 -nc 8          OK    1 criteres
+test_distribute_multi np=3 -wg -v 5                            OK    14 criteres
+
+=== BILAN : 14 / 15 runs OK   (logs: /tmp/ff-dtest-hafLQK) ===
+--- valeurs des nouveaux criteres ---
+     83 S7=0
+     47 V6=0
+     21 S7=1.11022e-16
+      8 W6=0
+      4 X1=0
+--- diagnostic gratuit (runs -v 5) ---
+--distributedDofNumbering: intersections symetriques
+--distributedDofNumbering: max|sum PoU - 1| = 0
+--distributedDofNumbering: max|sum PoU - 1| = 1.11022e-16

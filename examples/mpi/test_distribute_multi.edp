@@ -13,6 +13,13 @@
 //  Lancer :
 //    ff-mpirun -np 4 test_distribute_multi.edp -ns
 //    ff-mpirun -np 3 test_distribute_multi.edp -ns   (tranches inegales)
+//    ff-mpirun -np 4 test_distribute_multi.edp -ns -v 5
+//      -> active le bloc de diagnostic de distributedDofNumbering (garde
+//         par agreeOnStatus, car verbosity vaut 0 hors du rang 0) : controle
+//         de symetrie des intersections, puis meme residu de PoU que V6 mais
+//         calcule GRATUITEMENT en reutilisant l'echange deja fait, et
+//         ffassert. Un run -v 5 qui bloque signale que le garde uniforme a
+//         disparu ; un run qui avorte signale un appariement decale.
 //  Les criteres sont invariants au partitionnement : V1 (bijection
 //  loc2glob), V2 (partition de l'unite), V4 (alignement PETSc) et V5
 //  (comptage global) doivent valoir exactement 0. V3 (ecart a la solution
@@ -27,6 +34,27 @@
 //  l'assemblage : apres "A = vPb(...)" il segfaute.
 //
 //  V5 : Udh.ndofglobal doit egaler UhGlob.ndof.
+//
+//  V6 : Udh.checkPoU -- somme de la partition de l'unite le long des
+//  intersections de ddl DECLAREES, la ou V2 la somme le long du maillage
+//  global. Les deux sont complementaires : V2 valide la PoU contre un champ
+//  de reference, V6 valide la carte d'intersections elle-meme, c'est-a-dire
+//  exactement l'objet que Mat(Udh.ndof, Udh.intersection, D) transmet a
+//  HPDDM. Les listes Udh.intersection[1+j] de deux rangs voisins sont
+//  appariees POSITIONNELLEMENT par exchangeOnIntersections ; rien dans le
+//  code ne verifie que l'entree p des deux cotes designe le meme ddl. Un
+//  decalage y fait diverger V6 sans toucher V2. Contrairement a V2, V6 ne
+//  demande ni loc2glob ni maillage global : c'est le seul controle
+//  disponible en mode scatter. La valeur est deja reduite en max sur les
+//  rangs par checkPoU, donc aucun mpiAllReduce n'est fait dessus ici.
+//
+//  X1 : la creation d'un fespace distribue n'est PAS collective. Seuls
+//  .numbering, .ndofglobal et .checkPoU le sont. Le bloc X1 n'utilise le
+//  fespace que sur le rang 0 : si un collectif reapparait dans
+//  buildDistributedDofData, il bloque et le test ne rend jamais la main.
+//  C'est donc un test de TERMINAISON autant que de valeur -- le lancer avec
+//  un timeout, sinon une regression se presente comme un job suspendu et
+//  non comme un echec.
 //
 //  NI / NE : nombre total d'intersections de ddl declarees, et combien
 //  d'entre elles ont une liste de ddl VIDE. NE > 0 mesure ce que couterait
@@ -51,6 +79,10 @@
 //         du scaling cote Dmat, dont depend la numerotation globale).
 //    W5 : Udh.D relu APRES construction de A recompose encore exactement un
 //         champ global par somme ponderee inter-rangs.
+//    W6 : meme chose que W5 mais par la route des intersections plutot que
+//         par loc2glob. W2 detecte une mutation bit a bit de Udh.D ; W6
+//         detecte en plus une PoU restee intacte mais devenue incoherente
+//         avec la carte d'intersections. Doit valoir ~0.
 //
 //  Parametres de ligne de commande :
 //    -ov     recouvrement passe a distribute (defaut 1)
@@ -97,6 +129,9 @@ macro CHECKL(DTh, Th, tag) {
   int[int]  l2g = Udh.loc2glob;
   int nItot = 0, nEtot = 0;
   COUNTI(Udh, nItot, nEtot)
+  /* V6 : lu AVANT toute Mat, c'est la carte d'intersections telle qu'HPDDM
+     va la recevoir que l'on valide. Deja reduit en max sur les rangs. */
+  real v6 = Udh.checkPoU;
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -141,11 +176,12 @@ macro CHECKL(DTh, Th, tag) {
   mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
+          && v6 < 1e-8);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -160,6 +196,9 @@ macro CHECK3(DTh, Th, tag) {
   int[int]  l2g = Udh.loc2glob;
   int nItot = 0, nEtot = 0;
   COUNTI(Udh, nItot, nEtot)
+  /* V6 : lu AVANT toute Mat, c'est la carte d'intersections telle qu'HPDDM
+     va la recevoir que l'on valide. Deja reduit en max sur les rangs. */
+  real v6 = Udh.checkPoU;
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -204,11 +243,12 @@ macro CHECK3(DTh, Th, tag) {
   mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
+          && v6 < 1e-8);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -223,6 +263,9 @@ macro CHECKS(DTh, Th, tag) {
   int[int]  l2g = Udh.loc2glob;
   int nItot = 0, nEtot = 0;
   COUNTI(Udh, nItot, nEtot)
+  /* V6 : lu AVANT toute Mat, c'est la carte d'intersections telle qu'HPDDM
+     va la recevoir que l'on valide. Deja reduit en max sur les rangs. */
+  real v6 = Udh.checkPoU;
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -267,11 +310,12 @@ macro CHECKS(DTh, Th, tag) {
   mpiAllReduce(eNum, n4, mpiCommWorld, mpiMAX);
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
-  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0);
+  bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
+          && v6 < 1e-8);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -331,6 +375,12 @@ macro CHECKPOU(DTh, Th, tag) {
   real ePoU = 0;
   for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
 
+  /* W6 : meme controle que W5 mais par la route des intersections, APRES
+     que HPDDM a pris un tampon sur le chemin shell. W2 detecte deja une
+     mutation bit a bit de Udh.D ; W6 detecte en plus une PoU restee intacte
+     mais devenue incoherente avec la carte d'intersections. */
+  real w6 = Udh.checkPoU;
+
   real w1, w2, w3, w4, w5;
   mpiAllReduce(nfrac,   w1, mpiCommWorld, mpiSUM);
   mpiAllReduce(eStable, w2, mpiCommWorld, mpiMAX);
@@ -341,11 +391,12 @@ macro CHECKPOU(DTh, Th, tag) {
      sans aucune arithmetique entre les deux ; toute derive est une mutation.
      w1 n'est exigible qu'a plusieurs rangs : sans voisin, la PoU vaut 1
      partout et W2 passerait trivialement */
-  bool ok = ((mpisize == 1 || w1 > 0) && w2 == 0.0 && w3 < 1e-12 && w4 < 1e-5 && w5 < 1e-8);
+  bool ok = ((mpisize == 1 || w1 > 0) && w2 == 0.0 && w3 < 1e-12 && w4 < 1e-5 && w5 < 1e-8
+          && w6 < 1e-8);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  W1=" << w1 << "  W2=" << w2 << "  W3=" << w3
-         << "  W4=" << w4 << "  W5=" << w5
+         << "  W4=" << w4 << "  W5=" << w5 << "  W6=" << w6
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
 
@@ -419,6 +470,29 @@ if (cas == 0) {
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
   DmeshS DTh = distribute(Th, overlap = ov, partition = part);
   CHECKPOU(DTh, Th, "shell / Udh.D invariant / partition=user") }
+
+// ---------- X1 : la creation de fespace n'est PAS collective ----------
+//  Contrat ffddm : distribute() est collectif, le fespace ne l'est pas.
+//  Seuls .numbering, .ndofglobal et .checkPoU le sont, et ils ne sont pas
+//  touches ici. Voir X1 dans l'entete : test de TERMINAISON.
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  int nloc = 0;
+  if (mpirank == 0) {
+    fespace Udh(DTh, P1);            /* declenche buildDistributedDofData */
+    real[int] D   = Udh.D;           /* ... sur le rang 0 SEUL             */
+    int[int]  l2g = Udh.loc2glob;
+    nloc = Udh.ndof;
+    if (nloc <= 0 || D.n != nloc || l2g.n != nloc) nloc = 0;
+  }
+  mpiBarrier(mpiCommWorld);          /* si on arrive ici, rien n'a bloque  */
+  int x1 = ((mpirank == 0 && nloc == 0) ? 1 : 0), gx1;
+  mpiAllReduce(x1, gx1, mpiCommWorld, mpiMAX);
+  ntot++; if (gx1 == 0) npass++;
+  if (mpirank == 0)
+    cout << "  [fespace non collectif]  X1=" << gx1
+         << "   => " << (gx1 == 0 ? "PASS" : "FAIL") << endl;
+}
 
 }
 else {
