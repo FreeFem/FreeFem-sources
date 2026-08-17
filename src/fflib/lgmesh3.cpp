@@ -2290,6 +2290,15 @@ long pVhd_ndofglobal(v_dfes<Mesh>** p){
 }
 
 template<class Mesh>
+double pVhd_checkPoU(v_dfes<Mesh>** p){
+  throwassert(p && *p);
+  v_dfes<Mesh>* f = *p;
+  GFESpace<Mesh>* fes = **p;
+  if (!fes || !f ->DTh) return 0.0;
+  return checkPartitionOfUnity(f->DTh->comm, f->dofIntersectionDof, f->Ddof, fes->NbOfDF);
+}
+
+template<class Mesh>
 static void addDistributedFespaceOps(){
   typedef v_dfes<Mesh>* pdfesT;
   typedef const Mesh* pmeshT;
@@ -2303,6 +2312,7 @@ static void addDistributedFespaceOps(){
   Add<pdfesT*>("loc2glob",".", new OneOperator1s_<KN<long>*, pdfesT*>(pVhd_loc2glob<Mesh>));
   Add<pdfesT*>("numbering",".", new OneOperator1s_<KN<long>*,pdfesT*>(pVhd_numbering<Mesh>));
   Add<pdfesT*>("ndofglobal",".", new OneOperator1<long, pdfesT*>(pVhd_ndofglobal<Mesh>));
+  Add<pdfesT*>("checkPoU",".", new OneOperator1<double, pdfesT*>(pVhd_checkPoU<Mesh>));
 }
 
 //3D curve

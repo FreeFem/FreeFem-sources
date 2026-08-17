@@ -1450,6 +1450,7 @@ void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
 
 template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
+    // purely local function. Collective in buildNumberigIfNeeded and checkPoU (reachable only by explicit call)
     if (!DTh) return;
     if (DTh->overlap == 0 && mpisize > 1){
         ExecError("fespace distribute : overlap = 0 not supported.");
