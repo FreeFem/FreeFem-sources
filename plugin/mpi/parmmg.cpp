@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: parmmg mmg mpi metis scotch
 //ff-c++-cpp-dep:
+/* clang-format on */
 
 #include "ff++.hpp"
 #include "memory.h"

@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
 //ff-c++-cpp-dep:
+/* clang-format on */
 
 #define HPDDM_PRECISION                 2
 

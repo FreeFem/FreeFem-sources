@@ -1,4 +1,6 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: mpi pthread htool
+/* clang-format on */
 #if defined(__clang__)
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"

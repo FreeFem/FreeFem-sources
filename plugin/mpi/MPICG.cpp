@@ -7,8 +7,10 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:  mpi
 //ff-c++-cpp-dep: 
+/* clang-format on */
 
 /* 
  This file is part of Freefem++

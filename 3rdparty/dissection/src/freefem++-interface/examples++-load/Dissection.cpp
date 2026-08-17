@@ -1,6 +1,8 @@
 //   for automatic  compilation with ff-c++
+/* clang-format off */
 //ff-c++-LIBRARY-dep:  dissection blas pthread
 //ff-c++-cpp-dep: 
+/* clang-format on */
 //  
 //  file to add Dissection solver with dynamic load.
 #include  <iostream>
