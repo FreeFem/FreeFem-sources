@@ -2295,7 +2295,7 @@ double pVhd_checkPoU(v_dfes<Mesh>** p){
   v_dfes<Mesh>* f = *p;
   GFESpace<Mesh>* fes = **p;
   if (!fes || !f ->DTh) return 0.0;
-  return checkPartitionOfUnity(f->DTh->comm, f->dofIntersectionDof, f->Ddof, fes->NbOfDF);
+  return f->pouResidual;
 }
 
 template<class Mesh>

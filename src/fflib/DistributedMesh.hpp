@@ -78,3 +78,5 @@ KN<int> recvPartition(int n, int src, pcommworld comm);
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof);
 
 double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof);
+
+int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI);
