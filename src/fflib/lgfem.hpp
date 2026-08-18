@@ -404,6 +404,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
   KN<long> loc2globDof;
   KN<long> numberingDof;
   long globalNdof = 0;
+  double pouResidual = -1.0;
 
   static const int dHat = Mesh::RdHat::d, d = Mesh::Rd::d;
   const int N;
@@ -418,7 +419,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   operator FESpace *( ) {
     throwassert(dHat == Mesh::RdHat::d);
-    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false;}
+    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false; pouResidual = -1;}
     if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
     return pVh;
   }

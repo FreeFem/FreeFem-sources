@@ -263,9 +263,10 @@ KN<long> distributedDofNumbering(pcommworld, const KN<KN<long> > &, const KN<dou
   return trivialNumbering(nLocDof, globalNdof);
 }
 
-double checkPartitionOfUnity(pcommworld, const KN<KN<long> >&, const KN<double>&, int){
-  return 0.0;
-}
+double checkPartitionOfUnity(pcommworld, const KN<KN<long> >&, const KN<double>&, int){ return 0.0; }
+
+int checkIntersectionSymmetry(pcommworld, const KN<KN<long>>&) { return -1; }
+
 #else
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
@@ -280,32 +281,8 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
   MPI_Comm_rank(cw, &rank);
   MPI_Comm_size(cw, &size);
 
-  const bool dbg = (agreeOnStatus(verbosity > 4 ? 1 : 0, comm) != 0);
-
-  if (dbg) {
-    std::vector<MPI_Request> rq(2*nN);
-    std::vector<long> mine(nN), his(nN);
-    for (int j = 0; j < nN; ++j) mine[j] = dofI[1+j].n;
-    for (int j = 0; j < nN; ++j){
-      MPI_Irecv(&his[j],  1, MPI_LONG, nbr[j], TAG_SYM_CHECK, cw, &rq[j]);
-      MPI_Isend(&mine[j], 1, MPI_LONG, nbr[j], TAG_SYM_CHECK, cw, &rq[nN+j]);
-    }
-    MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
-    for (int j = 0; j < nN; ++j) ffassert(mine[j] == his[j]);
-    if (rank == 0) cout << "--distributedDofNumbering: intersections symetriques" << endl;
-  }
-
-
   std::vector<std::vector<double>> rcvD;
   exchangeOnIntersections<double>(cw, nbr, dofI, Ddof, MPI_DOUBLE, TAG_DOF_POU, rcvD);
-
-  if (dbg) {
-    const double e = pouResidualLocal(dofI, Ddof, nLocDof, rcvD);
-    double eg = 0.0;
-    MPI_Allreduce(&e, &eg, 1, MPI_DOUBLE, MPI_MAX, cw);
-    if (rank == 0) cout << "--distributedDofNumbering: max|sum PoU - 1| = " << eg << endl;
-    ffassert(eg < 1.0e-8);
-  }
 
   const double EPS = 1.0e-12; // HPDDM_EPS
   std::vector<char> owned(nLocDof, 1);
@@ -368,6 +345,30 @@ double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN
   MPI_Allreduce(&e, &eg, 1, MPI_DOUBLE, MPI_MAX, cw);
   return eg;
 }
+
+// Return -1 if all sizes match, else the local index of the faulty neighbour
+// Application before purge, to have all Irecv matched
+int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
+  if (mpisize <= 1) return -1;
+
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  const int nN = dofI.n -1;
+  ffassert(dofI[0].n == nN);
+
+  std::vector<MPI_Request> rq(2*nN);
+  std::vector<long> mine(nN), his(nN);
+  for (int j = 0; j < nN; ++j) mine[j] = dofI[1+j].n;
+  for (int j = 0; j < nN; ++j){
+    const int nb = (int)dofI[0][j];
+    MPI_Irecv(&his[j], 1, MPI_LONG, nb, TAG_SYM_CHECK, cw, &rq[j]);
+    MPI_Isend(&mine[j], 1, MPI_LONG, nb, TAG_SYM_CHECK, cw, &rq[nN+j]);
+  }
+  MPI_Waitall(2*nN, rq.data(), MPI_STATUSES_IGNORE);
+
+  for (int j = 0; j < nN; ++j) if (mine[j] != his[j]) return j;
+  return -1;
+}
+
 #endif
 
 // Instanciations explicites (miroir de registerDistributedMeshOps<MeshS/Mesh3/MeshL>)

@@ -1181,6 +1181,7 @@ void Init_map_type()
      Global.New("lockOrientation",CPValue<bool>(lockOrientation));
      extern long newconvect3;// def in global.cpp
      Global.New("newconvect",CPValue<long>(newconvect3)); //pichon
+     Global.New("checkDfespace", CPValue<long>(checkDfespace));
 
      // <<cout>> uses [[file:AFunction.hpp::CConstant]]
      Global.New("cout",CConstant<ostream*>(&cout));

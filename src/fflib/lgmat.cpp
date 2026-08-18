@@ -27,6 +27,7 @@
  */
 #include "AFunction.hpp"
 #include "FESpacen.hpp"
+#include "error.hpp"
 #include "lex.hpp"
 #include "throwassert.hpp"
 #ifndef REMOVE_CODE
@@ -1402,25 +1403,37 @@ KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const 
 template<class Mesh>
 KN<KN<long>> buildDofIntersection(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
     const int nN = D.neighborRanks.n;
-    std::vector<int> keptRank; keptRank.reserve(nN);
-    std::vector<KN<long>> keptDof; keptDof.reserve(nN);
+    KN<KN<long>> dofI(1 + nN);
+    dofI[0].resize(nN);
+
+    for (int j = 0; j< nN; ++j) dofI[0][j] = D.neighborRanks[j];
 
     for (int j = 0; j < nN; ++j){
         KN<int> n2o;
         Mesh* WhMesh = buildIntersectionSubmesh(D, j, n2o);
         {
             GFESpace<Mesh> Wh(*WhMesh, *Vhi.TFE[0]);
-            KN<long> L = restrictDOF(Wh, Vhi, n2o);
-            if (L.n > 0){ keptRank.push_back(D.neighborRanks[j]); keptDof.push_back(L); }
+            dofI[1+j] = restrictDOF(Wh, Vhi, n2o);
         }
         WhMesh->destroy();
     }
+    return dofI;
+}
 
-    const int nK = (int)keptRank.size();
-    KN<KN<long>> dofI(1 + nK);
+static KN<KN<long>> purgeEmptyIntersections(const KN<KN<long>>& raw) {
+    const int nN = raw.n - 1;
+    int nK = 0;
+    for (int j = 0; j < nN; ++j) if (raw[1+j].n > 0) ++nK;
+    KN<KN<long>> dofI(1+nK);
     dofI[0].resize(nK);
-    for (int j = 0; j < nK; ++j) dofI[0][j] = keptRank[j];
-    for (int j = 0; j < nK; ++j) dofI[1+j] = keptDof[j];
+    int k = 0;
+    for (int j = 0; j < nN; ++j){
+        if (raw[1+j].n > 0) { 
+            dofI[0][k] = raw[0][j];
+            dofI[1+k] = raw[1+j];
+            ++k;
+        }
+    }
     return dofI;
 }
 
@@ -1450,13 +1463,34 @@ void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
 
 template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
-    // purely local function. Collective in buildNumberigIfNeeded and checkPoU (reachable only by explicit call)
     if (!DTh) return;
+    const bool collective = (checkDfespace != 0) && (mpisize > 1);
     if (DTh->overlap == 0 && mpisize > 1){
         ExecError("fespace distribute : overlap = 0 not supported.");
     }
-    dofIntersectionDof = buildDofIntersection(*DTh, Vhi);
     Ddof = interpolatePoU(*DTh, Vhi);
+    KN<KN<long>> raw = buildDofIntersection(*DTh, Vhi);
+
+    if (collective){ 
+        const int bad = checkIntersectionSymmetry(DTh->comm, raw);
+        if (bad >= 0){
+            cerr << "fespace distribute: ddl intersection asymmetric on the rank" << raw[0][bad] << " (local " << raw[1+bad].n << ")" << endl;
+        }
+        if (agreeOnStatus(bad >= 0 ? 1 : 0, DTh->comm)){
+            ExecError("fespace distribute: incoherent intersection map");
+        }
+    }
+    dofIntersectionDof = purgeEmptyIntersections(raw);
+
+    pouResidual = -1.0;
+    if (collective){
+        pouResidual = checkPartitionOfUnity(DTh->comm, dofIntersectionDof, Ddof, Vhi.NbOfDF);
+        if (pouResidual > 1.0e-8) {
+            if (mpirank == 0){
+                cout << "[fespace distribute] Problem with the partition of unity: max|sum -1| = " << pouResidual << endl;
+            }
+        }
+    }
 }
 template void v_dfes<MeshS>::buildDistributedDofData(GFESpace<MeshS>&);
 template void v_dfes<Mesh3>::buildDistributedDofData(GFESpace<Mesh3>&);
