@@ -587,6 +587,32 @@ if (mpisize > 1) { meshS Th = square3(nsq + (mpirank == 0 ? 1 : 0), nsq);
          << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
 }
 
+// N5 : keepGlobal = false -> loc2glob indisponible, par erreur collective.
+//  La construction du fespace est HORS du try : elle doit reussir. keepGlobal
+//  n'enleve que le maillage global et ce qui en derive ; tout le reste (PoU,
+//  intersections, numbering, ndofglobal) doit continuer a se construire.
+//  Sans garde de np : le refus vaut aussi a un rang.
+//  Reduction en MIN, comme N1-N4 : verifie que TOUS les rangs levent. Cette
+//  collectivite n'est PAS une propriete locale de buildLoc2globIfNeeded, qui
+//  est appelee hors de tout contexte collectif : elle tient uniquement parce
+//  que TrueGlobalMesh est nul partout a la fois, ce que garantit la garde
+//  d'uniformite de keepGlobal= dans distribute. Si cette garde disparait, ce
+//  test se transforme en blocage -- le lancer avec un timeout.
+//  Le cas 2 de test_distribute_scatter.edp reprend ce controle en le doublant
+//  de son pendant positif (loc2glob toujours disponible du cote true).
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = false);
+  fespace Udh(DTh, P1);
+  int caught = 0;
+  try { int[int] l2g = Udh.loc2glob; if (l2g.n < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [N5 keepGlobal=false -> loc2glob indisponible]  N5=" << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
 }
 else {
 

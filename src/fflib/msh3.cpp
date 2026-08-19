@@ -9822,7 +9822,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 13;
+	static const int n_name_param = 14;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9870,7 +9870,8 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"partition", &typeid(KN_< long >)},
 {"partmethod", &typeid(string*)},
 {"comm", &typeid(pcommworld)},
-{"scatter", &typeid(bool)}
+{"scatter", &typeid(bool)},
+{"keepGlobal", &typeid(bool)}
 };
 
 inline long overlapLayers(long s) {
@@ -10023,6 +10024,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   bool cleanmesh(arg(3, stack, true));
   bool removeduplicate(arg(4, stack, false));
   long sizeoverlaps(arg(8, stack, 1L));
+  bool keepGlobal(arg(13, stack, true));
 
   string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
   std::string method = ppart ? *ppart : "metis";
@@ -10040,6 +10042,15 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
   }
 
+  {
+    const int kg = keepGlobal ? 1 : 0;
+    const int anyTrue = agreeOnStatus(kg, comm);
+    const int anyFalse = agreeOnStatus(1 - kg, comm);
+    if (anyTrue && anyFalse){
+      ExecError("distribute: keepGlobal must be the same on all ranks");
+    }
+  }
+
   if (mode == DM_SCATTER && method == "parmetis"){
   ExecError("distribute: partmethod= \"parmetis\" not supported with scatter mode");
   }
@@ -10052,7 +10063,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   if (mode == DM_REPLICATED || mpirank == 0){
     ffassert(pTh);
     pWork = pTh;
-    if (mode == DM_REPLICATED) {trueGlobal = pTh;}
+    if (mode == DM_REPLICATED && keepGlobal) {trueGlobal = pTh;}
     globalPartition.resize(pTh->nt);
     if (nargs[9]){
       KN_<long> userpart = GetAny<KN_<long>>((*nargs[9])(stack));

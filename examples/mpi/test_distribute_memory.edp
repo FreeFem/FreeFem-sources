@@ -1,0 +1,111 @@
+// NBPROC 2
+// PARAM -ns
+
+// =====================================================================
+//  distribute(..., keepGlobal = false) : le seul test qui mesure
+//  l'OBJECTIF, et non la coherence.
+//
+//  Les autres tests prouvent que keepGlobal n'enleve que loc2glob sans
+//  rien deplacer (cas 2 de test_distribute_scatter.edp) et que la lecture
+//  de loc2glob echoue collectivement (N5 de test_distribute_multi.edp).
+//  Aucun des deux ne prouve que la memoire retombe. C'est l'objet de ce
+//  fichier.
+//
+//  CE QU'ON MESURE
+//    De combien la memoire retombe quand le SCRIPT relache le maillage
+//    global, une fois distribute() passe :
+//      keepGlobal = false -> le DistributedMesh n'en est plus proprietaire,
+//                            la reassignation le libere entierement ;
+//      keepGlobal = true  -> DTh->TrueGlobalMesh le retient, rien ne part.
+//
+//  POURQUOI UN CRITERE RELATIF
+//    storageused() lit mallinfo::uordblks, qui ignore les blocs servis par
+//    mmap : les valeurs absolues sont sous-estimees et l'ecart depend de la
+//    taille des allocations. On ne compare donc jamais a un seuil en octets,
+//    seulement la chute a la taille du maillage global MESUREE DANS LE MEME
+//    RUN, par la meme operation. Le biais est commun aux deux mesures et
+//    s'annule dans le rapport.
+//
+//  PRECAUTIONS QUI COMPTENT
+//    - aucun fespace avant la mesure : sa construction alloue et declenche
+//      des collectifs, ce qui noierait le signal ;
+//    - mode REPLIQUE : en scatter les rangs > 0 n'ont pas de maillage global
+//      a relacher, la question ne se pose pas (TrueGlobalMesh y est deja nul) ;
+//    - -nc assez grand pour que 2*ov couches ne saturent pas le maillage,
+//      sinon on mesure surtout la copie du cover ;
+//    - reduction sur les rangs : le critere doit tenir sur CHAQUE rang, donc
+//      MIN sur la chute attendue et MAX sur la chute interdite.
+//
+//  A LANCER
+//    ff-mpirun -np 2 test_distribute_memory.edp -ns
+//    ff-mpirun -np 4 test_distribute_memory.edp -ns
+//    ff-mpirun -np 2 test_distribute_memory.edp -ns -nc 24 -v 1
+//
+//  Parametres :
+//    -ov   recouvrement passe a distribute   (defaut 1)
+//    -nc   raffinement du cube               (defaut 20)
+// =====================================================================
+include "getARGV.idp"
+
+int npass = 0, ntot = 0;
+
+int ov = getARGV("-ov", 1);
+int nc = getARGV("-nc", 20);
+
+//  Une mesure complete pour une valeur de keepGlobal. drop est le rapport
+//  (memoire rendue par la reassignation) / (memoire prise par le maillage
+//  global) : ~1 si le maillage global part, ~0 s'il reste epingle.
+macro DROP(KEEP, drop) {
+  real a0 = storageused();
+  mesh3 Th = cube(nc, nc, nc);
+  real szGlobal = storageused() - a0;
+  Dmesh3 DTh = distribute(Th, overlap = ov, keepGlobal = KEEP);
+  real b0 = storageused();
+  Th = cube(1, 1, 1);                     /* le script relache le maillage global */
+  real released = b0 - storageused();
+  drop = released / szGlobal;
+  if (mpirank == 0)
+    cout << "  keepGlobal=" << KEEP << " : global=" << szGlobal
+         << "  rendu=" << released << "  ratio=" << drop << endl;
+} // EOM
+
+if (mpirank == 0)
+  cout << "===== keepGlobal : la memoire retombe-t-elle ?  (np=" << mpisize
+       << "  overlap=" << ov << "  nc=" << nc << ") =====" << endl;
+
+//  PRECHAUFFAGE, indispensable. mallinfo::uordblks ne compte que l'arene
+//  principale : sur une arene froide, les gros blocs partent en mmap et
+//  n'y apparaissent pas, ce qui sous-estime szGlobal d'un facteur ~8 a la
+//  PREMIERE mesure seulement. Sans ce bloc, les deux DROP ne mesurent pas
+//  dans la meme unite et le resultat depend de leur ordre.
+{ mesh3 Twarm = cube(nc, nc, nc); }
+
+real dTrue, dFalse;
+{ DROP(true,  dTrue) }
+{ DROP(false, dFalse) }
+
+real gFalse, gTrue;
+mpiAllReduce(dFalse, gFalse, mpiCommWorld, mpiMIN);   /* pire cas : la plus petite chute */
+mpiAllReduce(dTrue,  gTrue,  mpiCommWorld, mpiMAX);   /* pire cas : la plus grande chute */
+
+//  M1 : c'est l'objectif de l'etape. Le maillage global est le seul poste en
+//  O(nt), independant du nombre de rangs : c'est lui qui empeche de monter en
+//  taille, et c'est lui que keepGlobal = false doit rendre.
+ntot++; if (gFalse > 0.8) npass++;
+if (mpirank == 0)
+  cout << "  [M1 keepGlobal=false rend le maillage global]  " << gFalse
+       << "   => " << (gFalse > 0.8 ? "PASS" : "FAIL") << endl;
+
+//  M2 : le temoin. Sans lui, M1 passerait aussi si le maillage global n'avait
+//  jamais ete retenu par personne -- il prouve que la chute mesuree en M1 est
+//  bien l'effet du parametre, et non celui de la reassignation seule.
+ntot++; if (gTrue < 0.1) npass++;
+if (mpirank == 0)
+  cout << "  [M2 keepGlobal=true  le retient]              " << gTrue
+       << "   => " << (gTrue < 0.1 ? "PASS" : "FAIL") << endl;
+
+if (mpirank == 0) {
+  cout << "===== BILAN : " << npass << " / " << ntot << " PASS =====" << endl;
+  cout << (npass == ntot ? "  >>> ALL PASS" : "  >>> DES ECHECS") << endl;
+}
+assert(npass == ntot);
