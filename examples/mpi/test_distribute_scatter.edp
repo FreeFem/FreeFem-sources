@@ -13,6 +13,10 @@
 //            1 = partition "bande" : trois sous-domaines
 //                x<gauche | bande de -strip mailles | x>droite,
 //                pour eprouver les contacts a distance. Exige -np 3.
+//            2 = keepGlobal = true contre false, en mode replique des
+//                deux cotes. Reutilise SIGNATURE + CMPPAIR : tout doit
+//                coincider sauf loc2glob, qui doit devenir indisponible
+//                (N5b) sans cesser de l'etre du cote true (N5a).
 //    -strip  epaisseur de la bande en mailles, cas 1    (defaut 2)
 //
 //  A LANCER
@@ -23,6 +27,7 @@
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 1 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 2 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 3 -nc 8
+//    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 2
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -v 5
 //      -> active le bloc de diagnostic de distributedDofNumbering (garde par
 //         agreeOnStatus, car verbosity vaut 0 hors du rang 0) : controle de
@@ -200,6 +205,30 @@ macro PAIRMETHOD(MTYPE, DTYPE, ThRep, ThSca, meth, tag) {
   CMPPAIR(MTYPE, P2, DA, DB, tag + " / P2")
 } // EOM
 
+// -------------------------------------------------------------------
+//  cas 2 : keepGlobal = true contre false, en mode REPLIQUE des deux
+//  cotes. Meme maillage, meme partition, meme recouvrement : la seule
+//  difference est TrueGlobalMesh, donc localToGlobalElement, donc
+//  loc2glob. Tout le reste doit coincider critere par critere.
+//
+//  C'est le seul test qui prouve que keepGlobal n'ENLEVE que cela, sans
+//  rien deplacer : CMPPAIR compare maillage local, ndof, PoU,
+//  intersections, numerotation globale et ndofglobal -- et ne lit jamais
+//  loc2glob, puisqu'il doit aussi tourner en mode scatter. Il est donc
+//  utilisable ici sans modification.
+//
+//  Partition UTILISATEUR : deterministe, donc l'egalite est exigible a 0
+//  exactement, sans marge.
+// -------------------------------------------------------------------
+macro PAIRKEEP(MTYPE, DTYPE, Th, tag) {
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  DTYPE DA = distribute(Th, overlap = ov, partition = part);                      /* defaut : keepGlobal = true */
+  DTYPE DB = distribute(Th, overlap = ov, partition = part, keepGlobal = false);
+  CMPPAIR(MTYPE, P1, DA, DB, tag + " / P1")
+  CMPPAIR(MTYPE, P2, DA, DB, tag + " / P2")
+} // EOM
+
 if (mpirank == 0)
   cout << "===== scatter == replique ?  (np=" << mpisize
        << "  overlap=" << ov << "  case=" << cas
@@ -263,14 +292,30 @@ if (cas == 0) {
   //  voyage, et le receveur reconstruit la surface par BuildMeshS()
   //  depuis les elements de bord du volume. Le maillage local doit donc
   //  etre identique a celui du mode replique, surface comprise.
-  if (doUser) {
+  //
+  //  GARDE nc > 4*ov : limitation CONNUE ET ACCEPTEE de trunc(), etrangere
+  //  au maillage distribue. truncmesh reconstruit inconditionnellement la
+  //  surface attachee (msh3.cpp, "building of the meshS after trunc"), et
+  //  BuildMeshS exige au moins un element de bord (ffassert(nbv_surf),
+  //  Mesh3dn.cpp). Une troncature VIDE d'un mesh3 portant un meshS avorte
+  //  donc au lieu de rendre un maillage vide -- reproductible en sequentiel
+  //  par trunc(buildBdMesh(cube(5,5,5)), x < -1). Quand 2*ov couches saturent
+  //  le maillage, la bande de BorderMesh devient vide et l'assertion tombe :
+  //  un rang avorte, les autres attendent, le run se presente comme un
+  //  blocage. Le regime ne concerne que des maillages minuscules devant le
+  //  recouvrement (nc=5 a ov=2), sans interet pratique. Verifie : passe a
+  //  ov=1/nc=5 et a ov=2/nc=12, echoue a ov=2/nc=5.
+  if (doUser && nc > 4*ov) {
     mesh3 ThR = cube(nc, nc, nc);  ThR = buildBdMesh(ThR);
     mesh3 ThS; if (mpirank == 0) { ThS = cube(nc, nc, nc); ThS = buildBdMesh(ThS); }
     PAIRUSER(mesh3, Dmesh3, ThR, ThS, "mesh3+Gamma")
   }
+  else if (doUser && mpirank == 0)
+    cout << "  [mesh3+Gamma]  ignore : nc=" << nc << " <= 4*ov=" << 4*ov
+         << "  (limitation connue de trunc sur surface attachee)" << endl;
 
 }
-else {
+else if (cas == 1) {
 
   // ---------- cas 1 : bande construite, contacts a distance -strip ----------
   //  Trois sous-domaines empiles en x : 0 | 2 (bande de -strip mailles) | 1.
@@ -312,6 +357,70 @@ else {
 
   CMPPAIR(mesh3, P1, DA, DB, "bande strip=" + strip + " / P1")
   CMPPAIR(mesh3, P2, DA, DB, "bande strip=" + strip + " / P2")
+
+}
+else {
+
+  // ---------- cas 2 : keepGlobal = true contre false ----------
+  //  Bloc opt-in : garde intacts les comptes de reference des cas 0 et 1.
+  { meshL Th = segment(nseg);     PAIRKEEP(meshL, DmeshL, Th, "keepGlobal / meshL") }
+  { meshS Th = square3(nsq, nsq); PAIRKEEP(meshS, DmeshS, Th, "keepGlobal / meshS") }
+  { mesh3 Th = cube(nc, nc, nc);  PAIRKEEP(mesh3, Dmesh3, Th, "keepGlobal / mesh3") }
+
+  //  N5 : loc2glob doit rester DISPONIBLE du cote keepGlobal = true et
+  //  INDISPONIBLE de l'autre, dans le meme run. Reduction en MIN pour la
+  //  branche qui doit lever : verifie que TOUS les rangs levent, donc que
+  //  l'erreur est collective et non un blocage -- propriete qui ne tient
+  //  que par la garde d'uniformite de keepGlobal= dans distribute.
+  { meshS Th = square3(nsq, nsq);
+    DmeshS DA = distribute(Th, overlap = ov, partmethod = "metis");
+    DmeshS DB = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = false);
+    fespace UA(DA, P1);
+    fespace UB(DB, P1);
+
+    int okA = 1;
+    try { int[int] l2g = UA.loc2glob; if (l2g.n != UA.ndof) okA = 0; }
+    catch (...) { okA = 0; }
+    int gA; mpiAllReduce(okA, gA, mpiCommWorld, mpiMIN);
+    ntot++; if (gA == 1) npass++;
+    if (mpirank == 0)
+      cout << "  [N5a keepGlobal=true  -> loc2glob disponible]    " << gA
+           << "   => " << (gA == 1 ? "PASS" : "FAIL") << endl;
+
+    int caught = 0;
+    try { int[int] l2g = UB.loc2glob; if (l2g.n < 0) caught = 1; }
+    catch (...) { caught = 1; }
+    int gB; mpiAllReduce(caught, gB, mpiCommWorld, mpiMIN);
+    ntot++; if (gB == 1) npass++;
+    if (mpirank == 0)
+      cout << "  [N5b keepGlobal=false -> loc2glob indisponible]  " << gB
+           << "   => " << (gB == 1 ? "PASS" : "FAIL") << endl;
+  }
+
+  //  N5c : keepGlobal doit etre UNIFORME sur les rangs. Un desaccord ne
+  //  bloque pas dans distribute, mais plus tard : un script qui lit
+  //  loc2glob partout reussirait sur les uns et leverait sur les autres,
+  //  donc une erreur non collective, donc un blocage. distribute etant deja
+  //  collectif, la garde y est gratuite -- et c'est elle, et rien d'autre,
+  //  qui rend N5b collectif. Test de TERMINAISON autant que de valeur : si
+  //  la garde disparait, ce bloc ne echoue pas, il pend. Le lancer avec un
+  //  timeout. Multi-rangs par nature : a un rang il n'y a pas de desaccord.
+  if (mpisize > 1) {
+    meshS Th = square3(nsq, nsq);
+    int caught = 0;
+    try {
+      DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis",
+                              keepGlobal = (mpirank == 0));
+      meshS Loc = DTh.local;
+      if (Loc.nt < 0) caught = 1;
+    }
+    catch (...) { caught = 1; }
+    int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+    ntot++; if (g == 1) npass++;
+    if (mpirank == 0)
+      cout << "  [N5c keepGlobal non uniforme refuse]            " << g
+           << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+  }
 
 }
 
