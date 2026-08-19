@@ -10096,7 +10096,8 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     KN<int> mask;
     const int nKept = overlapCoverMask(Tw, globalPartition, (int)mpirank, sizeoverlaps, mask);
 
-    if (nKept == Tw.nt || nKept == 0) {
+    const bool workIsScriptMesh = (pWork == pTh);
+    if (nKept == 0 || (nKept == Tw.nt && !workIsScriptMesh)) {
       pCover = pWork;
       n2oCover.resize(Tw.nt);
       for (int k = 0; k < Tw.nt; ++k) n2oCover[k] = k;
