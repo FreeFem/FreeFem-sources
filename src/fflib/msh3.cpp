@@ -10062,6 +10062,11 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   bad = agreeOnStatus(bad, comm);
   if (bad) ExecError("distribute: partition[] requires Th.nt values");
+  
+  if (mode == DM_REPLICATED && checkPartitionConsistency(comm, globalPartition)){
+    ExecError("distribute: global partition differs between the ranks");
+  }
+
   if (mode == DM_SCATTER){
     if (mpirank == 0){
       scatterGlobalMesh(*pTh, globalPartition, sizeoverlaps, precis_mesh, orientation, cleanmesh, removeduplicate, comm);

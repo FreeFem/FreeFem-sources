@@ -486,20 +486,21 @@ if (cas == 0) {
 
 // ---------- N1..N3 : chemins d'erreur ----------
 //  Une PoU cassee SEULE n'est pas atteignable depuis un script : PoU et carte
-//  d'intersections derivent du meme globalPartition, et le controle de
-//  symetrie tombe en premier. N1 exerce donc l'incoherence par la carte.
+//  d'intersections derivent du meme globalPartition, dont la coherence entre
+//  rangs est desormais verifiee DANS distribute. N1 et N4 exercent donc
+//  l'incoherence a sa source, le tableau partition= lui-meme.
 //  Chaque test reduit en MIN : verifie que TOUS les rangs levent, donc que
 //  l'erreur est collective et non un blocage.
 
-// N1 : cartes incoherentes -> erreur collective. Le rang 0 revendique un seul
-//  element de l'autre slab : l'interface change de FORME, donc de nombre de
-//  ddl (51 contre 59), et le controle de tailles tombe. Deplacer l'interface
-//  sans la deformer ne suffirait pas -- memes tailles et checkPoU nul.
-//  Restreint a np = 2 : deux rangs contigus sont forcement uniques voisins,
-//  donc les listes de voisins restent symetriques et l'echange de tailles ne
-//  peut pas rester non appariee. Au-dela, l'ilot creerait un voisin d'un seul
-//  cote et ferait bloquer le test lui-meme.
-if (mpisize == 2) {
+// N1 : partition incoherente entre rangs -> erreur collective. Le rang 0 seul
+//  revendique un element de l'autre slab. checkPartitionConsistency intercepte
+//  l'ecart DANS distribute, avant tout usage de la partition : le test n'est
+//  plus plafonne a np = 2, l'ilot ne peut plus creer un voisin d'un seul cote
+//  puisque distribute leve avant d'en arriver la.
+//  Corollaire : checkIntersectionSymmetry n'est plus atteignable depuis un
+//  script ; il ne peut plus se declencher que sur un bug interne.
+//  Test multi-rangs par nature : sans voisin il n'y a pas d'incoherence.
+if (mpisize > 1) {
   meshS Th = square3(nsq, nsq);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
@@ -514,7 +515,7 @@ if (mpisize == 2) {
   int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
   ntot++; if (g == 1) npass++;
   if (mpirank == 0)
-    cout << "  [N1 asymetrie -> erreur collective]  N1=" << g
+    cout << "  [N1 partition incoherente -> erreur collective]  N1=" << g
          << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
 }
 
@@ -541,6 +542,28 @@ if (mpisize == 2) {
   ntot++; if (g == 1) npass++;
   if (mpirank == 0)
     cout << "  [N3 espace composite refuse]  N3=" << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+// N4 : maillages differents entre rangs -> erreur collective. partition= a la
+//  bonne taille LOCALEMENT sur chaque rang, donc le controle de taille
+//  existant ("partition[] requires Th.nt values") passe. C'est l'accord sur
+//  part.n dans checkPartitionConsistency qui tombe -- la seule branche du
+//  controle que N1 n'atteint pas. Multi-rangs par nature, comme N1.
+if (mpisize > 1) { meshS Th = square3(nsq + (mpirank == 0 ? 1 : 0), nsq);
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  int caught = 0;
+  try {
+    DmeshS DTh = distribute(Th, overlap = ov, partition = part);
+    fespace Udh(DTh, P1);
+    if (Udh.ndof < 0) caught = 1;
+  }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [N4 maillages differents refuses]  N4=" << g
          << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
 }
 
