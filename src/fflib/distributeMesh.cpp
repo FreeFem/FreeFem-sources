@@ -267,6 +267,8 @@ double checkPartitionOfUnity(pcommworld, const KN<KN<long> >&, const KN<double>&
 
 int checkIntersectionSymmetry(pcommworld, const KN<KN<long>>&) { return -1; }
 
+int checkPartitionConsistency(pcommworld, const KN<int> &) { return 0; }
+
 #else
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
@@ -367,6 +369,26 @@ int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
 
   for (int j = 0; j < nN; ++j) if (mine[j] != his[j]) return j;
   return -1;
+}
+
+int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
+  if (mpisize <= 1) return 0;
+
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  int rank;
+  MPI_Comm_rank(cw, &rank);
+
+  int bad = (agreeOnStatus(part.n, comm) != part.n) ? 1 : 0;
+  if (agreeOnStatus(bad, comm)) return 1;
+
+  KN<int> ref(part.n);
+  if (rank == 0) ref = part;
+  MPI_Bcast((int*)ref, part.n, MPI_INT, 0, cw);
+  for (int k = 0; k < part.n; ++k){
+    if (ref[k] != part[k]) {bad = 1; break; }
+  }
+
+  return agreeOnStatus(bad, comm);
 }
 
 #endif

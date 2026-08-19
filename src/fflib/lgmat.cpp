@@ -1482,7 +1482,7 @@ void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     }
     dofIntersectionDof = purgeEmptyIntersections(raw);
 
-    pouResidual = -1.0;
+    pouResidual = (mpisize <= 1) ? 0.0 : -1.0;
     if (collective){
         pouResidual = checkPartitionOfUnity(DTh->comm, dofIntersectionDof, Ddof, Vhi.NbOfDF);
         if (pouResidual > 1.0e-8) {

@@ -80,3 +80,6 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof);
 
 int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI);
+
+// 0 if user partition equal on all ranks, 1 else
+int checkPartitionConsistency(pcommworld comm, const KN<int>& part);
