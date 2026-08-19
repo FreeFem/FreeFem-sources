@@ -10024,7 +10024,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   bool cleanmesh(arg(3, stack, true));
   bool removeduplicate(arg(4, stack, false));
   long sizeoverlaps(arg(8, stack, 1L));
-  bool keepGlobal(arg(13, stack, true));
+  bool keepGlobal(arg(13, stack, false));
 
   string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
   std::string method = ppart ? *ppart : "metis";
