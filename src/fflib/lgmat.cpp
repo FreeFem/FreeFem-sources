@@ -1439,6 +1439,7 @@ static KN<KN<long>> purgeEmptyIntersections(const KN<KN<long>>& raw) {
 
 template<class Mesh>
 KN<long> buildLoc2globDof(const DistributedMesh<Mesh>& D, GFESpace<Mesh>& Vhi){
+    ffassert(D.TrueGlobalMesh && D.localToGlobalElement.n == D.LocalMesh->nt);
     GFESpace<Mesh> Vhglob(*D.TrueGlobalMesh, *Vhi.TFE[0]);
     return restrictDOF(Vhi, Vhglob, D.localToGlobalElement);
 }

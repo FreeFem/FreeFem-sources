@@ -41,6 +41,14 @@
 //  V2. Seul controle disponible en mode scatter. Calcule et reduit a la
 //  construction : accesseur pur ici, et v6 < 0 = non calcule, donc FAIL.
 //
+//  DEGRE DES ELEMENTS : LocalMesh est obtenu par DEUX troncatures successives
+//  (global -> cover -> local) et non une seule. La composition des deux n2o
+//  n'est juste que si truncmesh preserve l'ordre des sommets DANS chaque
+//  element ; sinon restrictDOF apparie les mauvais ddl et V1 diverge. P1 est
+//  aveugle a ce defaut -- un ddl par sommet, une permutation ne se voit pas.
+//  Le filet est donc pose sur les trois familles avec un element sensible :
+//  P3 sur meshL (macro Pk), P2 sur mesh3 et meshS (cas "/ P2").
+//
 //  X1 : echappatoire checkDfespace = 0. Le bloc construit un fespace sur le
 //  rang 0 SEUL ; si un collectif subsiste malgre le drapeau, il bloque. Test
 //  de TERMINAISON : lancer avec un timeout, sinon une regression se presente
@@ -177,11 +185,11 @@ macro CHECKL(DTh, Th, tag) {
 }//EOM
 
 // -------- validation volume/3D (mesh3) --------
-macro CHECK3(DTh, Th, tag) {
+macro CHECK3(DTh, Th, PkX, tag) {
   mesh3 ThLocal = DTh.local;
-  fespace Uh(ThLocal, P1);
-  fespace Udh(DTh, P1);
-  fespace UhGlob(Th, P1);
+  fespace Uh(ThLocal, PkX);
+  fespace Udh(DTh, PkX);
+  fespace UhGlob(Th, PkX);
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
   int nItot = 0, nEtot = 0;
@@ -244,11 +252,11 @@ macro CHECK3(DTh, Th, tag) {
 }//EOM
 
 // -------- validation surface/2D-dans-3D (meshS) --------
-macro CHECKS(DTh, Th, tag) {
+macro CHECKS(DTh, Th, PkX, tag) {
   meshS ThLocal = DTh.local;
-  fespace Uh(ThLocal, P1);
-  fespace Udh(DTh, P1);
-  fespace UhGlob(Th, P1);
+  fespace Uh(ThLocal, PkX);
+  fespace Udh(DTh, PkX);
+  fespace UhGlob(Th, PkX);
   real[int] D = Udh.D;
   int[int]  l2g = Udh.loc2glob;
   int nItot = 0, nEtot = 0;
@@ -420,35 +428,47 @@ if (cas == 0) {
 // ---------- mesh3 : metis vs scotch ----------
 { mesh3 Th = cube(nc, nc, nc);
   Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis");
-  CHECK3(DTh, Th, "mesh3 / metis") }
+  CHECK3(DTh, Th, P1, "mesh3 / metis") }
 
 { mesh3 Th = cube(nc, nc, nc);
   Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "scotch");
-  CHECK3(DTh, Th, "mesh3 / scotch") }
+  CHECK3(DTh, Th, P1, "mesh3 / scotch") }
 
 { mesh3 Th = cube(nc, nc, nc);
   Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
-  CHECK3(DTh, Th, "mesh3 / parmetis") }
+  CHECK3(DTh, Th, P1, "mesh3 / parmetis") }
 
 // ---------- meshS : metis vs scotch ----------
 { meshS Th = square3(nsq, nsq);
   DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
-  CHECKS(DTh, Th, "meshS / metis") }
+  CHECKS(DTh, Th, P1, "meshS / metis") }
 
 { meshS Th = square3(nsq, nsq);
   DmeshS DTh = distribute(Th, overlap = ov, partmethod = "scotch");
-  CHECKS(DTh, Th, "meshS / scotch") }
+  CHECKS(DTh, Th, P1, "meshS / scotch") }
 
 { meshS Th = square3(nsq, nsq);
   DmeshS DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
-  CHECKS(DTh, Th, "meshS / parmetis") }
+  CHECKS(DTh, Th, P1, "meshS / parmetis") }
 
 // ---------- meshS : partition utilisateur (decoupage contigu) ----------
 { meshS Th = square3(nsq, nsq);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
   DmeshS DTh = distribute(Th, overlap = ov, partition = part);
-  CHECKS(DTh, Th, "meshS / partition=user") }
+  CHECKS(DTh, Th, P1, "meshS / partition=user") }
+
+// ---------- mesh3 / meshS en P2 : composition des deux troncatures ----------
+//  Voir DEGRE DES ELEMENTS dans l'entete. P1 ne peut pas detecter une
+//  permutation des sommets dans la composition global -> cover -> local ;
+//  P2 la detecte via V1.
+{ mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  CHECK3(DTh, Th, P2, "mesh3 / metis / P2") }
+
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  CHECKS(DTh, Th, P2, "meshS / metis / P2") }
 
 // ---------- chemin shell : invariance de Udh.D ----------
 { meshS Th = square3(nsq, nsq);
@@ -595,7 +615,7 @@ assert(mpisize == 3);
          << n0 << " / " << n2 << " / " << n1 << endl;
   assert(n0 > 0 && n1 > 0 && n2 > 0);
   Dmesh3 DTh = distribute(Th, overlap = ov, partition = part);
-  CHECK3(DTh, Th, "mesh3 / bande strip=" + strip) }
+  CHECK3(DTh, Th, P1, "mesh3 / bande strip=" + strip) }
 
 }
 
