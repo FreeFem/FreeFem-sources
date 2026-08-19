@@ -9887,14 +9887,14 @@ inline bool keepElt(const KN<double>& suppSmooth, const Mesh& Th, int k, long s,
 }
 
 template<class Mesh>
-KN<int> keptGlobalElements(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, int rank){
+KN<int> keptElements(const Mesh& Th, const KN<int>& coverPartition, long sizeoverlaps, int rank){
   const int nbt = Th.nt, nbv = Th.nv;
   KN<double> supp(nbt, 0.0), suppSmooth(nbv, 0.0);
-  for (int k = 0; k<nbt; ++k) supp[k] = (globalPartition[k] == rank) ? 1.0 : 0.0;
+  for (int k = 0; k<nbt; ++k) supp[k] = (coverPartition[k] == rank) ? 1.0 : 0.0;
   AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
   KN<int> keep(nbt, 0);
   for (int k = 0; k<nbt; ++k) {
-    keep[k] = keepElt(suppSmooth, Th, k, sizeoverlaps, globalPartition, rank);
+    keep[k] = keepElt(suppSmooth, Th, k, sizeoverlaps, coverPartition, rank);
   }
   return keep;
 }
@@ -9915,33 +9915,43 @@ KN<int> n2oFromSplit(const Mesh& parent, const Mesh& sub, const KN<int>& splitMa
   return n2o;
 }
 
+// Helper for the cover mask: used in scatterGlobalMesh and DistributeMesh_Op
+template<class Mesh>
+static int overlapCoverMask(const Mesh& Th, const KN<int>& part, int rank, long sizeoverlaps, KN<int>& mask){
+  const int nbt = Th.nt, nbv = Th.nv;
+  const int nve = Mesh::Element::nv;
+  KN<double> supp(nbt, 0.0), phi(nbv, 0.0);
+  for (int k = 0; k < nbt; ++k) supp[k] = (part[k] == rank) ? 1.0 : 0.0;
+  AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &phi);
+
+  mask.resize(nbt);
+  int nKept = 0;
+  for (int k = 0; k < nbt; ++k){
+    double m = 0.0;
+    for (int j = 0; j < nve; ++j) m = max(m, phi[Th(k,j)]);
+    mask[k] = (m > 0.001) ? 1 : 0;
+    nKept += mask[k];
+  }
+  return nKept;
+}
+
+template<class Mesh>
+static Mesh* buildOverlapCover(const Mesh& src, const KN<int>& mask, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate, KN<int>& n2oCover) {
+  Mesh* cover = truncmesh(src, 1, (int*)mask, false, 9999, precis_mesh, orientation, cleanmesh, removeduplicate);
+  ffassert(cover->nt > 0);
+  cover->BuildGTree();
+  n2oCover = n2oFromSplit(src, *cover, mask);
+  return cover;
+}
+
 template<class Mesh>
 static void scatterGlobalMesh(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate, pcommworld comm){
   int nbt = Th.nt;
-  int nbv = Th.nv;
-  int nve = Mesh::Element::nv;
-
   for (int i = 1; i < mpisize; i++){
-    KN<double> supp(nbt, 0.0);
-    for (int k = 0; k < nbt; k++){
-      supp[k] = (globalPartition[k] == i) ? 1.0 : 0.0;
-    }
-    KN<double> phi(nbv, 0.0);
-    AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &phi);
-
-    KN<int> mask(nbt, 0);
-    for (int k = 0; k < nbt; ++k){
-      double m = 0.0;
-      for (int j = 0; j < nve; ++j){
-        m = max(m, phi[Th(k,j)]);
-      }
-      mask[k] = (m > 0.001) ? 1 : 0;
-    }
-
-    Mesh* Sub = truncmesh(Th, 1, (int*)mask, false, 9999, precis_mesh, orientation, cleanmesh, removeduplicate);
-    ffassert(Sub->nt > 0);
-    Sub->BuildGTree();
-    KN<int> n2o = n2oFromSplit(Th, *Sub, mask);
+    KN<int> mask;
+    overlapCoverMask(Th, globalPartition, i, sizeoverlaps, mask);
+    KN<int> n2o;
+    Mesh* Sub = buildOverlapCover(Th, mask, precis_mesh, orientation, cleanmesh, removeduplicate, n2o);
 
     KN<int> parti(Sub->nt);
     for (int kc = 0; kc < Sub->nt; kc++){
@@ -9963,10 +9973,10 @@ static void scatterGlobalMesh(const Mesh& Th, const KN<int>& globalPartition, lo
 
 template<class Mesh>
 Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o){
-  KN<int> keptByJ = keptGlobalElements(*D.CoverMesh, D.globalPartition, (long)D.overlap, D.neighborRanks[j]);
+  KN<int> keptByJ = keptElements(*D.CoverMesh, D.coverPartition, (long)D.overlap, D.neighborRanks[j]);
   KN<int> splitInter(D.LocalMesh->nt,0);
   for (int k = 0; k < D.LocalMesh->nt; ++k){
-    splitInter[k] = keptByJ[D.localToGlobalElement[k]];
+    splitInter[k] = keptByJ[D.localToCoverElement[k]];
   }
   Mesh* Wh = truncmesh(*D.LocalMesh, 1, (int*)splitInter, false, 9999, 1e-7, 1L, true, false);
   Wh->BuildGTree();
@@ -10079,17 +10089,39 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
   }
 
-  const Mesh &Th = *pWork;
+  const Mesh* pCover = nullptr;
+  KN<int> n2oCover, coverPartition;
+  {
+    const Mesh& Tw = *pWork;
+    KN<int> mask;
+    const int nKept = overlapCoverMask(Tw, globalPartition, (int)mpirank, sizeoverlaps, mask);
+
+    if (nKept == Tw.nt || nKept == 0) {
+      pCover = pWork;
+      n2oCover.resize(Tw.nt);
+      for (int k = 0; k < Tw.nt; ++k) n2oCover[k] = k;
+    }
+    else {
+      pCover = buildOverlapCover(Tw, mask, precis_mesh, orientation, cleanmesh, removeduplicate, n2oCover);
+    }
+
+    coverPartition.resize(pCover->nt);
+    for (int kc = 0; kc < pCover->nt; ++kc){
+      coverPartition[kc] = globalPartition[n2oCover[kc]];
+    }
+  }
+
+  const Mesh &Th = *pCover;
   int nbv = Th.nv, nbt = Th.nt;
   const int nve = Mesh::Element::nv;
 
   KN<double> supp(nbt, 0.0);
-  for (int k = 0; k<nbt;++k){
-    supp[k] = (globalPartition[k] == (int)mpirank) ? 1.0 : 0.0;
+  for (int k = 0; k < nbt; ++k){
+    supp[k] = (coverPartition[k] == (int)mpirank) ? 1.0 : 0.0;
   }
   KN<double> suppSmooth(nbv, 0.0);
-  
   AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
+
 
   KN<int> neighborRanks;
 
@@ -10098,7 +10130,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     for (int k = 0; k < nbt; ++k){
       for (int i = 0; i < nve; ++i){
         if (suppSmooth[Th(k,i)] > 0.001 && suppSmooth[Th(k,i)] < 0.999) {
-          isNeighbor[globalPartition[k]] = 1;
+          isNeighbor[coverPartition[k]] = 1;
           break;
         }
       }
@@ -10133,32 +10165,32 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     return s/Mesh::Element::nv;
   };
 
-  KN<int> localToGlobalElement(nbt);
+  KN<int> localToCoverElement(nbt);
   int numLocalElt = 0;
   for (int k = 0; k < nbt; ++k){
-    bool keep = keepElt(suppSmooth, Th, k, sizeoverlaps, globalPartition, (int)mpirank);
+    bool keep = keepElt(suppSmooth, Th, k, sizeoverlaps, coverPartition, (int)mpirank);
     if (keep) {
       splitCore[k] = 1;
-      localToGlobalElement[numLocalElt++] = k;
+      localToCoverElement[numLocalElt++] = k;
       for (int i = 0; i < Mesh::Element::nv; ++i){
         vertexTag[Th(k,i)] = 1;
       }
     }
   }
-  localToGlobalElement.resize(numLocalElt);
+  localToCoverElement.resize(numLocalElt);
 
   // Map local to global vertex number
   int numLocalVtx = 0;
-  KN<int> localToGlobalVertex(nbv);
+  KN<int> localToCoverVertex(nbv);
   for (int v = 0; v < nbv; ++v){
-    if (vertexTag[v]) localToGlobalVertex[numLocalVtx++] = v;
+    if (vertexTag[v]) localToCoverVertex[numLocalVtx++] = v;
   }
-  localToGlobalVertex.resize(numLocalVtx);
+  localToCoverVertex.resize(numLocalVtx);
   
   // Appel à truncmesh
   Mesh* LocalMesh = truncmesh(Th, 1, (int*)splitCore, false, interfaceLabel, precis_mesh, orientation, cleanmesh, removeduplicate);
   LocalMesh->BuildGTree();
-  ffassert(localToGlobalVertex.n == LocalMesh->nv);
+  ffassert(localToCoverVertex.n == LocalMesh->nv);
 
   // Building splitBorder and BorderMesh
   KN<int> splitBorder(nbt, 0);
@@ -10187,7 +10219,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   for (int j = 0; j <neighborRanks.n; ++j){
     KN<double> supp_j(nbt, 0.0);
     for (int k = 0; k < nbt; ++k){
-      supp_j[k] = (globalPartition[k] ==neighborRanks[j]) ? 1.0 : 0.0;
+      supp_j[k] = (coverPartition[k] ==neighborRanks[j]) ? 1.0 : 0.0;
     }
 
     KN<double> phi_j(nbv, 0.0);
@@ -10202,23 +10234,30 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   KN<double> pouLocal(LocalMesh->nv);
   for (int lv = 0; lv < LocalMesh->nv; ++lv){
-    pouLocal[lv] = khi[localToGlobalVertex[lv]];
+    pouLocal[lv] = khi[localToCoverVertex[lv]];
   }
 
-  ffassert(localToGlobalElement.n == LocalMesh->nt);
+  ffassert(localToCoverElement.n == LocalMesh->nt);
   // DistributedMesh assembly
   DistributedMesh<Mesh>* DTh = new DistributedMesh<Mesh>();
 
   DTh->LocalMesh = LocalMesh;
   DTh->BorderMesh = BorderMesh;
-  DTh->setReferenceMeshes(pWork, trueGlobal);
-  DTh->localToGlobalElement = localToGlobalElement;
+  DTh->setReferenceMeshes(pCover, trueGlobal);
+  if (pCover != pWork) pCover->destroy();
+  DTh->localToCoverElement = localToCoverElement;
+  if (trueGlobal) {
+    DTh->localToGlobalElement.resize(localToCoverElement.n);
+    for (int k = 0; k < localToCoverElement.n; ++k){
+      DTh->localToGlobalElement[k] = n2oCover[localToCoverElement[k]];
+    }
+  }
   DTh->overlap = (int)sizeoverlaps;
   DTh->interfaceLabel = interfaceLabel;
   DTh->neighborRanks = neighborRanks;
   DTh->partitionOfUnity = pouLocal;
   DTh->comm = comm;
-  DTh->globalPartition = globalPartition;
+  DTh->coverPartition = coverPartition;
 
   Add2StackOfPtr2FreeRC(stack, DTh);
   return DTh;
