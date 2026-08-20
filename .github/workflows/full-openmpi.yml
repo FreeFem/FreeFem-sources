@@ -1,4 +1,4 @@
-# Full version of FreeFem, using Open MPI
+# Full version of FreeFEM, using Open MPI
 name: Full version Open MPI
 
 on:
@@ -94,7 +94,7 @@ jobs:
         with:
           path: |
             ${{ env.INSTALL_DIR }}/ff-petsc
-          key: "petsc-Full version Open MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
+          key: "petsc-Full version Open MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.build_type }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
         run: |

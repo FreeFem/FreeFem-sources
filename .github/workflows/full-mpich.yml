@@ -1,4 +1,4 @@
-# Full version of FreeFem, using MPICH installed by PETSc
+# Full version of FreeFEM, using MPICH installed by PETSc
 name: Full version MPICH
 
 on:
@@ -97,7 +97,7 @@ jobs:
         with:
           path: |
             ${{ env.INSTALL_DIR }}/ff-petsc
-          key: "petsc-Full version MPICH-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
+          key: "petsc-Full version MPICH-${{ steps.petsc-info.outputs.image }}-${{ matrix.build_type }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
         run: |
