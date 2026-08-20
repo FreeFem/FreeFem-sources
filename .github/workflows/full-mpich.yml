@@ -47,10 +47,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04]') }}
-        build-type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
+        version:  ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04, 26.04]') }}
+        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.build-type }} \
+    name: Ubuntu ${{ matrix.version }} with ${{ matrix.build_type }} \
             - ${{ github.workflow }}
     env:
       INSTALL_DIR: /usr/local
@@ -68,9 +68,9 @@ jobs:
       - name: Set configure flags and variables
         id: flags
         run: |
-          if [ "${{ matrix.build-type }}" = "debug" ]; then
-            echo "configure-flags=--enable-debug" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.build-type }}" = "release" ]; then
+          if [ "${{ matrix.build_type }}" = "debug" ]; then
+            echo "configure-flags=--enable-debug --enable-generic" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.build_type }}" = "release" ]; then
             echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
           fi
           echo "staging-dir=${{ github.workspace }}/install_staging" >> $GITHUB_OUTPUT
@@ -162,8 +162,8 @@ jobs:
       matrix:
         version: [14, 15, 26]
         cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+          - {opts: --enable-debug}
+          - {opts: --enable-optim --enable-generic}
 
     name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
       - ${{ github.workflow }}

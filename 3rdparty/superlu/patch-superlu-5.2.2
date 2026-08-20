@@ -1,6 +1,18 @@
-diff -ur OO-superlu-sources-origin/SRC/csnode_bmod.c superlu-sources/SRC/csnode_bmod.c
---- OO-superlu-sources-origin/SRC/csnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
-+++ superlu-sources/SRC/csnode_bmod.c	2021-02-17 09:02:06.000000000 +0100
+diff --color -ur OO-superlu-sources-origin/SRC/cgstrs.c superlu-sources/SRC/cgstrs.c
+--- OO-superlu-sources-origin/SRC/cgstrs.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/cgstrs.c	2026-07-14 14:57:38
+@@ -120,7 +120,7 @@
+     int      i, j, k, iptr, jcol, n, ldb, nrhs;
+     complex   *work, *rhs_work, *soln;
+     flops_t  solve_ops;
+-    void cprint_soln();
++    void cprint_soln(int, int, complex *);
+ 
+     /* Test input parameters ... */
+     *info = 0;
+diff --color -ur OO-superlu-sources-origin/SRC/csnode_bmod.c superlu-sources/SRC/csnode_bmod.c
+--- OO-superlu-sources-origin/SRC/csnode_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/csnode_bmod.c	2026-07-14 14:57:38
 @@ -33,6 +33,12 @@
  
  
@@ -14,9 +26,45 @@ diff -ur OO-superlu-sources-origin/SRC/csnode_bmod.c superlu-sources/SRC/csnode_
  
  
  /*! \brief Performs numeric block updates within the relaxed snode. 
-diff -ur OO-superlu-sources-origin/SRC/dsnode_bmod.c superlu-sources/SRC/dsnode_bmod.c
---- OO-superlu-sources-origin/SRC/dsnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
-+++ superlu-sources/SRC/dsnode_bmod.c	2021-02-17 09:00:45.000000000 +0100
+diff --color -ur OO-superlu-sources-origin/SRC/dgstrs.c superlu-sources/SRC/dgstrs.c
+--- OO-superlu-sources-origin/SRC/dgstrs.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/dgstrs.c	2026-07-14 14:57:38
+@@ -119,7 +119,7 @@
+     int      i, j, k, iptr, jcol, n, ldb, nrhs;
+     double   *work, *rhs_work, *soln;
+     flops_t  solve_ops;
+-    void dprint_soln();
++    void dprint_soln(int, int, double *);
+ 
+     /* Test input parameters ... */
+     *info = 0;
+diff --color -ur OO-superlu-sources-origin/SRC/dpanel_bmod.c superlu-sources/SRC/dpanel_bmod.c
+--- OO-superlu-sources-origin/SRC/dpanel_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/dpanel_bmod.c	2026-07-14 14:59:30
+@@ -43,7 +43,7 @@
+  */
+ void dlsolve(int, int, double *, double *);
+ void dmatvec(int, int, int, double *, double *, double *);
+-extern void dcheck_tempv();
++extern void dcheck_tempv(int, double *);
+ 
+ /*! \brief
+  *
+diff --color -ur OO-superlu-sources-origin/SRC/dreadtriple.c superlu-sources/SRC/dreadtriple.c
+--- OO-superlu-sources-origin/SRC/dreadtriple.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/dreadtriple.c	2026-07-14 14:59:41
+@@ -134,7 +134,7 @@
+ 
+ void dreadrhs(int m, double *b)
+ {
+-    FILE *fp, *fopen();
++    FILE *fp;
+     int i;
+     /*int j;*/
+ 
+diff --color -ur OO-superlu-sources-origin/SRC/dsnode_bmod.c superlu-sources/SRC/dsnode_bmod.c
+--- OO-superlu-sources-origin/SRC/dsnode_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/dsnode_bmod.c	2026-07-14 14:57:38
 @@ -33,6 +33,12 @@
  
  
@@ -30,9 +78,78 @@ diff -ur OO-superlu-sources-origin/SRC/dsnode_bmod.c superlu-sources/SRC/dsnode_
  
  
  /*! \brief Performs numeric block updates within the relaxed snode. 
-diff -ur OO-superlu-sources-origin/SRC/ssnode_bmod.c superlu-sources/SRC/ssnode_bmod.c
---- OO-superlu-sources-origin/SRC/ssnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
-+++ superlu-sources/SRC/ssnode_bmod.c	2021-02-17 08:58:12.000000000 +0100
+diff --color -ur OO-superlu-sources-origin/SRC/sgstrs.c superlu-sources/SRC/sgstrs.c
+--- OO-superlu-sources-origin/SRC/sgstrs.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/sgstrs.c	2026-07-14 14:57:38
+@@ -119,7 +119,7 @@
+     int      i, j, k, iptr, jcol, n, ldb, nrhs;
+     float   *work, *rhs_work, *soln;
+     flops_t  solve_ops;
+-    void sprint_soln();
++    void sprint_soln(int, int, float *);
+ 
+     /* Test input parameters ... */
+     *info = 0;
+diff --color -ur OO-superlu-sources-origin/SRC/smyblas2.c superlu-sources/SRC/smyblas2.c
+--- OO-superlu-sources-origin/SRC/smyblas2.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/smyblas2.c	2026-07-14 14:58:26
+@@ -133,11 +133,7 @@
+  * in the rhs vector.
+  */
+ void
+-susolve ( ldm, ncol, M, rhs )
+-int ldm;	/* in */
+-int ncol;	/* in */
+-float *M;	/* in */
+-float *rhs;	/* modified */
++susolve(int ldm, int ncol, float *M, float *rhs)
+ {
+     float xj;
+     int jcol, j, irow;
+@@ -162,15 +158,7 @@
+  * 
+  * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
+  */
+-void smatvec ( ldm, nrow, ncol, M, vec, Mxvec )
+-
+-int ldm;	/* in -- leading dimension of M */
+-int nrow;	/* in */ 
+-int ncol;	/* in */
+-float *M;	/* in */
+-float *vec;	/* in */
+-float *Mxvec;	/* in/out */
+-
++void smatvec(int ldm, int nrow, int ncol, float *M, float *vec, float *Mxvec)
+ {
+     float vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7;
+     float *M0;
+diff --color -ur OO-superlu-sources-origin/SRC/spanel_bmod.c superlu-sources/SRC/spanel_bmod.c
+--- OO-superlu-sources-origin/SRC/spanel_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/spanel_bmod.c	2026-07-14 14:57:38
+@@ -43,7 +43,7 @@
+  */
+ void slsolve(int, int, float *, float *);
+ void smatvec(int, int, int, float *, float *, float *);
+-extern void scheck_tempv();
++extern void scheck_tempv(int, float *);
+ 
+ /*! \brief
+  *
+diff --color -ur OO-superlu-sources-origin/SRC/sreadtriple.c superlu-sources/SRC/sreadtriple.c
+--- OO-superlu-sources-origin/SRC/sreadtriple.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/sreadtriple.c	2026-07-14 14:59:07
+@@ -134,7 +134,7 @@
+ 
+ void sreadrhs(int m, float *b)
+ {
+-    FILE *fp, *fopen();
++    FILE *fp;
+     int i;
+     /*int j;*/
+ 
+diff --color -ur OO-superlu-sources-origin/SRC/ssnode_bmod.c superlu-sources/SRC/ssnode_bmod.c
+--- OO-superlu-sources-origin/SRC/ssnode_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/ssnode_bmod.c	2026-07-14 14:57:38
 @@ -33,6 +33,12 @@
  
  
@@ -46,9 +163,21 @@ diff -ur OO-superlu-sources-origin/SRC/ssnode_bmod.c superlu-sources/SRC/ssnode_
  
  
  /*! \brief Performs numeric block updates within the relaxed snode. 
-diff -ur OO-superlu-sources-origin/SRC/zsnode_bmod.c superlu-sources/SRC/zsnode_bmod.c
---- OO-superlu-sources-origin/SRC/zsnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
-+++ superlu-sources/SRC/zsnode_bmod.c	2021-02-17 09:04:15.000000000 +0100
+diff --color -ur OO-superlu-sources-origin/SRC/zgstrs.c superlu-sources/SRC/zgstrs.c
+--- OO-superlu-sources-origin/SRC/zgstrs.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/zgstrs.c	2026-07-14 14:57:38
+@@ -120,7 +120,7 @@
+     int      i, j, k, iptr, jcol, n, ldb, nrhs;
+     doublecomplex   *work, *rhs_work, *soln;
+     flops_t  solve_ops;
+-    void zprint_soln();
++    void zprint_soln(int, int, doublecomplex *);
+ 
+     /* Test input parameters ... */
+     *info = 0;
+diff --color -ur OO-superlu-sources-origin/SRC/zsnode_bmod.c superlu-sources/SRC/zsnode_bmod.c
+--- OO-superlu-sources-origin/SRC/zsnode_bmod.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/zsnode_bmod.c	2026-07-14 14:57:38
 @@ -33,6 +33,12 @@
  
  
@@ -62,3 +191,147 @@ diff -ur OO-superlu-sources-origin/SRC/zsnode_bmod.c superlu-sources/SRC/zsnode_
  
  
  /*! \brief Performs numeric block updates within the relaxed snode. 
+diff --color -ur OO-superlu-sources-origin/SRC/dmyblas2.c superlu-sources/SRC/dmyblas2.c
+--- OO-superlu-sources-origin/SRC/dmyblas2.c	2020-10-18 00:23:21
++++ superlu-sources/SRC/dmyblas2.c	2026-07-14 14:58:26
+@@ -133,11 +133,7 @@
+  * in the rhs vector.
+  */
+ void
+-dusolve ( ldm, ncol, M, rhs )
+-int ldm;	/* in */
+-int ncol;	/* in */
+-double *M;	/* in */
+-double *rhs;	/* modified */
++dusolve(int ldm, int ncol, double *M, double *rhs)
+ {
+     double xj;
+     int jcol, j, irow;
+@@ -162,15 +158,7 @@
+  * 
+  * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
+  */
+-void dmatvec ( ldm, nrow, ncol, M, vec, Mxvec )
+-
+-int ldm;	/* in -- leading dimension of M */
+-int nrow;	/* in */ 
+-int ncol;	/* in */
+-double *M;	/* in */
+-double *vec;	/* in */
+-double *Mxvec;	/* in/out */
+-
++void dmatvec(int ldm, int nrow, int ncol, double *M, double *vec, double *Mxvec)
+ {
+     double vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7;
+     double *M0;
+diff --color -ur OO-superlu-sources-origin/SRC/cmyblas2.c superlu-sources/SRC/cmyblas2.c
+--- OO-superlu-sources-origin/SRC/cmyblas2.c
++++ superlu-sources/SRC/cmyblas2.c
+@@ -113,11 +113,7 @@
+  * in the rhs vector.
+  */
+ void
+-cusolve ( ldm, ncol, M, rhs )
+-int ldm;	/* in */
+-int ncol;	/* in */
+-complex *M;	/* in */
+-complex *rhs;	/* modified */
++cusolve(int ldm, int ncol, complex *M, complex *rhs)
+ {
+     complex xj, temp;
+     int jcol, j, irow;
+@@ -144,13 +140,7 @@
+  *
+  * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
+  */
+-void cmatvec ( ldm, nrow, ncol, M, vec, Mxvec )
+-int ldm;	/* in -- leading dimension of M */
+-int nrow;	/* in */ 
+-int ncol;	/* in */
+-complex *M;	/* in */
+-complex *vec;	/* in */
+-complex *Mxvec;	/* in/out */
++void cmatvec(int ldm, int nrow, int ncol, complex *M, complex *vec, complex *Mxvec)
+ {
+     complex vi0, vi1, vi2, vi3;
+     complex *M0, temp;
+diff --color -ur OO-superlu-sources-origin/SRC/zmyblas2.c superlu-sources/SRC/zmyblas2.c
+--- OO-superlu-sources-origin/SRC/zmyblas2.c
++++ superlu-sources/SRC/zmyblas2.c
+@@ -113,11 +113,7 @@
+  * in the rhs vector.
+  */
+ void
+-zusolve ( ldm, ncol, M, rhs )
+-int ldm;	/* in */
+-int ncol;	/* in */
+-doublecomplex *M;	/* in */
+-doublecomplex *rhs;	/* modified */
++zusolve(int ldm, int ncol, doublecomplex *M, doublecomplex *rhs)
+ {
+     doublecomplex xj, temp;
+     int jcol, j, irow;
+@@ -144,13 +140,8 @@
+  *
+  * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
+  */
+-void zmatvec ( ldm, nrow, ncol, M, vec, Mxvec )
+-int ldm;	/* in -- leading dimension of M */
+-int nrow;	/* in */ 
+-int ncol;	/* in */
+-doublecomplex *M;	/* in */
+-doublecomplex *vec;	/* in */
+-doublecomplex *Mxvec;	/* in/out */
++void zmatvec(int ldm, int nrow, int ncol, doublecomplex *M, doublecomplex *vec,
++             doublecomplex *Mxvec)
+ {
+     doublecomplex vi0, vi1, vi2, vi3;
+     doublecomplex *M0, temp;
+diff --color -ur OO-superlu-sources-origin/SRC/cpanel_bmod.c superlu-sources/SRC/cpanel_bmod.c
+--- OO-superlu-sources-origin/SRC/cpanel_bmod.c
++++ superlu-sources/SRC/cpanel_bmod.c
+@@ -43,7 +43,7 @@
+  */
+ void clsolve(int, int, complex *, complex *);
+ void cmatvec(int, int, int, complex *, complex *, complex *);
+-extern void ccheck_tempv();
++extern void ccheck_tempv(int, complex *);
+ 
+ /*! \brief
+  *
+diff --color -ur OO-superlu-sources-origin/SRC/zpanel_bmod.c superlu-sources/SRC/zpanel_bmod.c
+--- OO-superlu-sources-origin/SRC/zpanel_bmod.c
++++ superlu-sources/SRC/zpanel_bmod.c
+@@ -43,7 +43,7 @@
+  */
+ void zlsolve(int, int, doublecomplex *, doublecomplex *);
+ void zmatvec(int, int, int, doublecomplex *, doublecomplex *, doublecomplex *);
+-extern void zcheck_tempv();
++extern void zcheck_tempv(int, doublecomplex *);
+ 
+ /*! \brief
+  *
+diff --color -ur OO-superlu-sources-origin/SRC/creadtriple.c superlu-sources/SRC/creadtriple.c
+--- OO-superlu-sources-origin/SRC/creadtriple.c
++++ superlu-sources/SRC/creadtriple.c
+@@ -134,7 +134,7 @@
+ 
+ void creadrhs(int m, complex *b)
+ {
+-    FILE *fp, *fopen();
++    FILE *fp;
+     int i;
+     /*int j;*/
+ 
+diff --color -ur OO-superlu-sources-origin/SRC/zreadtriple.c superlu-sources/SRC/zreadtriple.c
+--- OO-superlu-sources-origin/SRC/zreadtriple.c
++++ superlu-sources/SRC/zreadtriple.c
+@@ -134,7 +134,7 @@
+ 
+ void zreadrhs(int m, doublecomplex *b)
+ {
+-    FILE *fp, *fopen();
++    FILE *fp;
+     int i;
+     /*int j;*/
+ 

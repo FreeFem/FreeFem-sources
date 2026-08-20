@@ -47,11 +47,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.windows_versions || '[2025]') }}
-        build-type: ${{ fromJson(inputs.build-types || '["release"]') }}
+        windows_version:  ${{ fromJson(inputs.windows_versions || '[2025]') }}
+        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
 
-    name: Windows Server ${{ matrix.version }} ${{ matrix.build-type }} - ${{github.workflow}}
-    runs-on: windows-${{ matrix.version }}
+    name: Windows Server ${{ matrix.windows_version }} ${{ matrix.build_type }} - ${{github.workflow}}
+    runs-on: windows-${{ matrix.windows_version }}
 
     defaults:
       run:
@@ -99,9 +99,9 @@ jobs:
       - name: Set configure flags and variables
         id: flags
         run: |
-          if [ "${{ matrix.build-type }}" = "debug" ]; then
-            echo "configure-flags=--enable-debug" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.build-type }}" = "release" ]; then
+          if [ "${{ matrix.build_type }}" = "debug" ]; then
+            echo "configure-flags=--enable-debug --enable-generic" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.build_type }}" = "release" ]; then
             echo "configure-flags=--enable-optim --enable-generic" >> $GITHUB_OUTPUT
           fi
 

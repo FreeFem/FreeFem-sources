@@ -22,10 +22,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [22.04, 24.04]
+        version: [22.04, 24.04, 26.04]
         cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+          - {opts: --enable-debug}
+          - {opts: --enable-optim --enable-generic}
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: ubuntu-${{ matrix.version }}
@@ -43,7 +43,11 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          extra_configure_opts=()
+          if [[ "${{ matrix.version }}" == "26.04" ]]; then
+            extra_configure_opts+=(--disable-scotch)
+          fi
+          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem" "${extra_configure_opts[@]}"
 
       - name: Build
         run: make -j 4
@@ -62,8 +66,8 @@ jobs:
       matrix:
         version: [14, 15, 26]
         cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+          - {opts: --enable-debug}
+          - {opts: --enable-optim --enable-generic}
 
     name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
     runs-on: macos-${{ matrix.version }}
@@ -80,7 +84,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --disable-superlu --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 3
@@ -98,7 +102,8 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-        - {opts: --enable-optim --enable-generic}
+          - {opts: --enable-debug}
+          - {opts: --enable-optim --enable-generic}
 
     name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
     runs-on: windows-2025
@@ -134,7 +139,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --disable-superlu --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
