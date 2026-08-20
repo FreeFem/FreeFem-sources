@@ -65,19 +65,41 @@ jobs:
           provenance: mode=max
           sbom: true
 
-      - name: Export Docker image
+      - name: Verify and export Docker image
         env:
           ARCH: ${{ matrix.arch }}
           DIGEST: ${{ steps.build.outputs.digest }}
           VERSION: ${{ inputs.release_version }}
         run: |
           set -euxo pipefail
-          mkdir -p docker-assets
+          mkdir -p docker-assets docker-smoke
           SOURCE_IMAGE="${REGISTRY_IMAGE}@${DIGEST}"
           TAGGED_IMAGE="${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
 
           docker pull --platform "linux/${ARCH}" "${SOURCE_IMAGE}"
           docker image tag "${SOURCE_IMAGE}" "${TAGGED_IMAGE}"
+
+          printf '%s\n' \
+            'cout << "FreeFEM container smoke test" << endl;' \
+            > docker-smoke/success.edp
+
+          docker run --rm \
+            -e GLOB=success.edp \
+            -v "${PWD}/docker-smoke:/data:ro" \
+            "${TAGGED_IMAGE}"
+
+          printf '%s\n' \
+            'This is deliberately invalid FreeFEM syntax' \
+            > docker-smoke/failure.edp
+
+          if docker run --rm \
+            -e GLOB=failure.edp \
+            -v "${PWD}/docker-smoke:/data:ro" \
+            "${TAGGED_IMAGE}"; then
+            echo "Container did not propagate the FreeFEM failure" >&2
+            exit 1
+          fi
+
           docker image save "${TAGGED_IMAGE}" \
             | gzip --best \
             > "docker-assets/FreeFEM-${VERSION}-docker-linux-${ARCH}.tar.gz"

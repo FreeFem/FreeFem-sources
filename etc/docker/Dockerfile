@@ -60,8 +60,9 @@ RUN ./3rdparty/getall -a -o PETSc \
 
 RUN make -j"${MAKE_JOBS}" \
     && make install \
-    && find /usr/local/lib -type f -name '*.a' -delete \
-    && find /usr/local/lib -type f -name '*.la' -delete
+    && find /usr/local/lib /usr/local/ff-petsc \
+        -type f \( -name '*.a' -o -name '*.la' \) \
+        -delete
 
 FROM debian:${BASE_IMAGE_VERSION}-slim AS runtime
 
