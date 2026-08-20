@@ -439,15 +439,20 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   v_dfes(int NN, const pmeshT *t, const DistributedMesh<Mesh>* dth, Stack s, int n, Expression *p)    /// TODO
     : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(dth) {
-  }    // take a pmesh3 and use the pmeshS
+      if (DTh) DTh->increment();
+    }    // take a pmesh3 and use the pmeshS
   v_dfes(int NN, const v_dfes *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(f->DTh) {}
+    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(f->DTh) {
+      if (DTh) DTh->increment();
+    }
 
   void buildDistributedDofData(FESpace& Vhi);
   void buildLoc2globIfNeeded(FESpace& Vhi);
   void buildNumberingIfNeeded(FESpace& Vhi);
   // void destroy(){ ppTh=0;pVh=0; delete this;}
-  virtual ~v_dfes( ) {}
+  virtual ~v_dfes( ) {
+    if (DTh) DTh->destroy();
+  }
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpace *buildupdate(KN< int > &) { return nullptr; }
   virtual FESpace *buildupdate( ) { return nullptr; }
