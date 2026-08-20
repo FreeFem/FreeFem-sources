@@ -97,4 +97,4 @@ RUN printf '%s\n' 'cout << "FreeFEM container smoke test" << endl;' > /tmp/smoke
     && FreeFem++-nw -v 0 /tmp/smoke.edp \
     && rm /tmp/smoke.edp
 
-CMD ["bash", "-c", "shopt -s nullglob; files=(/data/$GLOB); for file in \"${files[@]}\"; do ff-mpirun -n 1 \"$file\"; done"]
+CMD ["bash", "-c", "shopt -s nullglob; files=(/data/$GLOB); for file in \"${files[@]}\"; do ff-mpirun -n 1 \"$file\" || exit $?; done"]
