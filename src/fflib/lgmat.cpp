@@ -1388,16 +1388,68 @@ KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>
 }
 
 template<class Mesh>
-KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o){
+KN<long> restrictDOFPartial(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o){
     KN<long> inj(Wh.NbOfDF, -1L);
     for (int kc = 0; kc < Wh.NbOfElements; ++kc){
-        int kf = n2o[kc];
+        const int kf = n2o[kc];
+        if (kf < 0) continue;
         GFElement<Mesh> KC(&Wh, kc), KF(&Vhi, kf);
         ffassert(KC.NbDoF() == KF.NbDoF());
         for (int df = 0; df < KC.NbDoF(); ++df) inj[KC(df)] = KF(df);
     }
+    return inj;
+}
+
+template<class Mesh>
+KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o){
+    KN<long> inj = restrictDOFPartial(Wh, Vhi, n2o);
     ffassert(inj.min() != -1);
     return inj;
+}
+
+template<class Mesh>
+KN<long> buildInterfaceDofList(const DistributedMesh<Mesh>& D, int j, GFESpace<Mesh>&Vhi){
+    KN<int> n2oS;
+    Mesh* S = buildInterfaceSubmesh(D, j, n2oS);
+    if (!S) return KN<long>(0);
+
+    const int me = (int)mpirank;
+    const int nb = D.neighborRanks[j];
+
+    KN<int> coverToLocal(D.CoverMesh->nt, -1);
+    for (int kl = 0; kl < D.localToCoverElement.n; ++kl){
+        coverToLocal[D.localToCoverElement[kl]] = kl;
+    }
+
+    KN<long> out;
+    {
+        GFESpace<Mesh> Vs(*S, *Vhi.TFE[0]);
+        KN<int> byI(Vs.NbOfDF, 0), byJ(Vs.NbOfDF, 0);
+        for (int kS = 0; kS < Vs.NbOfElements; ++kS){
+            const int p = D.coverPartition[n2oS[kS]];
+            GFElement<Mesh> KS(&Vs, kS);
+            for (int df = 0; df < KS.NbDoF(); ++df){
+                const int d = KS(df);
+                if (p == me) byI[d] = 1;
+                else if (p == nb) byJ[d] = 1;
+            }
+        }
+        KN<int> n2oLocal(Vs.NbOfElements);
+        for (int kS = 0; kS < Vs.NbOfElements; ++kS){
+            n2oLocal[kS] = coverToLocal[n2oS[kS]];
+        }
+        KN<long> mapS2L = restrictDOFPartial(Vs, Vhi, n2oLocal);
+
+        int n = 0;
+        for (int d = 0; d < Vs.NbOfDF; ++d) if (byI[d] && byJ[d]) ++n;
+        out.resize(n);
+        int c = 0;
+        for (int d = 0; d < Vs.NbOfDF; ++d){
+            if (byI[d] && byJ[d]) { ffassert(mapS2L[d] >= 0); out[c++] = mapS2L[d]; }
+        }
+    }
+    S->destroy();
+    return out;
 }
 
 template<class Mesh>
@@ -1409,6 +1461,10 @@ KN<KN<long>> buildDofIntersection(const DistributedMesh<Mesh>& D, GFESpace<Mesh>
     for (int j = 0; j< nN; ++j) dofI[0][j] = D.neighborRanks[j];
 
     for (int j = 0; j < nN; ++j){
+        if (D.overlap == 0) {
+            dofI[1+j] = buildInterfaceDofList(D, j, Vhi);
+            continue;
+        }
         KN<int> n2o;
         Mesh* WhMesh = buildIntersectionSubmesh(D, j, n2o);
         {
@@ -1463,14 +1519,36 @@ void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
 }
 
 template<class Mesh>
+static void assertHomogeneousFE(const GFESpace<Mesh>& Uh) {
+    const GTypeOfFESum<Mesh>* sumFE = dynamic_cast<const GTypeOfFESum<Mesh>*>(Uh.TFE[0]);
+    if (sumFE){
+        for (int i = 1; i < sumFE->k; ++i){
+            if (sumFE->teb[i] != sumFE->teb[0]){
+                ExecError("fespace distribute: composite/mixed FE spaces not supported use homogeneous [Pk, Pk,...]");
+            }
+        }
+    }
+}
+
+template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
+    assertHomogeneousFE(Vhi);
     const bool collective = (checkDfespace != 0) && (mpisize > 1);
-    if (DTh->overlap == 0 && mpisize > 1){
-        ExecError("fespace distribute : overlap = 0 not supported.");
-    }
-    Ddof = interpolatePoU(*DTh, Vhi);
+
     KN<KN<long>> raw = buildDofIntersection(*DTh, Vhi);
+
+    if (DTh->overlap == 0){
+        Ddof.resize(Vhi.NbOfDF);
+        Ddof = 1.0;
+        for (int j = 0; j < raw.n -1; ++j){
+            for (long p = 0; p < raw[1+j].n; ++p) Ddof[raw[1+j][p]] += 1.0;
+        }
+        for (int d = 0; d < Vhi.NbOfDF; ++d) Ddof[d] = 1.0 / Ddof[d];
+    }
+    else {
+        Ddof = interpolatePoU(*DTh, Vhi);
+    }
 
     if (collective){ 
         const int bad = checkIntersectionSymmetry(DTh->comm, raw);

@@ -295,26 +295,19 @@ if (cas == 0) {
   //  depuis les elements de bord du volume. Le maillage local doit donc
   //  etre identique a celui du mode replique, surface comprise.
   //
-  //  GARDE nc > 4*ov : limitation CONNUE ET ACCEPTEE de trunc(), etrangere
-  //  au maillage distribue. truncmesh reconstruit inconditionnellement la
-  //  surface attachee (msh3.cpp, "building of the meshS after trunc"), et
-  //  BuildMeshS exige au moins un element de bord (ffassert(nbv_surf),
-  //  Mesh3dn.cpp). Une troncature VIDE d'un mesh3 portant un meshS avorte
-  //  donc au lieu de rendre un maillage vide -- reproductible en sequentiel
-  //  par trunc(buildBdMesh(cube(5,5,5)), x < -1). Quand 2*ov couches saturent
-  //  le maillage, la bande de BorderMesh devient vide et l'assertion tombe :
-  //  un rang avorte, les autres attendent, le run se presente comme un
-  //  blocage. Le regime ne concerne que des maillages minuscules devant le
-  //  recouvrement (nc=5 a ov=2), sans interet pratique. Verifie : passe a
-  //  ov=1/nc=5 et a ov=2/nc=12, echoue a ov=2/nc=5.
-  if (doUser && nc > 4*ov) {
+  //  PLUS DE GARDE. Une troncature VIDE d'un mesh3 portant un meshS avortait
+  //  sur ffassert(nbv_surf) : truncmesh reconstruit inconditionnellement la
+  //  surface attachee (msh3.cpp, "building of the meshS after trunc") et
+  //  BuildMeshS exige au moins un element de bord (Mesh3dn.cpp). Le masque de
+  //  BorderMesh etait vide dans trois regimes -- overlap = 0 toujours,
+  //  mpisize == 1 a tout recouvrement, et saturation de bande quand 2*ov
+  //  couches remplissent le maillage. distribute ne tronque plus a vide et
+  //  rend BorderMesh nul dans ce cas ; le bloc tourne donc partout.
+  if (doUser) {
     mesh3 ThR = cube(nc, nc, nc);  ThR = buildBdMesh(ThR);
     mesh3 ThS; if (mpirank == 0) { ThS = cube(nc, nc, nc); ThS = buildBdMesh(ThS); }
     PAIRUSER(mesh3, Dmesh3, ThR, ThS, "mesh3+Gamma")
   }
-  else if (doUser && mpirank == 0)
-    cout << "  [mesh3+Gamma]  ignore : nc=" << nc << " <= 4*ov=" << 4*ov
-         << "  (limitation connue de trunc sur surface attachee)" << endl;
 
 }
 else if (cas == 1) {

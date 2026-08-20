@@ -9985,9 +9985,47 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
   return Wh;
 }
 
+template<class Mesh>
+Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o) {
+  const Mesh& Th = *D.CoverMesh;
+  const int nbt = Th.nt, nbv = Th.nv;
+  const int nve = Mesh::Element::nv;
+  const int me = (int)mpirank;
+  const int nb = D.neighborRanks[j];
+
+  KN<int> vtxI(nbv, 0), vtxJ(nbv, 0);
+  for (int k = 0; k < nbt; ++k){
+    const int p = D.coverPartition[k];
+    if (p != me && p != nb) continue;
+    KN<int>& tag = (p == me) ? vtxI : vtxJ;
+    for (int a = 0; a < nve; ++a) tag[Th(k,a)] = 1;
+  }
+
+  KN<int> mask(nbt, 0);
+  int nKept = 0;
+  for (int k = 0; k < nbt; ++k){
+    const int p = D.coverPartition[k];
+    if (p != me && p != nb) continue;
+    for (int a = 0; a < nve; ++a){
+      const int v = Th(k,a);
+      if (vtxI[v] && vtxJ[v]) { mask[k] = 1; ++nKept; break; }
+    }
+  }
+  ffassert(nKept > 0);
+
+  Mesh* S =truncmesh(Th, 1, (int*)mask, false, 9999, 1e-7, 1L, true, false);
+  S->BuildGTree();
+  n2o = n2oFromSplit(Th, *S, mask);
+  return S;
+}
+
 template MeshS* buildIntersectionSubmesh<MeshS>(const DistributedMesh<MeshS>&, int, KN<int>&);
 template Mesh3* buildIntersectionSubmesh<Mesh3>(const DistributedMesh<Mesh3>&, int, KN<int>&);
 template MeshL* buildIntersectionSubmesh<MeshL>(const DistributedMesh<MeshL>&, int, KN<int>&);
+
+template MeshS* buildInterfaceSubmesh<MeshS>(const DistributedMesh<MeshS>&, int, KN<int>&);
+template Mesh3* buildInterfaceSubmesh<Mesh3>(const DistributedMesh<Mesh3>&, int, KN<int>&);
+template MeshL* buildInterfaceSubmesh<MeshL>(const DistributedMesh<MeshL>&, int, KN<int>&);
 
 
 template <class Mesh>
@@ -10216,34 +10254,66 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
       if (avg > threshold && avg < 0.501) splitBorder[k] = 1;
     }
   }
+  else {
+    for (int k = 0; k < nbt; ++k){
+      splitBorder[k] = (coverPartition[k] != (int)mpirank) ? 1 : 0;
+    }
+  }
 
-  Mesh* BorderMesh = truncmesh(Th, 1, (int*)splitBorder, false, borderLabel, precis_mesh, orientation, cleanmesh, removeduplicate);
-  BorderMesh->BuildGTree();
+  int nBorder = 0;
+  for (int k = 0; k < nbt; ++k) nBorder += splitBorder[k];
+
+  Mesh* BorderMesh = nullptr;
+  if (nBorder > 0){
+    BorderMesh = truncmesh(Th, 1, (int*)splitBorder, false, borderLabel, precis_mesh, orientation, cleanmesh, removeduplicate);
+  }
+  if (BorderMesh)  BorderMesh->BuildGTree();
 
   // Partition of Unity (PoU)
 
-  KN<double> khi(nbv);
-  for (int v = 0; v < nbv; ++v){
-    khi[v] = (sizeoverlaps > 0) ? std::max(2.0*suppSmooth[v] -1.0, 0.0) : 1.0;
-  }
+  KN<double> khi(nbv, 0.0);
 
-  // Normalisation PoU
-  KN<double> sumPou = khi;
-  
-  for (int j = 0; j <neighborRanks.n; ++j){
-    KN<double> supp_j(nbt, 0.0);
-    for (int k = 0; k < nbt; ++k){
-      supp_j[k] = (coverPartition[k] ==neighborRanks[j]) ? 1.0 : 0.0;
+  if (sizeoverlaps == 0) {
+    KN<int> mult(nbv, 0), touched(nbv, 0);
+
+    auto accumulate = [&](int r){
+      touched = 0;
+      for (int k = 0; k < nbt; ++k){
+        if (coverPartition[k] == r){
+          for (int i = 0; i < nve; ++i) touched[Th(k,i)] = 1;
+        }
+      }
+      for (int v = 0; v < nbv; ++v) if (touched[v]) mult[v]++;
+    };
+
+    accumulate((int)mpirank);
+    for (int j = 0; j < neighborRanks.n; ++j) accumulate(neighborRanks[j]);
+
+    for (int v = 0; v < nbv; ++v){
+      khi[v] = (mult[v] > 0) ? 1.0/mult[v] : 0.0;
+    }
+  }
+  else {
+    for (int v = 0; v < nbv; ++v){
+      khi[v] = std::max(2.0*suppSmooth[v] -1.0, 0.0);
     }
 
-    KN<double> phi_j(nbv, 0.0);
-    AddLayers(&Th, &supp_j, sizeoverlaps, &phi_j);
+    // Normalisation PoU
+    KN<double> sumPou = khi;
+    for (int j = 0; j <neighborRanks.n; ++j){
+      KN<double> supp_j(nbt, 0.0);
+      for (int k = 0; k < nbt; ++k){
+        supp_j[k] = (coverPartition[k] ==neighborRanks[j]) ? 1.0 : 0.0;
+      }
 
-    for (int v = 0; v < nbv; ++v) sumPou[v] += phi_j[v];
-  }
+      KN<double> phi_j(nbv, 0.0);
+      AddLayers(&Th, &supp_j, sizeoverlaps, &phi_j);
 
-  for (int v = 0; v < nbv; ++v){
-    if (sumPou[v] > 1e-15) khi[v]/=sumPou[v];
+      for (int v = 0; v < nbv; ++v) sumPou[v] += phi_j[v];
+    }
+    for (int v = 0; v < nbv; ++v){
+      if (sumPou[v] > 1e-15) khi[v]/=sumPou[v];
+    }
   }
 
   KN<double> pouLocal(LocalMesh->nv);
@@ -10342,6 +10412,20 @@ const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh
     return Th;
 }
 
+template<class Mesh>
+const Mesh* get_bordermesh(Stack stack, const DistributedMesh<Mesh>** const & DTh) {
+  throwassert(DTh && *DTh);
+  return (**DTh).BorderMesh;
+}
+
+template<class Mesh>
+const Mesh* get_covermesh(Stack stack, const DistributedMesh<Mesh>** const & DTh) {
+  throwassert(DTh && *DTh);
+  const Mesh *Th = (**DTh).CoverMesh;
+  throwassert(Th);
+  return Th;
+}
+
 // Enregistre <- / = / local / distributed pour Distributed Meshh
 template<class Mesh>
 static void registerDistributedMeshOps() {
@@ -10350,6 +10434,8 @@ static void registerDistributedMeshOps() {
   TheOperators->Add("=", new OneOperator2<DM*, DM*, DM>(&set_eqdestroy_incr));
   Add<DM*>("local", ".", new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
   atype<const Mesh*>()->AddCast(new OneOperator1s_<const Mesh*, DM*>(get_localmesh<Mesh>));
+  Add<DM*>("bordermesh", ".", new OneOperator1s_<const Mesh*, DM*>(get_bordermesh<Mesh>));
+  Add<DM*>("cover", ".", new OneOperator1s_<const Mesh*, DM*>(get_covermesh<Mesh>));
   Global.Add("distribute", "(", new DistributeMesh<Mesh>);
   Global.Add("distribute", "(", new DistributeMesh<Mesh>(1));
 }
