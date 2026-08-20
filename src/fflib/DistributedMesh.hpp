@@ -58,6 +58,9 @@ KN<int> keptElements(const Mesh& Th, const KN<int>& coverPartition, long sizeove
 template<class Mesh>
 Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o);
 
+template<class Mesh>
+Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o);
+
 // Partition globale
 template<class Mesh>
 void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true);

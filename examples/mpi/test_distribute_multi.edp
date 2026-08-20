@@ -45,6 +45,17 @@
 //  V2. Seul controle disponible en mode scatter. Calcule et reduit a la
 //  construction : accesseur pur ici, et v6 < 0 = non calcule, donc FAIL.
 //
+//  O1..O4 : overlap = 0 de bout en bout -- decomposition non recouvrante,
+//  intersections de mesure nulle, PoU = 1/multiplicite au ddl. Volontairement
+//  SANS solveur : mesure faite, le KSP converge mais sur un operateur faux,
+//  parce que Mat(ndof, intersection, D) exige des lignes locales completes la
+//  ou D > 0 -- vrai a recouvrement >= 1, structurellement faux a 0. Detail
+//  dans le commentaire du bloc. Les invariants propres a la decomposition,
+//  eux, sont tous exacts.
+//
+//  N2 : carte d'intersections a overlap = 0. Test POSITIF -- il attendait le
+//  refus tant que le chemin s = 0 n'existait pas. Il ne couvre PAS la PoU.
+//
 //  G0/G1 : detection des voisins. NI et NE ne peuvent PAS l'observer -- .intersection
 //  est lu APRES purge, donc NE vaut structurellement 0 et NI ne compte que les
 //  voisins reels. Un voisin manquant ne se voit que par V6, et seulement si la
@@ -113,11 +124,60 @@ int npass = 0, ntot = 0;
 string kspp = "-ksp_type gmres -pc_type asm -ksp_rtol 1e-8";
 
 int ov    = getARGV("-ov", 1);
+//  -ov 0 n'est pas une invocation valide de la suite : les blocs standards
+//  resolvent avec PETSc, et Mat(ndof, intersection, D) exige des lignes
+//  locales completes la ou D > 0 -- vrai a recouvrement >= 1, structurellement
+//  faux a 0. Tout tomberait sur V3 (et W4) alors que V1, V2, V4..V7 restent
+//  exacts. Le recouvrement nul est couvert de bout en bout par O1..O4.
+if (ov < 1) {
+  if (mpirank == 0)
+    cout << "  [-ov 0 : utiliser les blocs O1..O4 ; les blocs standards"
+         << " resolvent avec PETSc et exigent overlap >= 1]" << endl;
+  assert(ov >= 1);
+}
 int nseg  = getARGV("-nseg", 80);
 int nc    = getARGV("-nc", 8);
 int nsq   = getARGV("-nsq", 16);
 int cas   = getARGV("-case", 0);
 int strip = getARGV("-strip", 2);
+
+// -------- V7 : appariement POSITIONNEL des listes d'intersection --------
+//  checkIntersectionSymmetry (donc V6 en amont) ne verifie que les TAILLES.
+//  L'appariement lui-meme reste positionnel : la position p de ma liste doit
+//  designer le MEME ddl que la position p de la liste d'en face. Un decalage
+//  d'ordre passe les tailles, fait diverger V6, mais ne dit pas ou.
+//
+//  Ici on echange, dans l'ordre des listes, les COORDONNEES des ddl. En
+//  Lagrange chaque ddl porte un point : si les deux listes se correspondent,
+//  les points coincident exactement. V7 est donc un V6 qui localise -- et il
+//  reste valide meme quand la PoU est fausse, ce qui en fait le seul controle
+//  utilisable pendant la mise au point de overlap = 0.
+macro PAIRV7(Udh, Uh, v7) {
+  Uh pvx = x, pvy = y, pvz = z;
+  int pvN = Udh.intersection[0].n;
+  real[int][int] pvMine(pvN), pvHis(pvN);
+  mpiRequest[int] pvRq(2*pvN);
+  for (int pj = 0; pj < pvN; ++pj) {
+    int[int] pvL = Udh.intersection[1 + pj];
+    int pvM = pvL.n;
+    pvMine[pj].resize(3*pvM); pvHis[pj].resize(3*pvM);
+    for (int pp = 0; pp < pvM; ++pp) {
+      pvMine[pj][3*pp]     = pvx[][pvL[pp]];
+      pvMine[pj][3*pp + 1] = pvy[][pvL[pp]];
+      pvMine[pj][3*pp + 2] = pvz[][pvL[pp]];
+    }
+    Irecv(processor(Udh.intersection[0][pj], mpiCommWorld, pvRq[pj]),        pvHis[pj]);
+    Isend(processor(Udh.intersection[0][pj], mpiCommWorld, pvRq[pvN + pj]),  pvMine[pj]);
+  }
+  for (int pk = 0; pk < 2*pvN; ++pk) { int pw = mpiWaitAny(pvRq); }
+  real pvE = 0;
+  for (int pj = 0; pj < pvN; ++pj)
+    for (int pp = 0; pp < pvMine[pj].n/3; ++pp)
+      pvE = max(pvE, max(max(abs(pvMine[pj][3*pp]     - pvHis[pj][3*pp]),
+                             abs(pvMine[pj][3*pp + 1] - pvHis[pj][3*pp + 1])),
+                             abs(pvMine[pj][3*pp + 2] - pvHis[pj][3*pp + 2])));
+  mpiAllReduce(pvE, v7, mpiCommWorld, mpiMAX);
+}//EOM
 
 // -------- comptage des intersections (commun aux trois macros) --------
 macro COUNTI(Udh, nItot, nEtot) {
@@ -140,6 +200,8 @@ macro CHECKL(DTh, Th, tag) {
   /* V6 : valeur figee a la construction du fespace, deja reduite en max
      sur les rangs. Lecture locale. */
   real v6 = Udh.checkPoU;
+  real v7 = 0;
+  PAIRV7(Udh, Uh, v7)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -185,11 +247,11 @@ macro CHECKL(DTh, Th, tag) {
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
   bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
-          && v6 >= 0 && v6 < 1e-8);
+          && v6 >= 0 && v6 < 1e-8 && v7 < 1e-12);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6 << "  V7=" << v7
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -207,6 +269,8 @@ macro CHECK3(DTh, Th, PkX, tag) {
   /* V6 : valeur figee a la construction du fespace, deja reduite en max
      sur les rangs. Lecture locale. */
   real v6 = Udh.checkPoU;
+  real v7 = 0;
+  PAIRV7(Udh, Uh, v7)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -252,11 +316,11 @@ macro CHECK3(DTh, Th, PkX, tag) {
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
   bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
-          && v6 >= 0 && v6 < 1e-8);
+          && v6 >= 0 && v6 < 1e-8 && v7 < 1e-12);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6 << "  V7=" << v7
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -274,6 +338,8 @@ macro CHECKS(DTh, Th, PkX, tag) {
   /* V6 : valeur figee a la construction du fespace, deja reduite en max
      sur les rangs. Lecture locale. */
   real v6 = Udh.checkPoU;
+  real v7 = 0;
+  PAIRV7(Udh, Uh, v7)
   Mat A(Udh.ndof, Udh.intersection, D);
   int[int] pnum;
   GlobalNumbering(A, pnum);        /* AVANT l'assemblage : sinon SEGV */
@@ -319,11 +385,11 @@ macro CHECKS(DTh, Th, PkX, tag) {
   mpiAllReduce(eNG,  n5, mpiCommWorld, mpiMAX);
   mpiAllReduce(nbad, nb, mpiCommWorld, mpiMAX);
   bool ok = (b < 1e-8 && p < 1e-8 && s < 1e-5 && n4 < 1e-12 && n5 < 1e-12 && nb == 0
-          && v6 >= 0 && v6 < 1e-8);
+          && v6 >= 0 && v6 < 1e-8 && v7 < 1e-12);
   ntot++; if (ok) npass++;
   if (mpirank == 0)
     cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V3=" << s
-         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6
+         << "  V4=" << n4 << "  V5=" << n5 << "  V6=" << v6 << "  V7=" << v7
          << "  NI=" << nItot << "  NE=" << nEtot
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }//EOM
@@ -539,6 +605,181 @@ if (mpisize > 2) {
   DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECKS(DTh, Th, P2, "meshS / metis / P2") }
 
+// ---------- C1 : accesseurs .local / .bordermesh / .cover ----------
+//  Le cover est le maillage sur lequel distribute fait toute sa geometrie :
+//  mon partitionnement plus ce qui le touche (une couche a s = 0, 2*s au-dela).
+//  BorderMesh est la couche d'elements immediatement a l'exterieur du local.
+//  Quatre relations, verifiees sur les trois familles :
+//
+//    (a) cover contient le local            cover.nt >= local.nt, cover.nv >= local.nv
+//    (b) local et border sont DISJOINTS
+//        et inclus dans le cover            local.nt + border.nt <= cover.nt
+//    (c) a s <= 1 ils le PARTITIONNENT      local.nt + border.nt == cover.nt
+//    (d) sans voisin, rien a ajouter        mpisize == 1 -> cover.nt == local.nt
+//                                                       et border.nt == 0
+//
+//  (c) s'arrete a s = 1, et ce n'est pas un seuil arbitraire. Le masque du
+//  cover garde tout element ayant un sommet a suppSmooth > 0 ; celui du border
+//  demande une moyenne barycentrique > (s-0.999)/(2s). A s = 1 les valeurs
+//  possibles sont 0, 0.5, 1 et le seuil vaut 0.0005 : les deux masques se
+//  rejoignent exactement. A s = 2 le seuil monte a 0.25 et laisse dans le
+//  cover des elements qui ne sont ni locaux ni de bord -- mesure : deficit de
+//  50 a 131 elements sur cube(6,6,6). (b) reste vrai partout.
+//
+//  (d) est le cas que le lot BorderMesh a rendu sur : BorderMesh est nul, et
+//  l'accesseur rend le pointeur nul, dont .nt vaut 0 comme pour "meshS Th;".
+//  C'est aussi ce qui faisait avorter distribute avant, via ffassert(nbv_surf).
+{ meshS Th = square3(nsq, nsq);
+  int okLoc = 1;
+  for (int io = 0; io < 2; ++io) {
+    int ovc = (io == 0) ? ov : 0;
+    DmeshS DTh = distribute(Th, overlap = ovc, partmethod = "metis");
+    meshS L = DTh.local, B = DTh.bordermesh, C = DTh.cover;
+    int nl = L.nt, nb = B.nt, ncv = C.nt;
+    fespace Udh(DTh, P1);
+    int nvois = Udh.intersection[0].n;
+    if (nl <= 0 || ncv < nl || C.nv < L.nv)          okLoc = 0;   /* (a) */
+    if (nl + nb > ncv)                               okLoc = 0;   /* (b) */
+    if (ovc <= 1 && nl + nb != ncv)                  okLoc = 0;   /* (c) */
+    if (mpisize == 1 && (ncv != nl || nb != 0))      okLoc = 0;   /* (d) */
+    if (ovc == 0 && nvois > 0 && nb <= 0)            okLoc = 0;
+  }
+  int g; mpiAllReduce(okLoc, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [C1 accesseurs .local / .bordermesh / .cover]  C1=" << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+// ---------- B1 : mesh3 portant une surface attachee ----------
+//  Test de TERMINAISON. truncmesh reconstruit inconditionnellement la surface
+//  attachee d'un mesh3 (msh3.cpp, "building of the meshS after trunc") et
+//  BuildMeshS exige au moins un element de bord (ffassert(nbv_surf)). Une
+//  troncature VIDE avortait donc, et le masque de BorderMesh etait vide dans
+//  trois regimes : overlap = 0 toujours, mpisize == 1 a tout recouvrement, et
+//  saturation de bande (2*ov couches remplissant le maillage). Le second
+//  cassait deja sans rapport avec le recouvrement nul.
+//  distribute ne tronque plus a vide : BorderMesh devient nul, sans abandon.
+//  A lancer aussi a -np 1, regime que le reste de la suite ne couvre pas.
+{ mesh3 Th = cube(nc, nc, nc); Th = buildBdMesh(Th);
+  int okLoc = 1;
+  {
+    Dmesh3 D1 = distribute(Th, overlap = ov, partmethod = "metis");
+    mesh3 T1 = D1.local;
+    if (T1.nt <= 0 || T1.nbe <= 0) okLoc = 0;
+  }
+  {
+    Dmesh3 D0 = distribute(Th, overlap = 0, partmethod = "metis");
+    mesh3 T0 = D0.local;
+    if (T0.nt <= 0 || T0.nbe <= 0) okLoc = 0;
+  }
+  int g; mpiAllReduce(okLoc, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [B1 mesh3+surface : ov=" << ov << " et 0]  B1=" << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+// ---------- O1..O4 : overlap = 0, decomposition NON RECOUVRANTE ----------
+//  Seconde voie de construction, pas un cas limite de la premiere. A s = 0
+//  l'intersection entre deux sous-domaines est de MESURE NULLE -- une face,
+//  une arete, un sommet -- donc aucun sous-maillage n'a les ddl partages pour
+//  ddl. La liste est batie sur un porteur commun aux deux rangs puis filtree
+//  aux ddl portes des deux cotes ; et la PoU ne peut plus etre un champ P1
+//  nodal (un milieu d'arete d'interface est partage par 2 quand ses extremites
+//  peuvent l'etre par 3 ou 4 a un coin), elle vaut 1/multiplicite AU DDL.
+//
+//  PAS DE SOLVEUR ICI, ET C'EST DELIBERE. Mesure faite : a s = 0 le KSP
+//  converge (CONVERGED_RTOL) mais sur le MAUVAIS operateur. La convention de
+//  Mat(ndof, intersection, D) exige des lignes locales COMPLETES partout ou
+//  D > 0, puisque le produit global est somme(R_i^T D_i A_i R_i) : si chaque
+//  A_i porte la ligne entiere, la somme des D la reconstitue.
+//    ov = 1 : ecart ligne locale / ligne globale = 0 la ou D > 0
+//             (les lignes incompletes sont celles de la couronne, ou D = 0)
+//    ov = 0 : ecart = 1.2e-1 la ou D > 0, et aucun ddl n'a D = 0
+//  A recouvrement nul un ddl d'interface n'a qu'une PARTIE de sa ligne dans
+//  chaque sous-domaine -- format non assemble, celui de MATIS/BDDC, pas celui
+//  du Schwarz recouvrant. L'operateur reconstruit vaut alors A/multiplicite
+//  sur les lignes d'interface, d'ou une solution fausse a ~1e-2.
+//  Ce n'est pas un defaut de la decomposition : tous les invariants propres
+//  (V1, V2, V5, V6, V7, D = 1/multiplicite) sont exacts. C'est le CHAINAGE
+//  vers PETSc qui demande un autre format. C'est aussi pourquoi macro_ddm
+//  n'expose jamais overlap = 0 et pourquoi ffddm exige un opt-in explicite.
+macro CHECKO(Th, ThLocal, Uh, Udh, UhGlob, tag) {
+  real[int] D = Udh.D;
+  int[int]  l2g = Udh.loc2glob;
+  real v6 = Udh.checkPoU;
+  real v7 = 0;
+  PAIRV7(Udh, Uh, v7)
+
+  /* V1 : bijection loc2glob */
+  func fa = x + 2*y + 3*z + x*y;
+  UhGlob gg = fa;  Uh gl = fa;
+  real eBij = 0;
+  for (int i = 0; i < gl.n; ++i) eBij = max(eBij, abs(gl[][i] - gg[][l2g[i]]));
+
+  /* V2 : la PoU somme a 1 sur le maillage global */
+  real[int] acc(UhGlob.ndof); acc = 0;
+  for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i] * gg[][l2g[i]];
+  real[int] accG(UhGlob.ndof);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  real ePoU = 0;
+  for (int i = 0; i < UhGlob.ndof; ++i) ePoU = max(ePoU, abs(accG[i] - gg[][i]));
+
+  /* O : D == 1/multiplicite, plus fort que V2 -- V2 laisserait passer {0.7,0.3} */
+  real[int] cnt(UhGlob.ndof); cnt = 0;
+  for (int i = 0; i < Udh.ndof; ++i) cnt[l2g[i]] += 1.0;
+  real[int] cntG(UhGlob.ndof);
+  mpiAllReduce(cnt, cntG, mpiCommWorld, mpiSUM);
+  real eMult = 0;
+  for (int i = 0; i < Udh.ndof; ++i) eMult = max(eMult, abs(D[i] - 1.0/cntG[l2g[i]]));
+
+  /* partition EXACTE : pas un element en double */
+  int ntLoc = ThLocal.nt, ntSum = 0;
+  mpiAllReduce(ntLoc, ntSum, mpiCommWorld, mpiSUM);
+
+  real eNG = abs(Udh.ndofglobal - UhGlob.ndof);
+  real b, p, m, n5;
+  mpiAllReduce(eBij,  b,  mpiCommWorld, mpiMAX);
+  mpiAllReduce(ePoU,  p,  mpiCommWorld, mpiMAX);
+  mpiAllReduce(eMult, m,  mpiCommWorld, mpiMAX);
+  mpiAllReduce(eNG,   n5, mpiCommWorld, mpiMAX);
+  bool ok = (b < 1e-8 && p < 1e-8 && m < 1e-12 && n5 < 1e-12
+          && v6 >= 0 && v6 < 1e-8 && v7 < 1e-12 && ntSum == Th.nt);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  V1=" << b << "  V2=" << p << "  V5=" << n5
+         << "  V6=" << v6 << "  V7=" << v7 << "  Dmult=" << m
+         << "  nt=" << ntSum << "/" << Th.nt
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+{ meshS Th = square3(nsq, nsq);
+  DmeshS DTh = distribute(Th, overlap = 0, partmethod = "metis", keepGlobal = true);
+  meshS ThLocal = DTh.local;
+  fespace Uh(ThLocal, P2); fespace Udh(DTh, P2); fespace UhGlob(Th, P2);
+  CHECKO(Th, ThLocal, Uh, Udh, UhGlob, "O1 meshS overlap=0 / P2") }
+
+{ mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DTh = distribute(Th, overlap = 0, partmethod = "metis", keepGlobal = true);
+  mesh3 ThLocal = DTh.local;
+  fespace Uh(ThLocal, P2); fespace Udh(DTh, P2); fespace UhGlob(Th, P2);
+  CHECKO(Th, ThLocal, Uh, Udh, UhGlob, "O2 mesh3 overlap=0 / P2") }
+
+{ meshL Th = segment(nseg);
+  DmeshL DTh = distribute(Th, overlap = 0, partmethod = "metis", keepGlobal = true);
+  meshL ThLocal = DTh.local;
+  fespace Uh(ThLocal, Pk); fespace Udh(DTh, Pk); fespace UhGlob(Th, Pk);
+  CHECKO(Th, ThLocal, Uh, Udh, UhGlob, "O3 meshL overlap=0 / Pk") }
+
+{ meshS Th = square3(nsq, nsq);
+  int[int] part(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
+  DmeshS DTh = distribute(Th, overlap = 0, partition = part, keepGlobal = true);
+  meshS ThLocal = DTh.local;
+  fespace Uh(ThLocal, P2); fespace Udh(DTh, P2); fespace UhGlob(Th, P2);
+  CHECKO(Th, ThLocal, Uh, Udh, UhGlob, "O4 meshS overlap=0 / partition=user") }
+
 // ---------- chemin shell : invariance de Udh.D ----------
 { meshS Th = square3(nsq, nsq);
   DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
@@ -608,17 +849,37 @@ if (mpisize > 1) {
          << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
 }
 
-// N2 : overlap = 0 refuse a la construction du fespace.
+// N2 : overlap = 0 -- carte d'intersections. Test POSITIF depuis que le
+//  chemin s = 0 existe (il attendait auparavant le refus a la construction).
+//
+//  Ne verifie QUE la carte d'intersections, pas la partition de l'unite :
+//  a s = 0 l'intersection est de mesure nulle, donc aucun sous-maillage n'a
+//  les ddl partages pour ddl. La liste est batie sur un porteur commun puis
+//  filtree ; c'est cette construction que N2 met a l'epreuve, via
+//     - la symetrie des tailles, verifiee a la construction du fespace,
+//     - V7, l'appariement positionnel, qui LOCALISE un decalage.
+//  P2 est obligatoire : en P1 un ddl par sommet rend une permutation
+//  invisible. Les milieux d'aretes d'interface sont ce qui la revele.
+//
+//  La PoU relevera des blocs O* quand elle sera calculee au niveau ddl.
 { meshS Th = square3(nsq, nsq);
   DmeshS DTh = distribute(Th, overlap = 0, partmethod = "metis");
-  int caught = 0;
-  try { fespace Udh(DTh, P1); if (Udh.ndof < 0) caught = 1; }
-  catch (...) { caught = 1; }
-  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
-  ntot++; if (g == 1) npass++;
+  meshS ThLocal = DTh.local;
+  fespace Uh(ThLocal, P2);
+  fespace Udh(DTh, P2);
+  real v7 = 0;
+  PAIRV7(Udh, Uh, v7)
+  /* la partition doit etre exacte : pas un element en double */
+  int ntLoc = ThLocal.nt, ntSum = 0;
+  mpiAllReduce(ntLoc, ntSum, mpiCommWorld, mpiSUM);
+  int okLoc = (Udh.ndof > 0) ? 1 : 0, g;
+  mpiAllReduce(okLoc, g, mpiCommWorld, mpiMIN);
+  bool ok = (g == 1 && v7 < 1e-12 && ntSum == Th.nt);
+  ntot++; if (ok) npass++;
   if (mpirank == 0)
-    cout << "  [N2 overlap=0 refuse]  N2=" << g
-         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+    cout << "  [N2 overlap=0 / P2]  V7=" << v7
+         << "  nt(somme)=" << ntSum << "/" << Th.nt
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }
 
 // N3 : espace composite refuse (interpolatePoU).
