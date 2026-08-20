@@ -14,6 +14,10 @@
 //    ff-mpirun -np 4 test_distribute_multi.edp -ns
 //    ff-mpirun -np 3 test_distribute_multi.edp -ns   (tranches inegales)
 //
+//  keepGlobal = true EXPLICITE sur les distribute() du bloc cas 0 : depuis
+//  que le defaut est false, V1 (bijection loc2glob) exige de le redemander.
+//  Les blocs N1..N5 ne le passent pas -- N5 exige meme false.
+//
 //  CONTRAT : creer un fespace distribue est COLLECTIF sur DTh.comm
 //  (symetrie des intersections + residu de PoU), comme ffddmbuildDfespace.
 //  checkDfespace = 0 le rend local : plus aucun controle, .checkPoU vaut -1.
@@ -40,6 +44,12 @@
 //  POSITIONNEL et non verifie -- un decalage fait diverger V6 sans toucher
 //  V2. Seul controle disponible en mode scatter. Calcule et reduit a la
 //  construction : accesseur pur ici, et v6 < 0 = non calcule, donc FAIL.
+//
+//  G0/G1 : detection des voisins. NI et NE ne peuvent PAS l'observer -- .intersection
+//  est lu APRES purge, donc NE vaut structurellement 0 et NI ne compte que les
+//  voisins reels. Un voisin manquant ne se voit que par V6, et seulement si la
+//  configuration se presente. G0 la fabrique explicitement : un ilot d'un rang
+//  non adjacent, entierement inclus dans la fermeture du rang 0. Exige np > 2.
 //
 //  DEGRE DES ELEMENTS : LocalMesh est obtenu par DEUX troncatures successives
 //  (global -> cover -> local) et non une seule. La composition des deux n2o
@@ -407,84 +417,143 @@ if (cas == 0) {
 
 // ---------- meshL : metis vs scotch ----------
 { meshL Th = segment(nseg);
-  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECKL(DTh, Th, "meshL / metis") }
 
 { meshL Th = segment(nseg);
-  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "scotch");
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "scotch", keepGlobal = true);
   CHECKL(DTh, Th, "meshL / scotch") }
 
 { meshL Th = segment(nseg);
-  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
+  DmeshL DTh = distribute(Th, overlap = ov, partmethod = "parmetis", keepGlobal = true);
   CHECKL(DTh, Th, "meshL / parmetis") }
 
 // ---------- meshL : partition utilisateur (decoupage contigu) ----------
 { meshL Th = segment(nseg);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
-  DmeshL DTh = distribute(Th, overlap = ov, partition = part);
+  DmeshL DTh = distribute(Th, overlap = ov, partition = part, keepGlobal = true);
   CHECKL(DTh, Th, "meshL / partition=user") }
 
 // ---------- mesh3 : metis vs scotch ----------
 { mesh3 Th = cube(nc, nc, nc);
-  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECK3(DTh, Th, P1, "mesh3 / metis") }
 
 { mesh3 Th = cube(nc, nc, nc);
-  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "scotch");
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "scotch", keepGlobal = true);
   CHECK3(DTh, Th, P1, "mesh3 / scotch") }
 
 { mesh3 Th = cube(nc, nc, nc);
-  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "parmetis", keepGlobal = true);
   CHECK3(DTh, Th, P1, "mesh3 / parmetis") }
 
 // ---------- meshS : metis vs scotch ----------
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECKS(DTh, Th, P1, "meshS / metis") }
 
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "scotch");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "scotch", keepGlobal = true);
   CHECKS(DTh, Th, P1, "meshS / scotch") }
 
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "parmetis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "parmetis", keepGlobal = true);
   CHECKS(DTh, Th, P1, "meshS / parmetis") }
 
 // ---------- meshS : partition utilisateur (decoupage contigu) ----------
 { meshS Th = square3(nsq, nsq);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
-  DmeshS DTh = distribute(Th, overlap = ov, partition = part);
+  DmeshS DTh = distribute(Th, overlap = ov, partition = part, keepGlobal = true);
   CHECKS(DTh, Th, P1, "meshS / partition=user") }
+
+// ---------- meshS : ilot inclus dans la fermeture d'un rang NON adjacent ----------
+//  G0/G1 : le seul test qui EXERCE la detection des voisins par adjacence.
+//
+//  Construction : decoupage en tranches contigues, puis UN element pris au
+//  coeur de la tranche du rang 0 est reaffecte au rang mpisize-1, qui n'est
+//  pas adjacent au rang 0. Les trois sommets de cet ilot appartiennent donc
+//  tous a des elements du rang 0, et a aucun element d'un autre rang.
+//
+//  Vu du rang 0, suppSmooth vaut exactement 1 sur ces trois sommets. L'ancien
+//  critere de detection etait une BANDE, 0.001 < suppSmooth < 0.999, qui
+//  EXCLUT la valeur 1 : le rang 0 ne voyait pas l'ilot. Le rang mpisize-1, lui,
+//  voyait le rang 0 (son propre voisinage porte des valeurs intermediaires).
+//  neighborRanks devenait dissymetrique, donc checkIntersectionSymmetry postait
+//  un Irecv sans emetteur : BLOCAGE, et non FAIL. C'est aussi un test de
+//  TERMINAISON -- lancer avec un timeout.
+//
+//  Le critere actuel, suppSmooth > 0.001, couvre la bande ET la valeur 1.
+//
+//  G0 est diagnostique dans les DEUX sens : le contact doit apparaitre AVEC
+//  l'ilot et disparaitre SANS lui. Sans le second volet, le test passerait
+//  encore si les deux tranches devenaient adjacentes pour une autre raison,
+//  et ne prouverait plus rien.
+//
+//  Exige mpisize > 2 : il faut un rang non adjacent au rang 0.
+if (mpisize > 2) {
+  meshS Th = square3(nsq, nsq);
+  int[int] partIso(Th.nt), partRef(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) partRef[k] = k * mpisize / Th.nt;
+  partIso = partRef;
+  int n0 = 0;
+  for (int k = 0; k < Th.nt; ++k) if (partRef[k] == 0) n0++;
+  int riso = mpisize - 1;
+  partIso[n0 / 2] = riso;            /* element au coeur de la tranche 0 */
+
+  /* rang "d'en face" pour le couple teste : 0 <-> riso */
+  int face = (mpirank == 0) ? riso : 0;
+  int concerne = (mpirank == 0 || mpirank == riso) ? 1 : 0;
+
+  int vuIso = 0, vuRef = 0;
+  DmeshS DThIso = distribute(Th, overlap = ov, partition = partIso, keepGlobal = true);
+  { fespace Ui(DThIso, P1);
+    for (int j = 0; j < Ui.intersection[0].n; ++j)
+      if (Ui.intersection[0][j] == face && Ui.intersection[1 + j].n > 0) vuIso = 1; }
+  { DmeshS DThRef = distribute(Th, overlap = ov, partition = partRef, keepGlobal = true);
+    fespace Ur(DThRef, P1);
+    for (int j = 0; j < Ur.intersection[0].n; ++j)
+      if (Ur.intersection[0][j] == face && Ur.intersection[1 + j].n > 0) vuRef = 1; }
+
+  /* concerne : contact present avec l'ilot, absent sans. Autres rangs : neutres. */
+  int ok0 = concerne ? (vuIso == 1 && vuRef == 0) : 1;
+  int g0; mpiAllReduce(ok0, g0, mpiCommWorld, mpiMIN);
+  ntot++; if (g0 == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [G0 ilot : contact 0<->" << riso << " cree par l'ilot]  G0=" << g0
+         << "   => " << (g0 == 1 ? "PASS" : "FAIL") << endl;
+
+  CHECKS(DThIso, Th, P2, "G1 meshS / ilot dans cl(rang 0) / P2")
+}
 
 // ---------- mesh3 / meshS en P2 : composition des deux troncatures ----------
 //  Voir DEGRE DES ELEMENTS dans l'entete. P1 ne peut pas detecter une
 //  permutation des sommets dans la composition global -> cover -> local ;
 //  P2 la detecte via V1.
 { mesh3 Th = cube(nc, nc, nc);
-  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  Dmesh3 DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECK3(DTh, Th, P2, "mesh3 / metis / P2") }
 
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECKS(DTh, Th, P2, "meshS / metis / P2") }
 
 // ---------- chemin shell : invariance de Udh.D ----------
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   CHECKPOU(DTh, Th, "shell / Udh.D invariant / metis") }
 
 { meshS Th = square3(nsq, nsq);
   int[int] part(Th.nt);
   for (int k = 0; k < Th.nt; ++k) part[k] = k * mpisize / Th.nt;
-  DmeshS DTh = distribute(Th, overlap = ov, partition = part);
+  DmeshS DTh = distribute(Th, overlap = ov, partition = part, keepGlobal = true);
   CHECKPOU(DTh, Th, "shell / Udh.D invariant / partition=user") }
 
 // ---------- X1 : echappatoire non collective (checkDfespace = 0) ----------
 //  Voir X1 dans l'entete : test de TERMINAISON, lancer avec un timeout.
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   int nloc = 0;
   checkDfespace = 0;
   if (mpirank == 0) {
@@ -640,7 +709,7 @@ assert(mpisize == 3);
     cout << "  bande : strip=" << strip << " mailles, tailles = "
          << n0 << " / " << n2 << " / " << n1 << endl;
   assert(n0 > 0 && n1 > 0 && n2 > 0);
-  Dmesh3 DTh = distribute(Th, overlap = ov, partition = part);
+  Dmesh3 DTh = distribute(Th, overlap = ov, partition = part, keepGlobal = true);
   CHECK3(DTh, Th, P1, "mesh3 / bande strip=" + strip) }
 
 }
