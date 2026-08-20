@@ -44,8 +44,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.versions || '[22.04, 24.04, 26.04]') }}
-        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
+        version:  ${{ fromJSON(inputs.versions || '[22.04, 24.04, 26.04]') }}
+        build_type: ${{ fromJSON(inputs.build_types || '["debug", "release"]') }}
 
     name: Ubuntu ${{ matrix.version }} with ${{ matrix.build_type }} \
             - ${{ github.workflow }}
