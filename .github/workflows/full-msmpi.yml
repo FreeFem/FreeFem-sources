@@ -47,8 +47,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        windows_version: ${{ fromJson(inputs.windows_versions || '[2025]') }}
-        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
+        windows_version: ${{ fromJSON(inputs.windows_versions || '[2025]') }}
+        build_type: ${{ fromJSON(inputs.build_types || '["debug", "release"]') }}
 
     name: Windows Server ${{ matrix.windows_version }} ${{ matrix.build_type }} - ${{github.workflow}}
     runs-on: windows-${{ matrix.windows_version }}

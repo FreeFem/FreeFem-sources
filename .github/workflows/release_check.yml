@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ${{ fromJson(inputs.ubuntu_versions || '[22.04, 24.04, 26.04]') }}
+        version: ${{ fromJSON(inputs.ubuntu_versions || '[22.04, 24.04, 26.04]') }}
     name: Ubuntu ${{ matrix.version }} - Check .deb
     runs-on: ubuntu-${{ matrix.version }}
     steps:
@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.windows_versions || '[2025]') }}
+        version:  ${{ fromJSON(inputs.windows_versions || '[2025]') }}
     name: Windows ${{ matrix.version }} - Check .exe
     runs-on: windows-${{ matrix.version }}
     defaults:
