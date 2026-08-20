@@ -17,6 +17,8 @@
 //                deux cotes. Reutilise SIGNATURE + CMPPAIR : tout doit
 //                coincider sauf loc2glob, qui doit devenir indisponible
 //                (N5b) sans cesser de l'etre du cote true (N5a).
+//                keepGlobal = true est EXPLICITE sur DA : le defaut est
+//                passe a false, l'omettre faisait echouer N5a.
 //    -strip  epaisseur de la bande en mailles, cas 1    (defaut 2)
 //
 //  A LANCER
@@ -373,7 +375,7 @@ else {
   //  l'erreur est collective et non un blocage -- propriete qui ne tient
   //  que par la garde d'uniformite de keepGlobal= dans distribute.
   { meshS Th = square3(nsq, nsq);
-    DmeshS DA = distribute(Th, overlap = ov, partmethod = "metis");
+    DmeshS DA = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
     DmeshS DB = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = false);
     fespace UA(DA, P1);
     fespace UB(DB, P1);

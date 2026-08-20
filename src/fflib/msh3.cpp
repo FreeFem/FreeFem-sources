@@ -10140,9 +10140,11 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   if (mpisize > 1){
     KN<int> isNeighbor((int)mpisize, 0);
     for (int k = 0; k < nbt; ++k){
+      const int pk = coverPartition[k];
+      if (pk == (int)mpirank) continue;
       for (int i = 0; i < nve; ++i){
-        if (suppSmooth[Th(k,i)] > 0.001 && suppSmooth[Th(k,i)] < 0.999) {
-          isNeighbor[coverPartition[k]] = 1;
+        if (suppSmooth[Th(k,i)] > 0.001) {
+          isNeighbor[pk] = 1;
           break;
         }
       }
