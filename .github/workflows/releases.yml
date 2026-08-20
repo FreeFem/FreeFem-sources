@@ -62,7 +62,7 @@ jobs:
       upload_build_artifacts: true
 
   get_docker_images:
-    needs: set_versions
+    needs: [set_versions, get_deb_packages, get_exe_packages]
     uses: ./.github/workflows/release_docker.yml
     with:
       release_version: ${{ needs.set_versions.outputs.ff_version }}
