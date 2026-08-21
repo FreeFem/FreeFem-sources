@@ -14,6 +14,14 @@ on:
         description: 'Ubuntu versions as JSON array'
         required: true
         type: string
+      docker_arch:
+        description: 'Docker architectures as a JSON array'
+        required: true
+        type: string
+      publish_latest:
+        description: 'Whether to publish the latest Docker tag'
+        required: true
+        type: boolean
 
 jobs:
   build_freefem_ubuntu:
@@ -25,8 +33,16 @@ jobs:
       skip_macos: true
       upload_build_artifacts: true
 
+  get_docker_images:
+    uses: ./.github/workflows/release_docker.yml
+    with:
+      release_version: ${{ inputs.release_version }}
+      docker_arch: ${{ inputs.docker_arch }}
+      publish_latest: ${{ inputs.publish_latest }}
+    secrets: inherit
+
   package_freefem:
-    needs: build_freefem_ubuntu
+    needs: [build_freefem_ubuntu, get_docker_images]
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     strategy:
       matrix:

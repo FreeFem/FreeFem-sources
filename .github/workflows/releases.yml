@@ -50,6 +50,9 @@ jobs:
     with:
       release_version: ${{ needs.set_versions.outputs.ff_version }}
       ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
+      docker_arch: ${{ needs.set_versions.outputs.docker_arch }}
+      publish_latest: ${{ needs.set_versions.outputs.is_master == 'true' }}
+    secrets: inherit
 
   get_exe_packages:
     needs: set_versions
@@ -61,17 +64,8 @@ jobs:
       skip_check: true
       upload_build_artifacts: true
 
-  get_docker_images:
-    needs: [set_versions, get_deb_packages, get_exe_packages]
-    uses: ./.github/workflows/release_docker.yml
-    with:
-      release_version: ${{ needs.set_versions.outputs.ff_version }}
-      docker_arch: ${{ needs.set_versions.outputs.docker_arch }}
-      publish_latest: ${{ needs.set_versions.outputs.is_master == 'true' }}
-    secrets: inherit
-
   create_release:
-    needs: [set_versions, get_deb_packages, get_exe_packages, get_docker_images]
+    needs: [set_versions, get_deb_packages, get_exe_packages]
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create releases
