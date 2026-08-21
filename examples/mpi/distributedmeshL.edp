@@ -6,7 +6,9 @@ include "ffddm.idp"
 load "PETSc"
 
 meshL Th = segment(80);
-DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partmethod = "scotch");
+// keepGlobal = true : le defaut est passe a false, et Udh.loc2glob lu plus bas
+// exige le maillage global retenu par le DistributedMesh.
+DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partmethod = "scotch", keepGlobal = true);
 meshL ThLocal = DTh.local;
 
 fespace Uh(ThLocal, Pk);

@@ -19,6 +19,11 @@
 //                (N5b) sans cesser de l'etre du cote true (N5a).
 //                keepGlobal = true est EXPLICITE sur DA : le defaut est
 //                passe a false, l'omettre faisait echouer N5a.
+//            3 = chemins d'ERREUR en mode scatter (E0..E9). Le mode ou
+//                le rang 0 est seul a pouvoir constater la faute, donc
+//                seul a lever : c'est la que les erreurs non collectives
+//                se transformaient en blocage jusqu'au walltime.
+//                A LANCER SOUS TIMEOUT -- voir l'en-tete du bloc.
 //    -strip  epaisseur de la bande en mailles, cas 1    (defaut 2)
 //
 //  A LANCER
@@ -30,6 +35,8 @@
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 2 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 1 -strip 3 -nc 8
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 2
+//    timeout 300 ff-mpirun -np 3 test_distribute_scatter.edp -ns -case 3
+//    timeout 300 ff-mpirun -np 2 test_distribute_scatter.edp -ns -case 3
 //    ff-mpirun -np 3 test_distribute_scatter.edp -ns -v 5
 //      -> active le bloc de diagnostic de distributedDofNumbering (garde par
 //         agreeOnStatus, car verbosity vaut 0 hors du rang 0) : controle de
@@ -354,7 +361,7 @@ else if (cas == 1) {
   CMPPAIR(mesh3, P2, DA, DB, "bande strip=" + strip + " / P2")
 
 }
-else {
+else if (cas == 2) {
 
   // ---------- cas 2 : keepGlobal = true contre false ----------
   //  Bloc opt-in : garde intacts les comptes de reference des cas 0 et 1.
@@ -416,6 +423,213 @@ else {
       cout << "  [N5c keepGlobal non uniforme refuse]            " << g
            << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
   }
+
+}
+else {
+
+// ---------- cas 3 : chemins d'erreur EN MODE SCATTER ----------
+//  Bloc opt-in : garde intacts les comptes de reference des cas 0, 1 et 2.
+//
+//  C'est ici que se jouait le bug. En mode replique, tous les rangs evaluent
+//  les memes conditions et une levee est collective par accident. En scatter,
+//  le rang 0 est SEUL a detenir le maillage, donc seul a pouvoir constater
+//  qu'une methode est inconnue, que nt est trop petit ou qu'une partie est
+//  vide -- et il levait pendant que les autres attendaient dans recvMesh. Le
+//  job n'affichait rien (le buffering avale tout), n'appelait pas MPI_Abort,
+//  et brulait l'allocation jusqu'au walltime.
+//
+//  Chaque bloc reduit en MIN : g == 1 signifie que TOUS les rangs ont leve.
+//  g == 0 signifie que la levee est asymetrique. Et pas de sortie du tout
+//  signifie qu'on est retombe dans le mode d'echec d'origine -- donc :
+//  LANCER SOUS TIMEOUT. Un depassement n'est pas une lenteur.
+//
+//  Ce que ces blocs prouvent en creux : l'erreur est levee AVANT le premier
+//  sendMesh. C'est la seule raison pour laquelle le script survit au catch et
+//  peut enchainer le bloc suivant. Un scatter deja entame laisserait des
+//  messages non apparies et le bloc d'apres pendrait sur un tag qui ne vient
+//  pas. La suite du fichier est donc elle-meme un test de cette propriete.
+//
+//  ThS n'est construit que sur le rang 0 : c'est ce qui met
+//  detectDistributionMode en DM_SCATTER.
+
+//  E0 : garde de setup, comme S0 de PAIRUSER. Sans elle, tout ce bloc
+//  comparerait des chemins repliques en croyant tester le scatter.
+{ meshS Probe; if (mpirank == 0) Probe = square3(nsq, nsq);
+  int s0 = ((mpirank == 0 || Probe.nt == 0) ? 0 : 1), g0;
+  mpiAllReduce(s0, g0, mpiCommWorld, mpiMAX);
+  ntot++; if (g0 == 0) npass++;
+  if (mpirank == 0)
+    cout << "  [E0 setup : maillage sur le rang 0 seul]        " << (1 - g0)
+         << "   => " << (g0 == 0 ? "PASS" : "FAIL") << endl;
+}
+
+//  E1 : partmethod inconnu. Repro (a). La levee etait dans
+//  computeGlobalPartition, atteinte par le rang 0 seul.
+if (mpisize > 1) {
+  meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partmethod = "bogus");
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E1 partmethod inconnu -> collectif]            " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E2 : mpisize >= Th.nt. Repro (b). square3(1,1) porte 2 triangles, donc la
+//  condition tient des np = 2 sans dependre de -nsq.
+if (mpisize > 1) {
+  meshS ThS; if (mpirank == 0) ThS = square3(1, 1);
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partmethod = "metis");
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E2 mpisize >= Th.nt -> collectif]              " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E3 : repro (c), le plus vicieux des trois. cube(1,1,1) porte 6 tetraedres :
+//  nt > mpisize a np = 3, et pourtant METIS rend une partie VIDE. L'assertion
+//  de buildOverlapCover tombait alors APRES avoir servi le rang 1 et AVANT de
+//  servir le rang 2 -- un rang au travail, un rang mort, un rang en attente.
+//  Le declenchement depend de np et du partitionneur : le bloc n'exige donc
+//  que l'ACCORD entre rangs, pas un resultat donne. min != max, c'est
+//  exactement l'etat d'origine.
+if (mpisize > 1) {
+  mesh3 ThS; if (mpirank == 0) ThS = cube(1, 1, 1);
+  int caught = 0;
+  try { Dmesh3 D = distribute(ThS, overlap = ov, partmethod = "metis");
+        mesh3 L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int gmin, gmax;
+  mpiAllReduce(caught, gmin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(caught, gmax, mpiCommWorld, mpiMAX);
+  bool ok = (gmin == gmax);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [E3 cube(1,1,1) : rangs d'accord]               min=" << gmin
+         << " max=" << gmax << (gmin == 1 ? " (tous levent)" : " (aucun ne leve)")
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}
+
+//  E4 : parmetis refuse en scatter. Il exige le maillage global sur tous les
+//  rangs ; le refus tient a la METHODE, connue de tous, donc il etait deja
+//  collectif -- mais il repose maintenant sur la meme barriere que le reste,
+//  et sur la garde d'uniformite de partmethod (E7).
+if (mpisize > 1) {
+  meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partmethod = "parmetis");
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E4 parmetis refuse en scatter]                 " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E5 : partition= hors de [0, mpisize[. Le tableau est bati depuis un
+//  maillage de REFERENCE present partout (sinon les rangs > 0 ne sauraient pas
+//  le dimensionner), mais distribute ne le lit que sur le rang 0. Le controle
+//  de domaine n'existait pas : une valeur >= mpisize ecrivait hors bornes.
+if (mpisize > 1) {
+  meshS ThR = square3(nsq, nsq);
+  meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int[int] part(ThR.nt);
+  for (int k = 0; k < ThR.nt; ++k) part[k] = k * mpisize / ThR.nt;
+  part[0] = mpisize;
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partition = part);
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E5 partition hors domaine]                     " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E6 : partition= laissant un rang SANS ELEMENT, version deterministe de E3.
+//  Refus assume : l'etape 1 ne supporte pas le maillage local vide, elle le
+//  REFUSE proprement. L'etape 4 (redistribution) fera basculer allowEmpty
+//  dans checkPartitionUsable, et ce bloc changera alors de camp.
+if (mpisize > 1) {
+  meshS ThR = square3(nsq, nsq);
+  meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int[int] part(ThR.nt);
+  part = 0;
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partition = part);
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E6 partition laissant un rang vide]            " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E7 : overlap non uniforme. En scatter ce n'est pas qu'une question de
+//  symetrie des erreurs : le rang 0 taille les covers envoyes avec SON
+//  overlap, tandis que le rang i derive son masque local du sien. Sans le
+//  refus, le resultat est faux sans blocage ni message.
+if (mpisize > 1) {
+  meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = (mpirank == 0 ? ov : ov + 1),
+                              partmethod = "metis");
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E7 overlap non uniforme refuse]                " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E8 : mode MIXTE -- un rang autre que 0 porte aussi un maillage. Ni scatter
+//  (le maillage n'est pas sur le rang 0 seul) ni replique (tous ne l'ont pas).
+//  Le refus vient de detectDistributionMode et etait deja collectif, l'Allgather
+//  donnant a chacun le meme verdict : le bloc verrouille cette propriete, qui
+//  est le point d'appui de tous les autres. Exige np >= 3 pour qu'il existe un
+//  rang sans maillage a cote du rang fautif.
+if (mpisize > 2) {
+  meshS ThS; if (mpirank == 0 || mpirank == 1) ThS = square3(nsq, nsq);
+  int caught = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partmethod = "metis");
+        meshS L = D.local; if (L.nt < 0) caught = 1; }
+  catch (...) { caught = 1; }
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [E8 mode mixte refuse]                          " << g
+         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+//  E9 : controle NEGATIF de tout le bloc. Le meme scatter, sans faute : il doit
+//  passer. Sans lui, une barriere qui leverait sur TOUT rendrait E1..E8 verts.
+//  Reduction en MAX : un seul rang qui leve suffit a faire echouer.
+{ meshS ThS; if (mpirank == 0) ThS = square3(nsq, nsq);
+  int raised = 0, nl = 0;
+  try { DmeshS D = distribute(ThS, overlap = ov, partmethod = "metis");
+        meshS L = D.local; nl = L.nt; }
+  catch (...) { raised = 1; }
+  int empty = (nl <= 0 ? 1 : 0);
+  int g, gnt;
+  mpiAllReduce(raised, g, mpiCommWorld, mpiMAX);
+  mpiAllReduce(empty, gnt, mpiCommWorld, mpiMAX);
+  bool ok = (g == 0 && gnt == 0);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [E9 scatter correct accepte]                    leve=" << g
+         << " vide=" << gnt << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}
 
 }
 

@@ -63,11 +63,33 @@ Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o)
 
 // Partition globale
 template<class Mesh>
-void computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true);
+int computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true);
 
 int detectDistributionMode(int localNt, pcommworld comm);
 
 int agreeOnStatus(int local, pcommworld comm);
+// Collective error codes
+enum DistributeStatus {
+  DIST_OK = 0,
+  DIST_PART_SIZE = 1, // partition[] does not have Th.nt values
+  DIST_PART_RANGE = 2, // partition[k] outside [0, mpisize[
+  DIST_PART_EMPTY = 3, // At least one rank without element
+  DIST_NT_TOO_SMALL = 4, // mpisize >= Th.nt
+  DIST_PART_FAILED = 5, // partitioner return error
+  DIST_METHOD_BAD = 6, // unknown partmethod
+  DIST_SCOTCH_NA = 7, // build without scotch
+  DIST_PARMETIS_NA = 8, // build without parmetis
+  DIST_PARMETIS_SCAT = 9, // parmetis incompatible with scatter mode
+  DIST_ARG_METHOD = 10, // partmethod different between ranks
+  DIST_ARG_OVERLAP = 11, // overlap differs between ranks
+  DIST_ARG_KEEPGLOBAL = 12, // keepGlobal differs between ranks
+  DIST_ARG_SCATTER = 13 // scatter does not agree with detected mode
+};
+const char* distributeStatusMessage(int status);
+// 0 if method known and available in build
+int checkPartitionMethod(const std::string& method);
+// 0 if part is usable
+int checkPartitionUsable(const KN<int>& part, int nt, bool allowEmpty = false);
 
 template<class Mesh>
 void sendMesh(const Mesh& Th, int dest, pcommworld comm);

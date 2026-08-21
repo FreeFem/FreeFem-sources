@@ -402,8 +402,13 @@ namespace PETSc {
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
-    if (B._A) return;
     v_dfes<MMesh>* f = *pUh;
+    // overlap = 0: interface ddl does not carry its whole line et the operator is not built properly
+    if (f->DTh && f->DTh->overlap == 0 && mpisize > 1){
+      ExecError("Mat form fespace(Dmesh, ...): overlap = 0 is not supported by the PETSc/HPPDM additive Schwarz format; use distribute(..., overlap = 1)instead.");
+    }
+    if (B._A) return;
+    
     KN<double> Dscratch(f->Ddof);
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
       &B,
