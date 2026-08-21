@@ -536,8 +536,8 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
   Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
 
- if(lmin<diameter*1e-7) {
-    ExecError(" Error points  border points to close < diameter*1e-7 ");}
+  if(lmin < diameter*1e-7 && verbosity)
+    cout << " Warning: border points are very close < diameter*1e-7." << endl;
 
   if (verbosity>2)
     {
@@ -943,8 +943,8 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
   Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
 
- if(lmin<diameter*1e-7) {
-    ExecError(" Error points  border points to close < diameter*1e-7 ");}
+  if(lmin < diameter*1e-7 && verbosity)
+    cout << " Warning: border points are very close < diameter*1e-7." << endl;
 
   if (verbosity>2)
     {
@@ -1104,7 +1104,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
             {
                 long Nbseg =k->Nbseg(stack,index);
                 long n=  Max(1L,Abs(Nbseg));
-                Gh->subdomains[i].sens = Nbseg >0 ? 1 : -1;
+                Gh->subdomains[i].sens = Nbseg < 0 ? -1 : 1;
                 Gh->subdomains[i].edge=Gh->edges + i1;
                 Gh->subdomains[i].ref = i;
                 i1 += n;
