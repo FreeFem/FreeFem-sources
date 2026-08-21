@@ -44,7 +44,9 @@ int okCover = (ntsumR == Th.nt) ? 1 : 0;                        // recouvrement 
 // 3) Bout-en-bout : resolution distribuee AVEC la partition fournie,
 //    comparee a la resolution globale de reference (overlap = ffddmoverlap)
 // ---------------------------------------------------------------------------
-DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partition = part);
+// keepGlobal = true : le defaut est passe a false, et Udh.loc2glob lu plus bas
+// exige le maillage global retenu par le DistributedMesh.
+DmeshL DTh = distribute(Th, overlap = ffddmoverlap, partition = part, keepGlobal = true);
 meshL ThLocal = DTh.local;
 
 fespace Uh(ThLocal, Pk);

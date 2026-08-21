@@ -25,32 +25,28 @@ static const int TAG_DOF_POU = 1001;
 static const int TAG_DOF_NUM = 1002;
 
 template<class Mesh>
-void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast){
+int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast){
     const int nbt = Th.nt, nbv = Th.nv;
     const int nve = Mesh::Element::nv;
 
     // Séquentiel
     if (mpisize <= 1){
         part = 0;
-        return;
+        return DIST_OK;
     }
 
-    if (method != "metis" && method != "scotch" && method != "parmetis")
-      ExecError("distribute: partmethod inconnu (attendu \"metis\", \"scotch\" ou \"parmetis\")");
-    if (mpisize >= nbt)
-      ExecError("distribute: mpisize doit etre strictement inferieur a Th.nt");
-
-      if (method == "parmetis") {
+    int status = checkPartitionMethod(method);
+    if (!status && mpisize >= nbt) status = DIST_NT_TOO_SMALL;
+    if (status) return status;
+    
+    if (method == "parmetis") {
 #if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
-        MPI_Comm cwp = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
-        if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp) != 0)
-          ExecError("distribute: echec du partitionnement ParMETIS");
-        return;                 // tous les rangs ont part : pas de broadcast
-#else
-        ExecError("distribute: partmethod=\"parmetis\" indisponible ; reconfigurer "
-                "FreeFEM avec ParMETIS (cf. PARMETIS_CORE dans la sortie de configure)");
+      MPI_Comm cwp = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+      if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp) != 0)
+        status = DIST_PART_FAILED;
+      return status;                 // tous les rangs ont part : pas de broadcast
 #endif
-    }
+  }
 
     if (mpirank == 0) {
       if (method == "metis") {
@@ -68,26 +64,72 @@ void computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &me
         for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
       }
       else {  // "scotch"
-        #ifdef FF_WITH_SCOTCH
+#ifdef FF_WITH_SCOTCH
         KN<SCOTCH_Num> epart(nbt);
         SCOTCH_randomReset();
-        if (ffScotchPartFaceDual(Th, (SCOTCH_Num)mpisize, (SCOTCH_Num *)epart) != 0)
-          ExecError("distribute: echec du partitionnement Scotch");
-        for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
-        #else
-        ExecError("distribute: partmethod=\"scotch\" indisponible ; "
-                  "reconfigurer FreeFEM avec Scotch (cf. SCOTCH_CORE dans la sortie de configure)");
-        #endif
+        if (ffScotchPartFaceDual(Th, (SCOTCH_Num)mpisize, (SCOTCH_Num *)epart) != 0){
+          status = DIST_PART_FAILED;
+        }
+        else {
+          for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
+        }
+#endif
       }
     }
 
   // --- Broadcast depuis le rang 0 (uniquement en build MPI) ---
 #ifdef PARALLELE
-if (broadcast){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
-  MPI_Bcast((int*)part, nbt, MPI_INT, 0, cw);
-}
+  if (broadcast){
+    MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+    MPI_Bcast((int*)part, nbt, MPI_INT, 0, cw);
+  }
 #endif
+  return status;
+}
+
+const char* distributeStatusMessage(int status) {
+  switch (status) {
+    case DIST_PART_SIZE: return "distribute: partition[] requires Th.nt values";
+    case DIST_PART_RANGE : return "distribute: partition[] has a value outside [0, mpisize[";
+    case DIST_PART_EMPTY : return "distribute: at least one rank gets no element: reduce mpisize or refine the mesh";
+    case DIST_NT_TOO_SMALL : return "distribute: mpisize must be < Th.nt";
+    case DIST_PART_FAILED : return "distribute: partitioning failure";
+    case DIST_METHOD_BAD : return "distribute: unknown partmethod (expected \"metis\", \"scotch\" or \"parmetis\")";
+    case DIST_SCOTCH_NA : return "distribute: scotch partitioner is not available in this build";
+    case DIST_PARMETIS_NA : return "distribute: parmetis partitioner is not available in this build";
+    case DIST_PARMETIS_SCAT : return "distribute: parmetis is not compatible with scatter mode";
+    case DIST_ARG_METHOD : return "distribute: partmethod differs between ranks";
+    case DIST_ARG_OVERLAP : return "distribute: overlap differs between ranks";
+    case DIST_ARG_KEEPGLOBAL : return "distribute: keepGlobal differs between ranks";
+    case DIST_ARG_SCATTER : return "distribute: scatter argument does not agree with detected mode";
+  }
+  return "distribute: unknown status";
+}
+
+int checkPartitionMethod(const std::string &method) {
+  if (method != "metis" && method != "scotch" && method != "parmetis") return DIST_METHOD_BAD;
+#ifndef FF_WITH_SCOTCH
+  if (method == "scotch") return DIST_SCOTCH_NA;
+#endif
+#if !defined(PARALLELE) || !defined(FF_WITH_PARMETIS)
+  if (method == "parmetis") return DIST_PARMETIS_NA;
+#endif
+  return DIST_OK;
+}
+
+int checkPartitionUsable(const KN<int>& part, int nt, bool allowEmpty){
+  if (part.n != nt) return DIST_PART_SIZE;
+  if (mpisize <= 1) return DIST_OK;
+  KN<int> count((int)mpisize, 0);
+  for (int k = 0; k < nt; ++k){
+    const int p = part[k];
+    if (p < 0 || p >= (int)mpisize) return DIST_PART_RANGE;
+    count[p]++;
+  }
+  if (!allowEmpty){
+    for (int r = 0; r < (int)mpisize; ++r) if (count[r] == 0) return DIST_PART_EMPTY;
+  }
+  return DIST_OK;
 }
 
 #ifdef PARALLELE
@@ -394,9 +436,9 @@ int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
 #endif
 
 // Instanciations explicites (miroir de registerDistributedMeshOps<MeshS/Mesh3/MeshL>)
-template void computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld, bool);
-template void computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld, bool);
-template void computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld, bool);
+template int computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld, bool);
+template int computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld, bool);
+template int computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld, bool);
 
 template void sendMesh<MeshS>(const MeshS&, int, pcommworld);
 template MeshS* recvMesh<MeshS>(int, pcommworld);

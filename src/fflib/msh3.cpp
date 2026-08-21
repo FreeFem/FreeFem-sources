@@ -10053,6 +10053,13 @@ public:
 	}
 };
 
+static int methodCode(std::string& method) {
+  if (method == "metis") return 0;
+  else if (method == "scotch") return 1;
+  else if (method == "parmetis") return 2;
+  else return 3;
+}
+
 template <class Mesh>
 AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
@@ -10069,6 +10076,32 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   
   int localNt = (pTh) ? pTh->nt : 0;
   int mode = detectDistributionMode(localNt, comm);
+
+  int status = DIST_OK;
+
+  {
+    const int m = methodCode(method);
+    if (agreeOnStatus(m, comm) != -agreeOnStatus(-m, comm)) status = DIST_ARG_METHOD;
+
+    const int s = (int)sizeoverlaps;
+    if (!status && agreeOnStatus(s, comm) != -agreeOnStatus(-s, comm)){
+      status = DIST_ARG_OVERLAP;
+    }
+
+    const int kg = keepGlobal ? 1 : 0;
+    if (!status && agreeOnStatus(kg, comm) && agreeOnStatus(1-kg, comm)){
+      status = DIST_ARG_KEEPGLOBAL;
+    }
+
+    if (!status && nargs[12]){
+      const bool wanted = GetAny<bool>((*nargs[12])(stack));
+      if (wanted != (mode ==DM_SCATTER)) status = DIST_ARG_SCATTER;
+    }
+    if (!status) status = checkPartitionMethod(method);
+    if (!status && mode == DM_SCATTER && method == "parmetis") status = DIST_PARMETIS_SCAT;
+  }
+  status = agreeOnStatus(status, comm);
+  if (status) ExecError(distributeStatusMessage(status));
 
   if (nargs[12]){
     bool wanted = GetAny<bool>((*nargs[12])(stack));
@@ -10106,7 +10139,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     if (nargs[9]){
       KN_<long> userpart = GetAny<KN_<long>>((*nargs[9])(stack));
       if (userpart.N() != pTh->nt){
-        bad = 1;
+        status = DIST_PART_SIZE;
       }
       else {
         for (int k = 0; k< globalPartition.n; k++){
@@ -10115,12 +10148,13 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
       }
     }
     else {
-      computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED);
+      status = computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED);
     }
+    if (!status) status = checkPartitionUsable(globalPartition, pTh->nt);
   }
 
-  bad = agreeOnStatus(bad, comm);
-  if (bad) ExecError("distribute: partition[] requires Th.nt values");
+  status = agreeOnStatus(status, comm);
+  if (status) ExecError(distributeStatusMessage(status));
   
   if (mode == DM_REPLICATED && checkPartitionConsistency(comm, globalPartition)){
     ExecError("distribute: global partition differs between the ranks");
