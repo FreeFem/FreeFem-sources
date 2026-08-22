@@ -43,8 +43,11 @@ char *dirname (const char *pp) {
   for (i = l-1; i >= 0; i--)
     if (pp[i] == '\\') break;
   char *dir = new char[l+1];
-  strcpy(dir, pp);
-  dir[i] = 0;
+  if (i < 0) dir[0] = 0;
+  else {
+    strncpy(dir, pp, i);
+    dir[i] = 0;
+  }
   return dir;
 }
 
@@ -75,10 +78,12 @@ int main (int argc, const char **argv) {
   const char *dirll = dirname(argv[0]);
   const char *pp = 0;
   char ff[1000];
-  const char *fe = "\\freefem++.exe";//"C:\\msys64\\home\\hecht\\ff++\\src\\bin-win32\\ar v.exe";
+  const char *fe = "freefem++.exe";//"C:\\msys64\\home\\hecht\\ff++\\src\\bin-win32\\ar v.exe";
   *ff = 0;
   strcat(ff, dirll);
+  if (*dirll) strcat(ff, "\\");
   strcat(ff, fe);
+  delete[] dirll;
   //string cmd="freefem++.exe ";
   for (int i = 0; i < n100; ++i)
     ffargv[i] = 0;
