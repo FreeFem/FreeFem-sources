@@ -515,8 +515,6 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
             i++;
                     }
     }
-  lmin = (lmin);
-  double eps = (lmin)/16.;
   int nbvprev = i;
   long nbv=0;
   Gh->pmin =  vertices[0].r;
@@ -531,10 +529,10 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
     }
 
   double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
-  eps = Min(eps, diameter*1e-4);
   Gh->coefIcoor= (MaxICoor)/diameter;
-  Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
+  const Icoor1 epsI = 10; //rounding tolerance for integer coordinates
+  double eps = epsI / Gh->coefIcoor;
 
   if(lmin < diameter*1e-7 && verbosity)
     cout << " Warning: border points are very close < diameter*1e-7." << endl;
@@ -923,7 +921,6 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
                     }
     }
   lmin = sqrt(lmin);
-  double eps = (lmin)/16.;
   int nbvprev = i;
   long nbv=0;
   Gh->pmin =  vertices[0].r;
@@ -938,10 +935,10 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
     }
 
   double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
-  eps = Min(eps, diameter*1e-4);
   Gh->coefIcoor= (MaxICoor)/diameter;
-  Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
   ffassert(Gh->coefIcoor >0);
+  const Icoor1 epsI = 10; //rounding tolerance for integer coordinates
+  double eps = epsI / Gh->coefIcoor;
 
   if(lmin < diameter*1e-7 && verbosity)
     cout << " Warning: border points are very close < diameter*1e-7." << endl;
