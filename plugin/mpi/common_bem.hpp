@@ -185,7 +185,7 @@ public:
 class CBemDomainOfIntegration: public E_F0mps {
 public:
     
-    static const int n_name_param =3; //12;
+    static const int n_name_param =4; //12;
     static basicAC_F0::name_and_type name_param[] ;
     Expression nargs_t [n_name_param];
     // typeofkind  kind; //  0
@@ -194,6 +194,7 @@ public:
     Expression Th_s, Th_t, BemPartDI;
     vector<Expression> what_s, what_t;
     vector<int> whatis_s, whatis_t;
+    const CPartBemDI * sourceDI;
     //CBemDomainOfIntegration();
     CBemDomainOfIntegration(const basicAC_F0 & args_t, int ddim=3, int ddimHat=1) // always ddim=3d
     :d_s(0),dHat_s(0),d_t(ddim),dHat_t(ddimHat),
@@ -203,7 +204,7 @@ public:
     {
         args_t.SetNameParam(n_name_param,name_param,nargs_t);
         // acces to the value of the fist di Th_s
-        const CPartBemDI * sourceDI(dynamic_cast<const CPartBemDI*>((Expression) args_t[0]));
+        sourceDI = (dynamic_cast<const CPartBemDI*>((Expression) args_t[0]));
         
         CPartBemDI::typeofkind kind_s= sourceDI->kind; // int1dx1d=0, int2dx2d=1, int2dx1d=2, int1dx2d=3
         d_s=sourceDI->d;
@@ -254,10 +255,17 @@ public:
     const Fem2D::QuadratureFormular & FIT(Stack) const ;
     const Fem2D::QuadratureFormular1d & FIE(Stack) const ;
     const Fem2D::GQuadratureFormular<Fem2D::R3> & FIV(Stack) const ;  // 3d
+    const int Qforder(Stack) const ;
     
 };
 
-
+const int CBemDomainOfIntegration::Qforder(Stack stack) const
+{
+    int order = -1;
+    if (nargs_t[2]) order = GetAny<long>((*nargs_t[2])(stack));
+    if (sourceDI->nargs[2]) order = GetAny<long>((*(sourceDI->nargs[2]))(stack)); // higher priority for source qforder for now
+    return order;
+}
 
 basicAC_F0::name_and_type  CPartBemDI::name_param[]= {
     { "qft", &typeid(const Fem2D::QuadratureFormular *)},    //0
@@ -1030,6 +1038,33 @@ bemtool::BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) {
     }
     const bemtool::BIOpKernelEnum cpKernel=pKernel;
     return cpKernel;
+}
+
+int getBemQforder(Stack stack, const list<C_F0> & largs) {
+    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
+    bool haveBemBilinearOperator=false;
+    int qforder = -1;
+
+    for (ii=ib;ii != ie;ii++) {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
+
+        if (r==atype<const  BemFormBilinear *>() && !haveBemBilinearOperator) {
+            BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
+            CBemDomainOfIntegration * di=const_cast<  CBemDomainOfIntegration *>(bb->di);
+
+            if (di == NULL) {
+                if(mpirank == 0) cout << "dynamic_cast error" << endl;
+            }
+            else {
+                qforder = di->Qforder(stack);
+            }
+            haveBemBilinearOperator = true;
+        }
+    }
+    if (qforder == -1) qforder = 12; // default order 12
+    if(mpirank == 0 && verbosity>5) cout << " bem quadrature order for near field : qforder = " << qforder << endl;
+    return qforder;
 }
 
 bool checkVectorBemKernel(Stack stack, const list<C_F0> & largs){

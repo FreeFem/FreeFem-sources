@@ -207,7 +207,7 @@ public:
 struct Data_Bem_Solver
 : public Data_Sparse_Solver {
     double eta;
-    int maxleafsize,mintargetdepth,minsourcedepth,qforder;
+    int maxleafsize,mintargetdepth,minsourcedepth;
     string compressor, initialclustering, clusteringdirections;
     bool recompress, adaptiveclustering, hluinplace;
        
@@ -222,8 +222,7 @@ struct Data_Bem_Solver
        initialclustering("default"),
        clusteringdirections(!ff_htoolClusteringdirections?"pca":"boundingbox"),
        adaptiveclustering(ff_htoolAdaptiveclustering),
-       hluinplace(false),
-       qforder(12)
+       hluinplace(false)
     
         {epsilon=ff_htoolEpsilon;}
      
@@ -319,7 +318,6 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.clusteringdirections = *GetAny<string*>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.adaptiveclustering = GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.hluinplace = GetAny<bool>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.qforder = GetAny<int>((*nargs[kk])(stack));
         ffassert(++kk == n_name_param);
     }   
 }
@@ -491,8 +489,6 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     // compression infogfg
     
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
-
-    int qforder = ds.qforder;
     
     // source/target meshes
     const SMesh & ThU =Uh->Th; // line
@@ -676,6 +672,7 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     if (VFBEM==1) {
         // info kernel
         pair<BemKernel*,Complex> kernel = getBemKernel(stack,largs);
+        int qforder = getBemQforder(stack,largs);
         BemKernel *Ker = kernel.first;
         Complex alpha = kernel.second;
 

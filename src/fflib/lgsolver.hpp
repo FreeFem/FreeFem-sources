@@ -612,10 +612,9 @@ const int NB_NAME_PARM_MAT =  24 +6+4  ;
     {  "initialclustering",&typeid(string*)}, \
     {  "clusteringdirections",&typeid(string*)}, \
     {  "adaptiveclustering",&typeid(bool)}, \
-    {  "hluinplace",&typeid(bool)}, \
-    {  "qforder",&typeid(long)}
+    {  "hluinplace",&typeid(bool)}
 
-const int NB_NAME_PARM_HMAT = 11;
+const int NB_NAME_PARM_HMAT = 10;
 
 
 template<class R>
