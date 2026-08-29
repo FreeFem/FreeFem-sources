@@ -255,11 +255,11 @@ public:
     const Fem2D::QuadratureFormular & FIT(Stack) const ;
     const Fem2D::QuadratureFormular1d & FIE(Stack) const ;
     const Fem2D::GQuadratureFormular<Fem2D::R3> & FIV(Stack) const ;  // 3d
-    const int Qforder(Stack) const ;
+    int Qforder(Stack) const ;
     
 };
 
-const int CBemDomainOfIntegration::Qforder(Stack stack) const
+int CBemDomainOfIntegration::Qforder(Stack stack) const
 {
     int order = -1;
     if (nargs_t[2]) order = GetAny<long>((*nargs_t[2])(stack));
