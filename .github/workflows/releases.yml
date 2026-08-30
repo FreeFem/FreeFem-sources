@@ -106,9 +106,8 @@ jobs:
       windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
       ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
 
-  publish_docker:
-    name: Publish multi-platform Docker image
-    needs: [set_versions, get_deb_packages, get_docker_images]
+  publish_docker_image:
+    needs: [set_versions, check_release]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
