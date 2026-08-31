@@ -72,6 +72,12 @@ jobs:
 
   create_release:
     needs: [set_versions, get_deb_packages, get_exe_packages, get_docker_images]
+    outputs:
+      ff_version: ${{ needs.set_versions.outputs.ff_version }}
+      ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
+      windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
+      docker_arch: ${{ needs.set_versions.outputs.docker_arch }}
+      is_master: ${{ needs.set_versions.outputs.is_master }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create releases
@@ -99,15 +105,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   check_release:
-    needs: [set_versions, create_release]
+    needs: create_release
     uses: ./.github/workflows/release_check.yml
     with:
       release_version: ${{ github.ref_name }}
-      windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
-      ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
+      windows_versions: ${{ needs.create_release.outputs.windows_versions }}
+      ubuntu_versions: ${{ needs.create_release.outputs.ubuntu_versions }}
 
   publish_docker_image:
-    needs: [set_versions, check_release]
+    needs: [create_release, check_release]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -121,7 +127,7 @@ jobs:
           images: ${{ env.REGISTRY_IMAGE }}
           tags: |
             type=raw,value=${{ github.ref_name }}
-            type=raw,value=latest,enable=${{ needs.set_versions.outputs.is_master == 'true' }}
+            type=raw,value=latest,enable=${{ needs.create_release.outputs.is_master == 'true' }}
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
@@ -142,7 +148,7 @@ jobs:
       - name: Create and push multi-platform manifest
         working-directory: ${{ runner.temp }}/digests
         env:
-          DOCKER_ARCH: ${{ needs.set_versions.outputs.docker_arch }}
+          DOCKER_ARCH: ${{ needs.create_release.outputs.docker_arch }}
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
         run: |
           set -euxo pipefail
@@ -170,7 +176,7 @@ jobs:
 
       - name: Verify multi-platform image
         env:
-          DOCKER_ARCH: ${{ needs.set_versions.outputs.docker_arch }}
+          DOCKER_ARCH: ${{ needs.create_release.outputs.docker_arch }}
         run: |
           set -euxo pipefail
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
