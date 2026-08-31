@@ -61,3 +61,4 @@ jobs:
         with:
           name: v${{ inputs.release_version }}-ubuntu-${{ matrix.ubuntu_version }}
           path: ./*.deb
+          retention-days: 1
