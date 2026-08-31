@@ -53,6 +53,7 @@ jobs:
     needs: set_versions
     uses: ./.github/workflows/full-msmpi.yml
     with:
+      release_version: ${{ needs.set_versions.outputs.ff_version }}
       windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
       build_types: '["release"]'
       skip_check: true
@@ -60,6 +61,11 @@ jobs:
 
   create_release:
     needs: [set_versions, get_deb_packages, get_exe_packages]
+    outputs:
+      ff_version: ${{ needs.set_versions.outputs.ff_version }}
+      ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
+      windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
+      is_master: ${{ needs.set_versions.outputs.is_master }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create releases
@@ -68,6 +74,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./release-assets
+          pattern: v${{ needs.set_versions.outputs.ff_version }}*
           merge-multiple: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,9 +92,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   check_release:
-    needs: [set_versions, create_release]
+    needs: create_release
     uses: ./.github/workflows/release_check.yml
     with:
       release_version: ${{ github.ref_name }}
-      windows_versions: ${{ needs.set_versions.outputs.windows_versions }}
-      ubuntu_versions: ${{ needs.set_versions.outputs.ubuntu_versions }}
+      windows_versions: ${{ needs.create_release.outputs.windows_versions }}
+      ubuntu_versions: ${{ needs.create_release.outputs.ubuntu_versions }}
