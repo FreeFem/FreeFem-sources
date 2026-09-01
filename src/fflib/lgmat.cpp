@@ -1342,49 +1342,20 @@ KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>
     if (Uh_target.TFE[0] == &DataFE<Mesh>::P1){
         return DTh.partitionOfUnity;
     }
-    const GTypeOfFE<Mesh>* topFE = Uh_target.TFE[0];
-    const GTypeOfFESum<Mesh>* sumFE = dynamic_cast<const GTypeOfFESum<Mesh>*>(topFE);
-    const GTypeOfFE<Mesh>* scalarFE = sumFE ? sumFE->teb[0] : topFE;
 
-    if (sumFE){
-        for (int i = 1; i < sumFE->k;++i){
-            if (sumFE->teb[i] != sumFE->teb[0]){
-                ExecError("interpolatePoU: composite/mixed FE space not supported (use homogeneous [Pk,...,Pk])");
-            }
-        }
-    }
-
-    // Build P1 state on LocalMesh & target space
     typedef GFESpace<Mesh> FESpaceSD;
     FESpaceSD Vh_P1(*DTh.LocalMesh, DataFE<Mesh>::P1);
-    FESpaceSD Uh_scalar(*DTh.LocalMesh, *scalarFE);
+
+    int data[4 + Uh_target.N];
+    data[0] = 0; data[1] = op_id; data[2] = 0; data[3] = 0;
+    for (int i = 0; i < Uh_target.N; ++i) data[4 + i] = 0;
 
     // Build the interpolation matrix (scalar)
-    MatriceMorse<R>* M = buildInterpolationMatrixT<FESpaceSD,FESpaceSD>(Uh_scalar, Vh_P1 , nullptr);
-
-    KN<double> pou_scalar(Uh_scalar.NbOfDF, 0.0);
-    M->addMatMul(const_cast<double*>((const double*)DTh.partitionOfUnity),(double*)pou_scalar);
+    MatriceMorse<R>* M = buildInterpolationMatrixT<FESpaceSD,FESpaceSD>(Uh_target, Vh_P1 , data);
+    KN<double> result(Uh_target.NbOfDF, 0.0);
+    M->addMatMul(const_cast<double*>((const double*)DTh.partitionOfUnity),(double*)result);
     delete M;
-
-    if (Uh_target.N == 1){
-        return pou_scalar;          // pou_scalar EST déjà le résultat
-    }
-    // Extend to vector components
-    ffassert(Uh_scalar.NbOfNodes == Uh_target.NbOfNodes);
-    KN<double> result(Uh_target.NbOfDF);
-    for (int n = 0; n < Uh_target.NbOfNodes; ++n) {
-        int sf = Uh_scalar.FirstDFOfNode(n);            // DDL scalaires du nœud n : [sf, sf+m)
-        int m  = Uh_scalar.LastDFOfNode(n) - sf;
-        int tf = Uh_target.FirstDFOfNode(n);            // DDL vectoriels du nœud n : [tf, tf+tm)
-        int tm = Uh_target.LastDFOfNode(n) - tf;
-        ffassert(tm % m == 0);
-        int Nc = tm / m;                                // nb de composantes
-        for (int c = 0; c < Nc; ++c)
-        for (int j = 0; j < m; ++j)
-            result[tf + c*m + j] = pou_scalar[sf + j];
-    }
     return result;
-
 }
 
 template<class Mesh>
@@ -1519,21 +1490,8 @@ void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
 }
 
 template<class Mesh>
-static void assertHomogeneousFE(const GFESpace<Mesh>& Uh) {
-    const GTypeOfFESum<Mesh>* sumFE = dynamic_cast<const GTypeOfFESum<Mesh>*>(Uh.TFE[0]);
-    if (sumFE){
-        for (int i = 1; i < sumFE->k; ++i){
-            if (sumFE->teb[i] != sumFE->teb[0]){
-                ExecError("fespace distribute: composite/mixed FE spaces not supported use homogeneous [Pk, Pk,...]");
-            }
-        }
-    }
-}
-
-template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
-    assertHomogeneousFE(Vhi);
     const bool collective = (checkDfespace != 0) && (mpisize > 1);
 
     KN<KN<long>> raw = buildDofIntersection(*DTh, Vhi);
