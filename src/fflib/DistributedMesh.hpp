@@ -63,7 +63,7 @@ Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o)
 
 // Partition globale
 template<class Mesh>
-int computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true);
+int computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true, int nWorkers = 0);
 
 int detectDistributionMode(int localNt, pcommworld comm);
 
@@ -83,7 +83,8 @@ enum DistributeStatus {
   DIST_ARG_METHOD = 10, // partmethod different between ranks
   DIST_ARG_OVERLAP = 11, // overlap differs between ranks
   DIST_ARG_KEEPGLOBAL = 12, // keepGlobal differs between ranks
-  DIST_ARG_SCATTER = 13 // scatter does not agree with detected mode
+  DIST_ARG_SCATTER = 13, // scatter does not agree with detected mode
+  DIST_ARG_PARTWORKERS = 14 // partworkers differs between ranks
 };
 const char* distributeStatusMessage(int status);
 // 0 if method known and available in build

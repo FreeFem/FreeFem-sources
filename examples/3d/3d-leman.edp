@@ -1,0 +1,34 @@
+//  created with md2edp examples/3d/3d-leman.md
+load "medit"
+verbosity=3;
+mesh Th2("lac-leman-v4.msh");
+fespace Vh2(Th2,P1);
+Vh2 d;
+{  Vh2 v; 
+	macro Grad(u) [dx(u),dy(u)] //
+	solve P(d,v)= int2d(Th2)(Grad(d)'*Grad(v))+int2d(Th2)(v)
+	+on(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,d=-1);
+	d = d*5/abs(d[].min);
+	plot(d,wait=1);
+}
+int[int] rup=[0,200],  rdown=[0,100];
+real maxdeep = d[].min;
+int nn=10; // controls the mesh fineness
+mesh3 Th=buildlayers(Th2,nn,
+  coef= d/maxdeep,
+  zbound=[d,0],
+  reffaceup = rup,
+  reffacelow = rdown);
+fespace Vh(Th,P1);
+Vh p,q;
+macro Grad(u) [dx(u),dy(u),dz(u)] //
+
+real ain=int2d(Th,1)(1.);
+real aout=int2d(Th,2)(1.);
+cout << " area " << ain << " " << aout << endl;
+real din=1./ain; // inflow
+real dout=-1./aout; // ouflow
+
+solve P(p,q)= int3d(Th)(Grad(p)'*Grad(q)+1e-5*p*q)-int2d(Th,1)(q*din)+int2d(Th,2)(q*dout);
+plot(p,wait=1,nbiso=30,value=1);
+/* if(!NoUseOfWait) medit("potentiel",Th,p,wait=1);*/

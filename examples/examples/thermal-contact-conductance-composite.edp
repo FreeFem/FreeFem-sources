@@ -1,0 +1,106 @@
+//  created with md2edp examples/examples/thermal-contact-conductance-composite.md
+
+//include "getARGV.idp"
+// Version with composite space  
+bool nonconformcase = 0;//getARGV("-nc",0); // bug under windows bizarre
+real x0=0,x2=4;
+real y0=0,y1=1;
+real L= x2-x0; 
+real k1=1;
+real k2=1;
+
+real c=1;
+
+real T0=100.0, T1=00.0;
+
+
+//  mesh construction.  
+
+//  the curve in y .
+ func  F = 2+0.5*sin(2*pi*(y)); 
+ func  dF=  -1*0.5*pi*2*cos(2*pi*(y));  
+ func  dux =  (T1-T0)/(L+ (k1/c)/sqrt(1.+0*square(dF))); // 
+ 
+ //  k du/dn = c[u]
+//   if we neglect the du/dy 
+//  the solution 
+//  du/dx is constant in x and
+//  du/dx*L + [u] = T1-T0 
+//  du/dx*L + N.x k/c  du/dx = T1-T0
+//  => 
+//  du/dx = (T1-T0) /(L+nx*k/c)
+
+ //  t ->( F,t )  t' = ( dF, 1)  n = (-1, dF) / sqrt( 1+ dF^2) 
+ // N.x = 1 /  sqrt( 1+ dF^2)
+
+ func  Te1= T0+x*dux;
+ func  Te2= T1+(x-L)*dux;
+ 
+real xb1=  F(0,0);
+real xu1=  F(0,1);
+
+border left(t=y1,y0) {x=x0; y=t;label=3;} 
+border right(t=y0,y1) {x=x2; y=t;label=4;}
+border bot1(t=x0,xb1) {y=y0; x=t;label=2;}
+border bot2(t=xb1,x2) {y=y0; x=t;label=2;}
+border up1(t=x2,xu1) {y=y1; x=t;label=2;}
+border up2(t=xu1,x0) {y=y1; x=t;label=2;}
+border curve(t=0,1) {y=t;x=F(0,t) ; label=10;}
+
+
+// Maillages coincidents
+int n=30;
+int ny=n*(y1-y0);
+func Bord = left(ny)+right(ny)+curve(ny*2)
+                  +bot1(n*(xb1-x0))+bot2(n*(x2-xb1))
+                  +up1(n*(x2-xu1))+up2(n*(x2-xu1));
+plot(Bord,wait=1);                  
+mesh Th=  buildmesh( Bord );
+// get region number to build 2 meshes:
+int rg1=Th(x0+0.1,y0+0.1).region;
+int rg2=Th(x2-0.1,y1-0.1).region;
+//  2 meshes conform. 
+mesh Th1=trunc(Th,region==rg1);
+mesh Th2=trunc(Th,region==rg2);
+// now the 2 meshes are not conform. 
+if(nonconformcase)
+{
+Th2 = adaptmesh(Th2,0.05,IsMetric=1,nbvx=1000000);
+Th1 = adaptmesh(Th1,0.03,IsMetric=1,nbvx=1000000);
+}
+
+plot(Th1,Th2,wait=1);
+
+fespace Vh1(Th1,P1); 
+fespace Vh2(Th2,P1);
+
+//  two no too bad approximation (1d) of the exact solution. 
+Vh1 ue1=Te1;
+Vh2 ue2=Te2;
+plot(ue1,ue2,wait=1,cmm="analytic approximation");
+
+// composite version 
+fespace cVh(<Vh1,Vh2>);
+
+varf compositeVall([u1,u2],[v1,v2]) = 
+  int2d(Th1)(k1*dx(u1)*dx(v1) + k1*dy(u1)*dy(v1)) 
++ int2d(Th2)(k2*dx(u2)*dx(v2) + k2*dy(u2)*dy(v2)) 
++ int1d(Th1,10,mortar=1)(c*(u1-u2)*(v1-v2) )
++ on(3,u1=T0)
++ on(4,u2=T1);
+
+real[int] cB = compositeVall(0,cVh);
+matrix    cA = compositeVall(cVh,cVh);
+set(cA, solver=UMFPACK);
+
+real[int] cT = cA^-1*cB;
+
+Vh1 uc1;
+Vh2 uc2;
+[uc1[],uc2[]]=cT;  // dispatch the solution. 
+
+plot(uc1,uc2,value=1,fill=1,wait=1,nbiso=100);
+plot(uc1,ue1,value=1,fill=0,wait=1);
+plot(uc2,ue2,value=1,fill=0,wait=1);
+cout << " T1=" << int1d(Th1,10)(uc1)/int1d(Th1,10)(1.0) << " T2=" << int1d(Th2,10)(uc2)/int1d(Th2,10)(1.0) << endl;
+

@@ -1,0 +1,29 @@
+//  created with md2edp examples/examples/lame.md
+real E = 21e5, nu = 0.28;
+real f = -1;
+real mu = E/(2*(1 + nu));
+real lambda = E*nu/((1 + nu)*(1 - 2*nu));
+
+mesh Th = square(10, 10, [20*x, 2*y-1]);
+
+fespace Vh(Th, P2);
+Vh u, v, uu, vv;
+
+real sqrt2 = sqrt(2.);
+macro epsilon(u1, u2) [dx(u1), dy(u2), (dy(u1)+dx(u2))/sqrt2] // EOM
+macro div(u, v) (dx(u) + dy(v)) // EOM
+
+solve lame([u, v], [uu, vv])
+  = int2d(Th)(  lambda*div(u,v)*div(uu,vv)
+              + 2.*mu*(epsilon(u,v)'*epsilon(uu,vv)) )
+  - int2d(Th)(f*vv) + on(4, u=0, v=0);
+
+real coef=100;
+plot([u, v], wait=1, ps="lamevect.ps", coef=coef);
+mesh th1 = movemesh(Th, [x+u*coef, y+v*coef]);
+plot(th1, wait=1, ps="lamedeform.eps");
+
+real dxmin = u[].min;
+real dymin = v[].min;
+cout << "   displacement  max x = " << dxmin << " y = " << dymin << endl;
+cout << "   displacement (20,0) = " << u(20,0) << " " << v(20,0) << endl;

@@ -1,0 +1,49 @@
+//  created with md2edp examples/3d/cylinder-3d.md
+load "medit"// contains the interface with medit graphic display
+load "tetgen"// used by the second part of this program
+
+border C(t=0,2*pi) { x = cos(t); y=sin(t); label=1;}
+mesh Baseh = buildmesh(C(20));
+plot(Baseh,wait=0);// press return to go to the next plot
+
+int[int] rup=[0,1],  rdown=[0,2], rmid=[1,3];
+func zmin= 1;
+func zmax= 10;
+int nlayer=100;
+mesh3 Th=buildlayers(Baseh,nlayer,
+  coef= 1.,
+  zbound=[zmin,zmax],
+  labelmid=rmid, 
+  reffaceup = rup,
+  reffacelow = rdown);
+// To see the volumic mesh use the f1 then f2 control functions on the keyboard
+medit("Cyl1",Th,wait=1); // press escape in the medit window to go to the next plot
+
+plot(Th,cmm="Cyl1");
+int nx=10; // nomber of points along the axis
+int nth=50; // number of points on the cercle
+real xmin=1.,xmax=3.; // bottom and top of the cylinder
+
+// The mesh of the disk
+mesh Thcercle = buildmesh(C(nth));
+
+// This mesh will be wrapped around and above the bottom cercle
+mesh Thcarre=square(nx,nth,[xmin+x*(xmax-xmin),2*pi*y]);
+cout<<" Build a lateral mesh\n";
+func f1 = x;
+func f2 = cos(y);
+func f3 = sin(y);
+meshS Thsurf1=movemesh23(Thcarre,transfo=[f1,f2,f3],orientation=-1);
+meshS Thsurf2=movemesh23(Thcercle,transfo=[xmin,x,y],orientation=-1);
+meshS Thsurf3=movemesh23(Thcercle,transfo=[xmax,x,y],orientation=1);
+meshS Thsurf=Thsurf1+Thsurf2+Thsurf3; // To see that the mesh is surfacic only use the f1 then f2 control functions. To close the window hit the escape key
+medit("Cyl2",Thsurf,wait=1);
+real voltet= ( ( (2*pi)/50 )^3 )/6.;
+cout << "  voltet = " << voltet << endl;
+real[int] domaine = [1.5,0.,0.,1,voltet];
+mesh3 Th2=tetg(Thsurf,switch="pqaaAAYYQ",nbofregions=1,regionlist=domaine);
+
+//savemesh(Th,"cyl.mesh");
+medit("Cyl3",Th2,wait=1);
+// FFCS: testing 3d plots
+plot(Th2,cmm="Cyl3");

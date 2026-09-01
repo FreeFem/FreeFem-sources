@@ -1,0 +1,35 @@
+//  created with md2edp examples/3d/LapDG3d.md
+int nn=5;
+mesh3 Th = cube(nn,nn,nn);
+macro grad(u) [dx(u),dy(u),dz(u)] //
+macro dn(u) (N'*grad(u) ) //'  def the normal derivative
+int[int] labs=labels(Th);
+fespace Vh(Th,P2dc3d);     // Discontinous P2 finite element
+fespace Xh(Th,P2);
+real pena=1e2; //to add penalisation for Vh, not needed if Xh is used
+func f=1;
+func g=0;
+Vh u,v;
+Xh uu,vv;
+problem A(u,v,solver=sparsesolver) = 
+   int3d(Th)( grad(u)'*grad(v)) //'
+ + intallfaces(Th)(//  loop on all  edges of all triangles
+           ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
+          + pena*jump(u)*jump(v) ) / nElementonB 
+)
+- int3d(Th)(f*v) 
+- int2d(Th)(g*dn(v)  + pena*g*v) 
+;
+problem A1(uu,vv,solver=sparsesolver) 
+= 
+ int3d(Th)(grad(uu)'*grad(vv))//'
+  - int3d(Th)(f*vv) + on(labs,uu=g);
+ 
+ A; // solve  DG
+ A1; // solve continuous
+
+ real err= sqrt(int3d(Th) ( sqr(u-uu)));
+ cout << " err= "<< err<< " " << u[].linfty << " " << uu[].linfty << endl; 
+plot(u,uu,cmm="Discontinue Galerkin",wait=1,value=1);
+plot(u,cmm="Discontinue Galerkin",wait=1,value=1,fill=1);
+assert(err< 0.01);

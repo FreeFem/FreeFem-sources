@@ -17,12 +17,12 @@ macro grad(u)[dx(u), dy(u) , dz(u)]// EOM
 func Pk = P1;
 
 mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10)); // global mesh
-Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "scotch");
+Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "metis");
 mesh3 ThLocal = DTh.local;
 
 fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th
 fespace Wdh(DTh, Pk);
-varf vPb(u, v) = int3d(ThLocal)(grad(u)' * grad(v)) + int2d(ThLocal)(v) + on(1, u = 0.0);
+varf vPb(u, v) = int3d(DTh)(grad(u)' * grad(v)) + int2d(DTh)(v) + on(1, u = 0.0);
 Mat A = vPb(Wdh,Wdh);
 Wh u, rhs, residual; // local solution, right-hand side, and final residual
 
