@@ -1,0 +1,301 @@
+// NBPROC 4
+// PARAM -wg -ns
+
+// Test : support des espaces vectoriels FE composes heterogenes (type [P2,P2,P1])
+// pour les fespaces distribuees construites via distribute().
+//
+// Partie 1 (ci-dessous) : overlap = 0.
+// Partie 2 (plus bas)   : overlap > 0, apres la correction d'interpolatePoU
+//                         (interpolation directe vers l'espace compose complet
+//                         avec broadcast U2Vc, sans hypothese de dominance de teb[0]).
+//
+// Verifie (partie 1) :
+//  - V1 : bijection loc2glob (les valeurs locales et globales d'un meme DOF concordent)
+//  - V2 : partition de l'unite (D) correcte au niveau DOF pour un espace compose
+//  - V3 : coherence de l'assemblage distribue vs global (somme des R_i b_i = b_global,
+//         sommation brute car overlap = 0 = partition disjointe), pour une forme
+//         lineaire exercant les 3 sous-composantes simultanement
+//  - insensibilite a l'ordre des sous-FE dans la liste : Pk1 = [P2,P2,P1] (le premier
+//    sous-FE domine topologiquement les autres) et Pk2 = [P1,P2,P1] (le premier
+//    sous-FE ne domine pas : cas qui ferait echouer interpolatePoU en overlap > 0,
+//    mais qui ne doit pas poser de probleme ici puisque overlap = 0 ne passe jamais
+//    par interpolatePoU).
+//
+// NB : la resolution distribuee via PETSc (Mat/set/A^-1) n'est PAS testee ici :
+// Mat refuse explicitement overlap = 0 ("overlap = 0 is not supported by the
+// PETSc/HPDDM additive Schwarz format"), une limitation preexistante et sans lien
+// avec la composition de l'espace FE. V3 verifie donc la coherence de l'assemblage
+// (quadrature + evaluation des fonctions de base du GTypeOfFESum compose) via les
+// memes primitives non-PETSc que V1/V2 (D, loc2glob), ce qui suffit a couvrir le
+// chemin de code modifie par la levee du garde overlap = 0.
+
+func Pk1 = [P2, P2, P1];   // ordre naturel (Taylor-Hood) : teb[0] = P2 domine
+func Pk2 = [P1, P2, P1];   // teb[0] = P1 ne domine pas les noeuds milieu d'arete de P2
+
+mesh3 Th = cube(6, 6, 6);
+Dmesh3 DTh = distribute(Th, overlap = 0, keepGlobal = true);
+mesh3 ThLocal = DTh.local;
+
+func fa1 = x + 2*y + 3*z + x*y;
+func fa2 = 2*x - y + z - y*z;
+func fa3 = x*y*z + x - z;
+
+real globEBij = 0, globEPoU = 0, globESol = 0;
+bool globPass = true;
+
+macro TESTCASE(Pk, label)
+{
+    if (mpirank == 0) cout << "---- test " << label << " ----" << endl;
+
+    fespace Uh(ThLocal, Pk);
+    fespace Udh(DTh, Pk);
+    fespace UhGlob(Th, Pk);
+
+    real[int] D   = Udh.D;
+    int[int]  l2g = Udh.loc2glob;
+    assert(D.n == Udh.ndof && l2g.n == Udh.ndof);
+
+    if (mpirank == 0) cout << "  ndof local (rang 0) = " << Udh.ndof << ", ndof global = " << UhGlob.ndof << endl;
+
+    /* V1 : bijection loc2glob */
+    UhGlob [gglob1, gglob2, gglob3] = [fa1, fa2, fa3];
+    Uh     [gloc1, gloc2, gloc3]    = [fa1, fa2, fa3];
+    real errBij = 0;
+    for (int i = 0; i < gloc1[].n; ++i)
+        errBij = max(errBij, abs(gloc1[][i] - gglob1[][l2g[i]]));
+
+    /* V2 : partition de l'unite */
+    real[int] dloc(Udh.ndof);
+    for (int i = 0; i < Udh.ndof; ++i) dloc[i] = D[i] * gglob1[][l2g[i]];
+    real[int] acc(UhGlob.ndof); acc = 0;
+    for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += dloc[i];
+    real[int] accG(UhGlob.ndof);
+    mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+    real errPoU = 0;
+    for (int i = 0; i < UhGlob.ndof; ++i) errPoU = max(errPoU, abs(accG[i] - gglob1[][i]));
+
+    /* V3 : coherence de l'assemblage distribue vs global (sans PETSc, sans BC)
+       R_i b_i somme sur les rangs == b assemble sur le maillage global,
+       pour une forme lineaire exercant les 3 sous-FE (quadrature + fonctions
+       de base du GTypeOfFESum compose) simultanement. Pas de on(...) ici :
+       verifie separement (cf note ci-dessus), l'elimination Dirichlet interagit
+       avec les points de jonction a 3+ sous-domaines independamment de la
+       composition de l'espace (meme artefact reproduit avec un P2 scalaire pur),
+       ce qui est hors du perimetre teste ici. */
+    varf vPb([u1, u2, p], [v1, v2, q]) = int3d(ThLocal)(1.0*v1 + 2.0*v2 + 3.0*q);
+    real[int] rhsLoc = vPb(0, Uh);
+
+    varf vPbGlob([u1, u2, p], [v1, v2, q]) = int3d(Th)(1.0*v1 + 2.0*v2 + 3.0*q);
+    real[int] rhsGlob = vPbGlob(0, UhGlob);
+
+    /* overlap = 0 : partition non recouvrante => sommation brute (pas de ponderation D),
+       contrairement a V2 qui reconstruit un CHAMP (valeurs nodales dupliquees a
+       recombiner) ; ici chaque sous-domaine integre une portion disjointe du domaine,
+       la somme brute des contributions locales redonne exactement le vecteur global. */
+    real[int] rhsAcc(UhGlob.ndof); rhsAcc = 0;
+    for (int i = 0; i < Udh.ndof; ++i) rhsAcc[l2g[i]] += rhsLoc[i];
+    real[int] rhsAccG(UhGlob.ndof);
+    mpiAllReduce(rhsAcc, rhsAccG, mpiCommWorld, mpiSUM);
+    real errAsm = 0;
+    for (int i = 0; i < UhGlob.ndof; ++i) errAsm = max(errAsm, abs(rhsAccG[i] - rhsGlob[i]));
+
+    real eBij, ePoU, eAsm;
+    mpiAllReduce(errBij, eBij, mpiCommWorld, mpiMAX);
+    mpiAllReduce(errPoU, ePoU, mpiCommWorld, mpiMAX);
+    mpiAllReduce(errAsm, eAsm, mpiCommWorld, mpiMAX);
+
+    bool localPass = (eBij < 1e-8 && ePoU < 1e-8 && eAsm < 1e-8);
+    if (mpirank == 0) {
+        cout << "  V1 bijection loc2glob   : " << eBij << endl;
+        cout << "  V2 partition de l'unite : " << ePoU << endl;
+        cout << "  V3 assemblage dist/glob : " << eAsm << endl;
+        cout << "  => " << (localPass ? "PASS" : "FAIL") << " (" << label << ")" << endl;
+    }
+    globEBij = max(globEBij, eBij);
+    globEPoU = max(globEPoU, ePoU);
+    globESol = max(globESol, eAsm);
+    globPass = globPass && localPass;
+}//
+
+TESTCASE(Pk1, "P2P2P1 (ordre naturel, teb[0] domine)")
+TESTCASE(Pk2, "P1P2P1 (teb[0] ne domine pas)")
+
+if (mpirank == 0) {
+    cout << "==== SYNTHESE test_vectorFE (np=" << mpisize << ", overlap=0) ====" << endl;
+    cout << " max bijection loc2glob  : " << globEBij << endl;
+    cout << " max partition de l'unite: " << globEPoU << endl;
+    cout << " max distribue vs global : " << globESol << endl;
+    cout << (globPass ? " => PASS" : " => FAIL") << endl;
+}
+
+/* ================================================================
+   Partie 2 : overlap > 0
+   ================================================================
+   Contrairement a overlap = 0, PETSc/HPDDM accepte overlap > 0 :
+   on peut donc ici faire un vrai test bout-en-bout (assemblage +
+   resolution distribuee via Mat/set/A^-1, comparee a une resolution
+   globale UMFPACK), et la partition de l'unite passe reellement par
+   interpolatePoU (contrairement a overlap = 0 qui utilise un simple
+   comptage de multiplicite). Pk2 = [P1,P2,P1] (teb[0] ne domine pas)
+   etait bloque par ExecError avant la correction ; il doit maintenant
+   fonctionner tout comme Pk1. */
+
+load "PETSc"
+
+Dmesh3 DTh1 = distribute(Th, overlap = 1, keepGlobal = true);
+mesh3 ThLocal1 = DTh1.local;
+
+real globEBij1 = 0, globEPoU1 = 0, globESol1 = 0;
+bool globPass1 = true;
+
+macro TESTOV(Pk, label)
+{
+    if (mpirank == 0) cout << "---- test overlap=1 " << label << " ----" << endl;
+
+    fespace Uh1(ThLocal1, Pk);
+    fespace Udh1(DTh1, Pk);
+    fespace UhGlob1(Th, Pk);
+
+    real[int] D1   = Udh1.D;
+    int[int]  l2g1 = Udh1.loc2glob;
+    assert(D1.n == Udh1.ndof && l2g1.n == Udh1.ndof);
+
+    if (mpirank == 0) cout << "  ndof local (rang 0) = " << Udh1.ndof << ", ndof global = " << UhGlob1.ndof << endl;
+
+    /* V1 : bijection loc2glob */
+    UhGlob1 [gg1, gg2, gg3] = [fa1, fa2, fa3];
+    Uh1     [gl1, gl2, gl3] = [fa1, fa2, fa3];
+    real errBij = 0;
+    for (int i = 0; i < gl1[].n; ++i)
+        errBij = max(errBij, abs(gl1[][i] - gg1[][l2g1[i]]));
+
+    /* V2 : partition de l'unite, calculee via interpolatePoU (overlap > 0) */
+    real[int] dloc(Udh1.ndof);
+    for (int i = 0; i < Udh1.ndof; ++i) dloc[i] = D1[i] * gg1[][l2g1[i]];
+    real[int] acc(UhGlob1.ndof); acc = 0;
+    for (int i = 0; i < Udh1.ndof; ++i) acc[l2g1[i]] += dloc[i];
+    real[int] accG(UhGlob1.ndof);
+    mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+    real errPoU = 0;
+    for (int i = 0; i < UhGlob1.ndof; ++i) errPoU = max(errPoU, abs(accG[i] - gg1[][i]));
+
+    /* V3 : resolution distribuee (PETSc, ASM) vs resolution globale (UMFPACK) */
+    varf vPb([u1, u2, p], [v1, v2, q]) =
+          int3d(ThLocal1)(dx(u1)*dx(v1) + dy(u1)*dy(v1) + dz(u1)*dz(v1)
+                         + dx(u2)*dx(v2) + dy(u2)*dy(v2) + dz(u2)*dz(v2)
+                         + dx(p)*dx(q)   + dy(p)*dy(q)   + dz(p)*dz(q))
+        + int3d(ThLocal1)(1.0*v1 + 2.0*v2 + 3.0*q)
+        + on(1, 2, 3, 4, 5, 6, u1 = 0, u2 = 0, p = 0);
+
+    Mat A(Udh1.ndof, Udh1.intersection, D1);
+    A = vPb(Udh1, Udh1);
+    real[int] rhs = vPb(0, Uh1);
+
+    set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-8 -ksp_converged_reason");
+    real[int] u = A^-1 * rhs;
+
+    varf vPbGlob([u1, u2, p], [v1, v2, q]) =
+          int3d(Th)(dx(u1)*dx(v1) + dy(u1)*dy(v1) + dz(u1)*dz(v1)
+                   + dx(u2)*dx(v2) + dy(u2)*dy(v2) + dz(u2)*dz(v2)
+                   + dx(p)*dx(q)   + dy(p)*dy(q)   + dz(p)*dz(q))
+        + int3d(Th)(1.0*v1 + 2.0*v2 + 3.0*q)
+        + on(1, 2, 3, 4, 5, 6, u1 = 0, u2 = 0, p = 0);
+    matrix AGlob = vPbGlob(UhGlob1, UhGlob1, solver = UMFPACK);
+    real[int] rhsGlob = vPbGlob(0, UhGlob1);
+    real[int] uglob = AGlob^-1 * rhsGlob;
+
+    real errSol = 0;
+    for (int i = 0; i < u.n; ++i)
+        errSol = max(errSol, abs(u[i] - uglob[l2g1[i]]));
+
+    real eBij, ePoU, eSol;
+    mpiAllReduce(errBij, eBij, mpiCommWorld, mpiMAX);
+    mpiAllReduce(errPoU, ePoU, mpiCommWorld, mpiMAX);
+    mpiAllReduce(errSol, eSol, mpiCommWorld, mpiMAX);
+
+    bool localPass = (eBij < 1e-8 && ePoU < 1e-6 && eSol < 1e-5);
+    if (mpirank == 0) {
+        cout << "  V1 bijection loc2glob   : " << eBij << endl;
+        cout << "  V2 partition de l'unite : " << ePoU << endl;
+        cout << "  V3 distribue vs global  : " << eSol << endl;
+        cout << "  => " << (localPass ? "PASS" : "FAIL") << " (" << label << ")" << endl;
+    }
+    globEBij1 = max(globEBij1, eBij);
+    globEPoU1 = max(globEPoU1, ePoU);
+    globESol1 = max(globESol1, eSol);
+    globPass1 = globPass1 && localPass;
+}//
+
+TESTOV(Pk1, "overlap=1 P2P2P1 (teb[0] domine)")
+TESTOV(Pk2, "overlap=1 P1P2P1 (teb[0] ne domine pas -- bloque avant correctif)")
+
+if (mpirank == 0) {
+    cout << "==== SYNTHESE test_vectorFE overlap=1 (np=" << mpisize << ") ====" << endl;
+    cout << " max bijection loc2glob  : " << globEBij1 << endl;
+    cout << " max partition de l'unite: " << globEPoU1 << endl;
+    cout << " max distribue vs global : " << globESol1 << endl;
+    cout << (globPass1 ? " => PASS" : " => FAIL") << endl;
+}
+
+/* ================================================================
+   Partie 3 : cas periodique
+   ================================================================
+   Question : distribute()/DistributedMesh gere-t-il correctement
+   periodic=[...] ?
+   Reponse empirique : NON pour np > 1.
+
+   Constat : distribute()/DistributedMesh (DistributedMesh.hpp,
+   distributeMesh.cpp) n'a AUCUNE notion de periodicite au moment du
+   partitionnement (aucune occurrence de "period" dans ces fichiers).
+   Un partitionneur generaliste (metis/scotch) place presque toujours
+   les faces periodiques appariees (typiquement aux deux extremites
+   opposees du domaine) sur des rangs MPI differents. Or v_dfes::
+   buildperiodic() -> BuildPeriodic3() (lgmesh3.cpp) travaille
+   uniquement sur le maillage LOCAL (ThLocal), sans connaissance
+   globale : des qu'un rang ne voit qu'un seul cote d'une paire
+   periodique, l'appariement echoue avec
+   "Periodic 3d: the both number of face is not the same".
+
+   Ce n'est pas lie a la composition de l'espace FE (le meme echec se
+   produit avec un P2 scalaire pur) : c'est une limitation du
+   partitionnement, en amont de tout ce qui a ete corrige pour le
+   support vectoriel.
+
+   Pour comparaison : l'ancien framework ffddm (macro_ddm.idp,
+   buildOverlapEdgePeriodic, ~ligne 1220) sait deja gerer ce cas -- il
+   detecte les elements proches des bords periodiques, les regroupe
+   TOUS sur un meme rang dedie avant de partitionner le reste du
+   maillage sur les rangs restants, ce qui garantit que chaque paire
+   periodique est toujours vue integralement par un seul rang.
+   distribute()/DistributedMesh n'a pas d'equivalent : ce serait le
+   point de depart pour ajouter ce support.
+
+   Ce test ne s'execute donc que pour np = 1 (cas trivial ou
+   ThLocal == Th, sans partitionnement) : il sert de non-regression
+   pour la partie qui fonctionne deja. Pour np > 1, on se contente de
+   documenter l'echec attendu sans interrompre le reste de la suite. */
+
+int nnP = 6;
+mesh Th2P = square(nnP, nnP, region = 0);
+int[int] rupP = [0, 5], rdownP = [0, 6], rmidP = [4,1,2,2, 1,3, 3,4];
+mesh3 ThP = buildlayers(Th2P, nnP, zbound = [0, 1], labelmid = rmidP, reffaceup = rupP, reffacelow = rdownP);
+
+if (mpisize == 1) {
+    Dmesh3 DThP = distribute(ThP, overlap = 1, keepGlobal = true);
+
+    fespace UdhP(DThP, Pk1, periodic = [[1,y,z],[2,y,z],[3,x,z],[4,x,z],[5,x,y],[6,x,y]]);
+    fespace UhGlobP(ThP, Pk1, periodic = [[1,y,z],[2,y,z],[3,x,z],[4,x,z],[5,x,y],[6,x,y]]);
+
+    cout << "---- test periodique (np=1, Pk1=[P2,P2,P1]) ----" << endl;
+    cout << "  ndof distribue = " << UdhP.ndof << ", ndof global = " << UhGlobP.ndof << endl;
+    bool passP = (UdhP.ndof == UhGlobP.ndof);
+    cout << "  => " << (passP ? "PASS" : "FAIL") << " (coherence ndof periodique, np=1)" << endl;
+}
+else {
+    if (mpirank == 0) {
+        cout << "---- test periodique : ignore pour np=" << mpisize << " (limitation connue) ----" << endl;
+        cout << "  distribute()/DistributedMesh ne gere pas la periodicite au partitionnement;" << endl;
+        cout << "  un partitionneur generaliste separe les faces periodiques appariees entre" << endl;
+        cout << "  rangs differents, ce qui fait echouer BuildPeriodic3 (voir commentaire ci-dessus)." << endl;
+    }
+}
