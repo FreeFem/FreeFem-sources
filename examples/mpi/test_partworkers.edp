@@ -1,0 +1,60 @@
+// NBPROC 4
+// PARAM -wg -ns
+
+// =====================================================================
+//  Tests cibles pour distribute(..., partmethod="parmetis", partworkers=N) :
+//   1) equilibre de la partition (aucun rang vide/degenere) pour plusieurs
+//      tailles de sous-groupe de calcul (0 = defaut, 1 = sequentiel, valeur
+//      intermediaire, = mpisize, > mpisize)
+//   2) rejet collectif propre (erreur sur tous les rangs, pas de blocage)
+//      quand partworkers differe entre rangs
+//
+//  Lancer :  ff-mpirun -np 4 test_partworkers.edp -ns
+// =====================================================================
+
+int npass = 0, ntot = 0;
+
+macro CHECKBALANCE(pw, tag) {
+  mesh3 Th = cube(10, 10, 10);
+  Dmesh3 DTh = distribute(Th, partmethod = "parmetis", partworkers = pw);
+  mesh3 ThLocal = DTh.local;
+  int nt = ThLocal.nt;
+  int minNt, maxNt, sumNt;
+  mpiAllReduce(nt, minNt, mpiCommWorld, mpiMIN);
+  mpiAllReduce(nt, maxNt, mpiCommWorld, mpiMAX);
+  mpiAllReduce(nt, sumNt, mpiCommWorld, mpiSUM);
+  bool ok = (minNt > 0);
+  ntot++; if (ok) npass++;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  nt local min/max=" << minNt << "/" << maxNt
+         << "  somme=" << sumNt << " (global nt=" << Th.nt << ")"
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
+}//EOM
+
+CHECKBALANCE(0, "partworkers=0 (defaut)")
+CHECKBALANCE(1, "partworkers=1 (sequentiel)")
+CHECKBALANCE(2, "partworkers=2")
+CHECKBALANCE(3, "partworkers=3")
+CHECKBALANCE(4, "partworkers=4 (=mpisize)")
+CHECKBALANCE(5, "partworkers=5 (>mpisize)")
+
+// ---------- partworkers incoherent entre rangs -> erreur collective ----------
+{
+  int pw = (mpirank == 0) ? 2 : 3;
+  mesh3 Th = cube(10, 10, 10);
+  int caught = 0;
+  try {
+    Dmesh3 DTh = distribute(Th, partmethod = "parmetis", partworkers = pw);
+  }
+  catch (...) { caught = 1; }
+  int g;
+  mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
+  mpiBarrier(mpiCommWorld);   // si on arrive ici, rien n'a bloque
+  ntot++; if (g == 1) npass++;
+  if (mpirank == 0)
+    cout << "  [partworkers incoherent entre rangs -> erreur collective]   => "
+         << (g == 1 ? "PASS" : "FAIL") << endl;
+}
+
+if (mpirank == 0)
+  cout << "===== test_partworkers : " << npass << "/" << ntot << " PASS =====" << endl;

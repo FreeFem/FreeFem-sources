@@ -1,0 +1,129 @@
+//  created with md2edp examples/3d/adaptindicator3dP1.md
+// Mesh
+load "tetgen"
+load "mmg"
+int adapmmg = 1;//  0 teth , 1 mmg 
+int nn  = 4;
+
+int[int] lc=[1,2,2,1,1,2]; //  label numbering 
+
+mesh3 Th3=cube(nn,nn,nn,label=lc);
+Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);
+plot(Th3,wait=1);
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+// Fespace
+fespace Vh(Th3, P1);
+fespace Ph(Th3, P0);
+fespace Eh(Th3,P0edge);
+Vh u, v;
+// calcul length of edges
+macro  MeshSizecomputation3d(Th3, Vh, h)
+{
+	int[int] i0 = [ 0,0,0,1,1,2];/* edge numbering in ff*/
+	int[int] i1 = [ 1,2,3,2,3,3];
+
+	fespace Eh(Th3,P0edge); /* fe for edge size */ 
+    Eh h3;
+for(int k=0; k<Th3.nt;++k)
+  for (int j = 0; j< 6;++j)
+    {
+		int e0 = Eh(k,j);
+		h3[][e0]= (Th3[k][i0[j]].P -Th3[k][i1[j]].P ).l2;
+						
+	}
+	if(verbosity>3) cout << " h3 " << h3[].min << " " << h3[].max << endl;
+	Vh cc=0;
+    for(int k=0; k<Th3.nt;++k)
+     for (int j = 0; j< 6;++j)
+    {
+		int e0 = Eh(k,j);
+		int v0 = Th3[k][i0[j]];
+		int v1 = Th3[k][i1[j]];
+		cc[][v0] += 1;
+		cc[][v1] += 1;
+		h[][v0] += h3[][e0];
+	    h[][v1] += h3[][e0];
+	}
+    h[] ./= cc[];
+	assert(h[].min>1e-10);/*  verif*/ 
+} //
+
+macro  ReMeshIndicator3d(Th, Ph, Vh, vindicator, coef)
+{
+	fespace Mh(Th3,[P1,P1,P1,P1,P1,P1]);
+	Vh h = 0;
+	/* evalutate the mesh size  */
+	MeshSizecomputation3d(Th, Vh, h);
+	cout << "MeshSizecomputation3d  h " << h[].min << " " << h[].max << endl;
+    
+	Ph etak;
+	etak[] = vindicator(0, Ph);
+	cout << "global  Eta: " << sqrt(etak[].sum) << "  ......... " <<  Th.nv<< endl;
+	etak[] = sqrt(etak[]);
+	plot(etak, ps="arei-etak.eps", fill=1, value=1);
+	real etastar = coef*(etak[].sum/etak[].n);
+	cout << "etastar = " << etastar << ", sum = " << etak[].sum << " " << endl;
+
+	/* here etaK is discontinous
+	 * we use the P1 L2 projection with mass lumping
+	 */
+
+	 Vh fn, sigma;
+	varf veta(unused, v) = int3d(Th)(etak*v);
+	varf vun(unused, v) = int3d(Th)(1*v);
+	fn[] = veta(0, Vh);
+	sigma[] = vun(0, Vh);
+	fn[] = fn[] ./ sigma[];
+	fn =  max(min(fn/etastar, 3.), 0.3333) ;
+  	/* new mesh size */
+	h = h / fn ;
+	plot(h,value=1,wait=1,cmm=" mesh size ");
+	cout << "meshsize:  h " << h[].min << " " << h[].max << endl;
+ 
+	if(adapmmg==1)
+	{
+	Mh [m11,m21,m22,m31,m32,m33];
+    [m11,m21,m22,m31,m32,m33]=[1./sqr(h),0.,1./sqr(h),0.,0.,1./sqr(h)]; /* def the metric */
+	 Th =mmg3d(Th,metric=m11[],hgrad=2.3, verbose =  1);
+	}
+	else 
+	 Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=h*h*h/6.);
+ }//
+func hface=sqrt(area);// Approximation of $h_F^2 $
+varf indicator2 (unused, chiK)
+	= intallBE(Th3)(
+		  chiK*hface*square(jump(N'*[dx(u),dy(u),dz(u)]))
+	)
+	+int3d(Th3)(
+		  chiK*square(hTriangle*(1 + dxx(u) + dyy(u)+ dzz(u)))
+	)
+	;
+
+  //plot(h,wait=1);
+// Variables
+
+
+
+problem Poisson(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs 
+  -int3d(Th3)( 1*v ) + on(1,u=0);
+Poisson;
+	plot(u,wait=1);
+
+int nbiter= 5;
+for (int i = 0; i <= nbiter; i++) {
+	// Solve
+	Poisson;
+
+	// Plot
+
+	plot(Th3, u, wait=1);
+
+	// Mesh adaptation
+	real cc=0.8;
+	if (i > 3) cc = 1;
+	if (i < nbiter) {
+		ReMeshIndicator3d(Th3, Ph, Vh, indicator2, cc);
+		u=u;
+	}
+}

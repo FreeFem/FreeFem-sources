@@ -1,0 +1,47 @@
+//  created with md2edp examples/examples/BlackScholes2D.md
+real sigma1 = 0.3;
+real sigma2 = 0.3;
+real rho = 0.3;
+real r = 0.05;
+real K = 40;
+int m = 30;
+int L = 80;
+int LL = 80;
+int j = 100;
+mesh th = square(m, m, [L*x, LL*y]);
+// Fespace
+fespace Vh(th, P1);
+Vh u = max(K - max(x, y), 0.);
+Vh xveloc, yveloc, v, uold;
+real dt = 0.01;
+for (int n = 0; n*dt <= 1.0; n++) {
+    xveloc = -x*r + x*sigma1^2 + x*rho*sigma1*sigma2/2;
+    yveloc = -y*r + y*sigma2^2 + y*rho*sigma1*sigma2/2;
+    // Update
+    uold = u;
+    // Solve
+    solve eq1(u, v, init=j, solver=LU)
+        = int2d(th)(
+              u*v*(r + 1/dt)
+            + dx(u)*dx(v)*(x*sigma1)^2/2
+            + dy(u)*dy(v)*(y*sigma2)^2/2
+            + dy(u)*dx(v)*rho*sigma1*sigma2*x*y/2
+            + dx(u)*dy(v)*rho*sigma1*sigma2*x*y/2
+        )
+        + int2d(th)(
+            - v*convect([xveloc, yveloc], dt, uold)/dt
+        )
+        + on(2,3,u=0)
+        ;
+}
+plot(u, fill=true, wait=true, value=true);
+   // Mesh adaptation
+    j = j + 1;
+    if (j > 20) {
+        th = adaptmesh(th, u, verbosity=1, abserror=1, nbjacoby=2,
+        err=0.001, nbvx=5000, omega=1.8, ratio=1.8, nbsmooth=3,
+        splitpbedge=1, maxsubdiv=5, rescaling=1) ;
+        j = 0;
+        u = u;
+        plot(th, wait=true);
+    }

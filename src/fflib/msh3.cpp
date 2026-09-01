@@ -9822,7 +9822,7 @@ template <class Mesh>
 class DistributeMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 14;
+	static const int n_name_param = 15;
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
 
@@ -9871,7 +9871,8 @@ basicAC_F0::name_and_type DistributeMesh_Op<Mesh>::name_param[] = {
 {"partmethod", &typeid(string*)},
 {"comm", &typeid(pcommworld)},
 {"scatter", &typeid(bool)},
-{"keepGlobal", &typeid(bool)}
+{"keepGlobal", &typeid(bool)},
+{"partworkers", &typeid(long)}
 };
 
 inline long overlapLayers(long s) {
@@ -10070,6 +10071,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   bool removeduplicate(arg(4, stack, false));
   long sizeoverlaps(arg(8, stack, 1L));
   bool keepGlobal(arg(13, stack, false));
+  long nWorkers(arg(14, stack, 0L));
 
   string* ppart = nargs[10] ? GetAny<string*>((*nargs[10])(stack)) : 0;
   std::string method = ppart ? *ppart : "metis";
@@ -10099,6 +10101,11 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
     if (!status) status = checkPartitionMethod(method);
     if (!status && mode == DM_SCATTER && method == "parmetis") status = DIST_PARMETIS_SCAT;
+
+    const int w = (int)nWorkers;
+    if (!status && agreeOnStatus(w, comm) != -agreeOnStatus(-w, comm)){
+      status = DIST_ARG_PARTWORKERS;
+    }
   }
   status = agreeOnStatus(status, comm);
   if (status) ExecError(distributeStatusMessage(status));
@@ -10148,7 +10155,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
       }
     }
     else {
-      status = computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED);
+      status = computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED, nWorkers);
     }
     if (!status) status = checkPartitionUsable(globalPartition, pTh->nt);
   }

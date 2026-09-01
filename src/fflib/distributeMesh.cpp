@@ -25,7 +25,7 @@ static const int TAG_DOF_POU = 1001;
 static const int TAG_DOF_NUM = 1002;
 
 template<class Mesh>
-int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast){
+int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast, int nWorkers){
     const int nbt = Th.nt, nbv = Th.nv;
     const int nve = Mesh::Element::nv;
 
@@ -42,7 +42,7 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
     if (method == "parmetis") {
 #if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
       MPI_Comm cwp = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
-      if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp) != 0)
+      if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp, nWorkers) != 0)
         status = DIST_PART_FAILED;
       return status;                 // tous les rangs ont part : pas de broadcast
 #endif
@@ -102,6 +102,7 @@ const char* distributeStatusMessage(int status) {
     case DIST_ARG_OVERLAP : return "distribute: overlap differs between ranks";
     case DIST_ARG_KEEPGLOBAL : return "distribute: keepGlobal differs between ranks";
     case DIST_ARG_SCATTER : return "distribute: scatter argument does not agree with detected mode";
+    case DIST_ARG_PARTWORKERS : return "distribute: partworkers argument differs between ranks";
   }
   return "distribute: unknown status";
 }
@@ -436,9 +437,9 @@ int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
 #endif
 
 // Instanciations explicites (miroir de registerDistributedMeshOps<MeshS/Mesh3/MeshL>)
-template int computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld, bool);
-template int computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld, bool);
-template int computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld, bool);
+template int computeGlobalPartition<MeshS>(const MeshS&, KN<int>&, const std::string&, pcommworld, bool, int);
+template int computeGlobalPartition<Mesh3>(const Mesh3&, KN<int>&, const std::string&, pcommworld, bool, int);
+template int computeGlobalPartition<MeshL>(const MeshL&, KN<int>&, const std::string&, pcommworld, bool, int);
 
 template void sendMesh<MeshS>(const MeshS&, int, pcommworld);
 template MeshS* recvMesh<MeshS>(int, pcommworld);
