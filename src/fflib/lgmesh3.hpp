@@ -39,6 +39,24 @@ typedef pair<pfLcbasearray,int> pfLcarray ;
 
 // fin
 
+// 3d distributed volume
+typedef FEbase<double, v_dfes3>* pdf3rbase;   typedef FEbaseArray<double, v_dfes3>* pdf3rbasearray;
+typedef pair<pdf3rbase,int> pdf3r;            typedef pair<pdf3rbasearray,int> pdf3rarray;
+typedef FEbase<Complex, v_dfes3>* pdf3cbase;  typedef FEbaseArray<Complex, v_dfes3>* pdf3cbasearray;
+typedef pair<pdf3cbase,int> pdf3c;            typedef pair<pdf3cbasearray,int> pdf3carray;
+// 3d distributed surface
+typedef FEbase<double, v_dfesS>* pdfSrbase;   typedef FEbaseArray<double, v_dfesS>* pdfSrbasearray;
+typedef pair<pdfSrbase,int> pdfSr;            typedef pair<pdfSrbasearray,int> pdfSrarray;
+typedef FEbase<Complex, v_dfesS>* pdfScbase;  typedef FEbaseArray<Complex, v_dfesS>* pdfScbasearray;
+typedef pair<pdfScbase,int> pdfSc;            typedef pair<pdfScbasearray,int> pdfScarray;
+// 3d distributed curve
+typedef FEbase<double, v_dfesL>* pdfLrbase;   typedef FEbaseArray<double, v_dfesL>* pdfLrbasearray;
+typedef pair<pdfLrbase,int> pdfLr;            typedef pair<pdfLrbasearray,int> pdfLrarray;
+typedef FEbase<Complex, v_dfesL>* pdfLcbase;  typedef FEbaseArray<Complex, v_dfesL>* pdfLcbasearray;
+typedef pair<pdfLcbase,int> pdfLc;            typedef pair<pdfLcbasearray,int> pdfLcarray;
+// fin
+
+
 
 bool isSameMesh(const list<C_F0> & largs,const void * Thu,const void * Thv,Stack stack) ; // true => VF type of Matrix   
   //bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  ;

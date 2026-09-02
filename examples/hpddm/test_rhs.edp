@@ -1,0 +1,75 @@
+// NBPROC 4
+// PARAM -wg -ns -ffddm_overlap 1
+// Test for point (A): rhs[] = vPb(0, Wdh) must compile and give the same
+// LOCAL (non-exchanged) contribution as the existing rhs[] = vPb(0, Wh)
+// pattern, since point (A) only wires the OpArraytoLinearForm<...,v_dfes3>
+// operator -- it does not hide the exchange() step (that is point (B),
+// not implemented here). Also sanity-checks the "+=" variant and that
+// the result stays consistent once exchanged.
+//
+// STATUS (checked against the current src/fflib/lgfem.cpp): this test does
+// NOT compile yet. The failure happens BEFORE point (A)'s own code is ever
+// reached: "vPb(0, Wdh)" itself fails to parse into a Call_FormLinear<v_dfes3>*
+// value, with (both with and without an on(...) BC term in vPb):
+//   error operator <C_args>, <l>, <PP6v_dfes...Mesh3EE>
+// This is because the "(" operator overload set for v_dfes3/v_dfesS/v_dfesL
+// only registers OpCall_FormLinear2<FormBilinear, v_dfesX> (lgfem.cpp, near
+// the Add<const FormBilinear*> block for each distributed fespace), but is
+// missing the C_args* counterpart that every LOCAL fespace has, e.g. for
+// v_fes3 (lgfem.cpp:7120):
+//   Add<const C_args*>("(", "", new OpCall_FormLinear2<C_args, v_fes3>);
+// Adding the equivalent three lines for v_dfes3/v_dfesS/v_dfesL should let
+// this test proceed to actually exercise point (A)'s OpArraytoLinearForm
+// registrations below.
+
+load "PETSc"
+include "getARGV.idp"
+macro dimension()3// EOM
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+func Pk = P1;
+
+mesh3 Th = cube(getARGV("-global", 6), getARGV("-global", 6), getARGV("-global", 6));
+Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "metis");
+mesh3 ThLocal = DTh.local;
+
+fespace Wh(ThLocal, Pk);
+fespace Wdh(DTh, Pk);
+varf vPb(u, v) = int3d(DTh)(grad(u)' * grad(v)) + int2d(DTh)(v) + on(1, u = 0.0);
+Mat A = vPb(Wdh, Wdh);
+
+Wh rhsRef, rhsNew, diff;
+
+// reference path (existing, known-working)
+rhsRef[] = vPb(0, Wh);
+
+// path under test (point A): assemble directly on the distributed fespace
+rhsNew[] = vPb(0, Wdh);
+
+diff[] = rhsRef[] - rhsNew[];
+real errLocal = diff[].linfty;
+if (mpirank == 0)
+    cout << "point A, local contribution, max abs diff = " << errLocal << endl;
+assert(errLocal < 1.0e-12);
+
+// "+=" variant sanity check
+rhsNew[] += vPb(0, Wdh);
+diff[] = rhsNew[] - 2.0 * rhsRef[];
+real errPlusEq = diff[].linfty;
+if (mpirank == 0)
+    cout << "point A, += variant, max abs diff vs 2*ref = " << errPlusEq << endl;
+assert(errPlusEq < 1.0e-12);
+
+// end-to-end sanity: still consistent once exchanged (exchange() itself is
+// untouched by point A, this just checks nothing upstream broke it)
+rhsNew[] = vPb(0, Wdh);
+exchange(A, rhsRef[], scaled = true);
+exchange(A, rhsNew[], scaled = true);
+diff[] = rhsRef[] - rhsNew[];
+real errExchanged = diff[].linfty;
+if (mpirank == 0)
+    cout << "point A, after exchange, max abs diff = " << errExchanged << endl;
+assert(errExchanged < 1.0e-12);
+
+if (mpirank == 0)
+    cout << "test_rhs: PASSED" << endl;

@@ -1078,7 +1078,6 @@ class FEbaseArray : public FEbaseArrayKn< K > {
   typedef typename v_fes::pfes pfes;
   typedef typename v_fes::FESpace FESpace;
 
-  // int N;
   FEbase< K, v_fes > **xx;
   FEbaseArray(const pfes *ppVh, int NN)
     : FEbaseArrayKn< K >(NN), xx(new FEbase< K, v_fes > *[std::max(NN, 1)]) {
