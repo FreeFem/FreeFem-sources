@@ -6229,6 +6229,10 @@ void Add_u_init_array(int ii=0)
 
 }
 
+DistributedExchangeHookD g_distributedExchangeHookD = nullptr;
+DistributedExchangeHookC g_distributedExchangeHookC = nullptr;
+void (*g_distributedExchangeHandleDtor)(void*) = nullptr;
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA

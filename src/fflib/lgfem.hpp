@@ -387,6 +387,14 @@ class v_fesS : public generic_v_fes {
   int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
+// Hook for automatic exchange of distributed rhs (nullptr by default -> no exchange)
+typedef void* pcommworld;
+typedef void (*DistributedExchangeHookD)(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<double>* xx, bool scaled);
+typedef void (*DistributedExchangeHookC)(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled);
+extern DistributedExchangeHookD g_distributedExchangeHookD;
+extern DistributedExchangeHookC g_distributedExchangeHookC;
+extern void (*g_distributedExchangeHandleDtor)(void*);
+
 // FE space distribué
 template<class M> class DistributedMesh;
 template<class Mesh> class v_dfes : public generic_v_fes {
@@ -419,7 +427,14 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   operator FESpace *( ) {
     throwassert(dHat == Mesh::RdHat::d);
-    if (!pVh || *ppTh != &pVh->Th) { pVh = CountPointer< FESpace >(update( ), true); dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false; pouResidual = -1;}
+    if (!pVh || *ppTh != &pVh->Th) { 
+      pVh = CountPointer< FESpace >(update( ), true); 
+      dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false; pouResidual = -1;
+      if (exchangeHandle && g_distributedExchangeHandleDtor) {
+        g_distributedExchangeHandleDtor(exchangeHandle);
+        exchangeHandle = nullptr;
+      }
+    }
     if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
     return pVh;
   }
@@ -449,9 +464,14 @@ template<class Mesh> class v_dfes : public generic_v_fes {
   void buildDistributedDofData(FESpace& Vhi);
   void buildLoc2globIfNeeded(FESpace& Vhi);
   void buildNumberingIfNeeded(FESpace& Vhi);
+  void* exchangeHandle = nullptr;
+
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_dfes( ) {
     if (DTh) DTh->destroy();
+    if (exchangeHandle && g_distributedExchangeHandleDtor) {
+      g_distributedExchangeHandleDtor(exchangeHandle);
+    }
   }
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpace *buildupdate(KN< int > &) { return nullptr; }

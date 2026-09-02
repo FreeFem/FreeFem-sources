@@ -1837,7 +1837,48 @@ namespace PETSc {
           }
         }
   }
-  
+
+  static void distributedExchangeHookD(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<double>* xx, bool scaled) {
+    auto* sub = static_cast<HpSchwarz<PetscScalar>*>(*handle);
+    if (!sub) {
+      sub = new HpSchwarz<PetscScalar>();
+      auto* dA = new HPDDM::MatrixCSR<PetscScalar>(xx->n, xx->n, 0, nullptr, nullptr, nullptr, false);
+      KN_<KN<long>> sub_lists = (*dofIntersectionDof)(FromTo(1, dofIntersectionDof->N()-1));
+      sub->HPDDM::Subdomain<PetscScalar>::initialize(dA, STL<long>(dofIntersectionDof->operator[](0)), sub_lists, (MPI_Comm*)comm);
+      sub->initialize(&Ddof->operator[](0));
+      *handle = sub;
+    }
+    KN<double> tmp(*xx);
+    exchange_dispatched<double>(sub, &tmp, scaled);
+    *xx = tmp;
+  }
+  static void distributedExchangeHandleDtor(void *h) {
+    delete static_cast<HpSchwarz<PetscScalar>*>(h);
+  }
+
+  static void distributedExchangeHookC(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled) {
+    auto* sub = static_cast<HpSchwarz<PetscScalar>*>(*handle);
+    if (!sub) {
+      sub = new HpSchwarz<PetscScalar>();
+      auto* dA = new HPDDM::MatrixCSR<PetscScalar>(xx->n, xx->n, 0, nullptr, nullptr, nullptr, false);
+      KN_<KN<long>> sub_lists = (*dofIntersectionDof)(FromTo(1, dofIntersectionDof->N()-1));
+      sub->HPDDM::Subdomain<PetscScalar>::initialize(dA, STL<long>(dofIntersectionDof->operator[](0)), sub_lists, (MPI_Comm*)comm);
+      sub->initialize(&Ddof->operator[](0));
+      *handle = sub;
+    }
+    // KNOWN LIMITATION: exchange_dispatched<Complex> does not type-check
+    // against HpSchwarz<PetscScalar> when PetscScalar is real: likely: only supported when
+    // PetscScalar itself is complex, i.e. the PETSc-complex plugin).
+    static bool warnedComplex = false;
+    if (!warnedComplex && mpirank == 0) {
+      cout << "Warning: automatic exchange of a Complex distributed rhs is not "
+           << "implemented for this PETSc build (real PetscScalar) -- rhs[] "
+           << "stays LOCAL ONLY for Complex forms; use the manual exchange() "
+           << "pattern instead." << endl;
+      warnedComplex = true;
+    }
+  }
+
 
   template< class HpddmType, bool C >
   AnyType initCSR< HpddmType, C >::E_initCSR::operator( )(Stack stack) const {
@@ -7076,6 +7117,9 @@ static void Init_PETSc( ) {
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >(1));
 #endif
+g_distributedExchangeHookD = &PETSc::distributedExchangeHookD;
+g_distributedExchangeHookC = &PETSc::distributedExchangeHookC;
+g_distributedExchangeHandleDtor = &PETSc::distributedExchangeHandleDtor;
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

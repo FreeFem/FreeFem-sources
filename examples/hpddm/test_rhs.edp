@@ -1,26 +1,10 @@
 // NBPROC 4
 // PARAM -wg -ns -ffddm_overlap 1
-// Test for point (A): rhs[] = vPb(0, Wdh) must compile and give the same
-// LOCAL (non-exchanged) contribution as the existing rhs[] = vPb(0, Wh)
-// pattern, since point (A) only wires the OpArraytoLinearForm<...,v_dfes3>
-// operator -- it does not hide the exchange() step (that is point (B),
-// not implemented here). Also sanity-checks the "+=" variant and that
-// the result stays consistent once exchanged.
-//
-// STATUS (checked against the current src/fflib/lgfem.cpp): this test does
-// NOT compile yet. The failure happens BEFORE point (A)'s own code is ever
-// reached: "vPb(0, Wdh)" itself fails to parse into a Call_FormLinear<v_dfes3>*
-// value, with (both with and without an on(...) BC term in vPb):
-//   error operator <C_args>, <l>, <PP6v_dfes...Mesh3EE>
-// This is because the "(" operator overload set for v_dfes3/v_dfesS/v_dfesL
-// only registers OpCall_FormLinear2<FormBilinear, v_dfesX> (lgfem.cpp, near
-// the Add<const FormBilinear*> block for each distributed fespace), but is
-// missing the C_args* counterpart that every LOCAL fespace has, e.g. for
-// v_fes3 (lgfem.cpp:7120):
-//   Add<const C_args*>("(", "", new OpCall_FormLinear2<C_args, v_fes3>);
-// Adding the equivalent three lines for v_dfes3/v_dfesS/v_dfesL should let
-// this test proceed to actually exercise point (A)'s OpArraytoLinearForm
-// registrations below.
+// Test for the distributed-exchange hook (point B): once PETSc is loaded,
+// rhs[] = vPb(0, Wdh) must be automatically exchanged (globally consistent),
+// with NO explicit exchange(A, rhs[], scaled=true) call needed -- unlike the
+// old pattern rhs[] = vPb(0, Wh); exchange(A, rhs[], scaled=true);
+// This test compares the two paths, including through a full PETSc solve.
 
 load "PETSc"
 include "getARGV.idp"
@@ -38,38 +22,50 @@ fespace Wdh(DTh, Pk);
 varf vPb(u, v) = int3d(DTh)(grad(u)' * grad(v)) + int2d(DTh)(v) + on(1, u = 0.0);
 Mat A = vPb(Wdh, Wdh);
 
-Wh rhsRef, rhsNew, diff;
+Wh rhsLocal, rhsRef, rhsNew, uRef, uNew, diff;
 
-// reference path (existing, known-working)
-rhsRef[] = vPb(0, Wh);
+// raw local contribution, before any exchange at all
+rhsLocal[] = vPb(0, Wh);
 
-// path under test (point A): assemble directly on the distributed fespace
+// reference path: manual exchange (existing, known-working)
+rhsRef[] = rhsLocal[];
+exchange(A, rhsRef[], scaled = true);
+
+// path under test: automatic exchange via the hook, no manual exchange() call
 rhsNew[] = vPb(0, Wdh);
 
+diff[] = rhsLocal[] - rhsNew[];
+real errVsLocal = diff[].linfty;
 diff[] = rhsRef[] - rhsNew[];
-real errLocal = diff[].linfty;
-if (mpirank == 0)
-    cout << "point A, local contribution, max abs diff = " << errLocal << endl;
-assert(errLocal < 1.0e-12);
+real errAutoExchange = diff[].linfty;
+if (mpirank == 0) {
+    cout << "diagnostic: rhsLocal[].linfty  = " << rhsLocal[].linfty << endl;
+    cout << "diagnostic: rhsRef[].linfty    = " << rhsRef[].linfty << endl;
+    cout << "diagnostic: rhsNew[].linfty    = " << rhsNew[].linfty << endl;
+    cout << "diagnostic: max abs diff rhsNew vs rhsLocal (unexchanged) = " << errVsLocal << endl;
+    cout << "auto-exchange, max abs diff vs manual exchange = " << errAutoExchange << endl;
+}
+assert(errAutoExchange < 1.0e-12);
 
-// "+=" variant sanity check
+// "+=" variant sanity check (also goes through the auto-exchange hook)
 rhsNew[] += vPb(0, Wdh);
 diff[] = rhsNew[] - 2.0 * rhsRef[];
 real errPlusEq = diff[].linfty;
 if (mpirank == 0)
-    cout << "point A, += variant, max abs diff vs 2*ref = " << errPlusEq << endl;
+    cout << "auto-exchange, += variant, max abs diff vs 2*ref = " << errPlusEq << endl;
 assert(errPlusEq < 1.0e-12);
+rhsNew[] = vPb(0, Wdh);    // reset for what follows
 
-// end-to-end sanity: still consistent once exchanged (exchange() itself is
-// untouched by point A, this just checks nothing upstream broke it)
-rhsNew[] = vPb(0, Wdh);
-exchange(A, rhsRef[], scaled = true);
-exchange(A, rhsNew[], scaled = true);
-diff[] = rhsRef[] - rhsNew[];
-real errExchanged = diff[].linfty;
+// end-to-end sanity: full PETSc solve gives the same solution through
+// either path (manual exchange vs automatic exchange)
+set(A, sparams = "-pc_type lu");
+uRef[] = A^-1 * rhsRef[];
+uNew[] = A^-1 * rhsNew[];
+diff[] = uRef[] - uNew[];
+real errSolve = diff[].linfty;
 if (mpirank == 0)
-    cout << "point A, after exchange, max abs diff = " << errExchanged << endl;
-assert(errExchanged < 1.0e-12);
+    cout << "auto-exchange, solve, max abs diff vs manual path = " << errSolve << endl;
+assert(errSolve < 1.0e-8);
 
 if (mpirank == 0)
     cout << "test_rhs: PASSED" << endl;

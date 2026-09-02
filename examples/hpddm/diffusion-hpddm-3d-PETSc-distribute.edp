@@ -20,7 +20,6 @@ mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global
 Dmesh3 DTh = distribute(Th, overlap = 1, partmethod = "metis");
 mesh3 ThLocal = DTh.local;
 
-fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th
 fespace Wdh(DTh, Pk);
 varf vPb(u, v) = int3d(DTh)(grad(u)' * grad(v)) + int2d(DTh)(v) + on(1, u = 0.0);
 Mat A = vPb(Wdh,Wdh);
@@ -29,15 +28,8 @@ Wdh u, rhs, residual; // local solution, right-hand side, and final residual
 // local component of the global right-hand side
 rhs[] = vPb(0, Wdh);
 
-if(1) {
-    // R_i sum R_j^T D_j rhs_j
-    exchange(A, rhs[] , scaled = true);
-    //plotD(Th, rhs, cmm = "Global right-hand side")
-}
-
-
-
 // near kernel of the operator (used only by PCGAMG)
+fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th
 Wh Rb[1];
 Rb[0] = 1;
 // all in one; see at the end of the script the meaning of the parameters
