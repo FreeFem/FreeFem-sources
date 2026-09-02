@@ -1354,6 +1354,46 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceL> & 
 }
 
 
+template<class MMesh,class v_fes, class R>
+typename std::enable_if<!std::is_same<v_fes, v_dfes<MMesh>>::value >::type
+maybeDistributedExchange(v_fes* const&, KN_<R>&) {}
+
+template<class MMesh,class v_fes, class R>
+typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value >::type
+maybeDistributedExchange(v_fes* const& f, KN_<R>& xx) {
+  distributedExchangeDispatch(f, xx);
+}
+
+template<class MMesh>
+void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<double>& xx) {
+  if (g_distributedExchangeHookD) {
+    g_distributedExchangeHookD(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, true);
+  } else {
+    static bool warned = false;
+    if (!warned && verbosity > 1 && mpirank == 0) {
+      cout << "Warning: rhs[] = form(0, " /* nom fespace */ ") on a distributed fespace was "
+           << "assembled LOCALLY ONLY (no exchange) -- load a plugin providing distributed "
+           << "exchange (e.g. \"PETSc\") to get a globally consistent vector." << endl;
+      warned = true;
+    }
+  }
+}
+
+template<class MMesh>
+void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<Complex>& xx) {
+  if (g_distributedExchangeHookC) {
+    g_distributedExchangeHookC(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, true);
+  } else {
+    static bool warned = false;
+    if (!warned && verbosity > 1 && mpirank == 0) {
+      cout << "Warning: rhs[] = form(0, " /* nom fespace */ ") on a distributed fespace was "
+           << "assembled LOCALLY ONLY (no exchange) -- load a plugin providing distributed "
+           << "exchange (e.g. \"PETSc\") to get a globally consistent vector." << endl;
+      warned = true;
+    }
+  }
+}
+
 template<class R,class MMesh,class v_fes>
 AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
 {
@@ -1417,6 +1457,7 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
     else
       AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   }
+  maybeDistributedExchange<MMesh, v_fes>(pp, xx);
   return SetAny<KN_<R> >(xx);
 }
 
