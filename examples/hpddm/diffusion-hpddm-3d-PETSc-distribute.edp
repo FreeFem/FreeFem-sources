@@ -24,10 +24,10 @@ fespace Wh(ThLocal, Pk); // local finite element space on the local mesh Th
 fespace Wdh(DTh, Pk);
 varf vPb(u, v) = int3d(DTh)(grad(u)' * grad(v)) + int2d(DTh)(v) + on(1, u = 0.0);
 Mat A = vPb(Wdh,Wdh);
-Wh u, rhs, residual; // local solution, right-hand side, and final residual
+Wdh u, rhs, residual; // local solution, right-hand side, and final residual
 
 // local component of the global right-hand side
-rhs[] = vPb(0, Wh);
+rhs[] = vPb(0, Wdh);
 
 if(1) {
     // R_i sum R_j^T D_j rhs_j

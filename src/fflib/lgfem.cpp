@@ -6345,6 +6345,34 @@ void init_lgfem( ) {
   Dcl_Type< pfLc >( );
   Dcl_Type< pfLcarray >( );
 
+  // Dcl type for 3D volume FE distributed
+  Dcl_TypeandPtr< pdf3rbase >( );
+  Dcl_TypeandPtr< pdf3rbasearray >( );
+  Dcl_Type< pdf3r >( );
+  Dcl_Type< pdf3rarray >( );
+  Dcl_TypeandPtr< pdf3cbase >( );
+  Dcl_TypeandPtr< pdf3cbasearray >( );
+  Dcl_Type< pdf3c >( );
+  Dcl_Type< pdf3carray >( );
+  // Dcl type for 3D surface FE distributed
+  Dcl_TypeandPtr< pdfSrbase >( );
+  Dcl_TypeandPtr< pdfSrbasearray >( );
+  Dcl_Type< pdfSr >( );
+  Dcl_Type< pdfSrarray >( );
+  Dcl_TypeandPtr< pdfScbase >( );
+  Dcl_TypeandPtr< pdfScbasearray >( );
+  Dcl_Type< pdfSc >( );
+  Dcl_Type< pdfScarray >( );
+  // Dcl type for 3D curve FE distributed
+  Dcl_TypeandPtr< pdfLrbase >( );
+  Dcl_TypeandPtr< pdfLrbasearray >( );
+  Dcl_Type< pdfLr >( );
+  Dcl_Type< pdfLrarray >( );
+  Dcl_TypeandPtr< pdfLcbase >( );
+  Dcl_TypeandPtr< pdfLcbasearray >( );
+  Dcl_Type< pdfLc >( );
+  Dcl_Type< pdfLcarray >( );
+
   //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn< double > *).name( )]->AddCast
   (
@@ -6898,7 +6926,11 @@ void init_lgfem( ) {
                     new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
                     new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
                     new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
-                    new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
+                    new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >,
+                    new OpArraytoLinearForm< double, Mesh3, v_dfes3 >(atype< KN_< double > >( ), false, false),
+                    new OpArraytoLinearForm< double, MeshS, v_dfesS >(atype< KN_< double > >( ), false, false),
+                    new OpArraytoLinearForm< double, MeshL, v_dfesL >(atype< KN_< double > >( ), false, false)
+);       // 3D Surf / 3D curve on meshL
 
   TheOperators->Add(
     "<-", new OpArraytoLinearForm< double, Mesh, v_fes >(atype< KN< double > * >( ), true, true),
@@ -6908,7 +6940,13 @@ void init_lgfem( ) {
     new OpArraytoLinearForm< double, MeshS, v_fesS >(atype< KN< double > * >( ), true, true),    // 3D surface
     new OpArraytoLinearForm< Complex, MeshS, v_fesS >(atype< KN< Complex > * >( ), true, true),    // 3D surface
     new OpArraytoLinearForm< double, MeshL, v_fesL >(atype< KN< double > * >( ), true, true),    // 3D curve
-    new OpArraytoLinearForm< Complex, MeshL, v_fesL >(atype< KN< Complex > * >( ), true, true)    // 3D curve
+    new OpArraytoLinearForm< Complex, MeshL, v_fesL >(atype< KN< Complex > * >( ), true, true),    // 3D curve
+    new OpArraytoLinearForm< double, Mesh3, v_dfes3 >(atype< KN< double > * >( ), true, true),
+    new OpArraytoLinearForm< Complex, Mesh3, v_dfes3 >(atype< KN< Complex > * >( ), true, true),
+    new OpArraytoLinearForm< double, MeshS, v_dfesS >(atype< KN< double > * >( ), true, true),
+    new OpArraytoLinearForm< Complex, MeshS, v_dfesS >(atype< KN< Complex > * >( ), true, true),
+    new OpArraytoLinearForm< double, MeshL, v_dfesL >(atype< KN< double > * >( ), true, true),
+    new OpArraytoLinearForm< Complex, MeshL, v_dfesL >(atype< KN< Complex > * >( ), true, true)
   );
 
   TheOperators->Add(
@@ -6936,7 +6974,10 @@ void init_lgfem( ) {
                     new OpMatrixtoBilinearForm< Complex, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
                     new OpMatrixtoBilinearForm< Complex, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
                     new OpMatrixtoBilinearForm< Complex, MeshL, v_fesS, v_fesL >,      // 3D Surf / 3D curve on meshL
-                    new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fesS >);     // 3D curve / 3D Surf on meshL
+                    new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fesS >,
+                    new OpArraytoLinearForm< Complex, Mesh3, v_dfes3 >(atype< KN_< Complex > >( ), false, false),
+                    new OpArraytoLinearForm< Complex, MeshS, v_dfesS >(atype< KN_< Complex > >( ), false, false),
+                    new OpArraytoLinearForm< Complex, MeshL, v_dfesL >(atype< KN_< Complex > >( ), false, false));     // 3D curve / 3D Surf on meshL
   // add august 2007
   TheOperators->Add(
     "<-",
@@ -7017,8 +7058,11 @@ void init_lgfem( ) {
     new OpArraytoLinearForm< double, MeshS, v_fesS >(atype< KN_< double > >( ), false, false,
                                               false),    // 3D surface
     new OpArraytoLinearForm< double, MeshL, v_fesL >(atype< KN_< double > >( ), false, false,
-                                              false)    // 3D surface
-  );
+                                              false),    // 3D surface
+    new OpArraytoLinearForm< double, Mesh3, v_dfes3 >(atype< KN_< double > >( ), false, false, false),
+    new OpArraytoLinearForm< double, MeshS, v_dfesS >(atype< KN_< double > >( ), false, false, false),
+    new OpArraytoLinearForm< double, MeshL, v_dfesL >(atype< KN_< double > >( ), false, false, false)
+);
 
   TheOperators->Add(
     "+=",
@@ -7035,7 +7079,11 @@ void init_lgfem( ) {
     new OpArraytoLinearForm< Complex, MeshS, v_fesS >(atype< KN_< Complex > >( ), false, false,
                                                false),    // 3D surface
     new OpArraytoLinearForm< Complex, MeshL, v_fesL >(atype< KN_< Complex > >( ), false, false,
-                                               false)    // 3D curve
+                                               false),    // 3D curve
+    new OpArraytoLinearForm< Complex, Mesh3, v_dfes3 >(atype< KN_< Complex > >( ), false, false,
+                                               false),
+    new OpArraytoLinearForm< Complex, MeshS, v_dfesS >(atype< KN_< Complex > >( ), false, false, false),
+    new OpArraytoLinearForm< Complex, MeshL, v_dfesL >(atype< KN_< Complex > >( ), false, false, false)
   );
 
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< double, Mesh, v_fes, v_fes >(1));
@@ -7131,6 +7179,10 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes3, v_fesS >); // 3D volume / 3D Surf on meshS
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL, v_fesS >); // 3D curve / 3D Surf on meshL
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS, v_fesL>); // 3D Surf / 3D curve on meshL
+  Add<const C_args*>("(", "", new OpCall_FormLinear2<C_args, v_dfes3>);
+  Add<const C_args*>("(", "", new OpCall_FormLinear2<C_args, v_dfesS>);
+  Add<const C_args*>("(", "", new OpCall_FormLinear2<C_args, v_dfesL>);
+
 
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesL, v_fes >); // 3D curve / 2D on meshL
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fes, v_fesL >); // 2D / 3D curve on meshL

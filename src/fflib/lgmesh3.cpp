@@ -2066,7 +2066,26 @@ inline FEbaseArray<K,v_fesL> ** MakePtrFE3_3(FEbaseArray<K,v_fesL> * * const &  
     *p=new FEbaseArray<K,v_fesL>(a,N);
     return p ;}
 
+// 3D volume distributed
+template<class K>
+inline FEbase<K, v_dfes3> ** MakePtrFE3_2(FEbase<K, v_dfes3> ** const & p, pdfes3 * const & a) {
+    *p = new FEbase<K, v_dfes3>(a);
+    return p;
+}
 
+// 3D surface distributed
+template<class K>
+inline FEbase<K, v_dfesS> ** MakePtrFE3_2(FEbase<K, v_dfesS> ** const & p, pdfesS * const & a) {
+    *p = new FEbase<K, v_dfesS>(a);
+    return p;
+}
+
+// 3D curve distributed
+template<class K>
+inline FEbase<K, v_dfesL> ** MakePtrFE3_2(FEbase<K, v_dfesL> ** const & p, pdfesL * const & a) {
+    *p = new FEbase<K, v_dfesL>(a);
+    return p;
+}
 
 template<class K,class v_fes>
 class  OneOperatorMakePtrFE3 : public OneOperator 
@@ -3118,7 +3137,13 @@ void init_lgmesh3() {
  //  Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
  // Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
     
-    
+  // 3D volume distributed
+  Add<pdf3r>("[]",".",new OneOperator1<KN<double> *,pdf3r>(pf3r2vect<R,v_dfes3>));
+  Add<pdf3c>("[]",".",new OneOperator1<KN<Complex> *,pdf3c>(pf3r2vect<Complex,v_dfes3>));
+  Add<pdfSr>("[]",".",new OneOperator1<KN<double> *,pdfSr>(pf3r2vect<R,v_dfesS>));
+  Add<pdfSc>("[]",".",new OneOperator1<KN<Complex> *,pdfSc>(pf3r2vect<Complex,v_dfesS>));
+  Add<pdfLr>("[]",".",new OneOperator1<KN<double> *,pdfLr>(pf3r2vect<R,v_dfesL>));
+  Add<pdfLc>("[]",".",new OneOperator1<KN<Complex> *,pdfLc>(pf3r2vect<Complex,v_dfesL>));
 
   //3D volume
   TheOperators->Add("<-", new OneOperator2_<pmesh3*,pmesh3*,string* >(&initMesh));
@@ -3242,6 +3267,15 @@ TheOperators->Add("=",
                    new OneOperator2_<pfLr,pfLr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,v_fesL>) ,   // modif/ use template
                     new OneOperator2_<pfLc,pfLc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fesL>) // modif/ use template
                    ) ;
+                  
+  TheOperators->Add("<-",
+      new OneOperator2_<pdf3rbase*,pdf3rbase*,pdfes3* >(MakePtrFE3_2),
+      new OneOperator2_<pdf3cbase*,pdf3cbase*,pdfes3* >(MakePtrFE3_2),
+      new OneOperator2_<pdfSrbase*,pdfSrbase*,pdfesS* >(MakePtrFE3_2),
+      new OneOperator2_<pdfScbase*,pdfScbase*,pdfesS* >(MakePtrFE3_2),
+      new OneOperator2_<pdfLrbase*,pdfLrbase*,pdfesL* >(MakePtrFE3_2),
+      new OneOperator2_<pdfLcbase*,pdfLcbase*,pdfesL* >(MakePtrFE3_2)
+      );
   // to write u(x,y,z) when u si FE function on Surface or Line .. FH. jan 2020. 
   /*  Add< pfSr >("(", "", new OneQuadOperator< Op4_pfeK< R, v_fesS>, Op4_pfeK< R,v_fesS >::Op >);
     Add< pfSc >("(", "", new OneQuadOperator< Op4_pfeK< Complex,v_fesS >, Op4_pfeK< Complex,v_fesS >::Op >);
