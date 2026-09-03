@@ -997,18 +997,24 @@ class E_F0_PoUWeight : public E_F0mps {
     Expression DThExpr;
     E_F0_PoUWeight(Expression f, Expression dth) : fOrig(f), DThExpr(dth) { }
     AnyType operator()(Stack stack) const {
-    MeshPoint* mp = MeshPointStack(stack);
-    const DistributedMesh<MMesh>** pp =
-        GetAny<const DistributedMesh<MMesh>**>((*DThExpr)(stack));
-    const DistributedMesh<MMesh>& DTh = **pp;
-    const MMesh& Th = *DTh.LocalMesh;        
-    double lam[4];
-    mp->PHat.toBary(lam);
-    double pou = 0;
-    for (int j = 0; j < MMesh::Element::nv; ++j)
-      pou += lam[j] * DTh.partitionOfUnity[Th(mp->t, j)];
-    R v = GetAny<R>((*fOrig)(stack));
-    return SetAny<R>(v * pou);
+      MeshPoint* mp = MeshPointStack(stack);
+      const DistributedMesh<MMesh>** pp =
+          GetAny<const DistributedMesh<MMesh>**>((*DThExpr)(stack));
+      const DistributedMesh<MMesh>& DTh = **pp;
+
+      if (DTh.overlap == 0) {
+        // No duplication of element: straightforward sum already exact
+        return SetAny<R>(GetAny<R>((*fOrig)(stack)));
+      }
+
+      const MMesh& Th = *DTh.LocalMesh;        
+      double lam[4];
+      mp->PHat.toBary(lam);
+      double pou = 0;
+      for (int j = 0; j < MMesh::Element::nv; ++j)
+        pou += lam[j] * DTh.partitionOfUnity[Th(mp->t, j)];
+      R v = GetAny<R>((*fOrig)(stack));
+      return SetAny<R>(v * pou);
   }
   operator aType() const { return atype<R>(); }
 };
