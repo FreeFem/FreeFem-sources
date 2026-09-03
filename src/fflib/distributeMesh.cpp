@@ -312,6 +312,10 @@ int checkIntersectionSymmetry(pcommworld, const KN<KN<long>>&) { return -1; }
 
 int checkPartitionConsistency(pcommworld, const KN<int> &) { return 0; }
 
+template<class R> R distributedReduce(pcommworld, R local) { return local; }
+template double distributedReduce<double>(pcommworld, double);
+template Complex distributedReduce<Complex>(pcommworld, Complex);
+
 #else
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
@@ -433,6 +437,18 @@ int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
 
   return agreeOnStatus(bad, comm);
 }
+
+template<class R>
+R distributedReduce(pcommworld comm, R local) {
+  if (mpisize <= 1) return local;
+
+  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  R global;
+  MPI_Allreduce(&local, &global, sizeof(R)/sizeof(double), MPI_DOUBLE, MPI_SUM, cw);
+  return global;
+}
+template double distributedReduce<double>(pcommworld, double);
+template Complex distributedReduce<Complex>(pcommworld, Complex);
 
 #endif
 

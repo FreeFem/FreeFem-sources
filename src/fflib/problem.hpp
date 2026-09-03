@@ -327,11 +327,11 @@ public:
   Expression mapt[3],mapu[3];
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ???
+  Expression DTh = nullptr; // distributed mesh
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,int ddHat=0) // 3d
     :kind(b),d(ddim),dHat(ddHat==0 ? d : ddHat), Th(nullptr), what(args.size()-1),whatis(args.size()-1)
 
   {
-      
   //  isMeshS=surface;
  //   isMeshL=curve;
     mapt[0]=mapt[1]=mapt[2]=nullptr; // no map of intergration points for test function
@@ -340,11 +340,15 @@ public:
     if(d==2) // 2d
       Th=CastTo<pmesh>(args[0]);
     else if(d==3 && dHat==3){
-        Th=CastTo<pmesh3>(args[0]);}
+      // Check if distributed mesh
+      if(args[0].left() == atype<const DistributedMesh<Mesh3>**>()) DTh = CastTo<const DistributedMesh<Mesh3>**>(args[0]);
+      Th=CastTo<pmesh3>(args[0]);}
     else if(d==3 && dHat==2){
-        Th=CastTo<pmeshS>(args[0]);}
+      if (args[0].left() == atype<const DistributedMesh<MeshS>**>()) DTh = CastTo<const DistributedMesh<MeshS>**>(args[0]);
+      Th=CastTo<pmeshS>(args[0]);}
     else if(d==3 && dHat==1){
-        Th=CastTo<pmeshL>(args[0]);}
+      if (args[0].left() == atype<const DistributedMesh<MeshL>**>()) DTh = CastTo<const DistributedMesh<MeshL>**>(args[0]);
+      Th=CastTo<pmeshL>(args[0]);}
     else ffassert(0); // a faire
     int n=args.size();
 
@@ -986,6 +990,29 @@ struct OpArraytoLinearFormVG
 
 };
 
+template< class R, class MMesh >
+class E_F0_PoUWeight : public E_F0mps {
+  public:
+    Expression fOrig;
+    Expression DThExpr;
+    E_F0_PoUWeight(Expression f, Expression dth) : fOrig(f), DThExpr(dth) { }
+    AnyType operator()(Stack stack) const {
+    MeshPoint* mp = MeshPointStack(stack);
+    const DistributedMesh<MMesh>** pp =
+        GetAny<const DistributedMesh<MMesh>**>((*DThExpr)(stack));
+    const DistributedMesh<MMesh>& DTh = **pp;
+    const MMesh& Th = *DTh.LocalMesh;        
+    double lam[4];
+    mp->PHat.toBary(lam);
+    double pou = 0;
+    for (int j = 0; j < MMesh::Element::nv; ++j)
+      pou += lam[j] * DTh.partitionOfUnity[Th(mp->t, j)];
+    R v = GetAny<R>((*fOrig)(stack));
+    return SetAny<R>(v * pou);
+  }
+  operator aType() const { return atype<R>(); }
+};
+
 template<class R>
 class IntFunction  : public E_F0mps { public:
   typedef R Result;
@@ -996,7 +1023,13 @@ class IntFunction  : public E_F0mps { public:
   IntFunction(const basicAC_F0 & args) {
     di= dynamic_cast<A>(CastTo<A>(args[0]));
     fonc= CastTo<B>(args[1]);
-    ffassert(di && fonc); }
+    ffassert(di && fonc); 
+    if (di->DTh) {
+      if (di->d == 3 && di->dHat == 3) fonc = new E_F0_PoUWeight<R, Mesh3>(fonc, di->DTh);
+      else if (di->d == 3 && di->dHat == 2) fonc = new E_F0_PoUWeight<R, MeshS>(fonc, di->DTh);
+      else if (di->d == 3 && di->dHat == 1) fonc = new E_F0_PoUWeight<R, MeshL>(fonc, di->DTh);
+    }
+  }
 
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
   AnyType operator()(Stack ) const;
