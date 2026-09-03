@@ -1,0 +1,147 @@
+// NBPROC 4
+// PARAM -wg -ns -ffddm_overlap 1
+
+// Test for distributed integration (int3d/int2d/int1d(DTh)(expr) as a bare
+// scalar expression, auto-weighted by the partition of unity and
+// auto-reduced across ranks).
+//
+// Usage:
+//   mpiexec -np <N> FreeFem++-mpi -nw test_intDist.edp -overlap <0|1|2|3> -global <n>
+
+load "PETSc"
+include "getARGV.idp"
+macro dimension()3// EOM
+
+int overlapArg = getARGV("-overlap", 1);
+int n = getARGV("-global", 6);
+real tol = 1e-9;
+bool allPass = true;
+
+if (mpirank == 0)
+  cout << "\n########## test_intDist.edp : np=" << mpisize << " overlap=" << overlapArg << " ##########" << endl;
+
+// ---------------------------------------------------------------------
+// TEST 1 : volume Mesh3 -- constante et intégrande d'ordre élevé
+// ---------------------------------------------------------------------
+{
+  mesh3 Th = cube(n, n, n);
+  Dmesh3 DTh = distribute(Th, overlap = overlapArg, partmethod = "metis");
+  mesh3 ThLocal = DTh.local;
+
+  // constante : volume du cube unite
+  real truth1 = int3d(Th)(1.0);
+  real localVol1 = int3d(ThLocal)(1.0);
+  real naive1; mpiAllReduce(localVol1, naive1, mpiCommWorld, mpiSUM);
+  real dist1 = int3d(DTh)(1.0);
+  bool pass1 = abs(dist1 - truth1) < tol;
+
+  // intégrande d'ordre élevé (teste si la pondération P1 sous-intègre)
+  func fpoly = x*x*x + y*y*x + z*z*z*x;
+  real truth2 = int3d(Th)(fpoly);
+  real dist2 = int3d(DTh)(fpoly);
+  bool pass2 = abs(dist2 - truth2) < 1e-6;
+
+  allPass = allPass && pass1 && pass2;
+  if (mpirank == 0) {
+    cout << "== TEST 1 : volume Mesh3 ==" << endl;
+    cout << "   [constante] verite=" << truth1 << " naif(somme brute)=" << naive1
+         << " int3d(DTh) auto=" << dist1 << (pass1 ? "  => PASS" : "  => FAIL") << endl;
+    cout << "   [ordre eleve] verite=" << truth2 << " int3d(DTh) auto=" << dist2
+         << " ecart=" << abs(dist2-truth2) << (pass2 ? "  => PASS" : "  => FAIL") << endl;
+  }
+}
+
+// ---------------------------------------------------------------------
+// TEST 2 : intégrale de bord sur un maillage volumique (Mesh3)
+// ---------------------------------------------------------------------
+{
+  mesh3 Th = cube(n, n, n);
+  Dmesh3 DTh = distribute(Th, overlap = overlapArg, partmethod = "metis");
+  mesh3 ThLocal = DTh.local;
+
+  real truthAll = int2d(Th)(1.0);          // aire totale du bord (verite globale)
+  real localAll = int2d(ThLocal)(1.0);
+  real naiveAll; mpiAllReduce(localAll, naiveAll, mpiCommWorld, mpiSUM);
+  real distAll = int2d(DTh)(1.0);          // meme quantite, chemin distribue automatique
+  bool passAll = abs(distAll - truthAll) < tol;
+
+  real truthLab = int2d(Th, 1)(1.0);       // aire du label 1 uniquement
+  real distLab = int2d(DTh, 1)(1.0);
+  bool passLab = abs(distLab - truthLab) < tol;
+
+  allPass = allPass && passAll && passLab;
+  if (mpirank == 0) {
+    cout << "== TEST 2 : bord (int2d) sur Mesh3 ==" << endl;
+    cout << "   [bord entier]  verite=" << truthAll << " naif=" << naiveAll
+         << " int2d(DTh) auto=" << distAll << (passAll ? "  => PASS" : "  => FAIL") << endl;
+    cout << "   [label 1 seul] verite=" << truthLab
+         << " int2d(DTh,1) auto=" << distLab << (passLab ? "  => PASS" : "  => FAIL") << endl;
+  }
+}
+
+// ---------------------------------------------------------------------
+// TEST 3 : surface (MeshS) -- int2d comme integrale "volumique" de surface
+// ---------------------------------------------------------------------
+{
+  meshS ThS = square3(n, n);
+  DmeshS DThS = distribute(ThS, overlap = overlapArg, partmethod = "metis");
+  meshS ThSLocal = DThS.local;
+
+  real truth = int2d(ThS)(1.0);
+  real localS = int2d(ThSLocal)(1.0);
+  real naive; mpiAllReduce(localS, naive, mpiCommWorld, mpiSUM);
+  real dist = int2d(DThS)(1.0);
+  bool pass = abs(dist - truth) < tol;
+
+  allPass = allPass && pass;
+  if (mpirank == 0) {
+    cout << "== TEST 3 : surface MeshS ==" << endl;
+    cout << "   verite=" << truth << " naif=" << naive
+         << " int2d(DThS) auto=" << dist << (pass ? "  => PASS" : "  => FAIL") << endl;
+  }
+}
+
+// ---------------------------------------------------------------------
+// TEST 4 : courbe (MeshL) -- int1d comme integrale "volumique" de courbe
+// ---------------------------------------------------------------------
+{
+  meshL ThL = segment(n * 10);
+  DmeshL DThL = distribute(ThL, overlap = overlapArg, partmethod = "scotch");
+  meshL ThLLocal = DThL.local;
+
+  real truth = int1d(ThL)(1.0);
+  real localL = int1d(ThLLocal)(1.0);
+  real naive; mpiAllReduce(localL, naive, mpiCommWorld, mpiSUM);
+  real dist = int1d(DThL)(1.0);
+  bool pass = abs(dist - truth) < tol;
+
+  allPass = allPass && pass;
+  if (mpirank == 0) {
+    cout << "== TEST 4 : courbe MeshL ==" << endl;
+    cout << "   verite=" << truth << " naif=" << naive
+         << " int1d(DThL) auto=" << dist << (pass ? "  => PASS" : "  => FAIL") << endl;
+  }
+}
+
+// ---------------------------------------------------------------------
+// TEST 5 : non-regression -- int3d(DTh) dans un varf (Mat) doit rester
+// inchange (overlap force a >=1 : contrainte HPDDM/PETSc, sans rapport
+// avec l'integration scalaire testee ci-dessus)
+// ---------------------------------------------------------------------
+{
+  int ovMat = (overlapArg == 0) ? 1 : overlapArg;
+  mesh3 Th = cube(n, n, n);
+  Dmesh3 DTh = distribute(Th, overlap = ovMat, partmethod = "metis");
+  mesh3 ThLocal = DTh.local;
+  fespace Wh(ThLocal, P1);
+  fespace Wdh(DTh, P1);
+  varf vPb(u, v) = int3d(DTh)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v)) + int3d(DTh)(v) + on(1, u = 0.0);
+  Mat A = vPb(Wdh, Wdh);
+  Wh rhs; rhs[] = vPb(0, Wh);
+  real normRhs = rhs[].linfty;
+  if (mpirank == 0)
+    cout << "== TEST 5 : coexistence varf (Mat construite sans erreur, ||rhs||_inf=" << normRhs << ") => PASS" << endl;
+}
+
+if (mpirank == 0)
+  cout << (allPass ? "\n==== RESULTAT GLOBAL: PASS ====\n" : "\n==== RESULTAT GLOBAL: FAIL ====\n") << endl;

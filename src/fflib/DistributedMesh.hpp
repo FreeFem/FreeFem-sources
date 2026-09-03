@@ -110,3 +110,6 @@ int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI);
 
 // 0 if user partition equal on all ranks, 1 else
 int checkPartitionConsistency(pcommworld comm, const KN<int>& part);
+
+template<class R>
+R distributedReduce(pcommworld comm, R local);

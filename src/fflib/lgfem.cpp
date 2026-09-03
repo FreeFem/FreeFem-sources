@@ -4301,6 +4301,21 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
   }
 
   *MeshPointStack(stack) = mp;
+  if (di->DTh) {
+    if (di->d == 3 && di->dHat == 3) {
+      auto pp = GetAny< const DistributedMesh<Mesh3> **>((*di->DTh)(stack));
+      r = distributedReduce<R>((**pp).comm, r);
+    }
+    else if (di->d == 3 && di->dHat == 2) {
+      auto pp = GetAny< const DistributedMesh<MeshS> **>((*di->DTh)(stack));
+      r = distributedReduce<R>((**pp).comm, r);
+    }
+    else if (di->d == 3 && di->dHat == 1) {
+      auto pp = GetAny< const DistributedMesh<MeshL> **>((*di->DTh)(stack));
+      r = distributedReduce<R>((**pp).comm, r);
+    }
+  }
+
   return SetAny< R >(r);
 }
 
