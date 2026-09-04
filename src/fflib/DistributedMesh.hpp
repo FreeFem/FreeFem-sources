@@ -61,6 +61,25 @@ Mesh* buildIntersectionSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n
 template<class Mesh>
 Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o);
 
+Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate);
+MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMortar, const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate);
+MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMortar, const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate);
+
+template<class Mesh>
+KN<int> n2oFromSplit(const Mesh& parent, const Mesh& sub, const KN<int>& splitMask);
+
+template<class Mesh>
+KN<double> interpolatePoU(const DistributedMesh<Mesh>& DTh, const GFESpace<Mesh>& Uh_target);
+
+template<class Mesh>
+KN<long> restrictDOFPartial(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o);
+
+template<class Mesh>
+KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const KN<int>& n2o);
+
+template<class Mesh>
+void registerTransferInterpolateOps();
+
 // Partition globale
 template<class Mesh>
 int computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true, int nWorkers = 0);

@@ -1,0 +1,742 @@
+// NBPROC 4
+// PARAM -ns
+
+// ---------------------------------------------------------------------
+//  Jalon 1 : appariement de rangs entre deux maillages distribues
+//            independants (overlapRankPairs / computeOverlapRankPairs).
+//
+//  Th1 = [0,1]^3 et Th2 = [0.5,1.5]^3 se recouvrent sur un huitieme de
+//  leur volume ; Th3 = [10,11]^3 est franchement disjoint.
+//
+//  POURQUOI UNE PARTITION UTILISATEUR EN TRANCHES ET PAS METIS
+//  ----------------------------------------------------------
+//  Metis minimise la coupe, pas l'etendue : sur un cube decoupe en 4, la
+//  BOITE ENGLOBANTE de chaque sous-domaine couvre presque tout le cube
+//  (mesure : x[0,1] y[0,1] z[0.1875,1] pour le rang 0). L'appariement
+//  all-to-all est alors la BONNE reponse, et aucun reglage de marge n'y
+//  changera rien. Un test de non-trivialite sur partition metis ne
+//  mesurerait donc rien du tout.
+//
+//  Avec des tranches selon x, l'appariement attendu se calcule a la main.
+//  Tranche r de Th1 apres recouvrement et marge :
+//      A_r = [r/n - e, (r+1)/n + e]      e = h + hmax
+//      B_s = [0.5 + s/n - e, 0.5 + (s+1)/n + e]
+//  et A_r coupe B_s ssi  r - s >= n/2 - 1 - 2*n*e.  Pour n = 4 et
+//  nc = 32 (h = 1/32, hmax = sqrt(3)/32) cela vaut r - s >= 0.317, donc
+//  exactement r > s : la matrice d'appariement est triangulaire
+//  inferieure stricte, 6 paires sur 16. C'est l'oracle du test B2, et il
+//  epingle la marge : avec 2*hmax on aurait e = 0.140, donc r - s >= -0.12,
+//  soit la triangulaire INFERIEURE LARGE (10 paires) et B2 en echec.
+//  Sensibilite verifiee a la main : a -ov 3 la geometrie bouge assez pour
+//  que la matrice change et que B2 echoue avec un code de retour non nul.
+//  B2 n'est donc pas une tautologie. Son garde inclut ov = 1, la valeur
+//  pour laquelle la structure attendue est demontree ci-dessus.
+//
+//  PROPRIETES VERIFIEES  (toutes sans maillage global, donc valables
+//  aussi en DM_SCATTER)
+//   A.  Symetrie croisee : r dans send(moi) <=> moi dans recv(r).
+//       C'est ce qui casse en premier si un indice est inverse dans le
+//       test de recouvrement.
+//   B1. Non-trivialite : l'appariement n'est pas all-to-all. Robuste,
+//       verifiee pour tout np > 1 et tout nc.
+//   B2. Structure exacte r > s. Verifiee seulement dans la configuration
+//       nominale np = 4, nc = 32, ou elle est demontree ci-dessus.
+//   C.  Cas disjoint : contre Th3, les deux listes sont vides sur tous
+//       les rangs. Sans ce test, un bboxOverlap toujours vrai passerait
+//       A, B1 et B2.
+//   D.  Auto-appariement : DTh1 contre lui-meme donne send == recv et
+//       contient mpirank. Cette auto-paire n'est pas un artefact de
+//       communication : en mono-rang c'est le seul fragment, et c'est
+//       elle qui portera toute la donnee au jalon 3.
+//   E.  Partition metis : la symetrie doit tenir la aussi. Le taux de
+//       remplissage est affiche sans etre asserte -- il depend du
+//       partitionneur, pas du code teste.
+//
+//  JALON 2 -- echange des fragments. transferFragmentCounts(DA, DB, nE, nR)
+//  remplit nE aligne sur sendToRanks et nR aligne sur recvFromRanks, chaque
+//  entree valant le nombre d'elements du fragment correspondant (0 si vide).
+//   F.  Conservation globale : la somme des elements emis sur tous les rangs
+//       egale la somme des elements recus. Signal grossier mais immediat.
+//   G.  Coherence par paire : ce que r declare envoyer a s egale ce que s
+//       declare avoir recu de r, pour les n*n paires. Localise ce que F ne
+//       fait que detecter, et attrape un desalignement des listes send/recv
+//       (nE[i] range en face du mauvais rang).
+//   H.  Auto-fragment exact : DTh1 contre lui-meme, la boite destination de
+//       mon propre rang contient tout mon maillage local, donc le fragment
+//       que je m'envoie a EXACTEMENT DTh1.local.nt elements -- et celui que
+//       je recois aussi. Oracle exact, sans tolerance.
+//   I.  Cas disjoint : contre Th3, aucun element emis ni recu, et surtout
+//       AUCUN BLOCAGE. Une regression du protocole non bloquant se manifeste
+//       en interblocage, pas en FAIL : lancer sous timeout.
+//         timeout 300 ff-mpirun -np 4 test_interpolationDMeshes.edp -ns
+//
+//  JALON 3 -- interpolation et accumulation. transferP1(DA, uA, DB, uB)
+//  transfere un champ P1 du maillage distribue A vers B.
+//   J.  Couverture exacte. Th4 = [0.25,0.75]^3 est STRICTEMENT inclus dans
+//       Th1 = [0,1]^3, donc tous ses DDL sont couverts. Transferer u = 1
+//       revient a reconstruire la partition de l'unite : chaque fragment
+//       porte chi_r * 1 = chi_r et la somme des interpolations vaut
+//       somme(chi_r) = 1. Assertion SANS tolerance de discretisation.
+//       C'est le test du mode de defaillance silencieux : un rang couvrant
+//       qui n'enverrait pas son fragment donne une valeur < 1, pas 0, donc
+//       invisible a un simple comptage de DDL non couverts. Il epingle
+//       aussi la marge PAR EN DESSOUS -- la reduire ferait tomber J, alors
+//       que B2 l'epingle par au dessus.
+//   K.  Fonction affine 1 + x + 2y + 3z, exacte en P1 : erreur nulle a
+//       l'arrondi. Valide buildInterpolationMatrixT lui-meme.
+//   L.  Couverture partielle. DTh1 -> DTh2 (cubes decales) avec u = 1 : les
+//       DDL franchement interieurs a [0,1]^3 valent 1, ceux franchement
+//       exterieurs valent 0. La bande de largeur 2*hmax autour de la
+//       frontiere est exclue, les points exactement sur dTh1 etant a la
+//       merci de Find. C'est L qui echouerait avec data[2] = 0 : sans
+//       inside, l'extrapolation donnerait des valeurs quelconques dehors.
+//
+//  Les verdicts passent par assert() : bin/test-driver-ff decide sur le
+//  code de retour de FreeFEM, il ne relit pas la chaine FAIL affichee.
+//
+//  Options :
+//    -nc     raffinement de Th1 et Th2                  (defaut 32)
+//    -ncm    raffinement des deux cubes metis du test E  (defaut 8)
+//    -ncfar  raffinement de Th3, sans influence          (defaut 4)
+//    -ov     recouvrement passe a distribute             (defaut 1)
+//
+//  Lancer :
+//    ff-mpirun -np 4 test_interpolationDMeshes.edp -ns
+// ---------------------------------------------------------------------
+
+include "getARGV.idp"
+
+int nc    = getARGV("-nc",    32);
+int ncm   = getARGV("-ncm",    8);
+int ncfar = getARGV("-ncfar",  4);
+// nc4 = 15 et non 16 : DELIBEREMENT non commensurable avec nc = 32.
+// Avec nc4 = 16 les sommets de Th4 tombent en 0.25 + k/32, exactement sur
+// ceux de Th1, l'interpolation degenere en recopie de DDL et K ne testerait
+// plus la geometrie -- l'erreur serait exactement 0 pour une mauvaise raison.
+int nc4   = getARGV("-nc4",   15);
+int nc5   = getARGV("-nc5",   10);   // paire grossiere pour les degres eleves
+int nc6   = getARGV("-nc6",    6);
+int ov    = getARGV("-ov",     1);
+
+int n = mpisize;
+
+// --- construction des tranches -----------------------------------------
+// part[k] = tranche de x contenant le barycentre de l'element k.
+// P0 interpole au barycentre, et sa numerotation de DDL suit celle des
+// elements : px[][k] est donc bien x(barycentre de k).
+macro SLABS(Th, x0, part)
+{
+  fespace PhSlab(Th, P0);
+  PhSlab pxSlab = x;
+  int[int] cntSlab(n);
+  cntSlab = 0;
+  for (int k = 0; k < Th.nt; k++) {
+    int s = int((pxSlab[][k] - x0) * n);
+    if (s < 0) s = 0;
+    if (s > n - 1) s = n - 1;
+    part[k] = s;
+    cntSlab[s] = cntSlab[s] + 1;
+  }
+  assert(cntSlab.min > 0);   /* distribute refuse un rang sans element */
+} // EOM
+
+mesh3 Th1 = cube(nc, nc, nc);
+mesh3 Th2 = cube(nc, nc, nc, [0.5 + x, 0.5 + y, 0.5 + z]);
+mesh3 Th3 = cube(ncfar, ncfar, ncfar, [10 + x, 10 + y, 10 + z]);
+// Strictement inclus dans Th1 : oracle de couverture exacte (bloc J).
+mesh3 Th4 = cube(nc4, nc4, nc4, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+
+int[int] p1(Th1.nt), p2(Th2.nt);
+SLABS(Th1, 0.0, p1)
+SLABS(Th2, 0.5, p2)
+
+Dmesh3 DTh1 = distribute(Th1, overlap = ov, partition = p1);
+Dmesh3 DTh2 = distribute(Th2, overlap = ov, partition = p2);
+Dmesh3 DTh3 = distribute(Th3, overlap = ov);          // metis, sans importance
+Dmesh3 DTh4 = distribute(Th4, overlap = ov);          // metis : couvre aussi ce chemin
+
+// Paire grossiere Th5 -> Th6, Th6 strictement inclus dans Th5. Sert aux blocs
+// M/N/O : P4 sur un maillage a 196k tetraedres serait hors de prix pour un
+// test de make check.
+mesh3 Th5 = cube(nc5, nc5, nc5);
+mesh3 Th6 = cube(nc6, nc6, nc6, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+Dmesh3 DTh5 = distribute(Th5, overlap = ov);
+Dmesh3 DTh6 = distribute(Th6, overlap = ov);
+// Meme paire sans recouvrement : interpolatePoU emprunte alors le chemin
+// buildInterfaceDofList, distinct et jamais exerce jusqu'ici (bloc O).
+Dmesh3 DTh5z = distribute(Th5, overlap = 0);
+Dmesh3 DTh6z = distribute(Th6, overlap = 0);
+
+if (mpirank == 0)
+  cout << "== jalon 1 : appariement de rangs ==  np = " << n
+       << "   nc = " << nc << "   overlap = " << ov << endl;
+
+// --- remontee de la matrice d'appariement -------------------------------
+// sAll[a*n+b] = 1 ssi le rang a declare envoyer au rang b.
+// rAll[b*n+a] = 1 ssi le rang b declare recevoir du rang a.
+// Apres reduction les deux matrices sont identiques sur tous les rangs,
+// donc les verdicts aussi : pas de divergence possible entre rangs.
+macro PAIRMATRIX(DA, DB, sAll, rAll)
+{
+  int[int] sndP(0), rcvP(0);
+  overlapRankPairs(DA, DB, sndP, rcvP);
+  int[int] sLocP(n*n), rLocP(n*n);
+  sLocP = 0;
+  rLocP = 0;
+  for (int i = 0; i < sndP.n; i++) sLocP[mpirank*n + sndP[i]] = 1;
+  for (int i = 0; i < rcvP.n; i++) rLocP[mpirank*n + rcvP[i]] = 1;
+  mpiAllReduce(sLocP, sAll, mpiCommWorld, mpiSUM);
+  mpiAllReduce(rLocP, rAll, mpiCommWorld, mpiSUM);
+} // EOM
+
+int[int] sAll(n*n), rAll(n*n);
+PAIRMATRIX(DTh1, DTh2, sAll, rAll)
+
+if (mpirank == 0) {
+  cout << "  matrice send (ligne = emetteur, colonne = destinataire) :" << endl;
+  for (int a = 0; a < n; a++) {
+    cout << "      " << a << " :";
+    for (int b = 0; b < n; b++) cout << " " << sAll[a*n + b];
+    cout << endl;
+  }
+}
+
+// Diagnostic : etendue en x de chaque tranche source, apres recouvrement.
+// C'est ce qu'il faut lire en premier si B1 ou B2 echoue. Remonte sur le
+// rang 0 plutot qu'imprime en ronde barriere, sinon la sortie s'entrelace
+// avec les verdicts.
+{
+  mesh3 Loc = DTh1.local;
+  fespace VLoc(Loc, P1);
+  VLoc xLoc = x;
+  real[int] xlo(n), xhi(n), gxlo(n), gxhi(n);
+  xlo = 0;
+  xhi = 0;
+  xlo[mpirank] = xLoc[].min;
+  xhi[mpirank] = xLoc[].max;
+  mpiAllReduce(xlo, gxlo, mpiCommWorld, mpiSUM);
+  mpiAllReduce(xhi, gxhi, mpiCommWorld, mpiSUM);
+  if (mpirank == 0)
+    for (int r = 0; r < n; r++)
+      cout << "      tranche " << r << " : x[" << gxlo[r] << ", " << gxhi[r]
+           << "]   hmax = " << Loc.hmax << endl;
+}
+
+// --- A : symetrie croisee -----------------------------------------------
+int badSym = 0;
+for (int a = 0; a < n; a++)
+  for (int b = 0; b < n; b++)
+    if (sAll[a*n + b] != rAll[b*n + a]) badSym++;
+
+if (mpirank == 0)
+  cout << "  [A symetrie croisee]   incoherences = " << badSym
+       << "   => " << (badSym == 0 ? "PASS" : "FAIL") << endl;
+assert(badSym == 0);
+
+// --- B1 : non-trivialite -------------------------------------------------
+int tot = 0;
+for (int i = 0; i < n*n; i++) tot += sAll[i];
+
+if (n > 1) {
+  if (mpirank == 0)
+    cout << "  [B1 non-trivialite]    paires = " << tot << " / " << n*n
+         << "   => " << (tot < n*n ? "PASS" : "FAIL") << endl;
+  assert(tot < n*n);
+}
+else if (mpirank == 0)
+  cout << "  [B1 non-trivialite]    SKIP (np = 1 : all-to-all legitime)" << endl;
+
+// --- B2 : structure exacte, configuration nominale seulement -------------
+if (n == 4 && nc == 32 && ov == 1) {
+  int badTri = 0;
+  for (int a = 0; a < n; a++)
+    for (int b = 0; b < n; b++) {
+      int attendu = (a > b) ? 1 : 0;
+      if (sAll[a*n + b] != attendu) badTri++;
+    }
+  if (mpirank == 0)
+    cout << "  [B2 structure r > s]   ecarts = " << badTri
+         << "   => " << (badTri == 0 ? "PASS" : "FAIL") << endl;
+  assert(badTri == 0);
+}
+else if (mpirank == 0)
+  cout << "  [B2 structure r > s]   SKIP (hors configuration nominale"
+       << " np = 4, nc = 32, ov = 1)" << endl;
+
+// --- C : cas disjoint ----------------------------------------------------
+int[int] snd3(0), rcv3(0);
+overlapRankPairs(DTh1, DTh3, snd3, rcv3);
+
+int loc3 = snd3.n + rcv3.n;
+int tot3 = 0;
+mpiAllReduce(loc3, tot3, mpiCommWorld, mpiSUM);
+
+if (mpirank == 0)
+  cout << "  [C cas disjoint]       paires = " << tot3
+       << "   => " << (tot3 == 0 ? "PASS" : "FAIL") << endl;
+assert(tot3 == 0);
+
+// --- D : auto-appariement ------------------------------------------------
+int[int] sndSelf(0), rcvSelf(0);
+overlapRankPairs(DTh1, DTh1, sndSelf, rcvSelf);
+
+int badSelf = 0;
+if (sndSelf.n != rcvSelf.n) badSelf = 1;
+else {
+  for (int i = 0; i < sndSelf.n; i++)
+    if (sndSelf[i] != rcvSelf[i]) badSelf = 1;
+}
+
+int hasSelf = 0;
+for (int i = 0; i < sndSelf.n; i++)
+  if (sndSelf[i] == mpirank) hasSelf = 1;
+
+int gBadSelf = 0, gHasSelf = 1;
+mpiAllReduce(badSelf, gBadSelf, mpiCommWorld, mpiMAX);
+mpiAllReduce(hasSelf, gHasSelf, mpiCommWorld, mpiMIN);
+
+if (mpirank == 0)
+  cout << "  [D auto-appariement]   send == recv : " << (gBadSelf == 0 ? "oui" : "non")
+       << "   mpirank present : " << (gHasSelf == 1 ? "oui" : "non")
+       << "   => " << (gBadSelf == 0 && gHasSelf == 1 ? "PASS" : "FAIL") << endl;
+assert(gBadSelf == 0);
+assert(gHasSelf == 1);
+
+// =======================================================================
+//  JALON 2 : echange des fragments
+// =======================================================================
+
+// Les listes d'appariement du couple (DTh1, DTh2). Le jalon 1 les consomme
+// dans le macro PAIRMATRIX, dont la portee est locale : on les redemande ici
+// pour indexer nEnv / nRec, qui suivent exactement le meme ordre.
+int[int] snd(0), rcv(0);
+overlapRankPairs(DTh1, DTh2, snd, rcv);
+
+int[int] nEnv(0), nRec(0);
+transferFragmentCounts(DTh1, DTh2, nEnv, nRec);
+
+// Contrat d'alignement, verifie AVANT toute lecture de valeur.
+assert(nEnv.n == snd.n);
+assert(nRec.n == rcv.n);
+
+mesh3 Loc1 = DTh1.local;
+// Les fragments sont decoupes dans CoverMesh, pas LocalMesh : la couche
+// supplementaire rend les points d'interface strictement interieurs au
+// fragment, ce qui evite le repli par le bord de Find. Les DDL de cette
+// couche portent zero (chi y est nul), donc l'identite nodale
+// somme_r chi_r(v) = 1 est preservee. Les bornes ci-dessous se referent
+// donc au cover, pas au local.
+mesh3 Cov1 = DTh1.cover;
+
+// --- F : conservation globale -------------------------------------------
+int locEnv = 0, locRec = 0;
+for (int i = 0; i < nEnv.n; i++) locEnv += nEnv[i];
+for (int j = 0; j < nRec.n; j++) locRec += nRec[j];
+
+int totEnv = 0, totRec = 0;
+mpiAllReduce(locEnv, totEnv, mpiCommWorld, mpiSUM);
+mpiAllReduce(locRec, totRec, mpiCommWorld, mpiSUM);
+
+if (mpirank == 0)
+  cout << "  [F conservation]       emis = " << totEnv << "   recus = " << totRec
+       << "   => " << (totEnv == totRec ? "PASS" : "FAIL") << endl;
+assert(totEnv == totRec);
+
+// Aucun fragment ne peut contenir plus d'elements que le maillage local dont
+// il est extrait : attrape un masque errone qui deborderait.
+int badBound = 0;
+for (int i = 0; i < nEnv.n; i++)
+  if (nEnv[i] < 0 || nEnv[i] > Cov1.nt) badBound = 1;
+int gBadBound = 0;
+mpiAllReduce(badBound, gBadBound, mpiCommWorld, mpiMAX);
+if (mpirank == 0)
+  cout << "  [F borne nEnv <= cover] => " << (gBadBound == 0 ? "PASS" : "FAIL") << endl;
+assert(gBadBound == 0);
+
+// --- G : coherence par paire ---------------------------------------------
+// Eall[r*n+s] : elements que r declare envoyer a s.
+// Rall[r*n+s] : elements que s declare avoir recus de r.
+int[int] Eloc(n*n), Rloc(n*n), Eall(n*n), Rall(n*n);
+Eloc = 0;
+Rloc = 0;
+for (int i = 0; i < snd.n; i++) Eloc[mpirank*n + snd[i]] = nEnv[i];
+for (int j = 0; j < rcv.n; j++) Rloc[rcv[j]*n + mpirank] = nRec[j];
+mpiAllReduce(Eloc, Eall, mpiCommWorld, mpiSUM);
+mpiAllReduce(Rloc, Rall, mpiCommWorld, mpiSUM);
+
+int badPair = 0;
+for (int i = 0; i < n*n; i++)
+  if (Eall[i] != Rall[i]) badPair++;
+
+if (mpirank == 0) {
+  cout << "  matrice des elements transferes (ligne = emetteur) :" << endl;
+  for (int a = 0; a < n; a++) {
+    cout << "      " << a << " :";
+    for (int b = 0; b < n; b++) cout << " " << Eall[a*n + b];
+    cout << endl;
+  }
+  cout << "  [G coherence par paire] desaccords = " << badPair
+       << "   => " << (badPair == 0 ? "PASS" : "FAIL") << endl;
+}
+assert(badPair == 0);
+
+// --- H : auto-fragment exact ----------------------------------------------
+// Pour DTh1 contre DTh1, la boite destination de mon rang est la boite de mon
+// propre maillage local, gonflee : tous mes barycentres y tombent. Le fragment
+// que je m'envoie doit donc etre le maillage local entier, sans tolerance.
+int[int] sndS(0), rcvS(0), nEnvS(0), nRecS(0);
+overlapRankPairs(DTh1, DTh1, sndS, rcvS);
+transferFragmentCounts(DTh1, DTh1, nEnvS, nRecS);
+
+int selfSent = -1, selfRecv = -1;
+for (int i = 0; i < sndS.n; i++) if (sndS[i] == mpirank) selfSent = nEnvS[i];
+for (int j = 0; j < rcvS.n; j++) if (rcvS[j] == mpirank) selfRecv = nRecS[j];
+
+// Encadrement et non egalite : la boite destination de mon rang est celle de
+// mon maillage LOCAL gonflee de h, et un element de la couche du cover peut
+// avoir son barycentre au dela. La borne basse reste exacte -- tout element
+// local a son barycentre dans la boite locale -- et garde tout son pouvoir
+// de detection.
+int badSelfFrag = 0;
+if (selfSent < Loc1.nt || selfSent > Cov1.nt) badSelfFrag = 1;
+if (selfRecv < Loc1.nt || selfRecv > Cov1.nt) badSelfFrag = 1;
+int gBadSelfFrag = 0;
+mpiAllReduce(badSelfFrag, gBadSelfFrag, mpiCommWorld, mpiMAX);
+
+if (mpirank == 0)
+  cout << "  [H auto-fragment]      rang 0 : emis " << selfSent
+       << " / recus " << selfRecv << "   dans [" << Loc1.nt << ", " << Cov1.nt << "]"
+       << "   => " << (gBadSelfFrag == 0 ? "PASS" : "FAIL") << endl;
+assert(gBadSelfFrag == 0);
+
+// --- I : cas disjoint, sans blocage ----------------------------------------
+int[int] nEnv3(0), nRec3(0);
+transferFragmentCounts(DTh1, DTh3, nEnv3, nRec3);
+
+int loc3b = 0;
+for (int i = 0; i < nEnv3.n; i++) loc3b += nEnv3[i];
+for (int j = 0; j < nRec3.n; j++) loc3b += nRec3[j];
+int tot3b = 0;
+mpiAllReduce(loc3b, tot3b, mpiCommWorld, mpiSUM);
+
+if (mpirank == 0)
+  cout << "  [I cas disjoint]       elements transferes = " << tot3b
+       << "   => " << (tot3b == 0 ? "PASS" : "FAIL") << endl;
+assert(tot3b == 0);
+
+// =======================================================================
+//  JALON 3 : interpolation et accumulation
+// =======================================================================
+
+mesh3 Loc2 = DTh2.local;
+mesh3 Loc4 = DTh4.local;
+fespace V1(Loc1, P1);
+fespace V2(Loc2, P1);
+fespace V4(Loc4, P1);
+
+// La numerotation de V1 coincide avec celle du GFESpace(P1) construit dans
+// transferP1 : meme objet maillage (DTh1.local), meme EF, BuildDFNumbering
+// deterministe.
+V1 uOne = 1.0;
+
+// --- J : couverture exacte -------------------------------------------------
+V4 cover = 0;
+transferP1(DTh1, uOne[], DTh4, cover[]);
+
+real errCov = 0;
+for (int i = 0; i < cover[].n; i++)
+  errCov = max(errCov, abs(cover[][i] - 1.0));
+real gErrCov = 0;
+mpiAllReduce(errCov, gErrCov, mpiCommWorld, mpiMAX);
+
+if (mpirank == 0)
+  cout << "  [J couverture exacte]  max|sum(chi) - 1| = " << gErrCov
+       << "   => " << (gErrCov < 1e-10 ? "PASS" : "FAIL") << endl;
+assert(gErrCov < 1e-10);
+
+// --- K : fonction affine ---------------------------------------------------
+V1 uAff = 1 + x + 2*y + 3*z;
+V4 got = 0;
+transferP1(DTh1, uAff[], DTh4, got[]);
+
+V4 want = 1 + x + 2*y + 3*z;
+real errAff = 0;
+for (int i = 0; i < got[].n; i++)
+  errAff = max(errAff, abs(got[][i] - want[][i]));
+real gErrAff = 0;
+mpiAllReduce(errAff, gErrAff, mpiCommWorld, mpiMAX);
+
+if (mpirank == 0)
+  cout << "  [K fonction affine]    erreur Linf = " << gErrAff
+       << "   => " << (gErrAff < 1e-10 ? "PASS" : "FAIL") << endl;
+assert(gErrAff < 1e-10);
+
+// --- L : couverture partielle ----------------------------------------------
+V2 part = 0;
+transferP1(DTh1, uOne[], DTh2, part[]);
+
+V2 px = x, py = y, pz = z;
+real band = 2.0 * Loc1.hmax;
+real errIn = 0, errOut = 0;
+int nIn = 0, nOut = 0;
+for (int i = 0; i < part[].n; i++) {
+  real a = px[][i], b = py[][i], c = pz[][i];
+  if (a > band && a < 1 - band && b > band && b < 1 - band && c > band && c < 1 - band) {
+    errIn = max(errIn, abs(part[][i] - 1.0));
+    nIn++;
+  }
+  if (a > 1 + band || b > 1 + band || c > 1 + band) {
+    errOut = max(errOut, abs(part[][i]));
+    nOut++;
+  }
+}
+real gErrIn = 0, gErrOut = 0;
+int gnIn = 0, gnOut = 0;
+mpiAllReduce(errIn, gErrIn, mpiCommWorld, mpiMAX);
+mpiAllReduce(errOut, gErrOut, mpiCommWorld, mpiMAX);
+mpiAllReduce(nIn, gnIn, mpiCommWorld, mpiSUM);
+mpiAllReduce(nOut, gnOut, mpiCommWorld, mpiSUM);
+
+if (mpirank == 0)
+  cout << "  [L couverture part.]   dedans " << gnIn << " DDL, err = " << gErrIn
+       << " ; dehors " << gnOut << " DDL, err = " << gErrOut
+       << "   => " << (gErrIn < 1e-10 && gErrOut < 1e-10 && gnIn > 0 && gnOut > 0 ? "PASS" : "FAIL")
+       << endl;
+assert(gnIn > 0 && gnOut > 0);      // sinon le test serait vacuous
+assert(gErrIn < 1e-10);
+assert(gErrOut < 1e-10);
+
+// =======================================================================
+//  JALON 4 : liaison langage (interpolateD)
+// =======================================================================
+//
+//  Une fonction EF sur fespace DISTRIBUE n'accepte ni initialisation ni
+//  affectation par expression sur cette branche. On porte donc les valeurs
+//  par une fonction EF sur le fespace LOCAL, qui partage exactement la
+//  numerotation : v_dfes::update() construit son GFESpace sur DTh->LocalMesh
+//  avec le meme EF. L'assertion ndof == ndof le verifie a chaque bloc.
+//
+//   M.  Degres croises sur un champ affine, exact dans tout espace de degre
+//       >= 1 : l'erreur doit rester au niveau de l'arrondi. nc6 = 6 n'est pas
+//       commensurable avec nc5 = 10 sur [0.25,0.75], donc les DDL ne
+//       coincident pas et la geometrie est reellement exercee -- c'est
+//       l'erreur commise puis corrigee au bloc K.
+//   N.  Couverture (u = 1) en degre superieur. En P1 destination,
+//       interpolatePoU court-circuite (lgmat.cpp:1342) ; en P2 c'est le
+//       chemin long, une matrice d'interpolation appliquee a la PoU, qui
+//       n'avait jamais ete exerce.
+//   O.  overlap = 0 : interpolatePoU emprunte alors buildInterfaceDofList
+//       (lgmat.cpp:1379), second chemin distinct jamais exerce.
+
+mesh3 L5 = DTh5.local, L6 = DTh6.local;
+
+// --- M : degres croises, champ affine ---------------------------------------
+{
+  fespace WdS1(DTh5, P2);  fespace WlS1(L5, P2);
+  fespace WdD1(DTh6, P1);  fespace WlD1(L6, P1);
+  assert(WdS1.ndof == WlS1.ndof && WdD1.ndof == WlD1.ndof);
+  WlS1 uS = 1 + x + 2*y + 3*z;
+  WlD1 uD = 0;
+  interpolateD(WdS1, uS[], WdD1, uD[]);
+  WlD1 ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < uD[].n; i++) eLoc = max(eLoc, abs(uD[][i] - ref[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [M P2 -> P1]        erreur Linf = " << eGlob
+         << "   => " << (eGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10);
+}
+{
+  fespace WdS2(DTh5, P1);  fespace WlS2(L5, P1);
+  fespace WdD2(DTh6, P2);  fespace WlD2(L6, P2);
+  assert(WdS2.ndof == WlS2.ndof && WdD2.ndof == WlD2.ndof);
+  WlS2 uS = 1 + x + 2*y + 3*z;
+  WlD2 uD = 0;
+  interpolateD(WdS2, uS[], WdD2, uD[]);
+  WlD2 ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < uD[].n; i++) eLoc = max(eLoc, abs(uD[][i] - ref[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [M P1 -> P2]        erreur Linf = " << eGlob
+         << "   => " << (eGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10);
+}
+// P3 et P4 ne sont pas des EF 3D de base (ils exigent un plugin) : la paire
+// de degres la plus ecartee disponible sans dependance est P1b -> P1dc, qui
+// croise en plus une base a bulle et une base discontinue.
+{
+  fespace WdS3(DTh5, P1b);  fespace WlS3(L5, P1b);
+  fespace WdD3(DTh6, P1dc); fespace WlD3(L6, P1dc);
+  assert(WdS3.ndof == WlS3.ndof && WdD3.ndof == WlD3.ndof);
+  WlS3 uS = 1 + x + 2*y + 3*z;
+  WlD3 uD = 0;
+  interpolateD(WdS3, uS[], WdD3, uD[]);
+  WlD3 ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < uD[].n; i++) eLoc = max(eLoc, abs(uD[][i] - ref[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [M P1b -> P1dc]        erreur Linf = " << eGlob
+         << "   => " << (eGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10);
+}
+
+// --- N : couverture en degre superieur ---------------------------------------
+{
+  fespace WdS4(DTh5, P1);  fespace WlS4(L5, P1);
+  fespace WdD4(DTh6, P2);  fespace WlD4(L6, P2);
+  WlS4 one = 1.0;
+  WlD4 cov = 0;
+  interpolateD(WdS4, one[], WdD4, cov[]);
+  real cLoc = 0;
+  for (int i = 0; i < cov[].n; i++) cLoc = max(cLoc, abs(cov[][i] - 1.0));
+  real cGlob = 0;
+  mpiAllReduce(cLoc, cGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [N P1 -> P2]  max|sum(chi) - 1| = " << cGlob
+         << "   => " << (cGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(cGlob < 1e-10);
+}
+{
+  fespace WdS5(DTh5, P2);  fespace WlS5(L5, P2);
+  fespace WdD5(DTh6, P1);  fespace WlD5(L6, P1);
+  WlS5 one = 1.0;
+  WlD5 cov = 0;
+  interpolateD(WdS5, one[], WdD5, cov[]);
+  real cLoc = 0;
+  for (int i = 0; i < cov[].n; i++) cLoc = max(cLoc, abs(cov[][i] - 1.0));
+  real cGlob = 0;
+  mpiAllReduce(cLoc, cGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [N P2 -> P1]  max|sum(chi) - 1| = " << cGlob
+         << "   => " << (cGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(cGlob < 1e-10);
+}
+{
+  fespace WdS6(DTh5, P2);  fespace WlS6(L5, P2);
+  fespace WdD6(DTh6, P2);  fespace WlD6(L6, P2);
+  WlS6 one = 1.0;
+  WlD6 cov = 0;
+  interpolateD(WdS6, one[], WdD6, cov[]);
+  real cLoc = 0;
+  for (int i = 0; i < cov[].n; i++) cLoc = max(cLoc, abs(cov[][i] - 1.0));
+  real cGlob = 0;
+  mpiAllReduce(cLoc, cGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [N P2 -> P2]  max|sum(chi) - 1| = " << cGlob
+         << "   => " << (cGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(cGlob < 1e-10);
+}
+
+// --- O : overlap = 0 ----------------------------------------------------------
+//  Ce bloc a servi a diagnostiquer puis a valider deux correctifs successifs.
+//  Historique, car il documente ce que chaque assertion protege :
+//
+//   1. Avant renormalisation : min(cover) = 0.361 sur cette paire. Un DDL
+//      destination sur une interface source n'etait localise par Find
+//      (inside = 1) que dans une partie des fragments y portant un chi non
+//      nul. Repare par dstU /= cover.
+//   2. Restait 1 DDL sur 114 entierement manque -- cover = 0, aucun fragment
+//      ne le contenait -- portant a lui seul l'erreur affine de 3.92. Cause :
+//      le point etait exactement sur une face du maillage source, donc sur le
+//      bord de TOUS les maillages locaux a recouvrement nul, et le repli
+//      GenericDataFindBoundary de Find (GQuadTree.cpp:990-1020) n'y est pas
+//      fiable. Repare en decoupant les fragments dans CoverMesh : la couche
+//      supplementaire rend le point strictement interieur. Ses DDL portent
+//      zero, chi y etant nul, donc somme_r chi_r(v) = 1 est preservee.
+//
+//  O1 verifie que la PoU elle-meme est saine a ov = 0 (elle l'a toujours ete).
+//  O2 interdit le sur-comptage. O3 et O4 sont les temoins du correctif : ils
+//  doivent rester a zero et a la precision machine.
+{
+  mesh3 L5z = DTh5z.local, L6z = DTh6z.local;
+  fespace WdS7(DTh5z, P1);  fespace WlS7(L5z, P1);
+  fespace WdD7(DTh6z, P1);  fespace WlD7(L6z, P1);
+
+  // O1 : transfert de DTh5z vers lui-meme. Les DDL destination SONT les DDL
+  // source, aucune interpolation n'intervient : on lit somme(chi) pure.
+  WlS7 one = 1.0, self = 0;
+  interpolateD(WdS7, one[], WdS7, self[]);
+  real sLoc = 0;
+  for (int i = 0; i < self[].n; i++) sLoc = max(sLoc, abs(self[][i] - 1.0));
+  real sGlob = 0;
+  mpiAllReduce(sLoc, sGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [O1 PoU a ov = 0]       max|somme(chi) - 1| = " << sGlob
+         << "   => " << (sGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(sGlob < 1e-10);
+
+  // O2 et O3 : couverture croisee Th5 -> Th6 a recouvrement nul.
+  WlD7 cov = 0;
+  interpolateD(WdS7, one[], WdD7, cov[]);
+  real xLoc = 0;
+  int missLoc = 0;
+  for (int i = 0; i < cov[].n; i++) {
+    xLoc = max(xLoc, cov[][i]);
+    if (abs(cov[][i] - 1.0) > 1e-10) missLoc++;
+  }
+  real xGlob = 0;
+  int missGlob = 0;
+  mpiAllReduce(xLoc, xGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(missLoc, missGlob, mpiCommWorld, mpiSUM);
+
+  if (mpirank == 0)
+    cout << "  [O2 pas de sur-comptage] max(cov) = " << xGlob
+         << "   => " << (xGlob < 1 + 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(xGlob < 1 + 1e-10);
+
+  if (mpirank == 0)
+    cout << "  [O3 couverture ov = 0]  DDL manques = " << missGlob << " / " << WdD7.ndof
+         << "   => " << (missGlob == 0 ? "PASS" : "FAIL") << endl;
+  assert(missGlob == 0);
+
+  // O4 : le symptome d'origine. Avant correctif l'erreur valait 3.92, portee
+  // par le seul DDL manque.
+  WlS7 uS = 1 + x + 2*y + 3*z;
+  WlD7 uD = 0;
+  interpolateD(WdS7, uS[], WdD7, uD[]);
+  WlD7 ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < uD[].n; i++) eLoc = max(eLoc, abs(uD[][i] - ref[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [O4 affine a ov = 0]    erreur Linf = " << eGlob
+         << "   => " << (eGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10);
+}
+
+// --- E : la symetrie tient aussi sur partition metis ---------------------
+{
+  mesh3 Tm1 = cube(ncm, ncm, ncm);
+  mesh3 Tm2 = cube(ncm, ncm, ncm, [0.5 + x, 0.5 + y, 0.5 + z]);
+  Dmesh3 DM1 = distribute(Tm1, overlap = ov);
+  Dmesh3 DM2 = distribute(Tm2, overlap = ov);
+
+  int[int] sM(n*n), rM(n*n);
+  PAIRMATRIX(DM1, DM2, sM, rM)
+
+  int badSymM = 0;
+  for (int a = 0; a < n; a++)
+    for (int b = 0; b < n; b++)
+      if (sM[a*n + b] != rM[b*n + a]) badSymM++;
+
+  int totM = 0;
+  for (int i = 0; i < n*n; i++) totM += sM[i];
+
+  if (mpirank == 0)
+    cout << "  [E metis / symetrie]   incoherences = " << badSymM
+         << "   remplissage = " << totM << " / " << n*n
+         << " (non asserte : depend du partitionneur)"
+         << "   => " << (badSymM == 0 ? "PASS" : "FAIL") << endl;
+  assert(badSymM == 0);
+}
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0)
+  cout << "== jalons 1 a 4 : toutes les assertions passent ==" << endl;
