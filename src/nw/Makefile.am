@@ -46,8 +46,8 @@ ffglut_DEPENDENCIES = ../libMesh/libMesh.a
 ffglut_LDADD = ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@
 ffglut_LIBS =
 
-FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp
-FreeFem___SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp
+FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp ../fflib/transferInterpolate.cpp
+FreeFem___SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp ../fflib/compositeFESpace.cpp ../fflib/distributeMesh.cpp ../fflib/transferInterpolate.cpp
 FreeFem___LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
 FreeFem___nw_LDADD = ../lglib/liblg.a ../fflib/libff.a  @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a

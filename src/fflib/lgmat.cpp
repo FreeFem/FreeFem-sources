@@ -1538,6 +1538,16 @@ template void v_dfes<MeshL>::buildLoc2globIfNeeded(GFESpace<MeshL>&);
 template void v_dfes<MeshS>::buildNumberingIfNeeded(GFESpace<MeshS>&);
 template void v_dfes<Mesh3>::buildNumberingIfNeeded(GFESpace<Mesh3>&);
 template void v_dfes<MeshL>::buildNumberingIfNeeded(GFESpace<MeshL>&);
+template KN<double> interpolatePoU<Mesh3>(const DistributedMesh<Mesh3>&, const GFESpace<Mesh3>&);
+template KN<double> interpolatePoU<MeshS>(const DistributedMesh<MeshS>&, const GFESpace<MeshS>&);
+template KN<double> interpolatePoU<MeshL>(const DistributedMesh<MeshL>&, const GFESpace<MeshL>&);
+template KN<long> restrictDOFPartial<Mesh3>(const GFESpace<Mesh3>&, const GFESpace<Mesh3>&, const KN<int>&);
+template KN<long> restrictDOFPartial<MeshS>(const GFESpace<MeshS>&, const GFESpace<MeshS>&, const KN<int>&);
+template KN<long> restrictDOFPartial<MeshL>(const GFESpace<MeshL>&, const GFESpace<MeshL>&, const KN<int>&);
+template KN<long> restrictDOF<Mesh3>(const GFESpace<Mesh3>&, const GFESpace<Mesh3>&, const KN<int>&);
+template KN<long> restrictDOF<MeshS>(const GFESpace<MeshS>&, const GFESpace<MeshS>&, const KN<int>&);
+template KN<long> restrictDOF<MeshL>(const GFESpace<MeshL>&, const GFESpace<MeshL>&, const KN<int>&);
+
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
 {

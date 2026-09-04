@@ -43,6 +43,7 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../lglib/lg.tab.cpp \
 	/compositeFESpace.cpp \
 	/distributeMesh.cpp \
+	/transferInterpolate.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
 LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@ @SCOTCH_CORE_LIBS@ @PARMETIS_CORE_LIBS@
@@ -66,4 +67,7 @@ compositeFESpace.cpp: ../fflib/compositeFESpace.cpp
 	cp $^ .
 
 distributeMesh.cpp: ../fflib/distributeMesh.cpp
+	cp $^ .
+
+transferInterpolate.cpp: ../fflib/transferInterpolate.cpp
 	cp $^ .

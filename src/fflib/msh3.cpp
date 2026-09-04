@@ -10028,6 +10028,9 @@ template MeshS* buildInterfaceSubmesh<MeshS>(const DistributedMesh<MeshS>&, int,
 template Mesh3* buildInterfaceSubmesh<Mesh3>(const DistributedMesh<Mesh3>&, int, KN<int>&);
 template MeshL* buildInterfaceSubmesh<MeshL>(const DistributedMesh<MeshL>&, int, KN<int>&);
 
+template KN<int> n2oFromSplit<Mesh3>(const Mesh3&, const Mesh3&, const KN<int>&);
+template KN<int> n2oFromSplit<MeshS>(const MeshS&, const MeshS&, const KN<int>&);
+template KN<int> n2oFromSplit<MeshL>(const MeshL&, const MeshL&, const KN<int>&);
 
 template <class Mesh>
 class DistributeMesh : public OneOperator {
@@ -10606,6 +10609,10 @@ static void Load_Init_msh3( ) {
   registerDistributedMeshOps<MeshS>();
   registerDistributedMeshOps<Mesh3>();
   registerDistributedMeshOps<MeshL>();
+
+  registerTransferInterpolateOps<MeshS>();
+  registerTransferInterpolateOps<Mesh3>();
+  registerTransferInterpolateOps<MeshL>();
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
