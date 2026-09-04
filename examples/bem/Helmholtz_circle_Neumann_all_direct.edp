@@ -69,6 +69,7 @@ plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
 // Solve formulation of second kind 
 Uh<complex> uSecondKind, bSecondKind;
 bSecondKind[] = HSecondKindRHS*gN[];
+bSecondKind[] *=-1;
 uSecondKind[] = HSecondKind^-1*bSecondKind[];
 plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");
 
@@ -125,7 +126,7 @@ plot(vFirstKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="First kind");
 // Solution for formulation of second kind
 UhOut<complex> vSecondKind1,vSecondKind2;
 vSecondKind1[] = HSLPot*gN[];
-vSecondKind2[] = HDLPot*uFirstKind[];
+vSecondKind2[] = HDLPot*uSecondKind[];
 vSecondKind1[] += vSecondKind2[]+vinc[];
 UhOut vSecondKindabs = abs(vSecondKind1);
 
