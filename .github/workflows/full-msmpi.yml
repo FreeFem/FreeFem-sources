@@ -1,4 +1,4 @@
-# Full version of FreeFem, using Microsoft MS-MPI
+# Full version of FreeFEM, using Microsoft MS-MPI
 name: Full version MS-MPI
 
 on:
@@ -47,11 +47,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:  ${{ fromJson(inputs.windows_versions || '[2025]') }}
-        build_type: ${{ fromJson(inputs.build_types || '["debug", "release"]') }}
+        windows_version: ${{ fromJSON(inputs.windows_versions || '[2025]') }}
+        build_type: ${{ fromJSON(inputs.build_types || '["debug", "release"]') }}
 
-    name: Windows Server ${{ matrix.version }} ${{ matrix.build_type }} - ${{github.workflow}}
-    runs-on: windows-${{ matrix.version }}
+    name: Windows Server ${{ matrix.windows_version }} ${{ matrix.build_type }} - ${{github.workflow}}
+    runs-on: windows-${{ matrix.windows_version }}
 
     defaults:
       run:
@@ -124,7 +124,7 @@ jobs:
         with:
           path: |
             ${{ steps.petsc-info.outputs.win_home }}/freefem/ff-petsc
-          key: "petsc-Full version MS-MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.cfg.opts }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
+          key: "petsc-Full version MS-MPI-${{ steps.petsc-info.outputs.image }}-${{ matrix.build_type }}-${{ steps.petsc-info.outputs.version }}-${{ hashFiles('3rdparty/ff-petsc/Makefile') }}"
 
       - name: Configure
         run: |
