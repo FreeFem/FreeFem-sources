@@ -269,49 +269,74 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
         if (fragOut[i]) fragOut[i]->destroy();
 }
 
+static KN<int> dataInterpolate(int N) {
+    KN<int> data(4 + N);
+    data[0] = 0;
+    data[1] = op_id;
+    data[2] = 1;
+    data[3] = 0;
+    for (int c = 0; c < N; ++c) data[4 + c] = c; 
+    return data;
+}
+
+ template<class Mesh, class R>
+ static void accumulateFragment(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const KN<R>& payload, const int* data, KN<R>& dstU, KN<R>& cover) {
+    const int nd = fragVh.NbOfDF;
+    ffassert(payload.n == 2*nd);
+
+    MatriceMorse<double>* M =
+        buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, fragVh, (int*)data);
+
+    for (size_t k = 0; k < M->nnz; ++k) {
+        const int ii = M->i[k], cc = M->j[k];
+        dstU[ii] += M->aij[k] * payload[cc];
+        cover[ii] += M->aij[k] * payload[nd+cc];
+    }
+    delete M;
+ }
+
 template<class Mesh, class R>
 static void interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
                                    const GFESpace<Mesh>& srcVh, const KN<R>& srcU,
                                    const DistributedMesh<Mesh>& Ddst,
                                    const GFESpace<Mesh>& dstVh, KN<R>& dstU)
 {
-    ffassert(srcVh.N == dstVh.N);          // arite vectorielle : rejet explicite
+    ffassert(srcVh.N == dstVh.N);
     ffassert(srcVh.TFE.N() == 1 && dstVh.TFE.N() == 1);
     ffassert(srcU.n == srcVh.NbOfDF);
     ffassert(dstU.n == dstVh.NbOfDF);
+
+    const int N = dstVh.N;
+    KN<int> data = dataInterpolate(N);
+    dstU = R();
+    KN<R> cover(dstU.n, R());
+    const long saveSearch = searchMethod;
+    searchMethod = 0;
+
+    const int nproc = mpisize > 0 ? (int)mpisize : 1;
+    if (nproc == 1) {
+        KN<double> chi = interpolatePoU(Dsrc, srcVh);
+        KN<R> payload(2*srcVh.NbOfDF);
+        for (int d = 0; d < srcVh.NbOfDF; ++d){
+            payload[d] = srcU[d]*chi[d];
+            payload[srcVh.NbOfDF + d] = R(chi[d]);
+        }
+        accumulateFragment(dstVh, srcVh, payload, data, dstU, cover);
+        searchMethod = saveSearch;
+        for (int i = 0; i < dstU.n; ++i){
+            if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
+        }
+        return;
+    }
 
     KN<int> snd, rcv;
     std::vector<RecvFragment<Mesh,R> > in;
     collectFragments(Dsrc, srcVh, srcU, Ddst, snd, rcv, in);
 
-    dstU = R();                            // addMatMul et l'accumulation sont ADDITIFS
-    KN<R> cover(dstU.n, R());
-    const long saveSearch = searchMethod;  // GenericMesh.hpp:43
-    searchMethod = 0;
-
-    const int N = dstVh.N;
-    KN<int> data(4 + N);
-    data[0] = 0;                           // transpose
-    data[1] = op_id;                       // valeur, pas derivee
-    data[2] = 1;                           // inside : VOIR CI-DESSOUS
-    data[3] = 0;
-    for (int c = 0; c < N; ++c) data[4 + c] = c;   // iU2V : identite
-
     for (size_t j = 0; j < in.size(); ++j) {
         if (!in[j].mesh) continue;
         GFESpace<Mesh> fragVh(*in[j].mesh, *srcVh.TFE[0]);
-        const int nd = fragVh.NbOfDF;
-        ffassert(in[j].dof.n == 2*nd);
-
-        MatriceMorse<double>* M =
-            buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, fragVh, (int*)data);
-
-        for (size_t k = 0; k < M->nnz; ++k) {
-            const int ii = M->i[k], cc = M->j[k];
-            dstU[ii] += M->aij[k] * in[j].dof[cc];
-            cover[ii] += M->aij[k] * in[j].dof[nd+cc];
-        }
-        delete M;
+        accumulateFragment(dstVh, fragVh, in[j].dof, data, dstU, cover);
     }
     for (int i = 0; i < dstU.n; ++i)
         if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
