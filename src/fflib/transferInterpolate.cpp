@@ -153,23 +153,17 @@ static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const KN<R>& scaledU
     return sub;
 }
 
-template<class Mesh, class R>
-struct RecvFragment {
-    Mesh*  mesh = nullptr;   
-    KN<R>  dof;             
-};
-
 #ifdef PARALLELE
-template<class Mesh, class R>
+template<class Mesh, class R, class OnFragment>
 static void exchangeFragments(pcommworld comm,
                               const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
-                              const std::vector<Mesh*>& fragOut,      // aligne sur sendToRanks
-                              const std::vector<KN<R> >& subOut,      // idem, .n == 0 si vide
-                              std::vector<RecvFragment<Mesh,R> >& in) // aligne sur recvFromRanks
+                              const std::vector<Mesh*>& fragOut,      
+                              const std::vector<KN<R> >& subOut,   
+                              OnFragment&& onArrive) // onArrive(int j, Mesh&, const KN<R>&)
 {
     MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
     const int nS = sendToRanks.n, nR = recvFromRanks.n;
-    in.assign(nR, RecvFragment<Mesh,R>());
+
 
     std::vector<long long> hdrIn(2*nR, 0), hdrOut(2*nS, 0);
     std::vector<Serialize*> ser(nS, nullptr);
@@ -184,79 +178,115 @@ static void exchangeFragments(pcommworld comm,
             hdrOut[2*i]   = (long long)ser[i]->size();
             hdrOut[2*i+1] = (long long)subOut[i].n;
             ffassert(hdrOut[2*i] < (long long)INT_MAX);        // un seul Isend, count en int
+            ffassert(hdrOut[2*i+1] * (long long)sizeof(R) < (long long)INT_MAX);
         }
         MPI_Isend(&hdrOut[2*i], 2, MPI_LONG_LONG, sendToRanks[i], TAG_XFER_HDR, cw, &rqH[nR+i]);
     }
     MPI_Waitall(nR + nS, rqH.data(), MPI_STATUSES_IGNORE);
 
     std::vector<Serialize*> bufIn(nR, nullptr);
-    std::vector<MPI_Request> rq;
-    rq.reserve(2*(nR + nS));
+    std::vector<KN<R> >     dofIn(nR);          // construits par defaut : unset,
+                                                // donc resize() alloue bien
+    std::vector<int>        remaining(nR, 0);
 
+    std::vector<MPI_Request> rqR;   rqR.reserve(2*nR);
+    std::vector<int>         owner; owner.reserve(2*nR);
+    std::vector<MPI_Request> rqS;   rqS.reserve(2*nS);
+
+    // Tous les Irecv AVANT les Isend 
     for (int j = 0; j < nR; ++j) {
         if (hdrIn[2*j] == 0) continue;
         bufIn[j] = new Serialize((size_t)hdrIn[2*j], Fem2D::GenericMesh_magicmesh);
-        in[j].dof.resize((long)hdrIn[2*j+1]);
-        rq.resize(rq.size() + 2);
+        dofIn[j].resize((long)hdrIn[2*j+1]);
+        remaining[j] = 2;
+        rqR.resize(rqR.size() + 2);
+        owner.push_back(j);
+        owner.push_back(j);
         MPI_Irecv((char*)*bufIn[j], (int)hdrIn[2*j], MPI_BYTE,
-                  recvFromRanks[j], TAG_XFER_BODY, cw, &rq[rq.size()-2]);
-        MPI_Irecv((R*)in[j].dof, (int)(hdrIn[2*j+1]*sizeof(R)), MPI_BYTE,
-                  recvFromRanks[j], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
+                  recvFromRanks[j], TAG_XFER_BODY, cw, &rqR[rqR.size()-2]);
+        MPI_Irecv((R*)dofIn[j], (int)(hdrIn[2*j+1]*sizeof(R)), MPI_BYTE,
+                  recvFromRanks[j], TAG_XFER_DOF, cw, &rqR[rqR.size()-1]);
     }
     for (int i = 0; i < nS; ++i) {
         if (!ser[i]) continue;
-        rq.resize(rq.size() + 2);
+        rqS.resize(rqS.size() + 2);
         MPI_Isend((char*)*ser[i], (int)hdrOut[2*i], MPI_BYTE,
-                  sendToRanks[i], TAG_XFER_BODY, cw, &rq[rq.size()-2]);
+                  sendToRanks[i], TAG_XFER_BODY, cw, &rqS[rqS.size()-2]);
         MPI_Isend((R*)subOut[i], (int)(subOut[i].n*sizeof(R)), MPI_BYTE,
-                  sendToRanks[i], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
+                  sendToRanks[i], TAG_XFER_DOF, cw, &rqS[rqS.size()-1]);
     }
-    if (!rq.empty()) MPI_Waitall((int)rq.size(), rq.data(), MPI_STATUSES_IGNORE);
 
-    // ---- reconstruction ----------------------------------------------
-    for (int j = 0; j < nR; ++j) {
-        if (!bufIn[j]) continue;
-        in[j].mesh = new Mesh(*bufIn[j]);
-        in[j].mesh->BuildGTree();
-        delete bufIn[j];
+    auto cleanup = [&]() {
+        if (!rqR.empty()) MPI_Waitall((int)rqR.size(), rqR.data(), MPI_STATUSES_IGNORE);
+        if(!rqS.empty()) MPI_Waitall((int)rqS.size(), rqS.data(), MPI_STATUSES_IGNORE);
+        for (int i = 0; i < nS; ++i) { delete ser[i]; ser[i] = nullptr; }
+        for (int j = 0; j < nR; ++j) { delete bufIn[j]; bufIn[j] = nullptr; }
+    };
+
+    // --- boucle d'arrivee : on interpole pendant que le reste arrive --------
+    try {
+        size_t done = 0;
+        while (done < rqR.size()) {
+            int t = MPI_UNDEFINED;
+            MPI_Waitany((int)rqR.size(), rqR.data(), &t, MPI_STATUS_IGNORE);
+            if (t == MPI_UNDEFINED) break;          // plus aucune requete active
+            ++done;
+            const int j = owner[t];
+            if (--remaining[j] > 0) continue;       // l'autre moitie n'est pas arrivee
+
+            Mesh* frag = new Mesh(*bufIn[j]);
+            frag->BuildGTree();
+            delete bufIn[j];
+            bufIn[j] = nullptr;
+
+            onArrive(j, *frag, dofIn[j]);
+
+            frag->destroy();                        // pic memoire = UN fragment
+            dofIn[j].resize(0);                     // libere le vecteur DDL aussitot
+        }
     }
-    for (int i = 0; i < nS; ++i) delete ser[i];
+    catch(...) {
+        cleanup();
+        throw;
+    }
+    cleanup();
 }
 #else
-template<class Mesh, class R>
+template<class Mesh, class R, class OnFragment>
 static void exchangeFragments(pcommworld,
                               const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
                               const std::vector<Mesh*>& fragOut,
                               const std::vector<KN<R> >& subOut,
-                              std::vector<RecvFragment<Mesh,R> >& in)
+                              OnFragment&& onArrive)
 {
-    in.assign(recvFromRanks.n, RecvFragment<Mesh,R>());
-    if (recvFromRanks.n == 0 || sendToRanks.n == 0) return;
-    ffassert(recvFromRanks.n == 1 && sendToRanks.n == 1);
-    if (!fragOut[0]) return;
-
-    Serialize s = fragOut[0]->serialize();
-    in[0].mesh = new Mesh(s);
-    in[0].mesh->BuildGTree();
-    in[0].dof.resize(subOut[0].n);
-    in[0].dof = subOut[0];
+    if (recvFromRanks.n && sendToRanks.n && fragOut[0]) {
+        Serialize s = fragOut[0]->serialize();
+        Mesh* frag = new Mesh(s);
+        frag->BuildGTree();
+        onArrive(0, *frag, subOut[0]);
+        frag->destroy();
+    }
 }
 #endif
 
-template<class Mesh1, class Mesh2, class R>
+template<class Mesh1, class Mesh2, class R, class OnFragment>
 static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
                              const GFESpace<Mesh1>& srcVh, const KN<R>& srcU,
                              const DistributedMesh<Mesh2>& Ddst,
                              KN<int>& sendToRanks, KN<int>& recvFromRanks,
-                             std::vector<RecvFragment<Mesh1,R> >& in, KN<long>* sentCounts = nullptr)
+                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr)
 {
     std::vector<BBox> allSrc, allDst;
     computeOverlapRankPairs(Dsrc.comm, Dsrc, Ddst, sendToRanks, recvFromRanks, allSrc, allDst);
+    if (recvCounts) { recvCounts->resize(recvFromRanks.n); *recvCounts = 0L; }
     const Mesh1* srcGeom = Dsrc.CoverMesh ? Dsrc.CoverMesh : Dsrc.LocalMesh;
     KN<int> cover2local(srcGeom->nt, -1);
     if (Dsrc.CoverMesh){
-        for (int k = 0; k < Dsrc.localToCoverElement.n; ++k)
+        ffassert(Dsrc.localToCoverElement.n <= srcGeom->nt);
+        for (int k = 0; k < Dsrc.localToCoverElement.n; ++k){
+            ffassert(Dsrc.localToCoverElement[k] >= 0 && Dsrc.localToCoverElement[k] < srcGeom->nt);
             cover2local[Dsrc.localToCoverElement[k]] = k;
+        }
     }
     else{
         for (int k = 0; k < srcGeom->nt; ++k) cover2local[k] = k;
@@ -283,7 +313,7 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
         }
     }
 
-    exchangeFragments(Dsrc.comm, sendToRanks, recvFromRanks, fragOut, subOut, in);
+    exchangeFragments(Dsrc.comm, sendToRanks, recvFromRanks, fragOut, subOut, onArrive);
 
     for (int i = 0; i < sendToRanks.n; ++i)
         if (fragOut[i]) fragOut[i]->destroy();
@@ -298,6 +328,12 @@ static KN<int> dataInterpolate(int N) {
     for (int c = 0; c < N; ++c) data[4 + c] = c; 
     return data;
 }
+
+struct SearchMethodGuard {
+    long saved;
+    SearchMethodGuard() : saved(searchMethod) { searchMethod = 0; }
+    ~SearchMethodGuard() { searchMethod = saved; }
+};
 
  template<class Mesh, class R>
  static void accumulateFragment(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const KN<R>& payload, const int* data, KN<R>& dstU, KN<R>& cover) {
@@ -332,8 +368,7 @@ static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
     KN<int> data = dataInterpolate(N);
     dstU = R();
     KN<R> cover(dstU.n, R());
-    const long saveSearch = searchMethod;
-    searchMethod = 0;
+    SearchMethodGuard sg;
 
     const int nproc = mpisize > 0 ? (int)mpisize : 1;
     if (nproc == 1) {
@@ -344,7 +379,6 @@ static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
             payload[srcVh.NbOfDF + d] = R(chi[d]);
         }
         accumulateFragment(dstVh, srcVh, payload, data, dstU, cover);
-        searchMethod = saveSearch;
         for (int i = 0; i < dstU.n; ++i){
             if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
         }
@@ -373,28 +407,16 @@ static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
         for (size_t k = 0; k < Mloc->nnz; ++k)
             dstU[Mloc->i[k]] += Mloc->aij[k]*srcU[Mloc->j[k]];
         delete Mloc;
-        searchMethod = saveSearch;
         return XFER_LOCAL;
     }
     delete Mloc;
 
     KN<int> snd, rcv;
-    std::vector<RecvFragment<Mesh,R> > in;
-    collectFragments(Dsrc, srcVh, srcU, Ddst, snd, rcv, in);
+    collectFragments(Dsrc, srcVh, srcU, Ddst, snd, rcv, [&](int, const Mesh& frag, const KN<R>& dof) {GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]); accumulateFragment(dstVh, fragVh, dof, data, dstU, cover);});
 
-    for (size_t j = 0; j < in.size(); ++j) {
-        if (!in[j].mesh) continue;
-        GFESpace<Mesh> fragVh(*in[j].mesh, *srcVh.TFE[0]);
-        accumulateFragment(dstVh, fragVh, in[j].dof, data, dstU, cover);
-    }
-    for (int i = 0; i < dstU.n; ++i)
+    for (int i = 0; i < dstU.n; ++i){
         if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
-
-    searchMethod = saveSearch;
-
-    for (size_t j = 0; j < in.size(); ++j)
-        if (in[j].mesh) in[j].mesh->destroy();
-
+    }
     return XFER_GENERAL;
 }
 
@@ -412,14 +434,7 @@ long transferFragmentCounts(const DistributedMesh<Mesh>** const & Dsrc,
     KN<double> u(srcVh.NbOfDF, 1.0);
 
     KN<int> snd, rcv;
-    std::vector<RecvFragment<Mesh,double> > in;
-    collectFragments(A, srcVh, u, B, snd, rcv, in, nEnvoyes);
-
-    nRecus->resize((long)in.size());
-    for (int j = 0; j < (int)in.size(); ++j) {
-        (*nRecus)[j] = in[j].mesh ? in[j].mesh->nt : 0;
-        if (in[j].mesh) in[j].mesh->destroy();
-    }
+    collectFragments(A, srcVh, u, B, snd, rcv, [&](int j, const Mesh& frag, const KN<double>&) { (*nRecus)[j] = frag.nt; }, nEnvoyes, nRecus);
     return 0L;
 }
 
