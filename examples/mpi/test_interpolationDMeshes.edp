@@ -94,6 +94,17 @@
 //  Les verdicts passent par assert() : bin/test-driver-ff decide sur le
 //  code de retour de FreeFEM, il ne relit pas la chaine FAIL affichee.
 //
+//  NON-DETERMINISME -- a lire avant de s'etonner d'une valeur qui bouge.
+//  Depuis que exchangeFragments interpole a la volee sur MPI_Waitany, les
+//  fragments sont accumules dans leur ORDRE D'ARRIVEE, qui varie d'une
+//  execution a l'autre. L'ordre de sommation dans dstU[i] += change donc, et
+//  les erreurs affichees varient au dernier bit : mesure sur 5 executions
+//  identiques, le bloc K oscille entre 8.88178e-16 et 1.77636e-15.
+//  N'ASSERTEZ JAMAIS UNE VALEUR EXACTE ici -- toutes les assertions
+//  numeriques sont a 1e-10 et doivent le rester. Les blocs qui affichent
+//  0 exact (J, N, O1, O2, O3) le font empiriquement, pas par garantie :
+//  ne transformez pas cette observation en assertion.
+//
 //  Options :
 //    -nc     raffinement de Th1 et Th2                  (defaut 32)
 //    -ncm    raffinement des deux cubes metis du test E  (defaut 8)
