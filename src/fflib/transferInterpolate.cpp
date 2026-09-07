@@ -63,6 +63,26 @@ static bool pointInBox(const BBox& b, const Rd& p) {
     return true;
 }
 
+static bool boxContains(const BBox& outer, const BBox& inner) {
+    if (outer.empty) return false;
+    if (inner.empty) return true;
+    
+    for (int d = 0; d < 3; ++d) {
+        if (inner.pmin[d] < outer.pmin[d] || inner.pmax[d] > outer.pmax[d]) return false;
+    }
+    return true;
+}
+
+static bool coversAllRows(const MatriceMorse<double>* M, int nrow) {
+    KN<int> cnt(nrow, 0);
+    KN<double> row(nrow, 0.0);
+    for (size_t k = 0; k < M->nnz; ++k) { cnt[M->i[k]]++; row[M->i[k]] += M->aij[k]; }
+    for (int i = 0; i < nrow; ++i)
+        if (cnt[i] == 0 || std::abs(row[i] - 1.0) > 1e-12) return false;
+
+    return true;
+}
+
 template<class Mesh1, class Mesh2>
 void computeOverlapRankPairs(pcommworld comm, const DistributedMesh<Mesh1>& Dsrc, const DistributedMesh<Mesh2>& Ddst, KN<int>& sendToRanks, KN<int>& recvFromRanks, std::vector<BBox>& allSrc, std::vector<BBox>& allDst) {
     ffassert(Dsrc.comm == Ddst.comm);
@@ -295,8 +315,10 @@ static KN<int> dataInterpolate(int N) {
     delete M;
  }
 
+ enum TransferPath { XFER_GENERAL = 0, XFER_SINGLE_RANK = 1, XFER_LOCAL = 2 };
+
 template<class Mesh, class R>
-static void interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
+static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
                                    const GFESpace<Mesh>& srcVh, const KN<R>& srcU,
                                    const DistributedMesh<Mesh>& Ddst,
                                    const GFESpace<Mesh>& dstVh, KN<R>& dstU)
@@ -326,8 +348,35 @@ static void interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
         for (int i = 0; i < dstU.n; ++i){
             if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
         }
-        return;
+        return XFER_SINGLE_RANK;
     }
+
+    MatriceMorse<double>* Mloc = nullptr;
+    int localOK = 0;
+    {
+        const BBox bs = rawBoxOf(srcVh.Th), bd = rawBoxOf(dstVh.Th);
+        if (boxContains(bs, bd)) {
+            Mloc = buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, srcVh, (int*)data);
+            localOK = coversAllRows(Mloc, dstU.n) ? 1 : 0;
+        }
+    }
+
+    int globalOK = localOK;
+    #ifdef PARALLELE
+    {
+        MPI_Comm cw = Dsrc.comm ? *(MPI_Comm*)Dsrc.comm : MPI_COMM_WORLD;
+        MPI_Allreduce(&localOK, &globalOK, 1, MPI_INT, MPI_MIN, cw);
+    }
+    #endif
+
+    if (globalOK) {
+        for (size_t k = 0; k < Mloc->nnz; ++k)
+            dstU[Mloc->i[k]] += Mloc->aij[k]*srcU[Mloc->j[k]];
+        delete Mloc;
+        searchMethod = saveSearch;
+        return XFER_LOCAL;
+    }
+    delete Mloc;
 
     KN<int> snd, rcv;
     std::vector<RecvFragment<Mesh,R> > in;
@@ -345,6 +394,8 @@ static void interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
 
     for (size_t j = 0; j < in.size(); ++j)
         if (in[j].mesh) in[j].mesh->destroy();
+
+    return XFER_GENERAL;
 }
 
 
@@ -395,8 +446,8 @@ long transferP1(const DistributedMesh<Mesh>** const & Dsrc, KN<double>* const & 
     GFESpace<Mesh> dstVh(*(**Ddst).LocalMesh, DataFE<Mesh>::P1);
     ffassert(uSrc->n == srcVh.NbOfDF);
     uDst->resize(dstVh.NbOfDF);            // resize, pas operator= : cf. le bug du jalon 2
-    interpolateDistributed(**Dsrc, srcVh, *uSrc, **Ddst, dstVh, *uDst);
-    return 0L;
+    int xfer = interpolateDistributed(**Dsrc, srcVh, *uSrc, **Ddst, dstVh, *uDst);
+    return (long)xfer;
 }
 
 template<class Mesh, class R>
@@ -415,8 +466,8 @@ long interpolateD(v_dfes<Mesh>** const & ppSrc, KN<R>* const & uSrc,
     ffassert(uSrc->n == srcVh.NbOfDF);
     ffassert(uDst->n == dstVh.NbOfDF);
 
-    interpolateDistributed(*pSrc->DTh, srcVh, *uSrc, *pDst->DTh, dstVh, *uDst);
-    return 0L;
+    int xfer = interpolateDistributed(*pSrc->DTh, srcVh, *uSrc, *pDst->DTh, dstVh, *uDst);
+    return (long)xfer;
 }
 
 template<class Mesh>
