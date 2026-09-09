@@ -430,34 +430,9 @@ static void applyWeighted(const MatriceMorse<double>* M, int nd, const KN<R>& pa
 }
 
 template<class R>
-static void applyPlain(const MatriceMorse<double>* M, const KN<R>& u, KN<R>& dstU){
-    for (size_t k = 0; k < M->nnz; ++k)
-        dstU[M->i[k]] += M->aij[k]*u[M->j[k]];
-}
-
-template<class R>
-static void applyWeightedOp(const FragOp& F, int nd, const KN<R>& payload, KN<R>& dstU, KN<double>& cover) {
-    for (long k = 0; k < F.ii.n; ++k) {
-        const int ii = F.ii[k], cc = F.jj[k];
-        dstU[ii] += F.aij[k]*payload[cc];
-        cover[ii] += F.aij[k]*std::real(payload[nd+cc]);
-    }
-}
-
-template<class R>
 static void applyPlainOp(const FragOp& F, const KN<R>& u, KN<R>& dstU){
     for (long k = 0; k < F.ii.n; ++k)
         dstU[F.ii[k]] += F.aij[k]*u[F.jj[k]];
-}
-
-template<class Mesh, class R>
-static void accumulateFragment(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const KN<R>& payload, const int* data, KN<R>& dstU, KN<double>& cover) {
-    const int nd = fragVh.NbOfDF;
-    ffassert(payload.n == 2*nd);
-
-    MatriceMorse<double>* M =buildFragmentMatrix(dstVh, fragVh, data);
-    applyWeighted(M, nd, payload, dstU, cover);
-    delete M;
 }
 
 template<class Mesh>
