@@ -6649,6 +6649,24 @@ void init_lgfem( ) {
                            AddIncrement<const DistributedMesh<MeshL>*>, NotReturnOfthisType);
   zzzfff->Add("DmeshL", atype<const DistributedMesh<MeshL>**>());
 
+  Dcl_TypeandPtr< const TransferPlan<Mesh3>* >(0, 0,
+      ::InitializePtr< const TransferPlan<Mesh3>* >, ::DestroyPtr< const TransferPlan<Mesh3>* >,
+      AddIncrement< const TransferPlan<Mesh3>* >, NotReturnOfthisType);
+  zzzfff->Add("Dtransfer3", atype< const TransferPlan<Mesh3>** >());
+
+  Dcl_TypeandPtr< const TransferPlan<MeshS>* >(0, 0,
+      ::InitializePtr< const TransferPlan<MeshS>* >, ::DestroyPtr< const TransferPlan<MeshS>* >,
+      AddIncrement< const TransferPlan<MeshS>* >, NotReturnOfthisType);
+  zzzfff->Add("DtransferS", atype< const TransferPlan<MeshS>** >());
+
+  Dcl_TypeandPtr< const TransferPlan<MeshL>* >(0, 0,
+      ::InitializePtr< const TransferPlan<MeshL>* >, ::DestroyPtr< const TransferPlan<MeshL>* >,
+      AddIncrement< const TransferPlan<MeshL>* >, NotReturnOfthisType);
+  zzzfff->Add("DtransferL", atype< const TransferPlan<MeshL>** >());
+
+
+
+
   // old --
   //  init FESpace
   TheOperators->Add(
