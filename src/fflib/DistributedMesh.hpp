@@ -7,6 +7,7 @@ typedef void* pcommworld;
 #endif
 
 enum DistributionMode {DM_SCATTER = 0, DM_REPLICATED = 1 };
+enum TransferPath { XFER_GENERAL = 0, XFER_SINGLE_RANK = 1, XFER_LOCAL = 2 };
 
 template <class Mesh>
 class DistributedMesh : public RefCounter {
@@ -48,6 +49,53 @@ public:
 private:
   DistributedMesh(const DistributedMesh &); // pas de construction par copie
    void operator=(const DistributedMesh &);// pas affectation par copy
+};
+
+struct FragInj {
+    int      nd = 0;   // fragVh.NbOfDF : longueur du vecteur a emettre
+    KN<int>  pos;      // indices d dans [0, nd) ayant une image
+    KN<long> src;      // inj[pos[k]], meme longueur que pos
+};
+
+struct FragOp {
+    int        nrow = 0, ncol = 0;
+    KN<int>    ii, jj;
+    KN<double> aij;
+};
+
+template<class Mesh>
+struct TransferPlan : public RefCounter {
+    const DistributedMesh<Mesh>* Dsrc  = nullptr;  
+    const DistributedMesh<Mesh>* Ddst  = nullptr;  
+    const GFESpace<Mesh>*        srcVh = nullptr;   
+    const GFESpace<Mesh>*        dstVh = nullptr;
+    const Mesh*                  srcTh = nullptr;
+    const Mesh*                  dstTh = nullptr;
+    int        nSrcDof = 0, nDstDof = 0;
+    int        path = XFER_GENERAL;
+    pcommworld comm = nullptr;
+
+    // emission 
+    KN<int> sendToRanks;
+    std::vector<FragInj> inj;
+
+    // reception
+    KN<int> recvFromRanks;
+    std::vector<FragOp*> M;        
+    std::vector<int> ndFrag;     
+
+    KN<double> chi;
+    KN<double> cover;
+
+    TransferPlan() {};
+    ~TransferPlan() {
+        for (size_t j = 0; j < M.size(); ++j) delete M[j];
+        if (Dsrc) Dsrc->destroy();
+        if (Ddst) Ddst->destroy();
+    }
+private:
+    TransferPlan(const TransferPlan&);
+    void operator=(const TransferPlan&);
 };
 
 // Helpers géométriques (liens géométrie (msh3.cpp) - FESpace (lgmat.cpp))

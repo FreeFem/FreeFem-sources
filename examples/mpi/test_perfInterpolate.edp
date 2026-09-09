@@ -1,0 +1,253 @@
+// NBPROC 4
+// PARAMS -ns
+
+// ---------------------------------------------------------------------
+//  Banc de comparaison : plan de transfert (C++ natif) contre
+//  VecInterpolate de macro_ddm.
+//
+//  Les deux implementations resolvent le meme probleme -- transferer un
+//  champ EF entre deux maillages distribues independamment -- mais par des
+//  strategies opposees :
+//
+//    macro_ddm  : echange les fragments, les TRONQUE a la partie possedee,
+//                 les RECOLLE en un seul maillage (gluemesh), puis interpole
+//                 UNE fois depuis ce patch non recouvrant. Pas de
+//                 renormalisation, mais un recollement de maillages a
+//                 chaque appel.
+//
+//    plan natif : echange les fragments, interpole SEPAREMENT depuis chacun,
+//                 recolle sur l'espace destination par partition de l'unite
+//                 avec renormalisation. Pas de gluemesh, et surtout : la
+//                 partie geometrique est conservee dans un objet reutilisable.
+//
+//  La difference decisive n'est pas le cout du premier transfert mais le
+//  fait que macro_ddm refait tout a chaque appel, alors que le plan ne refait
+//  que l'echange de vecteurs.
+//
+//  AVERTISSEMENT sur l'equite de la comparaison :
+//    - les deux partitionnent avec metis mais par des chemins differents
+//      (DmeshCreate contre distribute), donc les sous-domaines ne sont pas
+//      identiques ; les temps sont comparables statistiquement, pas au %.
+//    - les deux operateurs different dans les zones de recouvrement (moyenne
+//      de partition de l'unite contre patch non recouvrant). Tous deux sont
+//      exacts sur l'espace source, ce que verifie l'erreur affine.
+//
+//  Usage :
+//    ff-mpirun -np 4 test_perfInterpolate.edp -ns
+//    ff-mpirun -np 4 test_perfInterpolate.edp -ns -nd 16 -nrep 10
+//
+//  Parametres :
+//    -nd     raffinement des cubes                      (defaut 10)
+//    -nrep   nombre de rejeux chronometres              (defaut 5)
+//    -ov     recouvrement passe a distribute            (defaut 1)
+// ---------------------------------------------------------------------
+
+load "PETSc"
+load "Element_P3"
+load "Element_P4"
+
+macro dimension()3// EOM
+macro def(u)u// EOM
+macro init(u)u// EOM
+include "macro_ddm.idp"
+include "getARGV.idp"
+
+verbosity = 0;
+
+int nd   = getARGV("-nd",   10);
+int nrep = getARGV("-nrep",  5);
+int ov   = getARGV("-ov",    1);
+int np   = mpisize;
+
+/* Selecteurs pour la mesure de PIC memoire. Le pic ne s'observe pas depuis
+   FreeFEM : il faut isoler chaque implementation dans son propre processus
+   et lire le maximum resident depuis l'exterieur, par exemple
+     /usr/bin/time -v mpiexec -np 4 ... -impl 1 -cfg 2
+   -impl 0 ne fait aucun transfert : c'est la ligne de base, la memoire des
+   maillages et des partitions, commune aux deux implementations. */
+int impl = getARGV("-impl", 3);   /* 0 = rien, 1 = macro_ddm, 2 = natif, 3 = les deux */
+int cfg  = getARGV("-cfg", -1);   /* -1 = toutes, sinon 0..4 */
+int icfg = 0;
+
+/* Maillages pour macro_ddm. VecInterpolate modifie temporairement le
+   maillage source (change(fregion=...)), d'ou deux jeux distincts. */
+mesh3 ThA = cube(nd, nd, nd);
+mesh3 ThB = cube(nd, nd, nd, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+DmeshCreate(ThA);
+DmeshCreate(ThB);
+
+/* Maillages pour l'implementation native. */
+mesh3 ThC = cube(nd, nd, nd);
+mesh3 ThD = cube(nd, nd, nd, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+Dmesh3 DS = distribute(ThC, overlap = ov);
+Dmesh3 DD = distribute(ThD, overlap = ov);
+mesh3 LS = DS.local, LD = DD.local;
+
+if (mpirank == 0) {
+  cout << "\n#################################################################" << endl;
+  cout << "  test_perfInterpolate : np = " << np << "   nd = " << nd
+       << "   nrep = " << nrep << "   overlap = " << ov << endl;
+  cout << "#################################################################" << endl;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Une configuration = un couple (element source, element destination) */
+/* ------------------------------------------------------------------ */
+macro COMPARE(PA, PB, tag)
+{
+ int mine = (cfg < 0 || cfg == icfg);
+ icfg = icfg + 1;
+ if (mine) {
+  real tMacro1 = 0, tMacroRep = 0, tDirect = 0, tBuild = 0, tReplay = 0;
+  real emG = 0, ecG = 0, epG = 0;
+  real hiMG = 0, loMG = 0, hiCG = 0, loCG = 0;
+  int memMacro = 0, memPlan = 0, ndSG = 0, ndDG = 0, pMin = -1, pMax = -1;
+
+ if (impl == 1 || impl == 3) {
+  fespace VmS(ThA, PA);
+  fespace VmD(ThB, PB);
+
+  /* ---------- macro_ddm : chaque appel refait tout ---------- */
+  VmS um = 1 + x + 2*y + 3*z;
+  VmD vm = 0;
+  VmD rm = 1 + x + 2*y + 3*z;
+
+  int mm0 = storageused();
+  mpiBarrier(mpiCommWorld);
+  real tm0 = mpiWtime();
+  VecInterpolate(ThA, PA, um, ThB, PB, vm);
+  mpiBarrier(mpiCommWorld);
+  tMacro1 = mpiWtime() - tm0;
+
+  real em = 0;
+  for (int i = 0; i < vm[].n; i++) em = max(em, abs(vm[][i] - rm[][i]));
+  mpiAllReduce(em, emG, mpiCommWorld, mpiMAX);
+
+  mpiBarrier(mpiCommWorld);
+  real tm1 = mpiWtime();
+  for (int k = 0; k < nrep; k++) {
+    VmS uk = (k+1) + x + 2*y + 3*z;
+    VmD vk = 0;
+    VecInterpolate(ThA, PA, uk, ThB, PB, vk);
+  }
+  mpiBarrier(mpiCommWorld);
+  tMacroRep = (mpiWtime() - tm1) / nrep;
+  int mm1 = storageused();
+  int memMacroLoc = mm1 - mm0;
+  mpiAllReduce(memMacroLoc, memMacro, mpiCommWorld, mpiSUM);
+
+  VmS us = sin(3*pi*x)*cos(3*pi*y)*sin(3*pi*z);
+  VmD vs = 0;
+  VecInterpolate(ThA, PA, us, ThB, PB, vs);
+  real hiM = -1e30, loM = 1e30;
+  for (int i = 0; i < vs[].n; i++) { hiM = max(hiM, vs[][i]); loM = min(loM, vs[][i]); }
+  mpiAllReduce(hiM, hiMG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(loM, loMG, mpiCommWorld, mpiMIN);
+ }
+
+ if (impl == 2 || impl == 3) {
+  fespace WdS(DS, PA);   fespace WlS(LS, PA);
+  fespace WdD(DD, PB);   fespace WlD(LD, PB);
+
+  int ndS = WdS.ndof, ndD = WdD.ndof;
+  mpiAllReduce(ndS, ndSG, mpiCommWorld, mpiSUM);
+  mpiAllReduce(ndD, ndDG, mpiCommWorld, mpiSUM);
+
+  /* ---------- natif : voie directe ---------- */
+  WlS uc = 1 + x + 2*y + 3*z;
+  WlD vc = 0;
+  WlD rc = 1 + x + 2*y + 3*z;
+
+  mpiBarrier(mpiCommWorld);
+  real tc0 = mpiWtime();
+  int pathC = interpolateD(WdS, uc[], WdD, vc[]);
+  mpiBarrier(mpiCommWorld);
+  tDirect = mpiWtime() - tc0;
+
+  real ec = 0;
+  for (int i = 0; i < vc[].n; i++) ec = max(ec, abs(vc[][i] - rc[][i]));
+  mpiAllReduce(ec, ecG, mpiCommWorld, mpiMAX);
+
+  /* ---------- natif : plan conserve ---------- */
+  int mp0 = storageused();
+  mpiBarrier(mpiCommWorld);
+  real tp0 = mpiWtime();
+  Dtransfer3 Plan = transferPlan(WdS, WdD);
+  mpiBarrier(mpiCommWorld);
+  tBuild = mpiWtime() - tp0;
+  int mp1 = storageused();
+  int memPlanLoc = mp1 - mp0;
+  mpiAllReduce(memPlanLoc, memPlan, mpiCommWorld, mpiSUM);
+
+  WlD vp = 0;
+  mpiBarrier(mpiCommWorld);
+  real tp1 = mpiWtime();
+  for (int k = 0; k < nrep; k++) {
+    WlS uk = (k+1) + x + 2*y + 3*z;
+    WlD vk = 0;
+    interpolateD(Plan, uk[], vk[]);
+  }
+  mpiBarrier(mpiCommWorld);
+  tReplay = (mpiWtime() - tp1) / nrep;
+
+  interpolateD(Plan, uc[], vp[]);
+  real ep = 0;
+  for (int i = 0; i < vp[].n; i++) ep = max(ep, abs(vp[][i] - rc[][i]));
+  mpiAllReduce(ep, epG, mpiCommWorld, mpiMAX);
+
+  mpiAllReduce(pathC, pMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pathC, pMax, mpiCommWorld, mpiMAX);
+
+  /* Les deux implementations calculent des operateurs DIFFERENTS dans les
+     zones de recouvrement : moyenne de partition de l'unite d'un cote,
+     interpolation depuis un patch non recouvrant de l'autre. Sur un champ
+     affine, exactement representable, elles coincident. Sur un champ qui ne
+     l'est pas, l'ecart mesure la difference des deux operateurs. On le sonde
+     par les extrema globaux, qui ne dependent pas du partitionnement. */
+  WlS ut = sin(3*pi*x)*cos(3*pi*y)*sin(3*pi*z);
+  WlD vt = 0;
+  interpolateD(WdS, ut[], WdD, vt[]);
+  real hiC = -1e30, loC = 1e30;
+  for (int i = 0; i < vt[].n; i++) { hiC = max(hiC, vt[][i]); loC = min(loC, vt[][i]); }
+  mpiAllReduce(hiC, hiCG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(loC, loCG, mpiCommWorld, mpiMIN);
+ }
+
+  if (mpirank == 0) {
+    real gainRep  = tReplay  > 0 ? tMacroRep / tReplay : 0;
+    real gainInit = tBuild   > 0 ? tMacro1 / tBuild    : 0;
+    real seuil    = (tMacroRep - tReplay) > 0 ? tBuild / (tMacroRep - tReplay) : 0;
+    cout << "\n  ---------------- " << tag << " ----------------" << endl;
+    cout << "   DDL cumules            source " << ndSG << "   destination " << ndDG
+         << "   (chemin natif " << pMin << ")" << endl;
+    cout << "   macro_ddm  1er         " << tMacro1   << " s" << endl;
+    cout << "   macro_ddm  rejeu       " << tMacroRep << " s" << endl;
+    cout << "   natif      direct      " << tDirect   << " s" << endl;
+    cout << "   natif      plan        " << tBuild    << " s" << endl;
+    cout << "   natif      rejeu       " << tReplay   << " s" << endl;
+    cout << "   RAPPORT initial        x" << gainInit
+         << "    (macro 1er / construction du plan)" << endl;
+    cout << "   RAPPORT rejeu          x" << gainRep
+         << "    (macro rejeu / rejeu sur plan)" << endl;
+    cout << "   plan rentable des      " << seuil << " transferts" << endl;
+    cout << "   memoire macro_ddm      " << memMacro/1024./1024. << " Mo retenus" << endl;
+    cout << "   memoire plan natif     " << memPlan/1024./1024. << " Mo retenus" << endl;
+    cout << "   erreur affine          macro " << emG
+         << "   direct " << ecG << "   plan " << epG << endl;
+    cout << "   champ non polynomial   macro [" << loMG << ", " << hiMG
+         << "]   natif [" << loCG << ", " << hiCG << "]" << endl;
+    cout << "   ecart des extrema      " << max(abs(hiMG-hiCG), abs(loMG-loCG)) << endl;
+  }
+  if (impl == 1 || impl == 3) assert(emG < 1e-8);
+  if (impl == 2 || impl == 3) { assert(ecG < 1e-8); assert(epG < 1e-8); }
+ }
+}// EOM
+
+COMPARE(P1, P1, "P1 -> P1")
+COMPARE(P1, P2, "P1 -> P2")
+COMPARE(P1, P4, "P1 -> P4")
+COMPARE(P2, P1, "P2 -> P1")
+COMPARE(P4, P1, "P4 -> P1")
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0) cout << "\n== test_perfInterpolate : OK ==\n" << endl;

@@ -139,17 +139,36 @@ static Mesh* buildFragmentFor(const Mesh& Loc, const BBox& target, KN<int>& n2o)
 
 template<class Mesh, class R>
 static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const KN<R>& scaledU,
-                               const KN<double>& chi, const Mesh& frag, const KN<int>& n2o)
+                               const KN<double>& chi, const Mesh& frag, const KN<int>& n2o, FragInj* injOut = nullptr)
 {
     ffassert(srcVh.TFE.N() == 1);            // espaces composites hors perimetre
     GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]);   
     KN<long> inj = restrictDOFPartial(fragVh, srcVh, n2o);  
-    const int nd = fragVh.NbOfDF; 
+    const int nd = fragVh.NbOfDF;
+    std::vector<int> vpos;
+    std::vector<long> vsrc;
+    if (injOut) { vpos.reserve(nd); vsrc.reserve(nd); }
+
     KN<R> sub(2*nd);
     for (int d = 0; d < nd; ++d) { 
         if (inj[d] < 0) { sub[d] = R(); sub[nd + d] = R(); }
-        else { sub[d] = scaledU[inj[d]]; sub[nd + d] = R(chi[inj[d]]); }
+        else { 
+            sub[d] = scaledU[inj[d]];
+            sub[nd + d] = R(chi[inj[d]]); 
+            if (injOut) { vpos.push_back(d); vsrc.push_back(inj[d]); }
+        }
     }
+    
+    if (injOut) {
+        injOut->nd = nd;
+        const long np = (long)vpos.size();
+        injOut->pos.resize(np);
+        injOut->src.resize(np);
+        for (long k = 0; k < np; ++k) {
+            injOut->pos[k] = vpos[k];
+            injOut->src[k] = vsrc[k];
+        }
+    }    
     return sub;
 }
 
@@ -269,15 +288,62 @@ static void exchangeFragments(pcommworld,
 }
 #endif
 
+#ifdef PARALLELE
+template<class R>
+static void exchangeDofOnly(pcommworld comm,
+                            const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
+                            const std::vector<KN<R> >& subOut,
+                            const std::vector<int>& ndFrag,
+                            std::vector<KN<R> >& dofIn)
+{
+    MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+    const int nS = sendToRanks.n, nR = recvFromRanks.n;
+    dofIn.assign(nR, KN<R>());
+
+    std::vector<MPI_Request> rq;
+    rq.reserve(nR + nS);                       // AUCUNE reallocation ensuite
+
+    for (int j = 0; j < nR; ++j) {             // tous les Irecv AVANT les Isend
+        if (ndFrag[j] == 0) continue;
+        dofIn[j].resize(ndFrag[j]);
+        rq.resize(rq.size() + 1);
+        MPI_Irecv((R*)dofIn[j], (int)(ndFrag[j]*sizeof(R)), MPI_BYTE,
+                  recvFromRanks[j], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
+    }
+    for (int i = 0; i < nS; ++i) {
+        if (subOut[i].n == 0) continue;
+        rq.resize(rq.size() + 1);
+        MPI_Isend((R*)subOut[i], (int)(subOut[i].n*sizeof(R)), MPI_BYTE,
+                  sendToRanks[i], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
+    }
+    if (!rq.empty()) MPI_Waitall((int)rq.size(), rq.data(), MPI_STATUSES_IGNORE);
+}
+#else
+template<class R>
+static void exchangeDofOnly(pcommworld, const KN<int>&, const KN<int>& recvFromRanks,
+                            const std::vector<KN<R> >& subOut,
+                            const std::vector<int>& ndFrag,
+                            std::vector<KN<R> >& dofIn)
+{
+    dofIn.assign(recvFromRanks.n, KN<R>());
+    if (recvFromRanks.n && !subOut.empty() && ndFrag[0] > 0) {
+        dofIn[0].resize(ndFrag[0]);
+        dofIn[0] = subOut[0];
+    }
+}
+#endif
+
+
 template<class Mesh1, class Mesh2, class R, class OnFragment>
 static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
                              const GFESpace<Mesh1>& srcVh, const KN<R>& srcU,
                              const DistributedMesh<Mesh2>& Ddst,
                              KN<int>& sendToRanks, KN<int>& recvFromRanks,
-                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr)
+                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr, std::vector<FragInj>* injOut = nullptr, KN<double>* chiOut = nullptr)
 {
     std::vector<BBox> allSrc, allDst;
     computeOverlapRankPairs(Dsrc.comm, Dsrc, Ddst, sendToRanks, recvFromRanks, allSrc, allDst);
+    if (injOut) injOut->resize(sendToRanks.n);
     if (recvCounts) { recvCounts->resize(recvFromRanks.n); *recvCounts = 0L; }
     const Mesh1* srcGeom = Dsrc.CoverMesh ? Dsrc.CoverMesh : Dsrc.LocalMesh;
     KN<int> cover2local(srcGeom->nt, -1);
@@ -293,7 +359,8 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
     }
 
     if (sentCounts) sentCounts->resize(sendToRanks.n);
-    KN<double> chi = interpolatePoU(Dsrc, srcVh);   
+    KN<double> chi = interpolatePoU(Dsrc, srcVh);
+    if (chiOut) { chiOut->resize(chi.n); *chiOut = chi; }
     ffassert(chi.n == srcVh.NbOfDF && srcU.n == srcVh.NbOfDF);
     KN<R> scaledU(srcU.n);
     for (int d = 0; d < srcU.n; ++d) scaledU[d] = srcU[d] * chi[d];
@@ -309,7 +376,7 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
             for (int kc = 0; kc < n2oCover.n; ++kc){
                 n2oLocal[kc] = cover2local[n2oCover[kc]];
             }
-            subOut[i] = fragmentDofVector(srcVh, scaledU, chi, *fragOut[i], n2oLocal);
+            subOut[i] = fragmentDofVector(srcVh, scaledU, chi, *fragOut[i], n2oLocal, injOut ? &(*injOut)[i] : nullptr);
         }
     }
 
@@ -335,54 +402,98 @@ struct SearchMethodGuard {
     ~SearchMethodGuard() { searchMethod = saved; }
 };
 
- template<class Mesh, class R>
- static void accumulateFragment(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const KN<R>& payload, const int* data, KN<R>& dstU, KN<R>& cover) {
+template<class Mesh>
+static MatriceMorse<double>* buildFragmentMatrix(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const int* data) {
+    return buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, fragVh, (int*)data);
+}
+
+static FragOp* compactFragmentMatrix(MatriceMorse<double>* M)
+{
+    M->COO();
+    FragOp* F = new FragOp;
+    F->nrow = M->n; F->ncol = M->m;
+    const size_t nz = M->nnz;
+    F->ii.resize(nz); F->jj.resize(nz); F->aij.resize(nz);
+    for (long k = 0; k < long(nz); ++k) {
+        F->ii[k] = M->i[k]; F->jj[k] = M->j[k]; F->aij[k] = M->aij[k];
+    }
+    return F;
+}
+
+template<class R>
+static void applyWeighted(const MatriceMorse<double>* M, int nd, const KN<R>& payload, KN<R>& dstU, KN<double>& cover) {
+    for (size_t k = 0; k < M->nnz; ++k) {
+        const int ii = M->i[k], cc = M->j[k];
+        dstU[ii] += M->aij[k]*payload[cc];
+        cover[ii] += M->aij[k]*std::real(payload[nd+cc]);
+    }
+}
+
+template<class R>
+static void applyPlain(const MatriceMorse<double>* M, const KN<R>& u, KN<R>& dstU){
+    for (size_t k = 0; k < M->nnz; ++k)
+        dstU[M->i[k]] += M->aij[k]*u[M->j[k]];
+}
+
+template<class R>
+static void applyWeightedOp(const FragOp& F, int nd, const KN<R>& payload, KN<R>& dstU, KN<double>& cover) {
+    for (long k = 0; k < F.ii.n; ++k) {
+        const int ii = F.ii[k], cc = F.jj[k];
+        dstU[ii] += F.aij[k]*payload[cc];
+        cover[ii] += F.aij[k]*std::real(payload[nd+cc]);
+    }
+}
+
+template<class R>
+static void applyPlainOp(const FragOp& F, const KN<R>& u, KN<R>& dstU){
+    for (long k = 0; k < F.ii.n; ++k)
+        dstU[F.ii[k]] += F.aij[k]*u[F.jj[k]];
+}
+
+template<class Mesh, class R>
+static void accumulateFragment(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const KN<R>& payload, const int* data, KN<R>& dstU, KN<double>& cover) {
     const int nd = fragVh.NbOfDF;
     ffassert(payload.n == 2*nd);
 
-    MatriceMorse<double>* M =
-        buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, fragVh, (int*)data);
-
-    for (size_t k = 0; k < M->nnz; ++k) {
-        const int ii = M->i[k], cc = M->j[k];
-        dstU[ii] += M->aij[k] * payload[cc];
-        cover[ii] += M->aij[k] * payload[nd+cc];
-    }
+    MatriceMorse<double>* M =buildFragmentMatrix(dstVh, fragVh, data);
+    applyWeighted(M, nd, payload, dstU, cover);
     delete M;
- }
+}
 
- enum TransferPath { XFER_GENERAL = 0, XFER_SINGLE_RANK = 1, XFER_LOCAL = 2 };
-
-template<class Mesh, class R>
-static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
-                                   const GFESpace<Mesh>& srcVh, const KN<R>& srcU,
-                                   const DistributedMesh<Mesh>& Ddst,
-                                   const GFESpace<Mesh>& dstVh, KN<R>& dstU)
+template<class Mesh>
+static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, const GFESpace<Mesh>& srcVh, const DistributedMesh<Mesh>& Ddst, const GFESpace<Mesh>& dstVh)
 {
+
     ffassert(srcVh.N == dstVh.N);
     ffassert(srcVh.TFE.N() == 1 && dstVh.TFE.N() == 1);
-    ffassert(srcU.n == srcVh.NbOfDF);
-    ffassert(dstU.n == dstVh.NbOfDF);
 
-    const int N = dstVh.N;
-    KN<int> data = dataInterpolate(N);
-    dstU = R();
-    KN<R> cover(dstU.n, R());
+    TransferPlan<Mesh>* P = new TransferPlan<Mesh>();
+    P->Dsrc = &Dsrc; Dsrc.increment();
+    P->Ddst = &Ddst; Ddst.increment();
+    P->srcVh = &srcVh; P->srcTh = &srcVh.Th;
+    P->dstVh = &dstVh; P->dstTh = &dstVh.Th;
+    P->nSrcDof = srcVh.NbOfDF;
+    P->nDstDof = dstVh.NbOfDF;
+    P->comm = Dsrc.comm;
+
+    KN<int> data = dataInterpolate(dstVh.N);
     SearchMethodGuard sg;
 
     const int nproc = mpisize > 0 ? (int)mpisize : 1;
     if (nproc == 1) {
-        KN<double> chi = interpolatePoU(Dsrc, srcVh);
-        KN<R> payload(2*srcVh.NbOfDF);
-        for (int d = 0; d < srcVh.NbOfDF; ++d){
-            payload[d] = srcU[d]*chi[d];
-            payload[srcVh.NbOfDF + d] = R(chi[d]);
+        P->chi = interpolatePoU(Dsrc, srcVh);
+        P->cover.resize(P->nDstDof); P->cover = 0.0;
+
+        MatriceMorse<double>* M0 = buildFragmentMatrix(dstVh, srcVh, data);
+        // cover = M0*chi
+        for (size_t k = 0; k < M0->nnz; ++k){
+            P->cover[M0->i[k]] += M0->aij[k]*P->chi[M0->j[k]];
         }
-        accumulateFragment(dstVh, srcVh, payload, data, dstU, cover);
-        for (int i = 0; i < dstU.n; ++i){
-            if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
-        }
-        return XFER_SINGLE_RANK;
+        P->M.assign(1, compactFragmentMatrix(M0));
+        delete M0;
+
+        P->path = XFER_SINGLE_RANK;
+        return P;        
     }
 
     MatriceMorse<double>* Mloc = nullptr;
@@ -390,8 +501,8 @@ static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
     {
         const BBox bs = rawBoxOf(srcVh.Th), bd = rawBoxOf(dstVh.Th);
         if (boxContains(bs, bd)) {
-            Mloc = buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, srcVh, (int*)data);
-            localOK = coversAllRows(Mloc, dstU.n) ? 1 : 0;
+            Mloc = buildFragmentMatrix(dstVh, srcVh, data);
+            localOK = coversAllRows(Mloc, P->nDstDof) ? 1 : 0;
         }
     }
 
@@ -404,20 +515,91 @@ static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
     #endif
 
     if (globalOK) {
-        for (size_t k = 0; k < Mloc->nnz; ++k)
-            dstU[Mloc->i[k]] += Mloc->aij[k]*srcU[Mloc->j[k]];
+        P->M.assign(1, compactFragmentMatrix(Mloc));
         delete Mloc;
-        return XFER_LOCAL;
+        P->path = XFER_LOCAL;
+        P->chi.resize(0);
+        P->cover.resize(0);
+        return P;
     }
     delete Mloc;
 
-    KN<int> snd, rcv;
-    collectFragments(Dsrc, srcVh, srcU, Ddst, snd, rcv, [&](int, const Mesh& frag, const KN<R>& dof) {GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]); accumulateFragment(dstVh, fragVh, dof, data, dstU, cover);});
+    KN<double> ones(P->nSrcDof, 1.0);
+    KN<double> sink(P->nDstDof, 0.0);
+    P->cover.resize(P->nDstDof); P->cover = 0.0;
 
-    for (int i = 0; i < dstU.n; ++i){
-        if (std::abs(cover[i]) > 1e-14) dstU[i] /= cover[i];
+    collectFragments(Dsrc, srcVh, ones, Ddst, P->sendToRanks, P->recvFromRanks, [&](int j, const Mesh& frag, const KN<double>& dof) {
+            const int nR = P->recvFromRanks.n;
+            if ((int)P->M.size() < nR) {
+                P->M.resize(nR, nullptr);
+                P->ndFrag.resize(nR, 0);
+            }
+            GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]);
+            MatriceMorse<double>* Mj = buildFragmentMatrix(dstVh, fragVh, data);
+            P->ndFrag[j] = fragVh.NbOfDF;
+            applyWeighted(Mj, fragVh.NbOfDF, dof, sink, P->cover);
+            P->M[j] = compactFragmentMatrix(Mj);
+            delete Mj; 
+        },
+        nullptr, nullptr, &P->inj, &P->chi);
+
+    P->M.resize(P->recvFromRanks.n, nullptr);
+    P->ndFrag.resize(P->recvFromRanks.n, 0);
+    P->path = XFER_GENERAL;
+    return P;
+}
+
+template<class Mesh, class R>
+static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN<R>& dstU)
+{
+    ffassert(srcU.n == P.nSrcDof && dstU.n == P.nDstDof);
+    dstU = R();
+
+    if (P.path == XFER_LOCAL) {                     // ni chi ni renormalisation
+        applyPlainOp(*P.M[0], srcU, dstU);
+        return;
     }
-    return XFER_GENERAL;
+
+    KN<R> scaledU(srcU.n);
+    for (int d = 0; d < srcU.n; ++d) scaledU[d] = srcU[d] * P.chi[d];
+
+    if (P.path == XFER_SINGLE_RANK) {
+        applyPlainOp(*P.M[0], scaledU, dstU);       // colonnes = srcVh
+    } else {
+        std::vector<KN<R> > subOut(P.sendToRanks.n);
+        for (int i = 0; i < P.sendToRanks.n; ++i) {
+            const FragInj& J = P.inj[i];
+            subOut[i].resize(J.nd);  subOut[i] = R();     // les trous restent nuls
+            for (long k = 0; k < J.pos.n; ++k)
+                subOut[i][J.pos[k]] = scaledU[J.src[k]];
+        }
+        std::vector<KN<R> > dofIn;
+        exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, P.ndFrag, dofIn);
+        for (int j = 0; j < P.recvFromRanks.n; ++j)
+            if (P.M[j]) applyPlainOp(*P.M[j], dofIn[j], dstU);
+    }
+
+    for (int i = 0; i < dstU.n; ++i)
+        if (std::abs(P.cover[i]) > 1e-14) dstU[i] /= P.cover[i];
+}
+
+
+template<class Mesh, class R>
+static int interpolateDistributed(const DistributedMesh<Mesh>& Dsrc,
+                                   const GFESpace<Mesh>& srcVh, const KN<R>& srcU,
+                                   const DistributedMesh<Mesh>& Ddst,
+                                   const GFESpace<Mesh>& dstVh, KN<R>& dstU)
+{
+    ffassert(srcVh.N == dstVh.N);
+    ffassert(srcVh.TFE.N() == 1 && dstVh.TFE.N() == 1);
+    ffassert(srcU.n == srcVh.NbOfDF);
+    ffassert(dstU.n == dstVh.NbOfDF);
+
+    TransferPlan<Mesh>* P = buildTransferPlan(Dsrc, srcVh, Ddst, dstVh);
+    applyTransferPlan(*P, srcU, dstU);
+    const int path = P->path;
+    P->destroy();
+    return path;
 }
 
 
@@ -486,6 +668,34 @@ long interpolateD(v_dfes<Mesh>** const & ppSrc, KN<R>* const & uSrc,
 }
 
 template<class Mesh>
+const TransferPlan<Mesh>* makeTransferPlan(v_dfes<Mesh>** const& ppSrc,
+                                           v_dfes<Mesh>** const& ppDst)
+{
+    throwassert(ppSrc && *ppSrc && ppDst && *ppDst);
+    v_dfes<Mesh>* pSrc = *ppSrc;
+    v_dfes<Mesh>* pDst = *ppDst;
+    throwassert(pSrc->DTh && pDst->DTh);
+    ffassert(pSrc->DTh->comm == pDst->DTh->comm);
+    const GFESpace<Mesh>& srcVh = **pSrc;      // operator FESpace*() : lgfem.hpp:428
+    const GFESpace<Mesh>& dstVh = **pDst;
+    return buildTransferPlan(*pSrc->DTh, srcVh, *pDst->DTh, dstVh);
+}
+
+template<class Mesh, class R>
+long interpolateDPlan(const TransferPlan<Mesh>** const& ppP,
+                      KN<R>* const& uSrc, KN<R>* const& uDst)
+{
+    throwassert(ppP && *ppP && uSrc && uDst);
+    const TransferPlan<Mesh>& P = **ppP;
+    if (uSrc->n != P.nSrcDof || uDst->n != P.nDstDof)
+        ExecError("interpolateD(plan, u[], v[]) : outdated plan — "
+                  "the FE spaces have changed size since transferPlan()");
+    applyTransferPlan(P, *uSrc, *uDst);
+    return (long)P.path;
+}
+
+
+template<class Mesh>
 void registerTransferInterpolateOps() {
     typedef const DistributedMesh<Mesh>** DMP;
     Global.Add("overlapRankPairs", "(",
@@ -500,6 +710,22 @@ void registerTransferInterpolateOps() {
     Global.Add("interpolateD", "(",
         new OneOperator4_<long, v_dfes<Mesh>**, KN<Complex>*, v_dfes<Mesh>**, KN<Complex>*>(
             interpolateD<Mesh,Complex>));
+
+        typedef const TransferPlan<Mesh>*  TP;
+    typedef const TransferPlan<Mesh>** TPP;
+
+    TheOperators->Add("<-", new OneOperator2_<TP*, TP*, TP>(&set_copy_incr));
+    TheOperators->Add("=",  new OneOperator2 <TP*, TP*, TP>(&set_eqdestroy_incr));
+
+    Global.Add("transferPlan", "(",
+        new OneOperator2_<TP, v_dfes<Mesh>**, v_dfes<Mesh>**,
+                          E_F_F0F0_Add2RC<TP, v_dfes<Mesh>**, v_dfes<Mesh>**> >(
+            makeTransferPlan<Mesh>));
+
+    Global.Add("interpolateD", "(",
+        new OneOperator3_<long, TPP, KN<double>*,  KN<double>* >(interpolateDPlan<Mesh,double>));
+    Global.Add("interpolateD", "(",
+        new OneOperator3_<long, TPP, KN<Complex>*, KN<Complex>*>(interpolateDPlan<Mesh,Complex>));
 
 
 }

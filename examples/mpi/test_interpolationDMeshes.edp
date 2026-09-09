@@ -860,6 +860,314 @@ mesh3 L5 = DTh5.local, L6 = DTh6.local;
   assert(badSymM == 0);
 }
 
+// =======================================================================
+//  JALON 5 : plan de transfert reutilisable
+// =======================================================================
+//
+//  transferPlan(Wsrc, Wdst) construit une fois les matrices d'interpolation,
+//  la partition de l'unite, les cartes d'indices et la couverture ; les
+//  applications suivantes ne font plus qu'un echange de vecteurs.
+//
+//  Le plan est PUREMENT GEOMETRIQUE : il ne depend pas du type scalaire
+//  transfere. Un meme plan sert donc les transferts reels ET complexes,
+//  ce que verifie le bloc T.
+//
+//   R.  Equivalence. interpolateD(P, u[], v[]) doit coincider avec
+//       interpolateD(Wsrc, u[], Wdst, v[]). Tolerance et non egalite
+//       binaire : les deux voies partagent le meme ordre d'accumulation
+//       depuis le passage a Waitall, mais cover est accumule a la
+//       construction sur la matrice de hachage et relu a l'application sur
+//       la forme compactee triee -- l'ecart residuel vaut quelques ulp.
+//   S.  Reutilisation. Trois applications successives du meme plan doivent
+//       rendre exactement ce que rendent trois transferts sans plan. C'est
+//       ce qui verifie qu'aucun etat residuel ne traine : dstU = 0 en tete
+//       d'application et cover NON reaccumule sont les deux points ou cela
+//       peut casser.
+//   T.  Complexe. Jusqu'ici la surcharge interpolateD<Mesh,Complex> n'etait
+//       qu'instanciee par le compilateur, jamais executee. Un plan bati une
+//       fois sert ici un champ reel puis un champ complexe.
+//   U.  Chemins rapides. path doit etre conserve dans le plan et respecte a
+//       l'application. Sur XFER_LOCAL ni chi ni renormalisation : si
+//       l'application les appliquait quand meme, l'erreur serait d'ordre
+//       1 - chi, donc massive et immediatement visible.
+//   V.  Plan perime. Appliquer un plan a des vecteurs de mauvaise taille
+//       doit lever une erreur explicite, pas produire un resultat faux.
+
+// --- R : equivalence plan / sans plan --------------------------------------
+{
+  fespace WrS(DTh1, P1);
+  fespace WrD(DTh4, P1);
+  Dtransfer3 P = transferPlan(WrS, WrD);
+
+  V1 uS = 1 + x + 2*y + 3*z;
+  V4 vDirect = 0, vPlan = 0;
+  int pDir = interpolateD(WrS, uS[], WrD, vDirect[]);
+  int pPln = interpolateD(P, uS[], vPlan[]);
+
+  real eLoc = 0;
+  for (int i = 0; i < vDirect[].n; i++)
+    eLoc = max(eLoc, abs(vDirect[][i] - vPlan[][i]));
+  real eGlob = 0;
+  int pdG = 0, ppG = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pDir, pdG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pPln, ppG, mpiCommWorld, mpiMAX);
+
+  if (mpirank == 0)
+    cout << "  [R1 P1 -> P1]          ecart = " << eGlob
+         << "   chemins = " << pdG << "/" << ppG
+         << "   => " << (eGlob < 1e-12 && pdG == ppG ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12 && pdG == ppG);
+}
+
+{
+  fespace WrS(DTh5, P2);  fespace WlrS(L5, P2);
+  fespace WrD(DTh6, P1);  fespace WlrD(L6, P1);
+  Dtransfer3 P = transferPlan(WrS, WrD);
+
+  WlrS uS = 1 + x + 2*y + 3*z;
+  WlrD vDirect = 0, vPlan = 0;
+  interpolateD(WrS, uS[], WrD, vDirect[]);
+  interpolateD(P, uS[], vPlan[]);
+
+  real eLoc = 0;
+  for (int i = 0; i < vDirect[].n; i++)
+    eLoc = max(eLoc, abs(vDirect[][i] - vPlan[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [R2 P2 -> P1]          ecart = " << eGlob
+         << "   => " << (eGlob < 1e-12 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12);
+}
+
+{
+  fespace WrS(DTh5, P1);  fespace WlrS(L5, P1);
+  fespace WrD(DTh6, P2);  fespace WlrD(L6, P2);
+  Dtransfer3 P = transferPlan(WrS, WrD);
+
+  WlrS uS = 1 + x + 2*y + 3*z;
+  WlrD vDirect = 0, vPlan = 0;
+  interpolateD(WrS, uS[], WrD, vDirect[]);
+  interpolateD(P, uS[], vPlan[]);
+
+  real eLoc = 0;
+  for (int i = 0; i < vDirect[].n; i++)
+    eLoc = max(eLoc, abs(vDirect[][i] - vPlan[][i]));
+  real eGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [R3 P1 -> P2]          ecart = " << eGlob
+         << "   => " << (eGlob < 1e-12 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12);
+}
+
+{
+  fespace WrS(DTh5, P2);  fespace WlrS(L5, P2);
+  fespace WrD(DTh6, P2);  fespace WlrD(L6, P2);
+  Dtransfer3 P = transferPlan(WrS, WrD);
+
+  // u = 1 : le plan doit reproduire la couverture exacte du bloc N.
+  WlrS one = 1.0;
+  WlrD vDirect = 0, vPlan = 0;
+  interpolateD(WrS, one[], WrD, vDirect[]);
+  interpolateD(P, one[], vPlan[]);
+
+  real eLoc = 0, cLoc = 0;
+  for (int i = 0; i < vDirect[].n; i++) {
+    eLoc = max(eLoc, abs(vDirect[][i] - vPlan[][i]));
+    cLoc = max(cLoc, abs(vPlan[][i] - 1.0));
+  }
+  real eGlob = 0, cGlob = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(cLoc, cGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [R4 P2 -> P2, u = 1]   ecart = " << eGlob
+         << "   |plan - 1| = " << cGlob
+         << "   => " << (eGlob < 1e-12 && cGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12 && cGlob < 1e-10);
+}
+
+// --- S : reutilisation, trois champs successifs ----------------------------
+{
+  fespace WsS(DTh5, P2);  fespace WlsS(L5, P2);
+  fespace WsD(DTh6, P1);  fespace WlsD(L6, P1);
+  Dtransfer3 P = transferPlan(WsS, WsD);
+
+  real eMax = 0;
+  for (int k = 1; k <= 3; k++) {
+    WlsS uk = k + k*x + 2*y + 3*z;
+    WlsD a = 0, b = 0;
+    interpolateD(WsS, uk[], WsD, a[]);
+    interpolateD(P, uk[], b[]);
+    for (int i = 0; i < a[].n; i++) eMax = max(eMax, abs(a[][i] - b[][i]));
+  }
+  real eGlob = 0;
+  mpiAllReduce(eMax, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [S reutilisation x3]   ecart max = " << eGlob
+         << "   => " << (eGlob < 1e-12 ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12);
+}
+
+// --- T : le MEME plan sert le reel et le complexe --------------------------
+{
+  fespace WtS(DTh5, P1);  fespace WltS(L5, P1);
+  fespace WtD(DTh6, P1);  fespace WltD(L6, P1);
+  Dtransfer3 P = transferPlan(WtS, WtD);
+
+  // d'abord un champ reel, pour que le plan ait deja servi
+  WltS uR = 1 + x + 2*y + 3*z;
+  WltD vR = 0;
+  interpolateD(P, uR[], vR[]);
+  WltD refR = 1 + x + 2*y + 3*z;
+  real eR = 0;
+  for (int i = 0; i < vR[].n; i++) eR = max(eR, abs(vR[][i] - refR[][i]));
+
+  // puis un champ complexe, AVEC LE MEME PLAN
+  WltS<complex> uC = 1 + 1i;
+  WltD<complex> vC = 0;
+  interpolateD(P, uC[], vC[]);
+  real eC = 0;
+  for (int i = 0; i < vC[].n; i++) eC = max(eC, abs(vC[][i] - (1 + 1i)));
+
+  // et un champ complexe non constant, pour ne pas tester qu'une constante
+  WltS<complex> uC2 = (1 + x) + 2i*y;
+  WltD<complex> vC2 = 0;
+  interpolateD(P, uC2[], vC2[]);
+  WltD<complex> refC2 = (1 + x) + 2i*y;
+  real eC2 = 0;
+  for (int i = 0; i < vC2[].n; i++) eC2 = max(eC2, abs(vC2[][i] - refC2[][i]));
+
+  real eRG = 0, eCG = 0, eC2G = 0;
+  mpiAllReduce(eR, eRG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eC, eCG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eC2, eC2G, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [T reel puis complexe] reel = " << eRG << "   1+i = " << eCG
+         << "   (1+x)+2iy = " << eC2G
+         << "   => " << (eRG < 1e-10 && eCG < 1e-10 && eC2G < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(eRG < 1e-10 && eCG < 1e-10 && eC2G < 1e-10);
+}
+
+// --- U : les chemins rapides survivent au plan -----------------------------
+//  U1 reprend la paire emboitee du bloc P : le plan doit memoriser
+//  XFER_LOCAL et le rejouer SANS chi ni renormalisation.
+{
+  mesh3 Ua = cube(ncnest, ncnest, ncnest);
+  mesh3 Ub = cube(2*ncnest, 2*ncnest, 2*ncnest);
+  int[int] qa(Ua.nt), qb(Ub.nt);
+  SLABS(Ua, 0.0, qa)
+  SLABS(Ub, 0.0, qb)
+  Dmesh3 DUa = distribute(Ua, overlap = ov, partition = qa);
+  Dmesh3 DUb = distribute(Ub, overlap = ov, partition = qb);
+  mesh3 LUa = DUa.local, LUb = DUb.local;
+  fespace WuS(DUa, P1);  fespace WluS(LUa, P1);
+  fespace WuD(DUb, P1);  fespace WluD(LUb, P1);
+
+  Dtransfer3 P = transferPlan(WuS, WuD);
+
+  WluS uS = 1 + x + 2*y + 3*z;
+  WluD vDirect = 0, vPlan = 0;
+  int pDir = interpolateD(WuS, uS[], WuD, vDirect[]);
+  int pPln = interpolateD(P, uS[], vPlan[]);
+
+  WluD ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0, dLoc = 0;
+  for (int i = 0; i < vPlan[].n; i++) {
+    eLoc = max(eLoc, abs(vPlan[][i] - ref[][i]));
+    dLoc = max(dLoc, abs(vPlan[][i] - vDirect[][i]));
+  }
+  real eGlob = 0, dGlob = 0;
+  int pdMin = 0, pdMax = 0, ppMin = 0, ppMax = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(dLoc, dGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pDir, pdMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pDir, pdMax, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pPln, ppMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pPln, ppMax, mpiCommWorld, mpiMAX);
+
+  // 1 a un seul rang (court-circuit mono-rang), 2 au dela (emboite).
+  int pWant = (n == 1) ? 1 : 2;
+  if (mpirank == 0)
+    cout << "  [U1 emboite / plan]    affine = " << eGlob << "   ecart = " << dGlob
+         << "   chemins = [" << pdMin << "," << pdMax << "]/["
+         << ppMin << "," << ppMax << "] (" << pWant << " attendu)"
+         << "   => " << (eGlob < 1e-10 && dGlob < 1e-12
+                         && ppMin == pWant && ppMax == pWant ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10 && dGlob < 1e-12);
+  assert(ppMin == pWant && ppMax == pWant);   // identique sur TOUS les rangs
+  assert(pdMin == ppMin && pdMax == ppMax);   // le plan emprunte le meme chemin
+}
+
+//  U2 reprend le piege du bloc Q : boites emboitees mais couverture
+//  incomplete. Le plan doit memoriser le REJET de l'etage 2.
+{
+  fespace WqS(DTh5, P1);  fespace WlqS(L5, P1);
+  fespace WqD(DTh6, P1);  fespace WlqD(L6, P1);
+  Dtransfer3 P = transferPlan(WqS, WqD);
+
+  WlqS uS = 1 + x + 2*y + 3*z;
+  WlqD vPlan = 0;
+  int pPln = interpolateD(P, uS[], vPlan[]);
+  WlqD ref = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < vPlan[].n; i++) eLoc = max(eLoc, abs(vPlan[][i] - ref[][i]));
+
+  real eGlob = 0;
+  int ppMin = 0, ppMax = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pPln, ppMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pPln, ppMax, mpiCommWorld, mpiMAX);
+
+  int pWantQ = (n == 1) ? 1 : 0;
+  if (mpirank == 0)
+    cout << "  [U2 metis / plan]      affine = " << eGlob
+         << "   chemin = [" << ppMin << ", " << ppMax << "] (" << pWantQ << " attendu)"
+         << "   => " << (eGlob < 1e-10 && ppMin == pWantQ && ppMax == pWantQ
+                         ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-10);
+  assert(ppMin == pWantQ && ppMax == pWantQ);
+}
+
+// --- V : un plan perime doit se plaindre, pas mentir -----------------------
+//  Le plan ne peut pas savoir qu'un maillage a ete refait ; il compare donc
+//  les tailles memorisees a celles des vecteurs recus. Un remaillage produit
+//  un nouvel objet fespace, donc une taille differente, donc l'assertion
+//  mord. C'est le prix d'un objet explicite -- et c'est bien moins risque
+//  qu'un cache implicite qui devinerait l'invalidation.
+{
+  fespace WvS(DTh5, P1);  fespace WlvS(L5, P1);
+  fespace WvD(DTh6, P1);  fespace WlvD(L6, P1);
+  fespace WvS2(DTh5, P2); fespace WlvS2(L5, P2);
+  Dtransfer3 P = transferPlan(WvS, WvD);
+
+  // le plan attend du P1 en source ; on lui donne du P2
+  WlvS2 uBad = 1;
+  WlvD vBad = 0;
+  int caught = 0;
+  try { interpolateD(P, uBad[], vBad[]); }
+  catch(...) { caught = 1; }
+
+  // et le plan doit rester utilisable apres l'erreur
+  WlvS uOk = 1 + x + 2*y + 3*z;
+  WlvD vOk = 0;
+  interpolateD(P, uOk[], vOk[]);
+  WlvD refOk = 1 + x + 2*y + 3*z;
+  real eLoc = 0;
+  for (int i = 0; i < vOk[].n; i++) eLoc = max(eLoc, abs(vOk[][i] - refOk[][i]));
+
+  int cGlob = 0;
+  real eGlob = 0;
+  mpiAllReduce(caught, cGlob, mpiCommWorld, mpiMIN);   // MIN : exige TOUS les rangs
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  if (mpirank == 0)
+    cout << "  [V plan perime]        detecte sur tous les rangs = " << cGlob
+         << "   plan encore valide, erreur = " << eGlob
+         << "   => " << (cGlob == 1 && eGlob < 1e-10 ? "PASS" : "FAIL") << endl;
+  assert(cGlob == 1);
+  assert(eGlob < 1e-10);
+}
 mpiBarrier(mpiCommWorld);
 if (mpirank == 0)
-  cout << "== jalons 1 a 4 : toutes les assertions passent ==" << endl;
+  cout << "== jalons 1 a 5 : toutes les assertions passent ==" << endl;
