@@ -1,0 +1,14 @@
+.git
+build
+install
+autom4te.cache
+**/.deps
+**/.libs
+**/*.a
+**/*.dylib
+**/*.la
+**/*.lo
+**/*.o
+**/*.so
+3rdparty/ff-petsc/petsc-[0-9.]*/
+3rdparty/pkg/

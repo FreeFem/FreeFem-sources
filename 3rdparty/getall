@@ -277,7 +277,7 @@ sub downloadone{
 	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){
 		print "Download failed (MD5 check $md5check) from $url of $pkg\n";
-                my $url="https://www.ljll.fr/hecht/pkg/$pkg";
+                my $url="https://joliv.et/freefem/pkg/$pkg";
 		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
