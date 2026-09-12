@@ -115,6 +115,7 @@
 //    ff-mpirun -np 4 test_interpolationDMeshes.edp -ns
 // ---------------------------------------------------------------------
 
+load "PETSc"
 include "getARGV.idp"
 
 int nc    = getARGV("-nc",    32);
@@ -1168,6 +1169,636 @@ mesh3 L5 = DTh5.local, L6 = DTh6.local;
   assert(cGlob == 1);
   assert(eGlob < 1e-10);
 }
+// =======================================================================
+//  JALON 6 : la numerotation globale native coincide-t-elle avec PETSc ?
+// =======================================================================
+//
+//  Prerequis a MatInterpolate. Assembler l'operateur de transfert en une
+//  matrice PETSc exige de nommer ses COLONNES par des indices globaux de
+//  l'espace source. Deux numerotations existent :
+//
+//    Wdh.numbering        distributedDofNumbering (distributeMesh.cpp)
+//    GlobalNumbering(A,.) le _num interne du Mat, construit par HPDDM
+//
+//  Les deux partent des memes donnees -- dofIntersectionDof et Ddof, que
+//  buildShellIfNeeded transmet a HPDDM -- et appliquent la meme regle de
+//  propriete : seuil EPS sur Ddof, departage par rang. Mais ce sont deux
+//  implementations distinctes, et rien ne GARANTIT qu'elles produisent les
+//  memes entiers.
+//
+//  L'enjeu est direct : si elles coincident, MatInterpolate peut se servir
+//  de Wdh.numbering et rester autonome ; sinon la numerotation doit devenir
+//  un argument, fourni par GlobalNumbering sur un Mat deja construit.
+//
+//  PETSc/HPDDM refuse overlap = 0 (format Schwarz additif), d'ou ovMat.
+
+{
+  int ovMat = (ov == 0) ? 1 : ov;
+  mesh3 Tw = cube(8, 8, 8);
+
+  int[int] pw(Tw.nt);
+  SLABS(Tw, 0.0, pw)
+  Dmesh3 DwSlab = distribute(Tw, overlap = ovMat, partition = pw);
+  Dmesh3 DwMetis = distribute(Tw, overlap = ovMat);
+
+  int badTot = 0;
+
+  macro CHECKNUM(Dw, Pk, tag)
+  {
+    fespace Ww(Dw, Pk);
+    varf vw(u, v) = int3d(Dw)(dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v)) + on(1, u = 0.0);
+    Mat Aw = vw(Ww, Ww);
+    int[int] numPetsc;
+    GlobalNumbering(Aw, numPetsc);
+    int[int] numNatif = Ww.numbering;
+
+    int szLoc = (numPetsc.n != numNatif.n) ? 1 : 0;
+    int badLoc = 0, nmin = min(numPetsc.n, numNatif.n);
+    for (int i = 0; i < nmin; i++) if (numPetsc[i] != numNatif[i]) badLoc++;
+    int hiP = numPetsc.max, hiN = numNatif.max;
+
+    int szG = 0, badG = 0, hiPG = 0, hiNG = 0;
+    mpiAllReduce(szLoc, szG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(badLoc, badG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(hiP, hiPG, mpiCommWorld, mpiMAX);
+    mpiAllReduce(hiN, hiNG, mpiCommWorld, mpiMAX);
+    badTot = badTot + badG + szG + abs(hiPG - hiNG);
+
+    if (mpirank == 0)
+      cout << "  [W " << tag << "]  ndofglobal " << Ww.ndofglobal
+           << "   max petsc/natif " << hiPG << "/" << hiNG
+           << "   ecarts " << badG << "   tailles " << szG
+           << "   => " << (badG == 0 && szG == 0 && hiPG == hiNG ? "PASS" : "FAIL") << endl;
+  }// EOM
+
+  CHECKNUM(DwSlab,  P1, "tranches P1")
+  CHECKNUM(DwSlab,  P2, "tranches P2")
+  CHECKNUM(DwMetis, P1, "metis    P1")
+  CHECKNUM(DwMetis, P2, "metis    P2")
+
+  if (mpirank == 0)
+    cout << "  [W verdict]            " << (badTot == 0
+         ? "les deux numerotations COINCIDENT : Wdh.numbering utilisable tel quel"
+         : "elles DIFFERENT : la numerotation devra etre un argument") << endl;
+  assert(badTot == 0);
+}
+
+// =======================================================================
+//  JALON 7 : transport brut sur le plan (exchangeRawOnPlan)
+// =======================================================================
+//
+//  Premiere brique de MatInterpolate. Pour nommer les COLONNES de la matrice
+//  assemblee, le recepteur doit connaitre l'indice global source de chaque
+//  DDL des fragments qu'il a recus. Or cette information vit chez
+//  l'EMETTEUR : la chaine est
+//
+//    c  --inj_j-->  DDL local de srcVh  --numbering-->  indice global
+//
+//  et les deux fleches sont chez celui qui envoie. Il faut donc la
+//  transporter, par un gather/scatter PUR -- jamais a travers une matrice
+//  d'interpolation, qui melangerait des indices distincts et rendrait du
+//  bruit.
+//
+//  exchangeRawOnPlan reutilise le tuyau du plan sans ponderation par chi ni
+//  renormalisation. Son seul parametre propre est fillHoles : la valeur
+//  donnee aux DDL de fragment sans image source. Pour une VALEUR, zero
+//  convient ; pour un INDICE, zero est un indice legitime -- celui du
+//  premier DDL possede par le rang 0 -- et confondre "pas d'image" avec
+//  "DDL global n0" rattacherait des coefficients a la mauvaise colonne,
+//  silencieusement. D'ou -1.
+//
+//  probeRawTransfer rend, pour l'ensemble des fragments recus :
+//    [0] nombre total de DDL de fragment
+//    [1] nombre de trous (valeur -1)
+//    [3] min des indices non-trous     [4] max des indices non-trous
+//  et retourne le chemin emprunte par le plan.
+//
+//   X1.  Transport de la numerotation. Les indices recus doivent tous
+//        tomber dans [0, ndofglobal). C'est la condition necessaire pour
+//        que l'assemblage les utilise comme colonnes.
+//   X2.  Transport d'une CONSTANTE. Le test le plus fort : si le
+//        gather/scatter est fidele, toutes les valeurs non-trous valent
+//        exactement la constante, donc min == max == K. Un decalage
+//        d'indice, une troncature ou un ecrasement des trous se voient
+//        immediatement.
+//   X3.  Transport du rang emetteur. Chaque fragment porte le rang qui l'a
+//        produit ; les valeurs recues doivent donc tomber dans [0, np).
+//   X4.  Invariance geometrique. Le nombre de DDL transportes et le nombre
+//        de trous ne dependent PAS des valeurs transportees. Les trois
+//        transports doivent donner les memes comptes.
+//
+//  A un seul rang le plan emprunte XFER_SINGLE_RANK : il n'y a aucun
+//  fragment, donc rien a transporter, et la sonde se contente de rendre le
+//  chemin. Le bloc est alors sans objet.
+
+{
+  fespace WxS(DTh5, P1);  fespace WlxS(L5, P1);
+  fespace WxD(DTh6, P1);
+  Dtransfer3 Px = transferPlan(WxS, WxD);
+
+  int[int] numSrc = WxS.numbering;
+  int ndofG = WxS.ndofglobal;
+
+  int[int] rA(5), rB(5), rC(5);
+  int pathA = probeRawTransfer(Px, numSrc, rA);
+
+  if (pathA != 0) {
+    if (mpirank == 0)
+      cout << "  [X transport brut]     SANS OBJET (chemin " << pathA
+           << " : aucun fragment echange)" << endl;
+  }
+  else {
+    /* X2 : une constante, pour prouver la fidelite du gather/scatter */
+    int[int] konst(numSrc.n);
+    konst = 42;
+    probeRawTransfer(Px, konst, rB);
+
+    /* X3 : le rang emetteur */
+    int[int] whoami(numSrc.n);
+    whoami = mpirank;
+    probeRawTransfer(Px, whoami, rC);
+
+    /* reductions : les comptes se somment, les extrema se reduisent */
+    int totG = 0, holG = 0, holBG = 0, holCG = 0, totBG = 0, totCG = 0;
+    int loAG = 0, hiAG = 0, loBG = 0, hiBG = 0, loCG = 0, hiCG = 0;
+    mpiAllReduce(rA[0], totG,  mpiCommWorld, mpiSUM);
+    mpiAllReduce(rA[1], holG,  mpiCommWorld, mpiSUM);
+    mpiAllReduce(rB[0], totBG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(rB[1], holBG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(rC[0], totCG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(rC[1], holCG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(rA[3], loAG, mpiCommWorld, mpiMIN);
+    mpiAllReduce(rA[4], hiAG, mpiCommWorld, mpiMAX);
+    mpiAllReduce(rB[3], loBG, mpiCommWorld, mpiMIN);
+    mpiAllReduce(rB[4], hiBG, mpiCommWorld, mpiMAX);
+    mpiAllReduce(rC[3], loCG, mpiCommWorld, mpiMIN);
+    mpiAllReduce(rC[4], hiCG, mpiCommWorld, mpiMAX);
+
+    int valides = totG - holG;
+
+    /* X1 : indices globaux dans les bornes */
+    int okA = (valides > 0 && loAG >= 0 && hiAG < ndofG) ? 1 : 0;
+    if (mpirank == 0)
+      cout << "  [X1 numerotation]      " << valides << " indices dans ["
+           << loAG << ", " << hiAG << "]   borne " << ndofG
+           << "   => " << (okA ? "PASS" : "FAIL") << endl;
+    assert(okA);
+
+    /* X2 : fidelite du transport */
+    int okB = (loBG == 42 && hiBG == 42) ? 1 : 0;
+    if (mpirank == 0)
+      cout << "  [X2 constante 42]      recu [" << loBG << ", " << hiBG << "]"
+           << "   => " << (okB ? "PASS" : "FAIL") << endl;
+    assert(okB);
+
+    /* X3 : le rang emetteur voyage correctement */
+    int okC = (loCG >= 0 && hiCG < n) ? 1 : 0;
+    if (mpirank == 0)
+      cout << "  [X3 rang emetteur]     recu [" << loCG << ", " << hiCG
+           << "]   borne " << n
+           << "   => " << (okC ? "PASS" : "FAIL") << endl;
+    assert(okC);
+
+    /* X4 : les comptes ne dependent pas des valeurs */
+    int okD = (totG == totBG && totG == totCG
+               && holG == holBG && holG == holCG) ? 1 : 0;
+    if (mpirank == 0)
+      cout << "  [X4 invariance]        DDL " << totG << "/" << totBG << "/" << totCG
+           << "   trous " << holG << "/" << holBG << "/" << holCG
+           << "   => " << (okD ? "PASS" : "FAIL") << endl;
+    assert(okD);
+
+    if (mpirank == 0)
+      cout << "  [X bilan]              " << totG << " DDL transportes, dont "
+           << holG << " sans image source ("
+           << (totG > 0 ? 100.0*holG/totG : 0.0) << " %)" << endl;
+  }
+}
+
+// =======================================================================
+//  JALON 8 : l'operateur assemble agit-il comme le transfert ?
+// =======================================================================
+//
+//  interpolateMat rend la matrice locale de l'operateur de transfert :
+//    lignes   = DDL destination locaux
+//    colonnes = indices globaux source, compactes en 0..m-1
+//    colNum[k] = indice global de la colonne k
+//
+//  Le test qui compte est  loc * u_global == interpolateD(Plan, u, .)  et
+//  il est FORT : les deux chemins de calcul sont entierement disjoints.
+//  interpolateD accumule a la volee, fragment par fragment, en ponderant
+//  par chi puis en renormalisant ; loc a subi tri, fusion des doublons,
+//  renormalisation et compression des colonnes. Rien n'est partage sinon
+//  les matrices P.M[j] et le plan lui-meme.
+//
+//  Deliberement SANS PETSc : le raccord viendra apres. Trois defauts sur
+//  quatre -- transport fausse, doublons non fusionnes, renormalisation mal
+//  placee -- se voient ici, et les diagnostiquer a travers PETSc couterait
+//  dix fois plus cher.
+//
+//  Pour appliquer loc il faut u en numerotation GLOBALE. On rassemble par
+//  somme puis division par le nombre de rangs contributeurs : un DDL
+//  partage porte la meme valeur partout, donc la moyenne le restitue. Cette
+//  reduction sur ndofglobal est grossiere -- c'est un test, pas de la
+//  production.
+//
+//   Y1.  Chemin general, P1 -> P1, champ affine.
+//   Y2.  Chemin general, degres croises P2 -> P1.
+//   Y3.  Chemin emboite (XFER_LOCAL) : ni chi ni renormalisation. Si
+//        l'assemblage les appliquait, l'ecart serait d'ordre 1 - chi.
+//   Y4.  Champ NON polynomial. Un champ affine est reproduit exactement par
+//        les deux voies, ce qui pourrait masquer un operateur faux mais
+//        exact sur les affines ; un champ oscillant ne pardonne pas.
+
+macro CHECKASM(WyS, WlyS, WyD, WlyD, Plan, expr, tag)
+{
+  int[int] numS = WyS.numbering;
+  matrix loc;  real[int] colNum;
+  int pth = interpolateMat(Plan, numS, loc, colNum);
+
+  WlyS uS = expr;
+
+  /* rassemblement en numerotation globale */
+  int ng = WyS.ndofglobal;
+  real[int] acc(ng), cnt(ng);
+  acc = 0.0;  cnt = 0.0;
+  for (int d = 0; d < uS[].n; d++) {
+    acc[numS[d]] = acc[numS[d]] + uS[][d];
+    cnt[numS[d]] = cnt[numS[d]] + 1.0;
+  }
+  real[int] accG(ng), cntG(ng);
+  mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+  mpiAllReduce(cnt, cntG, mpiCommWorld, mpiSUM);
+  for (int g = 0; g < ng; g++) { if (cntG[g] > 0.0) accG[g] = accG[g] / cntG[g]; }
+
+  /* la matrice appliquee au vecteur restreint a ses colonnes */
+  real[int] uCol(colNum.n);
+  for (int k = 0; k < colNum.n; k++) uCol[k] = accG[colNum[k]];
+  real[int] vMat = loc * uCol;
+
+  /* le transfert, par le chemin habituel */
+  WlyD vRef = 0;
+  interpolateD(Plan, uS[], vRef[]);
+
+  real e = 0, nrm = 0;
+  for (int i = 0; i < vMat.n; i++) {
+    e = max(e, abs(vMat[i] - vRef[][i]));
+    nrm = max(nrm, abs(vRef[][i]));
+  }
+  real eG = 0, nrmG = 0;
+  int pMin = 0, pMax = 0;
+  mpiAllReduce(e, eG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(nrm, nrmG, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pth, pMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pth, pMax, mpiCommWorld, mpiMAX);
+
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  chemin " << pMin << "   |v| = " << nrmG
+         << "   ecart = " << eG
+         << "   => " << (eG < 1e-12 && pMin == pMax ? "PASS" : "FAIL") << endl;
+  assert(eG < 1e-12);
+  assert(pMin == pMax);
+}// EOM
+
+/* --- Y1, Y2, Y4 : chemin general sur la paire DTh5 -> DTh6 ------------- */
+{
+  fespace WyS(DTh5, P1);  fespace WlyS(L5, P1);
+  fespace WyD(DTh6, P1);  fespace WlyD(L6, P1);
+  Dtransfer3 Py = transferPlan(WyS, WyD);
+  CHECKASM(WyS, WlyS, WyD, WlyD, Py, 1 + x + 2*y + 3*z, "Y1 P1 -> P1 affine ")
+  CHECKASM(WyS, WlyS, WyD, WlyD, Py, sin(3*pi*x)*cos(2*pi*y) + z*z, "Y4 P1 -> P1 oscill.")
+}
+
+{
+  fespace WyS(DTh5, P2);  fespace WlyS(L5, P2);
+  fespace WyD(DTh6, P1);  fespace WlyD(L6, P1);
+  Dtransfer3 Py = transferPlan(WyS, WyD);
+  CHECKASM(WyS, WlyS, WyD, WlyD, Py, 1 + x + 2*y + 3*z, "Y2 P2 -> P1 croise ")
+}
+
+/* --- Y3 : chemin emboite, ni chi ni renormalisation -------------------- */
+{
+  mesh3 Ya = cube(ncnest, ncnest, ncnest);
+  mesh3 Yb = cube(2*ncnest, 2*ncnest, 2*ncnest);
+  int[int] ya(Ya.nt), yb(Yb.nt);
+  SLABS(Ya, 0.0, ya)
+  SLABS(Yb, 0.0, yb)
+  Dmesh3 DYa = distribute(Ya, overlap = ov, partition = ya);
+  Dmesh3 DYb = distribute(Yb, overlap = ov, partition = yb);
+  mesh3 LYa = DYa.local, LYb = DYb.local;
+  fespace WyS(DYa, P1);  fespace WlyS(LYa, P1);
+  fespace WyD(DYb, P1);  fespace WlyD(LYb, P1);
+  Dtransfer3 Py = transferPlan(WyS, WyD);
+  CHECKASM(WyS, WlyS, WyD, WlyD, Py, sin(3*pi*x)*cos(2*pi*y) + z*z, "Y3 emboite oscill. ")
+}
+
+// =======================================================================
+//  JALON 9 : l'operateur assemble en Mat PETSc
+// =======================================================================
+//
+//  Aboutissement de MatInterpolate. Le jalon 8 validait l'assemblage EN
+//  LOCAL, matrice appliquee a la main ; ici on la confie a PETSc.
+//
+//  L'ESPACE COLONNE. C'est le point qui a coute le plus cher a comprendre.
+//  PETSc convertit le vecteur d'entree via ptA->_cnum, copie de la
+//  numerotation du Mat SOURCE sur nSrcDof entrees (PETSc-code.hpp:4262-4265),
+//  et le produit lit _exchange[1]->getDof() == nSrcDof valeurs. Pour que la
+//  matrice et cette conversion designent les memes colonnes, le PREFIXE de
+//  colGlobal doit reproduire srcNumbering A L'IDENTIQUE -- meme ordre, meme
+//  contenu, DDL locaux non touches compris. Les colonnes venues d'autres
+//  rangs viennent APRES ; PETSc les recupere par son propre VecScatter.
+//
+//  Une version anterieure compressait et TRIAIT les colonnes. Cela marchait
+//  par accident quand toutes les colonnes locales se trouvaient touchees et
+//  la numerotation croissante -- a np = 2 oui, a np = 4 non. Symptome : 45 a
+//  80 % des DDL destination a zero, sans aucune assertion.
+//
+//  C'est aussi ce qui aligne l'implementation sur macro_ddm, dont l'espace
+//  colonne est VhExchange, l'espace EF du maillage recolle : meme convention
+//  d'interface avec PETSc, par une construction differente.
+//
+//  CONTRAT : le srcNumbering passe a interpolateMat doit etre celui du Mat
+//  fourni en 3e argument de constructor. Rien ne le verifie.
+//
+//  ORDRE DES ARGUMENTS : constructor(P, MD, MS, loc, numbering = col)
+//  args[1] = lignes = DESTINATION, args[2] = colonnes = SOURCE. Inverser
+//  donnerait la transposee sans rien signaler.
+//
+//  PETSc/HPDDM refuse overlap = 0 (PETSc-code.hpp:405-408), d'ou ovz.
+//
+//   Z1.  Pmat * u contre interpolateD, chemin general.
+//   Z2.  Conservation : Pmat * 1.
+//   Z3.  Chemin emboite (XFER_LOCAL) : ni chi ni renormalisation.
+//   Z4.  Degres croises P2 -> P1.
+//   Z5.  Adjonction <Pu,w> == <u,P'w>. La transposee n'a aucun sens pour un
+//        transfert a la volee : c'est ce que la materialisation apporte.
+//   Z6.  Maillages disjoints : matrice entierement vide, Pmat * u == 0,
+//        exactement comme interpolateD.
+
+macro MATCHECK(mcDS, mcDD, mcLS, mcLD, mckS, mckD, mcTag)
+{
+  fespace McS(mcDS, mckS);   fespace MclS(mcLS, mckS);
+  fespace McD(mcDD, mckD);   fespace MclD(mcLD, mckD);
+  varf mcvs(u, v) = int3d(mcDS)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + on(1, u=0.0);
+  varf mcvd(u, v) = int3d(mcDD)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + on(1, u=0.0);
+  Mat McMS = mcvs(McS, McS);
+  Mat McMD = mcvd(McD, McD);
+
+  Dtransfer3 McP = transferPlan(McS, McD);
+  int[int] mcnum;   GlobalNumbering(McMS, mcnum);
+  matrix mcloc;     real[int] mccol;
+  int mcpath = interpolateMat(McP, mcnum, mcloc, mccol);
+
+  /* le prefixe de mccol doit reproduire mcnum a l'identique */
+  int mcpref = 1;
+  for (int k = 0; k < mcnum.n; k++) { if (mccol[k] != mcnum[k]) mcpref = 0; }
+
+  Mat McPn;
+  constructor(McPn, McMD, McMS, mcloc, numbering = mccol);
+
+  /* Z1 : Pmat * u == interpolateD */
+  MclS mcu = 1 + x + 2*y + 3*z + sin(3*pi*x)*cos(2*pi*y);
+  MclD mcref = 0;
+  interpolateD(McP, mcu[], mcref[]);
+  real[int] mcv = McPn * mcu[];
+  real mce = 0;
+  for (int i = 0; i < mcv.n; i++) mce = max(mce, abs(mcv[i] - mcref[][i]));
+
+  /* Z2 : conservation */
+  MclS mcone = 1.0;
+  MclD mccref = 0;
+  interpolateD(McP, mcone[], mccref[]);
+  real[int] mcc1 = McPn * mcone[];
+  real mcec = 0;
+  for (int i = 0; i < mcc1.n; i++) mcec = max(mcec, abs(mcc1[i] - mccref[][i]));
+
+  /* Z5 : adjonction, produits scalaires en numerotation PETSc */
+  MclD mcw = cos(2*pi*x)*sin(3*pi*z);
+  real[int] mcPtw = McPn' * mcw[];
+  real[int] mcvG, mcwG, mctG, mcuG;
+  ChangeNumbering(McMD, mcv,    mcvG);
+  ChangeNumbering(McMD, mcw[],  mcwG);
+  ChangeNumbering(McMS, mcPtw,  mctG);
+  ChangeNumbering(McMS, mcu[],  mcuG);
+  real mclhsL = 0, mcrhsL = 0;
+  for (int i = 0; i < mcvG.n; i++) mclhsL += mcvG[i]*mcwG[i];
+  for (int i = 0; i < mctG.n; i++) mcrhsL += mctG[i]*mcuG[i];
+
+  real mceG=0, mcecG=0, mclhs=0, mcrhs=0;
+  int mcpMin=0, mcpMax=0, mcprefG=0, mcxG=0, mcx=mccol.n-mcnum.n;
+  mpiAllReduce(mce,   mceG,   mpiCommWorld, mpiMAX);
+  mpiAllReduce(mcec,  mcecG,  mpiCommWorld, mpiMAX);
+  mpiAllReduce(mcpath, mcpMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(mcpath, mcpMax, mpiCommWorld, mpiMAX);
+  mpiAllReduce(mcpref, mcprefG, mpiCommWorld, mpiMIN);
+  mpiAllReduce(mcx,   mcxG,   mpiCommWorld, mpiSUM);
+  mpiAllReduce(mclhsL, mclhs, mpiCommWorld, mpiSUM);
+  mpiAllReduce(mcrhsL, mcrhs, mpiCommWorld, mpiSUM);
+  real mcrel = (abs(mclhs) > 1e-30) ? abs(mclhs-mcrhs)/abs(mclhs) : abs(mclhs-mcrhs);
+
+  if (mpirank == 0)
+    cout << "  [" << mcTag << "] chemin " << mcpMin << "  prefixe " << mcprefG
+         << "  distantes " << mcxG
+         << " | Pu " << mceG << " | P1 " << mcecG << " | adj " << mcrel
+         << "  => " << (mceG < 1e-10 && mcecG < 1e-10 && mcrel < 1e-8
+                        && mcprefG == 1 && mcpMin == mcpMax ? "PASS" : "FAIL") << endl;
+  assert(mcprefG == 1);
+  assert(mceG < 1e-10 && mcecG < 1e-10);
+  assert(mcrel < 1e-8);
+  assert(mcpMin == mcpMax);
+}// EOM
+
+/* --- Z1, Z2, Z4, Z5 : chemin general ---------------------------------- */
+{
+  int ovz = (ov == 0) ? 1 : ov;
+  mesh3 Ja = cube(nc5, nc5, nc5);
+  mesh3 Jb = cube(nc6, nc6, nc6, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+  Dmesh3 DJa = distribute(Ja, overlap = ovz);
+  Dmesh3 DJb = distribute(Jb, overlap = ovz);
+  mesh3 LJa = DJa.local, LJb = DJb.local;
+  MATCHECK(DJa, DJb, LJa, LJb, P1, P1, "Z1 general P1->P1")
+  MATCHECK(DJa, DJb, LJa, LJb, P2, P1, "Z4 croise  P2->P1")
+}
+
+/* --- Z3 : chemin emboite ---------------------------------------------- */
+{
+  int ovz = (ov == 0) ? 1 : ov;
+  mesh3 Ja = cube(ncnest, ncnest, ncnest);
+  mesh3 Jb = cube(2*ncnest, 2*ncnest, 2*ncnest);
+  int[int] ja(Ja.nt), jb(Jb.nt);
+  SLABS(Ja, 0.0, ja)
+  SLABS(Jb, 0.0, jb)
+  Dmesh3 DJa = distribute(Ja, overlap = ovz, partition = ja);
+  Dmesh3 DJb = distribute(Jb, overlap = ovz, partition = jb);
+  mesh3 LJa = DJa.local, LJb = DJb.local;
+  MATCHECK(DJa, DJb, LJa, LJb, P1, P1, "Z3 emboite P1->P1")
+}
+
+/* --- Z6 : maillages disjoints ----------------------------------------- */
+{
+  int ovz = (ov == 0) ? 1 : ov;
+  mesh3 Ja = cube(6, 6, 6);
+  mesh3 Jb = cube(4, 4, 4, [2.0 + x, 2.0 + y, 2.0 + z]);
+  Dmesh3 DJa = distribute(Ja, overlap = ovz);
+  Dmesh3 DJb = distribute(Jb, overlap = ovz);
+  mesh3 LJa = DJa.local, LJb = DJb.local;
+  MATCHECK(DJa, DJb, LJa, LJb, P1, P1, "Z6 disjoints     ")
+}
+
 mpiBarrier(mpiCommWorld);
 if (mpirank == 0)
-  cout << "== jalons 1 a 5 : toutes les assertions passent ==" << endl;
+  cout << "== jalons 1 a 9 : toutes les assertions passent ==" << endl;
+
+// =======================================================================
+//  JALON 10 : diagnostic de couverture (transferCoverage)
+// =======================================================================
+//  transferCoverage(P, out) renseigne out = [nEmpty, nPartial, vmin, nRows]
+//  et renvoie le chemin. Les quatre valeurs sont LOCALES au rang -- comme
+//  probeRawTransfer, la reduction est a la charge du script.
+//
+//  INVARIANT TESTE
+//  ---------------
+//  cover est l'interpolee de la partition de l'unite : elle vaut 1 sur tout
+//  DDL destination atteint par au moins un fragment source. Deux ecarts :
+//    cover ~ 0        le DDL n'est couvert par aucun fragment, et
+//                     applyTransferPlan le laisse a zero. C'est le zero
+//                     silencieux que ce diagnostic rend visible.
+//    0 < cover != 1   couverture partielle. Benin pour du Lagrange (le
+//                     quotient se simplifie des que les poids sont uniformes
+//                     sur les noeuds de l'element), mais signale que la
+//                     troncature par barycentre de buildFragmentFor a jete
+//                     des elements qu'elle n'aurait pas du.
+//
+//  CV1. Couverture nominale. Th4 est strictement inclus dans Th1, donc aucun
+//      DDL ne doit manquer. C'est le test de NON-REGRESSION du jalon : il
+//      tombe le jour ou buildFragmentFor se met a perdre des elements.
+//  CV2. Couverture debordante. Th2 = [0.5,1.5]^3 sort de Th1 = [0,1]^3.
+//      L'oracle n'est PAS un nombre fige -- il dependrait du partitionneur
+//      et se perimerait a la premiere mise a jour de metis. On transfere
+//      u = 1, dont l'image vaut EXACTEMENT 1 sur tout DDL couvert et
+//      EXACTEMENT 0 sinon (numerateur et denominateur sont la meme somme),
+//      et on verifie que le nombre de zeros egale nEmpty. Cela verifie que
+//      le diagnostic compte bien ce qu'il annonce. Croise avec un oracle
+//      geometrique : aucun DDL strictement interieur a Th1 ne doit etre nul.
+//  CV3. Les trois chemins. nRows doit valoir le ndof destination sur
+//      XFER_GENERAL, XFER_SINGLE_RANK et XFER_LOCAL. Ce dernier est le seul
+//      ou le plan ne stocke aucun vecteur cover (cover.resize(0)) : sans le
+//      cas particulier de transferCoverage il renverrait 0 au lieu du ndof.
+//      La paire emboitee empruntee ici passe bien par XFER_LOCAL des que
+//      mpisize > 1 ; a np = 1 tout passe par XFER_SINGLE_RANK.
+
+// --- CV1 : couverture nominale ----------------------------------------------
+{
+  fespace WyS1(DTh1, P1);
+  fespace WyD1(DTh4, P1);
+  Dtransfer3 Py1 = transferPlan(WyS1, WyD1);
+  real[int] sy1(4);
+  int py1 = transferCoverage(Py1, sy1);
+
+  int nEy1 = int(sy1[0]), nPy1 = int(sy1[1]);
+  real vmy1 = sy1[2];
+  int okRy1 = (int(sy1[3]) == WyD1.ndof) ? 1 : 0;
+
+  int gEy1 = 0, gPy1 = 0, gRy1 = 0;
+  real gVy1 = 0;
+  mpiAllReduce(nEy1, gEy1, mpiCommWorld, mpiSUM);
+  mpiAllReduce(nPy1, gPy1, mpiCommWorld, mpiSUM);
+  mpiAllReduce(okRy1, gRy1, mpiCommWorld, mpiMIN);
+  mpiAllReduce(vmy1, gVy1, mpiCommWorld, mpiMIN);
+
+  if (mpirank == 0)
+    cout << "  [CV1 couverture nominale] vides = " << gEy1 << "  partiels = " << gPy1
+         << "  min cover = " << gVy1 << "  nRows ok = " << gRy1
+         << "   => " << (gEy1 == 0 && gPy1 == 0 && abs(gVy1 - 1.0) < 1e-9 && gRy1 == 1
+                         ? "PASS" : "FAIL") << endl;
+  assert(gEy1 == 0 && gPy1 == 0);
+  assert(abs(gVy1 - 1.0) < 1e-9);
+  assert(gRy1 == 1);
+}
+
+// --- CV2 : couverture debordante --------------------------------------------
+{
+  fespace WyS2(DTh1, P1);
+  fespace WyD2(DTh2, P1);
+  Dtransfer3 Py2 = transferPlan(WyS2, WyD2);
+  real[int] sy2(4);
+  transferCoverage(Py2, sy2);
+
+  V1 uy2 = 1.0;
+  V2 gy2 = 0;
+  interpolateD(WyS2, uy2[], WyD2, gy2[]);
+
+  int nZy2 = 0;
+  for (int i = 0; i < gy2[].n; i++) if (gy2[][i] == 0.0) nZy2++;
+  int nEy2 = int(sy2[0]);
+  int okEy2 = (nZy2 == nEy2) ? 1 : 0;
+
+  V2 yx = x, yy = y, yz = z;
+  real bandy2 = 2.0 * Loc1.hmax;
+  int nBy2 = 0;
+  for (int i = 0; i < gy2[].n; i++) {
+    real a = yx[][i], b = yy[][i], c = yz[][i];
+    if (a > bandy2 && a < 1 - bandy2 && b > bandy2 && b < 1 - bandy2
+        && c > bandy2 && c < 1 - bandy2)
+      if (gy2[][i] == 0.0) nBy2++;
+  }
+
+  int gEy2 = 0, gOky2 = 0, gBy2 = 0;
+  mpiAllReduce(nEy2, gEy2, mpiCommWorld, mpiSUM);
+  mpiAllReduce(okEy2, gOky2, mpiCommWorld, mpiMIN);
+  mpiAllReduce(nBy2, gBy2, mpiCommWorld, mpiSUM);
+
+  if (mpirank == 0)
+    cout << "  [CV2 couverture debord.]  vides = " << gEy2
+         << "  zeros == nEmpty : " << gOky2
+         << "  interieurs nuls = " << gBy2
+         << "   => " << (gEy2 > 0 && gOky2 == 1 && gBy2 == 0 ? "PASS" : "FAIL") << endl;
+  assert(gEy2 > 0);        /* sinon le test serait vacuous */
+  assert(gOky2 == 1);
+  assert(gBy2 == 0);
+}
+
+// --- CV3 : les trois chemins, et le cas cover vide --------------------------
+{
+  int ovy3 = (ov == 0) ? 1 : ov;
+  mesh3 Ya = cube(ncnest, ncnest, ncnest);
+  mesh3 Yb = cube(2*ncnest, 2*ncnest, 2*ncnest);
+  int[int] ya(Ya.nt), yb(Yb.nt);
+  SLABS(Ya, 0.0, ya)
+  SLABS(Yb, 0.0, yb)
+  Dmesh3 DYa = distribute(Ya, overlap = ovy3, partition = ya);
+  Dmesh3 DYb = distribute(Yb, overlap = ovy3, partition = yb);
+
+  fespace WyS3(DYa, P1);
+  fespace WyD3(DYb, P1);
+  Dtransfer3 Py3 = transferPlan(WyS3, WyD3);
+  real[int] sy3(4);
+  int py3 = transferCoverage(Py3, sy3);
+
+  int okRy3 = (int(sy3[3]) == WyD3.ndof) ? 1 : 0;
+  /* sur XFER_LOCAL le plan ne stocke pas de cover : le cas particulier de
+     transferCoverage doit renvoyer 0 vide, 0 partiel et un min a 1 */
+  int okLy3 = 1;
+  if (py3 == 2)
+    okLy3 = (int(sy3[0]) == 0 && int(sy3[1]) == 0 && abs(sy3[2] - 1.0) < 1e-12) ? 1 : 0;
+  /* non-vacuite : des que mpisize > 1, cette paire doit emprunter XFER_LOCAL */
+  int okPy3 = (mpisize == 1) ? (py3 == 1 ? 1 : 0) : (py3 == 2 ? 1 : 0);
+
+  int gRy3 = 0, gLy3 = 0, gPy3 = 0;
+  mpiAllReduce(okRy3, gRy3, mpiCommWorld, mpiMIN);
+  mpiAllReduce(okLy3, gLy3, mpiCommWorld, mpiMIN);
+  mpiAllReduce(okPy3, gPy3, mpiCommWorld, mpiMIN);
+
+  if (mpirank == 0)
+    cout << "  [CV3 chemins/cover vide]  chemin = " << py3
+         << "  nRows ok = " << gRy3 << "  invariants XFER_LOCAL = " << gLy3
+         << "  chemin attendu = " << gPy3
+         << "   => " << (gRy3 == 1 && gLy3 == 1 && gPy3 == 1 ? "PASS" : "FAIL") << endl;
+  assert(gRy3 == 1);
+  assert(gLy3 == 1);
+  assert(gPy3 == 1);
+}
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0)
+  cout << "== jalon 10 : diagnostic de couverture, assertions passees ==" << endl;

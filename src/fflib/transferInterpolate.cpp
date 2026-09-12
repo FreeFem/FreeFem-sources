@@ -10,6 +10,9 @@ static const int TAG_XFER_HDR = 3000;
 static const int TAG_XFER_BODY = 3001;
 static const int TAG_XFER_DOF = 3002;
 
+static const double COVER_EMPTY_TOL = 1e-12;
+static const double COVER_ONE_TOL = 1e-9;
+
 template<class Mesh>
 double localMaxEdgeLength(const Mesh& Th) {
     double hmax = 0;
@@ -73,14 +76,32 @@ static bool boxContains(const BBox& outer, const BBox& inner) {
     return true;
 }
 
-static bool coversAllRows(const MatriceMorse<double>* M, int nrow) {
-    KN<int> cnt(nrow, 0);
-    KN<double> row(nrow, 0.0);
-    for (size_t k = 0; k < M->nnz; ++k) { cnt[M->i[k]]++; row[M->i[k]] += M->aij[k]; }
-    for (int i = 0; i < nrow; ++i)
-        if (cnt[i] == 0 || std::abs(row[i] - 1.0) > 1e-12) return false;
+struct CoverStats {
+    long nRows = 0;
+    long nEmpty = 0;
+    long nPartial = 0;
+    double vmin = 1.0;
+};
 
-    return true;
+static CoverStats coverageOf(const KN<double>& cover) {
+    CoverStats s; s.nRows = cover.n;
+    if (cover.n == 0) return s;
+    s.vmin = cover[0];
+    for (int i = 0; i < cover.n; ++i) {
+        const double c = cover[i];
+        s.vmin = std::min(s.vmin, c);
+        if (std::abs(c) <= COVER_EMPTY_TOL) s.nEmpty++;
+        else if (std::abs(c-1.0) > COVER_ONE_TOL) s.nPartial++;
+    }
+    return s;
+}
+
+static bool coversAll(const CoverStats& s) { return s.nEmpty == 0 && s.nPartial == 0; }
+
+static KN<double> rowSums(const MatriceMorse<double>* M, int nrow) {
+    KN<double> r(nrow, 0.0);
+    for (size_t k = 0; k < M->nnz; ++k) r[M->i[k]] += M->aij[k];
+    return r;
 }
 
 template<class Mesh1, class Mesh2>
@@ -293,11 +314,13 @@ template<class R>
 static void exchangeDofOnly(pcommworld comm,
                             const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
                             const std::vector<KN<R> >& subOut,
+                            const std::vector<int>& ndSend,
                             const std::vector<int>& ndFrag,
                             std::vector<KN<R> >& dofIn)
 {
     MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
     const int nS = sendToRanks.n, nR = recvFromRanks.n;
+    ffassert((int)ndSend.size() == nS && (int)ndFrag.size() == nR);
     dofIn.assign(nR, KN<R>());
 
     std::vector<MPI_Request> rq;
@@ -311,9 +334,10 @@ static void exchangeDofOnly(pcommworld comm,
                   recvFromRanks[j], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
     }
     for (int i = 0; i < nS; ++i) {
-        if (subOut[i].n == 0) continue;
+        if (ndSend[i] == 0) continue;
+        ffassert(subOut[i].n >= ndSend[i]);
         rq.resize(rq.size() + 1);
-        MPI_Isend((R*)subOut[i], (int)(subOut[i].n*sizeof(R)), MPI_BYTE,
+        MPI_Isend((R*)subOut[i], (int)(ndSend[i]*(long)sizeof(R)), MPI_BYTE,
                   sendToRanks[i], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
     }
     if (!rq.empty()) MPI_Waitall((int)rq.size(), rq.data(), MPI_STATUSES_IGNORE);
@@ -322,11 +346,12 @@ static void exchangeDofOnly(pcommworld comm,
 template<class R>
 static void exchangeDofOnly(pcommworld, const KN<int>&, const KN<int>& recvFromRanks,
                             const std::vector<KN<R> >& subOut,
+                            const std::vector<int>& ndSend,
                             const std::vector<int>& ndFrag,
                             std::vector<KN<R> >& dofIn)
 {
     dofIn.assign(recvFromRanks.n, KN<R>());
-    if (recvFromRanks.n && !subOut.empty() && ndFrag[0] > 0) {
+    if (recvFromRanks.n && !subOut.empty() && ndFrag[0] > 0 && ndSend[0] > 0) {
         dofIn[0].resize(ndFrag[0]);
         dofIn[0] = subOut[0];
     }
@@ -435,6 +460,34 @@ static void applyPlainOp(const FragOp& F, const KN<R>& u, KN<R>& dstU){
         dstU[F.ii[k]] += F.aij[k]*u[F.jj[k]];
 }
 
+static void reportCoverage(const CoverStats& s, pcommworld comm, const char* where) {
+    long glo[2] = { s.nEmpty, s.nPartial };
+    double gmin = s.vmin;
+    int rank = 0;
+    #ifdef PARALLELE
+    {
+        long loc[2] = { s.nEmpty, s.nPartial };
+        double vmin = s.vmin;
+        MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+        MPI_Allreduce(loc,  glo,  2, MPI_LONG,   MPI_SUM, cw);
+        MPI_Allreduce(&vmin,&gmin,1, MPI_DOUBLE, MPI_MIN, cw);
+        MPI_Comm_rank(cw, &rank);
+    }
+    #endif
+    if (rank != 0) return;
+    static int warned = 0;
+    if (glo[0] > 0 && warned < 3) {
+        cerr << "Warning: " << where << " : " << glo[0]
+             << " destination dof(s) are not covered by any source fragment"
+                " and are set to zero (min cover = " << gmin << ")." << endl;
+        if (++warned == 3) cerr << "Warning: further coverage warnings suppressed." << endl;
+    }
+    if (glo[1] > 0 && verbosity > 0)
+        cout << " -- transferPlan: " << glo[1]
+             << " destination dof(s) only partially covered (min cover = " << gmin << ")" << endl;
+}
+
+
 template<class Mesh>
 static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, const GFESpace<Mesh>& srcVh, const DistributedMesh<Mesh>& Ddst, const GFESpace<Mesh>& dstVh)
 {
@@ -464,6 +517,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         for (size_t k = 0; k < M0->nnz; ++k){
             P->cover[M0->i[k]] += M0->aij[k]*P->chi[M0->j[k]];
         }
+        reportCoverage(coverageOf(P->cover), nullptr, "interpolateD");
         P->M.assign(1, compactFragmentMatrix(M0));
         delete M0;
 
@@ -477,7 +531,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         const BBox bs = rawBoxOf(srcVh.Th), bd = rawBoxOf(dstVh.Th);
         if (boxContains(bs, bd)) {
             Mloc = buildFragmentMatrix(dstVh, srcVh, data);
-            localOK = coversAllRows(Mloc, P->nDstDof) ? 1 : 0;
+            localOK = coversAll(coverageOf(rowSums(Mloc, P->nDstDof))) ? 1 : 0;
         }
     }
 
@@ -518,6 +572,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         },
         nullptr, nullptr, &P->inj, &P->chi);
 
+    reportCoverage(coverageOf(P->cover), P->comm, "transferPlan");
     P->M.resize(P->recvFromRanks.n, nullptr);
     P->ndFrag.resize(P->recvFromRanks.n, 0);
     P->path = XFER_GENERAL;
@@ -542,20 +597,132 @@ static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN
         applyPlainOp(*P.M[0], scaledU, dstU);       // colonnes = srcVh
     } else {
         std::vector<KN<R> > subOut(P.sendToRanks.n);
+        std::vector<int> ndSend(P.sendToRanks.n, 0);
+        ffassert((int)P.inj.size() == P.sendToRanks.n);
         for (int i = 0; i < P.sendToRanks.n; ++i) {
             const FragInj& J = P.inj[i];
-            subOut[i].resize(J.nd);  subOut[i] = R();     // les trous restent nuls
+            ndSend[i] = J.nd;
+            subOut[i].resize(J.nd);  if (J.nd > 0) subOut[i] = R();     // les trous restent nuls
             for (long k = 0; k < J.pos.n; ++k)
                 subOut[i][J.pos[k]] = scaledU[J.src[k]];
         }
         std::vector<KN<R> > dofIn;
-        exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, P.ndFrag, dofIn);
+        exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, dofIn);
         for (int j = 0; j < P.recvFromRanks.n; ++j)
             if (P.M[j]) applyPlainOp(*P.M[j], dofIn[j], dstU);
     }
 
     for (int i = 0; i < dstU.n; ++i)
-        if (std::abs(P.cover[i]) > 1e-14) dstU[i] /= P.cover[i];
+        if (std::abs(P.cover[i]) > COVER_EMPTY_TOL) dstU[i] /= P.cover[i];
+}
+
+template<class Mesh, class T>
+static void exchangeRawOnPlan(const TransferPlan<Mesh>& P, const KN<T>& srcValues, T fillHoles, std::vector<KN<T> >& perFragment) {
+    ffassert(srcValues.n == P.nSrcDof);
+    ffassert(P.path == XFER_GENERAL);
+
+    std::vector<KN<T>> subOut(P.sendToRanks.n);
+    std::vector<int> ndSend(P.sendToRanks.n,0);
+    ffassert((int)P.inj.size() == P.sendToRanks.n);
+    for (int i = 0; i < P.sendToRanks.n; ++i) {
+        const FragInj& J = P.inj[i];
+        ndSend[i] = J.nd;
+        subOut[i].resize(J.nd);
+        if (J.nd > 0) subOut[i] = fillHoles;
+        for (long k = 0; k < J.pos.n; ++k)
+            subOut[i][J.pos[k]] = srcValues[J.src[k]];
+    }
+    exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, perFragment);
+}
+
+namespace {
+    struct XTrip {int i; long g; double v; };
+    inline bool xtripLess(const XTrip& a, const XTrip& b) {
+        return a.i != b.i ? a.i < b.i : a.g < b.g;
+    }
+}
+
+template<class Mesh>
+static MatriceMorse<double>* assembleTransferMatrix(const TransferPlan<Mesh>& P, const KN<long>& srcNumbering, KN<long>& colGlobal) {
+    ffassert(srcNumbering.n == P.nSrcDof);
+    const bool weighted = (P.path != XFER_LOCAL);
+
+    std::vector<XTrip> T;
+
+    if (P.path == XFER_GENERAL) {
+        std::vector<KN<long> > globFrag;
+        std::vector<KN<double>> chiFrag;
+        exchangeRawOnPlan(P, srcNumbering, -1L, globFrag);
+        exchangeRawOnPlan(P, P.chi, 0.0, chiFrag);
+        
+        for (int j = 0; j < P.recvFromRanks.n; ++j) {
+            if (!P.M[j]) continue;
+            const FragOp& F = *P.M[j];
+            for (long k = 0; k < F.ii.n; ++k) {
+                const int c = F.jj[k];
+                const long g = globFrag[j][c];
+                if (g<0) continue;
+                const double w = chiFrag[j][c];
+                if (w == 0.0) continue;
+                XTrip t; t.i = F.ii[k]; t.g = g; t.v = F.aij[k]*w;
+                T.push_back(t);
+            }
+        }
+    }
+    
+    else {
+        ffassert(P.M.size() == 1 && P.M[0]);
+        const FragOp& F = *P.M[0];
+        for (long k = 0; k < F.ii.n; ++k) {
+            const int c = F.jj[k];
+            const double w = weighted ? P.chi[c] : 1.0;
+            if (w == 0.0) continue;
+            XTrip t; t.i = F.ii[k]; t.g = srcNumbering[c]; t.v = F.aij[k]*w;
+            T.push_back(t);
+        }
+    }
+
+    std::sort(T.begin(), T.end(), xtripLess);
+
+    size_t nw = 0;
+    for (size_t r = 0; r < T.size(); ) { // avancement par s en fin de corps
+        size_t s = r; double acc = 0.0;
+        while (s < T.size() && T[s].i == T[r].i && T[s].g == T[r].g) { acc += T[s].v; ++s; }
+        T[nw].i = T[r].i; T[nw].g = T[r].g; T[nw].v = acc; ++nw;
+        r = s;
+    }
+    T.resize(nw);
+
+    if (weighted) {
+        size_t keep = 0;
+        for (size_t k = 0; k < T.size(); ++k) {
+            const double cv = P.cover[T[k].i];
+            if (std::abs(cv) <= COVER_EMPTY_TOL) continue;
+            T[keep] = T[k]; T[keep].v /= cv; ++keep;
+        }
+        T.resize(keep);
+    }
+
+    std::map<long, int> pos;
+    for (int d = 0; d < P.nSrcDof; ++d) pos[srcNumbering[d]] = d;
+
+    std::vector<long> extra;
+    for (size_t k = 0; k < T.size(); ++k) {
+        if (pos.find(T[k].g) == pos.end()) {
+            pos[T[k].g] = P.nSrcDof + (int)extra.size();
+            extra.push_back(T[k].g);
+        }
+    }
+
+    const long m = (long)P.nSrcDof + (long)extra.size();
+    colGlobal.resize(m);
+    for (int d = 0; d < P.nSrcDof; ++d)          colGlobal[d] = srcNumbering[d];
+    for (size_t e = 0; e < extra.size(); ++e)    colGlobal[(long)P.nSrcDof + (long)e] = extra[e];
+
+    MatriceMorse<double>* A = new MatriceMorse<double>(P.nDstDof, (int)m, 0, 0);
+    for (size_t k = 0; k < T.size(); ++k)
+        (*A)(T[k].i, pos[T[k].g]) += T[k].v;
+    return A;
 }
 
 
@@ -669,6 +836,62 @@ long interpolateDPlan(const TransferPlan<Mesh>** const& ppP,
     return (long)P.path;
 }
 
+template<class Mesh>
+long probeRawTransfer(const TransferPlan<Mesh>** const& ppP,
+                      KN<long>* const& srcNumbering,
+                      KN<long>* const& out)
+{
+    throwassert(ppP && *ppP && srcNumbering && out);
+    const TransferPlan<Mesh>& P = **ppP;
+    out->resize(5); *out = 0L; (*out)[3] = LONG_MAX; (*out)[4] = -1L;
+    if (P.path != XFER_GENERAL) return (long)P.path;
+
+    std::vector<KN<long> > globFrag;
+    exchangeRawOnPlan(P, *srcNumbering, -1L, globFrag);
+
+    for (int j = 0; j < P.recvFromRanks.n; ++j)
+        for (long c = 0; c < globFrag[j].n; ++c) {
+            const long g = globFrag[j][c];
+            (*out)[0]++;
+            if (g < 0) { (*out)[1]++; continue; }
+            (*out)[3] = std::min((*out)[3], g);
+            (*out)[4] = std::max((*out)[4], g);
+        }
+    return (long)P.path;
+}
+
+template<class Mesh>
+long transferCoverage(const TransferPlan<Mesh>** const& ppP, KN<double>* const& out) {
+    throwassert(ppP && *ppP && out);
+    const TransferPlan<Mesh>& P = **ppP;
+    out->resize(4);
+    if (P.path == XFER_LOCAL) {
+        (*out)[0] = 0; (*out)[1] = 0; (*out)[2] = 1.0; (*out)[3] = P.nDstDof;
+        return (long)P.path;
+    }
+    const CoverStats s = coverageOf(P.cover);
+    (*out)[0] = (double)s.nEmpty;
+    (*out)[1] = (double)s.nPartial;
+    (*out)[2] = s.vmin;
+    (*out)[3] = (double)s.nRows;
+    return (long)P.path;
+}
+
+template<class Mesh>
+long interpolateMat(const TransferPlan<Mesh>** const & ppP, KN<long>* const& srcNumbering, Matrice_Creuse<double>* const& out, KN<double>* const& colNumbering) {
+    throwassert(ppP && *ppP && srcNumbering && out && colNumbering);
+    const TransferPlan<Mesh>& P = **ppP;
+    if (srcNumbering->n != P.nSrcDof)
+        ExecError("interpolateMat : source numbering not compatible with the plan");
+
+    KN<long> colGlobal;
+    MatriceMorse<double>* A = assembleTransferMatrix(P, *srcNumbering, colGlobal);
+    out->A.master(A);
+
+    colNumbering->resize(colGlobal.n);
+    for (long k = 0; k <colGlobal.n; ++k) (*colNumbering)[k] = (double)colGlobal[k];
+    return (long)P.path;
+}
 
 template<class Mesh>
 void registerTransferInterpolateOps() {
@@ -702,7 +925,16 @@ void registerTransferInterpolateOps() {
     Global.Add("interpolateD", "(",
         new OneOperator3_<long, TPP, KN<Complex>*, KN<Complex>*>(interpolateDPlan<Mesh,Complex>));
 
+    Global.Add("probeRawTransfer", "(",
+        new OneOperator3_<long, TPP, KN<long>*, KN<long>*>(probeRawTransfer<Mesh>));
 
+    Global.Add("transferCoverage", "(",
+        new OneOperator2_<long, TPP, KN<double>*>(transferCoverage<Mesh>));
+
+
+    Global.Add("interpolateMat", "(",
+        new OneOperator4_<long, TPP, KN<long>*, Matrice_Creuse<double>*, KN<double>*>(
+            interpolateMat<Mesh>));
 }
 
 template void registerTransferInterpolateOps<Mesh3>();
