@@ -65,6 +65,7 @@ int np   = mpisize;
      /usr/bin/time -v mpiexec -np 4 ... -impl 1 -cfg 2
    -impl 0 ne fait aucun transfert : c'est la ligne de base, la memoire des
    maillages et des partitions, commune aux deux implementations. */
+int mat  = getARGV("-mat", 1);    /* 0 = pas de matrice, 1 = plan + matrice, 2 = matrice seule */
 int impl = getARGV("-impl", 3);   /* 0 = rien, 1 = macro_ddm, 2 = natif, 3 = les deux */
 int cfg  = getARGV("-cfg", -1);   /* -1 = toutes, sinon 0..4 */
 int icfg = 0;
@@ -102,6 +103,8 @@ macro COMPARE(PA, PB, tag)
   real emG = 0, ecG = 0, epG = 0;
   real hiMG = 0, loMG = 0, hiCG = 0, loCG = 0;
   int memMacro = 0, memPlan = 0, ndSG = 0, ndDG = 0, pMin = -1, pMax = -1;
+  real tMatBuild = 0, tMatMult = 0, eqG = 0;
+  int memMat = 0, memOp = 0, nnzMatG = 0, ncolMatG = 0;
 
  if (impl == 1 || impl == 3) {
   fespace VmS(ThA, PA);
@@ -169,6 +172,7 @@ macro COMPARE(PA, PB, tag)
   mpiAllReduce(ec, ecG, mpiCommWorld, mpiMAX);
 
   /* ---------- natif : plan conserve ---------- */
+  if (mat != 2) {
   int mp0 = storageused();
   mpiBarrier(mpiCommWorld);
   real tp0 = mpiWtime();
@@ -194,6 +198,54 @@ macro COMPARE(PA, PB, tag)
   real ep = 0;
   for (int i = 0; i < vp[].n; i++) ep = max(ep, abs(vp[][i] - rc[][i]));
   mpiAllReduce(ep, epG, mpiCommWorld, mpiMAX);
+  }
+
+  /* ---------- natif : operateur assemble en Mat PETSc ---------- */
+  if (mat >= 1) {
+    varf vqs(u, v) = int3d(DS)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + on(1, u=0.0);
+    varf vqd(u, v) = int3d(DD)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v)) + on(1, u=0.0);
+
+    int mq0 = storageused();
+    mpiBarrier(mpiCommWorld);
+    real tq0 = mpiWtime();
+    Mat QMS = vqs(WdS, WdS);
+    Mat QMD = vqd(WdD, WdD);
+    int mqA = storageused();          /* apres les deux Mat de raideur */
+    int[int] qnum;   GlobalNumbering(QMS, qnum);
+    Dtransfer3 QPl = transferPlan(WdS, WdD);
+    matrix qloc;     real[int] qcol;
+    interpolateMat(QPl, qnum, qloc, qcol);
+    Mat QPm;
+    constructor(QPm, QMD, QMS, qloc, numbering = qcol);
+    mpiBarrier(mpiCommWorld);
+    tMatBuild = mpiWtime() - tq0;
+    int mq1 = storageused();
+    int memMatLoc = mq1 - mq0;
+    mpiAllReduce(memMatLoc, memMat, mpiCommWorld, mpiSUM);
+    int memOpLoc = mq1 - mqA;          /* l'operateur SEUL, hors Mat de raideur */
+    mpiAllReduce(memOpLoc, memOp, mpiCommWorld, mpiSUM);
+
+    int nnzL = qloc.nbcoef, ncolL = qcol.n;
+    mpiAllReduce(nnzL, nnzMatG, mpiCommWorld, mpiSUM);
+    mpiAllReduce(ncolL, ncolMatG, mpiCommWorld, mpiSUM);
+
+    mpiBarrier(mpiCommWorld);
+    real tq1 = mpiWtime();
+    for (int k = 0; k < nrep; k++) {
+      WlS uq = (k+1) + x + 2*y + 3*z;
+      real[int] wq = QPm * uq[];
+    }
+    mpiBarrier(mpiCommWorld);
+    tMatMult = (mpiWtime() - tq1) / nrep;
+
+    /* justesse : Pmat * u contre le transfert */
+    WlS uq0 = 1 + x + 2*y + 3*z;
+    WlD rq = 1 + x + 2*y + 3*z;
+    real[int] wq0 = QPm * uq0[];
+    real eq = 0;
+    for (int i = 0; i < wq0.n; i++) eq = max(eq, abs(wq0[i] - rq[][i]));
+    mpiAllReduce(eq, eqG, mpiCommWorld, mpiMAX);
+  }
 
   mpiAllReduce(pathC, pMin, mpiCommWorld, mpiMIN);
   mpiAllReduce(pathC, pMax, mpiCommWorld, mpiMAX);
@@ -230,8 +282,19 @@ macro COMPARE(PA, PB, tag)
     cout << "   RAPPORT rejeu          x" << gainRep
          << "    (macro rejeu / rejeu sur plan)" << endl;
     cout << "   plan rentable des      " << seuil << " transferts" << endl;
+    real gainMat = tMatMult > 0 ? tMacroRep / tMatMult : 0;
+    real gainMR  = tMatMult > 0 ? tReplay   / tMatMult : 0;
+    cout << "   natif      matrice     " << tMatBuild << " s  (assemblage)" << endl;
+    cout << "   natif      MatMult     " << tMatMult  << " s" << endl;
+    cout << "   RAPPORT MatMult        x" << gainMat
+         << "    (macro rejeu / MatMult)" << endl;
+    cout << "   rejeu plan / MatMult   x" << gainMR << endl;
+    cout << "   matrice                " << nnzMatG << " nnz   " << ncolMatG << " colonnes" << endl;
     cout << "   memoire macro_ddm      " << memMacro/1024./1024. << " Mo retenus" << endl;
     cout << "   memoire plan natif     " << memPlan/1024./1024. << " Mo retenus" << endl;
+    cout << "   memoire matrice+Mat    " << memMat/1024./1024. << " Mo retenus" << endl;
+    cout << "   memoire operateur seul " << memOp/1024./1024. << " Mo retenus" << endl;
+    cout << "   erreur Pmat*u          " << eqG << endl;
     cout << "   erreur affine          macro " << emG
          << "   direct " << ecG << "   plan " << epG << endl;
     cout << "   champ non polynomial   macro [" << loMG << ", " << hiMG
