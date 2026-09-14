@@ -225,7 +225,8 @@ bool FragLocator<Mesh>::locate(const typename Mesh::Rd& x, int& j, int& k,
     int c[3];
     for (int d = 0; d < 3; ++d) {
         c[d] = (int)((x[d] - org[d]) * invh[d]);
-        if (c[d] < 0 || c[d] >= nc[d]) return false;
+        if (c[d] < 0) c[d] = 0;
+        else if (c[d] >= nc[d]) c[d] = nc[d] - 1;
     }
     const long cc = (long)c[0] + nc[0]*((long)c[1] + nc[1]*(long)c[2]);
     double dist;
@@ -237,8 +238,6 @@ bool FragLocator<Mesh>::locate(const typename Mesh::Rd& x, int& j, int& k,
     }
     return false;
 }
-
-
 
 template<class Mesh1, class Mesh2>
 void computeOverlapRankPairs(pcommworld comm, const DistributedMesh<Mesh1>& Dsrc, const DistributedMesh<Mesh2>& Ddst, KN<int>& sendToRanks, KN<int>& recvFromRanks, std::vector<BBox>& allSrc, std::vector<BBox>& allDst) {
