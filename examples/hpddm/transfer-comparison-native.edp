@@ -1,0 +1,306 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+//PARAMS -ns
+
+// ---------------------------------------------------------------------------
+//  Banc de comparaison : VecInterpolate de macro_ddm contre l'interpolation
+//  native entre maillages distribues (interpolateD / transferPlan).
+//
+//  Repris du bloc 3D de transfer.edp, dont la geometrie se prete exactement a
+//  la comparaison : les DEUX maillages sont globaux avant distribution
+//  (cube, puis mmg3d diffuse depuis le rang 0). distribute() s'y applique donc
+//  aussi bien que DmeshCreate, sur la meme geometrie.
+//
+//  POURQUOI LE BLOC 2D DE transfer.edp A ETE RETIRE
+//  ------------------------------------------------
+//  L'implementation native ne couvre que Mesh3, MeshS et MeshL : il n'existe
+//  pas de Dmesh 2D. Le bloc 2D n'est donc pas comparable, et le garder ne
+//  ferait qu'ajouter du bruit.
+//
+//  CE QUI EST MESURE
+//  -----------------
+//   1. VITESSE. Un seul chiffre de chaque cote, moyenne sur nrep appels.
+//      macro_ddm refait tout a chaque appel ; interpolateD aussi, ce qui rend
+//      la comparaison equitable. Le rejeu sur plan conserve n'est pas mesure :
+//      aucun exemple FreeFEM ne rejoue un transfert sur une paire de maillages
+//      inchangee, et l'operateur assemble (interpolateMat) est de toute facon
+//      la bonne voie quand on veut appliquer plusieurs fois.
+//   2. MEMOIRE. storageused() est un compteur d'allocation COURANTE
+//      (mallinfo2().uordblks) : il donne la memoire RETENUE apres coup, pas le
+//      pic. FreeFEM n'expose aucun compteur de pic. Pour le vrai pic RSS, il
+//      faut isoler chaque implementation dans son processus et mesurer depuis
+//      l'exterieur :
+//         /usr/bin/time -v mpiexec -np 4 FreeFem++-mpi -nw ce_script.edp -impl 1
+//         /usr/bin/time -v mpiexec -np 4 FreeFem++-mpi -nw ce_script.edp -impl 2
+//      -impl 0 ne fait aucun transfert : c'est la ligne de base commune
+//      (maillages, distributions, espaces EF).
+//      Les chiffres memoire ne sont lisibles qu'avec -oracle 0 : l'oracle
+//      ci-dessous alloue des espaces GLOBAUX sur chaque rang.
+//   3. MEME RESULTAT. Trois niveaux, du plus faible au plus fort :
+//      a. champ exactement representable dans P3 ET dans P2 : les deux
+//         transferts doivent rendre la valeur analytique a l'epsilon machine ;
+//      b. champ oscillant : les extrema globaux, independants du decoupage,
+//         doivent coincider ;
+//      c. ORACLE SERIE. ThNewG etant diffuse, chaque rang calcule
+//         l'interpolation exacte en sequentiel. Le maillage destination local
+//         etant un SOUS-MAILLAGE de ThNewG et l'espace etant le meme, la
+//         restriction de cet oracle sur l'espace local est exacte : on compare
+//         donc DDL par DDL. Si les deux implementations collent a l'oracle a
+//         l'epsilon machine, elles sont identiques entre elles.
+//         C'est le seul des trois qui etablit une egalite point a point ;
+//         les partitions differant, aucune comparaison directe entre les deux
+//         vecteurs distribues n'aurait de sens.
+//
+//  Usage :
+//    ff-mpirun -np 4 transfer-comparison-native.edp -ns
+//    ff-mpirun -np 4 transfer-comparison-native.edp -ns -global_3d 10 -nrep 5
+//
+//  Parametres :
+//    -global_3d  raffinement du cube source                 (defaut 5)
+//    -hmax       finesse du remaillage mmg3d destination    (defaut 8e-2)
+//    -nrep       repetitions chronometrees                  (defaut 3)
+//    -impl       0 = ligne de base, 1 = macro_ddm, 2 = natif, 3 = les deux
+//    -oracle     1 = comparaison DDL par DDL contre l'oracle serie (defaut 1)
+//    -vtk        1 = ecrire les sorties vtu                 (defaut 0)
+// ---------------------------------------------------------------------------
+
+load "PETSc"
+load "mmg"
+load "Element_P4"
+load "Element_P3"
+
+func PkSingle    = P3;
+func Pk          = [PkSingle, PkSingle];        // espace source
+func PkNewSingle = P2;
+func PkNew       = [PkNewSingle, PkNewSingle];  // espace destination
+
+macro dimension()3// EOM
+macro def(u)[u, u#B]// EOM
+macro init(u)[u, u]// EOM
+macro def1(u)u// EOM
+include "macro_ddm.idp"
+include "getARGV.idp"
+
+int nglob  = getARGV("-global_3d", 5);
+real hm    = getARGV("-hmax", 8.0e-2);
+int nrep   = getARGV("-nrep", 3);
+int impl   = getARGV("-impl", 3);
+int oracle = getARGV("-oracle", 1);
+int wvtk   = getARGV("-vtk", 0);
+int[int] fforder = [1];
+
+// Champ exactement representable dans P3 ET dans P2 : degre 2.
+macro FX() (1 + x + 2*y + 3*z + x*y + z*z)// EOM
+macro FY() (2 - x + y*z)// EOM
+// Champ non representable, celui de transfer.edp.
+macro GX() (cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z))// EOM
+macro GY() (cos(2*pi*z))// EOM
+
+// ===========================================================================
+//  Geometrie globale, construite UNE fois et partagee par les deux voies
+// ===========================================================================
+mesh3 ThNewG, ThG = cube(nglob, nglob, nglob);
+if (mpirank == 0)
+    ThNewG = mmg3d(ThG, hmax = hm);
+broadcast(processor(0), ThNewG);
+
+if (mpirank == 0) {
+    cout << "\n###############################################################" << endl;
+    cout << "  transfer-comparison-native : np = " << mpisize
+         << "   nrep = " << nrep << endl;
+    cout << "  source      " << ThG.nt    << " tetraedres   [P3,P3]" << endl;
+    cout << "  destination " << ThNewG.nt << " tetraedres   [P2,P2]" << endl;
+    cout << "###############################################################" << endl;
+}
+
+real tMac = 0, tNat = 0, tNatPlan = 0;
+real eMacF = 0, eNatF = 0, eMacO = 0, eNatO = 0;
+real hiMac = -1e30, loMac = 1e30, hiNat = -1e30, loNat = 1e30;
+int mMac = 0, mNat = 0, mNatPlan = 0;
+
+// ===========================================================================
+//  macro_ddm.  VecInterpolate modifie temporairement le maillage source
+//  (change(fregion=...)), d'ou un jeu de maillages qui lui est propre.
+// ===========================================================================
+mesh3 ThA = ThG, ThB = ThNewG;
+DmeshCreate(ThA);
+DmeshCreate(ThB);
+fespace VmS(ThA, Pk);
+fespace VmD(ThB, PkNew);
+
+if (impl == 1 || impl == 3) {
+    VmS def(um) = [FX, FY];
+    VmD def(vm);
+
+    int m0 = storageused();
+    mpiBarrier(mpiCommWorld);
+    VecInterpolate(ThA, Pk, um, ThB, PkNew, vm);   // premier appel : sert a l'exactitude
+    mpiBarrier(mpiCommWorld);
+    int m1 = storageused();
+    int mLoc = m1 - m0;
+    mpiAllReduce(mLoc, mMac, mpiCommWorld, mpiSUM);
+
+    // exactitude sur le champ representable
+    VmD def(rm) = [FX, FY];
+    real e = 0;
+    for (int i = 0; i < vm[].n; i++) e = max(e, abs(vm[][i] - rm[][i]));
+    mpiAllReduce(e, eMacF, mpiCommWorld, mpiMAX);
+
+    // temps retenu : moyenne sur nrep, comme pour le natif
+    mpiBarrier(mpiCommWorld);
+    real t1 = mpiWtime();
+    for (int k = 0; k < nrep; k++) {
+        VmS def(uk) = [FX, FY];
+        VmD def(vk);
+        VecInterpolate(ThA, Pk, uk, ThB, PkNew, vk);
+    }
+    mpiBarrier(mpiCommWorld);
+    tMac = (mpiWtime() - t1) / nrep;
+
+    // champ oscillant : extrema globaux
+    VmS def(us) = [GX, GY];
+    VmD def(vs);
+    VecInterpolate(ThA, Pk, us, ThB, PkNew, vs);
+    real hi = -1e30, lo = 1e30;
+    for (int i = 0; i < vs[].n; i++) { hi = max(hi, vs[][i]); lo = min(lo, vs[][i]); }
+    mpiAllReduce(hi, hiMac, mpiCommWorld, mpiMAX);
+    mpiAllReduce(lo, loMac, mpiCommWorld, mpiMIN);
+
+    if (oracle) {
+        // oracle serie : interpolation exacte calculee sur les maillages GLOBAUX,
+        // puis restreinte -- exactement -- sur l'espace destination local.
+        fespace VgS(ThG, Pk);
+        fespace VgD(ThNewG, PkNew);
+        VgS def(ug) = [GX, GY];
+        VgD def(rg) = def(ug);
+        VmD def(ro) = def(rg);
+        real eo = 0;
+        for (int i = 0; i < vs[].n; i++) eo = max(eo, abs(vs[][i] - ro[][i]));
+        mpiAllReduce(eo, eMacO, mpiCommWorld, mpiMAX);
+    }
+    if (wvtk) {
+        savevtk("transfer-comparison_macro.vtu", ThA, um, order = fforder);
+        savevtk("transfer-comparison_macro.vtu", ThB, vm, order = fforder, append = true);
+    }
+}
+
+// ===========================================================================
+//  Implementation native
+// ===========================================================================
+mesh3 ThC = ThG, ThD = ThNewG;
+Dmesh3 DS = distribute(ThC);
+Dmesh3 DD = distribute(ThD);
+mesh3 LS = DS.local, LD = DD.local;
+fespace WdS(DS, Pk);    fespace WlS(LS, Pk);
+fespace WdD(DD, PkNew); fespace WlD(LD, PkNew);
+
+if (impl == 2 || impl == 3) {
+    WlS def(uc) = [FX, FY];
+    WlD def(vc);
+
+    int m0 = storageused();
+    mpiBarrier(mpiCommWorld);
+    real t0 = mpiWtime();
+    interpolateD(WdS, uc[], WdD, vc[]);
+    mpiBarrier(mpiCommWorld);
+    tNat = mpiWtime() - t0;
+    int m1 = storageused();
+    int mLoc = m1 - m0;
+    mpiAllReduce(mLoc, mNat, mpiCommWorld, mpiSUM);
+
+    real e = 0;
+    WlD def(rc) = [FX, FY];
+    for (int i = 0; i < vc[].n; i++) e = max(e, abs(vc[][i] - rc[][i]));
+    mpiAllReduce(e, eNatF, mpiCommWorld, mpiMAX);
+
+    mpiBarrier(mpiCommWorld);
+    real t1 = mpiWtime();
+    for (int k = 0; k < nrep; k++) {
+        WlS def(uk) = [FX, FY];
+        WlD def(vk);
+        interpolateD(WdS, uk[], WdD, vk[]);
+    }
+    mpiBarrier(mpiCommWorld);
+    tNat = (mpiWtime() - t1) / nrep;   // moyenne, comme pour macro_ddm
+
+    // plan conserve : construit pour la seule comparaison memoire ci-dessous
+    int p0 = storageused();
+    mpiBarrier(mpiCommWorld);
+    real t2 = mpiWtime();
+    Dtransfer3 Pl = transferPlan(WdS, WdD);
+    mpiBarrier(mpiCommWorld);
+    tNatPlan = mpiWtime() - t2;
+    int p1 = storageused();
+    int pLoc = p1 - p0;
+    mpiAllReduce(pLoc, mNatPlan, mpiCommWorld, mpiSUM);
+
+    WlS def(ut) = [GX, GY];
+    WlD def(vt);
+    interpolateD(WdS, ut[], WdD, vt[]);
+    real hi = -1e30, lo = 1e30;
+    for (int i = 0; i < vt[].n; i++) { hi = max(hi, vt[][i]); lo = min(lo, vt[][i]); }
+    mpiAllReduce(hi, hiNat, mpiCommWorld, mpiMAX);
+    mpiAllReduce(lo, loNat, mpiCommWorld, mpiMIN);
+
+    if (oracle) {
+        fespace VgS(ThG, Pk);
+        fespace VgD(ThNewG, PkNew);
+        VgS def(ug) = [GX, GY];
+        VgD def(rg) = def(ug);
+        WlD def(ro) = def(rg);
+        real eo = 0;
+        for (int i = 0; i < vt[].n; i++) eo = max(eo, abs(vt[][i] - ro[][i]));
+        mpiAllReduce(eo, eNatO, mpiCommWorld, mpiMAX);
+    }
+    if (wvtk) {
+        savevtk("transfer-comparison_native.vtu", LS, uc, order = fforder);
+        savevtk("transfer-comparison_native.vtu", LD, vc, order = fforder, append = true);
+    }
+}
+
+// ===========================================================================
+//  Rapport
+// ===========================================================================
+if (mpirank == 0) {
+    real gain = tNat > 0 ? tMac / tNat : 0;
+
+    cout << "\n  ---------------- vitesse (moyenne sur " << nrep << " appels) ----------------" << endl;
+    cout << "   macro_ddm                    " << tMac << " s" << endl;
+    cout << "   natif                        " << tNat << " s"
+         << (gain > 0 ? "   x" + gain : "") << endl;
+
+    cout << "\n  ---------------- memoire retenue ----------------" << endl;
+    cout << "   (allocation courante, cumulee sur les rangs ; PAS le pic --" << endl;
+    cout << "    pour le pic RSS : /usr/bin/time -v ... -impl 1  puis  -impl 2)" << endl;
+    cout << "   macro_ddm  VecInterpolate    " << mMac/1024./1024.     << " Mo" << endl;
+    cout << "   natif      interpolateD      " << mNat/1024./1024.     << " Mo" << endl;
+    cout << "   natif      plan conserve     " << mNatPlan/1024./1024. << " Mo" << endl;
+
+    cout << "\n  ---------------- meme resultat ? ----------------" << endl;
+    cout << "   champ exactement representable, erreur Linf" << endl;
+    cout << "     macro_ddm                  " << eMacF << endl;
+    cout << "     natif                      " << eNatF << endl;
+    cout << "   champ oscillant, extrema globaux" << endl;
+    cout << "     macro_ddm                  [" << loMac << ", " << hiMac << "]" << endl;
+    cout << "     natif                      [" << loNat << ", " << hiNat << "]" << endl;
+    if (impl == 3)
+        cout << "     ecart des extrema          "
+             << max(abs(hiMac - hiNat), abs(loMac - loNat)) << endl;
+    if (oracle) {
+        cout << "   contre l'oracle serie, DDL par DDL, erreur Linf" << endl;
+        cout << "     macro_ddm                  " << eMacO << endl;
+        cout << "     natif                      " << eNatO << endl;
+    }
+    cout << endl;
+}
+
+// Les deux implementations doivent reproduire un champ representable a
+// l'epsilon machine, et coller a l'oracle serie. Si les deux tiennent, elles
+// calculent le meme operateur.
+if (impl == 1 || impl == 3) assert(eMacF < 1e-10);
+if (impl == 2 || impl == 3) assert(eNatF < 1e-10);
+if (oracle && (impl == 1 || impl == 3)) assert(eMacO < 1e-10);
+if (oracle && (impl == 2 || impl == 3)) assert(eNatO < 1e-10);
+if (impl == 3) assert(max(abs(hiMac - hiNat), abs(loMac - loNat)) < 1e-10);
+
+if (mpirank == 0) cout << "== transfer-comparison-native : OK ==" << endl;
