@@ -239,6 +239,17 @@ bool FragLocator<Mesh>::locate(const typename Mesh::Rd& x, int& j, int& k,
     return false;
 }
 
+template<class Mesh>
+static bool allDstVerticesInside(const GFESpace<Mesh>& dstVh, const FragLocator<Mesh>& L) {
+    typename Mesh::Element::RdHat xh;
+    int j = -1, k = -1;
+    const Mesh& Th = dstVh.Th;
+    for (int iv = 0; iv < Th.nv; ++iv){
+        if (!L.locate(Th(iv), j, k , xh)) return false;
+    }
+    return true;
+}
+
 template<class Mesh1, class Mesh2>
 void computeOverlapRankPairs(pcommworld comm, const DistributedMesh<Mesh1>& Dsrc, const DistributedMesh<Mesh2>& Ddst, KN<int>& sendToRanks, KN<int>& recvFromRanks, std::vector<BBox>& allSrc, std::vector<BBox>& allDst) {
     ffassert(Dsrc.comm == Ddst.comm);
@@ -294,8 +305,7 @@ static Mesh* buildFragmentFor(const Mesh& Loc, const BBox& target, KN<int>& n2o,
 }
 
 template<class Mesh, class R>
-static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const KN<R>& scaledU,
-                               const KN<double>& chi, const Mesh& frag, const KN<int>& n2o, FragInj* injOut = nullptr)
+static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const Mesh& frag, const KN<int>& n2o, FragInj* injOut = nullptr)
 {
     ffassert(srcVh.TFE.N() == 1);            // espaces composites hors perimetre
     GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]);   
@@ -305,12 +315,11 @@ static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const KN<R>& scaledU
     std::vector<long> vsrc;
     if (injOut) { vpos.reserve(nd); vsrc.reserve(nd); }
 
-    KN<R> sub(2*nd);
+    KN<R> sub(nd);
     for (int d = 0; d < nd; ++d) { 
-        if (inj[d] < 0) { sub[d] = R(); sub[nd + d] = R(); }
+        if (inj[d] < 0) sub[d] = R();
         else { 
-            sub[d] = scaledU[inj[d]];
-            sub[nd + d] = R(1.0); // masque 0/1 
+            sub[d] = R(1.0); // masque 0/1 
             if (injOut) { vpos.push_back(d); vsrc.push_back(inj[d]); }
         }
     }
@@ -515,12 +524,12 @@ static void exchangeDofOnly(pcommworld, const KN<int>&, const KN<int>& recvFromR
 #endif
 
 
-template<class Mesh1, class Mesh2, class R, class OnFragment>
+template<class Mesh1, class Mesh2, class OnFragment>
 static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
-                             const GFESpace<Mesh1>& srcVh, const KN<R>& srcU,
+                             const GFESpace<Mesh1>& srcVh,
                              const DistributedMesh<Mesh2>& Ddst,
                              KN<int>& sendToRanks, KN<int>& recvFromRanks,
-                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr, std::vector<FragInj>* injOut = nullptr, KN<double>* chiOut = nullptr, std::vector<Mesh1*>* keepFrags = nullptr, std::vector<KN<R>>* keepDof = nullptr)
+                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr, std::vector<FragInj>* injOut = nullptr, std::vector<Mesh1*>* keepFrags = nullptr, std::vector<KN<double>>* keepDof = nullptr)
 {
     std::vector<BBox> allSrc, allDst;
     computeOverlapRankPairs(Dsrc.comm, Dsrc, Ddst, sendToRanks, recvFromRanks, allSrc, allDst);
@@ -540,14 +549,9 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
     }
 
     if (sentCounts) sentCounts->resize(sendToRanks.n);
-    KN<double> chi = interpolatePoU(Dsrc, srcVh);
-    if (chiOut) { chiOut->resize(chi.n); *chiOut = chi; }
-    ffassert(chi.n == srcVh.NbOfDF && srcU.n == srcVh.NbOfDF);
-    KN<R> scaledU(srcU.n);
-    for (int d = 0; d < srcU.n; ++d) scaledU[d] = srcU[d] * chi[d];
 
     std::vector<Mesh1*> fragOut(sendToRanks.n, nullptr);
-    std::vector<KN<R> > subOut(sendToRanks.n);
+    std::vector<KN<double> > subOut(sendToRanks.n);
     for (int i = 0; i < sendToRanks.n; ++i) {
         KN<int> n2oCover;
         fragOut[i] = buildFragmentFor(*srcGeom, allDst[sendToRanks[i]], n2oCover, &cover2local);
@@ -557,7 +561,7 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
             for (int kc = 0; kc < n2oCover.n; ++kc){
                 n2oLocal[kc] = cover2local[n2oCover[kc]];
             }
-            subOut[i] = fragmentDofVector(srcVh, scaledU, chi, *fragOut[i], n2oLocal, injOut ? &(*injOut)[i] : nullptr);
+            subOut[i] = fragmentDofVector<Mesh1, double>(srcVh, *fragOut[i], n2oLocal, injOut ? &(*injOut)[i] : nullptr);
         }
     }
 
@@ -601,12 +605,9 @@ static FragOp* compactFragmentMatrix(MatriceMorse<double>* M)
     return F;
 }
 
-template<class R>
-static void applyWeighted(const MatriceMorse<double>* M, int nd, const KN<R>& payload, KN<R>& dstU, KN<double>& cover) {
+static void accumulateCover(const MatriceMorse<double>* M, const KN<double>& mask, KN<double>& cover) {
     for (size_t k = 0; k < M->nnz; ++k) {
-        const int ii = M->i[k], cc = M->j[k];
-        dstU[ii] += M->aij[k]*payload[cc];
-        cover[ii] += M->aij[k]*std::real(payload[nd+cc]);
+        cover[M->i[k]] += M->aij[k]*mask[M->j[k]];
     }
 }
 
@@ -649,7 +650,7 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
                                    const std::vector<KN<double> >& dofIn,
                                    const int* data,
                                    std::vector<FragOp*>& Mout, std::vector<int>& ndFrag,
-                                   KN<double>& cover, std::true_type)
+                                   KN<double>& cover, std::true_type, const FragLocator<Mesh>* preBuilt = nullptr)
 {
     typedef typename Mesh::Element          Element;
     typedef typename Element::RdHat         RdHat;
@@ -663,12 +664,21 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
     ffassert(srcVh.TFE.N() == 1 && dstVh.TFE.N() == 1);
     const GTypeOfFE<Mesh>* tfeSrc = srcVh.TFE[0];
 
-    FragLocator<Mesh> L; L.build(frags);
+    FragLocator<Mesh> Lown;
+    if (!preBuilt) Lown.build(frags);
+    const FragLocator<Mesh>& L = preBuilt ? *preBuilt : Lown;
 
     std::vector<GFESpace<Mesh>*> fragVh(nR, nullptr);
+    std::vector<char> owned(nR, 0);
     for (int j = 0; j < nR; ++j)
         if (frags[j]) {
-            fragVh[j] = new GFESpace<Mesh>(*frags[j], *tfeSrc);
+            if (frags[j] == &srcVh.Th) {
+                fragVh[j] = const_cast<GFESpace<Mesh>*>(&srcVh);
+                owned[j]  = 0;
+            } else {
+                fragVh[j] = new GFESpace<Mesh>(*frags[j], *tfeSrc);
+                owned[j]  = 1;
+            }
             ndFrag[j] = fragVh[j]->NbOfDF;
         }
 
@@ -760,14 +770,13 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
             F->ii[q] = cooI[j][q]; F->jj[q] = cooJ[j][q]; F->aij[q] = cooV[j][q];
         }
         Mout[j] = F;
-        // dofIn[j] = [ chi*u ; chi ] : la seconde moitie porte chi
-        // (fragmentDofVector, ligne 291). Identique a applyWeighted.
-        if (dofIn[j].n >= 2*(long)ndFrag[j])
+        // dofIn[j] = masque 0/1, un par DDl du fragment
+        if (dofIn[j].n >= (long)ndFrag[j])
             for (long q = 0; q < nz; ++q)
-                cover[F->ii[q]] += F->aij[q] * dofIn[j][ndFrag[j] + F->jj[q]];
+                cover[F->ii[q]] += F->aij[q] * dofIn[j][F->jj[q]];
     }
 
-    for (int j = 0; j < nR; ++j) delete fragVh[j];
+    for (int j = 0; j < nR; ++j) if (owned[j]) delete fragVh[j];
 }
 
 template<class Mesh>
@@ -776,21 +785,20 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
                                    const std::vector<KN<double> >& dofIn,
                                    const int* data,
                                    std::vector<FragOp*>& Mout, std::vector<int>& ndFrag,
-                                   KN<double>& cover, std::false_type)
+                                   KN<double>& cover, std::false_type, const FragLocator<Mesh>* = nullptr)
 {
     const int nR = (int)frags.size();
     Mout.assign(nR, nullptr);
     ndFrag.assign(nR, 0);
     cover.resize(dstVh.NbOfDF); cover = 0.0;
 
-    KN<double> sink(dstVh.NbOfDF, 0.0);
     SearchMethodGuard sg;
     for (int j = 0; j < nR; ++j) {
         if (!frags[j]) continue;
         GFESpace<Mesh> fragVh(*frags[j], *srcVh.TFE[0]);
         MatriceMorse<double>* Mj = buildFragmentMatrix(dstVh, fragVh, data);
         ndFrag[j] = fragVh.NbOfDF;
-        applyWeighted(Mj, fragVh.NbOfDF, dofIn[j], sink, cover);
+        accumulateCover(Mj, dofIn[j] , cover);
         Mout[j] = compactFragmentMatrix(Mj);
         delete Mj;
     }
@@ -835,42 +843,68 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         return P;        
     }
 
-    MatriceMorse<double>* Mloc = nullptr;
-    int localOK = 0;
-    {
-        const BBox bs = rawBoxOf(srcVh.Th), bd = rawBoxOf(dstVh.Th);
-        if (boxContains(bs, bd)) {
-            Mloc = buildFragmentMatrix(dstVh, srcVh, data);
-            localOK = coversAll(coverageOf(rowSums(Mloc, P->nDstDof))) ? 1 : 0;
+    const BBox bs = rawBoxOf(srcVh.Th), bd = rawBoxOf(dstVh.Th);
+    std::vector<Mesh*>       one(1, const_cast<Mesh*>(&srcVh.Th));
+    std::vector<KN<double> > mask(1);
+    FragLocator<Mesh>        Lv;
+    bool haveLv  = false;
+    int  localCand = 0;
+
+    if (boxContains(bs, bd)) {
+        if (LocatorTraits<Mesh>::fast) {
+            Lv.build(one); haveLv = true;
+            localCand = (dstVh.TFE[0]->ndfonVertex == 0
+                         || allDstVerticesInside(dstVh, Lv)) ? 1 : 0;
+        } else {
+            localCand = 1;
         }
     }
 
-    int globalOK = localOK;
+    int globalCand = localCand;
     #ifdef PARALLELE
     {
         MPI_Comm cw = Dsrc.comm ? *(MPI_Comm*)Dsrc.comm : MPI_COMM_WORLD;
-        MPI_Allreduce(&localOK, &globalOK, 1, MPI_INT, MPI_MIN, cw);
+        MPI_Allreduce(&localCand, &globalCand, 1, MPI_INT, MPI_MIN, cw);
     }
     #endif
 
+    std::vector<FragOp*> Mtry;
+    std::vector<int>     ndTry;
+    KN<double>           coverTry;
+    int globalOK = 0;
+    if (globalCand) {
+        mask[0].resize(srcVh.NbOfDF); mask[0] = 1.0;
+        buildFragmentOperators(dstVh, srcVh, one, mask, data,
+                               Mtry, ndTry, coverTry,
+                               std::integral_constant<bool, LocatorTraits<Mesh>::fast>(),
+                               haveLv ? &Lv : nullptr);
+        const int localOK = coversAll(coverageOf(coverTry)) ? 1 : 0;
+        globalOK = localOK;
+        #ifdef PARALLELE
+        {
+            MPI_Comm cw = Dsrc.comm ? *(MPI_Comm*)Dsrc.comm : MPI_COMM_WORLD;
+            MPI_Allreduce(&localOK, &globalOK, 1, MPI_INT, MPI_MIN, cw);
+        }
+        #endif
+    }
+
+
     if (globalOK) {
-        P->M.assign(1, compactFragmentMatrix(Mloc));
-        delete Mloc;
+        P->M = Mtry;
+        P->ndFrag = ndTry;
         P->path = XFER_LOCAL;
         P->chi.resize(0);
         P->cover.resize(0);
         return P;
     }
-    delete Mloc;
-
-    KN<double> ones(P->nSrcDof, 1.0);
+    for (size_t j = 0; j < Mtry.size(); ++j) delete Mtry[j];
 
     std::vector<Mesh*>        keepFrags;
     std::vector<KN<double> >  keepDof;
 
-    collectFragments(Dsrc, srcVh, ones, Ddst, P->sendToRanks, P->recvFromRanks,
-                     [](int, const Mesh&, const KN<double>&) {},   // mode retenu : jamais appele
-                     nullptr, nullptr, &P->inj, &P->chi, &keepFrags, &keepDof);
+    collectFragments(Dsrc, srcVh, Ddst, P->sendToRanks, P->recvFromRanks,
+                     [](int, const Mesh&, const KN<double>&) {}, 
+                     nullptr, nullptr, &P->inj, &keepFrags, &keepDof);
 
     try {
         buildFragmentOperators(dstVh, srcVh, keepFrags, keepDof, data,
@@ -1064,10 +1098,9 @@ long transferFragmentCounts(const DistributedMesh<Mesh>** const & Dsrc,
     const DistributedMesh<Mesh>& B = **Ddst;
 
     GFESpace<Mesh> srcVh(*A.LocalMesh, DataFE<Mesh>::P1);
-    KN<double> u(srcVh.NbOfDF, 1.0);
 
     KN<int> snd, rcv;
-    collectFragments(A, srcVh, u, B, snd, rcv, [&](int j, const Mesh& frag, const KN<double>&) { (*nRecus)[j] = frag.nt; }, nEnvoyes, nRecus);
+    collectFragments(A, srcVh, B, snd, rcv, [&](int j, const Mesh& frag, const KN<double>&) { (*nRecus)[j] = frag.nt; }, nEnvoyes, nRecus);
     return 0L;
 }
 
