@@ -88,56 +88,6 @@ Source: "plugin\seq\WHERE_LIBRARY-download"; DestDir: "{app}"
 Source: "plugin\seq\ff-pkg-download"; DestDir: "{app}"
 Source: "plugin\seq\ff-get-dep"; DestDir: "{app}"
 
-; mingwm10.dll is necessary when "-mthreads" is used as a compilation
-; flag.
-;
-;ldd.exe src/bin-win32/FreeFem++.exe  |awk '/mingw64/ {print "cygpath -w ",$3}'|sh|awk '{print "IFMGW64 Source: @" $0 "@ DestDir: @{app}@"}'|sed 's/@/"/g'
-
-
-
-IFMGW32 ; mingw32  ....    FH. I have put all dll in bin-win32 dir ....
-#ifexist "C:\MinGW\bin\mingwm10.dll"
-	IFMGW32 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
-	; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\bin\libgfortran-*.dll"; DestDir: "{app}"
-	IFMGW32 Source: "C:\MinGW\bin\libquadmath-*.dll"; DestDir: "{app}"
-
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libgcc_s_seh-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libstdc++-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
-	IFMGW64 Source: "C:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
-#endif
-#ifexist "D:\MinGW\bin\mingwm10.dll"
-	IFMGW32 Source: "D:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
-	; Source: "D:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\bin\libgfortran-*.dll"; DestDir: "{app}"
-	IFMGW32 Source: "D:\MinGW\bin\libquadmath-*.dll"; DestDir: "{app}"
-
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libgcc_s_seh-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libstdc++-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
-	IFMGW64 Source: "D:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
-#endif
-
-IFMGW64 ; mingw64 ....   FH. I have put all dll in bin-win32 dir ....
-
-;; end of mingw ------------
-
-
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
 ; Does not include FreeFem++-glx which would need the Cygwin X-Server
 

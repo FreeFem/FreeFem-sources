@@ -221,7 +221,9 @@ visualcheck: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
+# Also copy mingw .dlls
 win32: WindowsPackage.iss FreeFEM-documentation.pdf
+	ldd src/bin-win32/*.{dll,exe} | grep -vi /windows | grep -v /bin-win32 | grep -v libff.dll | grep '=>' | awk '{print "cp",$$3,"./src/bin-win32/"}' | sort -u | grep -v '[?]' | sh
 	rm -rf plugin/include-tmp
 	cd plugin; mkdir include-tmp; cp -Lr seq/include/* */*.h include-tmp
 	cp -r 3rdparty/include/. plugin/include-tmp/.
@@ -274,9 +276,7 @@ bin/init-var.sh:Makefile
 	echo "ff_prefix_dir_lib_mpi=$(ff_prefix_dir_lib_mpi)" >>$@
 	echo "ff_data=$(pkgdatadir)/$(VERSION)" >>$@
 	chmod a+x $@
-	
-	
-	
+
 install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2edp$(EXEEXT)
 
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
