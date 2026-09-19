@@ -99,6 +99,5 @@ jobs:
       - name: Verify installation
         run: |
           cd "C:\Program Files (x86)\FreeFem++"
-          & "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -n 4 \
-          .\FreeFem++-mpi.exe .\examples\mpi\MUMPS.edp
+          & "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -n 4 .\FreeFem++-mpi.exe .\examples\mpi\MUMPS.edp
 
