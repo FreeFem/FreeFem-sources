@@ -6,6 +6,7 @@
 #include <htool/distributed_operator/linalg.hpp>
 #include <htool/hmatrix/lrmat/recompressed_low_rank_generator.hpp>
 #include <htool/hmatrix/lrmat/interpolation.hpp>
+#include <htool/misc/fem_interface.hpp>
 #include <type_traits>
 
 #if defined(WITH_metis)
@@ -483,7 +484,7 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
                         for (int j = 0; j < Ny; j++) {
                             double r =std::sqrt(std::inner_product(target_points[i].begin(), target_points[i].end(), source_points[j].begin(), double(0), std::plus<double>(), [](double u, double v) { return (u - v) * (u - v); }));
                             // mat[i + j * Nx] = R(1./ (4 * M_PI * r));
-                            mat[i + j * Nx] = R(std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r));
+                            mat[i + j * Nx] = R(std::exp(std::complex<double>(0,2*M_PI*frequency/299792458.*r)) / (4 * M_PI * r));
                             // mat[i + j * Nx] = R(cos( 2*pi*frequency/299792458.*r) / (4 * M_PI * r));
 
                             // std::cout <<r<<" "<<2*pi*frequency/299792458.<<" "<<std::complex<double>(0,1)* 2*pi*frequency/299792458.*r<<" "<<std::exp(std::complex<double>(0,1)* 2*pi*frequency/299792458.*r) / (4 * M_PI * r)<<"\n";
@@ -495,7 +496,8 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
                 };
             }
             
-        using basis_function_type = typename BEMHCA<R, double, RdHatT::d>::basis_function_type;
+        // using basis_function_type = typename htool::BEMHCA<R, double, RdHatT::d>::basis_function_type;
+        using basis_function_type = typename htool::FEMSpace<R, double, RdHatT::d>::basis_function_type;
         basis_function_type target_basis_function = [&Vh](
             int element_index,
             int dof_local_index,
@@ -535,7 +537,7 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
             target_points[3*p+2]=pp[2];
         }
         int target_size=ThT.nv;
-        int target_quadrature_order=20;
+        int target_quadrature_order=data.qforder;
         int source_number_of_dofs_per_element=(*Uh)[0].NbDoF(); 
         for (int e=0;e<ThS.nt;e++){
             FElementS KU((*Uh)[e]);
@@ -575,11 +577,13 @@ void buildHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,con
             source_points[3*p+2]=pp[2];
         }
         int source_size=ThS.nv;
-        int source_quadrature_order=20;
-        LowRankGenerator = std::make_shared<htool::BEMHCA<R,double,RdHatT::d+1>>(kernel, target_basis_function, target_dofs_to_elements, target_number_of_dofs_per_element, target_elements_to_points.data(),  target_number_of_points_per_element, target_points.data(),  target_size, t->get_permutation().data(), target_quadrature_order, source_basis_function, source_dofs_to_elements, source_number_of_dofs_per_element, source_elements_to_points.data(), source_number_of_points_per_element, source_points.data(), source_size,s->get_permutation().data(), source_quadrature_order);
+        int source_quadrature_order=data.qforder;
+
+        htool::FEMSpace<R, double, RdHatT::d+1> target_fem_space{target_basis_function, &target_dofs_to_elements, target_number_of_dofs_per_element, target_elements_to_points.data(), target_number_of_points_per_element, target_points.data(), static_cast<std::size_t>(target_size), t->get_permutation().data(), target_quadrature_order};
+        htool::FEMSpace<R, double, RdHatT::d+1> source_fem_space{source_basis_function, &source_dofs_to_elements, source_number_of_dofs_per_element, source_elements_to_points.data(), source_number_of_points_per_element, source_points.data(), static_cast<std::size_t>(source_size), s->get_permutation().data(), source_quadrature_order};
+        LowRankGenerator = std::make_shared<htool::BEMHCA<R,double,RdHatT::d+1>>(kernel, target_fem_space, source_fem_space);
         // LowRankGenerator->check_size=false;
     }
-    //   BEMHCA(kernel_type kernel, basis_function_type target_basis_function, std::map<int, std::vector<int>> target_dofs_to_elements, int target_number_of_dofs_per_element, const int *target_elements_to_points, int target_number_of_points_per_element, CoordinatePrecision *target_points, int target_size, const int *target_permutation, int target_quadrature_order, basis_function_type source_basis_function, std::map<int, std::vector<int>> source_dofs_to_elements, int source_number_of_dofs_per_element, int *source_elements_to_points, int source_number_of_points_per_element, CoordinatePrecision *source_points, int source_size, const int *source_permutation, int source_quadrature_order)
     else {
         cerr << "Error: unknown htool compressor \""+data.compressor+"\"" << endl;
         ffassert(0);
