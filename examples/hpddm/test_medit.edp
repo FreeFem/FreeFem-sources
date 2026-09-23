@@ -1,0 +1,5 @@
+load "medit"
+
+mesh Th = square(10,10);
+
+medit("Coucou", Th);

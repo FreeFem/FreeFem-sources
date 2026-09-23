@@ -1,0 +1,86 @@
+// NBPROC 1
+//PARAMS -ns -wg
+load "medit"
+load "Element_P3"
+load "PETSc"
+macro dimension()3// EOM
+include "macro_ddm.idp"
+
+mesh3 Th1, Th2;
+Th1 = cube(10,10,10);
+Th2 = cube(10,10,10);
+
+fespace Uh(Th1, P2);
+fespace Vh(Th2, P3);
+
+/*
+medit("Th1", Th1);
+medit("Th2", Th2);
+*/
+
+macro InterpMatD(WS, WD, A, colNum)
+{
+    Dtransfer3 plTmp = transferPlan(WS, WD);
+    int[int] numTmp = WS.numbering;
+    interpolateMat(plTmp, numTmp, A, colNum);
+} // EOM
+
+Dmesh3 DTh1 = distribute(Th1, keepGlobal = true);
+Dmesh3 DTh2 = distribute(Th2, keepGlobal = true);
+
+fespace Udh(DTh1, P2);
+fespace Vdh(DTh2, P3);
+
+mesh3 ThA = Th1, ThB = Th2;
+DmeshCreate(ThA);
+DmeshCreate(ThB);
+
+int nrep = 5;
+
+matrix A;
+real[int] colNum;
+mpiBarrier(mpiCommWorld);
+real t0 = mpiWtime();
+for (int k = 0; k < nrep; k++){
+    InterpMatD(Udh, Vdh, A, colNum);
+}
+real tD = (mpiWtime() - t0)/nrep;
+
+matrix B;
+mpiBarrier(mpiCommWorld);
+t0 = mpiWtime();
+for (int k = 0; k < nrep; k++){
+    B = interpolate(Vh, Uh);
+}
+real tS = (mpiWtime() - t0)/nrep;
+
+Mat MA, MB, C;
+MatCreate(ThA, MA, P2);
+MatCreate(ThB, MB, P3);
+MatInterpolate(ThA, P2, MA, ThB, P3, MB, C);
+mpiBarrier(mpiCommWorld);
+t0 = mpiWtime();
+for (int k = 0; k < nrep; k++){
+    MatInterpolate(ThA, P2, MA, ThB, P3, MB, C);
+}
+real tM = (mpiWtime() - t0)/nrep;
+
+cout << "Temps total (initialisation, plan, interpolation) modele distribue: " << tD*1000 << "ms" << endl;
+cout << "Temps total (initialisation, plan, interpolation) modele FreeFem: " << tS*1000 << "ms" << endl;
+cout << "Temps total (initialisation, plan, interpolation) macro_ddm: " << tM*1000 << "ms" << endl;
+
+
+matrix D = A-B;
+real inftyNorm = D.linfty;
+real frobNorm = D.l2;
+real l1Norm = D.l1;
+
+cout << "Differentes normes de la differences entre matrices: " << endl;
+cout << "Infinity norm: " << inftyNorm << endl;
+cout << "Frobenius norm: " << frobNorm << endl;
+cout << "L1 norm: " << l1Norm << endl;
+
+cout << "Differentes normes de la differences entre matrices rapportees au nombre de nnz (si approprie): " << endl;
+cout << "Infinity norm: " << inftyNorm << endl;
+cout << "Frobenius norm: " << frobNorm/sqrt(D.nnz) << endl;
+cout << "L1 norm: " << l1Norm/D.nnz << endl;

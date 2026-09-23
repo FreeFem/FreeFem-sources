@@ -1251,7 +1251,7 @@ void registerTransferInterpolateOps() {
         new OneOperator4_<long, v_dfes<Mesh>**, KN<Complex>*, v_dfes<Mesh>**, KN<Complex>*>(
             interpolateD<Mesh,Complex>));
 
-        typedef const TransferPlan<Mesh>*  TP;
+    typedef const TransferPlan<Mesh>*  TP;
     typedef const TransferPlan<Mesh>** TPP;
 
     TheOperators->Add("<-", new OneOperator2_<TP*, TP*, TP>(&set_copy_incr));

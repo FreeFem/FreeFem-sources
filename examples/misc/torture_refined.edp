@@ -1,0 +1,8 @@
+mesh Th=square(50,50);
+
+fespace Uh(Th,P1);
+
+Uh u = x^4;
+
+Th = adaptmesh(Th,u,err=1e-4);
+plot(Th,u);
