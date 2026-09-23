@@ -96,11 +96,11 @@ void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vecto
         MatSetOption(A->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
     }
     MatSetFromOptions(A->_petsc);
-    MatAssemblyBegin(A->_petsc, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(A->_petsc, MAT_FINAL_ASSEMBLY);
     if(std::is_same<HtoolCtx<P, MeshBemtool>, Gen<P, MeshBemtool>>::value) {
         MatHtoolSetKernel(A->_petsc, GenEntriesFromCtx<P, MeshBemtool>, generator);
     }
+    MatAssemblyBegin(A->_petsc, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(A->_petsc, MAT_FINAL_ASSEMBLY);
 }
 
 template<class fes1, class fes2, typename std::enable_if< (fes1::FESpace::Mesh::RdHat::d >= 3) || std::is_same<typename fes1::FESpace::Mesh, Mesh>::value >::type* = nullptr >
@@ -687,7 +687,7 @@ namespace PETSc {
       for(int i = 0; i < rest->n; ++i) {
         if(std::abs(gamma->operator[](i) - 1.0) < 1.0e-6) {
           map[rest->operator[](i)] = std::make_pair(i, A->_num[rest->operator[](i)]);
-          val[rest->operator[](i)] = HPDDM::Wrapper<PetscScalar>::d__1;
+          val[rest->operator[](i)] = PetscScalar(1.0);
         }
       }
       A->_A->recvBuffer(val);
@@ -703,7 +703,7 @@ namespace PETSc {
           communicators->operator[](2 * k + 2).resize(neighbors[i].second.size());
           int m = 0;
           for(unsigned int j = 0; j < neighbors[i].second.size(); ++j) {
-              if(std::abs(buffer[i][j] - HPDDM::Wrapper<PetscScalar>::d__1) < 1.0e-6) {
+              if(std::abs(buffer[i][j] - PetscScalar(1.0)) < 1.0e-6) {
                   std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
                   if(it != map.cend()) {
                       communicators->operator[](2 * k + 1)[m] = it->second.first + 1;
