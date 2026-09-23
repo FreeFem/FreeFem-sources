@@ -5,6 +5,7 @@ load "PETSc"
 load "mmg"
 load "Element_P4"
 load "Element_P3"
+load "medit"
 macro def1(u)u//
 
 int[int] fforder = [1];
@@ -47,6 +48,7 @@ int[int] fforder = [1];
     mesh3 ThNew, Th = cube(getARGV("-global_3d", 5), getARGV("-global_3d", 5), getARGV("-global_3d", 5)); // global mesh
     if(mpirank == 0)
         ThNew = mmg3d(Th, hmax = 8.0e-2);
+        medit("", ThNew);
     broadcast(processor(0), ThNew);
     DmeshCreate(Th);
     DmeshCreate(ThNew);

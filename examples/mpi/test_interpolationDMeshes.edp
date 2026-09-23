@@ -1802,3 +1802,167 @@ if (mpirank == 0)
 mpiBarrier(mpiCommWorld);
 if (mpirank == 0)
   cout << "== jalon 10 : diagnostic de couverture, assertions passees ==" << endl;
+
+// =======================================================================
+//  JALON 11 : transfert sur maillages surfaciques (MeshS) et curvilignes (MeshL)
+// =======================================================================
+//  Les jalons 1 a 10 sont integralement Mesh3. Or interpolateD est enregistre
+//  pour MeshS et MeshL, et aucun test ne les couvrait -- ni avant ni apres la
+//  refonte par localisateur. Ce jalon comble ce trou AVANT que MeshS/MeshL ne
+//  passent sur le chemin rapide, pour qu'il existe une reference.
+//
+//  ETAT MESURE DU CHEMIN ACTUEL (LocatorTraits<MeshS>::fast == false, donc
+//  buildFragmentMatrix et Mesh::Find)
+//  ---------------------------------------------------------------------
+//  Le chemin lent n'accepte un point que s'il tombe DANS un element source
+//  (inside = 1 dans dataInterpolate). Pour une surface, un point de
+//  destination n'est sur un triangle source que si les deux maillages sont
+//  geometriquement confondus. D'ou :
+//    - plan / segment droit : les deux discretisations partagent le meme
+//      support geometrique, tout point y tombe exactement -> transfert exact ;
+//    - surface COURBE : les deux triangulations different en O(h^2), les
+//      points tombent a cote, et MeshS::Find les rejette -> pres de la moitie
+//      des DDL sont mis a zero. C'est SL3, la limite que la refonte doit lever.
+//    - courbe 1D : MeshL::Find projette au lieu de rejeter, donc aucun DDL
+//      n'est perdu et il ne reste que l'ecart geometrique. SL4 passe deja.
+//
+//  CE QU'IL NE FAUT PAS ASSERTER
+//  ----------------------------
+//  Sur une variete courbe, deux discretisations ne decrivent pas la meme
+//  surface : l'ecart est en O(h^2) et il est IRREDUCTIBLE. Exiger 1e-10 sur
+//  SL3 ou SL4 serait exiger l'impossible. La cible de la refonte est
+//  "zero DDL non couvert", pas "erreur nulle" -- l'erreur doit simplement
+//  rester de l'ordre de l'ecart geometrique.
+//
+//  SL1. MeshS plan      : transfert exact attendu.            ASSERTE.
+//  SL2. MeshL segment   : transfert exact attendu.            ASSERTE.
+//  SL3. MeshS courbe    : limite connue du chemin lent.       NON asserte
+//       tant que MeshS n'est pas passe sur le localisateur. Cible ecrite
+//       ci-dessous et activable par -strict-sl 1.
+//  SL4. MeshL courbe    : deja correct.                       ASSERTE, avec
+//       un seuil geometrique (1e-2) et non numerique.
+// ---------------------------------------------------------------------
+
+int ncs      = getARGV("-ncs",   16);
+int ncs2     = getARGV("-ncs2",  23);   // non commensurable avec ncs, cf. nc4
+int ncl      = getARGV("-ncl",   60);
+int ncl2     = getARGV("-ncl2",  89);   // non commensurable avec ncl
+int strictSL = getARGV("-strict-sl", 0);
+
+macro SLBUMP() [x, y, 0.3*sin(pi*x)*sin(pi*y)]// EOM
+macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
+
+// --- SL1 : MeshS, meme plan, deux finesses --------------------------------
+{
+  meshS Sa = square3(ncs, ncs), Sb = square3(ncs2, ncs2);
+  DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
+  meshS La = DSa.local, Lb = DSb.local;
+  fespace WsA(DSa, P1); fespace wsA(La, P1);
+  fespace WsB(DSb, P1); fespace wsB(Lb, P1);
+  wsA u = 1 + x + 2*y + 3*z;
+  wsB v = 0;
+  int pth = interpolateD(WsA, u[], WsB, v[]);
+  wsB r = 1 + x + 2*y + 3*z;
+  real e = 0;
+  for (int i = 0; i < v[].n; i++) e = max(e, abs(v[][i] - r[][i]));
+  real eg = 0; mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+  DtransferS Pl = transferPlan(WsA, WsB);
+  real[int] st(4); transferCoverage(Pl, st);
+  int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  if (mpirank == 0)
+    cout << "  [SL1 MeshS plan     ] chemin " << pth << "   err = " << eg
+         << "   vides = " << gE
+         << "   => " << (eg < 1e-10 && gE == 0 ? "PASS" : "FAIL") << endl;
+  assert(eg < 1e-10);
+  assert(gE == 0);
+}
+
+// --- SL2 : MeshL, meme segment droit --------------------------------------
+{
+  meshL Sa = segment(ncl), Sb = segment(ncl2);
+  DmeshL DLa = distribute(Sa, overlap = ov), DLb = distribute(Sb, overlap = ov);
+  meshL La = DLa.local, Lb = DLb.local;
+  fespace WlA(DLa, P1); fespace wlA(La, P1);
+  fespace WlB(DLb, P1); fespace wlB(Lb, P1);
+  wlA u = 1 + 2*x;
+  wlB v = 0;
+  int pth = interpolateD(WlA, u[], WlB, v[]);
+  wlB r = 1 + 2*x;
+  real e = 0;
+  for (int i = 0; i < v[].n; i++) e = max(e, abs(v[][i] - r[][i]));
+  real eg = 0; mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+  DtransferL Pl = transferPlan(WlA, WlB);
+  real[int] st(4); transferCoverage(Pl, st);
+  int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  if (mpirank == 0)
+    cout << "  [SL2 MeshL segment  ] chemin " << pth << "   err = " << eg
+         << "   vides = " << gE
+         << "   => " << (eg < 1e-10 && gE == 0 ? "PASS" : "FAIL") << endl;
+  assert(eg < 1e-10);
+  assert(gE == 0);
+}
+
+// --- SL3 : MeshS courbe -- limite connue du chemin lent -------------------
+//  Etat au moment de l'ecriture : pres de la moitie des DDL rejetes
+//  (274/576 a np=1, 465/887 a np=8) et erreur ~3.9.
+//  CIBLE apres passage de MeshS sur le localisateur : gE == 0, et erreur de
+//  l'ordre de l'ecart geometrique entre les deux triangulations, soit ~1e-2
+//  pour ces finesses -- PAS 1e-10. Basculer strictSL a 1 par defaut ce
+//  jour-la, et supprimer ce commentaire.
+{
+  meshS Sa = square3(ncs, ncs, SLBUMP), Sb = square3(ncs2, ncs2, SLBUMP);
+  DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
+  meshS La = DSa.local, Lb = DSb.local;
+  fespace WsA(DSa, P1); fespace wsA(La, P1);
+  fespace WsB(DSb, P1); fespace wsB(Lb, P1);
+  wsA u = 1 + x + 2*y;
+  wsB v = 0;
+  int pth = interpolateD(WsA, u[], WsB, v[]);
+  wsB r = 1 + x + 2*y;
+  real e = 0;
+  for (int i = 0; i < v[].n; i++) e = max(e, abs(v[][i] - r[][i]));
+  real eg = 0; mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+  DtransferS Pl = transferPlan(WsA, WsB);
+  real[int] st(4); transferCoverage(Pl, st);
+  int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nD = v[].n; int gD = 0; mpiAllReduce(nD, gD, mpiCommWorld, mpiSUM);
+  if (mpirank == 0)
+    cout << "  [SL3 MeshS courbe   ] chemin " << pth << "   err = " << eg
+         << "   vides = " << gE << "/" << gD
+         << (strictSL ? (eg < 1e-2 && gE == 0 ? "   => PASS" : "   => FAIL")
+                      : "   (limite connue, non assertee)") << endl;
+  if (strictSL) { assert(gE == 0); assert(eg < 1e-2); }
+}
+
+// --- SL4 : MeshL courbe ---------------------------------------------------
+//  Deja correct : MeshL::Find projette au lieu de rejeter. Le seuil est
+//  GEOMETRIQUE -- deux discretisations d'une meme courbe different en O(h^2),
+//  l'erreur mesuree est de 7.0e-5 et ne peut pas tomber a zero.
+{
+  meshL Sa = segment(ncl, SLWAVE), Sb = segment(ncl2, SLWAVE);
+  DmeshL DLa = distribute(Sa, overlap = ov), DLb = distribute(Sb, overlap = ov);
+  meshL La = DLa.local, Lb = DLb.local;
+  fespace WlA(DLa, P1); fespace wlA(La, P1);
+  fespace WlB(DLb, P1); fespace wlB(Lb, P1);
+  wlA u = 1 + 2*x;
+  wlB v = 0;
+  int pth = interpolateD(WlA, u[], WlB, v[]);
+  wlB r = 1 + 2*x;
+  real e = 0;
+  for (int i = 0; i < v[].n; i++) e = max(e, abs(v[][i] - r[][i]));
+  real eg = 0; mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+  DtransferL Pl = transferPlan(WlA, WlB);
+  real[int] st(4); transferCoverage(Pl, st);
+  int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nD = v[].n; int gD = 0; mpiAllReduce(nD, gD, mpiCommWorld, mpiSUM);
+  if (mpirank == 0)
+    cout << "  [SL4 MeshL courbe   ] chemin " << pth << "   err = " << eg
+         << "   vides = " << gE << "/" << gD
+         << "   => " << (eg < 1e-2 && gE == 0 ? "PASS" : "FAIL") << endl;
+  assert(gE == 0);
+  assert(eg < 1e-2);
+}
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0)
+  cout << "== jalon 11 : MeshS / MeshL, assertions passees ==" << endl;

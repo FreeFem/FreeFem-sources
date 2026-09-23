@@ -1,0 +1,717 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+//PARAMS -ns
+
+// ---------------------------------------------------------------------------
+//  interpolation-comparison.edp
+//
+//  Banc de comparaison entre les deux interpolations entre maillages
+//  DISTRIBUES disponibles dans FreeFEM :
+//
+//    (A) VecInterpolate      de macro_ddm.idp   -- la voie historique
+//    (B) interpolateD        natif, cette branche (transferInterpolate.cpp)
+//        + transferPlan / interpolateD(plan, ...) -- le plan conserve
+//
+//  Trois geometries VOLUMIQUES (mesh3), chacune dans les deux sens
+//  polynomiaux, avec statistiques sur plusieurs echantillons pour tous les
+//  temps.
+//
+//  Ce que le banc mesure :
+//    1. TEMPS      nstat echantillons chronometres par mesure, des deux cotes,
+//                  a armes egales : chaque appel refait tout le travail
+//                  (appariement des rangs, echange des fragments,
+//                  interpolation). Chaque echantillon est le MAXIMUM sur les
+//                  rangs du temps local, encadre de barrieres : c'est le temps
+//                  mur du transfert, pas celui du rang le plus rapide. Sont
+//                  rapportes la moyenne, l'ecart-type relatif, le minimum et
+//                  le maximum. Le rejeu sur plan conserve est chronometre a
+//                  part, il n'entre pas dans la comparaison principale.
+//    2. MEMOIRE    storageused() est un compteur d'allocation COURANTE
+//                  (mallinfo2().uordblks) : c'est la memoire RETENUE apres
+//                  l'appel, pas le pic. FreeFEM n'expose pas de compteur de
+//                  pic. Pour le vrai pic RSS il faut isoler chaque
+//                  implementation dans son propre processus :
+//                    /usr/bin/time -v ff-mpirun -np 4 \
+//                        interpolation-comparison.edp -oracle 0 -impl 1
+//                    /usr/bin/time -v ff-mpirun -np 4 \
+//                        interpolation-comparison.edp -oracle 0 -impl 2
+//                  -impl 0 ne transfere rien : c'est la ligne de base commune
+//                  (maillages, distributions, espaces EF).
+//                  -oracle 0 est INDISPENSABLE pour lire les chiffres memoire :
+//                  l'oracle alloue des espaces EF GLOBAUX sur chaque rang.
+//    3. MEME RESULTAT, en trois niveaux du plus faible au plus fort :
+//       a. champ polynomial de degre 2, donc exactement representable dans
+//          [P3]^3 comme dans [P2]^3 : les deux transferts doivent rendre la
+//          valeur analytique a l'epsilon machine ;
+//       b. champ oscillant : les extrema GLOBAUX ne dependent pas du
+//          decoupage, ils doivent coincider entre les deux voies ;
+//       c. ORACLE SERIE, le seul qui etablisse une egalite point a point.
+//          Les maillages globaux sont connus de tous les rangs, donc chaque
+//          rang calcule l'interpolation exacte en sequentiel. Le maillage
+//          destination local etant un SOUS-MAILLAGE du global et l'espace EF
+//          etant le meme, la restriction de cet oracle sur l'espace local est
+//          exacte : la comparaison se fait DDL par DDL. Si les deux
+//          implementations collent a l'oracle, elles sont identiques entre
+//          elles. Une comparaison directe des deux vecteurs distribues
+//          n'aurait aucun sens : les partitions different.
+//
+//  HYPOTHESES RESPECTEES (perimetre de l'interpolateD actuel)
+//  ----------------------------------------------------------
+//    * mesh3 / Dmesh3 ici (il n'existe pas de Dmesh 2D) ;
+//    * elements de Lagrange ;
+//    * espace VECTORIEL mais NON composite : un seul TypeOfFE repete
+//      (ffassert(srcVh.TFE.N() == 1) dans transferInterpolate.cpp) -- d'ou
+//      [P3,P3,P3] et [P2,P2,P2], jamais un [P2,P2,P1] ;
+//    * meme nombre de composantes a la source et a la destination ;
+//    * meme communicateur pour les deux Dmesh.
+//
+//  POURQUOI LA TOLERANCE VAUT 1e-8 ET PAS L'EPSILON MACHINE
+//  --------------------------------------------------------
+//  Aux reglages par defaut, tous les cas concordent a l'epsilon machine des
+//  deux cotes : la marge n'est pas consommee. Elle est la parce que ce qui
+//  separe les deux voies, une fois l'operateur verifie identique, est de
+//  l'arrondi, et que l'amplification de cet arrondi depend de la QUALITE DES
+//  ELEMENTS. L'inversion de la transformation affine vers les coordonnees
+//  barycentriques est d'autant moins bien conditionnee que l'element est
+//  aplati, et la valeur est ensuite evaluee par la base de l'espace SOURCE,
+//  d'autant plus raide que son degre est eleve.
+//  Le cas 2 rend l'effet reproductible : a -n2 8 -- cube de base assez
+//  grossier pour que mmg3d laisse des tetraedres franchement etires dans la
+//  zone a h = 0.13 -- interpolateD s'ecarte de l'oracle serie d'environ 1e-10
+//  dans le sens P3 -> P2, sur quelques dizaines de DDL sur douze mille, contre
+//  1e-15 pour VecInterpolate. A -n2 10 et au-dela l'ecart retombe a 5e-15.
+//  Le sens P2 -> P3 est moins touche mais pas epargne : 5.0e-11 contre
+//  1.1e-10, soit un facteur 2 -- l'ordre de grandeur d'une base source de
+//  degre 2 au lieu de 3, pas d'une immunite. L'amplification suit donc bien
+//  le degre de la base source, et les deux sens la subissent.
+//  Une vraie divergence d'operateur -- mauvais element retenu, DDL
+//  destination manque, paire de rangs oubliee -- se voit en O(h^p), soit 1e-2
+//  a 1e-4 sur ces maillages : elle ne peut pas se cacher sous 1e-8. Le banc
+//  valide donc l'egalite des operateurs a 1e-8, et rapporte a part le rapport
+//  des deux erreurs pour laisser voir l'ecart de conditionnement.
+//
+//  LES TROIS GEOMETRIES
+//  --------------------
+//   1. CUBE REGULIER, TAILLES COMPARABLES (mesh3).  [0,1]^3 maille par
+//      cube(n,n,n) a la source et cube(m,m,m) a la destination, avec n et m
+//      premiers entre eux : aucun plan de coupe ne coincide, donc quasiment
+//      aucun DDL destination ne tombe sur un sommet source.
+//   2. CUBE, FORTES VARIATIONS DE TAILLE, ET DESALIGNEES (mesh3).  Meme cube,
+//      mais les deux maillages sont remailles par mmg3d avec des cartes de
+//      taille DIFFERENTES : la source est fine au CENTRE, la destination est
+//      fine dans le COIN (1,1,1). Un element source grossier recouvre donc
+//      beaucoup d'elements destination fins, et reciproquement ailleurs.
+//      C'est le cas qui malmene le plus l'appariement par boites englobantes
+//      et l'equilibrage de la charge.
+//   3. DOMAINE EN L, RAFFINEMENT DANS LE COIN RENTRANT (mesh3).  Le L plan
+//      [0,1]^2 \ [0.5,1]^2 est maille en 2D avec une carte de taille qui
+//      s'effondre au coin rentrant (0.5,0.5), puis extrude par buildlayers.
+//      Le polygone etant a bords DROITS et identique des deux cotes, les deux
+//      domaines coincident exactement. Seul cas a geometrie non convexe : les
+//      boites englobantes des sous-domaines s'y recouvrent beaucoup plus que
+//      leur volume reel, ce qui est le point faible du filtrage par boites.
+//  LES DEUX SENS
+//  -------------
+//  Chaque geometrie est parcourue dans les DEUX sens, sur la MEME paire de
+//  maillages et dans le meme sens geometrique (maillage source -> maillage
+//  destination) : seuls les ordres polynomiaux s'echangent.
+//    sens 1   [P3,P3,P3] -> [P2,P2,P2]   RESTRICTION. L'espace destination ne
+//             peut pas representer la fonction source : le resultat depend
+//             reellement du choix des DDL destination et de l'element source
+//             retenu pour chacun.
+//    sens 2   [P2,P2,P2] -> [P3,P3,P3]   ENRICHISSEMENT. P2 est inclus dans
+//             P3, donc l'interpolation est exacte sur la fonction source
+//             ELLE-MEME, pas seulement sur un polynome choisi : la
+//             destination doit reproduire la fonction P2 source a l'epsilon
+//             machine, y compris pour le champ oscillant. C'est une
+//             verification bien plus serree que dans le sens 1, ou seul le
+//             champ polynomial de degre 2 est reproductible exactement.
+//             En contrepartie l'espace destination est nettement plus gros.
+//  Le champ polynomial de degre 2 reste exactement representable des deux
+//  cotes dans les deux sens : le test a. vaut donc a l'identique.
+//
+//  Usage :
+//    ff-mpirun -np 4 interpolation-comparison.edp -ns
+//    ff-mpirun -np 4 interpolation-comparison.edp -ns -nstat 10 -case 2
+//    ff-mpirun -np 4 interpolation-comparison.edp -ns -case 3 -dir 2
+//    for p in 1 2 3 4 5 6 7 8; do
+//      ff-mpirun -np $p interpolation-comparison.edp -v 0; done | grep '^CSV'
+//
+//  Parametres :
+//    -nstat    echantillons chronometres par mesure                (defaut 5)
+//    -case     0 = les trois geometries (defaut), sinon 1, 2 ou 3
+//    -dir      1 = P3 -> P2, 2 = P2 -> P3, 3 = les deux sens (defaut)
+//    -impl     0 = ligne de base, 1 = macro_ddm, 2 = natif, 3 = les deux (def.)
+//    -oracle   1 = comparaison DDL par DDL contre l'oracle serie (defaut 1)
+//    -serial   1 = chronometrer la reference serie                (defaut 1)
+//    -tol      tolerance des verifications                        (defaut 1e-8)
+//    -vtk      1 = ecrire les sorties vtu                         (defaut 0)
+//    -n1 / -m1     finesse source / destination, geometrie 1   (defaut 6 / 7)
+//    -n2           finesse du cube de base, geometrie 2        (defaut 10)
+//    -hfine2 / -hcoarse2  bornes de la carte de taille, geom. 2 (0.025 / 0.13)
+//    -n3           densite des bords du L, geometrie 3         (defaut 16)
+//    -hfine3 / -hcoarse3  bornes de la carte de taille, geom. 3 (0.020 / 0.10)
+//    -nl3 / -ml3   couches d'extrusion source / destination     (defaut 4 / 5)
+// ---------------------------------------------------------------------------
+
+load "PETSc"
+load "msh3"
+load "mmg"
+load "Element_P3"
+
+// Espaces EF : vectoriels, de Lagrange, non composites (un seul TypeOfFE).
+// Les quatre noms ne designent que deux espaces : Pk / QkNew sont [P3]^3 et
+// PkNew / Qk sont [P2]^3. Les deux jeux existent pour pouvoir passer le sens
+// en argument du banc, sans dupliquer son corps. P3 etant enregistre sous le
+// meme nom pour Mesh3, MeshS et MeshL, ces quatre func servent les cinq
+// geometries sans distinction.
+func PkS   = P3;
+func PkD   = P2;
+func Pk    = [PkS, PkS, PkS];       // sens 1 : source [P3]^3
+func PkNew = [PkD, PkD, PkD];       // sens 1 : destination [P2]^3
+func Qk    = [PkD, PkD, PkD];       // sens 2 : source [P2]^3
+func QkNew = [PkS, PkS, PkS];       // sens 2 : destination [P3]^3
+
+macro dimension()3// EOM
+macro def(u)[u, u#B, u#C]// EOM
+macro init(u)[u, u, u]// EOM
+macro def1(u)u// EOM
+include "macro_ddm.idp"
+include "getARGV.idp"
+
+int nstat  = getARGV("-nstat", 5);
+int csel   = getARGV("-case", 0);
+int dsel   = getARGV("-dir", 3);
+int impl   = getARGV("-impl", 3);
+int oracle = getARGV("-oracle", 1);
+int doser  = getARGV("-serial", 1);
+real tol   = getARGV("-tol", 1.0e-8);
+int wvtk   = getARGV("-vtk", 0);
+int[int] fforder = [1, 1, 1];
+
+// Champ de degre 2 : exactement representable dans [P3]^3 ET dans [P2]^3.
+macro FX() (1 + x + 2*y + 3*z + x*y + z*z)// EOM
+macro FY() (2 - x + y*z + 0.5*x*x)// EOM
+macro FZ() (-1 + y - 2*z + x*z + 0.25*y*y)// EOM
+// Champ oscillant, non representable : il exerce reellement l'interpolation.
+macro GX() (cos(2*pi*x) * cos(2*pi*y) * cos(2*pi*z))// EOM
+macro GY() (sin(3*pi*x) * cos(pi*z))// EOM
+macro GZ() (cos(2*pi*z) * sin(2*pi*y))// EOM
+
+// ===========================================================================
+//  Geometries globales
+// ===========================================================================
+mesh3 Th1S, Th1D, Th2S, Th2D, Th3S, Th3D;
+
+if (csel == 0 || csel == 1) {
+    int n1 = getARGV("-n1", 6);
+    int m1 = getARGV("-m1", 7);
+    Th1S = cube(n1, n1, n1);
+    Th1D = cube(m1, m1, m1);
+}
+
+//  mmg3d conserve les faces planes du cube : les deux domaines restent
+//  rigoureusement identiques malgre deux remaillages independants.
+if (csel == 0 || csel == 2) {
+    int n2 = getARGV("-n2", 10);
+    real hf = getARGV("-hfine2", 0.025);
+    real hc = getARGV("-hcoarse2", 0.13);
+    mesh3 base2 = cube(n2, n2, n2);
+    if (mpirank == 0) {
+        fespace U2(base2, P1);
+        U2 mS = hf + (hc - hf) * min(1.0, sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) / 0.35);
+        U2 mD = hf + (hc - hf) * min(1.0, sqrt((x-1.0)^2 + (y-1.0)^2 + (z-1.0)^2) / 0.60);
+        Th2S = mmg3d(base2, metric = mS[], hgrad = 2);
+        Th2D = mmg3d(base2, metric = mD[], hgrad = 2);
+    }
+    broadcast(processor(0), Th2S);
+    broadcast(processor(0), Th2D);
+}
+
+//  Le polygone est a bords DROITS : adaptmesh redecoupe les bords le long des
+//  memes segments, donc les deux triangulations recouvrent EXACTEMENT le meme
+//  domaine, et buildlayers conserve cette propriete.
+if (csel == 0 || csel == 3) {
+    int n3   = getARGV("-n3", 16);
+    real hf3 = getARGV("-hfine3", 0.020);
+    real hc3 = getARGV("-hcoarse3", 0.100);
+    int nl3  = getARGV("-nl3", 4);
+    int ml3  = getARGV("-ml3", 5);
+    real c = 0.5;
+    if (mpirank == 0) {
+        border e1(t = 0, 1)  { x = t;   y = 0;   label = 1; }
+        border e2(t = 0, c)  { x = 1;   y = t;   label = 2; }
+        border e3(t = 1, c)  { x = t;   y = c;   label = 3; }
+        border e4(t = c, 1)  { x = c;   y = t;   label = 4; }
+        border e5(t = c, 0)  { x = t;   y = 1;   label = 5; }
+        border e6(t = 1, 0)  { x = 0;   y = t;   label = 6; }
+        mesh L0 = buildmesh(e1(n3) + e2(n3/2) + e3(n3/2) + e4(n3/2)
+                          + e5(n3/2) + e6(n3));
+        fespace V3(L0, P1);
+        V3 hS = hf3      + (hc3 - hf3)         * min(1.0, sqrt((x-c)^2 + (y-c)^2) / 0.30);
+        V3 hD = 1.6*hf3  + (0.7*hc3 - 1.6*hf3) * min(1.0, sqrt((x-c)^2 + (y-c)^2) / 0.55);
+        mesh L1 = adaptmesh(L0, hS, IsMetric = 1, nbvx = 400000);
+        mesh L2 = adaptmesh(L0, hD, IsMetric = 1, nbvx = 400000);
+        Th3S = buildlayers(L1, nl3, zbound = [0, 1]);
+        Th3D = buildlayers(L2, ml3, zbound = [0, 1]);
+    }
+    broadcast(processor(0), Th3S);
+    broadcast(processor(0), Th3D);
+}
+
+// ===========================================================================
+//  Collecte des resultats
+//
+//  Indices : g pour le sens 1 (P3 -> P2), g+3 pour le sens 2 (P2 -> P3), avec
+//  g = 1..3 la geometrie. Les deux sens d'une meme geometrie partagent donc
+//  exactement la meme paire de maillages globaux.
+// ===========================================================================
+int NC = 7;                               // indices 1..6 utilises
+string[int] geoName(4);
+geoName[1] = "cube regulier, tailles comparables";
+geoName[2] = "cube, tailles fortement variables et desalignees";
+geoName[3] = "domaine en L, raffinement au coin rentrant";
+string[int] caseName(NC), dirLab(NC);
+for (int g = 1; g < 4; g++) {
+    caseName[g]     = geoName[g];  dirLab[g]     = "[P3,P3,P3] -> [P2,P2,P2]  (restriction)";
+    caseName[g + 3] = geoName[g];  dirLab[g + 3] = "[P2,P2,P2] -> [P3,P3,P3]  (enrichissement)";
+}
+
+int[int]  ran(NC), ntSrc(NC), ntDst(NC), ndofSrc(NC), ndofDst(NC);
+int[int]  memMac(NC), memNat(NC), memPlan(NC), pathNat(NC);
+int[int]  covEmpty(NC), covPartial(NC);
+real[int] covWmin(NC);
+real[int] tMacMu(NC), tMacSd(NC), tMacMn(NC), tMacMx(NC);
+real[int] tNatMu(NC), tNatSd(NC), tNatMn(NC), tNatMx(NC);
+real[int] tBldMu(NC), tRepMu(NC), tSerMu(NC), tSerSd(NC);
+real[int] errMacF(NC), errNatF(NC), errMacO(NC), errNatO(NC);
+real[int] hiMac(NC), loMac(NC), hiNat(NC), loNat(NC);
+ran = 0; ntSrc = 0; ntDst = 0; ndofSrc = 0; ndofDst = 0;
+memMac = 0; memNat = 0; memPlan = 0; pathNat = -1;
+covEmpty = 0; covPartial = 0; covWmin = 0;
+tMacMu = 0; tMacSd = 0; tMacMn = 0; tMacMx = 0;
+tNatMu = 0; tNatSd = 0; tNatMn = 0; tNatMx = 0;
+tBldMu = 0; tRepMu = 0; tSerMu = 0; tSerSd = 0;
+errMacF = 0; errNatF = 0; errMacO = 0; errNatO = 0;
+hiMac = 0; loMac = 0; hiNat = 0; loNat = 0;
+
+// Moyenne, ecart-type d'echantillon, min et max d'un jeu d'echantillons.
+macro TSTAT(smp, ns, mu, sd, mn, mx)
+    mu = 0; mn = 1e30; mx = -1e30;
+    for (int q = 0; q < ns; q++) { mu = mu + smp[q]; mn = min(mn, smp[q]); mx = max(mx, smp[q]); }
+    mu = mu / ns;
+    sd = 0;
+    for (int q = 0; q < ns; q++) sd = sd + (smp[q] - mu) * (smp[q] - mu);
+    sd = ns > 1 ? sqrt(sd / (ns - 1)) : 0.0;
+// EOM
+
+// Un echantillon chronometre : temps local encadre de barrieres, puis maximum
+// sur les rangs -- le temps mur du transfert, pas celui du rang le plus rapide.
+macro TSAMPLE(dst, CALL)
+    mpiBarrier(mpiCommWorld);
+    {
+        real tt0 = mpiWtime();
+        CALL
+        real dtl = mpiWtime() - tt0, dtg = 0;
+        mpiAllReduce(dtl, dtg, mpiCommWorld, mpiMAX);
+        dst = dtg;
+    }
+// EOM
+
+// Reference serie : cout de la MEME interpolation faite en sequentiel sur les
+// maillages globaux. Chaque rang la calcule redondamment et on prend le
+// maximum, exactement comme pour les autres temps, donc sous la meme charge
+// machine. Ce troisieme point de repere est mesure a l'identique dans les
+// trois fichiers du banc : c'est lui qui rend les chiffres mesh3, meshS et
+// meshL comparables entre eux malgre des tailles de probleme differentes.
+macro SERIALREF(ic, TSG, TDG, PS, PD)
+if (doser) {
+    fespace VsS(TSG, PS);
+    fespace VsD(TDG, PD);
+    VsS def(usg) = [GX, GY, GZ];
+    VsD def(rsg);
+    real[int] smps(nstat);
+    for (int q = 0; q < nstat; q++) {
+        TSAMPLE(smps[q], def(rsg) = def(usg);)
+    }
+    real mus = 0, sds = 0, mns = 0, mxs = 0;
+    TSTAT(smps, nstat, mus, sds, mns, mxs)
+    tSerMu[ic] = mus; tSerSd[ic] = sds;
+}
+// EOM
+
+// Emission vtk du cote natif.
+macro VTKNATIVE(ic, A, B, U, V)
+    if (wvtk) {
+        savevtk("interpolation-comparison_native_" + ic + ".vtu", A, U, order = fforder);
+        savevtk("interpolation-comparison_native_" + ic + ".vtu", B, V, order = fforder, append = true);
+    }
+// EOM
+// ===========================================================================
+//  Partie native du banc, commune aux trois types de maillage.
+//
+//  MT / DT / TR  types du maillage, du maillage distribue et du plan
+//                (mesh3/Dmesh3/Dtransfer3, meshS/DmeshS/DtransferS, ...)
+// ===========================================================================
+macro NATIVEPART(ic, TSG, TDG, NA, NB, MT, DT, TR, VTK, PS, PD)
+{
+    MT NA = TSG, NB = TDG;
+    DT DS = distribute(NA);
+    DT DD = distribute(NB);
+    MT LS = DS.local, LD = DD.local;
+    fespace WdS(DS, PS);      fespace WlS(LS, PS);
+    fespace WdD(DD, PD);      fespace WlD(LD, PD);
+    ndofSrc[ic] = WlS.ndof;   ndofDst[ic] = WlD.ndof;
+
+    if (impl == 2 || impl == 3) {
+        WlS def(uc) = [FX, FY, FZ];
+        WlD def(vc);
+
+        mpiBarrier(mpiCommWorld);
+        int m0 = storageused();
+        pathNat[ic] = interpolateD(WdS, uc[], WdD, vc[]);
+        mpiBarrier(mpiCommWorld);
+        int m1 = storageused();
+        int mLoc = m1 - m0, mSum = 0;
+        mpiAllReduce(mLoc, mSum, mpiCommWorld, mpiSUM);
+        memNat[ic] = mSum;
+
+        /* a. champ exactement representable */
+        WlD def(rc) = [FX, FY, FZ];
+        real e = 0, eg = 0;
+        for (int i = 0; i < vc[].n; i++) e = max(e, abs(vc[][i] - rc[][i]));
+        mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+        errNatF[ic] = eg;
+
+        real[int] smp(nstat);
+        for (int q = 0; q < nstat; q++) {
+            TSAMPLE(smp[q], interpolateD(WdS, uc[], WdD, vc[]);)
+        }
+        real mu = 0, sd = 0, mn = 0, mx = 0;
+        TSTAT(smp, nstat, mu, sd, mn, mx)
+        tNatMu[ic] = mu; tNatSd[ic] = sd; tNatMn[ic] = mn; tNatMx[ic] = mx;
+
+        /* plan conserve : construction, puis rejeu. Hors comparaison
+           principale -- macro_ddm n'a pas d'equivalent -- mais c'est ce qui
+           compte des qu'on transfere plusieurs fois la meme paire. */
+        mpiBarrier(mpiCommWorld);
+        int p0 = storageused();
+        TR Pl = transferPlan(WdS, WdD);
+        mpiBarrier(mpiCommWorld);
+        int p1 = storageused();
+        int pLoc = p1 - p0, pSum = 0;
+        mpiAllReduce(pLoc, pSum, mpiCommWorld, mpiSUM);
+        memPlan[ic] = pSum;
+
+        /* Couverture du plan. Distingue les deux facons dont un transfert peut
+           se tromper : un DDL destination que PERSONNE ne sert (vide), ou un
+           DDL servi par PLUSIEURS fragments source et donc recombine
+           (partiel). Le poids minimum dit si la partition de l'unite somme
+           bien a 1. Sans ce diagnostic, une erreur Linf ne dit pas laquelle
+           des deux est en cause. */
+        {
+            real[int] cst(4);
+            transferCoverage(Pl, cst);
+            int nEmp = int(cst[0]), nPar = int(cst[1]), gEmp = 0, gPar = 0;
+            mpiAllReduce(nEmp, gEmp, mpiCommWorld, mpiSUM);
+            mpiAllReduce(nPar, gPar, mpiCommWorld, mpiSUM);
+            real wmn = cst[2], gWmn = 0;
+            mpiAllReduce(wmn, gWmn, mpiCommWorld, mpiMIN);
+            covEmpty[ic] = gEmp; covPartial[ic] = gPar; covWmin[ic] = gWmn;
+        }
+
+        real[int] smpb(nstat);
+        for (int q = 0; q < nstat; q++) {
+            TSAMPLE(smpb[q], TR Pq = transferPlan(WdS, WdD);)
+        }
+        real mub = 0, sdb = 0, mnb = 0, mxb = 0;
+        TSTAT(smpb, nstat, mub, sdb, mnb, mxb)
+        tBldMu[ic] = mub;
+
+        real[int] smpr(nstat);
+        for (int q = 0; q < nstat; q++) {
+            TSAMPLE(smpr[q], interpolateD(Pl, uc[], vc[]);)
+        }
+        real mur = 0, sdr = 0, mnr = 0, mxr = 0;
+        TSTAT(smpr, nstat, mur, sdr, mnr, mxr)
+        tRepMu[ic] = mur;
+
+        /* le rejeu sur plan doit redonner exactement le champ representable */
+        real ep = 0, epg = 0;
+        for (int i = 0; i < vc[].n; i++) ep = max(ep, abs(vc[][i] - rc[][i]));
+        mpiAllReduce(ep, epg, mpiCommWorld, mpiMAX);
+        errNatF[ic] = max(errNatF[ic], epg);
+
+        /* b. champ oscillant : extrema globaux */
+        WlS def(ut) = [GX, GY, GZ];
+        WlD def(vt);
+        interpolateD(WdS, ut[], WdD, vt[]);
+        real hi = -1e30, lo = 1e30, hig = 0, lg = 0;
+        for (int i = 0; i < vt[].n; i++) { hi = max(hi, vt[][i]); lo = min(lo, vt[][i]); }
+        mpiAllReduce(hi, hig, mpiCommWorld, mpiMAX);
+        mpiAllReduce(lo, lg, mpiCommWorld, mpiMIN);
+        hiNat[ic] = hig; loNat[ic] = lg;
+
+        /* c. oracle serie, DDL par DDL */
+        if (oracle) {
+            fespace VgS(TSG, PS);
+            fespace VgD(TDG, PD);
+            VgS def(ug) = [GX, GY, GZ];
+            VgD def(rg) = def(ug);
+            WlD def(ro) = def(rg);
+            real eo = 0, eog = 0;
+            for (int i = 0; i < vt[].n; i++) eo = max(eo, abs(vt[][i] - ro[][i]));
+            mpiAllReduce(eo, eog, mpiCommWorld, mpiMAX);
+            errNatO[ic] = eog;
+        }
+        VTK(ic, LS, LD, ut, vt)
+    }
+}// EOM
+
+macro CASEHEAD(ic, TSG, TDG)
+    ran[ic] = 1;
+    ntSrc[ic] = TSG.nt;  ntDst[ic] = TDG.nt;
+    if (mpirank == 0)
+        cout << "  cas " << ic << " : " << caseName[ic] << "   " << dirLab[ic] << endl;
+// EOM
+
+// ===========================================================================
+//  Banc complet pour mesh3 : macro_ddm PUIS natif.
+//
+//  Les deux maillages sont globaux sur tous les rangs AVANT distribution :
+//  c'est ce qui permet a DmeshCreate (macro_ddm) et a distribute (natif) de
+//  s'appliquer a la meme geometrie, et c'est ce qui rend l'oracle serie
+//  calculable. Les deux voies partitionnent independamment : les decoupages
+//  source et destination ne coincident donc pas.
+//
+//  Les noms MA/MB doivent etre distincts d'un SITE D'APPEL a l'autre :
+//  DmeshCreate declare des variables privateDmesh<nom> sous garde IFMACRO, un
+//  nom reutilise a un autre site verrait la garde fermee mais la variable hors
+//  portee. Les maillages globaux TSG/TDG se partagent sans risque : ni
+//  DmeshCreate ni distribute ne touchent au maillage dont on part.
+// ===========================================================================
+macro BENCH3(ic, TSG, TDG, MA, MB, NA, NB, PS, PD)
+{
+    CASEHEAD(ic, TSG, TDG)
+
+    /* ---- (A) macro_ddm. VecInterpolate modifie temporairement le maillage
+       source (change(fregion=...)) : il lui faut ses propres copies. ---- */
+    mesh3 MA = TSG, MB = TDG;
+    DmeshCreate(MA);
+    DmeshCreate(MB);
+    fespace VmS(MA, PS);
+    fespace VmD(MB, PD);
+
+    if (impl == 1 || impl == 3) {
+        VmS def(um) = [FX, FY, FZ];
+        VmD def(vm);
+
+        mpiBarrier(mpiCommWorld);
+        int m0 = storageused();
+        VecInterpolate(MA, PS, um, MB, PD, vm);
+        mpiBarrier(mpiCommWorld);
+        int m1 = storageused();
+        int mLoc = m1 - m0, mSum = 0;
+        mpiAllReduce(mLoc, mSum, mpiCommWorld, mpiSUM);
+        memMac[ic] = mSum;
+
+        VmD def(rm) = [FX, FY, FZ];
+        real e = 0, eg = 0;
+        for (int i = 0; i < vm[].n; i++) e = max(e, abs(vm[][i] - rm[][i]));
+        mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+        errMacF[ic] = eg;
+
+        real[int] smp(nstat);
+        for (int q = 0; q < nstat; q++) {
+            TSAMPLE(smp[q], VecInterpolate(MA, PS, um, MB, PD, vm);)
+        }
+        real mu = 0, sd = 0, mn = 0, mx = 0;
+        TSTAT(smp, nstat, mu, sd, mn, mx)
+        tMacMu[ic] = mu; tMacSd[ic] = sd; tMacMn[ic] = mn; tMacMx[ic] = mx;
+
+        VmS def(us) = [GX, GY, GZ];
+        VmD def(vs);
+        VecInterpolate(MA, PS, us, MB, PD, vs);
+        real hi = -1e30, lo = 1e30, hig = 0, lg = 0;
+        for (int i = 0; i < vs[].n; i++) { hi = max(hi, vs[][i]); lo = min(lo, vs[][i]); }
+        mpiAllReduce(hi, hig, mpiCommWorld, mpiMAX);
+        mpiAllReduce(lo, lg, mpiCommWorld, mpiMIN);
+        hiMac[ic] = hig; loMac[ic] = lg;
+
+        if (oracle) {
+            fespace VgS(TSG, PS);
+            fespace VgD(TDG, PD);
+            VgS def(ug) = [GX, GY, GZ];
+            VgD def(rg) = def(ug);
+            VmD def(ro) = def(rg);
+            real eo = 0, eog = 0;
+            for (int i = 0; i < vs[].n; i++) eo = max(eo, abs(vs[][i] - ro[][i]));
+            mpiAllReduce(eo, eog, mpiCommWorld, mpiMAX);
+            errMacO[ic] = eog;
+        }
+        if (wvtk) {
+            savevtk("interpolation-comparison_macro_" + ic + ".vtu", MA, us, order = fforder);
+            savevtk("interpolation-comparison_macro_" + ic + ".vtu", MB, vs, order = fforder, append = true);
+        }
+    }
+
+    NATIVEPART(ic, TSG, TDG, NA, NB, mesh3, Dmesh3, Dtransfer3, VTKNATIVE, PS, PD)
+    SERIALREF(ic, TSG, TDG, PS, PD)
+}// EOM
+
+if (mpirank == 0) {
+    cout << "\n###########################################################" << endl;
+    cout << "  interpolation-comparison : np = " << mpisize
+         << "   nstat = " << nstat << "   impl = " << impl
+         << "   dir = " << dsel << "   oracle = " << oracle << endl;
+    cout << "  VecInterpolate (macro_ddm)  contre  interpolateD (natif)" << endl;
+    cout << "  mesh3 seul ; voir les fichiers jumeaux -meshS et -meshL" << endl;
+    cout << "###########################################################" << endl;
+}
+
+if (csel == 0 || csel == 1) {
+    if (dsel == 1 || dsel == 3) BENCH3(1, Th1S, Th1D, Ma1, Mb1, Na1, Nb1, Pk, PkNew)
+    if (dsel == 2 || dsel == 3) BENCH3(4, Th1S, Th1D, Xa1, Xb1, Ya1, Yb1, Qk, QkNew)
+}
+if (csel == 0 || csel == 2) {
+    if (dsel == 1 || dsel == 3) BENCH3(2, Th2S, Th2D, Ma2, Mb2, Na2, Nb2, Pk, PkNew)
+    if (dsel == 2 || dsel == 3) BENCH3(5, Th2S, Th2D, Xa2, Xb2, Ya2, Yb2, Qk, QkNew)
+}
+if (csel == 0 || csel == 3) {
+    if (dsel == 1 || dsel == 3) BENCH3(3, Th3S, Th3D, Ma3, Mb3, Na3, Nb3, Pk, PkNew)
+    if (dsel == 2 || dsel == 3) BENCH3(6, Th3S, Th3D, Xa3, Xb3, Ya3, Yb3, Qk, QkNew)
+}
+// ===========================================================================
+//  Verdict
+// ===========================================================================
+int ok = 1;
+int[int] okc(NC);
+okc = 1;
+for (int i = 1; i < NC; i++) {
+    if (!ran[i]) { okc[i] = 1; continue; }
+    /* sens 2 : P2 est inclus dans P3, donc la destination doit reproduire la
+       fonction P2 source exactement, meme sur le champ oscillant. La meme
+       tolerance tol sert, mais le fait qu'elle soit atteinte sur un champ NON
+       polynomial est une garantie strictement plus forte. */
+    if (impl == 1 || impl == 3) { if (!(errMacF[i] < tol)) okc[i] = 0; }
+    if (impl == 2 || impl == 3) { if (!(errNatF[i] < tol)) okc[i] = 0; }
+    if (oracle && (impl == 1 || impl == 3)) { if (!(errMacO[i] < tol)) okc[i] = 0; }
+    if (oracle && (impl == 2 || impl == 3)) { if (!(errNatO[i] < tol)) okc[i] = 0; }
+    if (impl == 3) {
+        if (!(max(abs(hiMac[i] - hiNat[i]), abs(loMac[i] - loNat[i])) < tol)) okc[i] = 0;
+    }
+    if (!okc[i]) ok = 0;
+}
+
+// ===========================================================================
+//  Rapport
+// ===========================================================================
+if (mpirank == 0) {
+    int prec = cout.precision(3);
+    cout.scientific;
+    cout << "\n\n###########################################################" << endl;
+    cout << "  RAPPORT   np = " << mpisize << "   nstat = " << nstat
+         << " echantillons par mesure" << endl;
+    cout << "###########################################################" << endl;
+
+    /* groupe par geometrie : les deux sens d'un meme cas se lisent cote a cote */
+    for (int g = 1; g < 4; g++)
+    for (int d = 0; d < 2; d++) {
+        int i = g + 3*d;
+        if (!ran[i]) continue;
+
+        cout << "\n===========================================================" << endl;
+        cout << " cas " << i << " : " << caseName[i] << endl;
+        cout << "        sens " << dirLab[i] << endl;
+        cout << "   " << ntSrc[i] << " -> " << ntDst[i] << " elements, "
+             << ndofSrc[i] << " -> " << ndofDst[i] << " DDL locaux (rang 0)" << endl;
+        cout << "===========================================================" << endl;
+
+        cout << "  temps [s], moyenne (cv) et minimum sur " << nstat << " echantillons" << endl;
+        real cvM = tMacMu[i] > 0 ? 100.*tMacSd[i]/tMacMu[i] : 0;
+        cout << "    macro_ddm  VecInterpolate   " << tMacMu[i] << " (" << cvM
+             << "%)   min " << tMacMn[i] << endl;
+        real cvN = tNatMu[i] > 0 ? 100.*tNatSd[i]/tNatMu[i] : 0;
+        cout << "    natif      interpolateD     " << tNatMu[i] << " (" << cvN
+             << "%)   min " << tNatMn[i];
+        if (tNatMu[i] > 0 && tMacMu[i] > 0)
+            cout << "   x" << tMacMu[i]/tNatMu[i] << " vs macro_ddm";
+        cout << endl;
+        cout << "    natif      transferPlan     " << tBldMu[i] << "   (construction)" << endl;
+        cout << "    natif      rejeu sur plan   " << tRepMu[i];
+        if (tRepMu[i] > 0 && tNatMu[i] > 0) cout << "   x" << tNatMu[i]/tRepMu[i] << " vs interpolateD";
+        cout << endl;
+        if (doser) {
+            real cvS = tSerMu[i] > 0 ? 100.*tSerSd[i]/tSerMu[i] : 0;
+            cout << "    reference serie             " << tSerMu[i] << " (" << cvS << "%)";
+            if (tNatMu[i] > 0 && tSerMu[i] > 0) cout << "   x" << tSerMu[i]/tNatMu[i] << " vs natif";
+            cout << endl;
+        }
+
+        cout << "  memoire retenue [Mo, cumul sur les rangs]" << endl;
+        cout << "   (allocation courante, PAS le pic ; lisible seulement avec -oracle 0)" << endl;
+        cout << "    macro_ddm  VecInterpolate   " << memMac[i]/1024./1024. << endl;
+        cout << "    natif      interpolateD     " << memNat[i]/1024./1024. << endl;
+        cout << "    natif      plan conserve    " << memPlan[i]/1024./1024. << endl;
+
+        cout << "  meme resultat ? erreurs Linf" << endl;
+        cout << "    champ representable   macro_ddm " << errMacF[i]
+             << "   natif " << errNatF[i] << endl;
+        if (oracle) {
+            cout << "    contre l'oracle serie, DDL par DDL   macro_ddm " << errMacO[i]
+                 << "   natif " << errNatO[i] << endl;
+            if (impl == 3 && errMacO[i] > 0)
+                cout << "      rapport natif / macro_ddm " << errNatO[i]/errMacO[i]
+                     << "   (conditionnement, pas un operateur different)" << endl;
+        }
+        if (impl == 3) {
+            cout << "    champ oscillant, extrema globaux" << endl;
+            cout << "      macro_ddm [" << loMac[i] << ", " << hiMac[i] << "]"
+                 << "   natif [" << loNat[i] << ", " << hiNat[i] << "]"
+                 << "   ecart " << max(abs(hiMac[i] - hiNat[i]), abs(loMac[i] - loNat[i])) << endl;
+        }
+        cout << "    couverture du plan : DDL vides " << covEmpty[i]
+             << "   partiels " << covPartial[i]
+             << "   poids min " << covWmin[i] << endl;
+        cout << "    chemin emprunte par interpolateD  " << pathNat[i] << " = "
+             << (pathNat[i] == 0 ? "XFER_GENERAL"
+               : (pathNat[i] == 1 ? "XFER_SINGLE_RANK"
+               : (pathNat[i] == 2 ? "XFER_LOCAL" : "n/a"))) << endl;
+        cout << "  verdict du cas : " << (okc[i] ? "PASS" : "FAIL") << endl;
+    }
+
+    /* Lignes machine : une par cas, np en premiere colonne, pour concatener
+       les executions d'un balayage externe sur np. */
+    cout << "\nCSVHEAD;np;cas;geom;sens;ntSrc;ntDst;ndofSrc;ndofDst;"
+         << "tMacMu;tMacSd;tMacMin;tNatMu;tNatSd;tNatMin;tPlanBuild;tPlanReplay;"
+         << "tSerMu;memMacMo;memNatMo;memPlanMo;errMacO;errNatO;path;covVides;covPartiels;covPoidsMin" << endl;
+    for (int g = 1; g < 4; g++)
+    for (int d = 0; d < 2; d++) {
+        int i = g + 3*d;
+        if (!ran[i]) continue;
+        cout << "CSV;" << mpisize << ";" << i << ";" << g << ";" << (d + 1) << ";"
+             << ntSrc[i] << ";" << ntDst[i] << ";" << ndofSrc[i] << ";" << ndofDst[i] << ";"
+             << tMacMu[i] << ";" << tMacSd[i] << ";" << tMacMn[i] << ";"
+             << tNatMu[i] << ";" << tNatSd[i] << ";" << tNatMn[i] << ";"
+             << tBldMu[i] << ";" << tRepMu[i] << ";" << tSerMu[i] << ";"
+             << memMac[i]/1024./1024. << ";" << memNat[i]/1024./1024. << ";"
+             << memPlan[i]/1024./1024. << ";"
+             << errMacO[i] << ";" << errNatO[i] << ";" << pathNat[i] << ";"
+             << covEmpty[i] << ";" << covPartial[i] << ";" << covWmin[i] << endl;
+    }
+
+    cout << "\n  tolerance = " << tol << endl;
+    if (!ok) {
+        cout << "  cas en echec :";
+        for (int i = 1; i < NC; i++) if (ran[i] && !okc[i]) cout << " " << i;
+        cout << endl;
+    }
+    cout << "  np balaye de l'exterieur : une execution par valeur, cf. L1 en tete." << endl;
+    cout.precision(prec);
+    cout << (ok ? "== interpolation-comparison : OK ==" : "== interpolation-comparison : ECHEC ==") << endl;
+}
+
+// Les deux implementations doivent reproduire un champ representable a
+// l'epsilon machine ET coller a l'oracle serie. Si les deux tiennent, elles
+// calculent le meme operateur.
+assert(ok);

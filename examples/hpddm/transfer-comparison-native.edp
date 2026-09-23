@@ -68,6 +68,7 @@ load "PETSc"
 load "mmg"
 load "Element_P4"
 load "Element_P3"
+load "medit"
 
 func PkSingle    = P3;
 func Pk          = [PkSingle, PkSingle];        // espace source
@@ -83,7 +84,7 @@ include "getARGV.idp"
 
 int nglob  = getARGV("-global_3d", 5);
 real hm    = getARGV("-hmax", 8.0e-2);
-int nrep   = getARGV("-nrep", 3);
+int nrep   = getARGV("-nrep", 1);
 int impl   = getARGV("-impl", 3);
 int oracle = getARGV("-oracle", 1);
 int wvtk   = getARGV("-vtk", 0);
@@ -93,15 +94,20 @@ int[int] fforder = [1];
 macro FX() (1 + x + 2*y + 3*z + x*y + z*z)// EOM
 macro FY() (2 - x + y*z)// EOM
 // Champ non representable, celui de transfer.edp.
-macro GX() (cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z))// EOM
+macro GX() (cos(2*pi*x) * cos(2*pi*y) * cos(2*pi*z))// EOM
 macro GY() (cos(2*pi*z))// EOM
 
 // ===========================================================================
 //  Geometrie globale, construite UNE fois et partagee par les deux voies
 // ===========================================================================
 mesh3 ThNewG, ThG = cube(nglob, nglob, nglob);
-if (mpirank == 0)
+fespace Uh(ThG, P1);
+Uh Met = max(min(1*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2), 0.2), 1e-3);
+if (mpirank == 0) {
+    ThG = mmg3d(ThG, metric = Met[], hgrad = 2);
     ThNewG = mmg3d(ThG, hmax = hm);
+}
+broadcast(processor(0), ThG);
 broadcast(processor(0), ThNewG);
 
 if (mpirank == 0) {
@@ -165,6 +171,9 @@ if (impl == 1 || impl == 3) {
     for (int i = 0; i < vs[].n; i++) { hi = max(hi, vs[][i]); lo = min(lo, vs[][i]); }
     mpiAllReduce(hi, hiMac, mpiCommWorld, mpiMAX);
     mpiAllReduce(lo, loMac, mpiCommWorld, mpiMIN);
+    
+    plotMPI(ThA, def1(us), PkSingle, def1, real, cmm = "Old FE function");
+    plotMPI(ThB, def1(vs), PkNewSingle, def1, real, cmm = "New FE function");
 
     if (oracle) {
         // oracle serie : interpolation exacte calculee sur les maillages GLOBAUX,
@@ -241,6 +250,11 @@ if (impl == 2 || impl == 3) {
     for (int i = 0; i < vt[].n; i++) { hi = max(hi, vt[][i]); lo = min(lo, vt[][i]); }
     mpiAllReduce(hi, hiNat, mpiCommWorld, mpiMAX);
     mpiAllReduce(lo, loNat, mpiCommWorld, mpiMIN);
+    /* medit("Natif", ThG, ut);
+    medit("NatifV", ThNewG, vt);*/
+    
+    plotMPI(DS.local, def1(ut), PkSingle, def1, real, cmm = "Old FE function natif");
+    plotMPI(DD.local, def1(vt), PkNewSingle, def1, real, cmm = "New FE function natif");
 
     if (oracle) {
         fespace VgS(ThG, Pk);
