@@ -35,6 +35,7 @@
 
 #include <cmath>
 #include <complex>
+#include <cstdlib>
 //  put here some def dur to c++11
 // problem with mixed with using namespace std;
 // to correct bug in g++ v 4.8.1 add std
@@ -179,6 +180,127 @@ template<class A,class B>  A Build(B b) {  return A(b);}
 
 long Exit(long i) {throw(ErrorExit("Exit",i));return 0;}
 bool Assert(bool b) {if (!b) throw(ErrorExec("exec assert",1));return true;}
+
+// pause(): interactive debugging console. See lg.ypp's `start` rule (the
+// "lean path") and Compile() for the other half of this. Threads a nested,
+// recursive Compile() call through the SAME grammar/lexer (zzzfff), one
+// typed line at a time, evaluating each against the CURRENT, already-live
+// Stack -- not a fresh one -- and resolving variable names against the
+// scope that was active at the pause() call site (captured at PARSE time,
+// in code() below, since by EVAL time the compile-time Block chain has
+// normally already been destroyed -- see Block::keepAliveForPause).
+//
+// Definitions for the two globals declared `extern` in lg.ypp:
+Block *ff_pauseNestedFather = nullptr;
+Stack  ff_pauseNestedStack  = nullptr;
+extern int Compile();
+extern Block *currentblock;
+
+// Shared entry point for the debug console: used both by pause() (E_pause
+// below, capturedBlock = the live Block at the pause() call site) and by
+// the Ctrl-C (SIGINT) interrupt check in AFunction2.cpp's
+// ListOfInst::operator(), which calls this with capturedBlock = nullptr
+// since there is no compile-time Block for an arbitrary, asynchronously
+// requested break point -- so an interrupt-triggered console resolves
+// names the same way a non-nested, top-level pause() call would.
+void RunPauseConsole(Stack stack, Block *capturedBlock)
+{
+  extern void ff_finalize(); // see lg.ypp: runs the AtEnd hooks (e.g. fingraphique)
+  if (mpirank==0)
+    cout << "\n-- pause() : FreeFEM debug console -- type one FreeFEM "
+         << "statement per line (ending in ';'), 'resume' alone to "
+         << "continue the script, 'vars' alone to list the script's "
+         << "variables, or 'kill' alone to end FreeFEM --" << capturedBlock << " line "<< TheCurrentLine << endl;
+  string line;
+  while (true)
+  {
+    if (mpirank==0) cout << "pause> " << flush;
+    if (!std::getline(cin,line)) break; // EOF (Ctrl-D)
+    size_t b = line.find_first_not_of(" \t\r");
+    if (b==string::npos) continue; // blank line: keep prompting
+    size_t e = line.find_last_not_of(" \t\r");
+    string trimmed = line.substr(b,e-b+1);
+    if (trimmed=="resume" || trimmed=="resume;") break;
+      if (trimmed=="step" || trimmed=="step;")
+      {ff_ctrlCRequested=1;break;} // break at next  step.
+    if (trimmed=="kill" || trimmed=="kill;") {
+      if (mpirank==0) cout << "-- kill: ending FreeFEM --" << endl;
+      ff_finalize();
+      exit(1);
+    }
+      if (trimmed=="stack" || trimmed=="stack;") {
+          extern void ShowDebugStack();
+          ShowDebugStack();
+          continue;
+      }
+    if (trimmed=="vars" || trimmed=="vars;") {
+      // ::Find() (AFunction2.cpp) resolves every identifier by walking this
+      // same global list of currently-open-or-kept-alive scopes -- not
+      // Block::fatherblock -- so it doubles as the right thing to walk to
+      // list "the script's variables". Global itself is FreeFEM's built-in
+      // operator/function namespace (thousands of entries), not anything
+      // the script declared, so it's skipped.
+      if (mpirank==0) {
+        bool any=false;
+        for (list<TableOfIdentifier*>::const_iterator bi=tables_of_identifier.begin();
+             bi!=tables_of_identifier.end(); ++bi)
+        {
+          if (*bi == &Global) continue;
+          for (TableOfIdentifier::const_iterator vi=(*bi)->m.begin(); vi!=(*bi)->m.end(); ++vi)
+          {
+            cout << "  " << vi->first << " : " << *(vi->second.first) << endl;
+            any=true;
+          }
+        }
+        if (!any) cout << "  (no script variables currently visible)" << endl;
+      }
+      continue;
+    }
+
+    ff_pauseNestedFather = capturedBlock;
+    ff_pauseNestedStack  = stack;
+    string src = line; src += "\n";
+    // mylex::xxxx::close() unconditionally `delete`s the filename
+    // pointer passed to input() -- must be heap-allocated.
+    zzzfff->input(src,new string("pause console"));
+    Compile(); // parse+eval errors are reported by Compile() itself
+    ff_pauseNestedFather = nullptr;
+    ff_pauseNestedStack  = nullptr;
+    // Compile()'s own final check ("Error:a block is not close") runs
+    // only once the OUTER script's yyparse() fully returns -- i.e.
+    // after this whole pause() console session ends -- and it inspects
+    // this same global currentblock. Our nested Compile() leaves it
+    // pointing at capturedBlock (its own child's father) rather than
+    // null; restore it so that later, outer check doesn't false-fire.
+    currentblock = nullptr;
+  }
+}
+
+class OneOperatorPause : public OneOperator {
+public:
+  class E_pause : public E_F0 {
+  public:
+    Block *capturedBlock;
+    E_pause(Block *b) : capturedBlock(b) {}
+    AnyType operator()(Stack stack) const
+    {
+      RunPauseConsole(stack,capturedBlock);
+      return SetAny<long>(0L);
+    }
+    operator aType () const { return atype<long>(); }
+  };
+  E_F0 * code(const basicAC_F0 & args) const
+  {
+    if (args.named_parameter && !args.named_parameter->empty())
+      CompileError(" pause() takes no arguments ");
+    // Captured HERE, at parse time, while currentblock is still the real,
+    // live scope active at this call site -- not at eval time, by which
+    // point it would normally already be destroyed.
+    currentblock->keepAliveChainForPause();
+    return new E_pause(currentblock);
+  }
+  OneOperatorPause() : OneOperator(map_type[typeid(long).name()]) {}
+};
 
 inline void MyAssert(int i,char * ex,char * file,long line)
 {if (i) {
@@ -1687,6 +1809,7 @@ void Init_map_type()
      Global.Add("norm","(",new OneOperator1_<double,Complex>(norm));
      Global.Add("exit","(",new OneOperator1<long>(Exit));
      Global.Add("assert","(",new OneOperator1<bool>(Assert));
+     Global.Add("pause","(",new OneOperatorPause());
 
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
     Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon.

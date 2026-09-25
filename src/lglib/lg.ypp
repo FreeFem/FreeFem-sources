@@ -158,8 +158,24 @@ void ff_atend(AtEnd f)
 void signalCPUHandler( int signum ) {
     ff_finalize();
     std::cout << "Cputime limit exceeded:  (" << signum << ") received.\n";
-    
+
     exit(24);
+}
+
+// Ctrl-C: unlike signalCPUHandler above, do NOT terminate -- just record the
+// request. ListOfInst::operator() (AFunction2.cpp) polls ff_ctrlCRequested
+// once per statement and, when set, opens the same debug console pause()
+// uses (RunPauseConsole), so Ctrl-C halts the running script exactly like
+// hitting a pause() at the current line. Only touches a volatile int, so
+// it stays safe to run as a signal handler.
+void signalInterruptHandler( int signum ) {
+#ifdef _WIN32
+    // The Windows C runtime resets a SIGINT handler to SIG_DFL each time it
+    // fires (and runs it on a separate console-control thread), so re-arm it
+    // or the *second* Ctrl-C would terminate the process.
+    signal(SIGINT, signalInterruptHandler);
+#endif
+    ff_ctrlCRequested = 1;
 }
 
 %}
@@ -337,6 +353,37 @@ void signalCPUHandler( int signum ) {
 %%
 
 start:   input ENDOFFILE {
+                        // pause()/debug console lean path (see AFunction.cpp
+                        // OneOperatorPause / E_pause, and Compile() above):
+                        // when this parse was triggered recursively from
+                        // inside a running pause() breakpoint,
+                        // ff_pauseNestedStack is the ALREADY-LIVE Stack of
+                        // the outer, still-executing script. Eval directly
+                        // against it and skip everything below -- the
+                        // one-shot, whole-program bookkeeping
+                        // (fingraphique/ThePlotStream teardown, ShowAlloc,
+                        // a brand new newStack()) is neither needed nor
+                        // safe to run again mid-program.
+                        extern Stack ff_pauseNestedStack;
+                        if (ff_pauseNestedStack) {
+                          $1.setclose(Block::snewclose(currentblock));
+                          try {
+                            $1.eval(ff_pauseNestedStack);
+                          }
+                          catch ( E_exception & e)  {
+                            cerr << e.what() << " ,  mpirank " << mpirank << endl;
+                            return 1; }
+                          catch( Error & err) {
+                            cerr << err.what() << endl;
+                            cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
+                            return err.errcode();
+                          }
+                          catch( ...) { cerr << "Strange catch exception ???\n";
+                            cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
+                            return 1;
+                          }
+                          return 0;
+                        }
                         if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
 		        const char *  magicffglut="#!ffglutdata4.1\n";// for complex and vector 3d plot
@@ -887,8 +934,18 @@ int Compile()
   int retvalue=0;
 
   // <<initialize_currentblock>>
-
-  currentblock=0;
+  // pause()/debug console support (see AFunction.cpp OneOperatorPause,
+  // ff_pauseNestedFather/ff_pauseNestedStack): when Compile() is called
+  // recursively from inside a pause() breakpoint's E_pause::operator(), the
+  // outer script's own currentblock has already been captured (and kept
+  // alive -- see Block::keepAliveForPause) at the pause() call site. Opening
+  // the new block as its CHILD (instead of resetting to a fresh root) lets
+  // Find() resolve variables the user types at the pause prompt all the way
+  // up through whatever was already declared at that point in the outer
+  // script.
+  extern Block *ff_pauseNestedFather;
+  Block *ff_expectedClosedBlock = ff_pauseNestedFather; // "properly closed" means back to THIS, not always null
+  currentblock = ff_pauseNestedFather; // nullptr in the normal (non-nested) case
   Block::open(currentblock);
   try {
     UnShowAlloc =0;
@@ -896,7 +953,7 @@ int Compile()
     retvalue=yyparse(); // grammar analysis starting from [[start_symbol]]
 
     if(retvalue==0){
-      if(currentblock)
+      if(currentblock != ff_expectedClosedBlock)
         {retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }
       else {
         if( verbosity  ) {
@@ -968,7 +1025,22 @@ int mainff (int  argc, char **argv)
 {
 #ifndef _WIN32
   	signal(SIGXCPU, signalCPUHandler);
-#endif	
+	// ThePlotStream (see Graphics/getprog-unix.hpp) is a FILE* piped to an
+	// external ffglut process via popen(). If the user closes/quits that
+	// window, ffglut exits and the pipe's reader is gone; the *next* write
+	// to ThePlotStream (another plot(), or just the final pclose() at
+	// program end) then raises SIGPIPE. Nothing here ever installs a
+	// SIGPIPE handler, so its default disposition -- terminate the whole
+	// process outright, no message -- applies; that's easily mistaken for
+	// the script having "resumed" when it actually just got killed
+	// (reported while debugging pause()'s debug console, but this was
+	// always a latent bug for plain scripts too: any plot() call after the
+	// window was closed would silently kill the process the same way).
+	// Ignoring SIGPIPE is the standard fix for pipe I/O to a child that can
+	// exit at any time: the write then just fails with EPIPE instead.
+	signal(SIGPIPE, SIG_IGN);
+#endif
+  signal(SIGINT, signalInterruptHandler); // Ctrl-C: halt like a pause() (POSIX and Windows)
   if(argc)
     prognamearg=argv[0];
 

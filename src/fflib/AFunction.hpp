@@ -1422,7 +1422,8 @@ public:
 };
 
 /// <<ListOfInst>>
-
+class Block ;
+extern Block *currentblock;
 class ListOfInst :
   public E_F0mps // [[E_F0mps]]
 { 
@@ -1433,12 +1434,12 @@ class ListOfInst :
   const int nx;
   vectorOfInst * atclose;  // Sep 2017 FH
     // add sep. 2016 FH
-
+    Block *cbk;
 public:
    
-  ListOfInst():n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(10),atclose(nullptr){}
-  ListOfInst(int nn):n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(nn?nn:10),atclose(nullptr) {}
-  void Add(const C_F0 & ins); 
+    ListOfInst():n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(10),atclose(nullptr),cbk(currentblock){}
+  ListOfInst(int nn):n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(nn?nn:10),atclose(nullptr),cbk(currentblock) {}
+  void Add(const C_F0 & ins);
 
   /// <<ListOfInst::operator()>> implemented at [[file:AFunction2.cpp::ListOfInst::operator()]]
 
@@ -2243,7 +2244,29 @@ template<class T>
    C_F0 Find(const char * k) const  {return table.Find(k);}
    ~Block(); //{}
     int nIdWithDelete() const { return table.nIdWithDelete;}
-}; 
+
+   // pause()/debug console support (see AFunction.cpp OneOperatorPause):
+   // a block chain marked keepAliveForPause survives Block::snewclose()
+   // (intentionally leaked, not deleted) so pause()'s captured `currentblock`
+   // -- taken at PARSE time, when its enclosing scope is still open -- stays
+   // a valid pointer at EVAL time, once parsing of the whole file (and thus
+   // the normal close of every block, including this one) has long since
+   // finished. keepAliveChainForPause() marks this block and every ancestor
+   // so name resolution (Find) still works all the way up to the global
+   // scope for whatever was already declared at the pause() call site.
+   bool keepAliveForPause;
+   void keepAliveChainForPause() {
+     keepAliveForPause=true;
+     if (fatherblock) fatherblock->keepAliveChainForPause();
+   }
+};
+
+// see AFunction.cpp: shared entry point for pause()'s debug console, also
+// invoked by the Ctrl-C (SIGINT) interrupt check in AFunction2.cpp's
+// ListOfInst::operator() to open the same console when the user halts a
+// running script. capturedBlock is nullptr for that interrupt case (no
+// compile-time Block exists for an asynchronously requested break point).
+void RunPauseConsole(Stack stack, Block *capturedBlock);
 
 
 

@@ -32,7 +32,14 @@
 #include "throwassert.hpp"
 #include <exception>
 
-extern int TheCurrentLine; 
+extern int TheCurrentLine;
+
+// Set by the SIGINT (Ctrl-C) handler installed in mainff() (see lg.ypp /
+// lg.tab.cpp, next to signalCPUHandler); polled once per statement by
+// ListOfInst::operator() (AFunction2.cpp) which, when it sees this set,
+// clears it and opens the same debug console as pause() (RunPauseConsole,
+// declared in AFunction.hpp) at the current line -- "halt like a pause()".
+extern volatile int ff_ctrlCRequested;
 
 #if defined(__GNUC__) && __GNUC__+0 < 3
 #include <strstream.h>

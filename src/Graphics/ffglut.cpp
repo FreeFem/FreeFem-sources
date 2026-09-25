@@ -34,6 +34,7 @@ using namespace std;
 #include <map>
 #include <utility>
 #include <unistd.h>
+#include <csignal>
 
 #include "rgraph.hpp"
 #include "throwassert.hpp"
@@ -3864,7 +3865,7 @@ static void Key( unsigned char key, int x, int y )
         case 27: // esc char
             Fin(0);
             break;
-        case 3: // esc char
+        case 17: // Ctrl Q
             Fin(9);
             break;
         case 'w':
@@ -4191,7 +4192,18 @@ void     SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
 }
 int main(int argc,  char** argv)
 {
-    lockOrientation=0;// to get bad mesh !! FH mai 2021 
+    // Ctrl-C in the launching terminal sends SIGINT to the whole foreground
+    // process group, which includes this process (a plain popen() child of
+    // FreeFEM's main interpreter, sharing its terminal/process group) -- not
+    // just the interpreter. FreeFEM's own SIGINT handler (see lg.ypp
+    // signalInterruptHandler) lets it survive and drop into the pause()
+    // debug console, but this window process has no such handler and would
+    // otherwise die on the same keystroke (default SIGINT disposition is to
+    // terminate), silently breaking all plotting for the rest of the run.
+    // Ignore it here, matching the existing SIGPIPE-ignore in mainff() for
+    // the same kind of cross-process signal-delivery concern.
+    signal(SIGINT, SIG_IGN);
+    lockOrientation=0;// to get bad mesh !! FH mai 2021
     ffapi::init();
     glutInit(&argc, argv);
     bool stereo=false;

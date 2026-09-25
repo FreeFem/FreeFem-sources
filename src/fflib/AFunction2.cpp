@@ -452,7 +452,7 @@ basicForEachType::basicForEachType(const type_info  & k,
  TableOfIdentifier:: ~TableOfIdentifier() {}
 
 
-Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
+Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top),keepAliveForPause(false)
     {
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
     }
@@ -460,14 +460,19 @@ Block::~Block(){}
 
    vectorOfInst * Block::snewclose(Block *& c) {
     Block * a=c;
-    tables_of_identifier.erase(a->itabl);
+    // see AFunction.hpp Block::keepAliveForPause: intentionally leaked, not
+    // deleted, and left registered in tables_of_identifier -- the free
+    // ::Find(name) (AFunction2.cpp) that actually resolves plain
+    // identifiers walks THIS global list, not Block::fatherblock, so a
+    // captured pause() scope must stay in it to remain resolvable.
+    if (!a->keepAliveForPause) tables_of_identifier.erase(a->itabl);
     c=a->fatherblock;
     if (a->fatherblock) {a->fatherblock->topmax=a->topmax;
         a->fatherblock->top=a->top;}
 
     vectorOfInst * r;
     r = a->table.newdestroy();
-    delete a;
+    if (!a->keepAliveForPause) delete a;
     return r;}
 
 CC_F0  Block::close(Block *& c,C_F0  ins)
@@ -791,6 +796,10 @@ AnyType ListOfInst::operator()(Stack s) const {
 	for (i=0;i<n;i++)
 	{
 	    TheCurrentLine=linenumber[i]  ;
+            if (ff_ctrlCRequested) { // Ctrl-C hit: halt here, like a pause()
+                ff_ctrlCRequested=0;
+                RunPauseConsole(s,cbk); // see AFunction.hpp
+            }
             r=(*list[i])(s);
 	    sptr->clean(); // modif FH mars 2006  clean Ptr
 	    s1=CPUtime();
