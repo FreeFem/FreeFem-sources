@@ -141,3 +141,11 @@ seq/ffmaster.c \
 seq/libff-mmap-semaphore.c \
 seq/ff-get-dep.in seq/ff-pkg-download.in seq/load.link.in \
 seq/ff-get-dep.awk seq/gsl.awk
+
+all-local: $(WIN32DLLTARGET)
+
+.PHONY: win32-dll-target
+
+win32-dll-target:
+	@echo "Copying plugins dependencies in src/bin-win32..."
+	ldd seq/*.dll mpi/*.dll | grep -v /WINDOWS/ | grep -v /bin-win32/ | grep -v libff.dll | grep '=>' | awk '{print "cp",$$3,"."}' | sort -u | grep -v '[?]' | sh
