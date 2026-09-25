@@ -123,7 +123,10 @@ endif
 
 ifneq ($(FC),)
 ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
-PETSC_DOWNLOAD += --download-scalapack --download-mumps
+PETSC_DOWNLOAD += --download-scalapack
+ifeq ($(WIN32DLLTARGET),)
+PETSC_DOWNLOAD += --download-mumps
+endif
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
 PETSC_DOWNLOAD += --download-superlu_dist
@@ -132,8 +135,14 @@ endif
 endif
 
 ifneq ($(WIN32DLLTARGET),)
+export MSYS2_ARG_CONV_EXCL := -DLAPACK_LIBRARIES;-DBLAS_LIBRARIES;-DTPL_BLAS_LIBRARIES
 COMMON_FLAGS += --with-shared-libraries=0 --with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 PETSC_CXXFLAGS := -fno-stack-protector -Wno-format -Wno-format-extra-args
+ifneq ($(FC),)
+ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
+PETSC_DOWNLOAD += --download-mumps=https://joliv.et/freefem/pkg/MUMPS_5.9.1-p1.tar.gz
+endif
+endif
 ifeq ($(FF_generic_petsc), yes)
 PETSC_CXXFLAGS += -mtune=generic
 endif
