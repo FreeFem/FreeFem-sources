@@ -77,11 +77,11 @@ if ( -x "../getall" ) { chdir ".." }
 system "mkdir -p pkg";
 my @downloads;
 
-download('ARPACK','https://www.ljll.fr/hecht/pkg/arpack96.tar.gz',
+download('ARPACK','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/arpack96.tar.gz',
  	'https://www.ljll.fr/hecht/pkg',
 	'arpack96.tar.gz',
 	'fffaa970198b285676f4156cebc8626e');
-download('ARPACK','https://www.ljll.fr/hecht/pkg/patch.tar.gz',
+download('ARPACK','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/patch.tar.gz',
 	'https://www.ljll.fr/hecht/pkg',
 	'patch.tar.gz',
 	'14830d758f195f272b8594a493501fa2');
@@ -102,11 +102,11 @@ download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
 	'http://www.fftw.org',
 	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
 # 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
-download('freeYams','https://www.ljll.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
+download('freeYams','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/freeyams.2012.02.05.tgz',
 	'https://www.ljll.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
 	'b7c82a256a3e59beeb2b578de93a4e0b');
-download('Gmm++','https://www.ljll.fr/hecht/pkg/gmm-4.2.tar.gz',
+download('Gmm++','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/gmm-4.2.tar.gz',
 	'https://www.ljll.fr/hecht/pkg/',
 	'gmm-4.2.tar.gz',
 	'35fe900f7459c49f4b4337dc691c8cdf');
@@ -114,11 +114,11 @@ download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz'
 	'https://projects.coin-or.org/Ipopt',
 	'Ipopt-3.12.4.tgz',
 	'12a8ecaff8dd90025ddea6c65b49cb03');
-download('METIS','https://www.ljll.fr/hecht/pkg/metis-5.1.0.tar.gz',
+download('METIS','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/metis-5.1.0.tar.gz',
 	'http://www.netlib.org/linalg/',
 	'metis-5.1.0.tar.gz',
 	'5465e67079419a69e0116de24fce58fe');
-download('ParMETIS','https://www.ljll.fr/hecht/pkg/ParMetis-4.0.3.tar.gz',
+download('ParMETIS','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/ParMetis-4.0.3.tar.gz',
 	'https://www.ljll.fr/hecht/pkg',
 	'ParMetis-4.0.3.tar.gz',
 	'f69c479586bf6bb7aff6a9bc0c739628');
@@ -126,7 +126,7 @@ download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mm
 	'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
 	'mmg3d4.0.tgz',
 	'bfc2b0373bc208e0512415d1aa2e76a1');
-download('mshmet','https://www.ljll.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
+download('mshmet','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/mshmet.2012.04.25.tgz',
 	'https://www.ljll.fr/frey/software.html',
 	'mshmet.2012.04.25.tgz',
 	'427f397e0602efc56aa897d38a8e9bfa');
@@ -158,7 +158,7 @@ download('SuperLU','https://github.com/xiaoyeli/superlu/archive/v5.2.2.zip',
 		'https://github.com/xiaoyeli/superlu',
 		'superlu-5.2.2.zip',
 		'6e24842b0aa07f457d929b162e09ca6c');
-download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
+download('TetGen','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
@@ -190,12 +190,12 @@ download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/6381b902
 	'bemtool.zip',
 	'ebbdadc398c8a1debbb58fcd69ae7996');
 
-download('Boost','https://www.ljll.fr/~tournier/boost_for_bemtool.tar.gz',
+download('Boost','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
 	'boost_for_bemtool.tar.gz',
 	'9b15ef07d3e8bd9eedf11bc3cd6f1f8f');
 
-download('libpthread-google','https://www.ljll.fr/hecht/pkg/libpthread-google.tar.gz',
+download('libpthread-google','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/libpthread-google.tar.gz',
 		'https://www.ljll.fr/hecht/pkg/',
 		'libpthread-google.tar.gz',
 		'945c006d898983d1a710aabf52a32d9c');
