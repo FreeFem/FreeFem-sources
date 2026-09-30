@@ -1,0 +1,249 @@
+// NBPROC 4
+// PARAM -ns
+
+// ---------------------------------------------------------------------
+//  Affectation entre fonctions EF distribuees : u = v et Vdh v = u;
+//
+//  En sequentiel, u = v interpole v sur l'espace de u en evaluant v aux
+//  points d'interpolation de u. En distribue ce mecanisme est faux : le
+//  point peut tomber hors du maillage LOCAL de v. L'operateur = entre deux
+//  fonctions EF distribuees passe donc par le transfert distribue
+//  (interpolateD), et Vdh v = u; par le meme chemin.
+//
+//  L'oracle est interpolateD(Udh, u[], Vdh, ref[]) : l'operateur doit en
+//  etre un simple habillage langage. Les cas qui empruntent une copie ou le
+//  chemin local ont un oracle plus fort (egalite exacte, ou interpolation
+//  sequentielle sur DTh.local).
+//
+//  CAS VERIFIES
+//   A.  Declaration avec init : Vdh v = u;  (P2 sur DTh1 -> P1 sur DTh2).
+//   B.  Affectation : w = u, puis reaffectation apres modification de u
+//       (la destination est deja allouee).
+//   C.  Champ affine, P1 -> P2 : exact, a l'arrondi pres.
+//   D.  Meme espace : w2 = u  => COPIE, egalite exacte.
+//   E.  Deux fespaces distincts sur le meme Dmesh et le meme EF : copie
+//       aussi, egalite exacte.
+//   F.  Meme Dmesh, EF different (P2 -> P1) : chemin local, egal a
+//       l'interpolation sequentielle sur DTh1.local a 1e-12.
+//   G.  u = u : u inchange, exactement.
+//   H.  Complexe.
+//   I.  Source jamais initialisee : destination nulle, source allouee a
+//       zero a la bonne taille.
+//   J.  Chainage a = b = u.
+//   K.  MeshS.
+//   L.  MeshL.
+//
+//  EGALITES EXACTES. La note de test_interpolationDMeshes.edp interdit
+//  d'asserter une valeur exacte sur un transfert : l'ordre d'arrivee des
+//  fragments change l'ordre de sommation. D, E, G et le couple a/b de J sont
+//  des COPIES, sans aucune sommation : l'egalite exacte y est la propriete
+//  testee, pas une observation. Tout le reste est asserte a 1e-10 (transfert)
+//  ou 1e-12 (chemin local, sans communication).
+//
+//  HORS SUITE, verifies a la main (une erreur interrompt l'execution) :
+//    * fespace vectoriel : b1 = a1  -> ExecError "only scalar ..." ;
+//    * reel <- complexe  : ur = uc  -> erreur de compilation "operator =".
+//
+//  Options :
+//    -nc1  raffinement de Th1                 (defaut 10)
+//    -nc2  raffinement de Th2, dans Th1       (defaut 7)
+//    -ov   recouvrement passe a distribute    (defaut 1)
+//
+//  Lancer :
+//    ff-mpirun -np 4 test_assignDistributed.edp -ns
+// ---------------------------------------------------------------------
+
+load "PETSc"
+include "getARGV.idp"
+
+int nc1 = getARGV("-nc1", 10);
+int nc2 = getARGV("-nc2",  7);   // non commensurable avec nc1 : vraie geometrie
+int ov  = getARGV("-ov",   1);
+
+macro FIELD() (sin(3*x)*cos(2*y) + exp(z))// EOM
+macro AFFINE() (1 + x + 2*y + 3*z)// EOM
+
+// max global de |a - b| sur deux tableaux reels
+macro GDIFF(a, b, g)
+real g = 0;
+{
+  real[int] dd = a - b;
+  real ll = dd.linfty;
+  mpiAllReduce(ll, g, mpiCommWorld, mpiMAX);
+}// EOM
+
+macro VERDICT(tag, e, tol, extra)
+if (mpirank == 0)
+  cout << "  [" << tag << "]  ecart = " << e << extra
+       << "   => " << (e <= tol ? "PASS" : "FAIL") << endl;
+assert(e <= tol);
+// EOM
+
+// Th2 strictement inclus dans Th1 : tous les DDL destination sont couverts.
+mesh3 Th1 = cube(nc1, nc1, nc1);
+mesh3 Th2 = cube(nc2, nc2, nc2, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+Dmesh3 DTh1 = distribute(Th1, overlap = ov);
+Dmesh3 DTh2 = distribute(Th2, overlap = ov);
+mesh3 L1 = DTh1.local, L2 = DTh2.local;
+
+fespace Udh(DTh1, P2);  fespace Ul(L1, P2);
+fespace Vdh(DTh2, P1);  fespace Vl(L2, P1);
+
+// Remplissage d'une fonction distribuee : pas encore de u = expression en
+// distribue, on passe par le fespace local (meme numerotation de DDL).
+Ul ul = FIELD;
+Udh u;
+u[] = ul[];
+assert(u[].n == Udh.ndof);
+
+real[int] ref(Vdh.ndof);
+interpolateD(Udh, u[], Vdh, ref);
+
+// --- A : declaration avec init ---------------------------------------------
+{
+  Vdh v = u;
+  assert(v[].n == Vdh.ndof);
+  GDIFF(v[], ref, eA)
+  VERDICT("A  Vdh v = u          ", eA, 1e-10, "")
+}
+
+// --- B : affectation, puis reaffectation -----------------------------------
+{
+  Vdh w;
+  w = u;
+  GDIFF(w[], ref, eB1)
+  VERDICT("B1 w = u               ", eB1, 1e-10, "")
+
+  // destination deja allouee, source modifiee : le resultat doit suivre
+  Udh u2;
+  u2[] = 2*u[];
+  w = u2;
+  real[int] ref2 = 2*ref;
+  GDIFF(w[], ref2, eB2)
+  VERDICT("B2 w = 2u (realloue)   ", eB2, 1e-10, "")
+}
+
+// --- C : champ affine, degre montant ---------------------------------------
+{
+  fespace Uadh(DTh1, P1);  fespace Ual(L1, P1);
+  fespace Vadh(DTh2, P2);  fespace Val(L2, P2);
+  Ual ua = AFFINE;
+  Uadh a;
+  a[] = ua[];
+  Vadh b = a;
+  Val exact = AFFINE;
+  GDIFF(b[], exact[], eC)
+  VERDICT("C  affine P1 -> P2     ", eC, 1e-10, "")
+}
+
+// --- D : meme espace => copie exacte ---------------------------------------
+{
+  Udh w2;
+  w2 = u;
+  GDIFF(w2[], u[], eD)
+  VERDICT("D  meme espace         ", eD, 0, "   (copie)")
+}
+
+// --- E : deux fespaces, meme Dmesh, meme EF => copie exacte ---------------
+{
+  fespace Udh2(DTh1, P2);
+  Udh2 z = u;
+  assert(z[].n == u[].n);
+  GDIFF(z[], u[], eE)
+  VERDICT("E  deux noms, meme EF  ", eE, 0, "   (copie)")
+}
+
+// --- F : meme Dmesh, EF different => chemin local --------------------------
+//  Reference : l'affectation SEQUENTIELLE sur le maillage local, qui evalue
+//  la fonction P2 aux sommets. Pas interpolate(Pl, Ul), qui appellerait la
+//  meme buildInterpolationMatrixT que le raccourci.
+{
+  fespace Pdh(DTh1, P1);  fespace Pl(L1, P1);
+  Pdh p = u;
+  Pl pl = ul;
+  GDIFF(p[], pl[], eF)
+  VERDICT("F  meme Dmesh, P2 -> P1", eF, 1e-12, "")
+}
+
+// --- G : u = u -------------------------------------------------------------
+{
+  real[int] before = u[];
+  u = u;
+  GDIFF(u[], before, eG)
+  VERDICT("G  u = u               ", eG, 0, "")
+}
+
+// --- H : complexe ------------------------------------------------------------
+{
+  Ul<complex> ulc = FIELD + 1i*AFFINE;
+  Udh<complex> uc;
+  uc[] = ulc[];
+  Vdh<complex> vc = uc;
+  complex[int] refc(Vdh.ndof);
+  interpolateD(Udh, uc[], Vdh, refc);
+  real hl = 0;
+  for (int i = 0; i < vc[].n; i++) hl = max(hl, abs(vc[][i] - refc[i]));
+  real eH = 0;
+  mpiAllReduce(hl, eH, mpiCommWorld, mpiMAX);
+  VERDICT("H  complexe            ", eH, 1e-10, "")
+}
+
+// --- I : source jamais initialisee ------------------------------------------
+{
+  Udh un;
+  Vdh vn = un;
+  real zl = vn[].linfty, zg = 0;
+  mpiAllReduce(zl, zg, mpiCommWorld, mpiMAX);
+  int badSize = (un[].n != Udh.ndof), gBad = 0;
+  mpiAllReduce(badSize, gBad, mpiCommWorld, mpiSUM);
+  VERDICT("I  source non initialisee", zg, 0, "   tailles fausses = " + gBad)
+  assert(gBad == 0);
+}
+
+// --- J : chainage --------------------------------------------------------------
+{
+  Vdh a, b;
+  a = b = u;
+  GDIFF(b[], ref, eJ1)
+  VERDICT("J1 a = b = u : b       ", eJ1, 1e-10, "")
+  GDIFF(a[], b[], eJ2)
+  VERDICT("J2 a = b = u : a == b  ", eJ2, 0, "   (copie)")
+}
+
+// --- K : MeshS -----------------------------------------------------------------
+{
+  meshS Sa = square3(12, 12), Sb = square3(17, 17);   // meme plan, non commensurables
+  DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
+  meshS La = DSa.local, Lb = DSb.local;
+  fespace WsA(DSa, P2); fespace wsA(La, P2);
+  fespace WsB(DSb, P1); fespace wsB(Lb, P1);
+  wsA ls = FIELD;
+  WsA us;
+  us[] = ls[];
+  WsB vs = us;
+  real[int] rs(WsB.ndof);
+  interpolateD(WsA, us[], WsB, rs);
+  GDIFF(vs[], rs, eK)
+  VERDICT("K  MeshS               ", eK, 1e-10, "")
+}
+
+// --- L : MeshL -----------------------------------------------------------------
+{
+  meshL Ca = segment(40), Cb = segment(57);
+  DmeshL DCa = distribute(Ca, overlap = ov), DCb = distribute(Cb, overlap = ov);
+  meshL La = DCa.local, Lb = DCb.local;
+  fespace WlA(DCa, P2); fespace wlA(La, P2);
+  fespace WlB(DCb, P1); fespace wlB(Lb, P1);
+  wlA ll = FIELD;
+  WlA ul1;
+  ul1[] = ll[];
+  WlB vl1 = ul1;
+  real[int] rl(WlB.ndof);
+  interpolateD(WlA, ul1[], WlB, rl);
+  GDIFF(vl1[], rl, eL)
+  VERDICT("L  MeshL               ", eL, 1e-10, "")
+}
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0)
+  cout << "== affectation distribuee : toutes les assertions passent ==" << endl;
