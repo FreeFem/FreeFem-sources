@@ -917,6 +917,18 @@ static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh
     return true;
 }
 
+static FragOp* morseToFragOp(const MatriceMorse<double>& A) {
+    ffassert(A.fortran == 0 && A.half == 0);
+    FragOp* F = new FragOp;
+    F->nrow = A.n;
+    F->ncol = A.m;
+    const long nz = (long)A.nnz;
+    F->ii.resize(nz); F->jj.resize(nz); F->aij.resize(nz);
+    for (long k = 0; k < nz; ++k) {
+        F->ii[k] = A.i[k]; F->jj[k] = A.j[k]; F->aij[k] = A.aij[k];
+    }
+    return F;
+}
 
 template<class Mesh>
 static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, const GFESpace<Mesh>& srcVh, const DistributedMesh<Mesh>& Ddst, const GFESpace<Mesh>& dstVh)
@@ -935,8 +947,17 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     P->comm = Dsrc.comm;
 
     KN<int> data = dataInterpolate(dstVh.N);
-    SearchMethodGuard sg;
 
+    if (&Dsrc == &Ddst && &srcVh.Th == &dstVh.Th) {
+        MatriceMorse<double>* A = buildInterpolationMatrixT(dstVh, srcVh, (int*)data);
+        P->M.assign(1, morseToFragOp(*A));
+        delete A;
+        P->ndFrag.assign(1, srcVh.NbOfDF);
+        P->path = XFER_LOCAL;
+        return P;
+    }
+
+    SearchMethodGuard sg;
     double tolN = std::max(0.0, transferTolN);
     double tolT = std::max(0.0, transferTolT);
     #ifdef PARALLELE

@@ -2007,3 +2007,110 @@ macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
 mpiBarrier(mpiCommWorld);
 if (mpirank == 0)
   cout << "== jalon 11 : MeshS / MeshL, assertions passees ==" << endl;
+
+// =======================================================================
+//  JALON 12 : meme maillage distribue, EF differents (raccourci samemesh)
+// =======================================================================
+//  Quand source et destination vivent sur le MEME Dmesh, le maillage local
+//  source EST le maillage local destination : l'interpolation est purement
+//  locale et se fait element par element. buildTransferPlan court-circuite
+//  alors toute la machinerie -- tolerances, localisateur, reductions -- et
+//  construit directement la matrice par buildInterpolationMatrixT (chemin
+//  samemesh de lgmat.cpp, sans aucun Find).
+//
+//  Aucun jalon precedent n'exerce reellement ce chemin : toutes les paires y
+//  relient deux Dmesh distincts, sauf O1 qui transfere un champ constant sur
+//  le meme espace -- ce qu'une identite reussit quel que soit le chemin.
+//
+//  CE QUE CHAQUE CAS ASSERTE
+//    * chemin == 2 (XFER_LOCAL) sur TOUS les rangs, y compris a np = 1, avec
+//      et sans plan. Le critere &Dsrc == &Ddst est global par construction ;
+//      un rang qui en divergerait laisserait les autres seuls dans un
+//      Allreduce, et le test se bloquerait au lieu d'echouer.
+//    * resultat == interpolation sequentielle sur DTh.local, a 1e-12. La
+//      reference est l'affectation sequentielle (set_fe3 : la fonction EF
+//      source evaluee aux points d'interpolation destination) et NON
+//      interpolate(Vh, Uh), qui appelle la meme buildInterpolationMatrixT :
+//      le test deviendrait une tautologie.
+//    * champ NON polynomial. Un champ affine serait reproduit par n'importe
+//      quel operateur correct, meme branche sur le mauvais element ; ici une
+//      erreur d'element ou de numerotation se voit.
+//
+//   SM1. P2 -> P1, Mesh3, recouvrement ov.
+//   SM2. P1 -> P2, sens montant : les DDL milieux d'arete sont de vraies
+//        interpolations, pas des recopies de valeurs nodales.
+//   SM3. P2 -> P2, deux fespaces distincts sur le meme Dmesh : matrice
+//        identite a l'arrondi, le resultat doit reproduire u.
+//   SM4. P2 -> P1 a overlap = 0 (DTh5z).
+//   SM5. MeshS, P2 -> P1 : le raccourci est generique en Mesh.
+//   SM6. MeshL, P2 -> P1.
+// ---------------------------------------------------------------------
+
+macro SMFIELD() (sin(3*x)*cos(2*y) + exp(z))// EOM
+
+macro SAMEMESH(tag, DT, LT, FES, FED, DTR)
+{
+  fespace WmS(DT, FES);  fespace WlmS(LT, FES);
+  fespace WmD(DT, FED);  fespace WlmD(LT, FED);
+  assert(WmS.ndof == WlmS.ndof && WmD.ndof == WlmD.ndof);
+  WlmS uS = SMFIELD;
+  WlmD vDirect = 0, vPlan = 0;
+  int pDir = interpolateD(WmS, uS[], WmD, vDirect[]);
+  DTR Pm = transferPlan(WmS, WmD);
+  int pPln = interpolateD(Pm, uS[], vPlan[]);
+  WlmD ref = uS;
+  real eLoc = 0, dLoc = 0;
+  for (int i = 0; i < vDirect[].n; i++) {
+    eLoc = max(eLoc, abs(vDirect[][i] - ref[][i]));
+    dLoc = max(dLoc, abs(vPlan[][i] - vDirect[][i]));
+  }
+  real eGlob = 0, dGlob = 0;
+  int pdMin = 0, pdMax = 0, ppMin = 0, ppMax = 0;
+  mpiAllReduce(eLoc, eGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(dLoc, dGlob, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pDir, pdMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pDir, pdMax, mpiCommWorld, mpiMAX);
+  mpiAllReduce(pPln, ppMin, mpiCommWorld, mpiMIN);
+  mpiAllReduce(pPln, ppMax, mpiCommWorld, mpiMAX);
+  bool okSM = eGlob < 1e-12 && dGlob < 1e-12
+              && pdMin == 2 && pdMax == 2 && ppMin == 2 && ppMax == 2;
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  ecart sequentiel = " << eGlob
+         << "   plan/direct = " << dGlob
+         << "   chemins = [" << pdMin << "," << pdMax << "]/["
+         << ppMin << "," << ppMax << "] (2 attendu)"
+         << "   => " << (okSM ? "PASS" : "FAIL") << endl;
+  assert(eGlob < 1e-12);
+  assert(dGlob < 1e-12);
+  assert(pdMin == 2 && pdMax == 2);
+  assert(ppMin == 2 && ppMax == 2);
+}// EOM
+
+// --- SM1 a SM4 : Mesh3 -----------------------------------------------------
+SAMEMESH("SM1 Mesh3 P2 -> P1     ", DTh5,  L5,  P2, P1, Dtransfer3)
+SAMEMESH("SM2 Mesh3 P1 -> P2     ", DTh5,  L5,  P1, P2, Dtransfer3)
+SAMEMESH("SM3 Mesh3 P2 -> P2     ", DTh5,  L5,  P2, P2, Dtransfer3)
+{
+  mesh3 L5z = DTh5z.local;
+  SAMEMESH("SM4 Mesh3 P2 -> P1 ov=0", DTh5z, L5z, P2, P1, Dtransfer3)
+}
+
+// --- SM5 : MeshS ------------------------------------------------------------
+{
+  meshS Sm = square3(ncs, ncs, SLBUMP);
+  DmeshS DSm = distribute(Sm, overlap = ov);
+  meshS LSm = DSm.local;
+  SAMEMESH("SM5 MeshS P2 -> P1     ", DSm, LSm, P2, P1, DtransferS)
+}
+
+// --- SM6 : MeshL ------------------------------------------------------------
+{
+  meshL Sl = segment(ncl, SLWAVE);
+  DmeshL DSl = distribute(Sl, overlap = ov);
+  meshL LSl = DSl.local;
+  SAMEMESH("SM6 MeshL P2 -> P1     ", DSl, LSl, P2, P1, DtransferL)
+}
+
+mpiBarrier(mpiCommWorld);
+if (mpirank == 0)
+  cout << "== jalon 12 : meme maillage distribue, assertions passees ==" << endl;
