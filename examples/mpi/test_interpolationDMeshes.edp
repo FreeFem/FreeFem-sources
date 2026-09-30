@@ -393,10 +393,18 @@ if (mpirank == 0) {
 }
 assert(badPair == 0);
 
-// --- H : auto-fragment exact ----------------------------------------------
-// Pour DTh1 contre DTh1, la boite destination de mon rang est la boite de mon
-// propre maillage local, gonflee : tous mes barycentres y tombent. Le fragment
-// que je m'envoie doit donc etre le maillage local entier, sans tolerance.
+// --- H : auto-fragment = exactement les elements POSSEDES ------------------
+// Depuis le filtre par propriete, le fragment qu'un rang s'envoie a lui-meme ne
+// contient plus son maillage LOCAL (qui comprend le recouvrement) mais seulement
+// ses elements POSSEDES. La boite destination de mon rang est celle de mon propre
+// maillage local gonflee, donc elle contient tous mes barycentres : le fragment
+// vaut donc exactement l'ensemble possede.
+// Deux assertions, ensemble strictement plus fortes que l'ancien encadrement
+// [Loc1.nt, Cov1.nt] :
+//   * borne haute : un fragment ne peut pas depasser le maillage local ;
+//   * somme sur les rangs : les ensembles possedes forment une PARTITION du
+//     maillage global, donc leur total vaut EXACTEMENT Th1.nt -- une egalite,
+//     la ou l'ancien test n'avait qu'un intervalle.
 int[int] sndS(0), rcvS(0), nEnvS(0), nRecS(0);
 overlapRankPairs(DTh1, DTh1, sndS, rcvS);
 transferFragmentCounts(DTh1, DTh1, nEnvS, nRecS);
@@ -405,20 +413,21 @@ int selfSent = -1, selfRecv = -1;
 for (int i = 0; i < sndS.n; i++) if (sndS[i] == mpirank) selfSent = nEnvS[i];
 for (int j = 0; j < rcvS.n; j++) if (rcvS[j] == mpirank) selfRecv = nRecS[j];
 
-// Encadrement et non egalite : la boite destination de mon rang est celle de
-// mon maillage LOCAL gonflee de h, et un element de la couche du cover peut
-// avoir son barycentre au dela. La borne basse reste exacte -- tout element
-// local a son barycentre dans la boite locale -- et garde tout son pouvoir
-// de detection.
+int gSelfSum = 0;
+mpiAllReduce(selfSent, gSelfSum, mpiCommWorld, mpiSUM);
+
 int badSelfFrag = 0;
-if (selfSent < Loc1.nt || selfSent > Cov1.nt) badSelfFrag = 1;
-if (selfRecv < Loc1.nt || selfRecv > Cov1.nt) badSelfFrag = 1;
+if (selfSent < 0 || selfRecv < 0) badSelfFrag = 1;   // la paire (r,r) doit exister
+if (selfSent != selfRecv)         badSelfFrag = 1;   // emis et recus concordent
+if (selfSent > Loc1.nt)           badSelfFrag = 1;   // sous-ensemble du local
+if (gSelfSum != Th1.nt)           badSelfFrag = 1;   // partition du global
 int gBadSelfFrag = 0;
 mpiAllReduce(badSelfFrag, gBadSelfFrag, mpiCommWorld, mpiMAX);
 
 if (mpirank == 0)
   cout << "  [H auto-fragment]      rang 0 : emis " << selfSent
-       << " / recus " << selfRecv << "   dans [" << Loc1.nt << ", " << Cov1.nt << "]"
+       << " / recus " << selfRecv << "   <= local " << Loc1.nt
+       << "   somme = " << gSelfSum << " / global " << Th1.nt
        << "   => " << (gBadSelfFrag == 0 ? "PASS" : "FAIL") << endl;
 assert(gBadSelfFrag == 0);
 
@@ -1147,6 +1156,12 @@ mesh3 L5 = DTh5.local, L6 = DTh6.local;
   WlvS2 uBad = 1;
   WlvD vBad = 0;
   int caught = 0;
+  // Test NEGATIF volontaire : le "Exec error : ... outdated plan" qui suit est
+  // ATTENDU, c'est precisement ce que l'on verifie. Annonce explicitement, sans
+  // quoi un lecteur du journal prend ce message pour un echec de la suite.
+  if (mpirank == 0)
+    cout << "  [V plan perime]        declenchement volontaire : le message "
+         << "'Exec error ... outdated plan' ci-dessous est ATTENDU" << endl;
   try { interpolateD(P, uBad[], vBad[]); }
   catch(...) { caught = 1; }
 
@@ -1807,52 +1822,63 @@ if (mpirank == 0)
 //  JALON 11 : transfert sur maillages surfaciques (MeshS) et curvilignes (MeshL)
 // =======================================================================
 //  Les jalons 1 a 10 sont integralement Mesh3. Or interpolateD est enregistre
-//  pour MeshS et MeshL, et aucun test ne les couvrait -- ni avant ni apres la
-//  refonte par localisateur. Ce jalon comble ce trou AVANT que MeshS/MeshL ne
-//  passent sur le chemin rapide, pour qu'il existe une reference.
+//  pour MeshS et MeshL, et aucun test ne les couvrait. Ce jalon comble ce trou.
 //
-//  ETAT MESURE DU CHEMIN ACTUEL (LocatorTraits<MeshS>::fast == false, donc
-//  buildFragmentMatrix et Mesh::Find)
-//  ---------------------------------------------------------------------
-//  Le chemin lent n'accepte un point que s'il tombe DANS un element source
-//  (inside = 1 dans dataInterpolate). Pour une surface, un point de
-//  destination n'est sur un triangle source que si les deux maillages sont
-//  geometriquement confondus. D'ou :
-//    - plan / segment droit : les deux discretisations partagent le meme
-//      support geometrique, tout point y tombe exactement -> transfert exact ;
-//    - surface COURBE : les deux triangulations different en O(h^2), les
-//      points tombent a cote, et MeshS::Find les rejette -> pres de la moitie
-//      des DDL sont mis a zero. C'est SL3, la limite que la refonte doit lever.
-//    - courbe 1D : MeshL::Find projette au lieu de rejeter, donc aucun DDL
-//      n'est perdu et il ne reste que l'ecart geometrique. SL4 passe deja.
+//  DEUX REGIMES, DEUX SEUILS
+//  -------------------------
+//  Tout depend de la position des points d'interpolation destination par
+//  rapport aux ELEMENTS source, et la codimension change la nature du
+//  probleme : un tetraedre contient un point ou ne le contient pas, alors
+//  qu'un triangle de R^3 n'est jamais traverse par un point qui ne se trouve
+//  pas exactement sur son plan.
+//    * maillages CONFORMES -- les deux discretisations partagent le meme
+//      support geometrique (un plan, une droite). Tout point destination est
+//      exactement sur un element source, a l'arrondi pres. Transfert EXACT,
+//      seuil 1e-10. C'est SL1 et SL2.
+//    * maillages NON CONFORMES sur une variete COURBE -- deux triangulations
+//      d'une meme surface lisse ne decrivent pas la meme surface : chaque
+//      facette est plane et approche la surface a sa facon. L'ecart normal est
+//      en O(kappa h^2) et il est IRREDUCTIBLE. Exiger 1e-10 sur SL3 ou SL4
+//      serait exiger l'impossible ; le seuil est GEOMETRIQUE (1e-2 a ces
+//      finesses). C'est SL3 et SL4.
+//  Les deux tolerances qui rendent le second regime possible -- ecart normal
+//  admis, et glissement tangentiel admis au creux des aretes concaves -- sont
+//  MESUREES par transferPlan, pas reglees a la main : ces tests tournent sans
+//  poser transferTolN ni transferTolT.
 //
-//  CE QU'IL NE FAUT PAS ASSERTER
-//  ----------------------------
-//  Sur une variete courbe, deux discretisations ne decrivent pas la meme
-//  surface : l'ecart est en O(h^2) et il est IRREDUCTIBLE. Exiger 1e-10 sur
-//  SL3 ou SL4 serait exiger l'impossible. La cible de la refonte est
-//  "zero DDL non couvert", pas "erreur nulle" -- l'erreur doit simplement
-//  rester de l'ordre de l'ecart geometrique.
+//  CE QUE CHAQUE CAS ASSERTE
+//  -------------------------
+//  Trois invariants, le meme jeu dans les quatre cas :
+//    * vides == 0     -- aucun DDL destination laisse a zero ;
+//    * partiels == 0  -- chaque DDL est servi par UN seul fragment source, donc
+//                       aucune moyenne entre valeurs concurrentes. C'est
+//                       l'invariant structurel du localisateur : le voir se
+//                       degrader signale un retour a l'attribution multiple ;
+//    * erreur < seuil du regime.
 //
-//  SL1. MeshS plan      : transfert exact attendu.            ASSERTE.
-//  SL2. MeshL segment   : transfert exact attendu.            ASSERTE.
-//  SL3. MeshS courbe    : limite connue du chemin lent.       NON asserte
-//       tant que MeshS n'est pas passe sur le localisateur. Cible ecrite
-//       ci-dessous et activable par -strict-sl 1.
-//  SL4. MeshL courbe    : deja correct.                       ASSERTE, avec
-//       un seuil geometrique (1e-2) et non numerique.
+//  VALEURS DE REFERENCE MESUREES (np = 1, 2, 4, 8, 12 -- identiques a tous
+//  les np, ce qui est la propriete la plus forte du lot)
+//    SL1  8.9e-16     SL2  4.4e-16     SL3  1.8e-03     SL4  7.0e-05
 // ---------------------------------------------------------------------
 
 int ncs      = getARGV("-ncs",   16);
 int ncs2     = getARGV("-ncs2",  23);   // non commensurable avec ncs, cf. nc4
 int ncl      = getARGV("-ncl",   60);
 int ncl2     = getARGV("-ncl2",  89);   // non commensurable avec ncl
-int strictSL = getARGV("-strict-sl", 0);
+// Les seuils geometriques de SL3 / SL4 sont asseres par defaut depuis que les
+// tolerances sont mesurees automatiquement. -strict-sl 0 les rend informatifs,
+// ce qui sert a instruire un ecart sans faire tomber toute la suite.
+int strictSL = getARGV("-strict-sl", 1);
 
 macro SLBUMP() [x, y, 0.3*sin(pi*x)*sin(pi*y)]// EOM
 macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
 
 // --- SL1 : MeshS, meme plan, deux finesses --------------------------------
+//  Regime conforme, donc seuil numerique. Ce cas garde aussi l'autre branche de
+//  la detection : si celle-ci relachait a tort les tolerances sur une paire
+//  conforme, l'erreur remonterait a l'ordre de l'ecart admis -- une tolerance
+//  tangentielle de 1e-2 imposee a la main degrade ce type de paire a ~3e-6.
+//  SL1 a 1e-10 atteste donc que la detection a bien conclu "conforme".
 {
   meshS Sa = square3(ncs, ncs), Sb = square3(ncs2, ncs2);
   DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
@@ -1869,12 +1895,14 @@ macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
   DtransferS Pl = transferPlan(WsA, WsB);
   real[int] st(4); transferCoverage(Pl, st);
   int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nP = int(st[1]); int gP = 0; mpiAllReduce(nP, gP, mpiCommWorld, mpiSUM);
   if (mpirank == 0)
     cout << "  [SL1 MeshS plan     ] chemin " << pth << "   err = " << eg
-         << "   vides = " << gE
-         << "   => " << (eg < 1e-10 && gE == 0 ? "PASS" : "FAIL") << endl;
+         << "   vides = " << gE << "   partiels = " << gP
+         << "   => " << (eg < 1e-10 && gE == 0 && gP == 0 ? "PASS" : "FAIL") << endl;
   assert(eg < 1e-10);
   assert(gE == 0);
+  assert(gP == 0);
 }
 
 // --- SL2 : MeshL, meme segment droit --------------------------------------
@@ -1894,21 +1922,26 @@ macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
   DtransferL Pl = transferPlan(WlA, WlB);
   real[int] st(4); transferCoverage(Pl, st);
   int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nP = int(st[1]); int gP = 0; mpiAllReduce(nP, gP, mpiCommWorld, mpiSUM);
   if (mpirank == 0)
     cout << "  [SL2 MeshL segment  ] chemin " << pth << "   err = " << eg
-         << "   vides = " << gE
-         << "   => " << (eg < 1e-10 && gE == 0 ? "PASS" : "FAIL") << endl;
+         << "   vides = " << gE << "   partiels = " << gP
+         << "   => " << (eg < 1e-10 && gE == 0 && gP == 0 ? "PASS" : "FAIL") << endl;
   assert(eg < 1e-10);
   assert(gE == 0);
+  assert(gP == 0);
 }
 
-// --- SL3 : MeshS courbe -- limite connue du chemin lent -------------------
-//  Etat au moment de l'ecriture : pres de la moitie des DDL rejetes
-//  (274/576 a np=1, 465/887 a np=8) et erreur ~3.9.
-//  CIBLE apres passage de MeshS sur le localisateur : gE == 0, et erreur de
-//  l'ordre de l'ecart geometrique entre les deux triangulations, soit ~1e-2
-//  pour ces finesses -- PAS 1e-10. Basculer strictSL a 1 par defaut ce
-//  jour-la, et supprimer ce commentaire.
+// --- SL3 : MeshS courbe, regime non conforme -------------------------------
+//  Le cas le plus exigeant du lot, et celui qui a motive la refonte. Deux
+//  triangulations de la meme bosse ne coincident nulle part : il faut admettre
+//  un ecart NORMAL (les facettes ne passent pas par les memes points) et un
+//  glissement TANGENTIEL (au creux d'une arete concave, le projete orthogonal
+//  d'un point tombe hors des DEUX facettes voisines -- sans cette seconde
+//  tolerance, 15 DDL sur 730 restaient vides quelle que soit la premiere).
+//  Les deux tolerances sont mesurees par transferPlan ; rien n'est pose ici.
+//  Reference : 1.8e-03, soit exactement l'ecart geometrique entre les deux
+//  triangulations -- irreductible, et identique de np = 1 a np = 12.
 {
   meshS Sa = square3(ncs, ncs, SLBUMP), Sb = square3(ncs2, ncs2, SLBUMP);
   DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
@@ -1925,19 +1958,25 @@ macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
   DtransferS Pl = transferPlan(WsA, WsB);
   real[int] st(4); transferCoverage(Pl, st);
   int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nP = int(st[1]); int gP = 0; mpiAllReduce(nP, gP, mpiCommWorld, mpiSUM);
   int nD = v[].n; int gD = 0; mpiAllReduce(nD, gD, mpiCommWorld, mpiSUM);
   if (mpirank == 0)
     cout << "  [SL3 MeshS courbe   ] chemin " << pth << "   err = " << eg
-         << "   vides = " << gE << "/" << gD
-         << (strictSL ? (eg < 1e-2 && gE == 0 ? "   => PASS" : "   => FAIL")
-                      : "   (limite connue, non assertee)") << endl;
-  if (strictSL) { assert(gE == 0); assert(eg < 1e-2); }
+         << "   vides = " << gE << "/" << gD << "   partiels = " << gP
+         << (strictSL ? (eg < 1e-2 && gE == 0 && gP == 0 ? "   => PASS" : "   => FAIL")
+                      : "   (seuil geometrique non asserte)") << endl;
+  if (strictSL) { assert(gE == 0); assert(gP == 0); assert(eg < 1e-2); }
 }
 
-// --- SL4 : MeshL courbe ---------------------------------------------------
-//  Deja correct : MeshL::Find projette au lieu de rejeter. Le seuil est
-//  GEOMETRIQUE -- deux discretisations d'une meme courbe different en O(h^2),
-//  l'erreur mesuree est de 7.0e-5 et ne peut pas tomber a zero.
+// --- SL4 : MeshL courbe, regime non conforme -------------------------------
+//  Meme regime que SL3, en codimension 2 : chaque segment est une corde qui
+//  approche la courbe a sa facon. Le seuil est GEOMETRIQUE -- l'erreur mesuree
+//  vaut 7.0e-5 et ne peut pas tomber a zero.
+//  Ce cas est un temoin precieux : il passait AVANT la refonte, mais par
+//  accident -- MeshL::Find projetait au lieu de rejeter, et sa tolerance, qui
+//  croit avec la taille d'element, se trouvait juste au-dessus de l'ecart.
+//  Il passe maintenant parce que la tolerance est mesuree. Meme chiffre, mais
+//  plus par chance.
 {
   meshL Sa = segment(ncl, SLWAVE), Sb = segment(ncl2, SLWAVE);
   DmeshL DLa = distribute(Sa, overlap = ov), DLb = distribute(Sb, overlap = ov);
@@ -1954,12 +1993,14 @@ macro SLWAVE() [x, 0.3*sin(pi*x), 0]// EOM
   DtransferL Pl = transferPlan(WlA, WlB);
   real[int] st(4); transferCoverage(Pl, st);
   int nE = int(st[0]); int gE = 0; mpiAllReduce(nE, gE, mpiCommWorld, mpiSUM);
+  int nP = int(st[1]); int gP = 0; mpiAllReduce(nP, gP, mpiCommWorld, mpiSUM);
   int nD = v[].n; int gD = 0; mpiAllReduce(nD, gD, mpiCommWorld, mpiSUM);
   if (mpirank == 0)
     cout << "  [SL4 MeshL courbe   ] chemin " << pth << "   err = " << eg
-         << "   vides = " << gE << "/" << gD
-         << "   => " << (eg < 1e-2 && gE == 0 ? "PASS" : "FAIL") << endl;
+         << "   vides = " << gE << "/" << gD << "   partiels = " << gP
+         << "   => " << (eg < 1e-2 && gE == 0 && gP == 0 ? "PASS" : "FAIL") << endl;
   assert(gE == 0);
+  assert(gP == 0);
   assert(eg < 1e-2);
 }
 
