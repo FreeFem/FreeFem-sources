@@ -133,27 +133,37 @@
 //  cotes dans les deux sens.
 //
 //  ============================================================
-//  DEFAUT CONNU : DESTINATION FORTEMENT GRADUEE, EN DISTRIBUE
+//  HISTORIQUE : LE DEFAUT QUE CE BANC A MIS EN EVIDENCE, ET SA CAUSE
 //  ============================================================
-//  La geometrie 2 -- destination graduee -- echoue cote NATIF, dans les DEUX
-//  sens, alors que macro_ddm reste a l'epsilon machine sur la MEME paire de
-//  maillages. C'est un vrai resultat, pas un artefact du banc :
-//    * a np = 1 le transfert natif est exact (4.4e-15) ; a np = 2 il est faux
-//      de 3.5e-4 sur 12 DDL, a np = 4 de 1.7e-4 sur 33 DDL. Le defaut est donc
-//      lie a la DISTRIBUTION, pas a l'interpolation elle-meme ;
-//    * ce n'est PAS un trou de couverture : transferCoverage rapporte 0 DDL
-//      vide et un poids minimum de 1. En revanche il rapporte beaucoup de DDL
-//      PARTIELS -- 1326 a np = 2, 3252 a np = 4 -- c'est-a-dire servis par
-//      plusieurs fragments source et donc recombines. Les DDL fautifs sont un
-//      sous-ensemble de ceux-la ;
-//    * la geometrie 1, non graduee, passe dans les deux sens.
-//  Signature identique a celle observee sur meshL (voir le fichier jumeau) :
-//  distribution seule, aucun DDL vide, une poignee de DDL recombines qui
-//  sortent faux. La colonne macro_ddm sert de temoin sur le meme decoupage,
-//  ce qui localise le defaut dans transferInterpolate.cpp sans ambiguite.
-//  Le banc se contente de CONSTATER ; le diagnostic fin appartient au source.
-//  Consequence pratique : une execution par defaut se termine sur ECHEC. Le
-//  rapport donne un verdict PAR CAS. Pour travailler sur le reste : -case 1.
+//  Ce banc a servi a diagnostiquer un defaut reel, maintenant corrige. Le
+//  paragraphe est conserve parce qu'il documente ce que la colonne
+//  covPartiels protege -- si elle se remet a compter, c'est ce defaut qui
+//  revient.
+//
+//  CE QUI ETAIT OBSERVE. La geometrie 2 -- destination graduee -- echouait
+//  cote NATIF dans les deux sens (6.9e-4 et 9.1e-4 a np = 4) alors que
+//  macro_ddm restait a l'epsilon machine sur la MEME paire. A np = 1 le
+//  transfert etait exact : le defaut etait donc lie a la DISTRIBUTION. Ce
+//  n'etait pas un trou de couverture -- 0 DDL vide, poids minimum 1 -- mais
+//  covPartiels comptait 3252 DDL a np = 4, c'est-a-dire servis par PLUSIEURS
+//  fragments source et donc recombines par moyenne. Les DDL fautifs en etaient
+//  un sous-ensemble. Signature identique sur meshL (1.9e-5, cas 3).
+//
+//  LA CAUSE. MeshS et MeshL passaient par le chemin generique, qui localise un
+//  point avec Mesh::Find. Or Find rend l'element le plus proche avec des
+//  coordonnees barycentriques CLAMPEES -- la valeur du projete, pas celle du
+//  point -- et decide "dedans / dehors" sur une tolerance ABSOLUE qui croit
+//  avec la taille d'element. Un point situe juste hors d'un fragment etait donc
+//  accepte par ce fragment, qui renvoyait la valeur de son projete ; cette
+//  valeur fausse etait ensuite MOYENNEE avec la bonne, venue du fragment qui
+//  contenait vraiment le point. D'ou l'echelle de l'erreur : proportionnelle a
+//  h_source, ce que le banc confirmait (1.3e-3 a n=12, 6.9e-4 a n=24,
+//  2.0e-4 a n=48).
+//
+//  LA CORRECTION. Un localisateur par grille, avec un test barycentrique
+//  exact et une distance normale separee, qui attribue chaque point a UN seul
+//  element -- celui de distance normale minimale. covPartiels tombe alors a 0
+//  par construction, et il n'y a plus de moyenne du tout.
 //  ============================================================
 //
 //  Usage :
@@ -643,8 +653,10 @@ if (mpirank == 0) {
         cout << "  cas en echec :";
         for (int i = 1; i < NC; i++) if (ran[i] && !okc[i]) cout << " " << i;
         cout << endl;
-        cout << "  (la geometrie 2, destination graduee, est un defaut connu" << endl;
-        cout << "   documente en tete de fichier.)" << endl;
+        cout << "  (aucun echec n'est attendu. Premier reflexe : lire la colonne" << endl;
+        cout << "   covPartiels -- si elle est non nulle, un DDL destination est" << endl;
+        cout << "   servi par plusieurs fragments et donc moyenne ; c'est le" << endl;
+        cout << "   defaut historique decrit en tete de fichier.)" << endl;
     }
     cout << "  np balaye de l'exterieur : une execution par valeur." << endl;
     cout.precision(prec);

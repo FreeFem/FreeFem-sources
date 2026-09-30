@@ -3,20 +3,52 @@
 load "medit"
 load "Element_P3"
 load "PETSc"
+load "mmg"
+
 macro dimension()3// EOM
 include "macro_ddm.idp"
 
+macro FSRC() (1 + x + 2*y + 3*z + sin(3*pi*x)*cos(2*pi*y) + z*z) // EOM
+
+// Maillages raffinés & EF associés
 mesh3 Th1, Th2;
-Th1 = cube(10,10,10);
-Th2 = cube(10,10,10);
+Th1 = cube(15,15,15);
+if (mpirank == 0) {
+    fespace Mh(Th1, P1);
+    Mh met = max(min(((x-0.5)^2+(y-0.5)^2+(z-0.5)^2), 0.2), 2e-3);
+    Th1 = mmg3d(Th1, metric = met[], hgrad = 2);
+    Th2 = mmg3d(Th1, hmax = 0.08);
+}
+broadcast(processor(0), Th1);
+broadcast(processor(0), Th2);
 
 fespace Uh(Th1, P2);
 fespace Vh(Th2, P3);
+
+// Distributed meshes
+Dmesh3 DTh1 = distribute(Th1, keepGlobal = true);
+Dmesh3 DTh2 = distribute(Th2, keepGlobal = true);
+
+fespace Udh(DTh1, P2);
+fespace Vdh(DTh2, P3);
+
+// Same but macro_ddm
+mesh3 ThA = Th1, ThB = Th2;
+DmeshCreate(ThA);
+DmeshCreate(ThB);
+
+fespace VA(ThA, P2);
+fespace VB(ThB, P3);
 
 /*
 medit("Th1", Th1);
 medit("Th2", Th2);
 */
+
+// Référence au global
+Uh ug = FSRC;
+matrix AFF = interpolate(Uh, Uh);
+Uh ugInterp; ugInterp[] = AFF*ug[];
 
 macro InterpMatD(WS, WD, A, colNum)
 {
@@ -25,34 +57,111 @@ macro InterpMatD(WS, WD, A, colNum)
     interpolateMat(plTmp, numTmp, A, colNum);
 } // EOM
 
-Dmesh3 DTh1 = distribute(Th1, keepGlobal = true);
-Dmesh3 DTh2 = distribute(Th2, keepGlobal = true);
+// V0: identical mesh, identical EF, identity matrix, v == u
+if (mpisize == 1){
+    // Vecteur référence
+    mesh3 L1 = DTh1.local;
+    fespace u1(L1,P2);
+    u1 uD = FSRC;
+    VA uA = FSRC;
+    // Native
+    matrix Anative;
+    real[int] colNum;
+    InterpMatD(Udh, Udh, Anative, colNum);
+    Udh uNative;
+    uNative[] = Anative*uD[];
+    // macro_ddm
+    Mat MA, C;
+    MatCreate(ThA, MA, P2);
+    MatInterpolate(ThA, P2, MA, ThA, P2, MA, C);
+    real[int] uC = C*uA[];
+    // Comparison
+    matrix D = Anative - AFF;
+    cout << "Norm of the matrix difference (Anative - AFF): " << D.linfty << endl;
+    real[int] du = ugInterp[] - ug[];
+    cout << "Norm of the vector differences (AFF - u original): " << du.linfty << endl;
+    real[int] dv = uNative[] - ugInterp[];
+    cout << "Norm of the vector differences (Anative - AFF): " << dv.linfty << endl;
+    real[int] dA = uNative[] - uC;
+    cout << "Norm of the vector differences (Anative - macro_ddm): " << dA.linfty << endl;
+    real[int] dM = ugInterp[] - uC;
+    cout << "Norm of the vector differences (AFF - macro_ddm): " << dM.linfty << endl;
+}
+/*
 
-fespace Udh(DTh1, P2);
-fespace Vdh(DTh2, P3);
+// Vecteur référence
+Uh u = FSRC;
+mesh3 L1 = DTh1.local;
+fespace u1(L1,P2);
+u1 uD = FSRC;
+VA uA = FSRC;
+// FreeFem
+matrix AFF = interpolate(Uh, Uh);
+Uh uInterp;
+uInterp[] = AFF*u[];
+// Native
+matrix Anative;
+real[int] colNum;
+InterpMatD(Udh, Udh, Anative, colNum);
+Udh uNative;
+uNative[] = Anative*uD[];
+// macro_ddm
+Mat MA, C;
+MatCreate(ThA, MA, P2);
+MatInterpolate(ThA, P2, MA, ThA, P2, MA, C);
+real[int] uC = C*uA[];
+// Comparison
+matrix D = Anative - AFF;
+cout << "Norm of the matrix difference (Anative - AFF): " << D.linfty << endl;
+real[int] du = uInterp[] - u[];
+cout << "Norm of the vector differences (AFF - u original): " << du.linfty << endl;
+real[int] dv = uNative[] - uInterp[];
+cout << "Norm of the vector differences (Anative - AFF): " << dv.linfty << endl;
+real[int] dA = uNative[] - uC;
+cout << "Norm of the vector differences (Anative - macro_ddm): " << dA.linfty << endl;
+real[int] dM = uInterp[] - uC;
+cout << "Norm of the vector differences (AFF - macro_ddm): " << dM.linfty << endl;
 
-mesh3 ThA = Th1, ThB = Th2;
-DmeshCreate(ThA);
-DmeshCreate(ThB);
+
+/*
+matrix B;
+real t0 = mpiWtime();
+    B = interpolate(Vh, Uh);
+real tS = (mpiWtime() - t0);
+
+Uh ug = FSRC;
+Vh vg;  vg[] = B * ug[];      // la reference : l'operateur sequentiel applique
+
+mesh3 LD = DTh2.local;
+fespace Vl(LD, P3);
+Vl ra = vg;
+
+fespace VB(ThB, P3);
 
 int nrep = 5;
 
 matrix A;
 real[int] colNum;
 mpiBarrier(mpiCommWorld);
-real t0 = mpiWtime();
+t0 = mpiWtime();
 for (int k = 0; k < nrep; k++){
     InterpMatD(Udh, Vdh, A, colNum);
 }
 real tD = (mpiWtime() - t0)/nrep;
 
-matrix B;
-mpiBarrier(mpiCommWorld);
-t0 = mpiWtime();
-for (int k = 0; k < nrep; k++){
-    B = interpolate(Vh, Uh);
-}
-real tS = (mpiWtime() - t0)/nrep;
+int[int] numS = Udh.numbering, l2gS = Udh.loc2glob;
+real[int] mp(Udh.ndofglobal), mpG(Udh.ndofglobal);
+mp = -1;
+for (int d = 0; d < numS.n; d++) mp[numS[d]] = l2gS[d];
+mpiAllReduce(mp, mpG, mpiCommWorld, mpiMAX);
+
+real[int] uCol(colNum.n);
+for (int k = 0; k < colNum.n; k++) uCol[k] = ug[][mpG[colNum[k]]];
+real[int] va = A * uCol;
+
+real eA = 0, nA = 0;
+for (int i = 0; i < va.n; i++) { eA = max(eA, abs(va[i] - ra[][i])); nA = max(nA, abs(ra[][i])); }
+
 
 Mat MA, MB, C;
 MatCreate(ThA, MA, P2);
@@ -65,22 +174,24 @@ for (int k = 0; k < nrep; k++){
 }
 real tM = (mpiWtime() - t0)/nrep;
 
+fespace VA(ThA, P2);
+VA ua = FSRC;
+real[int] vc = C * ua[];
+VB rc = vg;
+real eC = 0;
+for (int i = 0; i < vc.n; i++) eC = max(eC, abs(vc[i] - rc[][i]));
+
+real eAG, eCG, nAG;
+mpiAllReduce(eA, eAG, mpiCommWorld, mpiMAX);
+mpiAllReduce(eC, eCG, mpiCommWorld, mpiMAX);
+mpiAllReduce(nA, nAG, mpiCommWorld, mpiMAX);
+if (mpirank == 0) {
+  cout << "Oracle : |ref|inf   = " << nAG << endl;
+  cout << "Oracle : ecart natif     = " << eAG << endl;
+  cout << "Oracle : ecart macro_ddm = " << eCG << endl;
+}
+
 cout << "Temps total (initialisation, plan, interpolation) modele distribue: " << tD*1000 << "ms" << endl;
 cout << "Temps total (initialisation, plan, interpolation) modele FreeFem: " << tS*1000 << "ms" << endl;
 cout << "Temps total (initialisation, plan, interpolation) macro_ddm: " << tM*1000 << "ms" << endl;
-
-
-matrix D = A-B;
-real inftyNorm = D.linfty;
-real frobNorm = D.l2;
-real l1Norm = D.l1;
-
-cout << "Differentes normes de la differences entre matrices: " << endl;
-cout << "Infinity norm: " << inftyNorm << endl;
-cout << "Frobenius norm: " << frobNorm << endl;
-cout << "L1 norm: " << l1Norm << endl;
-
-cout << "Differentes normes de la differences entre matrices rapportees au nombre de nnz (si approprie): " << endl;
-cout << "Infinity norm: " << inftyNorm << endl;
-cout << "Frobenius norm: " << frobNorm/sqrt(D.nnz) << endl;
-cout << "L1 norm: " << l1Norm/D.nnz << endl;
+*/

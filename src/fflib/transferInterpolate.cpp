@@ -12,6 +12,8 @@ static const int TAG_XFER_DOF = 3002;
 
 static const double COVER_EMPTY_TOL = 1e-12;
 static const double COVER_ONE_TOL = 1e-9;
+static double transferTolN = 0.0;
+static double transferTolT = 0.0;
 
 template<class Mesh>
 double localMaxEdgeLength(const Mesh& Th) {
@@ -104,17 +106,12 @@ static KN<double> rowSums(const MatriceMorse<double>* M, int nrow) {
     return r;
 }
 
-template<class Mesh> struct LocatorTraits { static const bool fast = false; };
-template<> struct LocatorTraits<Mesh3> { static const bool fast = true; };
+// Localisation in simplex of dimension dHat
+template<int dHat> struct LocateByDim;
 
-template<class Mesh>
-struct ElementLocator {
-    static bool refCoords(const typename Mesh::Element&, const typename Mesh::Rd&, typename Mesh::Element::RdHat&, double, double&)
-    { ffassert(0); return false; }
-};
-
-template<> struct ElementLocator<Mesh3> {
-    static bool refCoords(const Mesh3::Element& K, const R3& x, R3& xhat, double eps, double& dist) {
+template<> struct LocateByDim<3> {
+    template<class E>
+    static bool refCoords(const E& K, const R3& x, R3& xhat, double epsT, double, double& dist2) {
         const R3 &A = K[0], &B = K[1], &C = K[2], &D = K[3];
         const double detK = 6.0*K.mesure();
         double l[4];
@@ -122,17 +119,68 @@ template<> struct ElementLocator<Mesh3> {
         l[2] = det(A, B, x, D) / detK;
         l[3] = det(A, B, C, x) / detK;
         l[0] = 1.0 - l[1] - l[2] - l[3];
-        dist = 0.0;
-        for (int i = 0; i < 4; ++i) if (l[i] < -eps) return false;
+        dist2 = 0.0;
+        for (int i = 0; i < 4; ++i) if (l[i] < -epsT) return false;
         xhat = R3(l[1], l[2], l[3]);
         return true;
     }
+};
+
+template<> struct LocateByDim<2> {
+    template<class E>
+    static bool refCoords(const E& K, const R3& x, R2& xhat, double epsT, double epsN, double& dist2) {
+        const R3 &A = K[0], &B = K[1], &C = K[2];
+        const R3 AB(A, B), AC(A, C), AP(A, x);
+        const R3 N = AB^AC;
+        const double N2 = (N, N);
+        if (!(N2>0)) return false; // triangle dégénéré
+        const double pn = (AP, N);
+        if (pn*pn > epsN*epsN*N2) return false;
+        dist2 = pn*pn/N2;
+        double l[3];
+        l[1] = det(AP, AC, N) / N2;
+        l[2] = det(AB, AP, N) / N2;
+        l[0] = 1.0 - l[1] - l[2];
+        for (int i = 0; i < 3; ++i) if (l[i] < -epsT) return false;
+        xhat = R2(l[1], l[2]);
+        return true;
+    }
+};
+
+template<> struct LocateByDim<1> {          // EdgeL dans R^3
+    template<class E>
+    static bool refCoords(const E& K, const R3& x, R1& xhat,
+                          double epsT, double epsN, double& dist2) {
+        const R3 &A = K[0], &B = K[1];
+        const R3 AB(A, B), AP(A, x);
+        const double ab2 = (AB, AB);
+        if (!(ab2 > 0)) return false; //segment dégénéré
+        const double l1  = (AP, AB) / ab2;
+        if (l1 < -epsT || l1 > 1.0 + epsT) return false;
+        const R3 Pj = A + l1*AB;
+        dist2 = R3(Pj, x).norme2();                   // distance a la DROITE
+        if (dist2 > epsN*epsN) return false;
+        xhat = R1(l1);
+        return true;
+    }
+};
+
+template<class Mesh>
+struct ElementLocator {
+    typedef typename Mesh::Element Element;
+    typedef typename Mesh::Rd Rd;
+    typedef typename Element::RdHat RdHat;
+    static bool refCoords(const Element& K, const Rd& x, RdHat& xhat, double epsT, double epsN, double& dist2)
+    { return LocateByDim<RdHat::d>::refCoords(K, x, xhat, epsT, epsN, dist2); }
 };
 
 template<class Mesh>
 struct FragLocator {
     double org[3], invh[3];
     int    nc[3];
+    double epsT = 0.0;
+    double epsN = 0.0;
+    double hCell = 0.0;
     std::vector<int> cellStart;         // nCells+1, CSR
     std::vector<int> fragOf, elemOf;
     const std::vector<Mesh*>* frags = nullptr;
@@ -145,6 +193,7 @@ struct FragLocator {
                 const double c = K[i][d];
                 lo[d] = std::min(lo[d], c); hi[d] = std::max(hi[d], c);
             }
+        for (int d = 0; d < 3; ++d) { lo[d] -= epsN; hi[d] += epsN; }
         for (int d = 0; d < 3; ++d) {
             a[d] = (int)((lo[d] - org[d]) * invh[d]);
             b[d] = (int)((hi[d] - org[d]) * invh[d]);
@@ -155,13 +204,13 @@ struct FragLocator {
     }
 
 
-    void build(const std::vector<Mesh*>& F);
+    void build(const std::vector<Mesh*>& F, double epsNRequested = 0.0, double epsTRequested = 0.0, double epsNFracOfH = 0.0);
     bool locate(const typename Mesh::Rd& x, int& j, int& k,
-                typename Mesh::Element::RdHat& xhat) const;
+                typename Mesh::Element::RdHat& xhat, double* d2out = nullptr) const;
 };
 
 template<class Mesh>
-void FragLocator<Mesh>::build(const std::vector<Mesh*>& F) {
+void FragLocator<Mesh>::build(const std::vector<Mesh*>& F, double epsNRequested, double epsTRequested, double epsNFracOfH) {
     frags = &F;
     cellStart.clear(); fragOf.clear(); elemOf.clear();
 
@@ -179,14 +228,40 @@ void FragLocator<Mesh>::build(const std::vector<Mesh*>& F) {
     }
     if (Ntot == 0) { nc[0]=nc[1]=nc[2]=0; cellStart.assign(1,0); return; }
 
-    // 2. pas de grille : viser #cellules ~ Ntot
-    double vol = 1.0;
-    for (int d = 0; d < 3; ++d) vol *= std::max(hi[d]-lo[d], 1e-30);
-    const double h = std::pow(vol / (double)Ntot, 1.0/3.0);
+    double ext[3]; int nActive = 0; double prodExt = 1.0, L2 = 0.0;
     for (int d = 0; d < 3; ++d) {
-        org[d]  = lo[d];
-        nc[d]   = std::max(1, std::min(512, (int)((hi[d]-lo[d]) / h) + 1));
-        invh[d] = nc[d] / std::max(hi[d]-lo[d], 1e-30);
+        ext[d] = std::max(0.0, hi[d] - lo[d]);
+        L2 += ext[d]*ext[d];
+        if (ext[d] > 0) { ++nActive; prodExt *= ext[d]; }
+    }
+    epsN = std::max(epsNRequested, 1e-12*std::sqrt(L2));
+    epsT = std::max(epsTRequested, 1e-10);
+
+    double mesTot = 0.0;
+    for (size_t j = 0; j < F.size(); ++j) {
+        if (!F[j]) continue;
+        for (int k = 0; k < F[j]->nt; ++k) mesTot += std::abs((*F[j])[k].mesure());
+    }
+
+    const int dH = Mesh::Element::RdHat::d;
+    double h = (mesTot > 0) ? std::pow(mesTot/(double)Ntot, 1.0/dH) : 0.0;
+
+    const double nCellsMax = 4.0*(double)Ntot;
+    if (nActive > 0) {
+        const double hMin = std::pow(prodExt/nCellsMax, 1.0/nActive);
+        if (!(h > hMin)) h = hMin;
+    }
+    if (!(h>0)) h = 1.0;
+    hCell = h;
+    if (epsNFracOfH > 0) epsN = std::max(epsN, epsNFracOfH*h);
+
+    for (int d = 0; d < 3; ++d) {
+        org[d] = lo[d];
+        if (ext[d] > 0) {
+            const double t = ext[d]/h + 1.0;
+            nc[d]   = (t > 1e7) ? 10000000 : std::max(1, (int)t);
+            invh[d] = nc[d]/ext[d];
+        } else { nc[d] = 1; invh[d] = 0.0; }      // cf. 2.5
     }
     const long nCells = (long)nc[0]*nc[1]*nc[2];
 
@@ -215,29 +290,56 @@ void FragLocator<Mesh>::build(const std::vector<Mesh*>& F) {
     // la passe 2 a decale cellStart : le remettre en place
     for (long c = nCells; c > 0; --c) cellStart[c] = cellStart[c-1];
     cellStart[0] = 0;
+
+    if (verbosity > 5) {
+        const long nCellsTot = (long)nc[0]*nc[1]*nc[2];
+        long nOcc = 0, mx = 0;
+        for (long c = 0; c < nCellsTot; ++c) {
+            const long e = cellStart[c+1] - cellStart[c];
+            if (e > 0) { ++nOcc; mx = std::max(mx, e); }
+        }
+        cout << " -- FragLocator: dHat " << dH << " nt " << Ntot << " h " << hCell
+            << " nc " << nc[0] << "x" << nc[1] << "x" << nc[2]
+            << " cellules " << nCellsTot << " occupees " << nOcc
+            << " balayage moyen " << (double)fragOf.size()/std::max(1L,nOcc)
+            << " max " << mx << " epsN " << epsN << endl;
+    }
+
+
 }
 
 template<class Mesh>
 bool FragLocator<Mesh>::locate(const typename Mesh::Rd& x, int& j, int& k,
-                               typename Mesh::Element::RdHat& xhat) const
+                               typename Mesh::Element::RdHat& xhat, double* d2out) const
 {
+    typedef typename Mesh::Element::RdHat RdHat;
     if (cellStart.size() <= 1) return false;
     int c[3];
     for (int d = 0; d < 3; ++d) {
-        c[d] = (int)((x[d] - org[d]) * invh[d]);
+        c[d] = (invh[d] > 0) ? (int)((x[d] - org[d]) * invh[d]) : 0;
         if (c[d] < 0) c[d] = 0;
         else if (c[d] >= nc[d]) c[d] = nc[d] - 1;
     }
     const long cc = (long)c[0] + nc[0]*((long)c[1] + nc[1]*(long)c[2]);
-    double dist;
+
+    int    jb = -1, kb = -1;
+    double d2b = 1e300;                 // sentinelle : un NaN ne peut jamais gagner
+    RdHat  xb;
     for (int q = cellStart[cc]; q < cellStart[cc+1]; ++q) {
         const int jj = fragOf[q], kk = elemOf[q];
-        if (ElementLocator<Mesh>::refCoords((*(*frags)[jj])[kk], x, xhat, 1e-10, dist)) {
-            j = jj; k = kk; return true;
-        }
+        RdHat  xh;
+        double d2;
+        if (!ElementLocator<Mesh>::refCoords((*(*frags)[jj])[kk], x, xh, epsT, epsN, d2))
+            continue;
+        if (d2 < d2b) { jb = jj; kb = kk; d2b = d2; xb = xh; }
+        if (d2 <= 0.0) break;           // optimal : aucun candidat ne peut faire mieux
     }
-    return false;
+    if (jb < 0) return false;
+    j = jb; k = kb; xhat = xb;
+    if (d2out) *d2out = d2b;
+    return true;
 }
+
 
 template<class Mesh>
 static bool allDstVerticesInside(const GFESpace<Mesh>& dstVh, const FragLocator<Mesh>& L) {
@@ -299,7 +401,7 @@ static Mesh* buildFragmentFor(const Mesh& Loc, const BBox& target, KN<int>& n2o,
   Mesh* frag = truncmesh(Loc, 1, (int*)mask, false, 9999, 1e-7, 1L, true, false);
   ffassert(frag && frag->nt > 0);
 
-  frag->BuildGTree();
+  //frag->BuildGTree();
   n2o = n2oFromSplit(Loc, *frag, mask);
   return frag;
 }
@@ -548,13 +650,21 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
         for (int k = 0; k < srcGeom->nt; ++k) cover2local[k] = k;
     }
 
+    KN<int> usable(cover2local);                 // copie : cover2local reste requis plus bas
+    const bool haveOwn = (Dsrc.CoverMesh && Dsrc.coverPartition.n == srcGeom->nt);
+    if (haveOwn) {
+        const int me = (int)mpirank;
+        for (int k = 0; k < srcGeom->nt; ++k)
+            if (Dsrc.coverPartition[k] != me) usable[k] = -1;
+    }
+
     if (sentCounts) sentCounts->resize(sendToRanks.n);
 
     std::vector<Mesh1*> fragOut(sendToRanks.n, nullptr);
     std::vector<KN<double> > subOut(sendToRanks.n);
     for (int i = 0; i < sendToRanks.n; ++i) {
         KN<int> n2oCover;
-        fragOut[i] = buildFragmentFor(*srcGeom, allDst[sendToRanks[i]], n2oCover, &cover2local);
+        fragOut[i] = buildFragmentFor(*srcGeom, allDst[sendToRanks[i]], n2oCover, &usable);
         if (sentCounts) (*sentCounts)[i] = fragOut[i] ? fragOut[i]->nt : 0;
         if (fragOut[i]) {
             KN<int> n2oLocal(n2oCover.n);
@@ -586,30 +696,6 @@ struct SearchMethodGuard {
     SearchMethodGuard() : saved(searchMethod) { searchMethod = 0; }
     ~SearchMethodGuard() { searchMethod = saved; }
 };
-
-template<class Mesh>
-static MatriceMorse<double>* buildFragmentMatrix(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& fragVh, const int* data) {
-    return buildInterpolationMatrixT<GFESpace<Mesh>, GFESpace<Mesh> >(dstVh, fragVh, (int*)data);
-}
-
-static FragOp* compactFragmentMatrix(MatriceMorse<double>* M)
-{
-    M->COO();
-    FragOp* F = new FragOp;
-    F->nrow = M->n; F->ncol = M->m;
-    const size_t nz = M->nnz;
-    F->ii.resize(nz); F->jj.resize(nz); F->aij.resize(nz);
-    for (long k = 0; k < long(nz); ++k) {
-        F->ii[k] = M->i[k]; F->jj[k] = M->j[k]; F->aij[k] = M->aij[k];
-    }
-    return F;
-}
-
-static void accumulateCover(const MatriceMorse<double>* M, const KN<double>& mask, KN<double>& cover) {
-    for (size_t k = 0; k < M->nnz; ++k) {
-        cover[M->i[k]] += M->aij[k]*mask[M->j[k]];
-    }
-}
 
 template<class R>
 static void applyPlainOp(const FragOp& F, const KN<R>& u, KN<R>& dstU){
@@ -650,7 +736,7 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
                                    const std::vector<KN<double> >& dofIn,
                                    const int* data,
                                    std::vector<FragOp*>& Mout, std::vector<int>& ndFrag,
-                                   KN<double>& cover, std::true_type, const FragLocator<Mesh>* preBuilt = nullptr)
+                                   KN<double>& cover, double epsNRequested = 0.0, double epsTRequested = 0.0, const FragLocator<Mesh>* preBuilt = nullptr)
 {
     typedef typename Mesh::Element          Element;
     typedef typename Element::RdHat         RdHat;
@@ -665,7 +751,7 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
     const GTypeOfFE<Mesh>* tfeSrc = srcVh.TFE[0];
 
     FragLocator<Mesh> Lown;
-    if (!preBuilt) Lown.build(frags);
+    if (!preBuilt) Lown.build(frags, epsNRequested, epsTRequested);
     const FragLocator<Mesh>& L = preBuilt ? *preBuilt : Lown;
 
     std::vector<GFESpace<Mesh>*> fragVh(nR, nullptr);
@@ -780,30 +866,56 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
 }
 
 template<class Mesh>
-static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<Mesh>& srcVh,
-                                   const std::vector<Mesh*>& frags,
-                                   const std::vector<KN<double> >& dofIn,
-                                   const int* data,
-                                   std::vector<FragOp*>& Mout, std::vector<int>& ndFrag,
-                                   KN<double>& cover, std::false_type, const FragLocator<Mesh>* = nullptr)
+static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh*>& frags,
+                             pcommworld comm, double& tolN, double& tolT)
 {
-    const int nR = (int)frags.size();
-    Mout.assign(nR, nullptr);
-    ndFrag.assign(nR, 0);
-    cover.resize(dstVh.NbOfDF); cover = 0.0;
-
-    SearchMethodGuard sg;
-    for (int j = 0; j < nR; ++j) {
-        if (!frags[j]) continue;
-        GFESpace<Mesh> fragVh(*frags[j], *srcVh.TFE[0]);
-        MatriceMorse<double>* Mj = buildFragmentMatrix(dstVh, fragVh, data);
-        ndFrag[j] = fragVh.NbOfDF;
-        accumulateCover(Mj, dofIn[j] , cover);
-        Mout[j] = compactFragmentMatrix(Mj);
-        delete Mj;
+    double dMax = 0.0, rel = 0.0, hRef = 0.0;
+    long   nOK = 0;
+    {
+        FragLocator<Mesh> L;
+        L.build(frags, 0.0, 0.0, 0.25);      // epsN = h/4, epsT au plancher
+        hRef = L.hCell;
+        if (hRef > 0) {
+            const Mesh& Th = dstVh.Th;
+            typename Mesh::Element::RdHat xh;
+            int j = -1, k = -1;
+            for (int iv = 0; iv < Th.nv; ++iv) {
+                double d2 = 0.0;
+                if (L.locate(Th(iv), j, k, xh, &d2)) { ++nOK; dMax = std::max(dMax, std::sqrt(d2)); }
+            }
+            rel = dMax/hRef;
+        }
     }
-}
 
+    double loc[3] = { dMax, rel, hRef }, glo[3] = { loc[0], loc[1], loc[2] };
+    long   lc = nOK, gc = nOK;
+    #ifdef PARALLELE
+    if (mpisize > 1) {
+        MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+        MPI_Allreduce(loc, glo, 3, MPI_DOUBLE, MPI_MAX, cw);
+        MPI_Allreduce(&lc, &gc, 1, MPI_LONG, MPI_SUM, cw);
+    }
+    #endif
+    hRef = glo[2];                            // hRef GLOBAL : la decision doit etre
+    if (!(hRef > 0)) return false;    
+
+    if (gc == 0) {                            // aucun echantillon : indecidable
+        if (verbosity > 0 && mpirank == 0)
+            cerr << "Warning: transferPlan: tolerances non mesurables (aucun point"
+                    " destination interieur a la source) ; tolN/tolT inchangees." << endl;
+        return false;
+    }
+    const double dg = glo[0]; rel = glo[1];
+    if (dg <= 1e-10*hRef) return true;        // conforme : les planchers de build() suffisent
+
+    tolN = std::max(tolN, std::pow(2.0, std::ceil(std::log2(4.0*dg))));
+    tolT = std::max(tolT, std::pow(2.0, std::ceil(std::log2(32.0*rel*rel))));
+    if (verbosity > 0 && mpirank == 0)
+        cout << " -- transferPlan: ecart geometrique " << dg << " (h " << hRef
+             << ", relatif " << rel << ", " << gc << " echantillons)"
+             << " -> tolN " << tolN << " tolT " << tolT << endl;
+    return true;
+}
 
 
 template<class Mesh>
@@ -825,20 +937,39 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     KN<int> data = dataInterpolate(dstVh.N);
     SearchMethodGuard sg;
 
+    double tolN = std::max(0.0, transferTolN);
+    double tolT = std::max(0.0, transferTolT);
+    #ifdef PARALLELE
+    if (Dsrc.comm || mpisize > 1) {
+        MPI_Comm cw = Dsrc.comm ? *(MPI_Comm*)Dsrc.comm : MPI_COMM_WORLD;
+        double t[2] = {tolN, tolT}, g[2];
+        MPI_Allreduce(&t, g, 2, MPI_DOUBLE, MPI_MAX, cw);
+        tolN = g[0];
+        tolT = g[1];
+    }
+    #endif
+
+    const bool autoTol = (tolN <= 0.0 && tolT <= 0.0);
+    if (autoTol) {
+        std::vector<Mesh*> oneT(1, const_cast<Mesh*>(&srcVh.Th));
+        detectTolerances(dstVh, oneT, Dsrc.comm, tolN, tolT);
+    }
+
     const int nproc = mpisize > 0 ? (int)mpisize : 1;
     if (nproc == 1) {
         P->chi = interpolatePoU(Dsrc, srcVh);
-        P->cover.resize(P->nDstDof); P->cover = 0.0;
-
-        MatriceMorse<double>* M0 = buildFragmentMatrix(dstVh, srcVh, data);
-        // cover = M0*chi
-        for (size_t k = 0; k < M0->nnz; ++k){
-            P->cover[M0->i[k]] += M0->aij[k]*P->chi[M0->j[k]];
+        std::vector<Mesh*> one1(1, const_cast<Mesh*>(&srcVh.Th));
+        std::vector<KN<double>> mask1(1);
+        mask1[0].resize(srcVh.NbOfDF); mask1[0] = P->chi;
+        buildFragmentOperators(dstVh, srcVh, one1, mask1, data, P->M, P->ndFrag, P->cover, tolN, tolT);
+        if (P->M.empty())  P->M.assign(1, (FragOp*)nullptr);
+        if (!P->M[0]) {
+            FragOp* F0 = new FragOp;
+            F0->nrow = P->nDstDof;
+            F0->ncol = srcVh.NbOfDF;
+            P->M[0] = F0;
         }
         reportCoverage(coverageOf(P->cover), nullptr, "interpolateD");
-        P->M.assign(1, compactFragmentMatrix(M0));
-        delete M0;
-
         P->path = XFER_SINGLE_RANK;
         return P;        
     }
@@ -850,15 +981,15 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     bool haveLv  = false;
     int  localCand = 0;
 
+    const bool codim = ((int)Mesh::Element::RdHat::d < (int)Mesh::Rd::d);
     if (boxContains(bs, bd)) {
-        if (LocatorTraits<Mesh>::fast) {
-            Lv.build(one); haveLv = true;
-            localCand = (dstVh.TFE[0]->ndfonVertex == 0
-                         || allDstVerticesInside(dstVh, Lv)) ? 1 : 0;
-        } else {
-            localCand = 1;
-        }
+        Lv.build(one, tolN, tolT); haveLv = true;
+        bool cand;
+        if (!codim && dstVh.TFE[0]->ndfonVertex == 0) cand = true;   // volume, aucun DDL sommet
+        else cand = allDstVerticesInside(dstVh, Lv);
+        localCand = cand ? 1 : 0;
     }
+
 
     int globalCand = localCand;
     #ifdef PARALLELE
@@ -876,8 +1007,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         mask[0].resize(srcVh.NbOfDF); mask[0] = 1.0;
         buildFragmentOperators(dstVh, srcVh, one, mask, data,
                                Mtry, ndTry, coverTry,
-                               std::integral_constant<bool, LocatorTraits<Mesh>::fast>(),
-                               haveLv ? &Lv : nullptr);
+                               tolN, tolT, haveLv ? &Lv : nullptr);
         const int localOK = coversAll(coverageOf(coverTry)) ? 1 : 0;
         globalOK = localOK;
         #ifdef PARALLELE
@@ -906,10 +1036,12 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
                      [](int, const Mesh&, const KN<double>&) {}, 
                      nullptr, nullptr, &P->inj, &keepFrags, &keepDof);
 
+
+    if (autoTol) detectTolerances(dstVh, keepFrags, Dsrc.comm, tolN, tolT);
     try {
         buildFragmentOperators(dstVh, srcVh, keepFrags, keepDof, data,
                                P->M, P->ndFrag, P->cover,
-                               std::integral_constant<bool, LocatorTraits<Mesh>::fast>());
+                               tolN, tolT);
     }
     catch (...) {
         for (size_t j = 0; j < keepFrags.size(); ++j)
@@ -1132,22 +1264,25 @@ long transferP1(const DistributedMesh<Mesh>** const & Dsrc, KN<double>* const & 
 }
 
 template<class Mesh, class R>
+static int interpolateFE(v_dfes<Mesh>* pSrc, const GFESpace<Mesh>& srcVh, const KN<R>& uSrc, v_dfes<Mesh>* pDst, const GFESpace<Mesh>& dstVh, KN<R>& uDst){
+    ffassert(pSrc && pDst && pSrc->DTh && pDst->DTh);
+    ffassert(pSrc->DTh->comm == pDst->DTh->comm);
+    ffassert(uSrc.n == srcVh.NbOfDF && uDst.n == dstVh.NbOfDF);
+    return interpolateDistributed(*pSrc->DTh, srcVh, uSrc, *pDst->DTh, dstVh, uDst);
+}
+
+template<class Mesh, class R>
 long interpolateD(v_dfes<Mesh>** const & ppSrc, KN<R>* const & uSrc,
                   v_dfes<Mesh>** const & ppDst, KN<R>* const & uDst)
 {
     throwassert(ppSrc && *ppSrc && ppDst && *ppDst && uSrc && uDst);
     v_dfes<Mesh>* pSrc = *ppSrc;
     v_dfes<Mesh>* pDst = *ppDst;
-    throwassert(pSrc->DTh && pDst->DTh);
-    ffassert(pSrc->DTh->comm == pDst->DTh->comm);   // meme limite que detectDistributionMode
 
     const GFESpace<Mesh>& srcVh = **pSrc;           // operator FESpace*() : lgfem.hpp:427
     const GFESpace<Mesh>& dstVh = **pDst;
 
-    ffassert(uSrc->n == srcVh.NbOfDF);
-    ffassert(uDst->n == dstVh.NbOfDF);
-
-    int xfer = interpolateDistributed(*pSrc->DTh, srcVh, *uSrc, *pDst->DTh, dstVh, *uDst);
+    int xfer = interpolateFE(pSrc, srcVh, *uSrc, pDst, dstVh, *uDst);
     return (long)xfer;
 }
 
@@ -1235,8 +1370,17 @@ long interpolateMat(const TransferPlan<Mesh>** const & ppP, KN<long>* const& src
     return (long)P.path;
 }
 
+static void registerTransferGlobals() {
+        static bool done = false;
+        if (done) return;
+        done = true;
+        Global.New("transferTolN", CPValue<double>(transferTolN));
+        Global.New("transferTolT", CPValue<double>(transferTolT));
+    }
+
 template<class Mesh>
 void registerTransferInterpolateOps() {
+    registerTransferGlobals();
     typedef const DistributedMesh<Mesh>** DMP;
     Global.Add("overlapRankPairs", "(",
         new OneOperator4_<long, DMP, DMP, KN<long>*, KN<long>*>(overlapRankPairs<Mesh>));
