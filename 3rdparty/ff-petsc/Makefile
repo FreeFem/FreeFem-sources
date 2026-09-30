@@ -140,7 +140,7 @@ COMMON_FLAGS += --with-shared-libraries=0 --with-mpiexec='/C/Program\ Files/Micr
 PETSC_CXXFLAGS := -fno-stack-protector -Wno-format -Wno-format-extra-args
 ifneq ($(FC),)
 ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
-PETSC_DOWNLOAD += --download-mumps=https://joliv.et/freefem/pkg/MUMPS_5.9.1-p1.tar.gz
+PETSC_DOWNLOAD += --download-mumps=https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/MUMPS_5.9.1-p1.tar.gz
 endif
 endif
 ifeq ($(FF_generic_petsc), yes)
