@@ -1391,6 +1391,53 @@ long interpolateMat(const TransferPlan<Mesh>** const & ppP, KN<long>* const& src
     return (long)P.path;
 }
 
+template<class Mesh>
+static bool sameDistributedSpace(const v_dfes<Mesh>* a, const GFESpace<Mesh>& Va, const v_dfes<Mesh>* b, const GFESpace<Mesh>& Vb) {
+    if (a==b) return true;
+    return (a->DTh && a->DTh == b->DTh && a->nbcperiodic == 0 && b->nbcperiodic == 0 && Va.TFE.N() == 1 && Vb.TFE.N() == 1 && Va.TFE[0] == Vb.TFE[0]);
+}
+
+template<class Mesh, class R>
+static std::pair<FEbase<R, v_dfes<Mesh>>*, int>
+setFEDistributed(const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& dst, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
+    if (dst.first == src.first) return dst;
+
+    v_dfes<Mesh>* pS = *src.first->pVh; v_dfes<Mesh>* pD = *dst.first->pVh;
+    ffassert(pS && pS->DTh);
+    ffassert(pD && pD->DTh);
+
+    if (pS->N != 1 || pD->N != 1) ExecError("u = v: only scalar distributed FE functions (use interpolateD per component)");
+
+    KN<R>* xs = src.first->x();
+    if (!xs) {
+        const GFESpace<Mesh>* V = src.first->newVh();
+        *src.first = xs = new KN<R>(V->NbOfDF);
+        *xs = R();
+    }
+    const GFESpace<Mesh>& VhS = (src.first->Vh) ? *src.first->Vh : *src.first->newVh();
+    const GFESpace<Mesh>& VhD = *dst.first->newVh();
+
+    if (xs->N() != VhS.NbOfDF) ExecError("u = v: outdated source FE function");
+
+    if (sameDistributedSpace(pS, VhS, pD, VhD)) {
+        *dst.first = new KN<R>(*xs);
+        return dst;
+    }
+
+    KN<R>* y = new KN<R>(VhD.NbOfDF);
+    try { interpolateFE(pS, VhS, *xs, pD, VhD, *y); }
+    catch (...) { delete y; throw; }
+    *dst.first = y;
+    return dst;
+}
+
+template<class Mesh, class R>
+static FEbase<R, v_dfes<Mesh>>** initFEDistributed(FEbase<R, v_dfes<Mesh>>** const& p, v_dfes<Mesh>** const& a, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
+    *p = new FEbase<R, v_dfes<Mesh>>(a);
+    setFEDistributed<Mesh, R>(std::make_pair(*p, 0), src);
+    return p;
+}
+
 static void registerTransferGlobals() {
         static bool done = false;
         if (done) return;
@@ -1442,6 +1489,16 @@ void registerTransferInterpolateOps() {
     Global.Add("interpolateMat", "(",
         new OneOperator4_<long, TPP, KN<long>*, Matrice_Creuse<double>*, KN<double>*>(
             interpolateMat<Mesh>));
+
+    typedef FEbase<double, v_dfes<Mesh>>* pdfRbase; typedef std::pair<pdfRbase, int> pdfR;
+    typedef FEbase<Complex, v_dfes<Mesh>>* pdfCbase; typedef std::pair<pdfCbase, int> pdfC;
+
+    TheOperators->Add("=",
+        new OneOperator2_<pdfR, pdfR, pdfR>(setFEDistributed<Mesh, double>),
+        new OneOperator2_<pdfC, pdfC, pdfC>(setFEDistributed<Mesh, Complex>));
+    TheOperators->Add("<-",
+        new OneOperator3_<pdfRbase*, pdfRbase*, v_dfes<Mesh>**, pdfR>(initFEDistributed<Mesh, double>),
+        new OneOperator3_<pdfCbase*, pdfCbase*, v_dfes<Mesh>**, pdfC>(initFEDistributed<Mesh, Complex>));
 }
 
 template void registerTransferInterpolateOps<Mesh3>();
