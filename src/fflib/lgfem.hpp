@@ -1195,6 +1195,21 @@ class E_FEcomp : public E_F0mps {
   operator aType( ) const { return atype< Result >( ); }
 };
 
+template<class K, class v_fes>
+int wholeFEArray(const E_Array& a, Expression& base) {
+  typedef E_FEcomp<K, v_fes> FEi;
+  int nFE = 0; bool ok = true; base = 0;
+  for (int i = 0; i < a.size(); ++i) {
+    const FEi* e = (a[i].left() == atype<typename FEi::Result>())
+                   ? dynamic_cast<const FEi*>(a[i].LeftValue()) : 0;
+    if (!e) { ok = false; continue; }
+    ++nFE;
+    if (e->comp != i || e->N != a.size() || (i && e->a0 != base)) ok = false;
+    if (!i) base = e->a0;
+  }
+  return nFE == 0 ? 0 : (ok && nFE == a.size() ? 1 : -1);
+}
+
 // typedef double R;
 typedef pair< FEbase< double, v_fes > *, int > aFEvarR;
 typedef pair< FEbaseArray< double, v_fes > *, int > aFEArrayR;

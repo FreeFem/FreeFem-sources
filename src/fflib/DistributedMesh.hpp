@@ -128,6 +128,9 @@ KN<long> restrictDOF(const GFESpace<Mesh>& Wh, const GFESpace<Mesh>& Vhi, const 
 template<class Mesh>
 void registerTransferInterpolateOps();
 
+template<class Mesh, class R>
+Expression newAssignFEDistributed(Expression dst, Expression src);
+
 // Partition globale
 template<class Mesh>
 int computeGlobalPartition(const Mesh& Th, KN<int>& part, const std::string& method, pcommworld comm = nullptr, bool broadcast = true, int nWorkers = 0);

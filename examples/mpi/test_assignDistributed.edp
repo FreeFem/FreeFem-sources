@@ -47,6 +47,19 @@
 //   FM7. vectoriel complexe.
 //   FM8. MeshS (scalaire et vectoriel) et MeshL.
 //
+//  TRANSFERT VECTORIEL : [b1,...] = [a1,...] et Vd [b1,...] = [a1,...]
+//  Oracle : interpolateD(Sd, a1[], Dd, ref) sur le tableau complet des DDL
+//  (interpolateD traite deja les N composantes).
+//   V1. [b1,b2,b3] = [a1,a2,a3] : [P2,P2,P1] sur DTh1 -> [P1,P1,P1] sur DTh2.
+//   V2. Dd [e1,e2,e3] = [a1,a2,a3];  declaration avec init.
+//   V3. Champ affine : exact, compare a la formule sur DTh2.local.
+//   V4. Meme Dmesh, EF differents ([P2,P2,P1] -> [P1,P2,P1]) : chemin local,
+//       egal a l'affectation SEQUENTIELLE sur DTh1.local a 1e-12.
+//   V5. Meme fespace : copie, egalite exacte.
+//   V6. Complexe.
+//   V7. [a1,a2,a3] = [a1,a2,a3] : inchange, exactement.
+//   V8. MeshS, [P2,P1] -> [P1,P1].
+//
 //  EGALITES EXACTES. La note de test_interpolationDMeshes.edp interdit
 //  d'asserter une valeur exacte sur un transfert : l'ordre d'arrivee des
 //  fragments change l'ordre de sommation. D, E, G et le couple a/b de J sont
@@ -63,7 +76,15 @@
 //      C'est voulu : evaluer u hors de son maillage local serait faux.
 //      Ecrire u2 = u; u2[] *= 2;
 //    * composantes desordonnees : [c2,c1] = [x,y]  -> erreur de compilation ;
-//    * tailles differentes : [c1,c2] = [x]         -> erreur de compilation.
+//    * tailles differentes : [c1,c2] = [x]         -> erreur de compilation ;
+//    * transfert, droite desordonnee : [c1,c2] = [a2,a1]
+//        -> erreur de compilation "the right side must be all the components" ;
+//    * transfert, composante et formule melangees : [c1,c2] = [a1, x]
+//        -> meme erreur de compilation ;
+//    * composante seule d'une fonction vectorielle : c1 = a1
+//        -> ExecError "b1 = a1 on a vector FE function" ;
+//    * nombres de composantes differents : [e1,e2] = [a1,a2], e a 3 comp.
+//        -> ExecError "incompatible number of components".
 //
 //  Options :
 //    -nc1  raffinement de Th1                 (defaut 10)
@@ -365,6 +386,96 @@ real g = 0;
   Cl cref = FIELD;
   GDIFF(cf[], cref[], eFM8c)
   VERDICT("FM8 MeshL scalaire      ", eFM8c, 1e-14, "")
+}
+
+// =======================================================================
+//  TRANSFERT VECTORIEL : [b1,...] = [a1,...]
+// =======================================================================
+
+fespace Sd(DTh1, [P2, P2, P1]);  fespace Sl(L1, [P2, P2, P1]);
+fespace Dd(DTh2, [P1, P1, P1]);  fespace Dl(L2, [P1, P1, P1]);
+Sd [a1, a2, a3] = [FIELD, AFFINE, x*y + z];
+real[int] refV(Dd.ndof);
+interpolateD(Sd, a1[], Dd, refV);
+
+// --- V1 : affectation --------------------------------------------------------
+{
+  Dd [b1, b2, b3];
+  [b1, b2, b3] = [a1, a2, a3];
+  GDIFF(b1[], refV, eV1)
+  VERDICT("V1 [b..] = [a..]        ", eV1, 1e-10, "")
+}
+
+// --- V2 : declaration avec init -------------------------------------------------
+{
+  Dd [e1, e2, e3] = [a1, a2, a3];
+  GDIFF(e1[], refV, eV2)
+  VERDICT("V2 Dd [e..] = [a..]     ", eV2, 1e-10, "")
+}
+
+// --- V3 : champ affine, exact ----------------------------------------------------
+{
+  Sd [p1, p2, p3] = [AFFINE, 2*AFFINE - z, x - y];
+  Dd [q1, q2, q3];
+  [q1, q2, q3] = [p1, p2, p3];
+  Dl [r1, r2, r3] = [AFFINE, 2*AFFINE - z, x - y];
+  GDIFF(q1[], r1[], eV3)
+  VERDICT("V3 affine vectoriel     ", eV3, 1e-10, "")
+}
+
+// --- V4 : meme Dmesh, EF differents => chemin local ---------------------------------
+//  Reference : affectation SEQUENTIELLE sur DTh1.local, a partir de la meme
+//  fonction posee sur le fespace local (meme numerotation).
+{
+  fespace Td(DTh1, [P1, P2, P1]);  fespace Tl(L1, [P1, P2, P1]);
+  Sl [al1, al2, al3] = [FIELD, AFFINE, x*y + z];
+  Td [t1, t2, t3];
+  [t1, t2, t3] = [a1, a2, a3];
+  Tl [s1, s2, s3] = [al1, al2, al3];
+  GDIFF(t1[], s1[], eV4)
+  VERDICT("V4 meme Dmesh, EF diff. ", eV4, 1e-12, "")
+}
+
+// --- V5 : meme fespace => copie exacte ------------------------------------------------
+{
+  Sd [f1, f2, f3];
+  [f1, f2, f3] = [a1, a2, a3];
+  GDIFF(f1[], a1[], eV5)
+  VERDICT("V5 meme fespace         ", eV5, 0, "   (copie)")
+}
+
+// --- V6 : complexe ---------------------------------------------------------------------
+{
+  Sd<complex> [ca1, ca2, ca3] = [FIELD + 1i*x, 1i*AFFINE, y - 1i*z];
+  Dd<complex> [cb1, cb2, cb3];
+  [cb1, cb2, cb3] = [ca1, ca2, ca3];
+  complex[int] refVc(Dd.ndof);
+  interpolateD(Sd, ca1[], Dd, refVc);
+  GDIFFC(cb1[], refVc, eV6)
+  VERDICT("V6 complexe             ", eV6, 1e-10, "")
+}
+
+// --- V7 : [a..] = [a..] -------------------------------------------------------------------
+{
+  real[int] before = a1[];
+  [a1, a2, a3] = [a1, a2, a3];
+  GDIFF(a1[], before, eV7)
+  VERDICT("V7 [a..] = [a..]        ", eV7, 0, "")
+}
+
+// --- V8 : MeshS -------------------------------------------------------------------------------
+{
+  meshS Sa = square3(12, 12), Sb = square3(17, 17);   // meme plan, non commensurables
+  DmeshS DSa = distribute(Sa, overlap = ov), DSb = distribute(Sb, overlap = ov);
+  fespace VsA(DSa, [P2, P1]);
+  fespace VsB(DSb, [P1, P1]);
+  VsA [m1, m2] = [FIELD, AFFINE];
+  VsB [n1, n2];
+  [n1, n2] = [m1, m2];
+  real[int] rs(VsB.ndof);
+  interpolateD(VsA, m1[], VsB, rs);
+  GDIFF(n1[], rs, eV8)
+  VERDICT("V8 MeshS vectoriel      ", eV8, 1e-10, "")
 }
 
 mpiBarrier(mpiCommWorld);
