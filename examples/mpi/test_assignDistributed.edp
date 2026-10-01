@@ -71,16 +71,17 @@
 //  HORS SUITE, verifies a la main (une erreur interrompt l'execution) :
 //    * fespace vectoriel : b1 = a1  -> ExecError "only scalar ..." ;
 //    * reel <- complexe  : ur = uc  -> erreur de compilation "operator =" ;
-//    * formule contenant une fonction DISTRIBUEE : Udh u2 = 2*u;  ou
-//      u2 = u + 1;  -> erreur de compilation "operator *" / "operator +".
-//      C'est voulu : evaluer u hors de son maillage local serait faux.
-//      Ecrire u2 = u; u2[] *= 2;
+//    * formule contenant une fonction distribuee d'un AUTRE Dmesh :
+//      Vdh u2 = 2*u;  -> ExecError "evaluated outside its local mesh".
+//      Sur le meme Dmesh, c'est permis (voir test_evalDistributed.edp).
+//      Ecrire Vdh u2 = u; u2[] *= 2;
 //    * composantes desordonnees : [c2,c1] = [x,y]  -> erreur de compilation ;
 //    * tailles differentes : [c1,c2] = [x]         -> erreur de compilation ;
 //    * transfert, droite desordonnee : [c1,c2] = [a2,a1]
 //        -> erreur de compilation "the right side must be all the components" ;
 //    * transfert, composante et formule melangees : [c1,c2] = [a1, x]
-//        -> meme erreur de compilation ;
+//        -> affectation par formule : ExecError "evaluated outside its local mesh"
+//           quand a vit sur un autre Dmesh ;
 //    * composante seule d'une fonction vectorielle : c1 = a1
 //        -> ExecError "b1 = a1 on a vector FE function" ;
 //    * nombres de composantes differents : [e1,e2] = [a1,a2], e a 3 comp.

@@ -1433,6 +1433,16 @@ void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<Complex>& xx) {
   }
 }
 
+template<class MMesh, class v_fes>
+typename std::enable_if<!std::is_same<v_fes, v_dfes<MMesh>>::value >::type
+maybeDistributedEvalCheck(v_fes* const&, DistributedEvalScope&) {}
+
+template<class MMesh, class v_fes>
+typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value >::type
+maybeDistributedEvalCheck(v_fes* const& f, DistributedEvalScope& scope) {
+  scope.check(f->DTh ? f->DTh->comm : nullptr);
+}
+
 template<class R,class MMesh,class v_fes>
 AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
 {
@@ -1446,6 +1456,7 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpaceT * pVh = *pp ;
   FESpaceT & Vh = *pVh ;
+  DistributedEvalScope dscope(IsDistributedFE<v_fes>::value);   // assemblage distribue : collectif
   double tgv= ff_tgv;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
   long NbOfDF =  pVh ? Vh.NbOfDF: 0;
@@ -1496,6 +1507,7 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
     else
       AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   }
+  maybeDistributedEvalCheck<MMesh, v_fes>(pp, dscope);   // avant l'echange
   maybeDistributedExchange<MMesh, v_fes>(pp, xx);
   return SetAny<KN_<R> >(xx);
 }

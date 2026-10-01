@@ -16,9 +16,11 @@
 //
 //  keepGlobal = true EXPLICITE sur les distribute() du bloc cas 0 : depuis
 //  que le defaut est false, V1 (bijection loc2glob) exige de le redemander.
-//  Les blocs N1..N15 ne le passent pas -- N5 exige meme false.
+//  Les blocs N1..N15 ne le passent pas -- N5 exige meme false -- sauf N3,
+//  qui lit loc2glob.
 //
-//  LANCER SOUS TIMEOUT. Les blocs N1..N14 sont des tests d'ERREUR COLLECTIVE :
+//  LANCER SOUS TIMEOUT. Les blocs N1..N14, hormis N2 et N3 (tests POSITIFS),
+//  sont des tests d'ERREUR COLLECTIVE :
 //  ils verifient que TOUS les rangs levent (reduction MIN), donc qu'aucun rang
 //  ne file en avant en laissant les autres dans un recv. Une regression s'y
 //  manifeste soit en FAIL, soit -- et c'est le cas le plus courant -- en
@@ -822,7 +824,7 @@ macro CHECKO(Th, ThLocal, Uh, Udh, UhGlob, tag) {
          << "   => " << (gx1 == 0 ? "PASS" : "FAIL") << endl;
 }
 
-// ---------- N1..N3 : chemins d'erreur ----------
+// ---------- N1..N3 : chemins d'erreur (N2, N3 : tests positifs) ----------
 //  Une PoU cassee SEULE n'est pas atteignable depuis un script : PoU et carte
 //  d'intersections derivent du meme globalPartition, dont la coherence entre
 //  rangs est desormais verifiee DANS distribute. N1 et N4 exercent donc
@@ -890,17 +892,48 @@ if (mpisize > 1) {
          << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }
 
-// N3 : espace composite refuse (interpolatePoU).
+// N3 : espace composite [P1, P2] ACCEPTE. Test POSITIF depuis f4278b42f :
+//  interpolatePoU interpole la PoU P1 sur chaque composante, il attendait
+//  auparavant le refus "composite/mixed FE space not supported".
+//  Verifie, sur tous les rangs :
+//     - aucun refus a la construction,
+//     - PoU au niveau ddl : somme des D sur chaque ddl global = 1, via
+//       loc2glob (d'ou keepGlobal = true), composante par composante,
+//     - D dans [0, 1],
+//     - ndofglobal = ndof du meme espace sequentiel,
+//     - V6 (Udh.checkPoU) nul.
 { meshS Th = square3(nsq, nsq);
-  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis");
+  DmeshS DTh = distribute(Th, overlap = ov, partmethod = "metis", keepGlobal = true);
   int caught = 0;
-  try { fespace Udh(DTh, [P1, P2]); if (Udh.ndof < 0) caught = 1; }
+  real ePoU = 1e30, eD = 1e30, eNG = 1e30, v6 = 1e30;
+  try {
+    fespace Udh(DTh, [P1, P2]);
+    fespace UhG(Th, [P1, P2]);
+    real[int] D = Udh.D;
+    int[int] l2g = Udh.loc2glob;
+    real[int] acc(UhG.ndof); acc = 0;
+    for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i];
+    real[int] accG(UhG.ndof);
+    mpiAllReduce(acc, accG, mpiCommWorld, mpiSUM);
+    accG -= 1.;
+    ePoU = accG.linfty;
+    eD = max(-D.min, D.max - 1.);
+    eNG = abs(Udh.ndofglobal - UhG.ndof);
+    v6 = Udh.checkPoU;
+  }
   catch (...) { caught = 1; }
-  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMIN);
-  ntot++; if (g == 1) npass++;
+  int g; mpiAllReduce(caught, g, mpiCommWorld, mpiMAX);
+  real p, d, n, c;
+  mpiAllReduce(ePoU, p, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eD,   d, mpiCommWorld, mpiMAX);
+  mpiAllReduce(eNG,  n, mpiCommWorld, mpiMAX);
+  mpiAllReduce(v6,   c, mpiCommWorld, mpiMAX);
+  bool ok = (g == 0 && p < 1e-12 && d <= 0 && n < 0.5 && c >= 0 && c < 1e-8);
+  ntot++; if (ok) npass++;
   if (mpirank == 0)
-    cout << "  [N3 espace composite refuse]  N3=" << g
-         << "   => " << (g == 1 ? "PASS" : "FAIL") << endl;
+    cout << "  [N3 espace composite [P1,P2] accepte]  refus=" << g << "  PoU(ddl)=" << p
+         << "  D hors [0,1]=" << d << "  ndofglobal=" << n << "  V6=" << c
+         << "   => " << (ok ? "PASS" : "FAIL") << endl;
 }
 
 // N4 : maillages differents entre rangs -> erreur collective. partition= a la
