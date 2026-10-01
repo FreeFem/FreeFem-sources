@@ -7627,6 +7627,24 @@ Expression Op_CopyArrayT(const E_Array &a, const E_Array &b) {
   return r;
 }
 
+template< class K, class Mesh >
+Expression Op_CopyArrayDT(const E_Array &a, const E_Array &b) {
+  typedef v_dfes< Mesh > v_fesD;
+  Expression rrr = 0, iii = 0;
+
+  Expression rr = IsFEcomp< K, v_fesD >(a[0], 0, rrr, iii);
+  if (!rr) return 0; 
+
+  for (int i = 1; i < a.size( ); i++)
+    if (!IsFEcomp< K, v_fesD >(a[i], i, rrr, iii))
+      CompileError("[u1,...] = [...] : left side must be the components, in order, of one distributed FE function");
+
+  if (iii) CompileError("[u1,...] = [...] : arrays of distributed FE functions are not supported");
+
+  return new E_set_fev3< K, v_fesD >(&b, rr);
+}
+
+
 E_F0 *Op_CopyArray::code(const basicAC_F0 &args) const {
   E_F0 *ret = 0;
   const E_Array &a = *dynamic_cast< const E_Array * >(args[0].LeftValue( ));
@@ -7643,6 +7661,13 @@ E_F0 *Op_CopyArray::code(const basicAC_F0 &args) const {
   if (!r) r = Op_CopyArrayT< Complex, v_fesS >(a, b);
   if (!r) r = Op_CopyArrayT< double, v_fesL >(a, b);
   if (!r) r = Op_CopyArrayT< Complex, v_fesL >(a, b);
+  if (!r) r = Op_CopyArrayDT< double,  Mesh3 >(a, b);
+  if (!r) r = Op_CopyArrayDT< Complex, Mesh3 >(a, b);
+  if (!r) r = Op_CopyArrayDT< double,  MeshS >(a, b);
+  if (!r) r = Op_CopyArrayDT< Complex, MeshS >(a, b);
+  if (!r) r = Op_CopyArrayDT< double,  MeshL >(a, b);
+  if (!r) r = Op_CopyArrayDT< Complex, MeshL >(a, b);
+
   if (r) return r;
   else {
     CompileError("Internal Error: General Copy of Array : to do ");

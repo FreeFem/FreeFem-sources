@@ -33,16 +33,37 @@
 //   K.  MeshS.
 //   L.  MeshL.
 //
+//  FORMULES : u = f, Udh u = f, [u1,...] = [f1,...], Vd [u1,...] = [f1,...]
+//  La formule est evaluee aux DDL du maillage LOCAL, sans communication.
+//  L'oracle est la meme formule affectee a la fonction sequentielle du
+//  fespace local DTh.local : meme maillage, meme numerotation, meme calcul.
+//   FM1. Udh uf = f;                  scalaire, declaration.
+//   FM2. uf = g;                      scalaire, reaffectation.
+//   FM3. complexe.
+//   FM4. Formule contenant une fonction EF SEQUENTIELLE definie sur le
+//        maillage global : chaque rang l'evalue en ses propres DDL.
+//   FM5. Wdh [w1,w2,w3] = [f,g,h];    vectoriel [P2,P2,P1], declaration.
+//   FM6. [w1,w2,w3] = [...];          vectoriel, reaffectation.
+//   FM7. vectoriel complexe.
+//   FM8. MeshS (scalaire et vectoriel) et MeshL.
+//
 //  EGALITES EXACTES. La note de test_interpolationDMeshes.edp interdit
 //  d'asserter une valeur exacte sur un transfert : l'ordre d'arrivee des
 //  fragments change l'ordre de sommation. D, E, G et le couple a/b de J sont
 //  des COPIES, sans aucune sommation : l'egalite exacte y est la propriete
 //  testee, pas une observation. Tout le reste est asserte a 1e-10 (transfert)
-//  ou 1e-12 (chemin local, sans communication).
+//  ou 1e-12 (chemin local, sans communication). Les FM sont asserees a
+//  1e-14 : meme calcul DDL par DDL que l'oracle, sans aucune sommation.
 //
 //  HORS SUITE, verifies a la main (une erreur interrompt l'execution) :
 //    * fespace vectoriel : b1 = a1  -> ExecError "only scalar ..." ;
-//    * reel <- complexe  : ur = uc  -> erreur de compilation "operator =".
+//    * reel <- complexe  : ur = uc  -> erreur de compilation "operator =" ;
+//    * formule contenant une fonction DISTRIBUEE : Udh u2 = 2*u;  ou
+//      u2 = u + 1;  -> erreur de compilation "operator *" / "operator +".
+//      C'est voulu : evaluer u hors de son maillage local serait faux.
+//      Ecrire u2 = u; u2[] *= 2;
+//    * composantes desordonnees : [c2,c1] = [x,y]  -> erreur de compilation ;
+//    * tailles differentes : [c1,c2] = [x]         -> erreur de compilation.
 //
 //  Options :
 //    -nc1  raffinement de Th1                 (defaut 10)
@@ -242,6 +263,108 @@ interpolateD(Udh, u[], Vdh, ref);
   interpolateD(WlA, ul1[], WlB, rl);
   GDIFF(vl1[], rl, eL)
   VERDICT("L  MeshL               ", eL, 1e-10, "")
+}
+
+// =======================================================================
+//  FORMULES : evaluation locale, oracle = meme formule sur DTh.local
+// =======================================================================
+
+// max global de |a - b| sur deux tableaux complexes
+macro GDIFFC(a, b, g)
+real g = 0;
+{
+  real ll = 0;
+  for (int i = 0; i < a.n; i++) ll = max(ll, abs(a[i] - b[i]));
+  mpiAllReduce(ll, g, mpiCommWorld, mpiMAX);
+}// EOM
+
+// --- FM1 / FM2 : scalaire, declaration puis reaffectation ------------------
+{
+  Udh uf = FIELD;
+  Ul ref1 = FIELD;
+  GDIFF(uf[], ref1[], eFM1)
+  VERDICT("FM1 Udh uf = f          ", eFM1, 1e-14, "")
+
+  uf = AFFINE;
+  Ul ref2 = AFFINE;
+  GDIFF(uf[], ref2[], eFM2)
+  VERDICT("FM2 uf = g              ", eFM2, 1e-14, "")
+}
+
+// --- FM3 : complexe -----------------------------------------------------------
+{
+  Udh<complex> ucf = FIELD + 1i*AFFINE;
+  Ul<complex> refc = FIELD + 1i*AFFINE;
+  GDIFFC(ucf[], refc[], eFM3)
+  VERDICT("FM3 complexe            ", eFM3, 1e-14, "")
+}
+
+// --- FM4 : fonction EF sequentielle sur le maillage global dans la formule -----
+//  Th1 est construit a l'identique sur tous les rangs. Les noeuds P2 du
+//  maillage local sont des noeuds P2 de Th1 : ug y vaut exactement FIELD a
+//  l'arrondi pres, d'ou un seuil 1e-12 et non 1e-14 (Find + evaluation).
+{
+  fespace Ug(Th1, P2);
+  Ug ug = FIELD;
+  Udh ufg = ug;
+  Ul ref4 = FIELD;
+  GDIFF(ufg[], ref4[], eFM4)
+  VERDICT("FM4 Udh u = ug (global) ", eFM4, 1e-12, "")
+}
+
+// --- FM5 / FM6 : vectoriel [P2,P2,P1] -----------------------------------------
+{
+  fespace Wdh(DTh1, [P2, P2, P1]);  fespace Wl(L1, [P2, P2, P1]);
+  Wdh [w1, w2, w3] = [FIELD, AFFINE, x*y];
+  Wl [r1, r2, r3] = [FIELD, AFFINE, x*y];
+  assert(w1[].n == Wdh.ndof);
+  GDIFF(w1[], r1[], eFM5)
+  VERDICT("FM5 Wdh [w..] = [f,g,h] ", eFM5, 1e-14, "")
+
+  [w1, w2, w3] = [z, sin(x), AFFINE];
+  [r1, r2, r3] = [z, sin(x), AFFINE];
+  GDIFF(w1[], r1[], eFM6)
+  VERDICT("FM6 [w..] = [...]       ", eFM6, 1e-14, "")
+}
+
+// --- FM7 : vectoriel complexe ----------------------------------------------------
+{
+  fespace Wdh(DTh1, [P2, P1]);  fespace Wl(L1, [P2, P1]);
+  Wdh<complex> [c1, c2] = [FIELD + 1i*x, 1i*AFFINE];
+  Wl<complex> [s1, s2] = [FIELD + 1i*x, 1i*AFFINE];
+  GDIFFC(c1[], s1[], eFM7a)
+  VERDICT("FM7 vect. complexe decl ", eFM7a, 1e-14, "")
+  [c1, c2] = [y - 1i*z, FIELD];
+  [s1, s2] = [y - 1i*z, FIELD];
+  GDIFFC(c1[], s1[], eFM7b)
+  VERDICT("FM7 vect. complexe aff  ", eFM7b, 1e-14, "")
+}
+
+// --- FM8 : MeshS et MeshL ----------------------------------------------------------
+{
+  meshS Sf = square3(12, 12);
+  DmeshS DSf = distribute(Sf, overlap = ov);
+  meshS LSf = DSf.local;
+  fespace Sdh(DSf, P2);           fespace Sl(LSf, P2);
+  Sdh sf = FIELD;
+  Sl sref = FIELD;
+  GDIFF(sf[], sref[], eFM8a)
+  VERDICT("FM8 MeshS scalaire      ", eFM8a, 1e-14, "")
+
+  fespace SVdh(DSf, [P2, P1]);    fespace SVl(LSf, [P2, P1]);
+  SVdh [t1, t2] = [FIELD, AFFINE];
+  SVl [q1, q2] = [FIELD, AFFINE];
+  GDIFF(t1[], q1[], eFM8b)
+  VERDICT("FM8 MeshS vectoriel     ", eFM8b, 1e-14, "")
+
+  meshL Cf = segment(40);
+  DmeshL DCf = distribute(Cf, overlap = ov);
+  meshL LCf = DCf.local;
+  fespace Cdh(DCf, P2);           fespace Cl(LCf, P2);
+  Cdh cf = FIELD;
+  Cl cref = FIELD;
+  GDIFF(cf[], cref[], eFM8c)
+  VERDICT("FM8 MeshL scalaire      ", eFM8c, 1e-14, "")
 }
 
 mpiBarrier(mpiCommWorld);
