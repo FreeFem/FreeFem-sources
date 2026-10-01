@@ -1,0 +1,273 @@
+// NBPROC 4
+// PARAM -ns
+
+// ---------------------------------------------------------------------
+//  Evaluation d'une fonction EF distribuee dans une expression (A1)
+//
+//  Une fonction EF distribuee u n'est connue que sur le maillage LOCAL de
+//  son rang. Elle peut entrer dans une expression (u*v, dx(u), coefficient
+//  de varf, u2 = 2*v, ...) tant que le point courant est sur ce maillage
+//  local. Ailleurs, l'evaluation est REFUSEE : la valeur serait fausse.
+//
+//  Oracle : le meme calcul en sequentiel sur le maillage global Th.
+//
+//  VALEURS (aucun refus attendu)
+//   V1. int3d(DTh)(u*v)
+//   V2. int3d(DTh)(|grad u|^2) : dx, dy, dz
+//   V3. erreur L2 sqrt(int3d(DTh)(square(u - f)))
+//   V4. u2 = 2*v  (affectation par formule, meme Dmesh)
+//   V5. Udh u3 = v + u;  (declaration)
+//   V6. [P2,P2,P1] : a1*a2 + a3
+//   V7. complexe
+//   V8. MeshS (int2d) et MeshL (int1d)
+//   V9. Vdh w = u; sur un autre Dmesh reste un TRANSFERT (oracle interpolateD)
+//   V10. varf lineaire int3d(DTh)(u*b) : somme ponderee par D = int u  (ov > 0)
+//   V11. Mat A = vP(Udh,Udh), vP = int3d(DTh)(u*a*b) : 1'A1 = int u  (ov > 0)
+//   V12. integrale de bord int2d(DTh, 1, 2, 5)(u*v)
+//   V13. pas de temps implicite : uold dans le varf et dans on(..., a = uold),
+//        Mat + A^-1 (PETSc), compare a la resolution sequentielle  (ov > 0)
+//
+//  FORMULES VECTORIELLES (composantes et formules melangees)
+//   F1. Wdh [c1,c2,c3] = [a1, 2*a2, a3 + 1];
+//   F2. [c1,c2,c3] = [a1, a2, 3*a3];
+//   Oracle : la meme affectation sequentielle sur DTh.local.
+//
+//  GARDE-FOU (mpisize > 1). DTh2 : partition en tranches decalee d'un
+//  rang, son maillage local ne recouvre pas celui de DTh sur le meme rang.
+//   G1. int3d(DTh2)(u)                 refus collectif
+//   G2. Vdh2 w = 1*u;                  refus immediat (formule, autre Dmesh)
+//   G3. us = u;  (fespace sequentiel)  refus immediat
+//   G4. real a = u;                    refus : point arbitraire
+//   G5. int3d(Th)(u)                   refus immediat (maillage global)
+//   G6. varf lineaire sur DTh2 avec u  refus collectif
+//   G7. Mat sur DTh2 avec u            refus collectif (ov > 0)
+//   G8. apres tous ces refus, l'etat du garde-fou est propre : V1 redonne
+//       la meme valeur et G1 est de nouveau refuse.
+//  Chaque refus doit etre leve sur TOUS les rangs.
+//
+//  HORS SUITE :
+//    * [c1,c2,c3] = [a2,a1,a3] : composantes desordonnees d'une meme fonction
+//        -> erreur de compilation "the right side must be all the components" ;
+//    * convect([..], -dt, u), u sur un autre maillage -> ExecError "outside its
+//        local mesh". PAS dans la suite : une exception attrapee (try/catch)
+//        pendant convect laisse le MeshPoint de la pile pointer sur une variable
+//        locale de Convect::eval* (bug preexistant, aussi en sequentiel), et
+//        l'instruction suivante plante.
+//
+//  Options :
+//    -nc   raffinement du cube        (defaut 8)
+//    -ov   recouvrement               (defaut 1)
+//
+//  Lancer :
+//    ff-mpirun -np 4 test_evalDistributed.edp -ns
+// ---------------------------------------------------------------------
+
+load "PETSc"
+include "getARGV.idp"
+
+int nc = getARGV("-nc", 8);
+int ov = getARGV("-ov", 1);
+
+macro FIELD() (sin(3*x)*cos(2*y) + exp(z))// EOM
+macro AFFINE() (1 + x + 2*y + 3*z)// EOM
+macro grad(w) [dx(w), dy(w), dz(w)]// EOM
+
+// max global d'un reel
+macro GMAX(a, g)
+real g = 0;
+{
+  real ll = a;
+  mpiAllReduce(ll, g, mpiCommWorld, mpiMAX);
+}// EOM
+
+macro VERDICT(tag, e, tol)
+if (mpirank == 0)
+  cout << "  [" << tag << "]  ecart = " << e
+       << "   => " << (e <= tol ? "PASS" : "FAIL") << endl;
+assert(e <= tol);
+// EOM
+
+// le refus doit avoir ete leve sur tous les rangs
+macro REFUSED(tag, refused)
+{
+  int rmin = 0;
+  mpiAllReduce(refused, rmin, mpiCommWorld, mpiMIN);
+  if (mpirank == 0)
+    cout << "  [" << tag << "]  refus sur tous les rangs = " << rmin
+         << "   => " << (rmin == 1 ? "PASS" : "FAIL") << endl;
+  assert(rmin == 1);
+}// EOM
+
+mesh3 Th = cube(nc, nc, nc);
+Dmesh3 DTh = distribute(Th, overlap = ov);
+mesh3 L = DTh.local;
+fespace Uh(Th, P2);  fespace Udh(DTh, P2);
+Uh us = FIELD, vs = AFFINE;
+Udh u = FIELD, v = AFFINE;
+
+if (mpirank == 0) cout << "--- valeurs" << endl;
+
+{ real Id = int3d(DTh)(u*v), Is = int3d(Th)(us*vs);
+  VERDICT("V1 int3d(u*v)        ", abs(Id - Is)/abs(Is), 1e-10) }
+
+{ real Id = int3d(DTh)(dx(u)*dx(u) + dy(u)*dy(u) + dz(u)*dz(u));
+  real Is = int3d(Th)(dx(us)*dx(us) + dy(us)*dy(us) + dz(us)*dz(us));
+  VERDICT("V2 int3d(|grad u|^2) ", abs(Id - Is)/abs(Is), 1e-10) }
+
+{ real ed = sqrt(int3d(DTh)(square(u - FIELD))), es = sqrt(int3d(Th)(square(us - FIELD)));
+  VERDICT("V3 erreur L2         ", abs(ed - es)/es, 1e-8) }
+
+{ Udh u2; u2 = 2*v;
+  real[int] d = u2[] - 2*v[];
+  GMAX(d.linfty, g)
+  VERDICT("V4 u2 = 2*v          ", g, 1e-12) }
+
+{ Udh u3 = v + u;
+  real[int] d = u3[] - v[]; d -= u[];
+  GMAX(d.linfty, g)
+  VERDICT("V5 Udh u3 = v + u    ", g, 1e-12) }
+
+{ fespace Wdh(DTh, [P2,P2,P1]); fespace Wh(Th, [P2,P2,P1]);
+  Wdh [a1,a2,a3] = [FIELD, AFFINE, x*y];
+  Wh [s1,s2,s3] = [FIELD, AFFINE, x*y];
+  real Id = int3d(DTh)(a1*a2 + a3), Is = int3d(Th)(s1*s2 + s3);
+  VERDICT("V6 [P2,P2,P1]        ", abs(Id - Is)/abs(Is), 1e-10) }
+
+{ fespace Ch(Th, P1); fespace Cdh(DTh, P1);
+  Cdh<complex> c = FIELD + 1i*AFFINE;
+  Ch<complex> cs = FIELD + 1i*AFFINE;
+  complex Id = int3d(DTh)(c*c), Is = int3d(Th)(cs*cs);
+  VERDICT("V7 complexe          ", abs(Id - Is)/abs(Is), 1e-10) }
+
+{ meshS ThS = square3(nc, nc);
+  DmeshS DThS = distribute(ThS, overlap = ov);
+  fespace Sh(ThS, P2); fespace Sdh(DThS, P2);
+  Sh ss = FIELD; Sdh sd = FIELD;
+  real Id = int2d(DThS)(sd*sd), Is = int2d(ThS)(ss*ss);
+  VERDICT("V8 MeshS             ", abs(Id - Is)/abs(Is), 1e-10)
+  meshL ThL = segment(5*nc, [cos(pi*x), sin(pi*x), 0]);
+  DmeshL DThL = distribute(ThL, overlap = ov);
+  fespace Lh(ThL, P1); fespace Ldh(DThL, P1);
+  Lh ls = FIELD; Ldh ld = FIELD;
+  real Jd = int1d(DThL)(ld*ld), Js = int1d(ThL)(ls*ls);
+  VERDICT("V8 MeshL             ", abs(Jd - Js)/abs(Js), 1e-10) }
+
+{ Dmesh3 DThB = distribute(Th, overlap = ov, partmethod = "scotch");
+  fespace Vdh(DThB, P1);
+  Vdh w = u;
+  Vdh ref; interpolateD(Udh, u[], Vdh, ref[]);
+  real[int] d = w[] - ref[];
+  GMAX(d.linfty, g)
+  VERDICT("V9 Vdh w = u transfert", g, 1e-10) }
+
+real Iu = int3d(Th)(us);
+// ov = 0 : sum(D .* rhs) ne redonne pas l'integrale, deja vrai pour une
+// formule seule (hors A1) : V10 et V11 seulement avec recouvrement.
+if (ov > 0) { varf vL(a, b) = int3d(DTh)(u*b);
+  real[int] rhs = vL(0, Udh);
+  real[int] Dr = Udh.D .* rhs;
+  real loc = Dr.sum, glob;
+  mpiAllReduce(loc, glob, mpiCommWorld, mpiSUM);
+  VERDICT("V10 varf lineaire u*b", abs(glob - Iu)/abs(Iu), 1e-10) }
+
+if (ov > 0) {
+  varf vP(a, b) = int3d(DTh)(u*a*b);
+  Mat A = vP(Udh, Udh);
+  real[int] one(Udh.ndof); one = 1;
+  real[int] y = A*one;
+  real[int] Dy = Udh.D .* y;
+  real loc = Dy.sum, glob;
+  mpiAllReduce(loc, glob, mpiCommWorld, mpiSUM);
+  VERDICT("V11 Mat varf u*a*b   ", abs(glob - Iu)/abs(Iu), 1e-10)
+}
+
+{ real Id = int2d(DTh, 1, 2, 5)(u*v), Is = int2d(Th, 1, 2, 5)(us*vs);
+  VERDICT("V12 int2d(DTh, 1,2,5)(u*v)", abs(Id - Is)/abs(Is), 1e-10) }
+
+if (ov > 0) {
+  real dt = 0.1;
+  fespace U1h(Th, P1); fespace U1dh(DTh, P1);
+  U1h uolds = FIELD;  U1dh uold = FIELD;
+  varf vHs(a, b) = int3d(Th)(a*b/dt + grad(a)'*grad(b)) + int3d(Th)(uolds*b/dt)
+                 + on(1, 2, 3, 4, 5, 6, a = uolds);
+  matrix As = vHs(U1h, U1h, solver = UMFPACK);
+  real[int] bs = vHs(0, U1h);
+  U1h u1s; u1s[] = As^-1 * bs;
+  varf vH(a, b) = int3d(DTh)(a*b/dt + grad(a)'*grad(b)) + int3d(DTh)(uold*b/dt)
+                + on(1, 2, 3, 4, 5, 6, a = uold);
+  Mat A = vH(U1dh, U1dh);
+  set(A, sparams = "-ksp_type cg -pc_type asm -ksp_rtol 1e-12");
+  real[int] b = vH(0, U1dh);
+  U1dh u1; u1[] = A^-1 * b;
+  real e = sqrt(int3d(DTh)(square(u1 - u1s))) / sqrt(int3d(Th)(square(u1s)));
+  VERDICT("V13 pas de temps implicite", e, 1e-8)
+}
+
+if (mpirank == 0) cout << "--- formules vectorielles" << endl;
+{ fespace Wdh(DTh, [P2,P2,P1]); fespace Wl(L, [P2,P2,P1]);
+  Wdh [a1,a2,a3] = [FIELD, AFFINE, x*y];
+  Wl [l1,l2,l3] = [FIELD, AFFINE, x*y];
+
+  Wdh [c1,c2,c3] = [a1, 2*a2, a3 + 1];
+  Wl [m1,m2,m3] = [l1, 2*l2, l3 + 1];
+  real[int] d = c1[] - m1[];
+  GMAX(d.linfty, g1)
+  VERDICT("F1 Wdh [c..] = [a1, 2*a2, a3+1]", g1, 1e-12)
+
+  [c1,c2,c3] = [a1, a2, 3*a3];
+  [m1,m2,m3] = [l1, l2, 3*l3];
+  d = c1[] - m1[];
+  GMAX(d.linfty, g2)
+  VERDICT("F2 [c..] = [a1, a2, 3*a3]      ", g2, 1e-12) }
+
+if (mpisize > 1) {
+  if (mpirank == 0) cout << "--- garde-fou" << endl;
+  // tranches en x, decalees d'un rang : le maillage local de DTh2 sur le
+  // rang r est la tranche r+1, hors du maillage local de u.
+  int[int] part2(Th.nt);
+  for (int k = 0; k < Th.nt; ++k) {
+    real xb = (Th[k][0].x + Th[k][1].x + Th[k][2].x + Th[k][3].x)/4;
+    part2[k] = (min(int(xb*mpisize), mpisize - 1) + 1) % mpisize;
+  }
+  Dmesh3 DTh2 = distribute(Th, overlap = ov, partition = part2);
+  fespace Vdh2(DTh2, P1);
+
+  int refused;
+  refused = 0;
+  try { real a = int3d(DTh2)(u); } catch (...) { refused = 1; }
+  REFUSED("G1 int3d(DTh2)(u)            ", refused)
+
+  refused = 0;
+  try { Vdh2 w = 1*u; } catch (...) { refused = 1; }
+  REFUSED("G2 Vdh2 w = 1*u              ", refused)
+
+  refused = 0;
+  try { Uh ws; ws = u; } catch (...) { refused = 1; }
+  REFUSED("G3 us = u (fespace sequentiel)", refused)
+
+  refused = 0;
+  try { x = 0.3; y = 0.6; z = 0.8; real a = u; } catch (...) { refused = 1; }
+  REFUSED("G4 real a = u                ", refused)
+
+  refused = 0;
+  try { real a = int3d(Th)(u); } catch (...) { refused = 1; }
+  REFUSED("G5 int3d(Th)(u)              ", refused)
+
+  refused = 0;
+  try { varf vL2(a, b) = int3d(DTh2)(u*b); real[int] rb = vL2(0, Vdh2); } catch (...) { refused = 1; }
+  REFUSED("G6 varf lineaire sur DTh2    ", refused)
+
+  if (ov > 0) {
+    refused = 0;
+    try { varf vB(a, b) = int3d(DTh2)(u*a*b); Mat B = vB(Vdh2, Vdh2); } catch (...) { refused = 1; }
+    REFUSED("G7 Mat sur DTh2              ", refused)
+  }
+
+  { real Id = int3d(DTh)(u*v), Is = int3d(Th)(us*vs);
+    VERDICT("G8 V1 apres les refus        ", abs(Id - Is)/abs(Is), 1e-10) }
+  refused = 0;
+  try { real a = int3d(DTh2)(u); } catch (...) { refused = 1; }
+  REFUSED("G8 G1 apres les refus        ", refused)
+}
+
+if (mpirank == 0) cout << "test_evalDistributed : OK" << endl;

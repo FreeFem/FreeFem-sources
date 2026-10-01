@@ -2179,8 +2179,8 @@ public:
       Expression src = 0;
       int w = wholeFEArray<K, v_fes>(*v, src);
       if (w == 1) setter = newAssignFEDistributed<Mesh, K>(fer, src);
-      else if (w == -1) CompileError("Vd [b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
-      else setter = new E_set_fev3<K, v_fes>(v, fer);
+      else if (w == -2) CompileError("Vd [b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
+      else setter = new E_set_fev3<K, v_fes>(v, fer);   // formules, evaluees sur le maillage local
     }
     
     AnyType operator()(Stack stack)  const {
@@ -2401,7 +2401,13 @@ pmeshL pVhL_Th(pfesL * p)
 { throwassert(p && *p);
     FESpaceL *fes=**p; ;  return &fes->Th ;}
 
-
+template<class R>
+static AnyType refuseDistributedEval(MeshPoint &mp, int status) {
+  const R3 P = mp.P;
+  if (!distributedEvalDeferred()) mp.unset();
+  distributedEvalFailure(status, P.x, P.y, P.z);
+  return SetAny<R>(R());
+}
 
 template<class R,int dd,class v_fes>
 AnyType pf3r2R(Stack s,const AnyType &a)
@@ -2440,6 +2446,8 @@ AnyType pf3r2R(Stack s,const AnyType &a)
      K=mp.T3;
      PHat=mp.PHat;
    }
+  else if (IsDistributedFE<v_fes>::value && !mp.T)
+    return refuseDistributedEval<R>(mp, DEVAL_NOPOINT);
   else if ( mp.other.Th3 
             && (mp.other.Th3->elements ==  Th.elements)
             && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
@@ -2453,6 +2461,8 @@ AnyType pf3r2R(Stack s,const AnyType &a)
     K=Th.Find(mp.P,PHat,outside);
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
+  if (IsDistributedFE<v_fes>::value && outside)
+    return refuseDistributedEval<R>(mp, DEVAL_OUTSIDE);
   if(verbosity>1000)
     {
     if(outside)
@@ -2542,6 +2552,8 @@ AnyType pfSr2R(Stack s,const AnyType &a)
      PHat.x = mp.PHat.x;
      PHat.y = mp.PHat.y;
    }
+  else if (IsDistributedFE<v_fes>::value && !mp.T)
+    return refuseDistributedEval<R>(mp, DEVAL_NOPOINT);
   else if (mp.other.ThS
             && (mp.other.ThS->elements ==  Th.elements)
             && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
@@ -2556,6 +2568,8 @@ AnyType pfSr2R(Stack s,const AnyType &a)
     K=Th.Find(mp.P,PHat,outside);
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
+  if (IsDistributedFE<v_fes>::value && outside)
+    return refuseDistributedEval<R>(mp, DEVAL_OUTSIDE);
   if(verbosity>1000)
     {
     if(outside)
@@ -2620,6 +2634,8 @@ AnyType pfLr2R(Stack s,const AnyType &a)
         K=mp.TL;
         PHat.x = mp.PHat.x;
     }
+    else if (IsDistributedFE<v_fes>::value && !mp.T)
+      return refuseDistributedEval<R>(mp, DEVAL_NOPOINT);
     else if (mp.other.ThL
              && (mp.other.ThL->elements ==  Th.elements)
              && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
@@ -2633,6 +2649,8 @@ AnyType pfLr2R(Stack s,const AnyType &a)
         K=Th.Find(mp.P,PHat,outside);
         mp.other.set(Th,mp.P,PHat,*K,0,outside);
     }
+    if (IsDistributedFE<v_fes>::value && outside)
+      return refuseDistributedEval<R>(mp, DEVAL_OUTSIDE);
     if(verbosity>1000)
     {
         if(outside)
@@ -2661,6 +2679,37 @@ AnyType pfLr2R(Stack s,const AnyType &a)
     if(verbosity>=10000)
         cout << componante<< " "<< dd << " f()  Tet:  " << Th(K) << " " << mp.P << " " << PHat << " =  " << rr <<  endl;
     return SetAny<R>(rr);
+}
+
+// Evaluation d'une fonction EF distribuee sur son maillage local
+template<class Mesh> struct DEvalOf;
+template<> struct DEvalOf<Mesh3> {
+  template<class K, int dd> static AnyType f(Stack s, const AnyType &a) { return pf3r2R<K, dd, v_dfes3>(s, a); }
+};
+template<> struct DEvalOf<MeshS> {
+  template<class K, int dd> static AnyType f(Stack s, const AnyType &a) { return pfSr2R<K, dd, v_dfesS>(s, a); }
+};
+template<> struct DEvalOf<MeshL> {
+  template<class K, int dd> static AnyType f(Stack s, const AnyType &a) { return pfLr2R<K, dd, v_dfesL>(s, a); }
+};
+
+template<class Mesh, class K>
+static void addDistributedFEEval() {
+  typedef pair<FEbase<K, v_dfes<Mesh> > *, int> pdf;
+  typedef DEvalOf<Mesh> E;
+  map_type[typeid(K).name()]->AddCast(new E_F1_funcT<K, pdf>(E::template f<K, 0>));
+  Global.Add("dx", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dx>));
+  Global.Add("dy", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dy>));
+  Global.Add("dz", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dz>));
+  Global.Add("dxx", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dxx>));
+  Global.Add("dyy", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dyy>));
+  Global.Add("dxy", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dxy>));
+  Global.Add("dyx", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dyx>));
+  Global.Add("dzx", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dzx>));
+  Global.Add("dzy", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dzy>));
+  Global.Add("dzz", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dzz>));
+  Global.Add("dxz", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dxz>));
+  Global.Add("dyz", "(", new E_F1_funcT<K, pdf>(E::template f<K, op_dyz>));
 }
 
 template<class K,class v_fes>
@@ -3392,6 +3441,14 @@ TheOperators->Add("=",
  map_type[typeid(Complex).name()]->AddCast(
    new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,0,v_fesL>)
  );
+
+ // fonctions EF distribuees : evaluation sur le maillage local (A1)
+ addDistributedFEEval<Mesh3, double>();
+ addDistributedFEEval<Mesh3, Complex>();
+ addDistributedFEEval<MeshS, double>();
+ addDistributedFEEval<MeshS, Complex>();
+ addDistributedFEEval<MeshL, double>();
+ addDistributedFEEval<MeshL, Complex>();
 
  Global.Add("dz","(",new OneOperatorCode<CODE_Diff<Ftest,op_dz> >);
  Global.Add("dxz","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxz> >);

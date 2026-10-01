@@ -293,6 +293,59 @@ KN<int> recvPartition(int, int, pcommworld){
 }
 #endif
 
+// Garde-fou de l'evaluation d'une fonction EF distribuee
+static int g_devalDepth = 0;           // scopes ouverts
+static long g_devalFail = 0;           // refus depuis l'ouverture du scope externe
+static int g_devalStatus = DEVAL_OK;   // premier refus
+static double g_devalP[3] = {0., 0., 0.};
+
+const char* distributedEvalMessage(int status){
+  switch (status) {
+    case DEVAL_OUTSIDE:
+      return "a distributed FE function is evaluated outside its local mesh (other mesh or other Dmesh): transfer it first, e.g. Vdh w = u;";
+    case DEVAL_NOPOINT:
+      return "a distributed FE function cannot be evaluated at an arbitrary point (u(x,y,z), cout << u, real a = u)";
+    default:
+      return "distributed FE function: evaluation refused";
+  }
+}
+
+void distributedEvalFailure(int status, double x, double y, double z){
+  if (g_devalDepth == 0) {
+    // ExecError n'est affichee que par le rang 0 (lg.ypp) : le rang fautif parle lui-meme
+    cerr << "[rank " << mpirank << "] " << distributedEvalMessage(status)
+         << " (point " << x << ", " << y << ", " << z << ")" << endl;
+    ExecError(distributedEvalMessage(status));
+  }
+  if (g_devalFail++ == 0) {
+    g_devalStatus = status;
+    g_devalP[0] = x; g_devalP[1] = y; g_devalP[2] = z;
+  }
+}
+
+bool distributedEvalDeferred(){ return g_devalDepth > 0; }
+
+DistributedEvalScope::DistributedEvalScope(bool active) : act(active), nFail0(g_devalFail){
+  if (act) ++g_devalDepth;
+}
+
+DistributedEvalScope::~DistributedEvalScope(){
+  if (act && --g_devalDepth == 0) { g_devalFail = 0; g_devalStatus = DEVAL_OK; }
+}
+
+void DistributedEvalScope::check(pcommworld comm){
+  if (!act) return;
+  int local = (g_devalFail > nFail0) ? g_devalStatus : DEVAL_OK;
+  int global = agreeOnStatus(local, comm);   // MPI_MAX
+  if (global == DEVAL_OK) return;
+  if (local != DEVAL_OK)
+    cerr << "[rank " << mpirank << "] " << distributedEvalMessage(local) << " (first point "
+         << g_devalP[0] << ", " << g_devalP[1] << ", " << g_devalP[2] << ")" << endl;
+  ExecError(distributedEvalMessage(global));
+}
+
+
+
 static KN<long> trivialNumbering(int nLocDof, long& globalNdof){
   KN<long> num(nLocDof);
   for (int d = 0; d < nLocDof; ++d) num[d] = d;

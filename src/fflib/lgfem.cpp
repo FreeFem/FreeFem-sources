@@ -3597,6 +3597,7 @@ struct set_eqvect_fl {
 template< class R >
 AnyType IntFunction< R >::operator( )(Stack stack) const {
   MeshPoint mp = *MeshPointStack(stack);
+  DistributedEvalScope dscope(di->DTh != 0);   // int(DTh) est collective
   StackOfPtr2Free *wsptr2free = WhereStackOfPtr2Free(stack);
   size_t swsptr2free = wsptr2free->size( );
   R r = 0;
@@ -4302,18 +4303,17 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
 
   *MeshPointStack(stack) = mp;
   if (di->DTh) {
-    if (di->d == 3 && di->dHat == 3) {
-      auto pp = GetAny< const DistributedMesh<Mesh3> **>((*di->DTh)(stack));
-      r = distributedReduce<R>((**pp).comm, r);
-    }
-    else if (di->d == 3 && di->dHat == 2) {
-      auto pp = GetAny< const DistributedMesh<MeshS> **>((*di->DTh)(stack));
-      r = distributedReduce<R>((**pp).comm, r);
-    }
-    else if (di->d == 3 && di->dHat == 1) {
-      auto pp = GetAny< const DistributedMesh<MeshL> **>((*di->DTh)(stack));
-      r = distributedReduce<R>((**pp).comm, r);
-    }
+    pcommworld comm = nullptr;
+    if (di->d == 3 && di->dHat == 3)
+      comm = (**GetAny< const DistributedMesh<Mesh3> **>((*di->DTh)(stack))).comm;
+    else if (di->d == 3 && di->dHat == 2)
+      comm = (**GetAny< const DistributedMesh<MeshS> **>((*di->DTh)(stack))).comm;
+    else if (di->d == 3 && di->dHat == 1)
+      comm = (**GetAny< const DistributedMesh<MeshL> **>((*di->DTh)(stack))).comm;
+    else
+      ffassert(0);
+    dscope.check(comm);   // avant la reduction : tous les rangs levent l'erreur ensemble
+    r = distributedReduce<R>(comm, r);
   }
 
   return SetAny< R >(r);
@@ -7644,7 +7644,8 @@ Expression Op_CopyArrayDT(const E_Array &a, const E_Array &b) {
   Expression src = 0;
   int w = wholeFEArray< K, v_fesD >(b, src);
   if (w == 1)  return newAssignFEDistributed< Mesh, K >(rr, src);     // transfert
-  if (w == -1) CompileError("[b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
+  if (w == -2) CompileError("[b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
+  // w == 0 ou -1 : formules, evaluees sur le maillage local
 
   return new E_set_fev3< K, v_fesD >(&b, rr);
 }

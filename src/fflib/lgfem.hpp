@@ -483,6 +483,38 @@ template<class Mesh> class v_dfes : public generic_v_fes {
   int getN(){ return N;}               
 };
 
+// Garde-fou de l'evaluation d'une fonction EF distribuee 
+// Une fonction EF distribuee n'est connue que sur le maillage local de son
+// rang : l'evaluer ailleurs donnerait une valeur fausse, sans erreur.
+template<class v_fes> struct IsDistributedFE { static const bool value = false; };
+template<class Mesh> struct IsDistributedFE< v_dfes<Mesh> > { static const bool value = true; };
+
+enum DistributedEvalStatus {
+  DEVAL_OK = 0,
+  DEVAL_OUTSIDE = 1,  // point hors du maillage local de la fonction
+  DEVAL_NOPOINT = 2   // point arbitraire : u(x,y,z), cout << u, real a = u
+};
+const char* distributedEvalMessage(int status);
+
+// Evaluation refusee. Hors scope : message du rang + ExecError (local).
+// Dans un scope : retient le premier refus, l'appelant renvoie 0.
+void distributedEvalFailure(int status, double x, double y, double z);
+bool distributedEvalDeferred();   // vrai a l'interieur d'un DistributedEvalScope
+
+// Ouvert autour d'une operation collective (int3d(DTh), varf -> Mat ou rhs) :
+// les refus sont differes, puis rendus collectifs par check().
+class DistributedEvalScope {
+ public:
+  explicit DistributedEvalScope(bool active = true);
+  ~DistributedEvalScope();        // pas de MPI : peut etre appele pendant une exception
+  bool active() const { return act; }
+  void check(pcommworld comm);    // collectif : ExecError sur tous les rangs
+ private:
+  bool act;
+  long nFail0;
+  DistributedEvalScope(const DistributedEvalScope &);
+  void operator=(const DistributedEvalScope &);
+};
 
 // 3D curve
 class v_fesL : public generic_v_fes {
@@ -1195,20 +1227,27 @@ class E_FEcomp : public E_F0mps {
   operator aType( ) const { return atype< Result >( ); }
 };
 
+//  1 : toutes les composantes, dans l'ordre, d'une meme fonction EF (transfert)
+// -2 : uniquement des composantes d'une meme fonction EF, desordonnees ou incompletes
+// -1 : autre melange (formules, plusieurs fonctions) : affectation par formule
+//  0 : aucune composante de fonction EF
 template<class K, class v_fes>
 int wholeFEArray(const E_Array& a, Expression& base) {
   typedef E_FEcomp<K, v_fes> FEi;
-  int nFE = 0; bool ok = true; base = 0;
+  int nFE = 0; bool ordered = true, sameFE = true; base = 0;
   for (int i = 0; i < a.size(); ++i) {
     const FEi* e = (a[i].left() == atype<typename FEi::Result>())
                    ? dynamic_cast<const FEi*>(a[i].LeftValue()) : 0;
-    if (!e) { ok = false; continue; }
-    ++nFE;
-    if (e->comp != i || e->N != a.size() || (i && e->a0 != base)) ok = false;
-    if (!i) base = e->a0;
+    if (!e) continue;
+    if (nFE++ == 0) base = e->a0;
+    else if (e->a0 != base) sameFE = false;
+    if (e->comp != i || e->N != a.size()) ordered = false;
   }
-  return nFE == 0 ? 0 : (ok && nFE == a.size() ? 1 : -1);
+  if (nFE == 0) return 0;
+  if (nFE < a.size() || !sameFE) return -1;
+  return ordered ? 1 : -2;
 }
+
 
 // typedef double R;
 typedef pair< FEbase< double, v_fes > *, int > aFEvarR;

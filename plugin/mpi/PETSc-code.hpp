@@ -431,6 +431,17 @@ namespace PETSc {
   typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh>>::value>::type
   buildShellIfNeeded(Dmat &B, typename fes1::pfes*, int, Data_Sparse_Solver&) {}
 
+  template<class MMesh, class fes1>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  checkDistributedEval(DistributedEvalScope& scope, typename fes1::pfes* pUh) {
+    v_dfes<MMesh>* f = *pUh;
+    scope.check(f->DTh ? f->DTh->comm : nullptr);
+  }
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  checkDistributedEval(DistributedEvalScope&, typename fes1::pfes*) {}
+
   template<class K, class MMesh, class fes1, class fes2>
   AnyType varfToMat<K, MMesh, fes1, fes2>::Op::operator()(Stack stack) const {
     typedef typename fes1::pfes pfes1;
@@ -458,6 +469,7 @@ namespace PETSc {
     const FESpace2& Vh = *PVh;
 
     buildShellIfNeeded<MMesh, fes1>(B, pUh, Uh.NbOfDF, ds);
+    DistributedEvalScope dscope(IsDistributedFE<fes1>::value);
 
     bool same = isSameMesh(b->largs, PUh ? &Uh.Th : nullptr, PVh ? &Vh.Th : nullptr, stack);
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
@@ -496,6 +508,7 @@ namespace PETSc {
         if(bc)
           AssembleBC<upscaled_type<K>>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, nullptr, nullptr, b->largs, ds.tgv);
       }
+      checkDistributedEval<MMesh, fes1>(dscope, pUh);   // avant changeOperatorSimple (collectif)
       changeOperatorSimple(&B, &A);
       if(B._A)
           B._A->setMatrix(nullptr);
