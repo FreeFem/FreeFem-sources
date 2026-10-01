@@ -2146,6 +2146,55 @@ public:
     OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt){}
 };
 
+template<class K,class Mesh>
+class  OneOperatorMakePtrFE3D : public OneOperator 
+{
+public:
+  typedef v_dfes<Mesh> v_fes;
+  typedef typename  v_fes::pfes pfes;
+  typedef  FEbase<K,v_fes> ** R;
+  typedef pfes* B;
+
+  class CODE : public E_F0mps  
+  {
+  public:
+    Expression fer,fes;
+    Expression setter;
+    const E_Array * v;
+    CODE(const basicAC_F0 & args) 
+      : 
+      fer(to<R>(args[0])),
+      fes(to<B>(args[1])),
+      setter(0) 
+    {
+      if (BCastTo<K>(args[2]) )
+	v = new E_Array(basicAC_F0_wa(to<K>(args[2]))); 
+      else 
+	v = dynamic_cast<const E_Array *>( args[2].LeftValue() );
+      if (!v) {
+	cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
+	ErrorCompile(" We wait  a double/complex expression or a array expression",1);
+      }
+      setter=  new   E_set_fev3<K,v_fes>(v,fer);
+      
+    }
+    
+    AnyType operator()(Stack stack)  const {
+      R  p = GetAny<R>( (*fer)(stack));
+      B  a = GetAny<B>( (*fes)(stack)); 
+      *p=new FEbase<K,v_fes>(a);
+      (*setter)(stack); 
+      return SetAny<R>(p);
+    }
+    operator aType () const { return atype<R>();}    
+  };
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { return  new CODE(args);}
+  OneOperatorMakePtrFE3D(aType tt):
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt){}
+};
+
 
 /*
 template<class K,class v_fes>    
@@ -3276,6 +3325,31 @@ TheOperators->Add("=",
       new OneOperator2_<pdfLrbase*,pdfLrbase*,pdfesL* >(MakePtrFE3_2),
       new OneOperator2_<pdfLcbase*,pdfLcbase*,pdfesL* >(MakePtrFE3_2)
       );
+
+  TheOperators->Add("=",
+    new OneOperator2_<pdf3r, pdf3r, double, E_F_StackF0F0opt2<double>>(set_fe3<double, v_dfes3>),
+    new OneOperator2_<pdf3c, pdf3c, Complex, E_F_StackF0F0opt2<Complex>>(set_fe3<Complex, v_dfes3>),
+    new OneOperator2_<pdfSr, pdfSr, double, E_F_StackF0F0opt2<double>>(set_fe3<double, v_dfesS>),
+    new OneOperator2_<pdfSc, pdfSc, Complex, E_F_StackF0F0opt2<Complex>>(set_fe3<Complex, v_dfesS>),
+    new OneOperator2_<pdfLr, pdfLr, double, E_F_StackF0F0opt2<double>>(set_fe3<double, v_dfesL>),
+    new OneOperator2_<pdfLc, pdfLc, Complex, E_F_StackF0F0opt2<Complex>>(set_fe3<Complex, v_dfesL>)
+  );
+
+  TheOperators->Add("<-",
+    new OneOperatorMakePtrFE3D<double, Mesh3>(atype<double>()),
+    new OneOperatorMakePtrFE3D<double, Mesh3>(atype<E_Array>()),
+    new OneOperatorMakePtrFE3D<Complex,Mesh3>(atype<Complex>()),
+    new OneOperatorMakePtrFE3D<Complex,Mesh3>(atype<E_Array>()),
+    new OneOperatorMakePtrFE3D<double, MeshS>(atype<double>()),
+    new OneOperatorMakePtrFE3D<double, MeshS>(atype<E_Array>()),
+    new OneOperatorMakePtrFE3D<Complex,MeshS>(atype<Complex>()),
+    new OneOperatorMakePtrFE3D<Complex,MeshS>(atype<E_Array>()),
+    new OneOperatorMakePtrFE3D<double, MeshL>(atype<double>()),
+    new OneOperatorMakePtrFE3D<double, MeshL>(atype<E_Array>()),
+    new OneOperatorMakePtrFE3D<Complex,MeshL>(atype<Complex>()),
+    new OneOperatorMakePtrFE3D<Complex,MeshL>(atype<E_Array>())
+  );
+
   // to write u(x,y,z) when u si FE function on Surface or Line .. FH. jan 2020. 
   /*  Add< pfSr >("(", "", new OneQuadOperator< Op4_pfeK< R, v_fesS>, Op4_pfeK< R,v_fesS >::Op >);
     Add< pfSc >("(", "", new OneQuadOperator< Op4_pfeK< Complex,v_fesS >, Op4_pfeK< Complex,v_fesS >::Op >);
@@ -3523,3 +3597,10 @@ template E_set_fev3<double,v_fesS>::E_set_fev3(const E_Array * a,Expression pp) 
 template E_set_fev3<Complex,v_fesS>::E_set_fev3(const E_Array * a,Expression pp) ;
 template E_set_fev3<double,v_fesL>::E_set_fev3(const E_Array * a,Expression pp) ;
 template E_set_fev3<Complex,v_fesL>::E_set_fev3(const E_Array * a,Expression pp) ;
+
+template E_set_fev3<double, v_dfes3>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_dfes3>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<double, v_dfesS>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_dfesS>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<double, v_dfesL>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_dfesL>::E_set_fev3(const E_Array * a,Expression pp) ;

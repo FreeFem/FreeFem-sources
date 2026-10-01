@@ -1398,6 +1398,39 @@ static bool sameDistributedSpace(const v_dfes<Mesh>* a, const GFESpace<Mesh>& Va
 }
 
 template<class Mesh, class R>
+void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<Mesh>>* src){
+    if (dst.first == src.first) return dst;
+
+    v_dfes<Mesh>* pS = *src.first->pVh; v_dfes<Mesh>* pD = *dst.first->pVh;
+    ffassert(pS && pS->DTh);
+    ffassert(pD && pD->DTh);
+
+    if (pS->N != pD->N) ExecError("u = v: incompatible number of components");
+
+    KN<R>* xs = src.first->x();
+    if (!xs) {
+        const GFESpace<Mesh>* V = src.first->newVh();
+        *src.first = xs = new KN<R>(V->NbOfDF);
+        *xs = R();
+    }
+    const GFESpace<Mesh>& VhS = (src.first->Vh) ? *src.first->Vh : *src.first->newVh();
+    const GFESpace<Mesh>& VhD = *dst.first->newVh();
+
+    if (xs->N() != VhS.NbOfDF) ExecError("u = v: outdated source FE function");
+
+    if (sameDistributedSpace(pS, VhS, pD, VhD)) {
+        *dst.first = new KN<R>(*xs);
+        return dst;
+    }
+
+    KN<R>* y = new KN<R>(VhD.NbOfDF);
+    try { interpolateFE(pS, VhS, *xs, pD, VhD, *y); }
+    catch (...) { delete y; throw; }
+    *dst.first = y;
+    return dst;
+}
+
+template<class Mesh, class R>
 static std::pair<FEbase<R, v_dfes<Mesh>>*, int>
 setFEDistributed(const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& dst, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
     if (dst.first == src.first) return dst;
