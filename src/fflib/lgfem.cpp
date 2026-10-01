@@ -7641,6 +7641,11 @@ Expression Op_CopyArrayDT(const E_Array &a, const E_Array &b) {
 
   if (iii) CompileError("[u1,...] = [...] : arrays of distributed FE functions are not supported");
 
+  Expression src = 0;
+  int w = wholeFEArray< K, v_fesD >(b, src);
+  if (w == 1)  return newAssignFEDistributed< Mesh, K >(rr, src);     // transfert
+  if (w == -1) CompileError("[b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
+
   return new E_set_fev3< K, v_fesD >(&b, rr);
 }
 

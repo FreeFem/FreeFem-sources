@@ -2175,8 +2175,12 @@ public:
 	cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
 	ErrorCompile(" We wait  a double/complex expression or a array expression",1);
       }
-      setter=  new   E_set_fev3<K,v_fes>(v,fer);
-      
+
+      Expression src = 0;
+      int w = wholeFEArray<K, v_fes>(*v, src);
+      if (w == 1) setter = newAssignFEDistributed<Mesh, K>(fer, src);
+      else if (w == -1) CompileError("Vd [b1,...] = [a1,...] : the right side must be all the components, in order, of one distributed FE function");
+      else setter = new E_set_fev3<K, v_fes>(v, fer);
     }
     
     AnyType operator()(Stack stack)  const {

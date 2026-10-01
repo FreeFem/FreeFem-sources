@@ -1398,69 +1398,43 @@ static bool sameDistributedSpace(const v_dfes<Mesh>* a, const GFESpace<Mesh>& Va
 }
 
 template<class Mesh, class R>
-void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<Mesh>>* src){
-    if (dst.first == src.first) return dst;
+static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<Mesh>>* src){
+    if (dst == src) return;
 
-    v_dfes<Mesh>* pS = *src.first->pVh; v_dfes<Mesh>* pD = *dst.first->pVh;
+    v_dfes<Mesh>* pS = *src->pVh; v_dfes<Mesh>* pD = *dst->pVh;
     ffassert(pS && pS->DTh);
     ffassert(pD && pD->DTh);
 
     if (pS->N != pD->N) ExecError("u = v: incompatible number of components");
 
-    KN<R>* xs = src.first->x();
+    KN<R>* xs = src->x();
     if (!xs) {
-        const GFESpace<Mesh>* V = src.first->newVh();
-        *src.first = xs = new KN<R>(V->NbOfDF);
+        const GFESpace<Mesh>* V = src->newVh();
+        *src = xs = new KN<R>(V->NbOfDF);
         *xs = R();
     }
-    const GFESpace<Mesh>& VhS = (src.first->Vh) ? *src.first->Vh : *src.first->newVh();
-    const GFESpace<Mesh>& VhD = *dst.first->newVh();
+    const GFESpace<Mesh>& VhS = (src->Vh) ? *src->Vh : *src->newVh();
+    const GFESpace<Mesh>& VhD = *dst->newVh();
 
     if (xs->N() != VhS.NbOfDF) ExecError("u = v: outdated source FE function");
 
     if (sameDistributedSpace(pS, VhS, pD, VhD)) {
-        *dst.first = new KN<R>(*xs);
-        return dst;
+        *dst = new KN<R>(*xs);
+        return;
     }
 
     KN<R>* y = new KN<R>(VhD.NbOfDF);
     try { interpolateFE(pS, VhS, *xs, pD, VhD, *y); }
     catch (...) { delete y; throw; }
-    *dst.first = y;
-    return dst;
+    *dst = y;
+    return;
 }
 
 template<class Mesh, class R>
 static std::pair<FEbase<R, v_dfes<Mesh>>*, int>
 setFEDistributed(const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& dst, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
-    if (dst.first == src.first) return dst;
-
-    v_dfes<Mesh>* pS = *src.first->pVh; v_dfes<Mesh>* pD = *dst.first->pVh;
-    ffassert(pS && pS->DTh);
-    ffassert(pD && pD->DTh);
-
-    if (pS->N != 1 || pD->N != 1) ExecError("u = v: only scalar distributed FE functions (use interpolateD per component)");
-
-    KN<R>* xs = src.first->x();
-    if (!xs) {
-        const GFESpace<Mesh>* V = src.first->newVh();
-        *src.first = xs = new KN<R>(V->NbOfDF);
-        *xs = R();
-    }
-    const GFESpace<Mesh>& VhS = (src.first->Vh) ? *src.first->Vh : *src.first->newVh();
-    const GFESpace<Mesh>& VhD = *dst.first->newVh();
-
-    if (xs->N() != VhS.NbOfDF) ExecError("u = v: outdated source FE function");
-
-    if (sameDistributedSpace(pS, VhS, pD, VhD)) {
-        *dst.first = new KN<R>(*xs);
-        return dst;
-    }
-
-    KN<R>* y = new KN<R>(VhD.NbOfDF);
-    try { interpolateFE(pS, VhS, *xs, pD, VhD, *y); }
-    catch (...) { delete y; throw; }
-    *dst.first = y;
+    if ((*src.first->pVh)->N != 1 || (*dst.first->pVh)->N != 1) ExecError("b1 = a1 on a vector FE function: use [b1,...]=[a1,...]");
+    assignFEDistributed<Mesh, R>(dst.first, src.first);
     return dst;
 }
 
@@ -1470,6 +1444,36 @@ static FEbase<R, v_dfes<Mesh>>** initFEDistributed(FEbase<R, v_dfes<Mesh>>** con
     setFEDistributed<Mesh, R>(std::make_pair(*p, 0), src);
     return p;
 }
+
+template<class Mesh, class R>
+class E_assignFEDistributed : public E_F0mps {
+    typedef FEbase<R, v_dfes<Mesh>> FE;
+    Expression dst, src;
+public:
+    E_assignFEDistributed(Expression d, Expression s) : dst(d), src(s) {}
+
+    AnyType operator()(Stack s) const { 
+        FE* d = *GetAny<FE**>((*dst)(s));
+        FE* r = *GetAny<FE**>((*src)(s));
+        assignFEDistributed<Mesh, R>(d, r); 
+        return Nothing;
+    }
+    operator aType() const { return atype<void>(); }
+};
+
+template<class Mesh, class R>
+Expression newAssignFEDistributed(Expression dst, Expression src) {
+    return new E_assignFEDistributed<Mesh, R>(dst, src);
+}
+
+template Expression newAssignFEDistributed<Mesh3, double >(Expression, Expression);
+template Expression newAssignFEDistributed<Mesh3, Complex>(Expression, Expression);
+template Expression newAssignFEDistributed<MeshS, double >(Expression, Expression);
+template Expression newAssignFEDistributed<MeshS, Complex>(Expression, Expression);
+template Expression newAssignFEDistributed<MeshL, double >(Expression, Expression);
+template Expression newAssignFEDistributed<MeshL, Complex>(Expression, Expression);
+
+
 
 static void registerTransferGlobals() {
         static bool done = false;
