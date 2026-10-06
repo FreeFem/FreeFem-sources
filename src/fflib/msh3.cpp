@@ -10115,15 +10115,15 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     }
   }
   status = agreeOnStatus(status, comm);
-  if (status) ExecError(distributeStatusMessage(status));
+  if (status) distributedError(comm, distributeStatusMessage(status));
 
   if (nargs[12]){
     bool wanted = GetAny<bool>((*nargs[12])(stack));
     if (wanted && mode != DM_SCATTER){
-      ExecError("distribute: user asked scatter = true but all ranks share the global mesh.");
+      distributedError(comm, "distribute: user asked scatter = true but all ranks share the global mesh.");
     }
     if (!wanted && mode == DM_SCATTER){
-      ExecError("distribute: user asked scatter=false, but the mesh is present only on rank 0.");
+      distributedError(comm, "distribute: user asked scatter=false, but the mesh is present only on rank 0.");
     }
   }
 
@@ -10132,12 +10132,12 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     const int anyTrue = agreeOnStatus(kg, comm);
     const int anyFalse = agreeOnStatus(1 - kg, comm);
     if (anyTrue && anyFalse){
-      ExecError("distribute: keepGlobal must be the same on all ranks");
+      distributedError(comm, "distribute: keepGlobal must be the same on all ranks");
     }
   }
 
   if (mode == DM_SCATTER && method == "parmetis"){
-  ExecError("distribute: partmethod= \"parmetis\" not supported with scatter mode");
+  distributedError(comm, "distribute: partmethod= \"parmetis\" not supported with scatter mode");
   }
 
   const Mesh* pWork = nullptr;
@@ -10168,10 +10168,10 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   }
 
   status = agreeOnStatus(status, comm);
-  if (status) ExecError(distributeStatusMessage(status));
+  if (status) distributedError(comm, distributeStatusMessage(status));
   
   if (mode == DM_REPLICATED && checkPartitionConsistency(comm, globalPartition)){
-    ExecError("distribute: global partition differs between the ranks");
+    distributedError(comm, "distribute: global partition differs between the ranks");
   }
 
   if (mode == DM_SCATTER){

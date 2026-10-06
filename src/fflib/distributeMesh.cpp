@@ -43,6 +43,14 @@ bool commIsNull(pcommworld) { return false; }
 bool sameComm(pcommworld, pcommworld) { return true; }
 #endif
 
+// Erreur COLLECTIVE sur comm. lg.ypp n'affiche ExecError que sur le rang 0 du
+// monde : quand il n'est pas le rang 0 de comm, ce dernier affiche le message.
+void distributedError(pcommworld comm, const char* msg) {
+  if (commRank(comm) == 0 && mpirank != 0)
+    cerr << "[rank " << mpirank << "] " << msg << endl;
+  ExecError(msg);
+}
+
 #ifdef PARALLELE
 pcommworld duplicateComm(pcommworld c) {
   if (commIsNull(c))
@@ -228,13 +236,13 @@ int detectDistributionMode(int localNt, pcommworld comm)
     return DM_SCATTER;
   }
   else if (nHas == 0){
-    ExecError("distribute: no rank has a mesh");
+    distributedError(comm, "distribute: no rank has a mesh");
   }
   else if (hasMesh[0] == 0){
-    ExecError("distribute: to use scatter mode, the global mesh must be built on rank 0");
+    distributedError(comm, "distribute: to use scatter mode, the global mesh must be built on rank 0 of comm");
   }
   else{
-    ExecError("distribute: mixed mode not supported: either all ranks have the global mesh, or only rank 0");
+    distributedError(comm, "distribute: mixed mode not supported: either all ranks have the global mesh, or only rank 0 of comm");
   }
   return DM_REPLICATED;
 }

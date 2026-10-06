@@ -1514,7 +1514,7 @@ void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
             cerr << "fespace distribute: ddl intersection asymmetric on the rank" << raw[0][bad] << " (local " << raw[1+bad].n << ")" << endl;
         }
         if (agreeOnStatus(bad >= 0 ? 1 : 0, DTh->comm)){
-            ExecError("fespace distribute: incoherent intersection map");
+            distributedError(DTh->comm, "fespace distribute: incoherent intersection map");
         }
     }
     dofIntersectionDof = purgeEmptyIntersections(raw);

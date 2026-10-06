@@ -6,7 +6,6 @@
 static inline MPI_Comm ffComm(pcommworld c) { return c ? *(MPI_Comm*)c : MPI_COMM_WORLD; }
 #endif
 
-extern long mpisize, mpirank;
 static const int TAG_XFER_HDR = 3000;
 static const int TAG_XFER_BODY = 3001;
 static const int TAG_XFER_DOF = 3002;
@@ -356,9 +355,9 @@ static bool allDstVerticesInside(const GFESpace<Mesh>& dstVh, const FragLocator<
 template<class Mesh1, class Mesh2>
 void computeOverlapRankPairs(pcommworld comm, const DistributedMesh<Mesh1>& Dsrc, const DistributedMesh<Mesh2>& Ddst, KN<int>& sendToRanks, KN<int>& recvFromRanks, std::vector<BBox>& allSrc, std::vector<BBox>& allDst) {
     if (!sameComm(Dsrc.comm, Ddst.comm))
-        ExecError("transfer between distributed meshes on different communicators "
+        distributedError(Dsrc.comm, "transfer between distributed meshes on different communicators "
                   "(they must have the same ranks in the same order)");
-    const int nproc = mpisize > 0 ? (int)mpisize : 1;
+    const int nproc = commSize(comm);
     std::vector<BBox> both(2*nproc);
     const double h = std::max(localMaxEdgeLength(*Dsrc.LocalMesh), localMaxEdgeLength(*Ddst.LocalMesh));
     BBox mySrc = rawBoxOf(*Dsrc.LocalMesh); inflate(mySrc, h);
@@ -656,7 +655,7 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
     KN<int> usable(cover2local);                 // copie : cover2local reste requis plus bas
     const bool haveOwn = (Dsrc.CoverMesh && Dsrc.coverPartition.n == srcGeom->nt);
     if (haveOwn) {
-        const int me = (int)mpirank;
+        const int me = Dsrc.rank;
         for (int k = 0; k < srcGeom->nt; ++k)
             if (Dsrc.coverPartition[k] != me) usable[k] = -1;
     }
@@ -893,7 +892,7 @@ static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh
     double loc[3] = { dMax, rel, hRef }, glo[3] = { loc[0], loc[1], loc[2] };
     long   lc = nOK, gc = nOK;
     #ifdef PARALLELE
-    if (mpisize > 1) {
+    if (commSize(comm) > 1) {
         MPI_Comm cw = ffComm(comm);
         MPI_Allreduce(loc, glo, 3, MPI_DOUBLE, MPI_MAX, cw);
         MPI_Allreduce(&lc, &gc, 1, MPI_LONG, MPI_SUM, cw);
@@ -903,7 +902,7 @@ static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh
     if (!(hRef > 0)) return false;    
 
     if (gc == 0) {                            // aucun echantillon : indecidable
-        if (verbosity > 0 && mpirank == 0)
+        if (verbosity > 0 && commRank(comm) == 0)
             cerr << "Warning: transferPlan: tolerances non mesurables (aucun point"
                     " destination interieur a la source) ; tolN/tolT inchangees." << endl;
         return false;
@@ -913,7 +912,7 @@ static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh
 
     tolN = std::max(tolN, std::pow(2.0, std::ceil(std::log2(4.0*dg))));
     tolT = std::max(tolT, std::pow(2.0, std::ceil(std::log2(32.0*rel*rel))));
-    if (verbosity > 0 && mpirank == 0)
+    if (verbosity > 0 && commRank(comm) == 0)
         cout << " -- transferPlan: ecart geometrique " << dg << " (h " << hRef
              << ", relatif " << rel << ", " << gc << " echantillons)"
              << " -> tolN " << tolN << " tolT " << tolT << endl;
@@ -964,7 +963,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     double tolN = std::max(0.0, transferTolN);
     double tolT = std::max(0.0, transferTolT);
     #ifdef PARALLELE
-    if (Dsrc.comm || mpisize > 1) {
+    if (commSize(Dsrc.comm) > 1) {
         MPI_Comm cw = ffComm(Dsrc.comm);
         double t[2] = {tolN, tolT}, g[2];
         MPI_Allreduce(&t, g, 2, MPI_DOUBLE, MPI_MAX, cw);
@@ -979,7 +978,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         detectTolerances(dstVh, oneT, Dsrc.comm, tolN, tolT);
     }
 
-    const int nproc = mpisize > 0 ? (int)mpisize : 1;
+    const int nproc = commSize(Dsrc.comm);
     if (nproc == 1) {
         P->chi = interpolatePoU(Dsrc, srcVh);
         std::vector<Mesh*> one1(1, const_cast<Mesh*>(&srcVh.Th));
@@ -993,7 +992,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
             F0->ncol = srcVh.NbOfDF;
             P->M[0] = F0;
         }
-        reportCoverage(coverageOf(P->cover), nullptr, "interpolateD");
+        reportCoverage(coverageOf(P->cover), P->comm, "interpolateD");
         P->path = XFER_SINGLE_RANK;
         return P;        
     }
@@ -1291,7 +1290,7 @@ template<class Mesh, class R>
 static int interpolateFE(v_dfes<Mesh>* pSrc, const GFESpace<Mesh>& srcVh, const KN<R>& uSrc, v_dfes<Mesh>* pDst, const GFESpace<Mesh>& dstVh, KN<R>& uDst){
     ffassert(pSrc && pDst && pSrc->DTh && pDst->DTh);
     if (!sameComm(pSrc->DTh->comm, pDst->DTh->comm))
-        ExecError("transfer between distributed meshes on different communicators "
+        distributedError(pSrc->DTh->comm, "transfer between distributed meshes on different communicators "
                   "(they must have the same ranks in the same order)");
     ffassert(uSrc.n == srcVh.NbOfDF && uDst.n == dstVh.NbOfDF);
     return interpolateDistributed(*pSrc->DTh, srcVh, uSrc, *pDst->DTh, dstVh, uDst);
@@ -1321,7 +1320,7 @@ const TransferPlan<Mesh>* makeTransferPlan(v_dfes<Mesh>** const& ppSrc,
     v_dfes<Mesh>* pDst = *ppDst;
     throwassert(pSrc->DTh && pDst->DTh);
     if (!sameComm(pSrc->DTh->comm, pDst->DTh->comm))
-        ExecError("transfer between distributed meshes on different communicators "
+        distributedError(pSrc->DTh->comm, "transfer between distributed meshes on different communicators "
                   "(they must have the same ranks in the same order)");
     const GFESpace<Mesh>& srcVh = **pSrc;      // operator FESpace*() : lgfem.hpp:428
     const GFESpace<Mesh>& dstVh = **pDst;

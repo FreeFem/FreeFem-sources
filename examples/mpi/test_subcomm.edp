@@ -22,6 +22,15 @@
 //   X  monde SANS le rang 0 : le rang 0 de cX est le rang monde 1. Le
 //      rang monde 0 recoit MPI_COMM_NULL et ne participe pas. En mode
 //      scatter, la racine est donc le rang monde 1.
+//      E1 : erreur collective sur cX (partition hors de [0, mpiSize(cX)[),
+//      refusee sur tous les rangs de cX et affichee par le rang monde 1.
+//      E2..E4 : erreurs de detection du mode (maillage hors du rang 0 de cX,
+//      aucun maillage -- erreur typique if (mpirank == 0) --, mode mixte).
+//   U  tailles INEGALES : le rang monde 0 SEUL (taille 1), les autres
+//      ensemble (taille mpisize-1). Un communicateur de taille 1 prend les
+//      chemins "sequentiels" (partition triviale, XFER_SINGLE_RANK...) alors
+//      que mpisize > 1 : tout collectif reste sur mpiCommWorld y bloque,
+//      puisque les autres rangs ne l'appellent pas.
 //
 //  SUITE (macro SUITE, pour un communicateur, un partitionneur, et le mode
 //  replique ou scatter). Toutes les reductions se font sur c.
@@ -95,18 +104,25 @@
 //   6 L  "ddl intersection asymmetric", puis MPI_Abort.
 //   7 O  FAIL : tous les rangs refusent, au lieu du seul rang hors de cX.
 //
+//  ETAT APRES LES ETAPES 0 A 7 (sous-communicateurs acceptes)
+//   Tout le fichier passe, sans -stop ni -skip : -np 4 et -np 3, -ov 1 et
+//   -ov 0 (173/173 sur le rang 0). Le cas 8 U a revele en cours de route un
+//   Allreduce reste sur mpiCommWorld dans le chemin XFER_SINGLE_RANK de
+//   buildTransferPlan (reportCoverage(..., nullptr, ...)).
+//
 //  OPTIONS
 //    -case  0 = tout (defaut), 1 = W, 2 = P, 3 = H, 4 = X,
-//           5 = C, 6 = L, 7 = O
+//           5 = C, 6 = L, 7 = O, 8 = U
 //    -nc    raffinement du cube                          (defaut 10)
 //    -nc2   raffinement du cube inclus (transfert)       (defaut 7)
 //    -ov    recouvrement passe a distribute              (defaut 1)
 //    -pm    1 = ajoute partmethod = "parmetis" aux cas W, P, H
 //           (FreeFEM configure avec ParMETIS)            (defaut 0)
 //    -stop  k = n'execute que S0..Sk de chaque suite     (defaut 9)
-//           Pour valider une etape sans les suivantes :
-//           -stop 7 saute S8 (PETSc, etape 6) et S9 (transfert, etape 5),
-//           qui bloquent tant que ces etapes ne sont pas faites.
+//           -stop 7 saute S8 (PETSc) et S9 (transfert) : utile pour
+//           isoler une regression de distribute ou du fespace.
+//    -skip  k = saute Sk (k = 8 ou 9) dans chaque suite   (defaut aucun)
+//           -skip 8 teste le transfert (S9) sans PETSc (S8).
 //
 //  Exige mpisize >= 2 (le cas X et le bloc O excluent le rang monde 0).
 // =====================================================================
@@ -120,6 +136,7 @@ int nc2 = getARGV("-nc2", 7);
 int ov  = getARGV("-ov", 1);
 int pm  = getARGV("-pm", 0);
 int stopAt = getARGV("-stop", 9);
+int skipS  = getARGV("-skip", -1);
 
 assert(mpisize >= 2);
 
@@ -295,7 +312,7 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
         }
 
         /* S8 : Mat PETSc sans communicator=, puis resolution */
-        if (stopAt >= 8) {
+        if (stopAt >= 8 && skipS != 8) {
           fespace U1dh(DTh, P1);
           fespace U1h(Th, P1);
           varf vPb(a, b) = int3d(DTh)(grad(a)'*grad(b)) + int3d(DTh)(1.*b)
@@ -316,7 +333,7 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */
-        if (stopAt >= 9) {
+        if (stopAt >= 9 && skipS != 9) {
           mesh3 Th2 = cube(nc2, nc2, nc2, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
           Dmesh3 DTh2 = distribute(Th2, overlap = ov, comm = COMM);
           mesh3 L2 = DTh2.local;
@@ -349,10 +366,13 @@ int colH = 0;
 if (mpirank >= mpisize/2) colH = 1;
 int colX = 0;
 if (mpirank == 0) colX = mpiUndefined;
+int colU = 0;
+if (mpirank > 0) colU = 1;
 
 mpiComm cP(mpiCommWorld, 0, mpisize - 1 - mpirank);   // monde permute
 mpiComm cH(mpiCommWorld, colH, mpirank);              // deux moities
 mpiComm cX(mpiCommWorld, colX, mpirank);              // sans le rang monde 0
+mpiComm cU(mpiCommWorld, colU, mpirank);              // {0} et {1..mpisize-1}
 
 // ---------------------------------------------------------------------
 //  1. W : temoin sur mpiCommWorld
@@ -396,6 +416,62 @@ if (cas == 0 || cas == 4) {
   SUITE(cX, "X", false, "user")
   SUITE(cX, "X", true, "user")
   SUITE(cX, "X", true, "metis")
+  // E1 : erreur collective sur cX. La valeur mpiSize(cX) est hors de
+  // [0, mpiSize(cX)[ mais dans [0, mpisize[ : refus attendu sur tous les
+  // rangs de cX. Le rang monde 0 n'etant pas dans cX, le message
+  // "partition[] has a value outside [0, comm size[" doit etre affiche
+  // sur cerr par le rang 0 de cX (rang monde 1) : a verifier dans la sortie.
+  if (cX) {
+    mesh3 ThE = cube(nc, nc, nc);
+    int[int] partE(ThE.nt);
+    partE = 0;
+    partE[0] = mpiSize(cX);
+    int refused = 0;
+    try { Dmesh3 DE = distribute(ThE, overlap = ov, comm = cX, partition = partE); }
+    catch (...) { refused = 1; }
+    real eE = 1 - refused;
+    CHK(cX, "X", "E1 partition hors de [0, taille de cX[ : refus", eE, 0)
+
+    // E2..E4 : erreurs de detectDistributionMode, collectives sur cX et
+    // affichees par le rang monde 1 (a verifier dans la sortie).
+    int crE = mpiRank(cX);
+    {   // E2 : maillage sur le rang 1 de cX seulement -> "must be built on rank 0 of comm"
+      mesh3 ThS;
+      if (crE == 1) ThS = cube(nc, nc, nc);
+      int refS = 0;
+      try { Dmesh3 DThS = distribute(ThS, overlap = ov, comm = cX); } catch (...) { refS = 1; }
+      real eS = 1 - refS;
+      CHK(cX, "X", "E2 scatter hors du rang 0 de cX : refus", eS, 0)
+    }
+    {   // E3 : erreur typique, if (mpirank == 0) au lieu de if (mpiRank(cX) == 0) :
+        // le rang monde 0 n'est pas dans cX -> "no rank has a mesh"
+      mesh3 ThN;
+      if (mpirank == 0) ThN = cube(nc, nc, nc);
+      int refN = 0;
+      try { Dmesh3 DThN = distribute(ThN, overlap = ov, comm = cX); } catch (...) { refN = 1; }
+      real eN = 1 - refN;
+      CHK(cX, "X", "E3 aucun rang de cX n'a le maillage : refus", eN, 0)
+    }
+    if (mpiSize(cX) >= 3) {   // E4 : rangs 0 et 1 de cX seulement -> "mixed mode"
+      mesh3 ThM;
+      if (crE <= 1) ThM = cube(nc, nc, nc);
+      int refM = 0;
+      try { Dmesh3 DThM = distribute(ThM, overlap = ov, comm = cX); } catch (...) { refM = 1; }
+      real eM = 1 - refM;
+      CHK(cX, "X", "E4 mode mixte : refus", eM, 0)
+    }
+  }
+  mpiBarrier(mpiCommWorld);
+}
+
+// ---------------------------------------------------------------------
+//  8. U : tailles inegales, {0} de taille 1 et {1..mpisize-1}
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 8) {
+  if (mpirank == 0) cout << "===== U : tailles 1 et mpisize-1" << endl;
+  SUITE(cU, "U", false, "user")
+  SUITE(cU, "U", false, "metis")
+  SUITE(cU, "U", true, "user")
   mpiBarrier(mpiCommWorld);
 }
 
