@@ -212,8 +212,6 @@ static double pouResidualLocal(const KN<KN<long>>& dofI, const KN<double>& Ddof,
 int detectDistributionMode(int localNt, pcommworld comm)
 {
   MPI_Comm cw = ffComm(comm);
-  int cmp;
-  MPI_Comm_compare(cw, MPI_COMM_WORLD, &cmp);
 
   int size;
   MPI_Comm_size(cw, &size);
