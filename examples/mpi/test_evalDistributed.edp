@@ -21,11 +21,11 @@
 //   V7. complexe
 //   V8. MeshS (int2d) et MeshL (int1d)
 //   V9. Vdh w = u; sur un autre Dmesh reste un TRANSFERT (oracle interpolateD)
-//   V10. varf lineaire int3d(DTh)(u*b) : somme ponderee par D = int u  (ov > 0)
-//   V11. Mat A = vP(Udh,Udh), vP = int3d(DTh)(u*a*b) : 1'A1 = int u  (ov > 0)
+//   V10. varf lineaire int3d(DTh)(u*b) : somme ponderee par D = int u
+//   V11. Mat A = vP(Udh,Udh), vP = int3d(DTh)(u*a*b) : 1'A1 = int u
 //   V12. integrale de bord int2d(DTh, 1, 2, 5)(u*v)
 //   V13. pas de temps implicite : uold dans le varf et dans on(..., a = uold),
-//        Mat + A^-1 (PETSc), compare a la resolution sequentielle  (ov > 0)
+//        Mat + A^-1 (PETSc), compare a la resolution sequentielle
 //
 //  FORMULES VECTORIELLES (composantes et formules melangees)
 //   F1. Wdh [c1,c2,c3] = [a1, 2*a2, a3 + 1];
@@ -40,7 +40,7 @@
 //   G4. real a = u;                    refus : point arbitraire
 //   G5. int3d(Th)(u)                   refus immediat (maillage global)
 //   G6. varf lineaire sur DTh2 avec u  refus collectif
-//   G7. Mat sur DTh2 avec u            refus collectif (ov > 0)
+//   G7. Mat sur DTh2 avec u            refus collectif
 //   G8. apres tous ces refus, l'etat du garde-fou est propre : V1 redonne
 //       la meme valeur et G1 est de nouveau refuse.
 //  Chaque refus doit etre leve sur TOUS les rangs.
@@ -161,16 +161,14 @@ if (mpirank == 0) cout << "--- valeurs" << endl;
   VERDICT("V9 Vdh w = u transfert", g, 1e-10) }
 
 real Iu = int3d(Th)(us);
-// ov = 0 : sum(D .* rhs) ne redonne pas l'integrale, deja vrai pour une
-// formule seule (hors A1) : V10 et V11 seulement avec recouvrement.
-if (ov > 0) { varf vL(a, b) = int3d(DTh)(u*b);
+{ varf vL(a, b) = int3d(DTh)(u*b);
   real[int] rhs = vL(0, Udh);
   real[int] Dr = Udh.D .* rhs;
   real loc = Dr.sum, glob;
   mpiAllReduce(loc, glob, mpiCommWorld, mpiSUM);
   VERDICT("V10 varf lineaire u*b", abs(glob - Iu)/abs(Iu), 1e-10) }
 
-if (ov > 0) {
+{
   varf vP(a, b) = int3d(DTh)(u*a*b);
   Mat A = vP(Udh, Udh);
   real[int] one(Udh.ndof); one = 1;
@@ -184,7 +182,7 @@ if (ov > 0) {
 { real Id = int2d(DTh, 1, 2, 5)(u*v), Is = int2d(Th, 1, 2, 5)(us*vs);
   VERDICT("V12 int2d(DTh, 1,2,5)(u*v)", abs(Id - Is)/abs(Is), 1e-10) }
 
-if (ov > 0) {
+{
   real dt = 0.1;
   fespace U1h(Th, P1); fespace U1dh(DTh, P1);
   U1h uolds = FIELD;  U1dh uold = FIELD;
@@ -257,7 +255,7 @@ if (mpisize > 1) {
   try { varf vL2(a, b) = int3d(DTh2)(u*b); real[int] rb = vL2(0, Vdh2); } catch (...) { refused = 1; }
   REFUSED("G6 varf lineaire sur DTh2    ", refused)
 
-  if (ov > 0) {
+  {
     refused = 0;
     try { varf vB(a, b) = int3d(DTh2)(u*a*b); Mat B = vB(Vdh2, Vdh2); } catch (...) { refused = 1; }
     REFUSED("G7 Mat sur DTh2              ", refused)

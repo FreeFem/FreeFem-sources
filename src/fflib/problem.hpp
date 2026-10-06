@@ -1404,9 +1404,14 @@ maybeDistributedExchange(v_fes* const& f, KN_<R>& xx) {
 }
 
 template<class MMesh>
+inline bool distributedExchangeScaled(const v_dfes<MMesh>* f) {
+  return !f->DTh || f->DTh->overlap > 0;
+}
+
+template<class MMesh>
 void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<double>& xx) {
   if (g_distributedExchangeHookD) {
-    g_distributedExchangeHookD(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, true);
+    g_distributedExchangeHookD(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, distributedExchangeScaled(f));
   } else {
     static bool warned = false;
     if (!warned && verbosity > 1 && mpirank == 0) {
@@ -1421,7 +1426,7 @@ void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<double>& xx) {
 template<class MMesh>
 void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<Complex>& xx) {
   if (g_distributedExchangeHookC) {
-    g_distributedExchangeHookC(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, true);
+    g_distributedExchangeHookC(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, distributedExchangeScaled(f));
   } else {
     static bool warned = false;
     if (!warned && verbosity > 1 && mpirank == 0) {
