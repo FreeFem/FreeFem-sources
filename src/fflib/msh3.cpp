@@ -9949,7 +9949,8 @@ static Mesh* buildOverlapCover(const Mesh& src, const KN<int>& mask, double prec
 template<class Mesh>
 static void scatterGlobalMesh(const Mesh& Th, const KN<int>& globalPartition, long sizeoverlaps, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate, pcommworld comm){
   int nbt = Th.nt;
-  for (int i = 1; i < mpisize; i++){
+  const int csize = commSize(comm);
+  for (int i = 1; i < csize; i++){
     KN<int> mask;
     overlapCoverMask(Th, globalPartition, i, sizeoverlaps, mask);
     KN<int> n2o;
@@ -9991,7 +9992,7 @@ Mesh* buildInterfaceSubmesh(const DistributedMesh<Mesh>& D, int j, KN<int>& n2o)
   const Mesh& Th = *D.CoverMesh;
   const int nbt = Th.nt, nbv = Th.nv;
   const int nve = Mesh::Element::nv;
-  const int me = (int)mpirank;
+  const int me = D.rank;
   const int nb = D.neighborRanks[j];
 
   KN<int> vtxI(nbv, 0), vtxJ(nbv, 0);
@@ -10070,6 +10071,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   pcommworld userComm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
   OwnedComm owned(duplicateComm(userComm));
   pcommworld comm = owned.c;
+  const int crank = commRank(comm), csize = commSize(comm);
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
   bool cleanmesh(arg(3, stack, true));
@@ -10143,7 +10145,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   KN<int> globalPartition;
   int bad = 0;
 
-  if (mode == DM_REPLICATED || mpirank == 0){
+  if (mode == DM_REPLICATED || crank == 0){
     ffassert(pTh);
     pWork = pTh;
     if (mode == DM_REPLICATED && keepGlobal) {trueGlobal = pTh;}
@@ -10162,7 +10164,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
     else {
       status = computeGlobalPartition(*pTh, globalPartition, method, comm, mode == DM_REPLICATED, nWorkers);
     }
-    if (!status) status = checkPartitionUsable(globalPartition, pTh->nt);
+    if (!status) status = checkPartitionUsable(globalPartition, pTh->nt, csize);
   }
 
   status = agreeOnStatus(status, comm);
@@ -10173,7 +10175,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   }
 
   if (mode == DM_SCATTER){
-    if (mpirank == 0){
+    if (crank == 0){
       scatterGlobalMesh(*pTh, globalPartition, sizeoverlaps, precis_mesh, orientation, cleanmesh, removeduplicate, comm);
     }
     else {
@@ -10189,7 +10191,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   {
     const Mesh& Tw = *pWork;
     KN<int> mask;
-    const int nKept = overlapCoverMask(Tw, globalPartition, (int)mpirank, sizeoverlaps, mask);
+    const int nKept = overlapCoverMask(Tw, globalPartition, crank, sizeoverlaps, mask);
 
     const bool workIsScriptMesh = (pWork == pTh);
     if (nKept == 0 || (nKept == Tw.nt && !workIsScriptMesh)) {
@@ -10213,7 +10215,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   KN<double> supp(nbt, 0.0);
   for (int k = 0; k < nbt; ++k){
-    supp[k] = (coverPartition[k] == (int)mpirank) ? 1.0 : 0.0;
+    supp[k] = (coverPartition[k] == crank) ? 1.0 : 0.0;
   }
   KN<double> suppSmooth(nbv, 0.0);
   AddLayers(&Th, &supp, overlapLayers(sizeoverlaps), &suppSmooth);
@@ -10221,11 +10223,11 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   KN<int> neighborRanks;
 
-  if (mpisize > 1){
-    KN<int> isNeighbor((int)mpisize, 0);
+  if (csize > 1){
+    KN<int> isNeighbor(csize, 0);
     for (int k = 0; k < nbt; ++k){
       const int pk = coverPartition[k];
-      if (pk == (int)mpirank) continue;
+      if (pk == crank) continue;
       for (int i = 0; i < nve; ++i){
         if (suppSmooth[Th(k,i)] > 0.001) {
           isNeighbor[pk] = 1;
@@ -10233,16 +10235,16 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
         }
       }
     }
-    isNeighbor[(int)mpirank] = 0;
+    isNeighbor[crank] = 0;
 
     int numNeighbors = 0;
-    for (int r = 0; r < (int)mpisize; ++r){
+    for (int r = 0; r < csize; ++r){
       if (isNeighbor[r]) numNeighbors++;
     }
 
     neighborRanks.resize(numNeighbors);
     int j = 0;
-    for (int r = 0; r < (int)mpisize; ++r){
+    for (int r = 0; r < csize; ++r){
       if (isNeighbor[r]) neighborRanks[j++] = r;
     }
   }
@@ -10266,7 +10268,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   KN<int> localToCoverElement(nbt);
   int numLocalElt = 0;
   for (int k = 0; k < nbt; ++k){
-    bool keep = keepElt(suppSmooth, Th, k, sizeoverlaps, coverPartition, (int)mpirank);
+    bool keep = keepElt(suppSmooth, Th, k, sizeoverlaps, coverPartition, crank);
     if (keep) {
       splitCore[k] = 1;
       localToCoverElement[numLocalElt++] = k;
@@ -10302,7 +10304,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   }
   else {
     for (int k = 0; k < nbt; ++k){
-      splitBorder[k] = (coverPartition[k] != (int)mpirank) ? 1 : 0;
+      splitBorder[k] = (coverPartition[k] != crank) ? 1 : 0;
     }
   }
 
@@ -10332,7 +10334,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
       for (int v = 0; v < nbv; ++v) if (touched[v]) mult[v]++;
     };
 
-    accumulate((int)mpirank);
+    accumulate(crank);
     for (int j = 0; j < neighborRanks.n; ++j) accumulate(neighborRanks[j]);
 
     for (int v = 0; v < nbv; ++v){

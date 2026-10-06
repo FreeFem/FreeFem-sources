@@ -71,27 +71,28 @@ template<class Mesh>
 int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast, int nWorkers){
     const int nbt = Th.nt, nbv = Th.nv;
     const int nve = Mesh::Element::nv;
+    const int csize = commSize(comm), crank = commRank(comm);
 
     // Séquentiel
-    if (mpisize <= 1){
+    if (csize <= 1){
         part = 0;
         return DIST_OK;
     }
 
     int status = checkPartitionMethod(method);
-    if (!status && mpisize >= nbt) status = DIST_NT_TOO_SMALL;
+    if (!status && csize >= nbt) status = DIST_NT_TOO_SMALL;
     if (status) return status;
     
     if (method == "parmetis") {
 #if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
       MPI_Comm cwp = ffComm(comm);
-      if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp, nWorkers) != 0)
+      if (ffParmetisPartFaceDual(Th, csize, (int*)part, cwp, nWorkers) != 0)
         status = DIST_PART_FAILED;
       return status;                 // tous les rangs ont part : pas de broadcast
 #endif
   }
 
-    if (mpirank == 0) {
+    if (crank == 0) {
       if (method == "metis") {
         idx_t nt = nbt, nv = nbv;
         KN<idx_t> eptr(nt + 1), elmnts(nve * nt), npart(nv), epart(nt, 0);
@@ -101,7 +102,7 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
             elmnts[i++] = Th(k, j);
           eptr[k + 1] = i;
         }
-        idx_t nparts = mpisize, edgecut, ncommon = 1;
+        idx_t nparts = csize, edgecut, ncommon = 1;
         METIS_PartMeshDual(&nt, &nv, eptr, (idx_t *)elmnts, 0, 0, &ncommon, &nparts, 0, 0,
                           &edgecut, (idx_t *)epart, (idx_t *)npart);
         for (int k = 0; k < nbt; ++k) part[k] = (int)epart[k];
@@ -110,7 +111,7 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
 #ifdef FF_WITH_SCOTCH
         KN<SCOTCH_Num> epart(nbt);
         SCOTCH_randomReset();
-        if (ffScotchPartFaceDual(Th, (SCOTCH_Num)mpisize, (SCOTCH_Num *)epart) != 0){
+        if (ffScotchPartFaceDual(Th, (SCOTCH_Num)csize, (SCOTCH_Num *)epart) != 0){
           status = DIST_PART_FAILED;
         }
         else {
@@ -133,9 +134,9 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
 const char* distributeStatusMessage(int status) {
   switch (status) {
     case DIST_PART_SIZE: return "distribute: partition[] requires Th.nt values";
-    case DIST_PART_RANGE : return "distribute: partition[] has a value outside [0, mpisize[";
-    case DIST_PART_EMPTY : return "distribute: at least one rank gets no element: reduce mpisize or refine the mesh";
-    case DIST_NT_TOO_SMALL : return "distribute: mpisize must be < Th.nt";
+    case DIST_PART_RANGE : return "distribute: partition[] has a value outside [0, comm size[";
+    case DIST_PART_EMPTY : return "distribute: at least one rank gets no element: use fewer ranks in comm or refine the mesh";
+    case DIST_NT_TOO_SMALL : return "distribute: the size of comm must be < Th.nt";
     case DIST_PART_FAILED : return "distribute: partitioning failure";
     case DIST_METHOD_BAD : return "distribute: unknown partmethod (expected \"metis\", \"scotch\" or \"parmetis\")";
     case DIST_SCOTCH_NA : return "distribute: scotch partitioner is not available in this build";
@@ -161,17 +162,17 @@ int checkPartitionMethod(const std::string &method) {
   return DIST_OK;
 }
 
-int checkPartitionUsable(const KN<int>& part, int nt, bool allowEmpty){
+int checkPartitionUsable(const KN<int>& part, int nt, int nparts, bool allowEmpty){
   if (part.n != nt) return DIST_PART_SIZE;
-  if (mpisize <= 1) return DIST_OK;
-  KN<int> count((int)mpisize, 0);
+  if (nparts <= 1) return DIST_OK;
+  KN<int> count(nparts, 0);
   for (int k = 0; k < nt; ++k){
     const int p = part[k];
-    if (p < 0 || p >= (int)mpisize) return DIST_PART_RANGE;
+    if (p < 0 || p >= nparts) return DIST_PART_RANGE;
     count[p]++;
   }
   if (!allowEmpty){
-    for (int r = 0; r < (int)mpisize; ++r) if (count[r] == 0) return DIST_PART_EMPTY;
+    for (int r = 0; r < nparts; ++r) if (count[r] == 0) return DIST_PART_EMPTY;
   }
   return DIST_OK;
 }
@@ -213,8 +214,6 @@ int detectDistributionMode(int localNt, pcommworld comm)
   MPI_Comm cw = ffComm(comm);
   int cmp;
   MPI_Comm_compare(cw, MPI_COMM_WORLD, &cmp);
-  if (cmp != MPI_IDENT && cmp != MPI_CONGRUENT)
-    ExecError("distribute: sub-communicators not yet supported");
 
   int size;
   MPI_Comm_size(cw, &size);
@@ -416,7 +415,7 @@ template Complex distributedReduce<Complex>(pcommworld, Complex);
 #else
 KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof, long& globalNdof)
 {
-  if (mpisize <=1) return trivialNumbering(nLocDof, globalNdof);
+  if (commSize(comm) <= 1) return trivialNumbering(nLocDof, globalNdof);
 
   MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n - 1;
@@ -473,7 +472,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 }
 
 double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof){
-  if (mpisize <= 1) return 0.0;
+  if (commSize(comm) <= 1) return 0.0;
 
   MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n-1;
@@ -495,7 +494,7 @@ double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN
 // Return -1 if all sizes match, else the local index of the faulty neighbour
 // Application before purge, to have all Irecv matched
 int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
-  if (mpisize <= 1) return -1;
+  if (commSize(comm) <= 1) return -1;
 
   MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n -1;
@@ -516,7 +515,7 @@ int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
 }
 
 int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
-  if (mpisize <= 1) return 0;
+  if (commSize(comm) <= 1) return 0;
 
   MPI_Comm cw = ffComm(comm);
   int rank;
@@ -537,7 +536,7 @@ int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
 
 template<class R>
 R distributedReduce(pcommworld comm, R local) {
-  if (mpisize <= 1) return local;
+  if (commSize(comm) <= 1) return local;
 
   MPI_Comm cw = ffComm(comm);
   R global;
