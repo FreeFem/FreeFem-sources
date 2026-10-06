@@ -6,6 +6,13 @@
 typedef void* pcommworld;
 #endif
 
+int commRank(pcommworld c);
+int commSize(pcommworld c);
+bool commIsNull(pcommworld c);
+bool sameComm(pcommworld a, pcommworld b);
+pcommworld duplicateComm(pcommworld c);
+void releaseComm(pcommworld c);
+
 enum DistributionMode {DM_SCATTER = 0, DM_REPLICATED = 1 };
 enum TransferPath { XFER_GENERAL = 0, XFER_SINGLE_RANK = 1, XFER_LOCAL = 2 };
 
@@ -27,6 +34,12 @@ public:
   KN<int> coverPartition; // parititon restreinte à CoverMesh
 
   pcommworld comm = nullptr;
+  int rank = 0, size = 1;
+
+  void adoptComm(pcommworld c) {
+    ffassert(!comm);
+    comm = c; rank = commRank(c); size = commSize(c);
+  }
   
   DistributedMesh() : LocalMesh(nullptr), BorderMesh(nullptr), overlap(0), interfaceLabel(10),
   neighborRanks(), partitionOfUnity(), coverPartition() {}
@@ -44,6 +57,7 @@ public:
     if (BorderMesh) BorderMesh->destroy();
     if (CoverMesh) CoverMesh->destroy();
     if (TrueGlobalMesh) TrueGlobalMesh->destroy();
+    releaseComm(comm);
   }
 
 private:
@@ -96,6 +110,15 @@ struct TransferPlan : public RefCounter {
 private:
     TransferPlan(const TransferPlan&);
     void operator=(const TransferPlan&);
+};
+
+struct OwnedComm {
+  pcommworld c;
+  explicit OwnedComm(pcommworld x) : c(x) {}
+  ~OwnedComm() { releaseComm(c); }
+  pcommworld release() { pcommworld r = c; c = nullptr; return r; }
+private:
+  OwnedComm(const OwnedComm&); void operator=(const OwnedComm&);
 };
 
 // Helpers géométriques (liens géométrie (msh3.cpp) - FESpace (lgmat.cpp))

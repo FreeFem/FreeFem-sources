@@ -468,10 +468,10 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_dfes( ) {
-    if (DTh) DTh->destroy();
     if (exchangeHandle && g_distributedExchangeHandleDtor) {
       g_distributedExchangeHandleDtor(exchangeHandle);
     }
+    if (DTh) DTh->destroy();
   }
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpace *buildupdate(KN< int > &) { return nullptr; }

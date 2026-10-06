@@ -24,6 +24,49 @@ static const int TAG_SYM_CHECK = 1004;
 static const int TAG_DOF_POU = 1001;
 static const int TAG_DOF_NUM = 1002;
 
+#ifdef PARALLELE
+static inline MPI_Comm ffComm(pcommworld c) { return c ? *(MPI_Comm*)c : MPI_COMM_WORLD; }
+
+int commRank(pcommworld c) { int r; MPI_Comm_rank(ffComm(c), &r); return r; }
+int commSize(pcommworld c) { int s; MPI_Comm_size(ffComm(c), &s); return s; }
+bool commIsNull(pcommworld c) { return c && *(MPI_Comm*)c == MPI_COMM_NULL; }
+bool sameComm(pcommworld a, pcommworld b) {
+  if (a == b) return true;
+  int r;
+  MPI_Comm_compare(ffComm(a), ffComm(b), &r);
+  return r == MPI_IDENT || r == MPI_CONGRUENT;
+}
+#else
+int commRank(pcommworld) { return 0; }
+int commSize(pcommworld) { return 1; }
+bool commIsNull(pcommworld) { return false; }
+bool sameComm(pcommworld, pcommworld) { return true; }
+#endif
+
+#ifdef PARALLELE
+pcommworld duplicateComm(pcommworld c) {
+  if (commIsNull(c))
+    ExecError("distribute: this rank does not belong to comm (MPI_COMM_NULL);"
+              " call distribute inside if (comm) {...}");
+
+  MPI_Comm* d = new MPI_Comm;
+  MPI_Comm_dup(ffComm(c), d);
+  return d;
+}
+
+void releaseComm(pcommworld c) {
+  if (!c) return;
+  MPI_Comm* p = (MPI_Comm*)c;
+  int finalized = 0;
+  MPI_Finalized(&finalized);
+  if (!finalized && *p != MPI_COMM_NULL) MPI_Comm_free(p);
+  delete p;
+}
+#else
+pcommworld duplicateComm(pcommworld) { return nullptr; }
+void releaseComm(pcommworld) {}
+#endif
+
 template<class Mesh>
 int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &method, pcommworld comm, bool broadcast, int nWorkers){
     const int nbt = Th.nt, nbv = Th.nv;
@@ -41,7 +84,7 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
     
     if (method == "parmetis") {
 #if defined(PARALLELE) && defined(FF_WITH_PARMETIS)
-      MPI_Comm cwp = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+      MPI_Comm cwp = ffComm(comm);
       if (ffParmetisPartFaceDual(Th, (int)mpisize, (int*)part, cwp, nWorkers) != 0)
         status = DIST_PART_FAILED;
       return status;                 // tous les rangs ont part : pas de broadcast
@@ -80,7 +123,7 @@ int computeGlobalPartition(const Mesh &Th, KN<int> &part, const std::string &met
   // --- Broadcast depuis le rang 0 (uniquement en build MPI) ---
 #ifdef PARALLELE
   if (broadcast){
-    MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+    MPI_Comm cw = ffComm(comm);
     MPI_Bcast((int*)part, nbt, MPI_INT, 0, cw);
   }
 #endif
@@ -167,13 +210,14 @@ static double pouResidualLocal(const KN<KN<long>>& dofI, const KN<double>& Ddof,
 
 int detectDistributionMode(int localNt, pcommworld comm)
 {
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
+  int cmp;
+  MPI_Comm_compare(cw, MPI_COMM_WORLD, &cmp);
+  if (cmp != MPI_IDENT && cmp != MPI_CONGRUENT)
+    ExecError("distribute: sub-communicators not yet supported");
+
   int size;
   MPI_Comm_size(cw, &size);
-
-  if (size != (int)mpisize){
-    ExecError("distribute: sub-communicator not yet supported hence comm must cover all ranks");
-  }
 
   int has = (localNt > 0) ? 1 : 0;
   KN<int> hasMesh(size);
@@ -199,7 +243,7 @@ int detectDistributionMode(int localNt, pcommworld comm)
 }
 
 int agreeOnStatus(int local, pcommworld comm){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   int global = 0;
   MPI_Allreduce(&local, &global, 1, MPI_INT, MPI_MAX, cw);
   return global;
@@ -214,7 +258,7 @@ static void rebuildAttached(MeshL*, bool) {}
 
 template<class Mesh>
 void sendMesh(const Mesh& Th, int dest, pcommworld comm){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   Serialize buf = Th.serialize();
   long long hdr[2] = { (long long)buf.size(), hasAttached(Th) ? 1LL : 0LL};
 
@@ -231,7 +275,7 @@ void sendMesh(const Mesh& Th, int dest, pcommworld comm){
 
 template<class Mesh>
 Mesh* recvMesh(int src, pcommworld comm){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   MPI_Status st;
   long long hdr[2];
   MPI_Recv(hdr, 2, MPI_LONG_LONG, src, TAG_SCATTER_HDR, cw, &st);
@@ -255,12 +299,12 @@ Mesh* recvMesh(int src, pcommworld comm){
 }
 
 void sendPartition(const KN<int>& part, int dest, pcommworld comm){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   MPI_Send((int*)part, part.n, MPI_INT, dest, TAG_SCATTER_PART, cw);
 }
 
 KN<int> recvPartition(int n, int src, pcommworld comm){
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   KN<int> partition(n);
   MPI_Status st;
   MPI_Recv((int*)partition, n, MPI_INT, src, TAG_SCATTER_PART, cw, &st);
@@ -374,7 +418,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 {
   if (mpisize <=1) return trivialNumbering(nLocDof, globalNdof);
 
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n - 1;
   ffassert(dofI[0].n == nN);
   KN<int> nbr(nN);
@@ -431,7 +475,7 @@ KN<long> distributedDofNumbering(pcommworld comm, const KN<KN<long>>& dofI, cons
 double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN<double>& Ddof, int nLocDof){
   if (mpisize <= 1) return 0.0;
 
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n-1;
   ffassert(dofI[0].n == nN);
   ffassert(Ddof.n == nLocDof);
@@ -453,7 +497,7 @@ double checkPartitionOfUnity(pcommworld comm, const KN<KN<long>>& dofI, const KN
 int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
   if (mpisize <= 1) return -1;
 
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   const int nN = dofI.n -1;
   ffassert(dofI[0].n == nN);
 
@@ -474,7 +518,7 @@ int checkIntersectionSymmetry(pcommworld comm, const KN<KN<long>>& dofI) {
 int checkPartitionConsistency(pcommworld comm, const KN<int>& part){
   if (mpisize <= 1) return 0;
 
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   int rank;
   MPI_Comm_rank(cw, &rank);
 
@@ -495,7 +539,7 @@ template<class R>
 R distributedReduce(pcommworld comm, R local) {
   if (mpisize <= 1) return local;
 
-  MPI_Comm cw = comm ? *(MPI_Comm*)comm : MPI_COMM_WORLD;
+  MPI_Comm cw = ffComm(comm);
   R global;
   MPI_Allreduce(&local, &global, sizeof(R)/sizeof(double), MPI_DOUBLE, MPI_SUM, cw);
   return global;
