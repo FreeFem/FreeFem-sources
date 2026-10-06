@@ -403,10 +403,7 @@ namespace PETSc {
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
     v_dfes<MMesh>* f = *pUh;
-    // overlap = 0: interface ddl does not carry its whole line et the operator is not built properly
-    if (f->DTh && f->DTh->overlap == 0 && mpisize > 1){
-      ExecError("Mat form fespace(Dmesh, ...): overlap = 0 is not supported by the PETSc/HPPDM additive Schwarz format; use distribute(..., overlap = 1)instead.");
-    }
+    // overlap = 0: matrix built by assembleWithoutOverlap
     if (B._A) return;
     
     KN<double> Dscratch(f->Ddof);
@@ -430,6 +427,59 @@ namespace PETSc {
   template<class MMesh, class fes1>
   typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh>>::value>::type
   buildShellIfNeeded(Dmat &B, typename fes1::pfes*, int, Data_Sparse_Solver&) {}
+
+  // overlap = 0 : aucun rang ne porte une ligne d'interface complete, le format
+  // de Schwarz (ligne globale = ligne locale du proprietaire) est faux. La
+  // matrice globale est la SOMME des matrices locales, A = sum_r R_r^T A_r R_r :
+  // assemblee en MATIS (numerotation globale _num), convertie en AIJ, elle
+  // remplace celle batie par changeOperatorSimple. Numerotation, proprietaires
+  // et conversions de vecteurs (D booleen apres restriction) sont inchanges.
+  template<class MMesh, class fes1, class R>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  assembleWithoutOverlap(Dmat& B, typename fes1::pfes* pUh, MatriceMorse<R>* mA) {
+    v_dfes<MMesh>* f = *pUh;
+    if (!f->DTh || f->DTh->overlap != 0 || !B._petsc || !B._num || !mA) return;
+    MPI_Comm comm = PetscObjectComm((PetscObject)B._petsc);
+    PetscMPIInt size;
+    MPI_Comm_size(comm, &size);
+    if (size == 1) return;
+    const PetscInt n = mA->n;
+    std::vector<PetscInt> nnz(n, 0);
+    for (size_t k = 0; k < mA->nnz; ++k) {
+      ++nnz[mA->i[k]];
+      if (mA->half && mA->i[k] != mA->j[k]) ++nnz[mA->j[k]];
+    }
+    Mat loc;
+    MatCreateSeqAIJ(PETSC_COMM_SELF, n, n, 0, nnz.data(), &loc);
+    for (size_t k = 0; k < mA->nnz; ++k) {
+      const PetscInt i = mA->i[k], j = mA->j[k];
+      const PetscScalar v = PetscScalar(mA->aij[k]);
+      MatSetValue(loc, i, j, v, ADD_VALUES);
+      if (mA->half && i != j) MatSetValue(loc, j, i, v, ADD_VALUES);
+    }
+    MatAssemblyBegin(loc, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(loc, MAT_FINAL_ASSEMBLY);
+    PetscInt M, N;
+    MatGetSize(B._petsc, &M, &N);
+    ISLocalToGlobalMapping l2g;
+    ISLocalToGlobalMappingCreate(comm, 1, n, B._num, PETSC_COPY_VALUES, &l2g);
+    Mat is;
+    MatCreateIS(comm, 1, B._last - B._first, B._last - B._first, M, N, l2g, l2g, &is);
+    ISLocalToGlobalMappingDestroy(&l2g);
+    MatISSetLocalMat(is, loc);
+    MatDestroy(&loc);
+    MatAssemblyBegin(is, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(is, MAT_FINAL_ASSEMBLY);
+    Mat aij;
+    MatConvert(is, MATAIJ, MAT_INITIAL_MATRIX, &aij);
+    MatDestroy(&is);
+    if (mA->half) MatSetOption(aij, MAT_SYMMETRIC, PETSC_TRUE);
+    MatHeaderReplace(B._petsc, &aij);
+  }
+
+  template<class MMesh, class fes1, class R>
+  typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  assembleWithoutOverlap(Dmat&, typename fes1::pfes*, MatriceMorse<R>*) {}
 
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
@@ -510,6 +560,9 @@ namespace PETSc {
       }
       checkDistributedEval<MMesh, fes1>(dscope, pUh);   // avant changeOperatorSimple (collectif)
       changeOperatorSimple(&B, &A);
+      assembleWithoutOverlap<MMesh, fes1>(B, pUh,
+          A.A ? static_cast<MatriceMorse<upscaled_type<K>>*>(&*A.A) : nullptr);
+
       if(B._A)
           B._A->setMatrix(nullptr);
     }

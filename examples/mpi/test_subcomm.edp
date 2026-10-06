@@ -1,0 +1,536 @@
+// NBPROC 4
+// PARAM -ns
+
+// =====================================================================
+//  Maillages distribues sur un SOUS-COMMUNICATEUR : distribute(..., comm=c)
+//
+//  Un rang a deux identites : son rang dans mpiCommWorld (mpirank) et son
+//  rang dans c (mpiRank(c)). Les numeros de partition (coverPartition,
+//  neighborRanks, Udh.intersection[0], rangs des plans de transfert) sont
+//  des rangs DANS c. Chaque bloc ci-dessous fabrique un communicateur ou ces
+//  deux identites different, et verifie que rien ne les confond.
+//
+//  COMMUNICATEURS (-np 4)
+//   W  mpiCommWorld : temoin, doit passer avant tout changement du code.
+//   P  monde PERMUTE : mpiComm cP(mpiCommWorld, 0, mpisize-1-mpirank).
+//      Meme taille que le monde, donc tout le code accepte d'y entrer,
+//      mais mpiRank(cP) = mpisize-1-mpirank : chaque mpirank oublie donne
+//      un resultat faux. C'est le detecteur principal.
+//   H  deux MOITIES : couleur mpirank < mpisize/2. Deux distribute
+//      independants tournent EN MEME TEMPS, un par moitie. Les rangs monde
+//      2 et 3 deviennent 0 et 1 : un mpirank oublie sort de [0, taille[.
+//   X  monde SANS le rang 0 : le rang 0 de cX est le rang monde 1. Le
+//      rang monde 0 recoit MPI_COMM_NULL et ne participe pas. En mode
+//      scatter, la racine est donc le rang monde 1.
+//
+//  SUITE (macro SUITE, pour un communicateur, un partitionneur, et le mode
+//  replique ou scatter). Toutes les reductions se font sur c.
+//   S0  distribute(..., comm=c) est accepte.
+//   S1  partition utilisateur en tranches de x, valeurs dans [0, mpiSize(c)[ :
+//       la tranche mpiRank(c) est ENTIERE dans DTh.local. Detecte tout
+//       "coverPartition[k] == mpirank" (msh3.cpp, distribute).
+//   S2  int3d(DTh)(1) = 1 et int3d(DTh)(f) = int3d(Th)(f) : la reduction
+//       se fait sur c (sur le monde, les moities compteraient deux fois).
+//   S3  Udh.ndofglobal = ndof sequentiel (P2).
+//   S4  Udh.checkPoU dans [0, 1e-8].
+//   S5  voisins : Udh.intersection[0][j] dans [0, mpiSize(c)[, different
+//       de mpiRank(c) ; puis appariement des listes d'intersection par
+//       echange des coordonnees des ddl SUR c (cf. V7 de
+//       test_distribute_multi.edp). Detecte buildInterfaceSubmesh /
+//       buildInterfaceDofList (overlap = 0) et la detection des voisins.
+//   S6  (replique) recomposition d'un champ global par la partition de
+//       l'unite : sum_r loc2glob(D .* u_r) = u.
+//   S7  (replique) Udh.numbering : coherent entre rangs et bijection sur
+//       [0, ndofglobal[.
+//   S8  Mat A = vP(Udh, Udh) (chemin "shell", SANS communicator=) puis
+//       A^-1 : compare a la resolution sequentielle. Detecte une Mat PETSc
+//       construite sur PETSC_COMM_WORLD au lieu de DTh.comm
+//       (buildShellIfNeeded).
+//   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
+//       exact) : nproc et rang dans buildTransferPlan / collectFragments.
+//   S*  aucune exception pendant S1..S9.
+//
+//  COMPARAISON DE COMMUNICATEURS (bloc C, sur le monde)
+//   C1  Dmesh sans comm= (defaut) <-> Dmesh avec comm=mpiCommWorld :
+//       meme communicateur, le transfert doit marcher.
+//   C2  monde <-> copie CONGRUENTE (mpiComm cc(mpiCommWorld, 0, mpirank)) :
+//       memes rangs dans le meme ordre, le transfert doit marcher.
+//   C3  deux Dmesh distribues avec la MEME variable cc : doit marcher (et
+//       continuer de marcher si DistributedMesh duplique son communicateur).
+//   C4  monde <-> moities : groupes differents, transfert REFUSE sur tous
+//       les rangs, sans blocage.
+//   C5  monde <-> monde permute : meme groupe, ordre different
+//       (MPI_SIMILAR), transfert REFUSE sur tous les rangs.
+//
+//  DUREE DE VIE (bloc L)
+//   L1  le mpiComm passe a distribute est declare dans un bloc et libere a
+//       la fin du bloc (MPI_Comm_free) ; le Dmesh, declare dehors, doit
+//       rester utilisable : fespace (collectif), ndofglobal, int3d.
+//
+//  RANG HORS DU COMMUNICATEUR (bloc O)
+//   O1  tous les rangs appellent distribute(Th, comm=cX) ; le rang monde 0,
+//       pour qui cX = MPI_COMM_NULL, doit recevoir une erreur propre
+//       (ExecError attrapable), les autres doivent reussir.
+//
+//  BLOCS QUI PEUVENT INTERROMPRE L'EXECUTION. Une confusion de rangs se
+//  manifeste souvent par un BLOCAGE (envoi vers un rang qui n'attend rien)
+//  ou une erreur MPI fatale (communicateur libere ou nul), pas par un FAIL.
+//  Une exception levee sur une partie des rangs seulement desynchronise les
+//  collectifs : la suite peut alors afficher des ecarts absurdes, puis
+//  bloquer au bloc suivant. Seul le premier FAIL d'un bloc est fiable.
+//  Lancer sous timeout, et bloc par bloc pendant la mise au point :
+//    timeout 600 ff-mpirun -np 4 test_subcomm.edp -ns -v 0
+//    timeout 300 ff-mpirun -np 4 test_subcomm.edp -ns -v 0 -case 2
+//  L1 et O1 sont les plus susceptibles d'arreter tout le job : ils sont
+//  places en dernier, et isoles dans les cas 6 et 7.
+//
+//  ETAT AVANT LES SOUS-COMMUNICATEURS (commit 8ede36dbc, -np 4)
+//   1 W  41/41 PASS.
+//   2 P  S0 PASS (le controle de TAILLE accepte un monde permute), S1 FAIL,
+//        PoU fausse (max|sum-1| = 2), exception, puis blocage.
+//   3 H  S0 FAIL : refus "sub-communicator not yet supported".
+//   4 X  S0 FAIL : meme refus.
+//   5 C  C3 PASS ; C1 s'arrete sur ffassert(pSrc->DTh->comm ==
+//        pDst->DTh->comm), non attrapable (MPI_Abort).
+//   6 L  "ddl intersection asymmetric", puis MPI_Abort.
+//   7 O  FAIL : tous les rangs refusent, au lieu du seul rang hors de cX.
+//
+//  OPTIONS
+//    -case  0 = tout (defaut), 1 = W, 2 = P, 3 = H, 4 = X,
+//           5 = C, 6 = L, 7 = O
+//    -nc    raffinement du cube                          (defaut 10)
+//    -nc2   raffinement du cube inclus (transfert)       (defaut 7)
+//    -ov    recouvrement passe a distribute              (defaut 1)
+//    -pm    1 = ajoute partmethod = "parmetis" aux cas W, P, H
+//           (FreeFEM configure avec ParMETIS)            (defaut 0)
+//
+//  Exige mpisize >= 2 (le cas X et le bloc O excluent le rang monde 0).
+// =====================================================================
+
+load "PETSc"
+include "getARGV.idp"
+
+int cas = getARGV("-case", 0);
+int nc  = getARGV("-nc", 10);
+int nc2 = getARGV("-nc2", 7);
+int ov  = getARGV("-ov", 1);
+int pm  = getARGV("-pm", 0);
+
+assert(mpisize >= 2);
+
+int npass = 0, ntot = 0;
+string kspp = "-ksp_type cg -pc_type asm -ksp_rtol 1e-12";
+
+macro FIELD() (sin(3*x)*cos(2*y) + exp(z))// EOM
+macro AFFINE() (1 + x + 2*y + 3*z)// EOM
+macro grad(w) [dx(w), dy(w), dz(w)]// EOM
+
+// tranche en x de l'element k du maillage T, parmi n tranches
+macro SLICE(T, k, n) min(int(n*(T[k][0].x + T[k][1].x + T[k][2].x + T[k][3].x)/4.), n - 1)// EOM
+
+// verdict : max sur COMM de E, compare a TOL ; affiche par le rang 0 de COMM
+macro CHK(COMM, TG, LBL, E, TOL) {
+  real chkL = E, chkG = 0;
+  mpiAllReduce(chkL, chkG, COMM, mpiMAX);
+  bool chkOk = (chkG <= TOL);
+  ntot++; if (chkOk) npass++;
+  if (mpiRank(COMM) == 0)
+    cout << "  [" << TG << "] " << LBL << " : ecart = " << chkG
+         << "   => " << (chkOk ? "PASS" : "FAIL") << endl;
+}// EOM
+
+// le refus doit avoir ete leve sur TOUS les rangs du monde
+macro REFUSED(LBL, R) {
+  int refL = R, refG = 0;
+  mpiAllReduce(refL, refG, mpiCommWorld, mpiMIN);
+  real refE = 1 - refG;
+  CHK(mpiCommWorld, "C", LBL, refE, 0)
+}// EOM
+
+// ---------------------------------------------------------------------
+//  SUITE : S0..S9 sur le communicateur COMM
+//    CTAG  nom du communicateur pour l'affichage
+//    SCAT  true = mode scatter (maillage global sur le rang 0 de COMM seul)
+//    METH  "user" (tranches en x) | "metis" | "scotch" | "parmetis"
+// ---------------------------------------------------------------------
+macro SUITE(COMM, CTAG, SCAT, METH) {
+  if (COMM) {
+    int cr = mpiRank(COMM), cs = mpiSize(COMM);
+    bool scat = SCAT;
+    bool kg = !scat;
+    string meth = METH;
+    string tg = CTAG + "/" + meth;
+    if (scat) tg = tg + "/scatter";
+    if (cr == 0)
+      cout << "--- " << tg << " : taille " << cs
+           << ", rang 0 = rang monde " << mpirank << endl;
+
+    /* Th : reference sequentielle, presente partout.
+       ThW : maillage passe a distribute (rang 0 de COMM seul en scatter). */
+    mesh3 Th = cube(nc, nc, nc);
+    mesh3 ThW;
+    if (!scat || cr == 0) ThW = cube(nc, nc, nc);
+    int[int] part(ThW.nt);
+    for (int k = 0; k < ThW.nt; ++k) part[k] = SLICE(ThW, k, cs);
+
+    Dmesh3 DTh;
+    int dok = 1;
+    try {
+      if (meth == "user")
+        DTh = distribute(ThW, overlap = ov, comm = COMM, partition = part, keepGlobal = kg);
+      else
+        DTh = distribute(ThW, overlap = ov, comm = COMM, partmethod = meth, keepGlobal = kg);
+    } catch (...) { dok = 0; }
+    real e0 = 1 - dok;
+    CHK(COMM, tg, "S0 distribute accepte          ", e0, 0)
+
+    if (dok) {
+      int crashed = 0;
+      try {
+        mesh3 L = DTh.local;
+
+        /* S1 : la tranche propre (au sens de mpiRank(COMM)) est entiere
+           dans le maillage local */
+        if (meth == "user") {
+          real vOwn = 0, vRef = 0;
+          for (int k = 0; k < L.nt; ++k) if (SLICE(L, k, cs) == cr) vOwn += L[k].measure;
+          for (int k = 0; k < Th.nt; ++k) if (SLICE(Th, k, cs) == cr) vRef += Th[k].measure;
+          real e1 = abs(vOwn - vRef)/max(vRef, 1e-300);
+          CHK(COMM, tg, "S1 tranche propre dans local   ", e1, 1e-10)
+        }
+
+        /* S2 : integrales, reduction sur COMM */
+        {
+          real v1 = int3d(DTh)(1.);
+          real e2a = abs(v1 - 1.);
+          CHK(COMM, tg, "S2 int3d(DTh)(1) = 1           ", e2a, 1e-10)
+          real Id = int3d(DTh)(FIELD), Is = int3d(Th)(FIELD);
+          real e2b = abs(Id - Is)/abs(Is);
+          CHK(COMM, tg, "S2 int3d(DTh)(f) = int3d(Th)(f)", e2b, 1e-10)
+        }
+
+        fespace Udh(DTh, P2);
+        fespace UhG(Th, P2);
+        fespace Ul(L, P2);
+
+        /* S3, S4 */
+        real e3 = abs(Udh.ndofglobal - UhG.ndof);
+        CHK(COMM, tg, "S3 ndofglobal = ndof sequentiel", e3, 0)
+        real v4 = Udh.checkPoU;
+        real e4 = v4;
+        if (v4 < 0) e4 = 1e30;
+        CHK(COMM, tg, "S4 checkPoU                    ", e4, 1e-8)
+
+        /* S5 : voisins dans [0, cs[, puis appariement des intersections */
+        {
+          int nN = Udh.intersection[0].n;
+          int nbad = 0;
+          for (int j = 0; j < nN; ++j) {
+            int nb = Udh.intersection[0][j];
+            if (nb < 0 || nb >= cs || nb == cr) nbad++;
+          }
+          int nbadG = 0;
+          mpiAllReduce(nbad, nbadG, COMM, mpiMAX);
+          real e5a = nbadG;
+          CHK(COMM, tg, "S5 voisins = rangs de comm     ", e5a, 0)
+
+          real e5b = 1e30;
+          if (nbadG == 0) {
+            Ul pvx = x, pvy = y, pvz = z;
+            real[int][int] pvMine(nN), pvHis(nN);
+            mpiRequest[int] pvRq(2*nN);
+            for (int j = 0; j < nN; ++j) {
+              int[int] pvL = Udh.intersection[1 + j];
+              int pvM = pvL.n;
+              pvMine[j].resize(3*pvM); pvHis[j].resize(3*pvM);
+              for (int p = 0; p < pvM; ++p) {
+                pvMine[j][3*p]     = pvx[][pvL[p]];
+                pvMine[j][3*p + 1] = pvy[][pvL[p]];
+                pvMine[j][3*p + 2] = pvz[][pvL[p]];
+              }
+              Irecv(processor(Udh.intersection[0][j], COMM, pvRq[j]),      pvHis[j]);
+              Isend(processor(Udh.intersection[0][j], COMM, pvRq[nN + j]), pvMine[j]);
+            }
+            for (int q = 0; q < 2*nN; ++q) { int pw = mpiWaitAny(pvRq); }
+            e5b = 0;
+            for (int j = 0; j < nN; ++j)
+              for (int p = 0; p < pvMine[j].n; ++p)
+                e5b = max(e5b, abs(pvMine[j][p] - pvHis[j][p]));
+          }
+          CHK(COMM, tg, "S5 appariement intersections   ", e5b, 1e-12)
+        }
+
+        /* S6, S7 : exigent loc2glob, donc le mode replique */
+        if (!scat) {
+          real[int] D = Udh.D;
+          int[int] l2g = Udh.loc2glob;
+          UhG gg = FIELD;
+          real[int] acc(UhG.ndof); acc = 0;
+          for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i]*gg[][l2g[i]];
+          real[int] accG(UhG.ndof);
+          mpiAllReduce(acc, accG, COMM, mpiSUM);
+          accG -= gg[];
+          real e6 = accG.linfty;
+          CHK(COMM, tg, "S6 recomposition par la PoU    ", e6, 1e-10)
+
+          int[int] gnum = Udh.numbering;
+          real[int] gmx(UhG.ndof), gmn(UhG.ndof);
+          gmx = -1; gmn = 1e30;
+          for (int i = 0; i < Udh.ndof; ++i) { gmx[l2g[i]] = gnum[i]; gmn[l2g[i]] = gnum[i]; }
+          real[int] gmxG(UhG.ndof), gmnG(UhG.ndof);
+          mpiAllReduce(gmx, gmxG, COMM, mpiMAX);
+          mpiAllReduce(gmn, gmnG, COMM, mpiMIN);
+          real[int] dg = gmxG - gmnG;
+          real e7a = dg.linfty;
+          CHK(COMM, tg, "S7 numbering coherent          ", e7a, 0)
+          gmxG.sort;
+          real e7b = 0;
+          for (int i = 0; i < gmxG.n; ++i) e7b = max(e7b, abs(gmxG[i] - i));
+          CHK(COMM, tg, "S7 numbering bijectif          ", e7b, 0)
+        }
+
+        /* S8 : Mat PETSc sans communicator=, puis resolution */
+        {
+          fespace U1dh(DTh, P1);
+          fespace U1h(Th, P1);
+          varf vPb(a, b) = int3d(DTh)(grad(a)'*grad(b)) + int3d(DTh)(1.*b)
+                         + on(1, 2, 3, 4, 5, 6, a = 0);
+          Mat A = vPb(U1dh, U1dh);
+          set(A, sparams = kspp);
+          real[int] rb = vPb(0, U1dh);
+          U1dh uh;
+          uh[] = A^-1 * rb;
+          varf vS(a, b) = int3d(Th)(grad(a)'*grad(b)) + int3d(Th)(1.*b)
+                        + on(1, 2, 3, 4, 5, 6, a = 0);
+          matrix As = vS(U1h, U1h, solver = UMFPACK);
+          real[int] bs = vS(0, U1h);
+          U1h us;
+          us[] = As^-1 * bs;
+          real e8 = sqrt(int3d(DTh)(square(uh - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S8 Mat + A^-1 = sequentiel     ", e8, 1e-7)
+        }
+
+        /* S9 : transfert entre deux Dmesh du meme COMM */
+        {
+          mesh3 Th2 = cube(nc2, nc2, nc2, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+          Dmesh3 DTh2 = distribute(Th2, overlap = ov, comm = COMM);
+          mesh3 L2 = DTh2.local;
+          fespace A1dh(DTh, P1);
+          fespace B2dh(DTh2, P2);
+          fespace B2l(L2, P2);
+          A1dh a = AFFINE;
+          B2dh w = a;
+          B2l wl = AFFINE;
+          real[int] d9 = w[] - wl[];
+          real e9a = d9.linfty;
+          CHK(COMM, tg, "S9 Vdh w = a (declaration)     ", e9a, 1e-10)
+          a = 2*AFFINE;
+          w = a;
+          d9 = w[] - 2*wl[];
+          real e9b = d9.linfty;
+          CHK(COMM, tg, "S9 w = a (reaffectation)       ", e9b, 1e-10)
+        }
+      } catch (...) { crashed = 1; }
+      real eX = crashed;
+      CHK(COMM, tg, "S* aucune exception            ", eX, 0)
+    }
+  }
+}// EOM
+
+// ---------------------------------------------------------------------
+//  Communicateurs (globaux : ils vivent jusqu'a la fin du script)
+// ---------------------------------------------------------------------
+int colH = 0;
+if (mpirank >= mpisize/2) colH = 1;
+int colX = 0;
+if (mpirank == 0) colX = mpiUndefined;
+
+mpiComm cP(mpiCommWorld, 0, mpisize - 1 - mpirank);   // monde permute
+mpiComm cH(mpiCommWorld, colH, mpirank);              // deux moities
+mpiComm cX(mpiCommWorld, colX, mpirank);              // sans le rang monde 0
+
+// ---------------------------------------------------------------------
+//  1. W : temoin sur mpiCommWorld
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 1) {
+  if (mpirank == 0) cout << "===== W : mpiCommWorld (temoin)" << endl;
+  SUITE(mpiCommWorld, "W", false, "user")
+  SUITE(mpiCommWorld, "W", false, "metis")
+  SUITE(mpiCommWorld, "W", true, "user")
+  if (pm) { SUITE(mpiCommWorld, "W", false, "parmetis") }
+}
+
+// ---------------------------------------------------------------------
+//  2. P : monde permute
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 2) {
+  if (mpirank == 0) cout << "===== P : monde permute" << endl;
+  SUITE(cP, "P", false, "user")
+  SUITE(cP, "P", false, "metis")
+  SUITE(cP, "P", true, "user")
+  if (pm) { SUITE(cP, "P", false, "parmetis") }
+}
+
+// ---------------------------------------------------------------------
+//  3. H : deux moities, en parallele
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 3) {
+  if (mpirank == 0) cout << "===== H : deux moities" << endl;
+  SUITE(cH, "H", false, "user")
+  SUITE(cH, "H", false, "metis")
+  SUITE(cH, "H", true, "metis")
+  if (pm) { SUITE(cH, "H", false, "parmetis") }
+  mpiBarrier(mpiCommWorld);
+}
+
+// ---------------------------------------------------------------------
+//  4. X : sans le rang monde 0 (racine scatter = rang monde 1)
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 4) {
+  if (mpirank == 0) cout << "===== X : sans le rang monde 0" << endl;
+  SUITE(cX, "X", false, "user")
+  SUITE(cX, "X", true, "user")
+  SUITE(cX, "X", true, "metis")
+  mpiBarrier(mpiCommWorld);
+}
+
+// ---------------------------------------------------------------------
+//  5. C : comparaison de communicateurs (tous les rangs du monde)
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 5) {
+  if (mpirank == 0) cout << "===== C : comparaison de communicateurs" << endl;
+  mesh3 Th = cube(nc, nc, nc);
+  mesh3 Th2 = cube(nc2, nc2, nc2, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
+  Dmesh3 DA = distribute(Th, overlap = ov);            // comm par defaut
+  fespace A1dh(DA, P1);
+  A1dh a = AFFINE;
+  mpiComm cc(mpiCommWorld, 0, mpirank);   // copie congruente du monde
+
+  // C3 en tete : il passe deja aujourd'hui (meme pointeur de comm), alors
+  // que C1, C2, C4, C5 s'arretent sur un ffassert non attrapable (MPI_Abort).
+  // C3 : deux Dmesh issus de la meme variable cc
+  {
+    real e = 1e30;
+    try {
+      Dmesh3 DC1 = distribute(Th, overlap = ov, comm = cc);
+      Dmesh3 DC2 = distribute(Th2, overlap = ov, comm = cc);
+      mesh3 LC2 = DC2.local;
+      fespace C1dh(DC1, P1); fespace C2dh(DC2, P2); fespace C2l(LC2, P2);
+      C1dh ac = AFFINE;
+      C2dh w = ac;
+      C2l wl = AFFINE;
+      real[int] d = w[] - wl[];
+      e = d.linfty;
+    } catch (...) { e = 1e30; }
+    CHK(mpiCommWorld, "C", "C3 meme variable cc            ", e, 1e-10)
+  }
+
+  // C1 : defaut <-> comm = mpiCommWorld
+  {
+    real e = 1e30;
+    try {
+      Dmesh3 DB = distribute(Th2, overlap = ov, comm = mpiCommWorld);
+      mesh3 LB = DB.local;
+      fespace B2dh(DB, P2); fespace B2l(LB, P2);
+      B2dh w = a;
+      B2l wl = AFFINE;
+      real[int] d = w[] - wl[];
+      e = d.linfty;
+    } catch (...) { e = 1e30; }
+    CHK(mpiCommWorld, "C", "C1 defaut <-> comm=mpiCommWorld", e, 1e-10)
+  }
+
+  // C2 : monde <-> copie congruente
+  {
+    real e = 1e30;
+    try {
+      Dmesh3 DC = distribute(Th2, overlap = ov, comm = cc);
+      mesh3 LC = DC.local;
+      fespace C2dh(DC, P2); fespace C2l(LC, P2);
+      C2dh w = a;
+      C2l wl = AFFINE;
+      real[int] d = w[] - wl[];
+      e = d.linfty;
+    } catch (...) { e = 1e30; }
+    CHK(mpiCommWorld, "C", "C2 monde <-> copie congruente  ", e, 1e-10)
+  }
+
+  // C4 : monde <-> moities, refus attendu
+  {
+    Dmesh3 DH;
+    int okL = 1, okG = 0;
+    try { DH = distribute(Th2, overlap = ov, comm = cH); } catch (...) { okL = 0; }
+    mpiAllReduce(okL, okG, mpiCommWorld, mpiMIN);
+    real eSetup = 1 - okG;
+    CHK(mpiCommWorld, "C", "C4 mise en place (moities)     ", eSetup, 0)
+    if (okG) {
+      fespace H2dh(DH, P2);
+      int refused = 0;
+      try { H2dh w = a; } catch (...) { refused = 1; }
+      REFUSED("C4 monde <-> moities : refus    ", refused)
+    }
+  }
+
+  // C5 : monde <-> monde permute (MPI_SIMILAR), refus attendu
+  {
+    Dmesh3 DP;
+    int okL = 1, okG = 0;
+    try { DP = distribute(Th2, overlap = ov, comm = cP); } catch (...) { okL = 0; }
+    mpiAllReduce(okL, okG, mpiCommWorld, mpiMIN);
+    real eSetup = 1 - okG;
+    CHK(mpiCommWorld, "C", "C5 mise en place (permute)     ", eSetup, 0)
+    if (okG) {
+      fespace P2dh(DP, P2);
+      int refused = 0;
+      try { P2dh w = a; } catch (...) { refused = 1; }
+      REFUSED("C5 monde <-> permute : refus    ", refused)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------
+//  6. L : le communicateur est libere avant le Dmesh
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 6) {
+  if (mpirank == 0) cout << "===== L : duree de vie du communicateur" << endl;
+  mesh3 Th = cube(nc, nc, nc);
+  fespace UhG(Th, P2);
+  Dmesh3 DL;
+  {
+    mpiComm cl(mpiCommWorld, 0, mpirank);
+    DL = distribute(Th, overlap = ov, comm = cl);
+  }   // cl est libere ici (MPI_Comm_free)
+  fespace Ldh(DL, P2);                  // collectif sur DL.comm
+  real e1 = abs(Ldh.ndofglobal - UhG.ndof);
+  CHK(mpiCommWorld, "L", "L1 ndofglobal apres liberation ", e1, 0)
+  real v = int3d(DL)(1.);
+  real e2 = abs(v - 1.);
+  CHK(mpiCommWorld, "L", "L1 int3d apres liberation      ", e2, 1e-10)
+}
+
+// ---------------------------------------------------------------------
+//  7. O : rang hors du communicateur
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 7) {
+  if (mpirank == 0) cout << "===== O : rang hors du communicateur" << endl;
+  mesh3 Th = cube(nc, nc, nc);
+  Dmesh3 DO;
+  int refused = 0;
+  try { DO = distribute(Th, overlap = ov, comm = cX); } catch (...) { refused = 1; }
+  int expected = 0;
+  if (mpirank == 0) expected = 1;       // seul le rang monde 0 est hors de cX
+  real e = abs(refused - expected);
+  CHK(mpiCommWorld, "O", "O1 refus propre hors de comm   ", e, 0)
+}
+
+// ---------------------------------------------------------------------
+//  Bilan : chaque rang a ses propres compteurs (les rangs hors d'un
+//  communicateur n'executent pas sa suite). Echec si un rang a un FAIL.
+// ---------------------------------------------------------------------
+int nfail = ntot - npass, gfail = 0;
+mpiAllReduce(nfail, gfail, mpiCommWorld, mpiMAX);
+if (mpirank == 0)
+  cout << "test_subcomm : rang 0 " << npass << "/" << ntot << " PASS ; "
+       << "max FAIL sur un rang = " << gfail
+       << "   => " << (gfail == 0 ? "OK" : "ECHEC") << endl;
+assert(gfail == 0);
