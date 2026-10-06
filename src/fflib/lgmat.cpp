@@ -1384,7 +1384,7 @@ KN<long> buildInterfaceDofList(const DistributedMesh<Mesh>& D, int j, GFESpace<M
     Mesh* S = buildInterfaceSubmesh(D, j, n2oS);
     if (!S) return KN<long>(0);
 
-    const int me = (int)mpirank;
+    const int me = D.rank;
     const int nb = D.neighborRanks[j];
 
     KN<int> coverToLocal(D.CoverMesh->nt, -1);
@@ -1492,7 +1492,7 @@ void v_dfes<Mesh>::buildNumberingIfNeeded(GFESpace<Mesh>& Vhi){
 template<class Mesh>
 void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     if (!DTh) return;
-    const bool collective = (checkDfespace != 0) && (mpisize > 1);
+    const bool collective = (checkDfespace != 0) && (DTh->size > 1);
 
     KN<KN<long>> raw = buildDofIntersection(*DTh, Vhi);
 
@@ -1519,11 +1519,11 @@ void v_dfes<Mesh>::buildDistributedDofData(GFESpace<Mesh>& Vhi){
     }
     dofIntersectionDof = purgeEmptyIntersections(raw);
 
-    pouResidual = (mpisize <= 1) ? 0.0 : -1.0;
+    pouResidual = (DTh->size <= 1) ? 0.0 : -1.0;
     if (collective){
         pouResidual = checkPartitionOfUnity(DTh->comm, dofIntersectionDof, Ddof, Vhi.NbOfDF);
         if (pouResidual > 1.0e-8) {
-            if (mpirank == 0){
+            if (DTh->rank == 0){
                 cout << "[fespace distribute] Problem with the partition of unity: max|sum -1| = " << pouResidual << endl;
             }
         }
