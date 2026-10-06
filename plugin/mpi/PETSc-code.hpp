@@ -405,8 +405,17 @@ namespace PETSc {
     v_dfes<MMesh>* f = *pUh;
     // overlap = 0: matrix built by assembleWithoutOverlap
     if (B._A) return;
-    
     KN<double> Dscratch(f->Ddof);
+
+    MPI_Comm* dcomm = static_cast<MPI_Comm*>(f->DTh->comm);
+    MPI_Comm* ucomm = static_cast<MPI_Comm*>(ds.commworld);
+    if (ucomm && dcomm) {
+      int r;
+      MPI_Comm_compare(*ucomm, *dcomm, &r);
+      if (r != MPI_IDENT && r != MPI_CONGRUENT)
+        ExecError("Mat = varf(Udh, Udh): commworld differs from the communicator of the distributed mesh");
+    }
+    
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
       &B,
       1,
@@ -415,7 +424,7 @@ namespace PETSc {
       nullptr,
       ndof,
       (PetscInt) f->N,
-      ds.commworld ? static_cast<MPI_Comm*>(ds.commworld) : nullptr,
+      dcomm ? dcomm : ucomm,
       nullptr,
       0,
       ds.sym ? PETSC_TRUE : PETSC_FALSE,
