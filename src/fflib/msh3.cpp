@@ -10067,7 +10067,9 @@ static int methodCode(std::string& method) {
 template <class Mesh>
 AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
-  pcommworld comm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
+  pcommworld userComm = nargs[11] ? GetAny<pcommworld>((*nargs[11])(stack)) : nullptr;
+  OwnedComm owned(duplicateComm(userComm));
+  pcommworld comm = owned.c;
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
   bool cleanmesh(arg(3, stack, true));
@@ -10384,7 +10386,7 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
   DTh->interfaceLabel = interfaceLabel;
   DTh->neighborRanks = neighborRanks;
   DTh->partitionOfUnity = pouLocal;
-  DTh->comm = comm;
+  DTh->adoptComm(owned.release());
   DTh->coverPartition = coverPartition;
 
   Add2StackOfPtr2FreeRC(stack, DTh);
