@@ -103,6 +103,10 @@
 //    -ov    recouvrement passe a distribute              (defaut 1)
 //    -pm    1 = ajoute partmethod = "parmetis" aux cas W, P, H
 //           (FreeFEM configure avec ParMETIS)            (defaut 0)
+//    -stop  k = n'execute que S0..Sk de chaque suite     (defaut 9)
+//           Pour valider une etape sans les suivantes :
+//           -stop 7 saute S8 (PETSc, etape 6) et S9 (transfert, etape 5),
+//           qui bloquent tant que ces etapes ne sont pas faites.
 //
 //  Exige mpisize >= 2 (le cas X et le bloc O excluent le rang monde 0).
 // =====================================================================
@@ -115,6 +119,7 @@ int nc  = getARGV("-nc", 10);
 int nc2 = getARGV("-nc2", 7);
 int ov  = getARGV("-ov", 1);
 int pm  = getARGV("-pm", 0);
+int stopAt = getARGV("-stop", 9);
 
 assert(mpisize >= 2);
 
@@ -290,7 +295,7 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
         }
 
         /* S8 : Mat PETSc sans communicator=, puis resolution */
-        {
+        if (stopAt >= 8) {
           fespace U1dh(DTh, P1);
           fespace U1h(Th, P1);
           varf vPb(a, b) = int3d(DTh)(grad(a)'*grad(b)) + int3d(DTh)(1.*b)
@@ -311,7 +316,7 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */
-        {
+        if (stopAt >= 9) {
           mesh3 Th2 = cube(nc2, nc2, nc2, [0.25 + 0.5*x, 0.25 + 0.5*y, 0.25 + 0.5*z]);
           Dmesh3 DTh2 = distribute(Th2, overlap = ov, comm = COMM);
           mesh3 L2 = DTh2.local;

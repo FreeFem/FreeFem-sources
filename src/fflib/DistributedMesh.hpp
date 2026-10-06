@@ -183,7 +183,7 @@ const char* distributeStatusMessage(int status);
 // 0 if method known and available in build
 int checkPartitionMethod(const std::string& method);
 // 0 if part is usable
-int checkPartitionUsable(const KN<int>& part, int nt, bool allowEmpty = false);
+int checkPartitionUsable(const KN<int>& part, int nt, int nparts, bool allowEmpty = false);
 
 template<class Mesh>
 void sendMesh(const Mesh& Th, int dest, pcommworld comm);
