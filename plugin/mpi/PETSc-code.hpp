@@ -358,6 +358,47 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
 #endif
 
 namespace PETSc {
+  // Solver parameters passed to varf call for distributed fespace
+  static bool varfParamHandled(const char* name) {
+    static const char* ok[] = {"bmat", "sparams", "sym", "tgv", "commworld"};
+    for (const char* n : ok) {
+      if (!strcmp(name, n)) return true;
+    }
+    return false;
+  }
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  warnIgnoredVarfParams(Expression const* nargs) {
+    std::string ignored;
+    for (int i = 0; i < OpCall_FormBilinear_np::n_name_param; ++i)
+      if (nargs[i] && !varfParamHandled(OpCall_FormBilinear_np::name_param[i].name))
+        ignored += std::string(ignored.empty() ? "" : ", ") + OpCall_FormBilinear_np::name_param[i].name;
+    if (!ignored.empty() && mpirank == 0)
+      cerr << "Warning: Mat A = varf(Udh, Udh, ...): parameter(s) " << ignored
+           << " ignored on a distributed fespace; use sparams = \"...\" "
+           << "(e.g. \"-ksp_type cg -ksp_rtol 1e-8\")" << endl;
+  }
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  warnIgnoredVarfParams(Expression const*) {}
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  applyVarfSparams(Dmat& B, const Data_Sparse_Solver& ds) {
+    if (ds.sparams.empty() || !B._petsc) return;
+    PetscOptionsInsertString(NULL, ds.sparams.c_str());
+    if (!B._ksp) {
+      KSPCreate(PetscObjectComm((PetscObject)B._petsc), &B._ksp);
+      KSPSetOperators(B._ksp, B._petsc, B._petsc);
+    }
+    KSPSetFromOptions(B._ksp);
+  }
+  template<class MMesh, class fes1>
+  typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  applyVarfSparams(Dmat&, const Data_Sparse_Solver&) {}
+
   template<class K, class MMesh, class fes1, class fes2 >
   struct varfToMat : public OneOperator {
     class Op : public E_F0mps {
@@ -369,6 +410,8 @@ namespace PETSc {
       Op(Expression x, Expression y) : b(new Call_FormBilinear<fes1, fes2>(*dynamic_cast<const Call_FormBilinear<fes1, fes2>*>(y))), a(x) {
           ffassert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<upscaled_type<K>>::value) == IsComplexType<upscaled_type<K>>::value);
+          warnIgnoredVarfParams<MMesh, fes1>(b->nargs);
+
 
           #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
           // Check the nbitem of inconnu and test in BemFormBilinear
@@ -571,6 +614,7 @@ namespace PETSc {
       changeOperatorSimple(&B, &A);
       assembleWithoutOverlap<MMesh, fes1>(B, pUh,
           A.A ? static_cast<MatriceMorse<upscaled_type<K>>*>(&*A.A) : nullptr);
+      applyVarfSparams<MMesh, fes1>(B, ds);
 
       if(B._A)
           B._A->setMatrix(nullptr);
