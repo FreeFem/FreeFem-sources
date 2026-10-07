@@ -6248,6 +6248,18 @@ DistributedExchangeHookD g_distributedExchangeHookD = nullptr;
 DistributedExchangeHookC g_distributedExchangeHookC = nullptr;
 void (*g_distributedExchangeHandleDtor)(void*) = nullptr;
 
+// matrix A = vP(Udh, Udh): no distributed matrix in native setting.
+// same signature as OpMatrixtoBilinearForm, but clean rebuttal at compile
+template<class R, class v_fes>
+struct OpMatrixDistributedRefused : public OneOperator {
+  OpMatrixDistributedRefused() : OneOperator(atype<Matrice_Creuse<R>*>(), atype<Matrice_Creuse<R>*>(), atype<const Call_FormBilinear<v_fes, v_fes>*>()) {}
+  E_F0 *code(const basicAC_F0&) const {
+    CompileError("matrix = varf(Udh, Udh) on a distributed fespace is not supported\n"
+                "Instead use load \"PETSc\" and write Mat A = vP(Udh, Udh); \n");
+    return 0;
+  }
+};
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -7235,6 +7247,20 @@ void init_lgfem( ) {
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, vect_generic_v_fes  >);    
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, vect_generic_v_fes  >);      
   Add< const C_args * >("(", "", new OpCall_CompositeFormBilinear< C_args, vect_generic_v_fes, vect_generic_v_fes >);   
+
+  // matrix = varf on distributed fespace : explicit rebuttal
+  TheOperators->Add("<-", new OpMatrixDistributedRefused<double, v_dfes3>,
+                          new OpMatrixDistributedRefused<double, v_dfesS>,
+                          new OpMatrixDistributedRefused<double, v_dfesL>);
+  TheOperators->Add("<-", new OpMatrixDistributedRefused<Complex, v_dfes3>,
+                          new OpMatrixDistributedRefused<Complex, v_dfesS>,
+                          new OpMatrixDistributedRefused<Complex, v_dfesL>);
+  TheOperators->Add("=",  new OpMatrixDistributedRefused<double, v_dfes3>,
+                          new OpMatrixDistributedRefused<double, v_dfesS>,
+                          new OpMatrixDistributedRefused<double, v_dfesL>);
+  TheOperators->Add("=",  new OpMatrixDistributedRefused<Complex, v_dfes3>,
+                          new OpMatrixDistributedRefused<Complex, v_dfesS>,
+                          new OpMatrixDistributedRefused<Complex, v_dfesL>);
 
 
   //  correction du bug morale
