@@ -172,7 +172,6 @@ int checkPartitionMethod(const std::string &method) {
 
 int checkPartitionUsable(const KN<int>& part, int nt, int nparts, bool allowEmpty){
   if (part.n != nt) return DIST_PART_SIZE;
-  if (nparts <= 1) return DIST_OK;
   KN<int> count(nparts, 0);
   for (int k = 0; k < nt; ++k){
     const int p = part[k];

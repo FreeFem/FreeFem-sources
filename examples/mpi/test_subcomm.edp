@@ -32,6 +32,12 @@
 //      que mpisize > 1 : tout collectif reste sur mpiCommWorld y bloque,
 //      puisque les autres rangs ne l'appellent pas.
 //
+//  MAILLAGES ET PARTITIONNEURS
+//   Cas 1 a 8 : mesh3 (cube). Partitions : utilisateur (tranches en x),
+//   metis, scotch (-sc 1, defaut), parmetis (-pm 1).
+//   Cas 9 : meshS (square3) et cas 10 : meshL (segment), sur W, P, H, X, U,
+//   avec la macro SUITEG (memes controles que SUITE, adaptes au type).
+//
 //  SUITE (macro SUITE, pour un communicateur, un partitionneur, et le mode
 //  replique ou scatter). Toutes les reductions se font sur c.
 //   S0  distribute(..., comm=c) est accepte.
@@ -112,7 +118,7 @@
 //
 //  OPTIONS
 //    -case  0 = tout (defaut), 1 = W, 2 = P, 3 = H, 4 = X,
-//           5 = C, 6 = L, 7 = O, 8 = U
+//           5 = C, 6 = L, 7 = O, 8 = U, 9 = meshS, 10 = meshL
 //    -nc    raffinement du cube                          (defaut 10)
 //    -nc2   raffinement du cube inclus (transfert)       (defaut 7)
 //    -ov    recouvrement passe a distribute              (defaut 1)
@@ -121,6 +127,11 @@
 //    -stop  k = n'execute que S0..Sk de chaque suite     (defaut 9)
 //           -stop 7 saute S8 (PETSc) et S9 (transfert) : utile pour
 //           isoler une regression de distribute ou du fespace.
+//    -sc    1 = ajoute partmethod = "scotch" (cas mesh3) et l'utilise
+//           comme second partitionneur des cas 9 et 10 ;
+//           0 = metis a la place (build sans Scotch)       (defaut 1)
+//    -nsq, -nsq2    raffinements des deux square3 (cas 9)  (defaut 16, 11)
+//    -nseg, -nseg2  raffinements des deux segments (cas 10) (defaut 80, 57)
 //    -skip  k = saute Sk (k = 8 ou 9) dans chaque suite   (defaut aucun)
 //           -skip 8 teste le transfert (S9) sans PETSc (S8).
 //
@@ -137,11 +148,20 @@ int ov  = getARGV("-ov", 1);
 int pm  = getARGV("-pm", 0);
 int stopAt = getARGV("-stop", 9);
 int skipS  = getARGV("-skip", -1);
+int sc    = getARGV("-sc", 1);
+int nsq   = getARGV("-nsq", 16);
+int nsq2  = getARGV("-nsq2", 11);
+int nseg  = getARGV("-nseg", 80);
+int nseg2 = getARGV("-nseg2", 57);
+string methB = "metis";          // second partitionneur des cas 9 et 10
+if (sc) methB = "scotch";
 
 assert(mpisize >= 2);
 
 int npass = 0, ntot = 0;
-string kspp = "-ksp_type cg -pc_type asm -ksp_rtol 1e-12";
+// GMRES et non CG : l ASM par defaut de PETSc (restricted) n est pas symetrique,
+// CG peut diverger (DIVERGED_ITS sur meshL a 2 sous-domaines).
+string kspp = "-ksp_type gmres -pc_type asm -ksp_rtol 1e-12 -ksp_max_it 1000";
 
 macro FIELD() (sin(3*x)*cos(2*y) + exp(z))// EOM
 macro AFFINE() (1 + x + 2*y + 3*z)// EOM
@@ -360,6 +380,235 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
 }// EOM
 
 // ---------------------------------------------------------------------
+//  SUITEG : S0..S9 pour meshS et meshL (meme logique que SUITE).
+//    MT, DMT  type du maillage et du maillage distribue (meshS, DmeshS...)
+//    INTG     integrale du type (int2d, int1d)
+//    NV       nombre de sommets par element (3, 2)
+//    THG      maillage global de reference, construit sur tous les rangs
+//             de COMM ; THG2 meme domaine, autre resolution (transfert S9)
+//    BLAB     int[int] des labels du bord (Dirichlet de S8)
+//  Differences avec SUITE : S1 compte les elements de la tranche propre
+//  (pas d'accesseur .measure sur les elements meshS / meshL) ; S8 compare
+//  l'integrale de la solution, et en mode replique la solution elle-meme
+//  via loc2glob ; S9 transfere entre deux resolutions du meme domaine.
+// ---------------------------------------------------------------------
+macro SUITEG(COMM, CTAG, SCAT, METH, MT, DMT, INTG, NV, THG, THG2, BLAB) {
+  if (COMM) {
+    int cr = mpiRank(COMM), cs = mpiSize(COMM);
+    bool scat = SCAT;
+    bool kg = !scat;
+    string meth = METH;
+    string tg = CTAG + "/" + meth;
+    if (scat) tg = tg + "/scatter";
+    if (cr == 0)
+      cout << "--- " << tg << " : taille " << cs
+           << ", rang 0 = rang monde " << mpirank << endl;
+
+    MT ThW;
+    if (!scat || cr == 0) ThW = THG;
+    int[int] part(ThW.nt);
+    for (int k = 0; k < ThW.nt; ++k) {
+      real xb = 0;
+      for (int i = 0; i < NV; ++i) xb += ThW[k][i].x;
+      part[k] = min(int(cs*xb/NV), cs - 1);
+    }
+
+    DMT DTh;
+    int dok = 1;
+    try {
+      if (meth == "user")
+        DTh = distribute(ThW, overlap = ov, comm = COMM, partition = part, keepGlobal = kg);
+      else
+        DTh = distribute(ThW, overlap = ov, comm = COMM, partmethod = meth, keepGlobal = kg);
+    } catch (...) { dok = 0; }
+    real e0 = 1 - dok;
+    CHK(COMM, tg, "S0 distribute accepte          ", e0, 0)
+
+    if (dok) {
+      int crashed = 0;
+      try {
+        MT L = DTh.local;
+
+        /* S1 : tous les elements de la tranche mpiRank(COMM) sont dans local */
+        if (meth == "user") {
+          int nOwn = 0, nRef = 0;
+          for (int k = 0; k < L.nt; ++k) {
+            real xb = 0;
+            for (int i = 0; i < NV; ++i) xb += L[k][i].x;
+            if (min(int(cs*xb/NV), cs - 1) == cr) nOwn++;
+          }
+          for (int k = 0; k < THG.nt; ++k) {
+            real xb = 0;
+            for (int i = 0; i < NV; ++i) xb += THG[k][i].x;
+            if (min(int(cs*xb/NV), cs - 1) == cr) nRef++;
+          }
+          real e1 = abs(nOwn - nRef);
+          if (nRef == 0) e1 = 1e30;
+          CHK(COMM, tg, "S1 tranche propre dans local   ", e1, 0)
+        }
+
+        /* S2 : integrales, reduction sur COMM */
+        {
+          real v1 = INTG(DTh)(1.), w1 = INTG(THG)(1.);
+          real e2a = abs(v1 - w1)/w1;
+          CHK(COMM, tg, "S2 mesure(DTh) = mesure(Th)    ", e2a, 1e-10)
+          real Id = INTG(DTh)(FIELD), Is = INTG(THG)(FIELD);
+          real e2b = abs(Id - Is)/abs(Is);
+          CHK(COMM, tg, "S2 integrale de f              ", e2b, 1e-10)
+        }
+
+        fespace Udh(DTh, P2);
+        fespace UhG(THG, P2);
+        fespace Ul(L, P2);
+
+        /* S3, S4 */
+        real e3 = abs(Udh.ndofglobal - UhG.ndof);
+        CHK(COMM, tg, "S3 ndofglobal = ndof sequentiel", e3, 0)
+        real v4 = Udh.checkPoU;
+        real e4 = v4;
+        if (v4 < 0) e4 = 1e30;
+        CHK(COMM, tg, "S4 checkPoU                    ", e4, 1e-8)
+
+        /* S5 : voisins dans [0, cs[, puis appariement des intersections */
+        {
+          int nN = Udh.intersection[0].n;
+          int nbad = 0;
+          for (int j = 0; j < nN; ++j) {
+            int nb = Udh.intersection[0][j];
+            if (nb < 0 || nb >= cs || nb == cr) nbad++;
+          }
+          int nbadG = 0;
+          mpiAllReduce(nbad, nbadG, COMM, mpiMAX);
+          real e5a = nbadG;
+          CHK(COMM, tg, "S5 voisins = rangs de comm     ", e5a, 0)
+
+          real e5b = 1e30;
+          if (nbadG == 0) {
+            Ul pvx = x, pvy = y, pvz = z;
+            real[int][int] pvMine(nN), pvHis(nN);
+            mpiRequest[int] pvRq(2*nN);
+            for (int j = 0; j < nN; ++j) {
+              int[int] pvL = Udh.intersection[1 + j];
+              int pvM = pvL.n;
+              pvMine[j].resize(3*pvM); pvHis[j].resize(3*pvM);
+              for (int p = 0; p < pvM; ++p) {
+                pvMine[j][3*p]     = pvx[][pvL[p]];
+                pvMine[j][3*p + 1] = pvy[][pvL[p]];
+                pvMine[j][3*p + 2] = pvz[][pvL[p]];
+              }
+              Irecv(processor(Udh.intersection[0][j], COMM, pvRq[j]),      pvHis[j]);
+              Isend(processor(Udh.intersection[0][j], COMM, pvRq[nN + j]), pvMine[j]);
+            }
+            for (int q = 0; q < 2*nN; ++q) { int pw = mpiWaitAny(pvRq); }
+            e5b = 0;
+            for (int j = 0; j < nN; ++j)
+              for (int p = 0; p < pvMine[j].n; ++p)
+                e5b = max(e5b, abs(pvMine[j][p] - pvHis[j][p]));
+          }
+          CHK(COMM, tg, "S5 appariement intersections   ", e5b, 1e-12)
+        }
+
+        /* S6, S7 : exigent loc2glob, donc le mode replique */
+        if (!scat) {
+          real[int] D = Udh.D;
+          int[int] l2g = Udh.loc2glob;
+          UhG gg = FIELD;
+          real[int] acc(UhG.ndof); acc = 0;
+          for (int i = 0; i < Udh.ndof; ++i) acc[l2g[i]] += D[i]*gg[][l2g[i]];
+          real[int] accG(UhG.ndof);
+          mpiAllReduce(acc, accG, COMM, mpiSUM);
+          accG -= gg[];
+          real e6 = accG.linfty;
+          CHK(COMM, tg, "S6 recomposition par la PoU    ", e6, 1e-10)
+
+          int[int] gnum = Udh.numbering;
+          real[int] gmx(UhG.ndof), gmn(UhG.ndof);
+          gmx = -1; gmn = 1e30;
+          for (int i = 0; i < Udh.ndof; ++i) { gmx[l2g[i]] = gnum[i]; gmn[l2g[i]] = gnum[i]; }
+          real[int] gmxG(UhG.ndof), gmnG(UhG.ndof);
+          mpiAllReduce(gmx, gmxG, COMM, mpiMAX);
+          mpiAllReduce(gmn, gmnG, COMM, mpiMIN);
+          real[int] dg = gmxG - gmnG;
+          real e7a = dg.linfty;
+          CHK(COMM, tg, "S7 numbering coherent          ", e7a, 0)
+          gmxG.sort;
+          real e7b = 0;
+          for (int i = 0; i < gmxG.n; ++i) e7b = max(e7b, abs(gmxG[i] - i));
+          CHK(COMM, tg, "S7 numbering bijectif          ", e7b, 0)
+        }
+
+        /* S8 : Mat PETSc sans communicator=, puis resolution */
+        if (stopAt >= 8 && skipS != 8) {
+          fespace U1dh(DTh, P1);
+          fespace U1h(THG, P1);
+          varf vPb(a, b) = INTG(DTh)(grad(a)'*grad(b)) + INTG(DTh)(1.*b) + on(BLAB, a = 0);
+          Mat A = vPb(U1dh, U1dh);
+          set(A, sparams = kspp);
+          real[int] rb = vPb(0, U1dh);
+          U1dh uh;
+          uh[] = A^-1 * rb;
+          varf vS(a, b) = INTG(THG)(grad(a)'*grad(b)) + INTG(THG)(1.*b) + on(BLAB, a = 0);
+          matrix As = vS(U1h, U1h, solver = UMFPACK);
+          real[int] bs = vS(0, U1h);
+          U1h us;
+          us[] = As^-1 * bs;
+          real Id = INTG(DTh)(uh), Is = INTG(THG)(us);
+          real e8a = abs(Id - Is)/abs(Is);
+          CHK(COMM, tg, "S8 Mat + A^-1 : integrale      ", e8a, 1e-8)
+          if (!scat) {
+            int[int] l2g1 = U1dh.loc2glob;
+            real e8b = 0;
+            for (int i = 0; i < U1dh.ndof; ++i) e8b = max(e8b, abs(uh[][i] - us[][l2g1[i]]));
+            CHK(COMM, tg, "S8 Mat + A^-1 : solution       ", e8b, 1e-8)
+          }
+        }
+
+        /* S9 : transfert vers un autre Dmesh du meme COMM (autre resolution) */
+        if (stopAt >= 9 && skipS != 9) {
+          DMT DTh2 = distribute(THG2, overlap = ov, comm = COMM);
+          MT L2 = DTh2.local;
+          fespace A1dh(DTh, P1);
+          fespace B2dh(DTh2, P2);
+          fespace B2l(L2, P2);
+          A1dh a = AFFINE;
+          B2dh w = a;
+          B2l wl = AFFINE;
+          real[int] d9 = w[] - wl[];
+          real e9a = d9.linfty;
+          CHK(COMM, tg, "S9 Vdh w = a (declaration)     ", e9a, 1e-10)
+          a = 2*AFFINE;
+          w = a;
+          d9 = w[] - 2*wl[];
+          real e9b = d9.linfty;
+          CHK(COMM, tg, "S9 w = a (reaffectation)       ", e9b, 1e-10)
+        }
+      } catch (...) { crashed = 1; }
+      real eX = crashed;
+      CHK(COMM, tg, "S* aucune exception            ", eX, 0)
+    }
+  }
+}// EOM
+
+// SUITEG sur meshS (carre unite du plan z = 0) et meshL (segment [0,1])
+macro SUITES(COMM, CTAG, SCAT, METH) {
+  if (COMM) {
+    meshS ThGs = square3(nsq, nsq);
+    meshS ThG2s = square3(nsq2, nsq2);
+    int[int] blabS = [1, 2, 3, 4];
+    SUITEG(COMM, CTAG, SCAT, METH, meshS, DmeshS, int2d, 3, ThGs, ThG2s, blabS)
+  }
+}// EOM
+
+macro SUITEL(COMM, CTAG, SCAT, METH) {
+  if (COMM) {
+    meshL ThGl = segment(nseg);
+    meshL ThG2l = segment(nseg2);
+    int[int] blabL = [1, 2];
+    SUITEG(COMM, CTAG, SCAT, METH, meshL, DmeshL, int1d, 2, ThGl, ThG2l, blabL)
+  }
+}// EOM
+
+// ---------------------------------------------------------------------
 //  Communicateurs (globaux : ils vivent jusqu'a la fin du script)
 // ---------------------------------------------------------------------
 int colH = 0;
@@ -383,6 +632,7 @@ if (cas == 0 || cas == 1) {
   SUITE(mpiCommWorld, "W", false, "metis")
   SUITE(mpiCommWorld, "W", true, "user")
   if (pm) { SUITE(mpiCommWorld, "W", false, "parmetis") }
+  if (sc) { SUITE(mpiCommWorld, "W", false, "scotch") }
 }
 
 // ---------------------------------------------------------------------
@@ -394,6 +644,7 @@ if (cas == 0 || cas == 2) {
   SUITE(cP, "P", false, "metis")
   SUITE(cP, "P", true, "user")
   if (pm) { SUITE(cP, "P", false, "parmetis") }
+  if (sc) { SUITE(cP, "P", false, "scotch") }
 }
 
 // ---------------------------------------------------------------------
@@ -405,6 +656,7 @@ if (cas == 0 || cas == 3) {
   SUITE(cH, "H", false, "metis")
   SUITE(cH, "H", true, "metis")
   if (pm) { SUITE(cH, "H", false, "parmetis") }
+  if (sc) { SUITE(cH, "H", false, "scotch") }
   mpiBarrier(mpiCommWorld);
 }
 
@@ -416,6 +668,7 @@ if (cas == 0 || cas == 4) {
   SUITE(cX, "X", false, "user")
   SUITE(cX, "X", true, "user")
   SUITE(cX, "X", true, "metis")
+  if (sc) { SUITE(cX, "X", true, "scotch") }
   // E1 : erreur collective sur cX. La valeur mpiSize(cX) est hors de
   // [0, mpiSize(cX)[ mais dans [0, mpisize[ : refus attendu sur tous les
   // rangs de cX. Le rang monde 0 n'etant pas dans cX, le message
@@ -472,6 +725,55 @@ if (cas == 0 || cas == 8) {
   SUITE(cU, "U", false, "user")
   SUITE(cU, "U", false, "metis")
   SUITE(cU, "U", true, "user")
+  mpiBarrier(mpiCommWorld);
+}
+
+// ---------------------------------------------------------------------
+//  9. meshS et 10. meshL : SUITEG sur W, P, H, X et U
+//     partitions : utilisateur, methB (scotch, ou metis avec -sc 0),
+//     utilisateur en scatter
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 9) {
+  if (mpirank == 0) cout << "===== 9 : meshS" << endl;
+  SUITES(mpiCommWorld, "meshS-W", false, "user")
+  SUITES(mpiCommWorld, "meshS-W", false, methB)
+  SUITES(mpiCommWorld, "meshS-W", true, "user")
+  SUITES(cP, "meshS-P", false, "user")
+  SUITES(cP, "meshS-P", false, methB)
+  SUITES(cP, "meshS-P", true, "user")
+  SUITES(cH, "meshS-H", false, "user")
+  SUITES(cH, "meshS-H", false, methB)
+  SUITES(cH, "meshS-H", true, "user")
+  mpiBarrier(mpiCommWorld);
+  SUITES(cX, "meshS-X", false, "user")
+  SUITES(cX, "meshS-X", false, methB)
+  SUITES(cX, "meshS-X", true, "user")
+  mpiBarrier(mpiCommWorld);
+  SUITES(cU, "meshS-U", false, "user")
+  SUITES(cU, "meshS-U", false, methB)
+  SUITES(cU, "meshS-U", true, "user")
+  mpiBarrier(mpiCommWorld);
+}
+
+if (cas == 0 || cas == 10) {
+  if (mpirank == 0) cout << "===== 10 : meshL" << endl;
+  SUITEL(mpiCommWorld, "meshL-W", false, "user")
+  SUITEL(mpiCommWorld, "meshL-W", false, methB)
+  SUITEL(mpiCommWorld, "meshL-W", true, "user")
+  SUITEL(cP, "meshL-P", false, "user")
+  SUITEL(cP, "meshL-P", false, methB)
+  SUITEL(cP, "meshL-P", true, "user")
+  SUITEL(cH, "meshL-H", false, "user")
+  SUITEL(cH, "meshL-H", false, methB)
+  SUITEL(cH, "meshL-H", true, "user")
+  mpiBarrier(mpiCommWorld);
+  SUITEL(cX, "meshL-X", false, "user")
+  SUITEL(cX, "meshL-X", false, methB)
+  SUITEL(cX, "meshL-X", true, "user")
+  mpiBarrier(mpiCommWorld);
+  SUITEL(cU, "meshL-U", false, "user")
+  SUITEL(cU, "meshL-U", false, methB)
+  SUITEL(cU, "meshL-U", true, "user")
   mpiBarrier(mpiCommWorld);
 }
 
