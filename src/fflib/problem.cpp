@@ -12965,6 +12965,29 @@ bool isCompositeProblem(const ListOfId &l){
 
 }
 
+// solve/problem on distributed fespace: not yet supported
+static bool isDistributedFEArg(const C_F0 &c) {
+    return BCastTo<pdf3r>(c) || BCastTo<pdf3c>(c) || BCastTo<pdfSr>(c) || BCastTo<pdfSc>(c) || BCastTo<pdfLr>(c) || BCastTo<pdfLc>(c);
+}
+
+static void refuseDistributedProblem(const ListOfId &l) {
+    for (int i = 0; i < l.size(); ++i) {
+        if (l[i].e) continue;
+        bool d = false;
+        if (l[i].array) {
+            for (int j = 0; j < l[i].array->size(); ++j) {
+                d = d || isDistributedFEArg(::Find((*l[i].array)[j].id));
+            }
+        } else {
+            d = isDistributedFEArg(::Find(l[i].id));
+    }
+        if (d) {
+            CompileError("solve/problem on distributed fespace is not yet supported: \n"
+            " load \"PETSc\" and write Mat A = vP(Udh, Udh); \n"
+        "real[int] b = vP(0, Udh); u[] = A^-1*b;");
+        }
+    }
+}
 
 // read the arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])
 // First Argument: samedim
@@ -12980,6 +13003,7 @@ std::pair< bool,bool> isSameDimAndComplexTypeProblem(const ListOfId &l){
     int dim=0;
     int nb=l.size();//,nbarray=0;//,n=0,
     //const UnId *p1;
+    refuseDistributedProblem(l);
     for(int i=0; i<nb; ++i)
     {
         if(l[i].e ==0)// to miss name parameter solver=ddd
