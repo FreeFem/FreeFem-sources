@@ -42,6 +42,9 @@ endif
 #to force the recompile if change ... FH
 $(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
 
+PETSc.$(DYLIB_SUFFIX) PETSc-complex.$(DYLIB_SUFFIX): PETSc-code.hpp SLEPc-code.hpp PETSc.hpp common_hpddm.hpp common.hpp common_bem.hpp
+hpddm.$(DYLIB_SUFFIX) hpddm_substructuring.$(DYLIB_SUFFIX): common_hpddm.hpp common.hpp common_bem.hpp
+
 .cpp.$(DYLIB_SUFFIX): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download ../seq/WHERE_LIBRARY-config Makefile
 #	FFCS needs an error exit code to make sure that all libraries are correctly compiled
 #
