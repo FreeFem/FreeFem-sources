@@ -60,6 +60,7 @@ if (ffddmnpart <= 0) {
   ffddmnpart = mpisize-ffddmexclude*ffddmpCS;
 }
 
+int braspart = (usedARGV("-raspart") != -1);
 int bnoGlob = usedARGV("-noGlob") > -1 ? 1 : 0;
 int bnoGlobwithpartloc = usedARGV("-noGlobwithpartloc") > -1 ? 1 : 0;
 int bnopartloc = bnoGlob;

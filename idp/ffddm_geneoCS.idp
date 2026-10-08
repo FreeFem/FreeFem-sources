@@ -1423,7 +1423,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   for(int j=0;j<nev;++j) {
     if (j == 0 || ffddmtau == 0 || (real(ev[j]) > 0 && real(ev[j]) < lambdamax)) {
        /* if (mpirank == 0) cout << i << " " << pr#si << " " << ev[j] << endl; */
-      if (pr#verbosity >= 1 && abs(imag(ev[j])) > 1e-6) cout << "["+Stringification(pr)+"] Warning in ffddmharmonicgeneosetup: nonzero imaginary part " << imag(ev[j]) << " of eigenvalue " << j << endl;
+      if (pr#verbosity > 1 && abs(imag(ev[j])) > 1e-6) cout << "["+Stringification(pr)+"] Warning in ffddmharmonicgeneosetup: nonzero imaginary part " << imag(ev[j]) << " of eigenvalue " << j << endl;
       pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
       pr#Z[pr#si] = pr#prfe#Dk[i].*eVV(0:pr#prfe#Dk[i].n-1,j);
       if (pr#Z[pr#si].sum < 0) pr#Z[pr#si] *= -1;
@@ -1597,7 +1597,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     if (j == 0 || ffddmtau == 0 || (real(ev[j]) > 0 && real(ev[j]) < ffddmtau)) {
       /*if (mpirank == 0) cout << i << " " << pr#si << " " << ev[j] << endl;*/
       assert(pr#prec != "asm"); /* otherwise eigenvector in tilde Omega */
-      if (pr#verbosity >= 1 && abs(imag(ev[j])) > 1e-6) cout << "["+Stringification(pr)+"] Warning in ffddmextendedharmonicgeneosetup: nonzero imaginary part " << imag(ev[j]) << " of eigenvalue " << j << endl;
+      if (pr#verbosity > 1 && abs(imag(ev[j])) > 1e-6) cout << "["+Stringification(pr)+"] Warning in ffddmextendedharmonicgeneosetup: nonzero imaginary part " << imag(ev[j]) << " of eigenvalue " << j << endl;
       pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
       via = ADirichlettilde*eV(:,j);
       vi = pr#prfe#Auginterp*via;

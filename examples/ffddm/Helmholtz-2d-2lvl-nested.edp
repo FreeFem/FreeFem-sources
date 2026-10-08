@@ -1,0 +1,322 @@
+// ff-mpirun -np 9 Helmholtz-2d-2lvl-nested.edp -ns -wg -waven 100 -ffddm_geneo_nu 100 -ffddm_geneo_threshold 1000 -ffddm_master_p 1 -ch 8 -cH 16 -keps 0.
+
+load "qf11to25"
+load "Element_P3"
+load "Element_P4"
+load "gsl"
+load "PETSc-complex"
+
+macro dimension 2// EOM
+include "ffddm.idp"
+
+ffddmprecond = "oras";
+ffddmmaxit = 50;
+ffddminexactCStol = 1e-12;
+
+macro def(i)i// EOM // scalar field definition
+macro init(i)i// EOM // scalar field initialization
+
+real R0 = 0.7;
+real lPML = 0.2;
+real Rc = R0+lPML;
+
+real waven = getARGV("-waven",100.);
+real freq = waven/2/pi; // frequency
+
+real rhok = 2;
+real keps = getARGV("-keps",0.);
+
+// preasymptotic scaling
+real ch = getARGV("-ch",8.); // $(\frac{h k}{ch})^{2p} k^rhok = 1$
+real cH = getARGV("-cH",16.); // $(\frac{H_c k}{cH})^{2p} k^rhok = k^keps$
+
+// constant number of points per wavelength -- takes precedence if non-zero
+real ccsth = getARGV("-ccsth",0.); // $h k = ccsth$
+real ccstH = getARGV("-ccstH",0.); // $H_c k = ccstH$
+
+int qorder = 12;//16;
+func Pk = P2;//P4;
+int p = 2;//4;
+
+string csv = getARGV("-csv","");
+real[int] savehistory;
+real[int] savehistoryFIXEDPOINT;
+
+int Dirichlet = 1;
+int Robin = 2;
+int Neumann = 7;
+int PML = 8;
+
+real c = 1;
+real k = 2*pi*freq/c;
+real lambda = c/freq;
+
+real xs = 0;
+real ys = 0; //-0.3+0.3*sqrt(2)/4;
+
+func r = sqrt((x-xs)^2+(y-ys)^2);
+
+real R1 = 0.05;
+real R2 = 0.1;
+func chi = r <= R1 ? 1.0 : (r >= R2 ? 0.0 : exp(-1.0/(R2-r)) / (exp(-1.0/(R2-r)) + exp(-1.0/(r-R1))));
+func source = chi*gslsfbesselJ0(k*r);
+
+real lCAPi = 0.5*0.5*sqrt(pi*Rc^2/ffddmnpart);
+
+mesh Thc;
+
+NewMacro constructmesh(np,hh,Thc)
+if (mpirank == 0) {
+  border circ(t=0,2*pi) {x=Rc*cos(t);y=Rc*sin(t);region=PML;}
+
+  real nloc = (np)/ffddmsplit/lambda;
+  int nx = rint(nloc*2*pi*Rc);
+  meshL ThL = buildmeshL(circ(nx));
+
+  real R = 0.3;
+
+  NewMacro buildsquare(xs,ys,Th)
+  {
+    border a(t=0,R) {x=t; y=0; label = Dirichlet;}
+    border b(t=0,R) {x=R; y=t; label = Dirichlet;}
+    border c(t=R,0) {x=t; y=R; label = Dirichlet;}
+    border d(t=R,0) {x=0; y=t; label = Dirichlet;}
+    real nn = nloc*R;
+    Th = buildmeshL(a(nn)+b(nn)+c(nn)+d(nn));
+    real theta = pi/4;
+    Th = movemesh(Th,[xs+(x-R/2)*cos(theta)-(y-R/2)*sin(theta),ys+(x-R/2)*sin(theta)+(y-R/2)*cos(theta)]);
+  }
+  EndMacro
+
+  meshL ThLa, ThLb, ThLc, ThLd;
+
+  buildsquare(-0.3,-0.3,ThLa)
+  buildsquare( 0.3, 0.3,ThLb)
+  buildsquare(-0.3, 0.3,ThLc)
+  buildsquare( 0.3,-0.3,ThLd)
+
+  ThL = ThL+ThLa+ThLb+ThLc+ThLd;
+
+  Thc = buildmesh(ThL,nbvx=50000000,fixedborder=1,fixeborder=1);
+  int reg = Thc(0.,0.).region;
+  Thc = trunc(Thc, region == reg,label=Dirichlet);
+  /*
+    load "mmg"
+    fespace Oh(Thc,P1);
+    Oh met = hh;
+    int[int] reqE = [PML,Dirichlet];
+    Thc = mmg2d(Thc,hgrad=1.05,mem=20000,metric=met[],requiredEdge=reqE);
+  */
+}
+broadcast(processor(0),Thc);
+EndMacro
+
+real hhC = cH*(1./k)^((2.*p+rhok-keps)/(2.*p)); // coarse h
+if (ccstH) hhC = ccstH*(1./k);
+real nppwlC = lambda/hhC;
+
+constructmesh(nppwlC,hhC,Thc)
+
+real hh = ch*(1./k)^((2.*p+rhok)/(2.*p)); // fine h
+if (ccsth) hh = ccsth*(1./k);
+real nppwl = lambda/hh;
+
+real truenppwl = nppwl;
+int split = ceil(nppwl/nppwlC);
+nppwl = nppwlC*split;
+
+ffddmoverlap = 2*lCAPi*nppwl/lambda/split;
+ffddmoverlap = max(ffddmoverlap,2);
+
+if (mpirank == 0) cout << "nppwlC = " << nppwlC << ", nppwl = " << truenppwl << ", split = " << split << ", new nppwl = " << nppwlC*split << endl;
+if (mpirank == 0) cout << "lambda = " << lambda << ", nppwl = " << nppwl << ",h = " << lambda/nppwl << ", overlap = " << ffddmoverlap << endl;
+
+real epst = 1e-10;
+
+real alpha = 10;
+real beta = 0.6;
+
+// absorption profile for global PML
+macro sigmag(u) ((u>0)*alpha*exp(-1./(beta*abs(u)/lPML+1e-10)))//EOM
+macro dsigmag(u) ((u>0)*beta/lPML/(beta*abs(u)/lPML+1e-10)^2*sigmag(u))//EOM
+
+// absorption profile for subdomain CAP
+macro sigmai(u) ((u>0)*alpha*exp(-1./(beta*abs(u)/lCAPi+1e-10)))//EOM
+macro sigmaCAP(u) sigmai(u)//EOM
+
+// Radial coordinate for PML
+func rr = sqrt(x^2+y^2);
+
+// Unit radial and tangential vectors
+func erx = x/(rr+1e-30);
+func ery = y/(rr+1e-30);
+
+func etx = -y/(rr+1e-30);
+func ety =  x/(rr+1e-30);
+
+func srad = max(rr-R0,0.);
+func fPML = sigmag(srad);
+func dfPML = dsigmag(srad);
+
+// Radial and tangential stretching factors
+func gammar = 1. + 1i*dfPML;
+func gammat = 1. + 1i*fPML/(rr+1e-30);
+
+macro GradRad(u) (erx*dx(u) + ery*dy(u)) // EOM
+macro GradTan(u) (etx*dx(u) + ety*dy(u)) // EOM
+
+func Ar = gammat/gammar;
+func At = gammar/gammat;
+
+// Jacobian determinant
+func detJ = gammar*gammat;
+
+macro Varf(varfName, meshName, PhName)
+varf varfName(u,v) =
+    int2d(meshName,qforder=qorder)(1./k^2 * (Ar * GradRad(u)*GradRad(v) + At * GradTan(u)*GradTan(v)) - 1./c^2 * detJ*u*v)
+        - int1d(meshName,Robin,qforder=qorder)(1i*1./(k*c)*u*v)
+        + on(Dirichlet,PML,u=0); // EOM
+
+// k-weighted inner product for the extended harmonic setup
+macro VarfIP(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int2d(meshName,qforder=qorder)(1./k^2 * (Ar * GradRad(u)*GradRad(v) + At * GradTan(u)*GradTan(v)) + 1./c^2 * detJ*u*v)
+        - int1d(meshName,Robin,qforder=qorder)(1i*1./(k*c)*u*v)
+        + on(Dirichlet,PML,u=0); // EOM
+
+// for the preconditioner with impedance BCs
+macro VarfOptRobin(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int2d(meshName,qforder=qorder)(1./k^2 * (Ar * GradRad(u)*GradRad(v) + At * GradTan(u)*GradTan(v)) - 1./c^2 * detJ*u*v)
+				- int1d(meshName,Robin,ffddminterfacelabel,qforder=qorder)(1i*1./(k*c)*u*v)
+				+ on(Dirichlet,PML,u=0); // EOM
+
+// for the preconditioner with CAP BCs
+macro VarfOptCAP(varfName, meshName, PhName)
+    load "distance"
+    varf vb(u,v) = on(ffddminterfacelabel,u=1);
+    HmeshVhiP1 ub;
+    ub[] = vb(0,HmeshVhiP1,tgv=1);
+    ub[] = ub[] ? 0 : 1;
+    HmeshVhiP1 dist;
+    distance(HmeshThi,ub,dist[]);
+    func sigmacap = sigmaCAP(lCAPi-dist);
+
+    varf varfName(u,v) =
+  int2d(meshName,qforder=qorder)(1./k^2 * (Ar * GradRad(u)*GradRad(v) + At * GradTan(u)*GradTan(v)) - 1./c^2 * detJ*u*v - 1i*sigmacap*u*v)
+				- int1d(meshName,Robin,10,qforder=qorder)(1i*1./(k*c)*u*v)
+				+ on(Dirichlet,PML,u=0); // EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int2d(meshName,qforder=qorder)(source*v)
+  + on(Dirichlet,PML,u=0); // EOM
+
+vsym = 0;
+vtgv = -1;
+vtgvelim = -1;
+
+int oldbraspart = braspart;
+braspart = 1;
+
+ffddmbuildDmeshNested(Hmesh,Thc,split,mpiCommWorld)
+
+ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
+ffddmbuildDfespace(HFECoarse,HmeshCoarse,complex,def,init,Pk)
+
+// for the extended harmonic coarse space on HmeshCoarse:
+ffddmoverlap += 1;
+ffddmbuildDmesh(HmeshCoarseAug,Thc,mpiCommWorld)
+ffddmoverlap -= 1;
+ffddmbuildDfespace(HFECoarseAug,HmeshCoarseAug,complex,def,init,Pk)
+HFECoarseAuginterp = interpolate(HFECoarseVhi,HFECoarseAugVhi);
+HFECoarseAuginterp.thresholding(0.99);
+
+braspart = oldbraspart;
+
+/*
+{
+  ffddmoverlap /= 2;
+  //macro HmeshPoUsimple()Hmeshsimple//
+  ffddmbuildDmeshNested(HmeshPoU,Thc,split,mpiCommWorld)
+  ffddmbuildDfespace(HFEPoU,HmeshPoU,complex,def,init,Pk)
+  matrix R = interpolate(HFEPoUVhi,HFEVhi);
+  matrix<complex> Rc = R;
+  HFEDk[mpirank] = Rc'*HFEPoUDk[mpirank];
+  ffddmoverlap *= 2;
+  HFEVhi<complex> PoU;
+  PoU[] = HFEDk[mpirank];
+  plot (PoU);
+}
+*/
+
+Thc = square(1,1); // clear memory
+
+HFEVhi<complex> u, x0, rhs;
+x0[] = 0;
+
+NewMacro Generate(pr)
+ffddmsetupOperator(pr#Coarse,HFECoarse,Varf)
+pr#Coarseverbosity = 1;
+
+ffddmsetupPrecond(pr#Coarse,VarfOptRobin)
+ffddmextendedharmonicgeneosetup(pr#Coarse,Varf,VarfIP)
+
+IFMACRO(!CAPI)
+ffddmsetup(pr,HFE,Varf,VarfOptRobin)
+ENDIFMACRO
+IFMACRO(CAPI)
+ffddmsetup(pr,HFE,Varf,VarfOptCAP)
+ENDIFMACRO
+
+ffddmcoarsemeshsetup(pr,Thc,Varf,null)
+
+ffddmbuildrhs(pr,Varfrhs,rhs[])
+
+u[] = pr#fGMRES(x0[], rhs[], 1.e-10, ffddmmaxit, "right");
+
+ffddmplot(HFE,real(u), "real part");
+
+int[int] fforder=[1,1,1];
+//savevtk("visu_"+k+".vtu",HmeshThi,real(u),imag(u),abs(u),dataname="ur ui uabs",order=fforder);
+
+savehistory.resize(pr#reshistory.n);
+savehistory = pr#reshistory;
+
+u[] = pr#FIXEDPOINT(x0[], rhs[], 1.e-10, ffddmmaxit);
+
+savehistoryFIXEDPOINT.resize(pr#reshistory.n);
+savehistoryFIXEDPOINT = pr#reshistory;
+
+pr#writesummary
+
+EndMacro
+
+real[int] resCAP, resIMP, resCAPG, resIMPG;
+
+// with CAP interface conditions
+{
+macro CAPI()1//
+Generate(CAP)
+  resCAP.resize(savehistoryFIXEDPOINT.n);
+  resCAP = savehistoryFIXEDPOINT;
+  resCAPG.resize(savehistory.n);
+  resCAPG = savehistory;
+}
+
+// with impedance interface conditions
+{
+Generate(IMP)
+  resIMP.resize(savehistoryFIXEDPOINT.n);
+  resIMP = savehistoryFIXEDPOINT;
+  resIMPG.resize(savehistory.n);
+  resIMPG = savehistory;
+}
+
+if (mpirank == 0 && csv != "") {
+  ofstream file(csv);
+  file << "CAP CAPGMRES IMP IMPGMRES" << endl;
+  int nmax = max(max(max(resCAP.n,resIMP.n),resCAPG.n),resIMPG.n);
+  for (int i=0; i < nmax; i++) 
+    file << resCAP[min(i,resCAP.n-1)] << " " << resCAPG[min(i,resCAPG.n-1)] << " " << resIMP[min(i,resIMP.n-1)] << " " << resIMPG[min(i,resIMPG.n-1)] << endl;
+}

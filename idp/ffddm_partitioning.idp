@@ -208,7 +208,7 @@ if (prmesh#isincomm)
         }
         else if(usedARGV("-steep") != -1)
           khi = khi > 0.001 ? 1.0 : 0.0;
-        else if (usedARGV("-raspart") != -1) {
+        else if (braspart) {
           VhGlobalff phir;
           PhGlobalff suppP0 = abs(ii - part) < 0.1;
           varf vSuppi(u,v) = prmesh#intN(overlapName,qforder=1)(suppP0*v);
@@ -252,7 +252,7 @@ if (prmesh#isincomm)
           }
           else if(usedARGV("-steep") != -1)
             phi = phi > 0.001 ? 1.0 : 0.0;
-          else if (usedARGV("-raspart") != -1) {
+          else if (braspart) {
             VhGlobalff phir;
             varf vSuppi(u,v) = prmesh#intN(overlapName,qforder=1)(suppP0*v);
             phir[] = vSuppi(0,VhGlobalff);
@@ -1184,6 +1184,9 @@ int prmesh#AugbinexactCS = 0;
 int prmesh#AugbinexactgeneoCS = 0;
 int prmesh#AugpCS = ffddmpCS;
 int prmesh#Augexclude = ffddmexclude;
+IFMACRO(!prmesh#buildAugoverlap)
+NewMacro prmesh#buildAugoverlap()1 EndMacro
+ENDIFMACRO
 IFMACRO(!prmesh#Augmminoverlap)
 NewMacro prmesh#Augmminoverlap()0 EndMacro
 ENDIFMACRO
@@ -1200,7 +1203,7 @@ ENDIFMACRO
   ffddmpartf(prmesh,Th,ffddmoverlap+prmesh#buildAug,locpartition)
   
   IFMACRO(prmesh#buildAug,1)
-  ffddmbuildDmeshf(prmesh#Aug,Th,locpartition,(ffddmoverlap+1))
+  ffddmbuildDmeshf(prmesh#Aug,Th,locpartition,(ffddmoverlap+prmesh#buildAugoverlap))
   ENDIFMACRO
 
   ffddmbuildDmeshf(prmesh,Th,locpartition,ffddmoverlap)

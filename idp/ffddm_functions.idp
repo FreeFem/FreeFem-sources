@@ -655,6 +655,84 @@ func preffe#K[int] pr#PREC(preffe#K[int] &l)
 }
 ENDIFMACRO
 
+func preffe#K[int] pr#FIXEDPOINT(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int maxit)
+{
+  if (preffe#prmesh#isincomm) {
+    preffe#prmesh#tic(pr#tgmresi)
+
+    preffe#K[int] uni(x0.n);
+
+    IFMACRO((!pr#withhpddm)&(!pr#withhpddmkrylov)&(!pr#withpetsc))
+    preffe#K[int] ri(x0.n), zi(x0.n);
+
+    uni = x0;
+
+    ri = pr#A(x0);
+
+    if (!preffe#prmesh#excluded)
+      ri -= rhs;
+
+    ri *= -1;
+    real normb = sqrt(real(pr#prfe#scalprod(rhs,rhs)));
+    if (normb < 1.e-20 || eps < 0) normb = 1.;
+
+    real relres = 0;
+
+    pr#nbiter = 1;
+    pr#reshistory.resize(maxit);
+
+    while (pr#nbiter <= maxit) {
+
+      zi = pr#PREC(ri);
+      uni += zi;
+      ri = pr#A(uni);
+      if (!preffe#prmesh#excluded)
+        ri -= rhs;
+      ri *= -1;
+
+      relres = sqrt(real(pr#prfe#scalprod(ri,ri)));
+
+      real relerr = 0;
+
+      if (pr#verbosity >= 3 && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+        if (pr#bdirect)
+          cout << "["+Stringification(pr)+"] It: "<< pr#nbiter << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
+        else
+          cout << "["+Stringification(pr)+"] It: "<< pr#nbiter << " Residual = " << relres << " Rel res = " << relres/normb << endl;
+      }
+
+      pr#reshistory[pr#nbiter-1] = relres/normb;
+      if(relres/normb < abs(eps)) {
+        if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+          cout << "["+Stringification(pr)+"] FIXEDPOINT has converged in " + pr#nbiter + " iterations " << endl;
+          cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+        }
+        break;
+      }
+
+      if(relres/normb > 1e12) {
+        if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+          cout << "["+Stringification(pr)+"] FIXEDPOINT has diverged" << endl;
+          cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+        }
+        break;
+      }
+      pr#nbiter++;
+    }
+    if(relres/normb >= abs(eps))
+    if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+      cout << "["+Stringification(pr)+"] FIXEDPOINT did not converge in " + maxit + " iterations " << endl;
+      cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+    }
+    ENDIFMACRO
+    pr#reshistory.resize(min(maxit,pr#nbiter));
+    preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
+    return uni;
+  }
+  else
+    return x0; /* dummy, not in comm */
+}
+
 func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int maxit, string sprec)
 {	
   if (preffe#prmesh#isincomm) {
