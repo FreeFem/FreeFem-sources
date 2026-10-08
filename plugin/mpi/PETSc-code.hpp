@@ -441,39 +441,44 @@ namespace PETSc {
     Matrice_Creuse<double>*, int, PetscBool, bool,
     Matrice_Creuse<upscaled_type<PetscScalar>>*);
 
+  template<class MMesh>
+  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm) {
+    MPI_Comm* dcomm = static_cast<MPI_Comm*>(f->DTh->comm);
+    if (ucomm && dcomm) {
+      int r;
+      MPI_Comm_compare(*ucomm, *dcomm, &r);
+      if (r != MPI_IDENT && r != MPI_CONGRUENT)
+        distributedError(f->DTh->comm, "Mat from a distributed fespace: communicator differs from the communicator of the distributed mesh");
+    }
+    KN<double> Dscratch(f->Ddof);      // restriction() ecrase son argument : jamais f->Ddof
+    buildDistributedShell< true, HpSchwarz<PetscScalar> >(
+      &B, 1, &f->dofIntersectionDof, &Dscratch, nullptr, ndof, (PetscInt) f->N,
+      dcomm ? dcomm : ucomm, nullptr, 0, sym ? PETSC_TRUE : PETSC_FALSE, false, nullptr);
+  }
+
+  template<class MMesh>
+  void checkMatMatchesDfes(Dmat& B, v_dfes<MMesh>* f, int ndof) {
+    int bad = 0;
+    if (B._petsc) {
+      MPI_Comm mc = PetscObjectComm((PetscObject)B._petsc);   // copie interne PETSc : CONGRUENT
+      int r;
+      MPI_Comm_compare(mc, *static_cast<MPI_Comm*>(f->DTh->comm), &r);
+      if (r != MPI_IDENT && r != MPI_CONGRUENT) bad = 2;
+    }
+    if (!bad && B._A->getDof() != ndof) bad = 1;
+    bad = agreeOnStatus(bad, f->DTh->comm);
+    if (bad == 2)
+      distributedError(f->DTh->comm, "A = varf(Udh, Udh): the Mat was built on another communicator than the distributed mesh of Udh; use Mat A(Udh)");
+    if (bad == 1)
+      distributedError(f->DTh->comm, "A = varf(Udh, Udh): the Mat was built for another fespace (local size differs); use Mat A(Udh)");
+  }
 
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
     v_dfes<MMesh>* f = *pUh;
-    // overlap = 0: matrix built by assembleWithoutOverlap
-    if (B._A) return;
-    KN<double> Dscratch(f->Ddof);
-
-    MPI_Comm* dcomm = static_cast<MPI_Comm*>(f->DTh->comm);
-    MPI_Comm* ucomm = static_cast<MPI_Comm*>(ds.commworld);
-    if (ucomm && dcomm) {
-      int r;
-      MPI_Comm_compare(*ucomm, *dcomm, &r);
-      if (r != MPI_IDENT && r != MPI_CONGRUENT)
-        ExecError("Mat = varf(Udh, Udh): commworld differs from the communicator of the distributed mesh");
-    }
-    
-    buildDistributedShell< true, HpSchwarz<PetscScalar> >(
-      &B,
-      1,
-      &f->dofIntersectionDof,
-      &Dscratch,
-      nullptr,
-      ndof,
-      (PetscInt) f->N,
-      dcomm ? dcomm : ucomm,
-      nullptr,
-      0,
-      ds.sym ? PETSC_TRUE : PETSC_FALSE,
-      false,
-      nullptr
-    );
+    if (B._A) { checkMatMatchesDfes<MMesh>(B, f, ndof); return; }
+    buildShellFromDfes(B, f, ndof, ds.sym, static_cast<MPI_Comm*>(ds.commworld));
   }
 
   template<class MMesh, class fes1>
@@ -1643,6 +1648,42 @@ namespace PETSc {
     }
     return ptA;
   }
+
+  template<class MMesh>
+  class initCSRfromDfes : public OneOperator {
+   public:
+    typedef v_dfes<MMesh>* pfes;
+    typedef typename v_dfes<MMesh>::FESpace FESpace;
+    class Op : public E_F0mps {
+     public:
+      Expression A, U;
+      static const int n_name_param = 2;
+      static basicAC_F0::name_and_type name_param[];
+      Expression nargs[n_name_param];
+      Op(const basicAC_F0& args, Expression a, Expression u) : A(a), U(u) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+      }
+      AnyType operator()(Stack stack) const {
+        Dmat* ptA = GetAny<Dmat*>((*A)(stack));
+        pfes* pUh = GetAny<pfes*>((*U)(stack));
+        const FESpace* Vh = (FESpace*)**pUh;          // 1.3 : construit intersection et D
+        ffassert(Vh && (*pUh)->DTh);
+        MPI_Comm* ucomm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : nullptr;
+        bool sym = nargs[1] && GetAny<bool>((*nargs[1])(stack));
+        buildShellFromDfes<MMesh>(*ptA, *pUh, Vh->NbOfDF, sym, ucomm);
+        return ptA;
+      }
+    };
+    initCSRfromDfes() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<pfes*>()) {}
+    E_F0* code(const basicAC_F0& args) const {
+      return new Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+    }
+  };
+  template<class MMesh>
+  basicAC_F0::name_and_type initCSRfromDfes<MMesh>::Op::name_param[] = {
+    {"communicator", &typeid(pcommworld)},
+    {"symmetric", &typeid(bool)}};
+
   template< class HpddmType >
   class initCSRfromArray_Op : public E_F0mps {
    public:
@@ -7174,6 +7215,10 @@ static void Init_PETSc( ) {
     new PETSc::varfToMat< PetscScalar, MeshS, v_dfesS, v_dfesS>,
     new PETSc::varfToMat< PetscScalar, MeshL, v_dfesL, v_dfesL>
   );
+  TheOperators->Add("<-", new PETSc::initCSRfromDfes<Mesh3>,
+                          new PETSc::initCSRfromDfes<MeshS>,
+                          new PETSc::initCSRfromDfes<MeshL>);
+
   TheOperators->Add(
     "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
          new PETSc::varfToMat< PetscScalar, Mesh , v_fes , v_fes  >,
