@@ -2030,7 +2030,7 @@ namespace PETSc {
     // against HpSchwarz<PetscScalar> when PetscScalar is real: likely: only supported when
     // PetscScalar itself is complex, i.e. the PETSc-complex plugin).
     static bool warnedComplex = false;
-    if (!warnedComplex && mpirank == 0) {
+    if (!warnedComplex && commRank(comm) == 0) {
       cout << "Warning: automatic exchange of a Complex distributed rhs is not "
            << "implemented for this PETSc build (real PetscScalar) -- rhs[] "
            << "stays LOCAL ONLY for Complex forms; use the manual exchange() "

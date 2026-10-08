@@ -26,6 +26,13 @@
 //      refusee sur tous les rangs de cX et affichee par le rang monde 1.
 //      E2..E4 : erreurs de detection du mode (maillage hors du rang 0 de cX,
 //      aucun maillage -- erreur typique if (mpirank == 0) --, mode mixte).
+//      E5, E5b, E6 : erreurs deterministes ([e1,e2] = [a1,a2] avec e a 3
+//      composantes, b1 = a1 sur une fonction vectorielle, Udh.loc2glob en
+//      scatter), refusees sur tous les rangs de cX, affichees par le rang
+//      monde 1.
+//      A1 : avertissement "automatic exchange of a Complex distributed rhs"
+//      (second membre complexe, plugin PETSc reel), affiche une fois par le
+//      rang monde 1.
 //   U  tailles INEGALES : le rang monde 0 SEUL (taille 1), les autres
 //      ensemble (taille mpisize-1). Un communicateur de taille 1 prend les
 //      chemins "sequentiels" (partition triviale, XFER_SINGLE_RANK...) alors
@@ -101,6 +108,22 @@
 //   O1  tous les rangs appellent distribute(Th, comm=cX) ; le rang monde 0,
 //       pour qui cX = MPI_COMM_NULL, doit recevoir une erreur propre
 //       (ExecError attrapable), les autres doivent reussir.
+//   O2  meme chose avec le DERNIER rang du monde exclu (jamais le rang 0) :
+//       refus local (localError), message affiche par ce rang lui-meme.
+//
+//  ERREURS DEPENDANT DU RANG (cas 11, R, sur cX)
+//   L'incoherence n'existe que sur le rang 1 de cX (rang monde 2). Sans
+//   decision collective, ce rang leve l'erreur seul pendant que les autres
+//   entrent dans le transfert et l'attendent : BLOCAGE. Attendu : refus sur
+//   tous les rangs de cX, message affiche une fois par le rang monde 1.
+//   Deux Dmesh du meme maillage sur cX, partitions en tranches decalees d'un
+//   rang : les maillages locaux ne se recouvrent pas, le transfert prend le
+//   chemin general (avec echanges), verifie par un temoin.
+//   E7  w = u, u[] agrandi d'un element sur un rang ("outdated source").
+//   E8  interpolateD(plan, x, y), x agrandi sur un rang ("outdated plan").
+//   E9  interpolateMat(plan, num, M, col), num agrandi sur un rang.
+//   Exige mpisize >= 3 (cX de taille >= 2). A lancer SOUS TIMEOUT, un
+//   controle a la fois (-e 7, -e 8, -e 9) : avant la correction, chacun bloque.
 //
 //  BLOCS QUI PEUVENT INTERROMPRE L'EXECUTION. Une confusion de rangs se
 //  manifeste souvent par un BLOCAGE (envoi vers un rang qui n'attend rien)
@@ -133,7 +156,8 @@
 //
 //  OPTIONS
 //    -case  0 = tout (defaut), 1 = W, 2 = P, 3 = H, 4 = X,
-//           5 = C, 6 = L, 7 = O, 8 = U, 9 = meshS, 10 = meshL
+//           5 = C, 6 = L, 7 = O, 8 = U, 9 = meshS, 10 = meshL,
+//           11 = R (erreurs dependant du rang, E7..E9)
 //    -nc    raffinement du cube                          (defaut 10)
 //    -nc2   raffinement du cube inclus (transfert)       (defaut 7)
 //    -ov    recouvrement passe a distribute              (defaut 1)
@@ -147,6 +171,7 @@
 //           0 = metis a la place (build sans Scotch)       (defaut 1)
 //    -nsq, -nsq2    raffinements des deux square3 (cas 9)  (defaut 16, 11)
 //    -nseg, -nseg2  raffinements des deux segments (cas 10) (defaut 80, 57)
+//    -e     cas 11 : 0 = E7, E8 et E9 ; 7, 8 ou 9 = un seul (defaut 0)
 //    -skip  k = saute Sk (k = 8 ou 9) dans chaque suite   (defaut aucun)
 //           -skip 8 teste le transfert (S9) sans PETSc (S8).
 //
@@ -163,6 +188,7 @@ int ov  = getARGV("-ov", 1);
 int pm  = getARGV("-pm", 0);
 int stopAt = getARGV("-stop", 9);
 int skipS  = getARGV("-skip", -1);
+int eSel   = getARGV("-e", 0);      // cas 11 : 0 = E7, E8 et E9 ; 7, 8 ou 9 = un seul
 int sc    = getARGV("-sc", 1);
 int nsq   = getARGV("-nsq", 16);
 int nsq2  = getARGV("-nsq2", 11);
@@ -765,6 +791,50 @@ if (cas == 0 || cas == 4) {
       real eM = 1 - refM;
       CHK(cX, "X", "E4 mode mixte : refus", eM, 0)
     }
+
+    // E5, E5b, E6 : erreurs DETERMINISTES (meme condition sur tous les rangs
+    // de cX), affichees par le rang monde 1 (a verifier dans la sortie).
+    {
+      mesh3 ThD = cube(nc, nc, nc);
+      Dmesh3 DThD = distribute(ThD, overlap = ov, comm = cX);
+      fespace V3d(DThD, [P1, P1, P1]);
+      fespace V2d(DThD, [P1, P1]);
+      V3d [e1, e2, e3];
+      V2d [a1, a2] = [x, y];
+      int ref5 = 0;
+      try { [e1, e2] = [a1, a2]; } catch (...) { ref5 = 1; }
+      real e5 = 1 - ref5;
+      CHK(cX, "X", "E5 u = v, composantes differentes : refus", e5, 0)
+
+      V2d [b1, b2];
+      int ref5b = 0;
+      try { b1 = a1; } catch (...) { ref5b = 1; }
+      real e5b = 1 - ref5b;
+      CHK(cX, "X", "E5b b1 = a1 sur fonction vectorielle : refus", e5b, 0)
+    }
+    {   // E6 : Udh.loc2glob sur un Dmesh en scatter (pas de maillage global)
+      mesh3 ThL;
+      if (crE == 0) ThL = cube(nc, nc, nc);
+      Dmesh3 DThL = distribute(ThL, overlap = ov, comm = cX);
+      fespace VL(DThL, P1);
+      int ref6 = 0;
+      try { int[int] l2g = VL.loc2glob; } catch (...) { ref6 = 1; }
+      real e6 = 1 - ref6;
+      CHK(cX, "X", "E6 loc2glob en scatter : refus", e6, 0)
+    }
+    {   // A1 : avertissement du second membre complexe (plugin PETSc reel) :
+        // ce n'est pas une erreur ; il doit etre affiche UNE fois, par le
+        // rang 0 de cX (rang monde 1), le rang monde 0 n'etant pas dans cX.
+        // A verifier dans la sortie.
+      mesh3 ThC = cube(nc, nc, nc);
+      Dmesh3 DThC = distribute(ThC, overlap = ov, comm = cX);
+      fespace VC(DThC, P1);
+      varf vc(a, b) = int3d(DThC)(1i*b);
+      int okA = 1;
+      try { complex[int] bc = vc(0, VC); } catch (...) { okA = 0; }
+      real eA = 1 - okA;
+      CHK(cX, "X", "A1 second membre complexe : pas d'erreur", eA, 0)
+    }
   }
   mpiBarrier(mpiCommWorld);
 }
@@ -1025,6 +1095,86 @@ if (cas == 0 || cas == 7) {
   if (mpirank == 0) expected = 1;       // seul le rang monde 0 est hors de cX
   real e = abs(refused - expected);
   CHK(mpiCommWorld, "O", "O1 refus propre hors de comm   ", e, 0)
+
+  // O2 : le rang exclu est le DERNIER rang du monde, jamais le rang 0 : le
+  // message n'est visible que si ce rang l'affiche lui-meme (localError).
+  // A verifier dans la sortie : "[rank <mpisize-1>] distribute: this rank
+  // does not belong to comm", exactement une fois.
+  {
+    int colO = 0;
+    if (mpirank == mpisize - 1) colO = mpiUndefined;
+    mpiComm cO(mpiCommWorld, colO, mpirank);
+    Dmesh3 DO2;
+    int refused2 = 0;
+    try { DO2 = distribute(Th, overlap = ov, comm = cO); } catch (...) { refused2 = 1; }
+    int expected2 = 0;
+    if (mpirank == mpisize - 1) expected2 = 1;
+    real e2 = abs(refused2 - expected2);
+    CHK(mpiCommWorld, "O", "O2 refus local, rang != 0      ", e2, 0)
+  }
+}
+
+// ---------------------------------------------------------------------
+//  11. R : erreurs dependant du rang (E7..E9), sur cX. Voir l'en-tete.
+//      Place en dernier : avant la correction, chaque controle bloque.
+// ---------------------------------------------------------------------
+if ((cas == 0 || cas == 11) && mpisize >= 3) {
+  if (mpirank == 0) cout << "===== R : erreurs dependant du rang" << endl;
+  if (cX) {
+    int crR = mpiRank(cX), csR = mpiSize(cX);
+    mesh3 ThR = cube(nc, nc, nc);
+    int[int] p1(ThR.nt), p2(ThR.nt);
+    for (int k = 0; k < ThR.nt; ++k) {
+      p1[k] = SLICE(ThR, k, csR);
+      p2[k] = (p1[k] + 1) % csR;          /* tranches decalees d'un rang */
+    }
+    Dmesh3 DR1 = distribute(ThR, overlap = ov, comm = cX, partition = p1);
+    Dmesh3 DR2 = distribute(ThR, overlap = ov, comm = cX, partition = p2);
+    fespace UR(DR1, P1), VR(DR2, P1);
+    Dtransfer3 PR = transferPlan(UR, VR);
+
+    /* temoin : donnees coherentes, chemin general (XFER_GENERAL = 0) */
+    {
+      real[int] xs(UR.ndof), ys(VR.ndof);
+      xs = 1;
+      int pth = interpolateD(PR, xs, ys);
+      real et = (pth != 0);
+      CHK(cX, "R", "R0 temoin : chemin general     ", et, 0)
+    }
+
+    if (eSel == 0 || eSel == 7) {   /* E7 : source perimee sur un seul rang */
+      UR u = FIELD;
+      if (crR == 1) u[].resize(u[].n + 1);
+      VR w;
+      int ref7 = 0;
+      try { w = u; } catch (...) { ref7 = 1; }
+      real e7 = 1 - ref7;
+      CHK(cX, "R", "E7 w = u, source perimee sur un rang : refus", e7, 0)
+    }
+
+    if (eSel == 0 || eSel == 8) {   /* E8 : plan perime sur un seul rang */
+      real[int] xs(UR.ndof), ys(VR.ndof);
+      xs = 1;
+      if (crR == 1) xs.resize(UR.ndof + 1);
+      int ref8 = 0;
+      try { interpolateD(PR, xs, ys); } catch (...) { ref8 = 1; }
+      real e8 = 1 - ref8;
+      CHK(cX, "R", "E8 interpolateD, plan perime sur un rang : refus", e8, 0)
+    }
+
+    if (eSel == 0 || eSel == 9) {   /* E9 : numerotation de mauvaise taille sur un seul rang */
+      int[int] num(UR.ndof);
+      num = 0;                      /* valeurs sans importance : seule la taille est fausse */
+      if (crR == 1) num.resize(UR.ndof + 1);
+      matrix M9;
+      real[int] col9;
+      int ref9 = 0;
+      try { interpolateMat(PR, num, M9, col9); } catch (...) { ref9 = 1; }
+      real e9 = 1 - ref9;
+      CHK(cX, "R", "E9 interpolateMat, numerotation fausse sur un rang : refus", e9, 0)
+    }
+  }
+  mpiBarrier(mpiCommWorld);
 }
 
 // ---------------------------------------------------------------------

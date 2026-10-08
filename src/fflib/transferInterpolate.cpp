@@ -1333,9 +1333,11 @@ long interpolateDPlan(const TransferPlan<Mesh>** const& ppP,
 {
     throwassert(ppP && *ppP && uSrc && uDst);
     const TransferPlan<Mesh>& P = **ppP;
-    if (uSrc->n != P.nSrcDof || uDst->n != P.nDstDof)
-        ExecError("interpolateD(plan, u[], v[]) : outdated plan — "
+    int bad = (uSrc->n != P.nSrcDof || uDst->n != P.nDstDof) ? 1 : 0;
+    if (agreeOnStatus(bad, P.comm)) {
+        distributedError(P.comm, "interpolateD(plan, u[], v[]) : outdated plan — "
                   "the FE spaces have changed size since transferPlan()");
+    }
     applyTransferPlan(P, *uSrc, *uDst);
     return (long)P.path;
 }
@@ -1385,9 +1387,10 @@ template<class Mesh>
 long interpolateMat(const TransferPlan<Mesh>** const & ppP, KN<long>* const& srcNumbering, Matrice_Creuse<double>* const& out, KN<double>* const& colNumbering) {
     throwassert(ppP && *ppP && srcNumbering && out && colNumbering);
     const TransferPlan<Mesh>& P = **ppP;
-    if (srcNumbering->n != P.nSrcDof)
-        ExecError("interpolateMat : source numbering not compatible with the plan");
-
+    int bad = (srcNumbering->n != P.nSrcDof) ? 1 : 0;
+    if (agreeOnStatus(bad, P.comm)) {
+        distributedError(P.comm, "interpolateMat(plan, srcNumbering[], A, colNumbering[]) : outdated plan — the source FE space has changed size since transferPlan()");
+    }
     KN<long> colGlobal;
     MatriceMorse<double>* A = assembleTransferMatrix(P, *srcNumbering, colGlobal);
     out->A.master(A);
@@ -1411,7 +1414,7 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     ffassert(pS && pS->DTh);
     ffassert(pD && pD->DTh);
 
-    if (pS->N != pD->N) ExecError("u = v: incompatible number of components");
+    if (pS->N != pD->N) distributedError(pS->DTh->comm, "u = v: incompatible number of components");
 
     KN<R>* xs = src->x();
     if (!xs) {
@@ -1421,8 +1424,8 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     }
     const GFESpace<Mesh>& VhS = (src->Vh) ? *src->Vh : *src->newVh();
     const GFESpace<Mesh>& VhD = *dst->newVh();
-
-    if (xs->N() != VhS.NbOfDF) ExecError("u = v: outdated source FE function");
+    int bad = (xs->N() != VhS.NbOfDF) ? 1 : 0;
+    if (agreeOnStatus(bad, pS->DTh->comm)) distributedError(pS->DTh->comm, "u = v: outdated source FE function");
 
     if (sameDistributedSpace(pS, VhS, pD, VhD)) {
         *dst = new KN<R>(*xs);
@@ -1439,7 +1442,7 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
 template<class Mesh, class R>
 static std::pair<FEbase<R, v_dfes<Mesh>>*, int>
 setFEDistributed(const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& dst, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
-    if ((*src.first->pVh)->N != 1 || (*dst.first->pVh)->N != 1) ExecError("b1 = a1 on a vector FE function: use [b1,...]=[a1,...]");
+    if ((*src.first->pVh)->N != 1 || (*dst.first->pVh)->N != 1) distributedError((*src.first->pVh)->DTh->comm, "b1 = a1 on a vector FE function: use [b1,...]=[a1,...]");
     assignFEDistributed<Mesh, R>(dst.first, src.first);
     return dst;
 }

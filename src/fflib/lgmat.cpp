@@ -1475,7 +1475,7 @@ template<class Mesh>
 void v_dfes<Mesh>::buildLoc2globIfNeeded(GFESpace<Mesh>& Vhi){
     if (!DTh || loc2globBuilt) return;
     if (!DTh->TrueGlobalMesh){
-        ExecError("Udh.loc2glob : unavailable: no global mesh in scatter mode or distribute(..., keepGlobal=false)");
+        distributedError(DTh->comm, "Udh.loc2glob : unavailable: no global mesh in scatter mode or distribute(..., keepGlobal=false)");
     }
     loc2globDof = buildLoc2globDof(*DTh, Vhi);
     loc2globBuilt = true;
