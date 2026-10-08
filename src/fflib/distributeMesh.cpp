@@ -43,18 +43,39 @@ bool commIsNull(pcommworld) { return false; }
 bool sameComm(pcommworld, pcommworld) { return true; }
 #endif
 
-// Erreur COLLECTIVE sur comm. lg.ypp n'affiche ExecError que sur le rang 0 du
-// monde : quand il n'est pas le rang 0 de comm, ce dernier affiche le message.
+#ifdef PARALLELE
+// Vrai si le rang 0 du monde appartient a comm (operation locale, sans communication).
+static bool worldRootIn(pcommworld c) {
+  MPI_Group gw, gc;
+  MPI_Comm_group(MPI_COMM_WORLD, &gw);
+  MPI_Comm_group(ffComm(c), &gc);
+  int zero = 0, r;
+  MPI_Group_translate_ranks(gw, 1, &zero, gc, &r);
+  MPI_Group_free(&gw); MPI_Group_free(&gc);
+  return r != MPI_UNDEFINED;
+}
+#else
+static bool worldRootIn(pcommworld) { return true; }
+#endif
+
+// Erreur COLLECTIVE sur comm. Le constructeur d'Error n'affiche le message que sur
+// le rang 0 du monde : s'il n'est pas dans comm, le rang 0 de comm l'affiche.
 void distributedError(pcommworld comm, const char* msg) {
-  if (commRank(comm) == 0 && mpirank != 0)
+  if (commRank(comm) == 0 && !worldRootIn(comm))
     cerr << "[rank " << mpirank << "] " << msg << endl;
+  ExecError(msg);
+}
+
+// Erreur LOCALE (ce rang seul). Les autres rangs ne l'attendent pas.
+void localError(const char* msg) {
+  if (mpirank != 0) cerr << "[rank " << mpirank << "] " << msg << endl;
   ExecError(msg);
 }
 
 #ifdef PARALLELE
 pcommworld duplicateComm(pcommworld c) {
   if (commIsNull(c))
-    ExecError("distribute: this rank does not belong to comm (MPI_COMM_NULL);"
+    localError("distribute: this rank does not belong to comm (MPI_COMM_NULL);"
               " call distribute inside if (comm) {...}");
 
   MPI_Comm* d = new MPI_Comm;
@@ -391,7 +412,6 @@ void DistributedEvalScope::check(pcommworld comm){
          << g_devalP[0] << ", " << g_devalP[1] << ", " << g_devalP[2] << ")" << endl;
   ExecError(distributedEvalMessage(global));
 }
-
 
 
 static KN<long> trivialNumbering(int nLocDof, long& globalNdof){

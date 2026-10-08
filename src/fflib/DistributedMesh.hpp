@@ -13,6 +13,7 @@ bool sameComm(pcommworld a, pcommworld b);
 pcommworld duplicateComm(pcommworld c);
 void releaseComm(pcommworld c);
 void distributedError(pcommworld comm, const char* msg);   // ExecError collective sur comm
+void localError(const char* msg); // ExecError local sur ce rang seul
 
 enum DistributionMode {DM_SCATTER = 0, DM_REPLICATED = 1 };
 enum TransferPath { XFER_GENERAL = 0, XFER_SINGLE_RANK = 1, XFER_LOCAL = 2 };
