@@ -61,6 +61,11 @@
 //       A^-1 : compare a la resolution sequentielle. Detecte une Mat PETSc
 //       construite sur PETSC_COMM_WORLD au lieu de DTh.comm
 //       (buildShellIfNeeded).
+//   S8b Mat A(Udh) (constructeur depuis le fespace : intersection, D et
+//       communicateur lus dans Udh), puis A = vP(Udh, Udh) et A^-1 : memes
+//       controles que S8.
+//   S8c Mat A(Udh) laisse Udh.D intact, bit a bit (HPDDM::restriction()
+//       ecrase en place le tableau qu'on lui cede).
 //   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
 //       exact) : nproc et rang dans buildTransferPlan / collectFragments.
 //   S*  aucune exception pendant S1..S9.
@@ -76,6 +81,16 @@
 //       les rangs, sans blocage.
 //   C5  monde <-> monde permute : meme groupe, ordre different
 //       (MPI_SIMILAR), transfert REFUSE sur tous les rangs.
+//   C7  Mat A(Udh, communicator = c) : accepte si c est congruent au
+//       communicateur du Dmesh (copie cc), refuse sur tous les rangs sinon
+//       (Dmesh sur le monde permute).
+//   C6  Mat construite a la main (Mat A(n, intersection, D, communicator =
+//       mpiCommWorld)) puis A = vP(Udh, Udh), Dmesh sur cc : acceptee (comm
+//       congruent), meme solution que Mat A(Udh). Pas de faux positif.
+//   C8  Mat A(UdhH) d'une moitie, assemblee avec un fespace du monde : refus.
+//   C8b Mat A(Udh P1) assemblee avec un fespace P2 du meme Dmesh : refus.
+//   La verification d'une Mat deja construite a lieu a l'assemblage : une
+//   Mat construite sur le MAUVAIS communicateur peut bloquer avant (non teste).
 //
 //  DUREE DE VIE (bloc L)
 //   L1  le mpiComm passe a distribute est declare dans un bloc et libere a
@@ -350,6 +365,21 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
           us[] = As^-1 * bs;
           real e8 = sqrt(int3d(DTh)(square(uh - us))) / sqrt(int3d(Th)(square(us)));
           CHK(COMM, tg, "S8 Mat + A^-1 = sequentiel     ", e8, 1e-7)
+
+          /* S8c : Mat A(Udh) ne modifie pas Udh.D (restriction() ecrase son argument) */
+          real[int] D0 = U1dh.D;
+          Mat Ab(U1dh);
+          real[int] D1 = U1dh.D;
+          D1 -= D0;
+          real e8c = D1.linfty;
+          CHK(COMM, tg, "S8c Mat A(Udh) : Udh.D intact  ", e8c, 0)
+          /* S8b : Mat A(Udh) puis A = vP(Udh, Udh) : meme resultat que S8 */
+          Ab = vPb(U1dh, U1dh);
+          set(Ab, sparams = kspp);
+          U1dh ub;
+          ub[] = Ab^-1 * rb;
+          real e8m = sqrt(int3d(DTh)(square(ub - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S8b Mat A(Udh) + A^-1          ", e8m, 1e-7)
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */
@@ -560,6 +590,28 @@ macro SUITEG(COMM, CTAG, SCAT, METH, MT, DMT, INTG, NV, THG, THG2, BLAB) {
             real e8b = 0;
             for (int i = 0; i < U1dh.ndof; ++i) e8b = max(e8b, abs(uh[][i] - us[][l2g1[i]]));
             CHK(COMM, tg, "S8 Mat + A^-1 : solution       ", e8b, 1e-8)
+          }
+
+          /* S8c : Mat A(Udh) ne modifie pas Udh.D (restriction() ecrase son argument) */
+          real[int] D0 = U1dh.D;
+          Mat Ab(U1dh);
+          real[int] D1 = U1dh.D;
+          D1 -= D0;
+          real e8c = D1.linfty;
+          CHK(COMM, tg, "S8c Mat A(Udh) : Udh.D intact  ", e8c, 0)
+          /* S8b : Mat A(Udh) puis A = vP(Udh, Udh) : memes controles que S8 */
+          Ab = vPb(U1dh, U1dh);
+          set(Ab, sparams = kspp);
+          U1dh ub;
+          ub[] = Ab^-1 * rb;
+          real Ib = INTG(DTh)(ub);
+          real e8ma = abs(Ib - Is)/abs(Is);
+          CHK(COMM, tg, "S8b Mat A(Udh) : integrale     ", e8ma, 1e-8)
+          if (!scat) {
+            int[int] l2g1b = U1dh.loc2glob;
+            real e8mb = 0;
+            for (int i = 0; i < U1dh.ndof; ++i) e8mb = max(e8mb, abs(ub[][i] - us[][l2g1b[i]]));
+            CHK(COMM, tg, "S8b Mat A(Udh) : solution      ", e8mb, 1e-8)
           }
         }
 
@@ -868,6 +920,75 @@ if (cas == 0 || cas == 5) {
       try { P2dh w = a; } catch (...) { refused = 1; }
       REFUSED("C5 monde <-> permute : refus    ", refused)
     }
+  }
+
+  // C7 : Mat A(Udh, communicator = c). La comparaison des communicateurs a
+  // lieu AVANT toute construction : le refus est sur, sans risque de blocage.
+  {   // Dmesh sur cc, communicator = mpiCommWorld : congruent, accepte
+    Dmesh3 DC7 = distribute(Th, overlap = ov, comm = cc);
+    fespace V7(DC7, P1);
+    int ok7 = 1;
+    try { Mat A7(V7, communicator = mpiCommWorld); } catch (...) { ok7 = 0; }
+    real e7 = 1 - ok7;
+    CHK(mpiCommWorld, "C", "C7 Mat(Udh, comm congruent) : accepte", e7, 0)
+  }
+  {   // Dmesh sur cP, communicator = mpiCommWorld : MPI_SIMILAR, refuse
+    Dmesh3 DP7 = distribute(Th, overlap = ov, comm = cP);
+    fespace W7(DP7, P1);
+    int refused = 0;
+    try { Mat B7(W7, communicator = mpiCommWorld); } catch (...) { refused = 1; }
+    REFUSED("C7 Mat(Udh, comm permute) : refus", refused)
+  }
+
+  // C6, C8 : verification d'une Mat DEJA construite, a l'assemblage
+  // A = vP(Udh, Udh). Elle a lieu avant tout collectif de l'assemblage.
+  // Non teste : une Mat construite sur le MAUVAIS communicateur (ex. WORLD
+  // pour un Dmesh sur cX) peut bloquer des la construction, avant la
+  // verification : c'est la limite connue, d'ou Mat A(Udh).
+  {   // C6 : Mat brute sur mpiCommWorld, Dmesh sur cc (congruent) : acceptee,
+      // et meme solution que Mat A(Udh)
+    Dmesh3 DC6 = distribute(Th, overlap = ov, comm = cc);
+    fespace U6(DC6, P1);
+    varf v6(a6, b6) = int3d(DC6)(grad(a6)'*grad(b6)) + int3d(DC6)(1.*b6)
+                    + on(1, 2, 3, 4, 5, 6, a6 = 0);
+    real[int] rb6 = v6(0, U6);
+    Mat Ar6(U6);
+    Ar6 = v6(U6, U6);
+    set(Ar6, sparams = kspp);
+    U6 ur6;
+    ur6[] = Ar6^-1 * rb6;
+    real e6 = 1e30;
+    try {
+      real[int] D6 = U6.D;
+      Mat A6(U6.ndof, U6.intersection, D6, communicator = mpiCommWorld);
+      A6 = v6(U6, U6);
+      set(A6, sparams = kspp);
+      U6 u6;
+      u6[] = A6^-1 * rb6;
+      real[int] d6 = u6[] - ur6[];
+      e6 = d6.linfty / max(ur6[].linfty, 1e-300);
+    } catch (...) { e6 = 1e30; }
+    CHK(mpiCommWorld, "C", "C6 Mat brute sur comm congruent : acceptee", e6, 1e-8)
+  }
+  {   // C8 : Mat A(UdhH) construite sur une moitie, assemblee avec un fespace
+      // du monde : autre communicateur, refus sur tous les rangs
+    Dmesh3 DH8 = distribute(Th, overlap = ov, comm = cH);
+    fespace UH8(DH8, P1);
+    Mat A8(UH8);
+    fespace UW8(DA, P1);
+    varf v8(a8, b8) = int3d(DA)(grad(a8)'*grad(b8)) + on(1, 2, 3, 4, 5, 6, a8 = 0);
+    int refused = 0;
+    try { A8 = v8(UW8, UW8); } catch (...) { refused = 1; }
+    REFUSED("C8 Mat d'un autre comm : refus  ", refused)
+  }
+  {   // C8b : Mat A(Udh P1) assemblee avec un fespace P2 du meme Dmesh :
+      // meme communicateur, taille locale differente, refus sur tous les rangs
+    fespace UP1(DA, P1), UP2(DA, P2);
+    Mat A8b(UP1);
+    varf v8b(a8, b8) = int3d(DA)(grad(a8)'*grad(b8)) + on(1, 2, 3, 4, 5, 6, a8 = 0);
+    int refused = 0;
+    try { A8b = v8b(UP2, UP2); } catch (...) { refused = 1; }
+    REFUSED("C8b Mat d'un autre fespace : refus", refused)
   }
 }
 
