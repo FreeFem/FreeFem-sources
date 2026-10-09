@@ -387,13 +387,28 @@ class v_fesS : public generic_v_fes {
   int getN(){ return N;}                // Morice : get the number of item of the FESpace
 };
 
-// Hook for automatic exchange of distributed rhs (nullptr by default -> no exchange)
 typedef void* pcommworld;
-typedef void (*DistributedExchangeHookD)(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<double>* xx, bool scaled);
-typedef void (*DistributedExchangeHookC)(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled);
-extern DistributedExchangeHookD g_distributedExchangeHookD;
-extern DistributedExchangeHookC g_distributedExchangeHookC;
-extern void (*g_distributedExchangeHandleDtor)(void*);
+
+// Args for automatic exchange of distributed rhs (for hook)
+template<class R>
+struct DistExchangeArgs {
+  void ** handle;
+  KN<KN<long>>* dofIntersectionDof;
+  KN<double>* Ddof;
+  pcommworld comm;
+  KN_<R>* xx;
+  bool scaled;
+};
+
+// Core-plugin interface providing distributed operations (PETSc)
+class DistributedBackend {
+  public :
+    virtual ~DistributedBackend() {}
+    virtual void exchange(DistExchangeArgs<double>& a);
+    virtual void exchange(DistExchangeArgs<Complex>& a);
+    virtual void destroyExchangeHandle(void* h) {};
+};
+extern DistributedBackend* g_distributedBackend;
 
 // FE space distribué
 template<class M> class DistributedMesh;
@@ -430,8 +445,8 @@ template<class Mesh> class v_dfes : public generic_v_fes {
     if (!pVh || *ppTh != &pVh->Th) { 
       pVh = CountPointer< FESpace >(update( ), true); 
       dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false; pouResidual = -1;
-      if (exchangeHandle && g_distributedExchangeHandleDtor) {
-        g_distributedExchangeHandleDtor(exchangeHandle);
+      if (exchangeHandle) {
+        g_distributedBackend->destroyExchangeHandle(exchangeHandle);
         exchangeHandle = nullptr;
       }
     }
@@ -468,8 +483,8 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_dfes( ) {
-    if (exchangeHandle && g_distributedExchangeHandleDtor) {
-      g_distributedExchangeHandleDtor(exchangeHandle);
+    if (exchangeHandle) {
+      g_distributedBackend->destroyExchangeHandle(exchangeHandle);
     }
     if (DTh) DTh->destroy();
   }

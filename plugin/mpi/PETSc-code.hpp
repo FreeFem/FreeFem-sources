@@ -2049,6 +2049,18 @@ namespace PETSc {
     }
   }
 
+  class PETScBackend : public DistributedBackend {
+    public:
+      void exchange(DistExchangeArgs<double>& a) override {
+        distributedExchangeHookD(a.handle, a.dofIntersectionDof, a.Ddof, a.comm, a.xx, a.scaled);
+      }
+      void exchange(DistExchangeArgs<Complex>& a) override {
+        distributedExchangeHookC(a.handle, a.dofIntersectionDof, a.Ddof, a.comm, a.xx, a.scaled);
+      }
+      void destroyExchangeHandle(void* h) override {
+        distributedExchangeHandleDtor(h);
+      }
+  };
 
   template< class HpddmType, bool C >
   AnyType initCSR< HpddmType, C >::E_initCSR::operator( )(Stack stack) const {
@@ -7291,9 +7303,7 @@ static void Init_PETSc( ) {
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >(1));
 #endif
-g_distributedExchangeHookD = &PETSc::distributedExchangeHookD;
-g_distributedExchangeHookC = &PETSc::distributedExchangeHookC;
-g_distributedExchangeHandleDtor = &PETSc::distributedExchangeHandleDtor;
+g_distributedBackend = new PETSc::PETScBackend;
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

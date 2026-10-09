@@ -1408,34 +1408,16 @@ inline bool distributedExchangeScaled(const v_dfes<MMesh>* f) {
   return !f->DTh || f->DTh->overlap > 0;
 }
 
-template<class MMesh>
-void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<double>& xx) {
-  if (g_distributedExchangeHookD) {
-    g_distributedExchangeHookD(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, distributedExchangeScaled(f));
-  } else {
-    static bool warned = false;
-    if (!warned && verbosity > 1 && mpirank == 0) {
-      cout << "Warning: rhs[] = form(0, " /* nom fespace */ ") on a distributed fespace was "
-           << "assembled LOCALLY ONLY (no exchange) -- load a plugin providing distributed "
-           << "exchange (e.g. \"PETSc\") to get a globally consistent vector." << endl;
-      warned = true;
-    }
-  }
-}
-
-template<class MMesh>
-void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<Complex>& xx) {
-  if (g_distributedExchangeHookC) {
-    g_distributedExchangeHookC(&f->exchangeHandle, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, &xx, distributedExchangeScaled(f));
-  } else {
-    static bool warned = false;
-    if (!warned && verbosity > 1 && mpirank == 0) {
-      cout << "Warning: rhs[] = form(0, " /* nom fespace */ ") on a distributed fespace was "
-           << "assembled LOCALLY ONLY (no exchange) -- load a plugin providing distributed "
-           << "exchange (e.g. \"PETSc\") to get a globally consistent vector." << endl;
-      warned = true;
-    }
-  }
+template<class MMesh, class R>
+void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<R>& xx) {
+  DistExchangeArgs<R> a;
+  a.handle = &f->exchangeHandle;
+  a.dofIntersectionDof = &f->dofIntersectionDof;
+  a.Ddof = &f->Ddof;
+  a.comm = f->DTh->comm;
+  a.xx = &xx;
+  a.scaled = distributedExchangeScaled(f);
+  g_distributedBackend->exchange(a);
 }
 
 template<class MMesh, class v_fes>

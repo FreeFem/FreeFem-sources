@@ -6244,9 +6244,20 @@ void Add_u_init_array(int ii=0)
 
 }
 
-DistributedExchangeHookD g_distributedExchangeHookD = nullptr;
-DistributedExchangeHookC g_distributedExchangeHookC = nullptr;
-void (*g_distributedExchangeHandleDtor)(void*) = nullptr;
+static void warnNoDistributedExchange() {
+  static bool warned = false;
+  if (!warned && verbosity > 1 && mpirank == 0) {
+    cout << "Warning: rhs[] = form(0, " /* nom fespace */ ") on a distributed fespace was "
+         << "assembled LOCALLY ONLY (no exchange) -- load a plugin providing distributed "
+         << "exchange (e.g. \"PETSc\") to get a globally consistent vector." << endl;
+    warned = true;
+  }
+}
+void DistributedBackend::exchange(DistExchangeArgs<double>&) { warnNoDistributedExchange(); }
+void DistributedBackend::exchange(DistExchangeArgs<Complex>&) { warnNoDistributedExchange(); }
+
+static DistributedBackend defaultDistributedBackend;
+DistributedBackend* g_distributedBackend = &defaultDistributedBackend;
 
 // matrix A = vP(Udh, Udh): no distributed matrix in native setting.
 // same signature as OpMatrixtoBilinearForm, but clean rebuttal at compile
