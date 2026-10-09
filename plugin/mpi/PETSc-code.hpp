@@ -455,7 +455,7 @@ namespace PETSc {
     if (bs>1) {
       int bad = (ndof % bs != 0) ? 1 : 0;
       if (agreeOnStatus(bad, f->DTh->comm))
-        distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must divide the number of dof"
+        distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must divide the number of dof; \n"
                                         " mixed or non-nodal elements ([P2, P2, P1]): use bs = 1");
     }
     KN<double> Dscratch(f->Ddof);      // restriction() ecrase son argument : jamais f->Ddof
