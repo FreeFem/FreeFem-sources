@@ -2079,6 +2079,12 @@ namespace PETSc {
       void destroyExchangeHandle(void* h) override {
         distributedExchangeHandleDtor(h);
       }
+      bool supportsSolve() const override { return true; }
+      void solve(DistSolveArgs<double>& a) override;
+      void solve(DistSolveArgs<Complex>& a) override;
+      void destroySolveHandle(void* h) override {
+        delete static_cast<Dmat*>(h);
+      }
   };
 
   template< class HpddmType, bool C >
@@ -5775,7 +5781,38 @@ namespace PETSc {
       init_KN_or_KNM(Ax, A.u);
       return inv(Ax, A);
     }
-  };
+};
+  // solve/problem on a distributed fespace : Dmat du Problem (cree au premier appel),
+  // matrice locale du coeur -> Mat PETSc, puis resolution par InvPETSc (A^-1 * b)
+  template<class R, typename std::enable_if< std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
+  void distributedSolve(DistSolveArgs<R>& a) {
+    Dmat* M = static_cast<Dmat*>(*a.handle);
+    if (!M) {
+      M = new Dmat;
+      buildShellFromData(*M, a.dofIntersectionDof, a.Ddof, a.comm, a.X->n, a.ds->sym,
+                         static_cast<MPI_Comm*>(a.ds->commworld));
+      *a.handle = M;
+    }
+    if (a.A) {
+      Matrice_Creuse<R> mc;
+      mc.A = a.A;                         // reference partagee : la matrice reste au Problem
+      changeOperatorSimple(M, &mc);
+      assembleWithoutOverlapData(*M, a.overlap, a.A);
+      applySparams(*M, *a.ds);
+      if (M->_A) M->_A->setMatrix(nullptr);   // la matrice HPDDM enveloppe les tableaux de a.A
+    }
+    InvPETSc< pwr<Dmat>, KN<R>*, PetscScalar, 'N' > inv(pwr<Dmat>(nullptr, M, -1L), a.B);
+    inv.solve(a.X);
+  }
+
+  template<class R, typename std::enable_if< !std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
+  void distributedSolve(DistSolveArgs<R>& a) {
+    distributedError(a.comm, "solve/problem on a distributed fespace: this scalar type (real/complex) "
+                             "is not supported by this PETSc build");
+  }
+
+  inline void PETScBackend::solve(DistSolveArgs<double>& a) { distributedSolve(a); }
+  inline void PETScBackend::solve(DistSolveArgs<Complex>& a) { distributedSolve(a); }
 
   template< class T, class U, class K, char N >
   class ProdPETSc {
