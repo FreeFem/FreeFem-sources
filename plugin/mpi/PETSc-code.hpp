@@ -450,6 +450,14 @@ namespace PETSc {
       if (r != MPI_IDENT && r != MPI_CONGRUENT)
         distributedError(f->DTh->comm, "Mat from a distributed fespace: communicator differs from the communicator of the distributed mesh");
     }
+    if (bs<1)
+      distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must be positive");
+    if (bs>1) {
+      int bad = (ndof % bs != 0) ? 1 : 0;
+      if (agreeOnStatus(bad, f->DTh->comm))
+        distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must divide the number of dof"
+                                        " mixed or non-nodal elements ([P2, P2, P1]): use bs = 1");
+    }
     KN<double> Dscratch(f->Ddof);      // restriction() ecrase son argument : jamais f->Ddof
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
       &B, 1, &f->dofIntersectionDof, &Dscratch, nullptr, ndof, bs,
@@ -1657,7 +1665,7 @@ namespace PETSc {
     class Op : public E_F0mps {
      public:
       Expression A, U;
-      static const int n_name_param = 2;
+      static const int n_name_param = 3;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       Op(const basicAC_F0& args, Expression a, Expression u) : A(a), U(u) {
@@ -1670,7 +1678,8 @@ namespace PETSc {
         ffassert(Vh && (*pUh)->DTh);
         MPI_Comm* ucomm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : nullptr;
         bool sym = nargs[1] && GetAny<bool>((*nargs[1])(stack));
-        buildShellFromDfes<MMesh>(*ptA, *pUh, Vh->NbOfDF, sym, ucomm);
+        PetscInt bs = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : 1;
+        buildShellFromDfes<MMesh>(*ptA, *pUh, Vh->NbOfDF, sym, ucomm, bs);
         return ptA;
       }
     };
@@ -1682,7 +1691,8 @@ namespace PETSc {
   template<class MMesh>
   basicAC_F0::name_and_type initCSRfromDfes<MMesh>::Op::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"symmetric", &typeid(bool)}};
+    {"symmetric", &typeid(bool)},
+    {"bs", &typeid(long)}};
 
   template< class HpddmType >
   class initCSRfromArray_Op : public E_F0mps {
