@@ -442,7 +442,7 @@ namespace PETSc {
     Matrice_Creuse<upscaled_type<PetscScalar>>*);
 
   template<class MMesh>
-  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm) {
+  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
     MPI_Comm* dcomm = static_cast<MPI_Comm*>(f->DTh->comm);
     if (ucomm && dcomm) {
       int r;
@@ -452,7 +452,7 @@ namespace PETSc {
     }
     KN<double> Dscratch(f->Ddof);      // restriction() ecrase son argument : jamais f->Ddof
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
-      &B, 1, &f->dofIntersectionDof, &Dscratch, nullptr, ndof, (PetscInt) f->N,
+      &B, 1, &f->dofIntersectionDof, &Dscratch, nullptr, ndof, bs,
       dcomm ? dcomm : ucomm, nullptr, 0, sym ? PETSC_TRUE : PETSC_FALSE, false, nullptr);
   }
 
