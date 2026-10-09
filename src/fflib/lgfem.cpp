@@ -6256,6 +6256,13 @@ static void warnNoDistributedExchange() {
 void DistributedBackend::exchange(DistExchangeArgs<double>&) { warnNoDistributedExchange(); }
 void DistributedBackend::exchange(DistExchangeArgs<Complex>&) { warnNoDistributedExchange(); }
 
+void DistributedBackend::solve(DistSolveArgs<double>&) {
+  ExecError("solve/problem on a distributed fespace needs a distributed backend: load \"PETSc\"");
+}
+void DistributedBackend::solve(DistSolveArgs<Complex>&) {
+  ExecError("solve/problem on a distributed fespace needs a distributed backend: load \"PETSc\"");
+}
+
 static DistributedBackend defaultDistributedBackend;
 DistributedBackend* g_distributedBackend = &defaultDistributedBackend;
 

@@ -400,6 +400,25 @@ struct DistExchangeArgs {
   bool scaled;
 };
 
+class Data_Sparse_Solver;
+template<class TypeIndex, class TypeScalaire>
+class HashMatrix;
+
+template<class R>
+struct DistSolveArgs {
+  void ** handle;
+  KN<KN<long>>* dofIntersectionDof;
+  KN<double>* Ddof;
+  pcommworld comm;
+  int overlap;
+  HashMatrix<int, R>* A;
+  KN<R>* B;
+  KN<R>* X;
+  const Data_Sparse_Solver* ds;
+  bool solverGiven;
+  bool epsGiven;
+};
+
 // Core-plugin interface providing distributed operations (PETSc)
 class DistributedBackend {
   public :
@@ -407,6 +426,11 @@ class DistributedBackend {
     virtual void exchange(DistExchangeArgs<double>& a);
     virtual void exchange(DistExchangeArgs<Complex>& a);
     virtual void destroyExchangeHandle(void* h) {};
+
+    virtual bool supportsSolve() const { return false; }
+    virtual void solve(DistSolveArgs<double>&);
+    virtual void solve(DistSolveArgs<Complex>&);
+    virtual void destroySolveHandle(void*) {}
 };
 extern DistributedBackend* g_distributedBackend;
 
