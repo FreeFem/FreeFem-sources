@@ -111,6 +111,25 @@
 //   O2  meme chose avec le DERNIER rang du monde exclu (jamais le rang 0) :
 //       refus local (localError), message affiche par ce rang lui-meme.
 //
+//  TAILLE DE BLOC (cas 12, B, sur W et H)
+//   Une Mat construite depuis un fespace distribue a bs = 1 par defaut
+//   (comme macro_ddm) ; bs > 1 n'est legitime que pour un element de
+//   Lagrange homogene ([P2,P2,P2]) et s'active par Mat A(Udh, bs = k) ou
+//   set(A, bs = k). Avant, bs = N : [P2,P2,P1] faisait echouer PETSc
+//   ("Local size must be divisible by blocksize"), arret ou blocage.
+//   Laplacien sur chaque composante, compare au sequentiel (integrale et
+//   loc2glob).
+//   B1  [P2,P2,P2], Mat A = vP(...)
+//   B2  [P2,P2,P1], Mat A = vP(...)
+//   B3  [P2,P2,P1], Mat A(Udh)
+//   B4  [P2,P2,P1], Mat A = vP(..., sym = 1)
+//   B5  [P2,P2,P2], Mat A(Udh, bs = 3)
+//   B6  [P2,P2,P2], Mat A = vP(...) puis set(A, bs = 3)
+//   B7  [P2,P2,P1], Mat A(Udh, bs = 3) : refus collectif si la taille
+//       locale n'est pas un multiple de 3 sur au moins un rang (sinon
+//       accepte, et c'est correct) ; jamais d'erreur PETSc.
+//   B8  Mat A(Udh, bs = 0) : refus.
+//
 //  ERREURS DEPENDANT DU RANG (cas 11, R, sur cX)
 //   L'incoherence n'existe que sur le rang 1 de cX (rang monde 2). Sans
 //   decision collective, ce rang leve l'erreur seul pendant que les autres
@@ -157,7 +176,8 @@
 //  OPTIONS
 //    -case  0 = tout (defaut), 1 = W, 2 = P, 3 = H, 4 = X,
 //           5 = C, 6 = L, 7 = O, 8 = U, 9 = meshS, 10 = meshL,
-//           11 = R (erreurs dependant du rang, E7..E9)
+//           11 = R (erreurs dependant du rang, E7..E9),
+//           12 = B (taille de bloc des Mat vectorielles)
 //    -nc    raffinement du cube                          (defaut 10)
 //    -nc2   raffinement du cube inclus (transfert)       (defaut 7)
 //    -ov    recouvrement passe a distribute              (defaut 1)
@@ -172,6 +192,7 @@
 //    -nsq, -nsq2    raffinements des deux square3 (cas 9)  (defaut 16, 11)
 //    -nseg, -nseg2  raffinements des deux segments (cas 10) (defaut 80, 57)
 //    -e     cas 11 : 0 = E7, E8 et E9 ; 7, 8 ou 9 = un seul (defaut 0)
+//    -nb    cas 12 : raffinement du cube                 (defaut 6)
 //    -skip  k = saute Sk (k = 8 ou 9) dans chaque suite   (defaut aucun)
 //           -skip 8 teste le transfert (S9) sans PETSc (S8).
 //
@@ -188,6 +209,7 @@ int ov  = getARGV("-ov", 1);
 int pm  = getARGV("-pm", 0);
 int stopAt = getARGV("-stop", 9);
 int skipS  = getARGV("-skip", -1);
+int nb     = getARGV("-nb", 6);     // cas 12 : raffinement du cube
 int eSel   = getARGV("-e", 0);      // cas 11 : 0 = E7, E8 et E9 ; 7, 8 ou 9 = un seul
 int sc    = getARGV("-sc", 1);
 int nsq   = getARGV("-nsq", 16);
@@ -686,6 +708,75 @@ macro SUITEL(COMM, CTAG, SCAT, METH) {
   }
 }// EOM
 
+
+// ---------------------------------------------------------------------
+//  Cas 12 : taille de bloc. BTEST resout un Laplacien sur chaque
+//  composante de FE sur le Dmesh DTB (maillage ThB) et compare au
+//  sequentiel. MODE : 0 = Mat A = vP, 1 = Mat A(Udh), 2 = Mat A(Udh, bs = BSV),
+//  3 = Mat A = vP puis set(A, bs = BSV).
+// ---------------------------------------------------------------------
+macro BTEST(COMM, CT, LBL, FE, SYM, MODE, BSV) {
+  fespace Wdh(DTB, FE);
+  fespace Wh(ThB, FE);
+  varf vd([u1, u2, u3], [v1, v2, v3]) = int3d(DTB)(grad(u1)'*grad(v1) + grad(u2)'*grad(v2) + grad(u3)'*grad(v3))
+       + int3d(DTB)(v1 + 2*v2 + 3*v3) + on(1, 2, 3, 4, 5, 6, u1 = 0, u2 = 0, u3 = 0);
+  varf vs([u1, u2, u3], [v1, v2, v3]) = int3d(ThB)(grad(u1)'*grad(v1) + grad(u2)'*grad(v2) + grad(u3)'*grad(v3))
+       + int3d(ThB)(v1 + 2*v2 + 3*v3) + on(1, 2, 3, 4, 5, 6, u1 = 0, u2 = 0, u3 = 0);
+  matrix As = vs(Wh, Wh, solver = UMFPACK);
+  real[int] bsq = vs(0, Wh);
+  Wh [s1, s2, s3];
+  s1[] = As^-1 * bsq;
+  real eB = 1e30;
+  try {
+    real[int] rb = vd(0, Wdh);
+    Wdh [w1, w2, w3];
+    if (MODE == 0) { Mat A = vd(Wdh, Wdh, sym = SYM); set(A, sparams = kspp); w1[] = A^-1 * rb; }
+    if (MODE == 1) { Mat A(Wdh); A = vd(Wdh, Wdh, sym = SYM); set(A, sparams = kspp); w1[] = A^-1 * rb; }
+    if (MODE == 2) { Mat A(Wdh, bs = BSV); A = vd(Wdh, Wdh, sym = SYM); set(A, sparams = kspp); w1[] = A^-1 * rb; }
+    if (MODE == 3) { Mat A = vd(Wdh, Wdh, sym = SYM); set(A, sparams = kspp, bs = BSV); w1[] = A^-1 * rb; }
+    real Id = int3d(DTB)(w1*w1 + w2*w2 + w3*w3), Is = int3d(ThB)(s1*s1 + s2*s2 + s3*s3);
+    int[int] l2g = Wdh.loc2glob;
+    real el = 0;
+    for (int i = 0; i < Wdh.ndof; ++i) el = max(el, abs(w1[][i] - s1[][l2g[i]]));
+    eB = max(abs(Id - Is)/abs(Is), el);
+  } catch (...) { eB = 1e30; }
+  CHK(COMM, CT, LBL, eB, 1e-8)
+}// EOM
+
+macro BCASE(COMM, CT) {
+  if (COMM) {
+    mesh3 ThB = cube(nb, nb, nb);
+    Dmesh3 DTB = distribute(ThB, overlap = ov, comm = COMM, keepGlobal = true);
+    if (mpiRank(COMM) == 0)
+      cout << "--- " << CT << " : taille " << mpiSize(COMM) << ", rang 0 = rang monde " << mpirank << endl;
+    BTEST(COMM, CT, "B1 [P2,P2,P2] vP              ", [P2, P2, P2], 0, 0, 1)
+    BTEST(COMM, CT, "B2 [P2,P2,P1] vP              ", [P2, P2, P1], 0, 0, 1)
+    BTEST(COMM, CT, "B3 [P2,P2,P1] Mat(Udh)        ", [P2, P2, P1], 0, 1, 1)
+    BTEST(COMM, CT, "B4 [P2,P2,P1] vP sym          ", [P2, P2, P1], 1, 0, 1)
+    BTEST(COMM, CT, "B5 [P2,P2,P2] Mat(Udh, bs=3)  ", [P2, P2, P2], 0, 2, 3)
+    BTEST(COMM, CT, "B6 [P2,P2,P2] vP + set(bs=3)  ", [P2, P2, P2], 0, 3, 3)
+    {   /* B7 : bs = 3 sur [P2,P2,P1] : refus si la taille locale n'est pas
+           un multiple de 3 sur au moins un rang, acceptation sinon */
+      fespace Wm(DTB, [P2, P2, P1]);
+      int notDiv = (Wm.ndof % 3 != 0), anyNotDiv = 0;
+      mpiAllReduce(notDiv, anyNotDiv, COMM, mpiMAX);
+      int ref7 = 0;
+      try { Mat A7(Wm, bs = 3); } catch (...) { ref7 = 1; }
+      real e7 = abs(ref7 - anyNotDiv);
+      CHK(COMM, CT, "B7 [P2,P2,P1] Mat(Udh, bs=3) : refus coherent", e7, 0)
+      if (mpiRank(COMM) == 0)
+        cout << "      (B7 : taille non multiple de 3 sur au moins un rang = " << anyNotDiv << ")" << endl;
+    }
+    {   /* B8 : bs = 0 : refus */
+      fespace Wp(DTB, [P1, P2, P1]);
+      int ref8 = 0;
+      try { Mat A8(Wp, bs = 0); } catch (...) { ref8 = 1; }
+      real e8 = 1 - ref8;
+      CHK(COMM, CT, "B8 Mat(Udh, bs=0) : refus     ", e8, 0)
+    }
+  }
+}// EOM
+
 // ---------------------------------------------------------------------
 //  Communicateurs (globaux : ils vivent jusqu'a la fin du script)
 // ---------------------------------------------------------------------
@@ -896,6 +987,17 @@ if (cas == 0 || cas == 10) {
   SUITEL(cU, "meshL-U", false, "user")
   SUITEL(cU, "meshL-U", false, methB)
   SUITEL(cU, "meshL-U", true, "user")
+  mpiBarrier(mpiCommWorld);
+}
+
+// ---------------------------------------------------------------------
+//  12. B : taille de bloc des Mat vectorielles, sur W et H
+// ---------------------------------------------------------------------
+if (cas == 0 || cas == 12) {
+  if (mpirank == 0) cout << "===== B : taille de bloc" << endl;
+  BCASE(mpiCommWorld, "B-W")
+  mpiBarrier(mpiCommWorld);
+  BCASE(cH, "B-H")
   mpiBarrier(mpiCommWorld);
 }
 
