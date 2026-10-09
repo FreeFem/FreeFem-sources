@@ -384,9 +384,8 @@ namespace PETSc {
   typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
   warnIgnoredVarfParams(Expression const*) {}
 
-  template<class MMesh, class fes1>
-  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
-  applyVarfSparams(Dmat& B, const Data_Sparse_Solver& ds) {
+  // sparams = "..." : options PETSc, puis KSPSetFromOptions (cree le KSP si besoin)
+  inline void applySparams(Dmat& B, const Data_Sparse_Solver& ds) {
     if (ds.sparams.empty() || !B._petsc) return;
     PetscOptionsInsertString(NULL, ds.sparams.c_str());
     if (!B._ksp) {
@@ -395,6 +394,13 @@ namespace PETSc {
     }
     KSPSetFromOptions(B._ksp);
   }
+
+  template<class MMesh, class fes1>
+  typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
+  applyVarfSparams(Dmat& B, const Data_Sparse_Solver& ds) {
+    applySparams(B, ds);
+  }
+
   template<class MMesh, class fes1>
   typename std::enable_if< !std::is_same<fes1, v_dfes<MMesh> >::value >::type
   applyVarfSparams(Dmat&, const Data_Sparse_Solver&) {}
@@ -441,28 +447,35 @@ namespace PETSc {
     Matrice_Creuse<double>*, int, PetscBool, bool,
     Matrice_Creuse<upscaled_type<PetscScalar>>*);
 
-  template<class MMesh>
-  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
-    MPI_Comm* dcomm = static_cast<MPI_Comm*>(f->DTh->comm);
+  // Shell of a distributed Mat from raw distributed data (intersections, D, comm)
+  inline void buildShellFromData(Dmat& B, KN<KN<long>>* inter, KN<double>* Ddof, pcommworld comm,
+                                 int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
+    MPI_Comm* dcomm = static_cast<MPI_Comm*>(comm);
     if (ucomm && dcomm) {
       int r;
       MPI_Comm_compare(*ucomm, *dcomm, &r);
       if (r != MPI_IDENT && r != MPI_CONGRUENT)
-        distributedError(f->DTh->comm, "Mat from a distributed fespace: communicator differs from the communicator of the distributed mesh");
+        distributedError(comm, "Mat from a distributed fespace: communicator differs from the communicator of the distributed mesh");
     }
     if (bs<1)
-      distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must be positive");
+      distributedError(comm, "Mat A(Udh, bs = k): block size must be positive");
     if (bs>1) {
       int bad = (ndof % bs != 0) ? 1 : 0;
-      if (agreeOnStatus(bad, f->DTh->comm))
-        distributedError(f->DTh->comm, "Mat A(Udh, bs = k): block size must divide the number of dof; \n"
-                                        " mixed or non-nodal elements ([P2, P2, P1]): use bs = 1");
+      if (agreeOnStatus(bad, comm))
+        distributedError(comm, "Mat A(Udh, bs = k): block size must divide the number of dof; \n"
+                               " mixed or non-nodal elements ([P2, P2, P1]): use bs = 1");
     }
-    KN<double> Dscratch(f->Ddof);      // restriction() ecrase son argument : jamais f->Ddof
+    KN<double> Dscratch(*Ddof);        // restriction() ecrase son argument : jamais Ddof
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
-      &B, 1, &f->dofIntersectionDof, &Dscratch, nullptr, ndof, bs,
+      &B, 1, inter, &Dscratch, nullptr, ndof, bs,
       dcomm ? dcomm : ucomm, nullptr, 0, sym ? PETSC_TRUE : PETSC_FALSE, false, nullptr);
   }
+
+  template<class MMesh>
+  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
+    buildShellFromData(B, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, ndof, sym, ucomm, bs);
+  }
+
 
   template<class MMesh>
   void checkMatMatchesDfes(Dmat& B, v_dfes<MMesh>* f, int ndof) {
@@ -501,9 +514,15 @@ namespace PETSc {
   // et conversions de vecteurs (D booleen apres restriction) sont inchanges.
   template<class MMesh, class fes1, class R>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
-  assembleWithoutOverlap(Dmat& B, typename fes1::pfes* pUh, MatriceMorse<R>* mA) {
+    assembleWithoutOverlap(Dmat& B, typename fes1::pfes* pUh, MatriceMorse<R>* mA) {
     v_dfes<MMesh>* f = *pUh;
-    if (!f->DTh || f->DTh->overlap != 0 || !B._petsc || !B._num || !mA) return;
+    if (f->DTh) assembleWithoutOverlapData(B, f->DTh->overlap, mA);
+  }
+
+  template<class R>
+  void assembleWithoutOverlapData(Dmat& B, int overlap, MatriceMorse<R>* mA) {
+    if (overlap != 0 || !B._petsc || !B._num || !mA) return;
+
     MPI_Comm comm = PetscObjectComm((PetscObject)B._petsc);
     PetscMPIInt size;
     MPI_Comm_size(comm, &size);
