@@ -41,7 +41,7 @@ Vh<complex> u;
  // computation of the matrice BEM
   // nb of  DoF on border 
  int[int] IdfB2Vh(1); // for numbering IdfB2Vh[i]==i 
- ExtractDofsonBorder(labup,Vh,IdfB2Vh,-1)
+ ExtractDofsonBorder(labup,Vh,IdfB2Vh,-1,1)
  int kdfBEM=IdfB2Vh.n;
  // verif
  if(0)  { Vh X=x;
