@@ -73,6 +73,12 @@
 //       controles que S8.
 //   S8c Mat A(Udh) laisse Udh.D intact, bit a bit (HPDDM::restriction()
 //       ecrase en place le tableau qu'on lui cede).
+//   S10s solve SEQUENTIEL avec parametre nomme (solver =) : non regression
+//       du refus des problemes distribues (refuseDistributedProblem).
+//   S10 solve(u, v, sparams =) sur Udh : compare a la resolution sequentielle.
+//   S10b problem p(u, v) puis p; : meme controle que S10.
+//   S10c second appel de p avec init = 1 (matrice reutilisee) et second
+//       membre double : la solution double.
 //   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
 //       exact) : nproc et rang dans buildTransferPlan / collectFragments.
 //   S*  aucune exception pendant S1..S9.
@@ -428,6 +434,32 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
           ub[] = Ab^-1 * rb;
           real e8m = sqrt(int3d(DTh)(square(ub - us))) / sqrt(int3d(Th)(square(us)));
           CHK(COMM, tg, "S8b Mat A(Udh) + A^-1          ", e8m, 1e-7)
+
+          /* S10s : solve SEQUENTIEL avec parametre nomme (non regression) */
+          U1h u10s, v10s;
+          solve P10s(u10s, v10s, solver = UMFPACK) = int3d(Th)(grad(u10s)'*grad(v10s))
+                                              - int3d(Th)(1.*v10s) + on(1, 2, 3, 4, 5, 6, u10s = 0);
+          real e10s = sqrt(int3d(Th)(square(u10s - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S10s solve sequentiel nomme    ", e10s, 1e-10)
+          /* S10 : solve sur fespace distribue = solution sequentielle */
+          U1dh u10, v10;
+          solve P10(u10, v10, sparams = kspp) = int3d(DTh)(grad(u10)'*grad(v10))
+                                              - int3d(DTh)(1.*v10) + on(1, 2, 3, 4, 5, 6, u10 = 0);
+          real e10 = sqrt(int3d(DTh)(square(u10 - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S10 solve distribue            ", e10, 1e-7)
+          /* S10b/c : problem, puis second appel avec init = 1 et second membre double */
+          real cf10 = 1;
+          bool re10 = false;
+          U1dh u10c, v10c;
+          problem P10c(u10c, v10c, init = re10, sparams = kspp) = int3d(DTh)(grad(u10c)'*grad(v10c))
+                                              - int3d(DTh)(cf10*v10c) + on(1, 2, 3, 4, 5, 6, u10c = 0);
+          P10c;
+          real e10b = sqrt(int3d(DTh)(square(u10c - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S10b problem distribue         ", e10b, 1e-7)
+          cf10 = 2; re10 = true;
+          P10c;
+          real e10c = sqrt(int3d(DTh)(square(u10c - 2*us))) / sqrt(int3d(Th)(square(2*us)));
+          CHK(COMM, tg, "S10c init = 1, rhs modifie     ", e10c, 1e-7)
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */
