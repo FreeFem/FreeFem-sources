@@ -11,7 +11,7 @@ Dmesh3 DTh = distribute(Th, overlap = 1, keepGlobal = true);
 fespace Udh(DTh, P1);
 Udh u = 0, v;
 Udh f = 1;
-problem p(u, v, solver = CG) = int3d(DTh)(dx(u) * dx(v) + dy(u) * dy(v) + dz(u) * dz(v)) - int3d(DTh)(f * v) + on(1, 2, 3, 4, u = 0);
+problem p(u, v, solver = CG, eps = 1e-10) =int3d(DTh)(dx(u) * dx(v) + dy(u) * dy(v) + dz(u) * dz(v)) - int3d(DTh)(f * v) + on(1, 2, 3, 4, u = 0);
 p;
 
 // verification : meme probleme sur le maillage global
@@ -21,4 +21,4 @@ solve ps(us, vs) = int3d(Th)(dx(us) * dx(vs) + dy(us) * dy(vs) + dz(us) * dz(vs)
 real errL = sqrt(int3d(DTh)(square(u - us))) / sqrt(int3d(Th)(square(us))), errG;
 mpiAllReduce(errL, errG, mpiCommWorld, mpiMAX);
 if (mpirank == 0) cout << "ecart relatif distribue / sequentiel = " << errG << endl;
-assert(errG < 1e-4);   // solveur PETSc par defaut : tolerance relative 1e-5 sur le residu
+assert(errG < 1e-7);   // eps = 1e-10 transmis a PETSc (sans lui : ~1e-6)

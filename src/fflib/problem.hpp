@@ -1446,12 +1446,12 @@ maybeDistributedEvalCheck(v_fes* const& f, DistributedEvalScope& scope) {
 template<class MMesh, class v_fes, class R>
 typename std::enable_if<!std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
 maybeDistributedSolve(vector<FEbase<R, v_fes>*>&, int, void**, MatriceCreuse<R>*, KN<R>*, KN<R>*,
-                      const Data_Sparse_Solver&, bool, bool, DistributedEvalScope&) { return false; }
+                      const Data_Sparse_Solver&, unsigned, DistributedEvalScope&) { return false; }
 
 template<class MMesh, class v_fes, class R>
 typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
 maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, MatriceCreuse<R>* A,
-                      KN<R>* B, KN<R>* X, const Data_Sparse_Solver& ds, bool solverGiven, bool epsGiven,
+                      KN<R>* B, KN<R>* X, const Data_Sparse_Solver& ds, unsigned given,
                       DistributedEvalScope& scope) {
   v_fes* f = *(u_h[0]->pVh);
   if (Nb != 1 || *(u_h[1]->pVh) != f)
@@ -1468,8 +1468,7 @@ maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, Mat
   a.B = B;
   a.X = X;
   a.ds = &ds;
-  a.solverGiven = solverGiven;
-  a.epsGiven = epsGiven;
+  a.given = given;
   g_distributedBackend->solve(a);
   return true;
 }
