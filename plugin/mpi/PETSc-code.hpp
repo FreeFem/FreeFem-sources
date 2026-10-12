@@ -5855,6 +5855,17 @@ namespace PETSc {
     }
     InvPETSc< pwr<Dmat>, KN<R>*, PetscScalar, 'N' > inv(pwr<Dmat>(nullptr, M, -1L), a.B);
     inv.solve(a.X);
+    if (M->_ksp) {
+      KSPConvergedReason reason;
+      PetscInt its;
+      KSPGetConvergedReason(M->_ksp, &reason);
+      KSPGetIterationNumber(M->_ksp, &its);
+      if (a.ds->getnbiter) *a.ds->getnbiter = its;     // getnbiteration = n
+      if (reason < 0 && commRank(a.comm) == 0)
+        cerr << "Warning: solve/problem on a distributed fespace: the solver did not converge ("
+             << KSPConvergedReasons[reason] << " after " << its << " iterations)" << endl;
+    }
+
   }
 
   template<class R, typename std::enable_if< !std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
