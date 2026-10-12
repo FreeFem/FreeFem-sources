@@ -59,14 +59,6 @@ if [ ! -e "$APPIMAGE_TOOL" ] ; then
     "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 fi
 
-
-# TODO: when migration from Autoconf to CMake will be finished in FreeFem project,
-# we need to update configure and build commands here to something like:
-# cmake . -DCMAKE_INSTALL_PREFIX=/usr
-# make
-# make install DESTDIR=$SRC_DIR/AppDir
-# https://docs.appimage.org/packaging-guide/from-source/native-binaries.html#cmake
-
 autoreconf -i
 ./configure \
     CFLAGS='-fpermissive' \
