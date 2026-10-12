@@ -83,6 +83,8 @@
 //   S10e solver = GMRES, eps =, nbiter =, dimKrylov = : transmis au KSP.
 //   S10f nbiter = 2 : la resolution s'arrete apres 2 iterations (non
 //       convergence avertie, pas d'erreur) et getnbiteration le rend.
+//   S10, S10c sont aussi joues par SUITEG (meshS, meshL) : integrale et,
+//       en mode replique, solution via loc2glob.
 //   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
 //       exact) : nproc et rang dans buildTransferPlan / collectFragments.
 //   S*  aucune exception pendant S1..S9.
@@ -526,6 +528,7 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
 //  (pas d'accesseur .measure sur les elements meshS / meshL) ; S8 compare
 //  l'integrale de la solution, et en mode replique la solution elle-meme
 //  via loc2glob ; S9 transfere entre deux resolutions du meme domaine.
+//  S10 (solve) et S10c (problem, init = 1) : memes controles que S8.
 // ---------------------------------------------------------------------
 macro SUITEG(COMM, CTAG, SCAT, METH, MT, DMT, INTG, NV, THG, THG2, BLAB) {
   if (COMM) {
@@ -718,6 +721,29 @@ macro SUITEG(COMM, CTAG, SCAT, METH, MT, DMT, INTG, NV, THG, THG2, BLAB) {
             for (int i = 0; i < U1dh.ndof; ++i) e8mb = max(e8mb, abs(ub[][i] - us[][l2g1b[i]]));
             CHK(COMM, tg, "S8b Mat A(Udh) : solution      ", e8mb, 1e-8)
           }
+          /* S10 : solve distribue = solution sequentielle (integrale, puis ddl via loc2glob) */
+          U1dh u10, v10;
+          solve P10(u10, v10, sparams = kspp) = INTG(DTh)(grad(u10)'*grad(v10))
+                                              - INTG(DTh)(1.*v10) + on(BLAB, u10 = 0);
+          real e10a = abs(INTG(DTh)(u10) - Is)/abs(Is);
+          CHK(COMM, tg, "S10 solve : integrale          ", e10a, 1e-8)
+          if (!scat) {
+            int[int] l2g10 = U1dh.loc2glob;
+            real e10b = 0;
+            for (int i = 0; i < U1dh.ndof; ++i) e10b = max(e10b, abs(u10[][i] - us[][l2g10[i]]));
+            CHK(COMM, tg, "S10 solve : solution           ", e10b, 1e-8)
+          }
+          /* S10c : problem, puis second appel avec init = 1 et second membre double */
+          real cf10 = 1;
+          bool re10 = false;
+          U1dh u10c, v10c;
+          problem P10c(u10c, v10c, init = re10, sparams = kspp) = INTG(DTh)(grad(u10c)'*grad(v10c))
+                                              - INTG(DTh)(cf10*v10c) + on(BLAB, u10c = 0);
+          P10c;
+          cf10 = 2; re10 = true;
+          P10c;
+          real e10c = abs(INTG(DTh)(u10c) - 2*Is)/abs(2*Is);
+          CHK(COMM, tg, "S10c init = 1 : integrale      ", e10c, 1e-8)
         }
 
         /* S9 : transfert vers un autre Dmesh du meme COMM (autre resolution) */

@@ -12987,33 +12987,33 @@ bool isCompositeProblem(const ListOfId &l){
 
 }
 
-// solve/problem on distributed fespace
+// solve/problem on distributed fespace : dimension du Problem (DIM_DFES*), 0 si non distribue
 static int distributedFEargKind(const C_F0 &c) {
-    if (BCastTo<pdf3r>(c) || BCastTo<pdf3c>(c) ) return 3;
-    if (BCastTo<pdfSr>(c) || BCastTo<pdfSc>(c) || BCastTo<pdfLc>(c) || BCastTo<pdfLr>(c) ) return 4;
+    if (BCastTo<pdf3r>(c) || BCastTo<pdf3c>(c)) return Problem::DIM_DFES3;
+    if (BCastTo<pdfSr>(c) || BCastTo<pdfSc>(c)) return Problem::DIM_DFESS;
+    if (BCastTo<pdfLr>(c) || BCastTo<pdfLc>(c)) return Problem::DIM_DFESL;
     return 0;
 }
 
 static void refuseDistributedProblem(const ListOfId &l) {
-    int nDist = 0, nSeq = 0, nSL = 0;
+    int nDist = 0, nSeq = 0, kind = 0;
+    bool mixedKinds = false;
     auto count = [&](const char* id) {
         int k = distributedFEargKind(::Find(id));
-        if (k == 0) nSeq++; else ++nDist;
-        if (k == 4) nSL++;
+        if (k == 0) { ++nSeq; return; }
+        ++nDist;
+        if (kind && k != kind) mixedKinds = true;
+        kind = k;
     };
     for (int i = 0; i < l.size(); ++i) {
-        if (l[i].e) continue;
+        if (l[i].e) continue;   // parametre nomme (solver=...)
         if (l[i].array) {
-            for (int j = 0; j < l[i].array->size(); ++j) {
-                count((*l[i].array)[j].id);
-            }
-        } else {
-            count(l[i].id);
-        }
+            for (int j = 0; j < l[i].array->size(); ++j) count((*l[i].array)[j].id);
+        } else count(l[i].id);
     }
     if (!nDist) return;
-    if (nSL) CompileError("solve/problem on a distributed surface or curve in not yet supported");
     if (nSeq) CompileError("solve/problem on a distributed FESpace cannot be mixed with sequential FESpace");
+    if (mixedKinds) CompileError("solve/problem: distributed FESpaces on different kinds of mesh (Dmesh3, DmeshS, DmeshL) cannot be mixed");
     if (isCompositeProblem(l)) CompileError("solve/problem on a distributed FESpace cannot be used with composite FESpace");
     if (!g_distributedBackend->supportsSolve()) CompileError("solve/problem on a distributed FESpace requires a distributed backend: load \"PETSc\"");
 }
