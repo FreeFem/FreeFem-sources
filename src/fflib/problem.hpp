@@ -513,6 +513,9 @@ class Problem  : public Polymorphic {
   int Nitem,Mitem;
   const int dim;
 public:
+  static const int DIM_DFES3 = 7; // solve problem on Dmesh3
+  static const int DIM_DFESS = 8; // solve problem on DmeshS
+  static const int DIM_DFESL = 9; // solve problem on DmeshL
  template<class FESpace>
   struct Data {
     typedef typename FESpace::Mesh Mesh;
@@ -525,15 +528,17 @@ public:
     typedef  CadnaType<complex<double> >::Scalaire cmplx_st;
     MatriceCreuse<double_st>  * AcadnaR;
     MatriceCreuse<cmplx_st>  * AcadnaC;
+    void* distSolveHandle; // Dmat of distribute backend
 
-    void init()  {pTh=nullptr; AcadnaR=nullptr;AcadnaC=nullptr; Uh.init(),Vh.init();AR.init();AC.init();}
+    void init()  {pTh=nullptr; AcadnaR=nullptr;AcadnaC=nullptr; distSolveHandle=nullptr; Uh.init(),Vh.init();AR.init();AC.init();}
+
     void destroy() {
       pTh=nullptr;
       Uh.destroy();
       Vh.destroy();
       AR.destroy();
       AC.destroy();
-
+      if (distSolveHandle) { g_distributedBackend->destroySolveHandle(distSolveHandle); distSolveHandle=nullptr; };
       if(AcadnaR) AcadnaR->destroy();
       if(AcadnaC) AcadnaC->destroy();
       }
@@ -598,6 +603,9 @@ public:
       dataptrS(stack)->init();
       else if(dim==5)
       dataptrL(stack)->init();
+      else if(dim==DIM_DFES3) dataptr3(stack)->init();
+      else if(dim==DIM_DFESS) dataptrS(stack)->init();
+      else if(dim==DIM_DFESL) dataptrL(stack)->init();
       else if(dim==6) dataptrCompo(stack)->init(); // allocation pour que les offset soit correct
   }
   void destroy(Stack stack)  const  {
@@ -605,6 +613,9 @@ public:
       else if(dim==3) dataptr3(stack)->destroy();
       else if(dim==4) dataptrS(stack)->destroy();
       else if(dim==5) dataptrL(stack)->destroy();
+      else if(dim==DIM_DFES3) dataptr3(stack)->destroy();
+      else if(dim==DIM_DFESS) dataptrS(stack)->destroy();
+      else if(dim==DIM_DFESL) dataptrL(stack)->destroy();
       else if(dim==6) dataptrCompo(stack)->destroy(); // allocation pour que les offset soit correct
   }
 
@@ -1428,6 +1439,39 @@ template<class MMesh, class v_fes>
 typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value >::type
 maybeDistributedEvalCheck(v_fes* const& f, DistributedEvalScope& scope) {
   scope.check(f->DTh ? f->DTh->comm : nullptr);
+}
+
+// solve/problem on a distributed fespace : controle collectif, echange du second
+// membre, resolution par le backend. Fespace non distribue : rien, renvoie false.
+template<class MMesh, class v_fes, class R>
+typename std::enable_if<!std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
+maybeDistributedSolve(vector<FEbase<R, v_fes>*>&, int, void**, MatriceCreuse<R>*, KN<R>*, KN<R>*,
+                      const Data_Sparse_Solver&, bool, bool, DistributedEvalScope&) { return false; }
+
+template<class MMesh, class v_fes, class R>
+typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
+maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, MatriceCreuse<R>* A,
+                      KN<R>* B, KN<R>* X, const Data_Sparse_Solver& ds, bool solverGiven, bool epsGiven,
+                      DistributedEvalScope& scope) {
+  v_fes* f = *(u_h[0]->pVh);
+  if (Nb != 1 || *(u_h[1]->pVh) != f)
+    ExecError("solve/problem on a distributed fespace: unknown and test functions must belong to the same fespace");
+  scope.check(f->DTh->comm);                       // collectif : avant l'echange
+  maybeDistributedExchange<MMesh, v_fes>(f, *B);   // apres AssembleBC, comme rhs = varf(0, Udh)
+  DistSolveArgs<R> a;
+  a.handle = handle;
+  a.dofIntersectionDof = &f->dofIntersectionDof;
+  a.Ddof = &f->Ddof;
+  a.comm = f->DTh->comm;
+  a.overlap = f->DTh->overlap;
+  a.A = A ? dynamic_cast<HashMatrix<int, R>*>(A) : nullptr;
+  a.B = B;
+  a.X = X;
+  a.ds = &ds;
+  a.solverGiven = solverGiven;
+  a.epsGiven = epsGiven;
+  g_distributedBackend->solve(a);
+  return true;
 }
 
 template<class R,class MMesh,class v_fes>

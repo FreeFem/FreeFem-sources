@@ -41,6 +41,7 @@ using namespace std;
 #include "lgfem.hpp"
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
+#include "DistributedMesh.hpp"
 #include "problem.hpp"
 #include <set>
 
@@ -12189,6 +12190,9 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 #endif
 */
 
+// indices of Problem parameters: save, cadna, bmat, LIST_NAME_PARM_MAT
+static const int PB_ARG_SOLVER = 4, PB_ARG_EPS = 5, PB_ARG_PRECON = 6;
+
 template<class R,class FESpace,class v_fes>    // TODO if coupling FE with problem
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
                       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
@@ -12274,6 +12278,11 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 
     if ( pTh != data->pTh )
     {
+        if (data->distSolveHandle) { 
+            g_distributedBackend->destroySolveHandle(data->distSolveHandle);
+            data->distSolveHandle = nullptr;
+        }
+
         // set value of the struct data 
         ds.initmat = true;
         data->pTh=pTh;
@@ -12346,6 +12355,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
        if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" <</* " skyline =" <<ds.typemat->profile <<*/ endl;
       }
     MatriceCreuse<R>  & A(dataA);
+    DistributedEvalScope dscope(IsDistributedFE<v_fes>::value);
     if  (AssembleVarForm( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, op->largs))
     {
         *B = - *B;
@@ -12359,6 +12369,15 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     *B = - *B;
 
     dynamic_cast<HashMatrix<int,R> *>(&A)->half = ds.sym;
+
+    if (maybeDistributedSolve<MeshT, v_fes>(u_h, Nb, &data->distSolveHandle, ds.initmat ? &A : nullptr,
+                                            B, X, ds, nargs[PB_ARG_SOLVER] != nullptr,
+                                            nargs[PB_ARG_EPS] != nullptr, dscope)) {
+        DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
+        *mps=mp;
+        return SetAny<const Problem *>(this);
+    }
+
 
     MatriceCreuse<R_st>  * ACadna = 0;
 
@@ -12965,28 +12984,35 @@ bool isCompositeProblem(const ListOfId &l){
 
 }
 
-// solve/problem on distributed fespace: not yet supported
-static bool isDistributedFEArg(const C_F0 &c) {
-    return BCastTo<pdf3r>(c) || BCastTo<pdf3c>(c) || BCastTo<pdfSr>(c) || BCastTo<pdfSc>(c) || BCastTo<pdfLr>(c) || BCastTo<pdfLc>(c);
+// solve/problem on distributed fespace
+static int distributedFEargKind(const C_F0 &c) {
+    if (BCastTo<pdf3r>(c) || BCastTo<pdf3c>(c) ) return 3;
+    if (BCastTo<pdfSr>(c) || BCastTo<pdfSc>(c) || BCastTo<pdfLc>(c) || BCastTo<pdfLr>(c) ) return 4;
+    return 0;
 }
 
 static void refuseDistributedProblem(const ListOfId &l) {
+    int nDist = 0, nSeq = 0, nSL = 0;
+    auto count = [&](const char* id) {
+        int k = distributedFEargKind(::Find(id));
+        if (k == 0) nSeq++; else ++nDist;
+        if (k == 4) nSL++;
+    };
     for (int i = 0; i < l.size(); ++i) {
         if (l[i].e) continue;
-        bool d = false;
         if (l[i].array) {
             for (int j = 0; j < l[i].array->size(); ++j) {
-                d = d || isDistributedFEArg(::Find((*l[i].array)[j].id));
+                count((*l[i].array)[j].id);
             }
         } else {
-            d = isDistributedFEArg(::Find(l[i].id));
-    }
-        if (d) {
-            CompileError("solve/problem on distributed fespace is not yet supported: \n"
-            " load \"PETSc\" and write Mat A = vP(Udh, Udh); \n"
-        "real[int] b = vP(0, Udh); u[] = A^-1*b;");
+            count(l[i].id);
         }
     }
+    if (!nDist) return;
+    if (nSL) CompileError("solve/problem on a distributed surface or curve in not yet supported");
+    if (nSeq) CompileError("solve/problem on a distributed FESpace cannot be mixed with sequential FESpace");
+    if (isCompositeProblem(l)) CompileError("solve/problem on a distributed FESpace cannot be used with composite FESpace");
+    if (!g_distributedBackend->supportsSolve()) CompileError("solve/problem on a distributed FESpace requires a distributed backend: load \"PETSc\"");
 }
 
 // read the arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])
@@ -13061,7 +13087,37 @@ std::pair< bool,bool> isSameDimAndComplexTypeProblem(const ListOfId &l){
                         if(dim==0 || dim==5){ dim=5;}
                         else{ return_samedim = false; }
                     }
-                    
+                    // distributed setting
+                    if (BCastTo<pdf3c>(c) ){ 
+                        complextype = true;
+                        if(dim==0 || dim==Problem::DIM_DFES3){ dim=Problem::DIM_DFES3;}
+                        else{ return_samedim = false; }
+                    }
+                    if (BCastTo<pdf3r>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==Problem::DIM_DFES3){ dim=Problem::DIM_DFES3;}
+                        else{ return_samedim = false; }
+                    }
+                    if (BCastTo<pdfSc>(c) ){
+                        complextype = true;
+                        if(dim==0 || dim==Problem::DIM_DFESS){ dim=Problem::DIM_DFESS;}
+                        else{ return_samedim = false; }
+                    }
+                    if (BCastTo<pdfSr>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==Problem::DIM_DFESS){ dim=Problem::DIM_DFESS;}
+                        else{ return_samedim = false; }
+                    }
+                    if (BCastTo<pdfLc>(c) ){
+                        complextype = true;
+                        if(dim==0 || dim==Problem::DIM_DFESL){ dim=Problem::DIM_DFESL;}
+                        else{ return_samedim = false; }
+                    } 
+                    if (BCastTo<pdfLr>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==Problem::DIM_DFESL){ dim=Problem::DIM_DFESL;}
+                        else{ return_samedim = false;}
+                    }
                 }
             }
 
@@ -13113,6 +13169,37 @@ std::pair< bool,bool> isSameDimAndComplexTypeProblem(const ListOfId &l){
                 if(dim==0 || dim==5){ dim=5;}
                 else{ return_samedim = false; }
             }
+            // distributed setting
+            if (BCastTo<pdf3c>(c) ){ 
+                complextype = true;
+                if(dim==0 || dim==Problem::DIM_DFES3){ dim=Problem::DIM_DFES3;}
+                else{ return_samedim = false; }
+            }
+            if (BCastTo<pdf3r>(c) ){
+                realtype = true;
+                if(dim==0 || dim==Problem::DIM_DFES3){ dim=Problem::DIM_DFES3;}
+                else{ return_samedim = false; }
+            }
+            if (BCastTo<pdfSc>(c) ){
+                complextype = true;
+                if(dim==0 || dim==Problem::DIM_DFESS){ dim=Problem::DIM_DFESS;}
+                else{ return_samedim = false; }
+            }
+            if (BCastTo<pdfSr>(c) ){
+                realtype = true;
+                if(dim==0 || dim==Problem::DIM_DFESS){ dim=Problem::DIM_DFESS;}
+                else{ return_samedim = false; }
+            }
+            if (BCastTo<pdfLc>(c) ){
+                complextype = true;
+                if(dim==0 || dim==Problem::DIM_DFESL){ dim=Problem::DIM_DFESL;}
+                else{ return_samedim = false; }
+            }
+            if (BCastTo<pdfLr>(c) ){
+                realtype = true;
+                if(dim==0 || dim==Problem::DIM_DFESL){ dim=Problem::DIM_DFESL;}
+                else{ return_samedim = false;}
+            } 
         }
         }
     }
@@ -13160,6 +13247,12 @@ int dimProblem(const ListOfId &l)
                     if(BCastTo<pfSc>(c) ) ffassert(dim==0 || dim==4),dim=4;
                     if(BCastTo<pfLr>(c) ) ffassert(dim==0 || dim==5),dim=5;
                     if(BCastTo<pfLc>(c) ) ffassert(dim==0 || dim==5),dim=5;
+                    if (BCastTo<pdf3r>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFES3),dim=Problem::DIM_DFES3;
+                    if (BCastTo<pdf3c>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFES3),dim=Problem::DIM_DFES3;
+                    if (BCastTo<pdfSr>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESS),dim=Problem::DIM_DFESS;
+                    if (BCastTo<pdfSc>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESS),dim=Problem::DIM_DFESS;
+                    if (BCastTo<pdfLr>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESL),dim=Problem::DIM_DFESL;
+                    if (BCastTo<pdfLc>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESL),dim=Problem::DIM_DFESL;
                 }
             }
 
@@ -13175,6 +13268,12 @@ int dimProblem(const ListOfId &l)
             if(BCastTo<pfSc>(c) ) ffassert(dim==0 || dim==4),dim=4;
             if(BCastTo<pfLr>(c) ) ffassert(dim==0 || dim==5),dim=5;
             if(BCastTo<pfLc>(c) ) ffassert(dim==0 || dim==5),dim=5;
+            if(BCastTo<pdf3r>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFES3),dim=Problem::DIM_DFES3;
+            if(BCastTo<pdf3c>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFES3),dim=Problem::DIM_DFES3;
+            if(BCastTo<pdfSr>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESS),dim=Problem::DIM_DFESS;
+            if(BCastTo<pdfSc>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESS),dim=Problem::DIM_DFESS;
+            if(BCastTo<pdfLr>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESL),dim=Problem::DIM_DFESL;
+            if(BCastTo<pdfLc>(c) ) ffassert(dim==0 || dim==Problem::DIM_DFESL),dim=Problem::DIM_DFESL;
         }
         }
     }
@@ -13212,6 +13311,27 @@ AnyType Problem::operator()(Stack stack) const
             return eval<Complex,FESpaceL,v_fesL>(stack,data,data->AC,data->AcadnaC);
         else
             return eval<double,FESpaceL,v_fesL>(stack,data,data->AR,data->AcadnaR);
+    }
+    else if(dim==Problem::DIM_DFES3) {
+        Data<FESpace3> *data= dataptr3(stack);
+        if (complextype)
+            return eval<Complex,FESpace3,v_dfes3>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpace3,v_dfes3>(stack,data,data->AR,data->AcadnaR);
+    }
+    else if(dim==Problem::DIM_DFESS) {
+        Data<FESpaceS> *data= dataptrS(stack);
+        if (complextype)
+            return eval<Complex,FESpaceS,v_dfesS>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpaceS,v_dfesS>(stack,data,data->AR,data->AcadnaR);
+    }
+    else if(dim==Problem::DIM_DFESL) {
+        Data<FESpaceL> *data= dataptrL(stack);
+        if (complextype)
+            return eval<Complex,FESpaceL,v_dfesL>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpaceL,v_dfesL>(stack,data,data->AR,data->AcadnaR);
     }
     else if(dim==6){
         DataComposite *dataComposite= dataptrCompo(stack);
@@ -13687,6 +13807,12 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
         iscomplex=GetBilinearParam<pf3r,pf3c>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==4)  // dim = 4 for a 3D surface problem
         iscomplex=GetBilinearParam<pfSr,pfSc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else if (dim==DIM_DFES3)  // distributed 3D fespace
+        iscomplex=GetBilinearParam<pdf3r,pdf3c>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else if (dim==DIM_DFESS)  // distributed 3D surface fespace
+        iscomplex=GetBilinearParam<pdfSr,pdfSc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else if (dim==DIM_DFESL)  // distributed 3D curve fespace
+        iscomplex=GetBilinearParam<pdfLr,pdfLc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==5)  // dim = 5 for a 3D curve problem
         iscomplex=GetBilinearParam<pfLr,pfLc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==6){
@@ -13773,6 +13899,12 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
             cout << "  -- Problem type  ( complex : " << complextype << " )  "  <<endl;
     }
     else ffassert(0); // bug
+
+    if (dim == DIM_DFES3 || dim == DIM_DFESL || dim == DIM_DFESS)
+    {
+        if (nargs[PB_ARG_PRECON])
+            CompileError("solve/problem on a distributed fespace: precon= is not supported, use sparams = \"...\" ");
+    }
 
     precon = 0; //  a changer
     if ( nargs[3+3])
