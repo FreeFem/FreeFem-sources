@@ -404,6 +404,9 @@ class Data_Sparse_Solver;
 template<class TypeIndex, class TypeScalaire>
 class HashMatrix;
 
+// parametres de solve/problem ecrits par l'utilisateur (DistSolveArgs::given)
+enum { DIST_GIVEN_SOLVER = 1, DIST_GIVEN_EPS = 2, DIST_GIVEN_NBITER = 4, DIST_GIVEN_DIMKRYLOV = 8 };
+
 template<class R>
 struct DistSolveArgs {
   void ** handle;
@@ -415,8 +418,7 @@ struct DistSolveArgs {
   KN<R>* B;
   KN<R>* X;
   const Data_Sparse_Solver* ds;
-  bool solverGiven;
-  bool epsGiven;
+  unsigned given; // DIST_GIVEN_*
 };
 
 // Core-plugin interface providing distributed operations (PETSc)

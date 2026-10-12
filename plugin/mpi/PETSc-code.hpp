@@ -5782,6 +5782,57 @@ namespace PETSc {
       return inv(Ax, A);
     }
 };
+
+  // solve/problem : solver=, eps=, nbiter=, dimKrylov= -> KSP. Appele apres applySparams :
+  // les parametres ecrits dans le problem l'emportent sur sparams et la ligne de commande.
+  template<class R>
+  void applyProblemOptions(Dmat& M, const DistSolveArgs<R>& a) {
+    if (!a.given || !M._petsc) return;
+    const Data_Sparse_Solver& ds = *a.ds;
+    if (!M._ksp) {                        // comme InvPETSc : ligne de commande prise en compte
+      KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
+      KSPSetOperators(M._ksp, M._petsc, M._petsc);
+      KSPSetFromOptions(M._ksp);
+    }
+    KSP ksp = M._ksp;
+    if (a.given & DIST_GIVEN_SOLVER) {
+      const std::string& s = ds.solver;   // deja en majuscules (Init_sym_positive_var)
+      if (s == "CG")
+        KSPSetType(ksp, KSPCG);
+      else if (s == "GMRES")
+        KSPSetType(ksp, KSPGMRES);
+      else if (s == "LU" || s == "UMFPACK" || s == "SPARSESOLVER" || s == "SPARSESOLVERSYM" ||
+               s == "CHOLESKY" || s == "CROUT" || s == "MUMPS") {
+        PC pc;
+        KSPSetType(ksp, KSPPREONLY);
+        KSPGetPC(ksp, &pc);
+        PCSetType(pc, ds.sym ? PCCHOLESKY : PCLU);
+#if defined(PETSC_HAVE_MUMPS)
+        PCFactorSetMatSolverType(pc, MATSOLVERMUMPS);
+#endif
+      }
+      else if (commRank(a.comm) == 0)
+        cerr << "Warning: solve/problem on a distributed fespace: solver = " << s
+             << " has no PETSc equivalent, PETSc default used (see sparams = \"-ksp_type ...\")" << endl;
+    }
+    if (a.given & (DIST_GIVEN_EPS | DIST_GIVEN_NBITER)) {
+      PetscReal rtol = PETSC_CURRENT, atol = PETSC_CURRENT;
+      PetscInt maxits = PETSC_CURRENT;
+      if (a.given & DIST_GIVEN_EPS) {
+        if (ds.epsilon > 0) rtol = ds.epsilon;            // relatif, comme en sequentiel
+        else { rtol = 0; atol = -ds.epsilon; }            // eps < 0 : test absolu
+      }
+      if (a.given & DIST_GIVEN_NBITER) maxits = ds.itmax;
+      KSPSetTolerances(ksp, rtol, atol, PETSC_CURRENT, maxits);
+    }
+    if (a.given & DIST_GIVEN_DIMKRYLOV) {
+      KSPType t;
+      KSPGetType(ksp, &t);
+      if (!t) KSPSetType(ksp, KSPGMRES);  // le redemarrage n'a de sens que pour GMRES
+      KSPGMRESSetRestart(ksp, ds.NbSpace);
+    }
+  }
+
   // solve/problem on a distributed fespace : Dmat du Problem (cree au premier appel),
   // matrice locale du coeur -> Mat PETSc, puis resolution par InvPETSc (A^-1 * b)
   template<class R, typename std::enable_if< std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
@@ -5799,6 +5850,7 @@ namespace PETSc {
       changeOperatorSimple(M, &mc);
       assembleWithoutOverlapData(*M, a.overlap, a.A);
       applySparams(*M, *a.ds);
+      applyProblemOptions(*M, a);
       if (M->_A) M->_A->setMatrix(nullptr);   // la matrice HPDDM enveloppe les tableaux de a.A
     }
     InvPETSc< pwr<Dmat>, KN<R>*, PetscScalar, 'N' > inv(pwr<Dmat>(nullptr, M, -1L), a.B);

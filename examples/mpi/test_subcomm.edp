@@ -79,6 +79,8 @@
 //   S10b problem p(u, v) puis p; : meme controle que S10.
 //   S10c second appel de p avec init = 1 (matrice reutilisee) et second
 //       membre double : la solution double.
+//   S10d solver = sparsesolver : preonly + LU (MUMPS), solveur direct.
+//   S10e solver = GMRES, eps =, nbiter =, dimKrylov = : transmis au KSP.
 //   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
 //       exact) : nproc et rang dans buildTransferPlan / collectFragments.
 //   S*  aucune exception pendant S1..S9.
@@ -460,6 +462,19 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
           P10c;
           real e10c = sqrt(int3d(DTh)(square(u10c - 2*us))) / sqrt(int3d(Th)(square(2*us)));
           CHK(COMM, tg, "S10c init = 1, rhs modifie     ", e10c, 1e-7)
+          /* S10d : solver = sparsesolver -> preonly + LU MUMPS (direct) */
+          U1dh u10d, v10d;
+          solve P10d(u10d, v10d, solver = sparsesolver) = int3d(DTh)(grad(u10d)'*grad(v10d))
+                                              - int3d(DTh)(1.*v10d) + on(1, 2, 3, 4, 5, 6, u10d = 0);
+          real e10d = sqrt(int3d(DTh)(square(u10d - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S10d solver = sparsesolver     ", e10d, 1e-9)
+          /* S10e : solver = GMRES, eps, nbiter, dimKrylov transmis au KSP */
+          U1dh u10e, v10e;
+          solve P10e(u10e, v10e, solver = GMRES, eps = 1e-11, nbiter = 3000, dimKrylov = 200)
+                                              = int3d(DTh)(grad(u10e)'*grad(v10e))
+                                              - int3d(DTh)(1.*v10e) + on(1, 2, 3, 4, 5, 6, u10e = 0);
+          real e10e = sqrt(int3d(DTh)(square(u10e - us))) / sqrt(int3d(Th)(square(us)));
+          CHK(COMM, tg, "S10e GMRES eps nbiter dimKrylov", e10e, 1e-7)
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */

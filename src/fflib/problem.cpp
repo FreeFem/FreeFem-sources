@@ -12191,7 +12191,7 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 */
 
 // indices of Problem parameters: save, cadna, bmat, LIST_NAME_PARM_MAT
-static const int PB_ARG_SOLVER = 4, PB_ARG_EPS = 5, PB_ARG_PRECON = 6;
+static const int PB_ARG_SOLVER = 4, PB_ARG_EPS = 5, PB_ARG_PRECON = 6, PB_ARG_DIMKRYLOV = 7, PB_ARG_NBITER = 13;
 
 template<class R,class FESpace,class v_fes>    // TODO if coupling FE with problem
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
@@ -12370,9 +12370,12 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 
     dynamic_cast<HashMatrix<int,R> *>(&A)->half = ds.sym;
 
+    unsigned given = (nargs[PB_ARG_SOLVER]    ? DIST_GIVEN_SOLVER    : 0)
+                   | (nargs[PB_ARG_EPS]       ? DIST_GIVEN_EPS       : 0)
+                   | (nargs[PB_ARG_NBITER]    ? DIST_GIVEN_NBITER    : 0)
+                   | (nargs[PB_ARG_DIMKRYLOV] ? DIST_GIVEN_DIMKRYLOV : 0);
     if (maybeDistributedSolve<MeshT, v_fes>(u_h, Nb, &data->distSolveHandle, ds.initmat ? &A : nullptr,
-                                            B, X, ds, nargs[PB_ARG_SOLVER] != nullptr,
-                                            nargs[PB_ARG_EPS] != nullptr, dscope)) {
+                                            B, X, ds, given, dscope)) {
         DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
         *mps=mp;
         return SetAny<const Problem *>(this);
