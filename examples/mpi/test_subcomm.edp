@@ -81,6 +81,8 @@
 //       membre double : la solution double.
 //   S10d solver = sparsesolver : preonly + LU (MUMPS), solveur direct.
 //   S10e solver = GMRES, eps =, nbiter =, dimKrylov = : transmis au KSP.
+//   S10f nbiter = 2 : la resolution s'arrete apres 2 iterations (non
+//       convergence avertie, pas d'erreur) et getnbiteration le rend.
 //   S9  transfert Vdh w = a entre deux Dmesh du MEME c (P1 affine -> P2,
 //       exact) : nproc et rang dans buildTransferPlan / collectFragments.
 //   S*  aucune exception pendant S1..S9.
@@ -475,6 +477,14 @@ macro SUITE(COMM, CTAG, SCAT, METH) {
                                               - int3d(DTh)(1.*v10e) + on(1, 2, 3, 4, 5, 6, u10e = 0);
           real e10e = sqrt(int3d(DTh)(square(u10e - us))) / sqrt(int3d(Th)(square(us)));
           CHK(COMM, tg, "S10e GMRES eps nbiter dimKrylov", e10e, 1e-7)
+          /* S10f : non convergence (nbiter = 2) : solution rendue, getnbiteration = 2 */
+          U1dh u10f, v10f;
+          int nit10 = -1;
+          solve P10f(u10f, v10f, solver = GMRES, nbiter = 2, getnbiteration = nit10)
+                                              = int3d(DTh)(grad(u10f)'*grad(v10f))
+                                              - int3d(DTh)(1.*v10f) + on(1, 2, 3, 4, 5, 6, u10f = 0);
+          real e10f = abs(nit10 - 2);
+          CHK(COMM, tg, "S10f nbiter = 2, getnbiteration", e10f, 0)
         }
 
         /* S9 : transfert entre deux Dmesh du meme COMM */
