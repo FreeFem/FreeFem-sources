@@ -4019,14 +4019,13 @@ namespace Fem2D {
     R3 Pm[16];                                 // all the momome function ..
 
     for (int ff = 0, k = 0; ff < Element::nf; ff++, k += 3) {
-      // orientation de la face a envert
-      int fp = K.facePermutation(ff);
-        int i0= fp/2, sp = fp%2;
-        if(!i0) {
-            if(!sp) Exchange(p[k+1], p[k +2]);
-            Exchange(p[k], p[k + i0]);// i0 en 0
-            }
-        else if(sp) Exchange(p[k+1], p[k + 2]);
+      // Use the same face permutation as set(), composed with the local
+      // basis ordering (reversed on faces 0 and 2).
+      int permutation[3];
+      SetNumPerm<3>(K.facePermutation(ff), permutation);
+      int local[3] = {p[k], p[k + 1], p[k + 2]};
+      for (int j = 0; j < 3; ++j)
+        p[k + j] = local[permutation[j]];
 /*
       if (fp & 1) {
         Exchange(p[k], p[k + 1]);
