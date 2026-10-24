@@ -1,0 +1,72 @@
+//ff-mpirun -np 4 heat-2d-coated-channels.edp -ffddm_schwarz_method oras -ffddm_overlap 2
+
+// Abstract : steady heat conduction in a hexagonal fuel element with 19 coated coolant
+// channels (two materials, heat source in the matrix only, Robin convection on the channel
+// walls). One-level ORAS uses an optimized Robin transmission condition (-alpha) on the
+// artificial interfaces; compare with -ffddm_schwarz_method ras or asm.
+
+// for the make check:
+// NBPROC 4
+// PARAM -ffddm_schwarz_method oras -ffddm_overlap 2
+
+macro dimension 2// EOM
+include "ffddm.idp"
+
+macro def(i)i// EOM
+macro init(i)i// EOM
+macro grad(u)[dx(u), dy(u)]// EOM
+
+int n = getARGV("-n", 40);                // segments per hexagon edge
+real alpha = getARGV("-alpha", 1.e4);     // ORAS Robin coefficient
+
+real qgen = 4.e9, h = 1.e4, Tinf = 1400.; // W/m^3, W/m^2/K, K
+real kMatrix = 40., kCoating = 21.;       // W/m/K
+
+// Hexagon (19.1 mm flat-to-flat) with 19 channels of radius rc, each with a coating ring
+real ap = 0.0191/2, ss = 0.0191/sqrt(3.), rc = 0.00127, rcoat = 1.3*rc, p = 0.004, hh = p*sqrt(3.)/2;
+real[int] xc = [-p, 0, p, -1.5*p, -0.5*p, 0.5*p, 1.5*p, -2*p, -p, 0, p, 2*p,
+                -1.5*p, -0.5*p, 0.5*p, 1.5*p, -p, 0, p];
+real[int] yc = [2*hh, 2*hh, 2*hh, hh, hh, hh, hh, 0, 0, 0, 0, 0,
+                -hh, -hh, -hh, -hh, -2*hh, -2*hh, -2*hh];
+border E0(t=0,1){x = ss - ss/2*t;    y = ap*t;       label = 1;}
+border E1(t=0,1){x = ss/2 - ss*t;    y = ap;         label = 1;}
+border E2(t=0,1){x = -ss/2 - ss/2*t; y = ap - ap*t;  label = 1;}
+border E3(t=0,1){x = -ss + ss/2*t;   y = -ap*t;      label = 1;}
+border E4(t=0,1){x = -ss/2 + ss*t;   y = -ap;        label = 1;}
+border E5(t=0,1){x = ss/2 + ss/2*t;  y = -ap + ap*t; label = 1;}
+border C(t=0,2*pi; i)   {x = xc[i] + rc*cos(t);    y = yc[i] + rc*sin(t);    label = 2;}
+border Coat(t=0,2*pi; i){x = xc[i] + rcoat*cos(t); y = yc[i] + rcoat*sin(t); label = 3;}
+int[int] nC(19), nCT(19);
+nC = -2*n/3;                              // negative orientation: channels are holes
+nCT = n;
+mesh ThGlobal = buildmesh(E0(n) + E1(n) + E2(n) + E3(n) + E4(n) + E5(n) + C(nC) + Coat(nCT));
+int rMatrix = ThGlobal(p/2, 0).region;    // point between two channels
+func k = (region == rMatrix) ? kMatrix : kCoating;
+func q = (region == rMatrix) ? qgen : 0.;
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u, v) = int2d(meshName)(k*grad(u)'*grad(v)) + int1d(meshName, 2)(h*u*v)
+                        + int2d(meshName)(q*v) + int1d(meshName, 2)(h*Tinf*v); // EOM
+// Local problems of the preconditioner; ORAS adds the Robin term on artificial interfaces
+real robin = (ffddmprecond == "oras") ? alpha : 0.;
+macro VarfPrec(varfName, meshName, PhName)
+    varf varfName(u, v) = int2d(meshName)(k*grad(u)'*grad(v)) + int1d(meshName, 2)(h*u*v)
+                        + int1d(meshName, ffddminterfacelabel)(robin*u*v); // EOM
+
+ffddmbuildDmesh(Heat, ThGlobal, mpiCommWorld)
+ffddmbuildDfespace(Heat, Heat, real, def, init, P1)
+ffddmsetupOperator(Heat, Heat, Varf)
+real[int] rhs(HeatVhi.ndof);
+ffddmbuildrhs(Heat, Varf, rhs)
+ffddmsetupPrecond(Heat, VarfPrec)
+
+HeatVhi def(u);
+real[int] x0(HeatVhi.ndof);
+x0 = 0;
+u[] = HeatfGMRES(x0, rhs, 1.e-6, 200, "right");
+Heatwritesummary
+
+real lTmax = u[].max, Tmax;
+mpiAllReduce(lTmax, Tmax, mpiCommWorld, mpiMAX);
+if (mpirank == 0) cout << "T_max = " << Tmax << " K" << endl;
+ffddmplot(Heat, u, "Temperature");
