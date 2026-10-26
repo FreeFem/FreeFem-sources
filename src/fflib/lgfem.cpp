@@ -3313,6 +3313,13 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].dist = 3;
         l[i][0] = CastTo< pdf3r >(args[i]);
       }
+      else if (BCastTo< const DistributedMesh< Mesh3 > ** >(args[i])) {    // maillage distribue (Dmesh3)
+        l[i].composant = true;
+        l[i].what = 5;
+        l[i].dist = 3;
+        l[i][0] = CastTo< const DistributedMesh< Mesh3 > ** >(args[i]);
+      }
+
       else if (BCastTo< pf3r >(args[i])) {    // [[file:lgmesh3.hpp::pf3r]]
         l[i].composant = false;
         l[i].what = 6;    //  real iso value 3D volume
@@ -4607,43 +4614,195 @@ static void unpackPiece(const vector< char > &b, DistPlotPiece &p) {
   ffassert(o == b.size( ));
 }
 
-// Phase A d'un item distribue : collectif sur le comm du Dmesh.
-// Retourne true sur la racine de plot quand l'item doit etre trace.
+// Mode global : elements possedes du maillage local et maillage brut correspondant (cache dans D).
+// Un bord est garde si sa face n'a pas de voisin dans CoverMesh, donc vrai bord du domaine global :
+// les faces d'interface (overlap 0) et de coupe sont ecartees.
 template< class Mesh >
-static bool gatherDistItem(FEbase< double, v_dfes< Mesh > > *fe, int cmp, long what, long onlyRank,
-                           DistPlotItem< Mesh > &out) {
-  const DistributedMesh< Mesh > *D = (*fe->pVh)->DTh;
-  pcommworld comm = D->comm;
-  const int me = commRank(comm), nr = commSize(comm);
+static void buildOwnedPlotMesh(const DistributedMesh< Mesh > &D) {
+  if (D.plotOwnedBuilt) return;
+  typedef typename Mesh::Rd Rd;
+  const Mesh &Th = *D.LocalMesh;
+  const Mesh *Cv = D.CoverMesh;
+  const int nve = Mesh::Element::nv, nvbe = Mesh::BorderElement::nv;
+  const bool haveCover = Cv && D.coverPartition.N( ) == Cv->nt && D.localToCoverElement.N( ) == Th.nt;
+
+  KN< int > own(Th.nt);
+  int nt = 0;
+  for (int k = 0; k < Th.nt; ++k) {
+    own[k] = haveCover ? (D.coverPartition[D.localToCoverElement[k]] == D.rank) : 1;
+    nt += own[k];
+  }
+  KN< int > newv(Th.nv, -1);
+  int nv = 0;
+  D.plotOwnedElements.resize(nt);
+  for (int k = 0, c = 0; k < Th.nt; ++k)
+    if (own[k]) {
+      D.plotOwnedElements[c++] = k;
+      for (int j = 0; j < nve; ++j) {
+        const int v = Th(Th[k][j]);
+        if (newv[v] < 0) newv[v] = nv++;
+      }
+    }
+
+  KN< int > keepBe(Th.nbe, 0);
+  int nbe = 0;
+  for (int b = 0; b < Th.nbe; ++b) {
+    int f;
+    const int k = Th.BoundaryElement(b, f);
+    if (!own[k]) continue;
+    bool trueBoundary = true;
+    if (haveCover) {
+      // la face f est opposee au sommet f : on retrouve ce sommet dans l'element du cover
+      const int kc = D.localToCoverElement[k];
+      const Rd P = Th[k][f];
+      int fc = 0;
+      double dmin = 1e300;
+      for (int j = 0; j < nve; ++j) {
+        const double d = (Rd((*Cv)[kc][j]) - P).norme2( );
+        if (d < dmin) { dmin = d; fc = j; }
+      }
+      ffassert(dmin <= 1e-10 * (Rd(Th[k][0]) - Rd(Th[k][1])).norme2( ));
+      trueBoundary = Cv->ElementAdj(kc, fc) < 0;
+    }
+    if (trueBoundary) { keepBe[b] = 1; ++nbe; }
+  }
+
+  // meme format que packPiece, sans les valeurs
+  vector< char > &buf = D.plotOwnedMesh;
+  buf.clear( );
+  KN< int > oldv(nv);
+  for (int v = 0; v < Th.nv; ++v)
+    if (newv[v] >= 0) oldv[newv[v]] = v;
+  putPOD(buf, nv); putPOD(buf, nt); putPOD(buf, nbe);
+  for (int i = 0; i < nv; ++i) { putPOD(buf, Th(oldv[i]).x); putPOD(buf, Th(oldv[i]).y); putPOD(buf, Th(oldv[i]).z); }
+  for (int i = 0; i < nv; ++i) putPOD(buf, (int)Th(oldv[i]).lab);
+  for (int c = 0; c < nt; ++c)
+    for (int j = 0; j < nve; ++j) putPOD(buf, newv[Th(Th[D.plotOwnedElements[c]][j])]);
+  for (int c = 0; c < nt; ++c) putPOD(buf, (int)Th[D.plotOwnedElements[c]].lab);
+  for (int b = 0; b < Th.nbe; ++b)
+    if (keepBe[b])
+      for (int j = 0; j < nvbe; ++j) putPOD(buf, newv[Th(Th.be(b)[j])]);
+  for (int b = 0; b < Th.nbe; ++b)
+    if (keepBe[b]) putPOD(buf, (int)Th.be(b).lab);
+  D.plotOwnedBuilt = true;
+}
+
+// Tampon du mode global : maillage possede (cache) + valeurs des elements possedes
+template< class Mesh >
+static void packOwnedPiece(vector< char > &b, const DistributedMesh< Mesh > &D, const KN_< double > &V) {
+  buildOwnedPlotMesh(D);
+  const KN< int > &own = D.plotOwnedElements;
+  const long nt = D.LocalMesh->nt, nK = nt ? V.N( ) / nt : 0;
+  ffassert(nK * nt == V.N( ));
+  b = D.plotOwnedMesh;
+  putPOD(b, (long long)(nK * own.N( )));
+  for (long c = 0; c < own.N( ); ++c)
+    for (long j = 0; j < nK; ++j) putPOD(b, V[own[c] * nK + j]);
+}
+
+// Concatene les morceaux en un seul maillage (sommets d'interface dupliques) et un seul vecteur de valeurs
+template< class Mesh >
+static void fusePieces(const vector< DistPlotPiece > &P, DistPlotPiece &f) {
+  const int nve = Mesh::Element::nv, nvbe = Mesh::BorderElement::nv;
+  long nv = 0, nt = 0, nbe = 0, nV = 0;
+  for (size_t r = 0; r < P.size( ); ++r) { nv += P[r].nv; nt += P[r].nt; nbe += P[r].nbe; nV += P[r].V.N( ); }
+  f.nv = nv; f.nt = nt; f.nbe = nbe;
+  f.xyz.resize(3 * nv); f.vlab.resize(nv); f.tv.resize(nve * nt); f.tlab.resize(nt);
+  f.bv.resize(nvbe * nbe); f.blab.resize(nbe); f.V.resize(nV);
+  long ov = 0, ot = 0, ob = 0, oV = 0;
+  for (size_t r = 0; r < P.size( ); ++r) {
+    const DistPlotPiece &p = P[r];
+    for (long i = 0; i < 3L * p.nv; ++i) f.xyz[3 * ov + i] = p.xyz[i];
+    for (long i = 0; i < p.nv; ++i) f.vlab[ov + i] = p.vlab[i];
+    for (long i = 0; i < (long)nve * p.nt; ++i) f.tv[nve * ot + i] = p.tv[i] + ov;
+    for (long i = 0; i < p.nt; ++i) f.tlab[ot + i] = p.tlab[i];
+    for (long i = 0; i < (long)nvbe * p.nbe; ++i) f.bv[nvbe * ob + i] = p.bv[i] + ov;
+    for (long i = 0; i < p.nbe; ++i) f.blab[ob + i] = p.blab[i];
+    for (long i = 0; i < p.V.N( ); ++i) f.V[oV + i] = p.V[i];
+    ov += p.nv; ot += p.nt; ob += p.nbe; oV += p.V.N( );
+  }
+}
+
+// Racine de plot d'un Dmesh, collectif sur son comm. -1 : rien a tracer (rang 0 du monde absent ou pas de flux).
+template< class Mesh >
+static int distPlotRoot(const DistributedMesh< Mesh > &D, long onlyRank) {
+  pcommworld comm = D.comm;
+  const int me = commRank(comm);
   const int root = plotRoot(comm);
   if (root < 0) {
     if (me == 0)
       cerr << "[rank " << mpirank << "] Warning: plot: rank 0 of mpiCommWorld is not in the communicator"
-           << " of this distributed FE function, item skipped" << endl;
-    return false;
+           << " of this distributed object, item skipped" << endl;
+    return -1;
   }
-  if (!bcastInt(me == root ? (ThePlotStream != 0) : 0, root, comm)) return false;    // pas de flux : rien
-  if (onlyRank >= nr) distributedError(comm, "plot: rank= must be in [0, mpiSize(comm)[");
+  if (!bcastInt(me == root ? (ThePlotStream != 0) : 0, root, comm)) return -1;    // pas de flux : rien
+  if (onlyRank >= commSize(comm)) distributedError(comm, "plot: rank= must be in [0, mpiSize(comm)[");
+  return root;
+}
+
+// Mise en tampon, rassemblement sur root et, en mode global, fusion. V vide pour un maillage seul.
+// owned : mode global (elements possedes) ; sinon byrank (maillage local complet). Retourne true sur root.
+template< class Mesh >
+static bool gatherDistPieces(const DistributedMesh< Mesh > &D, int root, bool owned, const KN_< double > &V,
+                             DistPlotItem< Mesh > &out) {
+  vector< char > buf;
+  if (owned) packOwnedPiece(buf, D, V);    // elements possedes, vrais bords seulement
+  else packPiece(buf, *D.LocalMesh, V);    // byrank : maillage local complet (overlap compris)
+  vector< vector< char > > all;
+  gatherPlotBuffers(buf, root, D.comm, all);
+  if (commRank(D.comm) != root) return false;
+
+  out.pieces.resize(all.size( ));
+  for (size_t r = 0; r < all.size( ); ++r) unpackPiece< Mesh >(all[r], out.pieces[r]);
+  if (owned) {
+    vector< DistPlotPiece > fused(1);    // element neuf : KN::operator= ne redimensionne pas
+    DistPlotPiece &f = fused[0];
+    fusePieces< Mesh >(out.pieces, f);
+    if (verbosity > 1) {
+      cout << "  -- plot (distributed): " << out.pieces.size( ) << " pieces -> nv " << f.nv << " nt " << f.nt
+           << " nbe " << f.nbe;
+      if (f.V.N( )) cout << " min " << f.V.min( ) << " max " << f.V.max( );
+      cout << endl;
+    }
+    out.pieces.swap(fused);
+  }
+  return true;
+}
+
+// Phase A d'une fonction EF distribuee. Retourne true sur la racine de plot quand l'item doit etre trace.
+template< class Mesh >
+static bool gatherDistItem(FEbase< double, v_dfes< Mesh > > *fe, int cmp, long what, long onlyRank, bool owned,
+                           DistPlotItem< Mesh > &out) {
+  const DistributedMesh< Mesh > *D = (*fe->pVh)->DTh;
+  const int root = distPlotRoot(*D, onlyRank);
+  if (root < 0) return false;
   const int bad = (!fe->x( ) || !fe->Vh || &fe->Vh->Th != D->LocalMesh) ? 1 : 0;
-  if (agreeOnStatus(bad, comm)) distributedError(comm, "plot: distributed FE function not initialized");
+  if (agreeOnStatus(bad, D->comm)) distributedError(D->comm, "plot: distributed FE function not initialized");
 
   int lg;
   KN< typename Mesh::RdHat > Psub;
   KN< int > Ksub;
   KN< double > V = fe->Vh->newSaveDraw(*fe->x( ), cmp, lg, Psub, Ksub, 0);
-  vector< char > buf;
-  packPiece(buf, *D->LocalMesh, V);    // etape 3 : maillage local complet (overlap compris)
-  vector< vector< char > > all;
-  gatherPlotBuffers(buf, root, comm, all);
-  if (me != root) return false;
-
+  if (!gatherDistPieces(*D, root, owned, V, out)) return false;
   out.what = what;
   out.Psub.resize(Psub.N( )); out.Psub = Psub;
   out.Ksub.resize(Ksub.N( )); out.Ksub = Ksub;
-  out.pieces.resize(all.size( ));
-  for (size_t r = 0; r < all.size( ); ++r) unpackPiece< Mesh >(all[r], out.pieces[r]);
   return true;
 }
+
+// Phase A d'un maillage distribue (what 5) : maillage seul, sans valeurs
+template< class Mesh >
+static bool gatherDistMesh(const DistributedMesh< Mesh > *D, long what, long onlyRank, bool owned,
+                           DistPlotItem< Mesh > &out) {
+  if (!D) localError("plot: distributed mesh not initialized");
+  const int root = distPlotRoot(*D, onlyRank);
+  if (root < 0) return false;
+  KN< double > V0;
+  if (!gatherDistPieces(*D, root, owned, V0, out)) return false;
+  out.what = what;
+  return true;
+}
+
 
 //  missing function
 inline void NewSetColorTable(int nb, float *colors = 0, int nbcolors = 0, bool hsv = true) {
@@ -4785,11 +4944,17 @@ AnyType Plot::operator( )(Stack s) const {
   vector< DistPlotItem< Mesh3 > > dItems3;    // racine de plot seulement
   for (size_t i = 0; i < l.size( ); i++)
     if (l[i].dist == 3) {
-      pdf3r p = GetAny< pdf3r >((*l[i].e[0])(s));
       DistPlotItem< Mesh3 > it;
-      if (gatherDistItem< Mesh3 >(p.first, p.second, l[i].what, onlyRank, it)) dItems3.push_back(it);
+      bool ok;
+      if (l[i].what == 5)
+        ok = gatherDistMesh< Mesh3 >(*GetAny< const DistributedMesh< Mesh3 > ** >((*l[i].e[0])(s)), 5, onlyRank,
+                                     !byrank, it);
+      else {
+        pdf3r p = GetAny< pdf3r >((*l[i].e[0])(s));
+        ok = gatherDistItem< Mesh3 >(p.first, p.second, l[i].what, onlyRank, !byrank, it);
+      }
+      if (ok) dItems3.push_back(it);
     }
-
 
   if (ThePlotStream) {
     // byrank : un plot complet par rang de comm (ou le seul rang demande) ; sinon un seul plot
@@ -5127,7 +5292,7 @@ AnyType Plot::operator( )(Stack s) const {
     for (size_t k = 0; k < dRef3.size( ); ++k) {
       const DistPlotRef3 &d = dRef3[k];
       theplot << d.item->what << d.mesh;
-      theplot << d.item->Psub << d.item->Ksub << d.piece->V;
+      if (d.item->what != 5) theplot << d.item->Psub << d.item->Ksub << d.piece->V;    // maillage seul : rien de plus
     }
     theplot.SendEndPlot( ); 
   }
