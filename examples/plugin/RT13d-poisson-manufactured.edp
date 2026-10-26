@@ -1,0 +1,84 @@
+load "Element_Mixte3d"
+load "msh3"
+load "qf11to25"
+
+/** @file
+ * @brief Exact RT13d/P1dc mixed Poisson solution on a sheared tetrahedral mesh.
+ * For p=1+2x-3y+4z, u=grad(p)=(2,-3,4), div(u)=0.
+ * Prescribe the potential on the entire boundary through its natural term:
+ * (u,v)+(p,div(v))=<p,v.n>, (div(u),q)=0.
+ * These equations determine the pressure without a nullspace or a penalty.
+ * The exact constant flux lies in RT13d and the affine pressure lies in P1dc.
+ * Degree-seven volume quadrature integrates RT13d mass products (degree four)
+ * exactly; degree-five face quadrature integrates p*(v.n) (degree two).
+ * Absolute L2 tolerances of 1e-8 allow direct-solve roundoff while requiring
+ * reproduction of the independently specified pressure, flux and divergence.
+ */
+verbosity = 0;
+cout.precision(12);
+mesh3 physicalMesh = cube(2, 2, 2);
+physicalMesh = movemesh3(physicalMesh,
+    transfo=[0.2 + 1.1*x + 0.2*y + 0.1*z,
+             -0.3 + 0.1*x + 0.9*y + 0.2*z,
+             0.4 + 0.2*x + 0.1*y + 1.2*z]);
+
+fespace FluxSpace(physicalMesh, RT13d);
+fespace PressureSpace(physicalMesh, P1dc);
+FluxSpace [fluxX, fluxY, fluxZ], [testFluxX, testFluxY, testFluxZ];
+PressureSpace pressure, testPressure;
+func exactPressure = 1. + 2.*x - 3.*y + 4.*z;
+func exactFluxX = 2.;
+func exactFluxY = -3.;
+func exactFluxZ = 4.;
+
+solve MixedPoisson([fluxX, fluxY, fluxZ, pressure],
+                   [testFluxX, testFluxY, testFluxZ, testPressure],
+                   solver=UMFPACK) =
+    int3d(physicalMesh, qfV=qfVp7)(
+        fluxX*testFluxX + fluxY*testFluxY + fluxZ*testFluxZ
+      + pressure*(dx(testFluxX) + dy(testFluxY) + dz(testFluxZ))
+      + (dx(fluxX) + dy(fluxY) + dz(fluxZ))*testPressure)
+  - int2d(physicalMesh, qforder=6)(
+        exactPressure*(testFluxX*N.x + testFluxY*N.y + testFluxZ*N.z));
+
+real fluxL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (fluxX-exactFluxX)^2 + (fluxY-exactFluxY)^2 + (fluxZ-exactFluxZ)^2));
+real pressureL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (pressure-exactPressure)^2));
+real divergenceL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (dx(fluxX) + dy(fluxY) + dz(fluxZ))^2));
+
+/** @brief Check zero-source balance and the divergence theorem independently.
+ * The exact total boundary flux and volume divergence both vanish, although
+ * individual boundary faces carry nonzero flux. Scale absolute integral
+ * residuals by max(1,volume) to keep the zero-source balance well defined.
+ * Independently compare the normal trace with (2,-3,4).n over every boundary
+ * triangle, so cancelling errors on different boundary portions are measured.
+ */
+real boundaryFlux = int2d(physicalMesh, qforder=6)(
+    fluxX*N.x + fluxY*N.y + fluxZ*N.z);
+real volumeDivergence = int3d(physicalMesh, qfV=qfVp7)(
+    dx(fluxX) + dy(fluxY) + dz(fluxZ));
+real conservationScale = max(1., int3d(physicalMesh, qfV=qfVp7)(1.));
+real sourceBalanceError = abs(boundaryFlux)/conservationScale;
+real divergenceTheoremError = abs(boundaryFlux-volumeDivergence)/conservationScale;
+real boundaryNormalL2Error = sqrt(int2d(physicalMesh, qforder=6)(
+    ((fluxX-exactFluxX)*N.x + (fluxY-exactFluxY)*N.y
+      + (fluxZ-exactFluxZ)*N.z)^2));
+
+cout << "RT13d manufactured: tetrahedra=" << physicalMesh.nt
+     << ", mixed DOFs=" << FluxSpace.ndof + PressureSpace.ndof << endl;
+cout << "L2 errors: flux=" << fluxL2Error << ", pressure=" << pressureL2Error
+     << ", divergence=" << divergenceL2Error
+     << ", boundary normal=" << boundaryNormalL2Error << endl;
+cout << "conservation: boundary=" << boundaryFlux << ", divergence="
+     << volumeDivergence << ", source=0, scale=" << conservationScale
+     << ", source balance=" << sourceBalanceError
+     << ", divergence theorem=" << divergenceTheoremError << endl;
+assert(fluxL2Error < 1.e-8);
+assert(pressureL2Error < 1.e-8);
+assert(divergenceL2Error < 1.e-8);
+assert(boundaryNormalL2Error < 1.e-8);
+assert(sourceBalanceError < 1.e-10);
+assert(divergenceTheoremError < 1.e-10);
+cout << "RT13d manufactured mixed Poisson: PASS" << endl;

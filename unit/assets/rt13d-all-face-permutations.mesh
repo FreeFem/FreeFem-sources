@@ -1,0 +1,54 @@
+MeshVersionFormatted 1
+Dimension 3
+
+# Three disjoint bipyramids. Each pair shares its first three tetrahedron
+# vertices. Their local shared-face orders are 012,021,120,210,201,102.
+# All six tetrahedra have positive signed volume and distinct region labels.
+Vertices
+15
+0 0 0 1
+1 0 0 1
+0 1 0 1
+0 0 1 1
+0 0 -1 1
+3 0 0 1
+4 0 0 1
+3 1 0 1
+3 0 1 1
+3 0 -1 1
+6 0 0 1
+7 0 0 1
+6 1 0 1
+6 0 1 1
+6 0 -1 1
+
+Triangles
+18
+4 3 2 1
+1 3 4 1
+4 2 1 1
+5 2 3 1
+1 2 5 1
+5 3 1 1
+9 6 8 1
+7 6 9 1
+9 8 7 1
+10 6 7 1
+8 6 10 1
+10 7 8 1
+14 12 11 1
+13 12 14 1
+14 11 13 1
+15 13 11 1
+12 13 15 1
+15 11 12 1
+
+Tetrahedra
+6
+1 2 3 4 1
+1 3 2 5 2
+7 8 6 9 3
+8 7 6 10 4
+13 11 12 14 5
+12 11 13 15 6
+End

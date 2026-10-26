@@ -1,0 +1,34 @@
+/** @file
+ * @brief Run the unit RT13d moment, derivative and orientation assertions in CI.
+ * The example preferences supply unit/ on the include path for test.idp.
+ * The included script invokes TestRT13dMomentsInterpolationDerivativesOrientations
+ * once at its end. Its fixture locator recognizes the unit-script basename
+ * in ARGV. Append that script's path, derived from this wrapper's invocation
+ * path, so the locator selects the source fixture both from examples/plugin
+ * and from an unrelated working directory with an absolute wrapper argument.
+ */
+string rtVerificationWrapperName =
+    "RT13d-verify-moments-interpolation-derivatives-orientations.edp";
+string rtVerificationUnitScript =
+    "../../unit/plugins/RT13d-moments-interpolation-derivatives-orientations.edp";
+
+for (int argument = 0; argument < ARGV.n; ++argument)
+{
+    int wrapperNamePosition = ARGV[argument].rfind(rtVerificationWrapperName);
+
+    if (wrapperNamePosition > 0)
+    {
+        string wrapperArgument = ARGV[argument];
+        rtVerificationUnitScript = wrapperArgument(0:wrapperNamePosition-1)
+                                 + rtVerificationUnitScript;
+        break;
+    }
+}
+
+int rtVerificationArgumentCount = ARGV.n;
+ARGV.resize(rtVerificationArgumentCount + 1);
+ARGV[rtVerificationArgumentCount] = rtVerificationUnitScript;
+
+include "../../unit/plugins/RT13d-moments-interpolation-derivatives-orientations.edp"
+
+ARGV.resize(rtVerificationArgumentCount);

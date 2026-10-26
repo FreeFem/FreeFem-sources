@@ -77,6 +77,9 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	ppm2rnm.edp \
 	provadxw.edp \
 	ref.edp \
+	RT13d-poisson-manufactured.edp \
+	RT13d-poisson-convergence.edp \
+	RT13d-verify-moments-interpolation-derivatives-orientations.edp \
 	RT2-ff.edp \
 	RT23d.edp \
 	RT23d-poisson-manufactured.edp \
