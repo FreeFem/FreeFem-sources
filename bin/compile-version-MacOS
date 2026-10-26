@@ -105,7 +105,7 @@ echo2 ==========================================================
 	(
 		export DYLD_PRINT_LIBRARIES=1
 		$fftmp/ffff
-	) 2>&1 | awk '{print $NF}' | egrep -v '/usr/lib|$fftmp/ffff|grep .dylib' >$prefix/gnu/list-dylib-gfortran
+	) 2>&1 | awk '{print $NF}' | grep -E -v '/usr/lib|$fftmp/ffff|grep .dylib' >$prefix/gnu/list-dylib-gfortran
 	rm -rf $fftmp
 )
 brewlibgfortran=$(grep gfortran $prefix/gnu/list-dylib-gfortran)
@@ -235,7 +235,7 @@ find $dirpkg/$prefix -name '*.dylib' > $tmpdylib
  $changedylibgfortran  $dirlibgfortrannew `cat $tmpdylib`
  ## verification 
  echo2 dylib to brew in installation for debug !!!! 
- cat $tmpdylib| xargs otool -L | egrep -i 'brew|/opt/' ||echo2 OK 
+ cat $tmpdylib| xargs otool -L | grep -E -i 'brew|/opt/' ||echo2 OK 
 
 echo2 ================================
 ##   build of PACKAGE directory
