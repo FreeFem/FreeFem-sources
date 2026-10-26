@@ -14,93 +14,91 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for downloaded ARPACK
+# SUMMARY : Makefile for downloaded arpack-ng
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
 # E-MAIL  : ...
 
-all-local:$(DOWNLOAD_ARPACK)
-EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz veclib_zdotc.f veclib_cdotc.f 
+# Downloading and compiling arpack-ng
+# -----------------------------------
+# arpack-ng (https://github.com/opencollab/arpack-ng) is the maintained
+# fork of the original 1996 ARPACK. It keeps the same F77 interface, so
+# src/Eigen/arpackff.hpp works unchanged. The library is built with its
+# own CMake build system into a static libarpack.a copied to ../lib,
+# where configure.ac expects it (ARPACKLIB).
+
+# Package selection (set by configure)
+# DOWNLOAD_ARPACK : "install" when the downloaded library must be built
+# ARPACKLIB       : final library path (empty when using a system arpack)
+
+# Package information
+PKG_VERSION=3.9.1
+DIRPKG=../pkg
+PKG_SRCDIR=ARPACK
+PKG_TARBALL=$(DIRPKG)/arpack-ng-$(PKG_VERSION).tar.gz
+PKG_BUILD=$(PKG_SRCDIR)/build
+PKG_PREFIX=$(CURDIR)/prefix
+CMAKE ?= cmake
+CMAKE_GENERATOR=$(if $(WIN32DLLTARGET),-G "MSYS Makefiles")
 
 PKGCOMMON_PACKTITLE=ARPACK
+PKGCOMMON_PACKAGES=$(PKG_TARBALL)
 include ../common.mak
 
-# nothing specific to do for [[file:../common.mak::reinstall]]
-
-reinstall::install
-
-# Downloading and compiling ARPACK
-# --------------------------------
+# Common package goals
+all-local:$(DOWNLOAD_ARPACK)
+EXTRA_DIST=
+compilepkg::$(ARPACKLIB)
 .NOTPARALLEL:
 
-# set in configure 
-#ARPACKLIB=ARPACK/libarpack_ff++.a
-DIRPKG=../pkg
-ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
-PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
+# Download and extract
+$(PKG_SRCDIR):$(PKG_TARBALL)
+	rm -rf $(PKG_SRCDIR)
+	mkdir -p $(PKG_SRCDIR)
+	cd $(PKG_SRCDIR) && tar xzf ../$(PKG_TARBALL) --strip-components=1
+	touch $(PKG_SRCDIR)
 
-PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
+# Configure (CMake)
+# BLAS/LAPACK come from FreeFEM's configure (@BLASLIBS@/@LAPACKLIBS@);
+# pass them explicitly so CMake's FindBLAS/FindLAPACK cannot pick
+# different ones than the rest of the build.
+$(PKG_BUILD)/configure.done:$(PKG_SRCDIR) Makefile
+	mkdir -p $(PKG_BUILD)
+	rm -f $(PKG_BUILD)/CMakeCache.txt
+	$(CMAKE) -S $(PKG_SRCDIR) -B $(PKG_BUILD) \
+	 -DCMAKE_Fortran_COMPILER='$(F77)' \
+	 -DCMAKE_Fortran_FLAGS='$(FFLAGS)' \
+	 -DCMAKE_C_COMPILER="$(CC)" \
+	 -DCMAKE_C_FLAGS='$(CFLAGS)' \
+	 -DCMAKE_INSTALL_PREFIX="$(PKG_PREFIX)" \
+	 -DCMAKE_INSTALL_LIBDIR=lib \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	 -DBUILD_SHARED_LIBS=OFF \
+	 -DTESTS=OFF \
+	 -DEXAMPLES=OFF \
+	 -DICB=OFF \
+	 -DMPI=OFF \
+	 -DBLAS_LIBRARIES='$(BLASLIBS)' \
+	 -DLAPACK_LIBRARIES='$(LAPACKLIBS)' \
+	 $(CMAKE_GENERATOR)
+	touch $@
 
-# FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
+# Build and install (CMake)
+$(PKG_BUILD)/install.done:$(PKG_BUILD)/configure.done
+	$(CMAKE) --build $(PKG_BUILD)
+	$(CMAKE) --install $(PKG_BUILD)
+	touch $@
 
-compilepkg::$(ARPACKLIB)
+# Install into FreeFEM's 3rdparty tree
+$(ARPACKLIB):$(PKG_BUILD)/install.done
+	mkdir -p ../lib
+	cp $(PKG_PREFIX)/lib/libarpack.a $(ARPACKLIB)
 
-ARPACK/ARmake.inc:ARPACK/ARmake.incnew
-	if diff -q ARPACK/ARmake.incnew ARPACK/ARmake.inc ; then echo No Modif skip compile of arpack ; else cp ARPACK/ARmake.incnew ARPACK/ARmake.inc; fi
-	
-$(ARPACKLIB):ARPACK/ARmake.inc
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_cdotc.f -o ARPACK/SRC/veclib_cdotc.o ;; esac; 
-	mkdir -p ../include ../lib
-	if [ -n '@FF_LAPACKdir@' ] ; then \
-	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
-	fi; \
-	cd ARPACK && $(MAKE) lib 
-	if test -n '@FF_LAPACKdir@' ; then \
-	$(AR) $(ARFLAGS) $(LAPACK_arpack_LIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
-	$(RANLIB) $(LAPACK_arpack_LIB) ;\
-	else \
-	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
-	fi
-	
-ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile 
-	-rm -rf ARPACK
-	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
-	gunzip -c $(PATCH_TAR_GZ) | tar xf -
-	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) \
-         for i in  ARPACK/LAPACK/zlatrs.f ARPACK/LAPACK/ztrsyl.f ARPACK/SRC/zgetv0.f ARPACK/SRC/znaitr.f ARPACK/SRC/znaup2.f ARPACK/SRC/zneupd.f;\
-	   do  mv  $$i $$i.cpy; sed -e 's/ZDOTC/ZZDOTC/' -e 's/zdotc/zzdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done; \
-         for i in  ARPACK/LAPACK/clatrs.f ARPACK/LAPACK/ctrsyl.f ARPACK/SRC/cgetv0.f ARPACK/SRC/cnaitr.f ARPACK/SRC/cnaup2.f ARPACK/SRC/cneupd.f;\
-	   do  mv  $$i $$i.cpy; sed -e 's/CDOTC/CCDOTC/' -e 's/cdotc/ccdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done; \
-	 esac 
-	for i in ARPACK/SRC/*.f ; do \
-	    mv  $$i $$i.cpy; sed -e 's/, second/, secnd2/' -e 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
-	for i in  ARPACK/UTIL/second.f;  do  \
-	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
-	m4  -DFF_BLASLIB="$(BLASLIB)" \
-	    -DFF_ARPACKLIB="$(ARPACKLIB)" \
-            -DFF_LAPACK_arpack_LIB="$(LAPACK_arpack_LIB)" \
-	    -DFF_FC="@F77@" \
-            -DFF_FFLAGS="@FFLAGS@" \
-	    -DFF_LAPACKdir='@FF_LAPACKdir@' \
-            -DFF_LDFLAGS="@LDFLAGS@" \
-            -DFF_HOME=`pwd`/ARPACK \
-	    -DFF_SECOND="@FF_SECOND@" \
-	    -DFF_AR="@AR@" \
-	    -DFF_ARFLAGS="@ARFLAGS@" \
-	    -DFF_RANLIB="@RANLIB@" \
-	    ARmake.m4 >ARPACK/ARmake.incnew
-	
-
-$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):download
-#	../getall -o ARPACK -a
-
+# Clean
 clean-local::
-	-rm -r ARPACK ../lib/libarpack.a
+	-rm -rf $(PKG_SRCDIR) $(PKG_BUILD) $(PKG_PREFIX)
+	-rm -f ../lib/libarpack.a
 
 # Local Variables:
 # mode:makefile

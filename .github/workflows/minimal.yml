@@ -36,7 +36,7 @@ jobs:
       - name: Install
         run: |
           sudo apt update
-          sudo apt install autoconf gcc g++ gfortran m4 patch git liblapack-dev flex bison
+          sudo apt install autoconf gcc g++ gfortran m4 patch git libopenblas-dev flex bison
 
       - name: Configure
         run: |
@@ -122,7 +122,7 @@ jobs:
             flex
             bison
             unzip
-            mingw-w64-x86_64-lapack
+            mingw-w64-x86_64-openblas
 
       - uses: actions/checkout@v6
 

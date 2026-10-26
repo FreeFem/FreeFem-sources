@@ -1743,19 +1743,11 @@ if test "$ff_lapack_ok" != no ; then
 AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
 fi
 
-# Lapack configuration for Arpack
-
-ff_lapackdir='$$(LAPACKdir)'
-if test "$ff_lapack_ok" = yes
-then
-    # no compilation of lapack in arpack
-    ff_lapackdir=
-else
-    ff_lapack_lib="-L${curdir}/3rdparty/lib -llapack"
-fi
-
 # Arpack itself
-AC_ARG_ENABLE(download-arpack,AS_HELP_STRING([--enable-download_arpack],[force the use  download of arpack]))
+# Note: the downloaded arpack-ng requires both LAPACK and cmake (see
+# 3rdparty/arpack/Makefile.am); the old "compile the LAPACK subset bundled
+# with ARPACK 96 when no LAPACK is available" fallback no longer exists.
+AC_ARG_ENABLE(download-arpack,AS_HELP_STRING([--enable-download-arpack],[force the use  download of arpack]))
 #echo "****** enable_download_arpack=$enable_download_arpack"
 
 if test -z "$ff_arpack_ok"; then
@@ -1800,8 +1792,14 @@ then
     # If all else fails, download!
     if test "$enable_fortran" != no -o -z "$enable_fortran"
     then
-    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes
+    if test "$enable_download_arpack" = yes -o \( "$ff_arpack_ok" = no -a "$enable_download" = yes \)
     then
+	if test "$ff_lapack_ok" != yes ; then
+	    AC_MSG_ERROR([arpack-ng requires LAPACK: install it (eg. liblapack-dev on Debian/Ubuntu) or use --with-lapack=library])
+	fi
+	if test "$ff_cmake" != yes ; then
+	    AC_MSG_ERROR([cmake is required to build the downloaded arpack-ng library: install cmake or use a system arpack (--with-arpack=library)])
+	fi
 	ff_arpack_download=yes
 	AC_MSG_NOTICE(using downloaded Arpack)
 
@@ -1810,9 +1808,7 @@ then
 
 	AC_SUBST(DOWNLOAD_ARPACK,install)
 
-	AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 	AC_SUBST(ARPACKLIB,${curdir}/3rdparty/lib/libarpack.a)
-	AC_SUBST(LAPACK_arpack_LIB,${curdir}/3rdparty/lib/liblapack.a)
 
 		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
 		# could make the following tests fail.
