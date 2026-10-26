@@ -19,6 +19,7 @@ static const size_t CHUNK = size_t(512) << 20;
 static const int TAG_SCATTER_HDR = 2000;
 static const int TAG_SCATTER_BUF = 2001;
 static const int TAG_SCATTER_PART = 2002;
+static const int TAG_PLOT_BUF = 2003;
 static const int TAG_POU_CHECK = 1003;
 static const int TAG_SYM_CHECK = 1004; 
 static const int TAG_DOF_POU = 1001;
@@ -44,17 +45,20 @@ bool sameComm(pcommworld, pcommworld) { return true; }
 #endif
 
 #ifdef PARALLELE
-// Vrai si le rang 0 du monde appartient a comm (operation locale, sans communication).
-static bool worldRootIn(pcommworld c) {
+// Rang dans comm du rang 0 du monde, -1 s'il n'y est pas (operation locale, sans communication).
+int plotRoot(pcommworld c) {
   MPI_Group gw, gc;
   MPI_Comm_group(MPI_COMM_WORLD, &gw);
   MPI_Comm_group(ffComm(c), &gc);
   int zero = 0, r;
   MPI_Group_translate_ranks(gw, 1, &zero, gc, &r);
   MPI_Group_free(&gw); MPI_Group_free(&gc);
-  return r != MPI_UNDEFINED;
+  return r == MPI_UNDEFINED ? -1 : r;
 }
+// Vrai si le rang 0 du monde appartient a comm.
+static bool worldRootIn(pcommworld c) { return plotRoot(c) >= 0; }
 #else
+int plotRoot(pcommworld) { return 0; }
 static bool worldRootIn(pcommworld) { return true; }
 #endif
 
@@ -335,6 +339,46 @@ KN<int> recvPartition(int n, int src, pcommworld comm){
   MPI_Recv((int*)partition, n, MPI_INT, src, TAG_SCATTER_PART, cw, &st);
   return partition;
 }
+
+int bcastInt(int v, int root, pcommworld comm){
+  MPI_Bcast(&v, 1, MPI_INT, root, ffComm(comm));
+  return v;
+}
+
+void gatherPlotBuffers(const std::vector<char>& mine, int root, pcommworld comm,
+                       std::vector<std::vector<char>>& all){
+  MPI_Comm cw = ffComm(comm);
+  int rank, size;
+  MPI_Comm_rank(cw, &rank);
+  MPI_Comm_size(cw, &size);
+  long long n = (long long)mine.size();
+  std::vector<long long> sizes(rank == root ? size : 0);
+  MPI_Gather(&n, 1, MPI_LONG_LONG, sizes.data(), 1, MPI_LONG_LONG, root, cw);
+
+  if (rank != root){
+    char* raw = const_cast<char*>(mine.data());
+    size_t total = mine.size(), off = 0;
+    while (off < total){
+      int c = (int)std::min(CHUNK, total - off);
+      MPI_Send(raw + off, c, MPI_BYTE, root, TAG_PLOT_BUF, cw);
+      off += c;
+    }
+    all.clear();
+    return;
+  }
+  all.assign(size, std::vector<char>());
+  all[root] = mine;
+  for (int r = 0; r < size; ++r){
+    if (r == root) continue;
+    all[r].resize((size_t)sizes[r]);
+    size_t total = all[r].size(), off = 0;
+    while (off < total){
+      int c = (int)std::min(CHUNK, total - off);
+      MPI_Recv(all[r].data() + off, c, MPI_BYTE, r, TAG_PLOT_BUF, cw, MPI_STATUS_IGNORE);
+      off += c;
+    }
+  }
+}
 #else
 int detectDistributionMode(int, pcommworld){
   return DM_REPLICATED;
@@ -360,6 +404,11 @@ KN<int> recvPartition(int, int, pcommworld){
   ExecError("recvPartition is only used in a parallel setting");
   return KN<int>(0);
 }
+int bcastInt(int v, int, pcommworld) { return v; }
+void gatherPlotBuffers(const std::vector<char>& mine, int, pcommworld, std::vector<std::vector<char>>& all){
+  all.assign(1, mine);
+}
+
 #endif
 
 // Garde-fou de l'evaluation d'une fonction EF distribuee
