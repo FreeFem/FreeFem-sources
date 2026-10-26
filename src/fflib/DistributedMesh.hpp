@@ -210,3 +210,12 @@ int checkPartitionConsistency(pcommworld comm, const KN<int>& part);
 
 template<class R>
 R distributedReduce(pcommworld comm, R local);
+
+// Distributed plot
+// Rang dans comm du rang 0 du monde (seul a afficher), -1 s'il n'est pas dans comm. Local.
+int plotRoot(pcommworld comm);
+// Diffuse v depuis root sur comm. Collectif.
+int bcastInt(int v, int root, pcommworld comm);
+// Rassemble sur root le tampon de chaque rang : all[r] sur root, vide ailleurs. Collectif.
+void gatherPlotBuffers(const std::vector<char>& mine, int root, pcommworld comm,
+                       std::vector<std::vector<char>>& all);
