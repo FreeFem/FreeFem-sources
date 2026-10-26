@@ -1,0 +1,93 @@
+load "Element_Mixte3d"
+load "msh3"
+load "qf11to25"
+
+/** @file
+ * @brief Measure RT23d/P2dc L2 convergence to a smooth mixed Poisson solution.
+ * On the unit cube, p=sin(pi*x)sin(pi*y)sin(pi*z), u=grad(p),
+ * f=div(u)=-3*pi^2*p. The potential is zero on the entire boundary.
+ * The mixed form is (u,v)+(p,div(v))=0, (div(u),q)=(f,q).
+ * Degree-seven volume quadrature integrates the polynomial mass matrix exactly
+ * and samples the analytic source and analytic errors without FE projection.
+ * With h proportional to 1/n, log(e_old/e_new)/log(n_new/n_old) measures the
+ * L2 rate for each of flux, pressure and divergence, expected to approach 3.
+ * The final refinement must achieve rate >2.5 for all three quantities;
+ * each refinement must decrease every error. The coarsest grid measures the
+ * preasymptotic regime as well as providing an independent error baseline.
+ */
+verbosity = 0;
+cout.precision(12);
+int[int] subdivisions = [2, 3, 4];
+real[int] fluxErrors(subdivisions.n), pressureErrors(subdivisions.n);
+real[int] divergenceErrors(subdivisions.n);
+func exactPressure = sin(pi*x)*sin(pi*y)*sin(pi*z);
+func exactFluxX = pi*cos(pi*x)*sin(pi*y)*sin(pi*z);
+func exactFluxY = pi*sin(pi*x)*cos(pi*y)*sin(pi*z);
+func exactFluxZ = pi*sin(pi*x)*sin(pi*y)*cos(pi*z);
+func exactDivergence = -3.*pi*pi*exactPressure;
+
+for (int level = 0; level < subdivisions.n; ++level)
+{
+    int n = subdivisions[level];
+    mesh3 physicalMesh = cube(n, n, n);
+    fespace FluxSpace(physicalMesh, RT23d);
+    fespace PressureSpace(physicalMesh, P2dc);
+    FluxSpace [fluxX, fluxY, fluxZ], [testFluxX, testFluxY, testFluxZ];
+    PressureSpace pressure, testPressure;
+
+    solve MixedPoisson([fluxX, fluxY, fluxZ, pressure],
+                       [testFluxX, testFluxY, testFluxZ, testPressure],
+                       solver=UMFPACK) =
+        int3d(physicalMesh, qfV=qfVp7)(
+            fluxX*testFluxX + fluxY*testFluxY + fluxZ*testFluxZ
+          + pressure*(dx(testFluxX) + dy(testFluxY) + dz(testFluxZ))
+          + (dx(fluxX) + dy(fluxY) + dz(fluxZ))*testPressure)
+      - int3d(physicalMesh, qfV=qfVp7)(exactDivergence*testPressure);
+
+    fluxErrors[level] = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+        (fluxX-exactFluxX)^2 + (fluxY-exactFluxY)^2 + (fluxZ-exactFluxZ)^2));
+    pressureErrors[level] = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+        (pressure-exactPressure)^2));
+    divergenceErrors[level] = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+        (dx(fluxX) + dy(fluxY) + dz(fluxZ) - exactDivergence)^2));
+
+    cout << "RT23d convergence: n=" << n << ", tetrahedra=" << physicalMesh.nt
+         << ", mixed DOFs=" << FluxSpace.ndof + PressureSpace.ndof
+         << ", flux=" << fluxErrors[level] << ", pressure=" << pressureErrors[level]
+         << ", divergence=" << divergenceErrors[level] << endl;
+
+    if (level > 0)
+    {
+        real logRefinement = log(1.*n/subdivisions[level-1]);
+        real fluxRate = log(fluxErrors[level-1]/fluxErrors[level])/logRefinement;
+        real pressureRate = log(pressureErrors[level-1]/pressureErrors[level])/logRefinement;
+        real divergenceRate = log(divergenceErrors[level-1]/divergenceErrors[level])/logRefinement;
+
+        cout << "rates " << subdivisions[level-1] << " -> " << n
+             << ": flux=" << fluxRate << ", pressure=" << pressureRate
+             << ", divergence=" << divergenceRate << endl;
+        assert(fluxErrors[level] < fluxErrors[level-1]);
+        assert(pressureErrors[level] < pressureErrors[level-1]);
+        assert(divergenceErrors[level] < divergenceErrors[level-1]);
+
+        if (level == subdivisions.n-1)
+        {
+            assert(fluxRate > 2.5);
+            assert(pressureRate > 2.5);
+            assert(divergenceRate > 2.5);
+        }
+    }
+}
+
+/** @brief Bound final absolute errors as well as their refinement rates.
+ * At n=4, these deliberately loose ceilings require relative L2 errors below
+ * approximately 1% for flux, 1.5% for pressure and 1% for divergence. Exact
+ * norms on the unit cube are pi*sqrt(3/8), sqrt(1/8), and 3*pi^2*sqrt(1/8).
+ * This detects large error growth even when the third-order rate is preserved.
+ */
+int finestLevel = subdivisions.n-1;
+assert(fluxErrors[finestLevel] < 0.02);
+assert(pressureErrors[finestLevel] < 0.005);
+assert(divergenceErrors[finestLevel] < 0.1);
+
+cout << "RT23d smooth mixed Poisson convergence: PASS" << endl;

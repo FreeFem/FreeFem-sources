@@ -4175,6 +4175,846 @@ namespace Fem2D {
   }    // end basis functions declaration
 
  
+  // RT2(K) = [P2(K)]^3 + x * homogeneous_P2(K): 6 moments per face,
+  // and 12 interior moments. The reference moment matrix defines the dual
+  // basis once; each physical tetrahedron uses the contravariant Piola map.
+  class TypeOfFE_RT2_3d : public GTypeOfFE<Mesh3>
+  {
+   public:
+    typedef Mesh3 Mesh;
+    typedef Mesh3::Element Element;
+    static int dfon[];
+    static const GQuadratureFormular<R2> QFface;
+    static const GQuadratureFormular<R3> QFtetra;
+
+    TypeOfFE_RT2_3d();
+    void set(const Mesh &Th,
+             const Element &K,
+             InterpolationMatrix<RdHat> &M,
+             int ocoef,
+             int odf,
+             int *nump) const;
+    void FB(const What_d whatd,
+            const Mesh &Th,
+            const Element &K,
+            const RdHat &referencePoint,
+            RNMK_ &val) const;
+
+   private:
+    /** Coefficients C[m][j] in referenceBasis_j = sum_m C[m][j] * spanningPolynomial_m.
+     *  referenceBasisCoefficients[m][j] is the coefficient of spanning polynomial m
+     *  in the basis function dual to reference moment j: moment_i(referenceBasis_j)
+     *  equals delta_ij. The 36 spanning polynomials generate the RT2 space; these
+     *  linear combinations form its moment-dual reference basis.
+     */
+    double referenceBasisCoefficients[36][36];
+
+    /** One vector coefficient multiplying scalar reference monomial monomialIndex. */
+    struct ReferencePolynomialTerm
+    {
+      int monomialIndex;
+      R3 vectorCoefficient;
+    };
+
+    /** Packed terms for derivatives ordered id, x, y, z, xx, yy, zz, xy, xz, yz.
+     *  Offsets [d][j]..[d][j+1] select the terms of reference derivative d
+     *  of the moment-dual reference basis function j.
+     */
+    std::vector<ReferencePolynomialTerm> referenceDerivativeTerms;
+    int referenceDerivativeTermOffsets[10][37];
+
+    /** Entry [p][i] maps oriented Bernstein moment i to its local index
+     *  for the face vertex permutation encoded by p.
+     */
+    int faceMomentPermutations[6][6];
+    KN<double> faceQuadratureMomentWeights;
+    KN<double> tetraQuadratureMomentWeights;
+
+    /** The first ten entries are scalarP2MonomialExponents; the remaining
+     *  entries are x^3, x^2*y, x^2*z, x*y^2, x*y*z, x*z^2,
+     *  y^3, y^2*z, y*z^2, z^3 in reference coordinates.
+     */
+    static const int referenceMonomialExponents[20][3];
+    static const int referenceDerivativeOrders[10][3];
+
+    /** Reference-coordinate exponents ordered as
+     *  1, xhat, yhat, zhat, xhat^2, xhat*yhat, xhat*zhat, yhat^2, yhat*zhat, zhat^2.
+     *  Entry [m][a] is the exponent of reference coordinate a in scalar P2 monomial m.
+     */
+    static const int scalarP2MonomialExponents[10][3];
+
+    /** Face-local barycentric vertex pairs ordered 00, 11, 22, 01, 02, 12. */
+    static const int faceBernsteinVertexPairs[6][2];
+
+    /** Evaluate a reference derivative of one vector component of a spanning field.
+     *  @param spanningPolynomialIndex Fields 0..29 are e_c times scalar P2 monomial m
+     *         (index = 10*c + m); fields 30..35 are referencePoint times the six
+     *         homogeneous quadratic monomials (scalar table entries 4..9).
+     *  @param vectorComponent Reference vector component, 0..2.
+     *  @param referencePoint Evaluation coordinates (xhat, yhat, zhat).
+     *  @param dxOrder Derivative order with respect to xhat.
+     *  @param dyOrder Derivative order with respect to yhat.
+     *  @param dzOrder Derivative order with respect to zhat.
+     *  @return The selected component's mixed reference derivative at referencePoint.
+     */
+    static double evaluateSpanningPolynomialComponent(
+      int spanningPolynomialIndex,
+      int vectorComponent,
+      const R3 &referencePoint,
+      int dxOrder,
+      int dyOrder,
+      int dzOrder);
+
+    /** Evaluate the Bernstein P2 weight for one face moment.
+     *  @param faceMomentIndex Index 0..5 in faceBernsteinVertexPairs.
+     *  @param faceBarycentricCoordinates Three face-local barycentric coordinates.
+     *  @return lambda_a^2 for pair aa, or 2*lambda_a*lambda_b for pair ab.
+     */
+    static double evaluateFaceBernsteinPolynomial(
+      int faceMomentIndex,
+      const double *faceBarycentricCoordinates);
+
+    /** Map oriented face moments to tetrahedron-local face moments.
+     *  @param K Physical tetrahedron supplying the face vertex permutation.
+     *  @param faceIndex Tetrahedron-local face index, 0..3.
+     *  @param faceMomentPermutation Output array of six local Bernstein indices;
+     *         entry i is the local moment corresponding to oriented face moment i.
+     */
+    static void computeFaceMomentPermutation(const Element &K,
+                                             int faceIndex,
+                                             int *faceMomentPermutation);
+  };
+
+  int TypeOfFE_RT2_3d::dfon[] = {0, 0, 6, 12};
+  const GQuadratureFormular<R2> TypeOfFE_RT2_3d::QFface(QuadratureFormular_T_5);
+  const GQuadratureFormular<R3> TypeOfFE_RT2_3d::QFtetra(QuadratureFormular_Tet_5);
+  const int TypeOfFE_RT2_3d::scalarP2MonomialExponents[10][3] = {
+    {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {2, 0, 0},
+    {1, 1, 0}, {1, 0, 1}, {0, 2, 0}, {0, 1, 1}, {0, 0, 2}};
+  const int TypeOfFE_RT2_3d::referenceMonomialExponents[20][3] = {
+    {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {2, 0, 0},
+    {1, 1, 0}, {1, 0, 1}, {0, 2, 0}, {0, 1, 1}, {0, 0, 2},
+    {3, 0, 0}, {2, 1, 0}, {2, 0, 1}, {1, 2, 0}, {1, 1, 1},
+    {1, 0, 2}, {0, 3, 0}, {0, 2, 1}, {0, 1, 2}, {0, 0, 3}};
+  const int TypeOfFE_RT2_3d::referenceDerivativeOrders[10][3] = {
+    {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {2, 0, 0},
+    {0, 2, 0}, {0, 0, 2}, {1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
+  // Bernstein P2 face ordering: vertices 0,1,2, then pairs 01,02,12.
+  const int TypeOfFE_RT2_3d::faceBernsteinVertexPairs[6][2] = {
+    {0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}};
+
+  double TypeOfFE_RT2_3d::evaluateSpanningPolynomialComponent(
+    int spanningPolynomialIndex,
+    int vectorComponent,
+    const R3 &referencePoint,
+    int dxOrder,
+    int dyOrder,
+    int dzOrder)
+  {
+    // Fields 0..29: e_c * P2. Fields 30..35: referencePoint * homogeneous_P2.
+
+    if (spanningPolynomialIndex < 30 && spanningPolynomialIndex / 10 != vectorComponent)
+    {
+
+      return 0.;
+    }
+
+    const int scalarMonomialIndex = spanningPolynomialIndex < 30
+      ? spanningPolynomialIndex % 10 : spanningPolynomialIndex - 30 + 4;
+    int coordinateExponents[3] = {scalarP2MonomialExponents[scalarMonomialIndex][0],
+                                 scalarP2MonomialExponents[scalarMonomialIndex][1],
+                                 scalarP2MonomialExponents[scalarMonomialIndex][2]};
+
+    if (spanningPolynomialIndex >= 30)
+    {
+      ++coordinateExponents[vectorComponent];
+    }
+
+    const int referenceDerivativeOrders[3] = {dxOrder, dyOrder, dzOrder};
+    double componentDerivative = 1.;
+
+    for (int referenceAxis = 0; referenceAxis < 3; ++referenceAxis)
+    {
+
+      if (referenceDerivativeOrders[referenceAxis] > coordinateExponents[referenceAxis])
+      {
+
+        return 0.;
+      }
+
+      for (int derivativeIndex = 0;
+           derivativeIndex < referenceDerivativeOrders[referenceAxis];
+           ++derivativeIndex)
+      {
+        componentDerivative *= coordinateExponents[referenceAxis] - derivativeIndex;
+      }
+
+      for (int exponentIndex = referenceDerivativeOrders[referenceAxis];
+           exponentIndex < coordinateExponents[referenceAxis];
+           ++exponentIndex)
+      {
+        componentDerivative *= referencePoint[referenceAxis];
+      }
+    }
+
+    return componentDerivative;
+  }
+
+  double TypeOfFE_RT2_3d::evaluateFaceBernsteinPolynomial(
+    int faceMomentIndex,
+    const double *faceBarycentricCoordinates)
+  {
+    const int firstVertex = faceBernsteinVertexPairs[faceMomentIndex][0];
+    const int secondVertex = faceBernsteinVertexPairs[faceMomentIndex][1];
+
+    return (firstVertex == secondVertex ? 1. : 2.) *
+      faceBarycentricCoordinates[firstVertex] * faceBarycentricCoordinates[secondVertex];
+  }
+
+  void TypeOfFE_RT2_3d::computeFaceMomentPermutation(const Element &K,
+                                                   int faceIndex,
+                                                   int *faceMomentPermutation)
+  {
+    int faceVertexPermutation[3];
+    SetNumPerm<3>(K.facePermutation(faceIndex), faceVertexPermutation);
+
+    for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+    {
+      int firstVertex = faceVertexPermutation[faceBernsteinVertexPairs[faceMomentIndex][0]];
+      int secondVertex = faceVertexPermutation[faceBernsteinVertexPairs[faceMomentIndex][1]];
+
+      if (firstVertex > secondVertex)
+      {
+        std::swap(firstVertex, secondVertex);
+      }
+
+      for (int localMomentIndex = 0; localMomentIndex < 6; ++localMomentIndex)
+      {
+
+        if (faceBernsteinVertexPairs[localMomentIndex][0] == firstVertex &&
+            faceBernsteinVertexPairs[localMomentIndex][1] == secondVertex)
+        {
+          faceMomentPermutation[faceMomentIndex] = localMomentIndex;
+          break;
+        }
+      }
+    }
+  }
+
+  TypeOfFE_RT2_3d::TypeOfFE_RT2_3d()
+    : GTypeOfFE<Mesh3>(dfon, 3, 3, 4 * QFface.n * 6 * 3 + QFtetra.n * 12 * 3,
+                       4 * QFface.n + QFtetra.n, false, true),
+      faceQuadratureMomentWeights(6 * QFface.n),
+      tetraQuadratureMomentWeights(4 * QFtetra.n)
+  {
+    for (int facePermutationIndex = 0; facePermutationIndex < 6; ++facePermutationIndex)
+    {
+      int faceVertexPermutation[3];
+      SetNumPerm<3>(facePermutationIndex, faceVertexPermutation);
+
+      for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+      {
+        int firstVertex = faceVertexPermutation[faceBernsteinVertexPairs[faceMomentIndex][0]];
+        int secondVertex = faceVertexPermutation[faceBernsteinVertexPairs[faceMomentIndex][1]];
+
+        if (firstVertex > secondVertex)
+        {
+          std::swap(firstVertex, secondVertex);
+        }
+
+        for (int localMomentIndex = 0; localMomentIndex < 6; ++localMomentIndex)
+        {
+
+          if (faceBernsteinVertexPairs[localMomentIndex][0] == firstVertex &&
+              faceBernsteinVertexPairs[localMomentIndex][1] == secondVertex)
+          {
+            faceMomentPermutations[facePermutationIndex][faceMomentIndex] = localMomentIndex;
+            break;
+          }
+        }
+      }
+    }
+
+    for (int quadraturePointIndex = 0; quadraturePointIndex < QFface.n; ++quadraturePointIndex)
+    {
+      const double faceBarycentricCoordinates[3] = {
+        1. - QFface[quadraturePointIndex].x - QFface[quadraturePointIndex].y,
+        QFface[quadraturePointIndex].x, QFface[quadraturePointIndex].y};
+
+      for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+      {
+        faceQuadratureMomentWeights[6 * quadraturePointIndex + faceMomentIndex] =
+          QFface[quadraturePointIndex].a *
+          evaluateFaceBernsteinPolynomial(faceMomentIndex, faceBarycentricCoordinates);
+      }
+    }
+
+    for (int quadraturePointIndex = 0; quadraturePointIndex < QFtetra.n; ++quadraturePointIndex)
+    {
+      const double tetraBarycentricCoordinates[4] = {
+        1. - QFtetra[quadraturePointIndex].x - QFtetra[quadraturePointIndex].y -
+          QFtetra[quadraturePointIndex].z,
+        QFtetra[quadraturePointIndex].x, QFtetra[quadraturePointIndex].y,
+        QFtetra[quadraturePointIndex].z};
+
+      for (int barycentricIndex = 0; barycentricIndex < 4; ++barycentricIndex)
+      {
+        tetraQuadratureMomentWeights[4 * quadraturePointIndex + barycentricIndex] =
+          QFtetra[quadraturePointIndex].a * tetraBarycentricCoordinates[barycentricIndex];
+      }
+    }
+
+    const R3 referenceVertices[4] = {R3(0., 0., 0.), R3(1., 0., 0.),
+                                     R3(0., 1., 0.), R3(0., 0., 1.)};
+    // Outward reference face normals multiplied by reference face area.
+    const R3 referenceFaceAreaNormals[4] = {R3(.5, .5, .5), R3(-.5, 0., 0.),
+                                           R3(0., -.5, 0.), R3(0., 0., -.5)};
+    // Left block: moment_i(spanningPolynomial_m); right block: identity, then inverse.
+    long double augmentedMomentMatrix[36][72] = {};
+    int interpolationPointIndex = 0, interpolationCoefficientIndex = 0;
+
+    for (int faceIndex = 0; faceIndex < 4; ++faceIndex)
+    {
+
+      for (int quadraturePointIndex = 0; quadraturePointIndex < QFface.n;
+           ++quadraturePointIndex, ++interpolationPointIndex)
+      {
+        const double faceBarycentricCoordinates[3] = {
+          1. - QFface[quadraturePointIndex].x - QFface[quadraturePointIndex].y,
+          QFface[quadraturePointIndex].x, QFface[quadraturePointIndex].y};
+        R3 referencePoint(0., 0., 0.);
+
+        for (int faceVertexIndex = 0; faceVertexIndex < 3; ++faceVertexIndex)
+        {
+          referencePoint += referenceVertices[Element::nvface[faceIndex][faceVertexIndex]] *
+            faceBarycentricCoordinates[faceVertexIndex];
+        }
+
+        PtInterpolation[interpolationPointIndex] = referencePoint;
+
+        for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+        {
+          const int referenceMomentIndex = 6 * faceIndex + faceMomentIndex;
+          const double faceMomentWeight =
+            faceQuadratureMomentWeights[6 * quadraturePointIndex + faceMomentIndex];
+
+          for (int vectorComponent = 0; vectorComponent < 3;
+               ++vectorComponent, ++interpolationCoefficientIndex)
+          {
+            pInterpolation[interpolationCoefficientIndex] = interpolationPointIndex;
+            cInterpolation[interpolationCoefficientIndex] = vectorComponent;
+            dofInterpolation[interpolationCoefficientIndex] = referenceMomentIndex;
+            coefInterpolation[interpolationCoefficientIndex] = 0.;
+
+            for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+                 ++spanningPolynomialIndex)
+            {
+              augmentedMomentMatrix[referenceMomentIndex][spanningPolynomialIndex] +=
+                faceMomentWeight * referenceFaceAreaNormals[faceIndex][vectorComponent] *
+                evaluateSpanningPolynomialComponent(spanningPolynomialIndex,
+                                                    vectorComponent,
+                                                    referencePoint,
+                                                    0, 0, 0);
+            }
+          }
+        }
+      }
+    }
+    // Interior ordering: vector component first, then lambda_0,...,lambda_3.
+    // Moments use normalized reference volume averages of the Piola pullback.
+
+    for (int quadraturePointIndex = 0; quadraturePointIndex < QFtetra.n;
+         ++quadraturePointIndex, ++interpolationPointIndex)
+    {
+      const R3 referencePoint(QFtetra[quadraturePointIndex].x,
+                              QFtetra[quadraturePointIndex].y,
+                              QFtetra[quadraturePointIndex].z);
+      PtInterpolation[interpolationPointIndex] = referencePoint;
+
+      for (int interiorMomentIndex = 0; interiorMomentIndex < 12; ++interiorMomentIndex)
+      {
+        const int referenceMomentIndex = 24 + interiorMomentIndex;
+
+        for (int vectorComponent = 0; vectorComponent < 3;
+             ++vectorComponent, ++interpolationCoefficientIndex)
+        {
+          pInterpolation[interpolationCoefficientIndex] = interpolationPointIndex;
+          cInterpolation[interpolationCoefficientIndex] = vectorComponent;
+          dofInterpolation[interpolationCoefficientIndex] = referenceMomentIndex;
+          coefInterpolation[interpolationCoefficientIndex] = 0.;
+        }
+
+        for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+             ++spanningPolynomialIndex)
+        {
+          augmentedMomentMatrix[referenceMomentIndex][spanningPolynomialIndex] +=
+            tetraQuadratureMomentWeights[4 * quadraturePointIndex + interiorMomentIndex % 4] *
+            evaluateSpanningPolynomialComponent(spanningPolynomialIndex,
+                                                interiorMomentIndex / 4,
+                                                referencePoint,
+                                                0, 0, 0);
+        }
+      }
+    }
+    ffassert(interpolationPointIndex == NbPtforInterpolation &&
+             interpolationCoefficientIndex == NbcoefforInterpolation);
+
+    double momentMatrix[36][36];
+
+    for (int referenceMomentIndex = 0; referenceMomentIndex < 36; ++referenceMomentIndex)
+    {
+
+      for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+           ++spanningPolynomialIndex)
+      {
+        momentMatrix[referenceMomentIndex][spanningPolynomialIndex] =
+          augmentedMomentMatrix[referenceMomentIndex][spanningPolynomialIndex];
+      }
+    }
+    // Pivoted Gauss-Jordan inversion at plugin initialization only. Extended
+    // precision limits cancellation in the monomial moment matrix.
+
+    for (int matrixRow = 0; matrixRow < 36; ++matrixRow)
+    {
+      augmentedMomentMatrix[matrixRow][36 + matrixRow] = 1.;
+    }
+
+    for (int pivotColumn = 0; pivotColumn < 36; ++pivotColumn)
+    {
+      int pivotRow = pivotColumn;
+
+      for (int matrixRow = pivotColumn + 1; matrixRow < 36; ++matrixRow)
+      {
+
+        if (std::abs(augmentedMomentMatrix[matrixRow][pivotColumn]) >
+            std::abs(augmentedMomentMatrix[pivotRow][pivotColumn]))
+        {
+          pivotRow = matrixRow;
+        }
+      }
+
+      ffassert(std::abs(augmentedMomentMatrix[pivotRow][pivotColumn]) > 1.e-18L);
+
+      for (int matrixColumn = 0; matrixColumn < 72; ++matrixColumn)
+      {
+        std::swap(augmentedMomentMatrix[pivotColumn][matrixColumn],
+                  augmentedMomentMatrix[pivotRow][matrixColumn]);
+      }
+
+      const long double pivotValue = augmentedMomentMatrix[pivotColumn][pivotColumn];
+
+      for (int matrixColumn = 0; matrixColumn < 72; ++matrixColumn)
+      {
+        augmentedMomentMatrix[pivotColumn][matrixColumn] /= pivotValue;
+      }
+
+      for (int matrixRow = 0; matrixRow < 36; ++matrixRow)
+      {
+
+        if (matrixRow != pivotColumn)
+        {
+          const long double eliminationFactor = augmentedMomentMatrix[matrixRow][pivotColumn];
+
+          for (int matrixColumn = 0; matrixColumn < 72; ++matrixColumn)
+          {
+            augmentedMomentMatrix[matrixRow][matrixColumn] -=
+              eliminationFactor * augmentedMomentMatrix[pivotColumn][matrixColumn];
+          }
+        }
+      }
+    }
+
+    for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+         ++spanningPolynomialIndex)
+    {
+
+      for (int referenceBasisIndex = 0; referenceBasisIndex < 36; ++referenceBasisIndex)
+      {
+        referenceBasisCoefficients[spanningPolynomialIndex][referenceBasisIndex] =
+          augmentedMomentMatrix[spanningPolynomialIndex][36 + referenceBasisIndex];
+      }
+    }
+    // Check the stored double-precision coefficients against the original
+    // moments: moment_i(referenceBasis_j) = delta_ij.
+
+    for (int referenceMomentIndex = 0; referenceMomentIndex < 36; ++referenceMomentIndex)
+    {
+
+      for (int referenceBasisIndex = 0; referenceBasisIndex < 36; ++referenceBasisIndex)
+      {
+        long double dualityResidual = referenceMomentIndex == referenceBasisIndex ? -1.L : 0.L;
+
+        for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+             ++spanningPolynomialIndex)
+        {
+          dualityResidual += (long double)momentMatrix[referenceMomentIndex][spanningPolynomialIndex] *
+            referenceBasisCoefficients[spanningPolynomialIndex][referenceBasisIndex];
+        }
+
+        ffassert(std::abs(dualityResidual) < 1.e-10L);
+      }
+    }
+
+    // Expand each moment-dual basis into vector coefficients of the 20 scalar
+    // reference monomials, then differentiate those coefficients algebraically.
+    R3 referencePolynomialCoefficients[36][20];
+
+    for (int referenceBasisIndex = 0; referenceBasisIndex < 36; ++referenceBasisIndex)
+    {
+
+      for (int monomialIndex = 0; monomialIndex < 20; ++monomialIndex)
+      {
+        referencePolynomialCoefficients[referenceBasisIndex][monomialIndex] = R3(0., 0., 0.);
+      }
+
+      for (int spanningPolynomialIndex = 0; spanningPolynomialIndex < 36;
+           ++spanningPolynomialIndex)
+      {
+        const int scalarMonomialIndex = spanningPolynomialIndex < 30
+          ? spanningPolynomialIndex % 10 : spanningPolynomialIndex - 30 + 4;
+
+        for (int vectorComponent = 0; vectorComponent < 3; ++vectorComponent)
+        {
+
+          if (spanningPolynomialIndex < 30 && spanningPolynomialIndex / 10 != vectorComponent)
+          {
+            continue;
+          }
+
+          int coordinateExponents[3] = {scalarP2MonomialExponents[scalarMonomialIndex][0],
+                                       scalarP2MonomialExponents[scalarMonomialIndex][1],
+                                       scalarP2MonomialExponents[scalarMonomialIndex][2]};
+
+          if (spanningPolynomialIndex >= 30)
+          {
+            ++coordinateExponents[vectorComponent];
+          }
+
+          int monomialIndex = 0;
+
+          while (monomialIndex < 20 &&
+                 (referenceMonomialExponents[monomialIndex][0] != coordinateExponents[0] ||
+                  referenceMonomialExponents[monomialIndex][1] != coordinateExponents[1] ||
+                  referenceMonomialExponents[monomialIndex][2] != coordinateExponents[2]))
+          {
+            ++monomialIndex;
+          }
+
+          ffassert(monomialIndex < 20);
+          referencePolynomialCoefficients[referenceBasisIndex][monomialIndex][vectorComponent] +=
+            referenceBasisCoefficients[spanningPolynomialIndex][referenceBasisIndex];
+        }
+      }
+    }
+
+    // Each basis has at most 20 value terms, 3*10 gradient terms and 6*4
+    // Hessian terms. Retain every vector coefficient with any nonzero component.
+    referenceDerivativeTerms.reserve(36 * (20 + 3 * 10 + 6 * 4));
+
+    for (int referenceDerivativeIndex = 0; referenceDerivativeIndex < 10;
+         ++referenceDerivativeIndex)
+    {
+
+      for (int referenceBasisIndex = 0; referenceBasisIndex < 36; ++referenceBasisIndex)
+      {
+        referenceDerivativeTermOffsets[referenceDerivativeIndex][referenceBasisIndex] =
+          referenceDerivativeTerms.size();
+
+        for (int monomialIndex = 0; monomialIndex < 20; ++monomialIndex)
+        {
+          int differentiatedExponents[3];
+          int derivativeFactor = 1;
+
+          for (int referenceAxis = 0; referenceAxis < 3; ++referenceAxis)
+          {
+            const int exponent = referenceMonomialExponents[monomialIndex][referenceAxis];
+            const int derivativeOrder = referenceDerivativeOrders[referenceDerivativeIndex][referenceAxis];
+            differentiatedExponents[referenceAxis] = exponent - derivativeOrder;
+
+            for (int derivativeIndex = 0; derivativeIndex < derivativeOrder; ++derivativeIndex)
+            {
+              derivativeFactor *= exponent - derivativeIndex;
+            }
+          }
+
+          if (derivativeFactor == 0)
+          {
+            continue;
+          }
+
+          const R3 vectorCoefficient =
+            referencePolynomialCoefficients[referenceBasisIndex][monomialIndex] * derivativeFactor;
+
+          if (vectorCoefficient.x == 0. && vectorCoefficient.y == 0. && vectorCoefficient.z == 0.)
+          {
+            continue;
+          }
+
+          int differentiatedMonomialIndex = 0;
+
+          while (differentiatedMonomialIndex < 20 &&
+                 (referenceMonomialExponents[differentiatedMonomialIndex][0] != differentiatedExponents[0] ||
+                  referenceMonomialExponents[differentiatedMonomialIndex][1] != differentiatedExponents[1] ||
+                  referenceMonomialExponents[differentiatedMonomialIndex][2] != differentiatedExponents[2]))
+          {
+            ++differentiatedMonomialIndex;
+          }
+
+          ffassert(differentiatedMonomialIndex < 20);
+          referenceDerivativeTerms.push_back({differentiatedMonomialIndex, vectorCoefficient});
+        }
+      }
+
+      referenceDerivativeTermOffsets[referenceDerivativeIndex][36] = referenceDerivativeTerms.size();
+    }
+  }
+
+  void TypeOfFE_RT2_3d::set(const Mesh &Th,
+                           const Element &K,
+                           InterpolationMatrix<RdHat> &M,
+                           int ocoef,
+                           int odf,
+                           int *nump) const
+  {
+    R3 physicalBarycentricGradients[4];
+    K.Gradlambda(physicalBarycentricGradients);
+    int interpolationCoefficientIndex = ocoef;
+
+    for (int faceIndex = 0; faceIndex < 4; ++faceIndex)
+    {
+      const int *const faceMomentPermutation = faceMomentPermutations[K.facePermutation(faceIndex)];
+      const R3 orientedPhysicalFaceAreaNormal = physicalBarycentricGradients[faceIndex] *
+        (-3. * K.mesure() * K.faceOrient(faceIndex));
+
+      for (int quadraturePointIndex = 0; quadraturePointIndex < QFface.n; ++quadraturePointIndex)
+      {
+        for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+        {
+          const double faceMomentWeight =
+            faceQuadratureMomentWeights[6 * quadraturePointIndex + faceMomentPermutation[faceMomentIndex]];
+
+          for (int vectorComponent = 0; vectorComponent < 3; ++vectorComponent)
+          {
+            M.coef[interpolationCoefficientIndex++] =
+              faceMomentWeight * orientedPhysicalFaceAreaNormal[vectorComponent];
+          }
+        }
+      }
+    }
+
+    const double jacobianDeterminant = 6. * K.mesure();
+
+    for (int quadraturePointIndex = 0; quadraturePointIndex < QFtetra.n; ++quadraturePointIndex)
+    {
+      for (int interiorMomentIndex = 0; interiorMomentIndex < 12; ++interiorMomentIndex)
+      {
+        const R3 physicalInteriorMomentWeight = physicalBarycentricGradients[1 + interiorMomentIndex / 4] *
+          (jacobianDeterminant *
+           tetraQuadratureMomentWeights[4 * quadraturePointIndex + interiorMomentIndex % 4]);
+
+        for (int vectorComponent = 0; vectorComponent < 3; ++vectorComponent)
+        {
+          M.coef[interpolationCoefficientIndex++] = physicalInteriorMomentWeight[vectorComponent];
+        }
+      }
+    }
+    ffassert(interpolationCoefficientIndex == ocoef + NbcoefforInterpolation);
+  }
+
+  void TypeOfFE_RT2_3d::FB(const What_d whatd,
+                          const Mesh &Th,
+                          const Element &K,
+                          const RdHat &referencePoint,
+                          RNMK_ &val) const
+  {
+    ffassert(val.N() >= 36 && val.M() == 3);
+    val = 0.;
+    const double jacobianDeterminant = 6. * K.mesure();
+    const R3 piolaColumns[3] = {(K[1] - K[0]) / jacobianDeterminant,
+                  (K[2] - K[0]) / jacobianDeterminant,
+                  (K[3] - K[0]) / jacobianDeterminant};
+    int referenceBasisIndices[36];
+    double basisOrientationSigns[36];
+
+    for (int basisIndex = 0; basisIndex < 36; ++basisIndex)
+    {
+      referenceBasisIndices[basisIndex] = basisIndex;
+      basisOrientationSigns[basisIndex] = 1.;
+    }
+
+    for (int faceIndex = 0; faceIndex < 4; ++faceIndex)
+    {
+      const int *const faceMomentPermutation = faceMomentPermutations[K.facePermutation(faceIndex)];
+      const double faceOrientationSign = K.faceOrient(faceIndex);
+
+      for (int faceMomentIndex = 0; faceMomentIndex < 6; ++faceMomentIndex)
+      {
+        referenceBasisIndices[6 * faceIndex + faceMomentIndex] =
+          6 * faceIndex + faceMomentPermutation[faceMomentIndex];
+        basisOrientationSigns[6 * faceIndex + faceMomentIndex] = faceOrientationSign;
+      }
+    }
+
+    const int derivativeOperators[10] = {op_id, op_dx, op_dy, op_dz, op_dxx,
+                                        op_dyy, op_dzz, op_dxy, op_dxz, op_dyz};
+    const int firstPhysicalDerivativeAxis[10] = {-1, 0, 1, 2, 0, 1, 2, 0, 0, 1};
+    const int secondPhysicalDerivativeAxis[10] = {-1, -1, -1, -1, 0, 1, 2, 1, 2, 2};
+    const int firstReferenceHessianAxis[6] = {0, 1, 2, 0, 0, 1};
+    const int secondReferenceHessianAxis[6] = {0, 1, 2, 1, 2, 2};
+    int requestedPhysicalDerivatives[10];
+    int requestedPhysicalDerivativeCount = 0;
+    bool needsReferenceValues = false;
+    bool needsReferenceGradient = false;
+    bool needsReferenceHessian = false;
+
+    for (int derivativeIndex = 0; derivativeIndex < 10; ++derivativeIndex)
+    {
+
+      if (whatd & (1 << derivativeOperators[derivativeIndex]))
+      {
+        requestedPhysicalDerivatives[requestedPhysicalDerivativeCount++] = derivativeIndex;
+        needsReferenceValues = needsReferenceValues || derivativeIndex == 0;
+        needsReferenceGradient = needsReferenceGradient || (derivativeIndex > 0 && derivativeIndex < 4);
+        needsReferenceHessian = needsReferenceHessian || derivativeIndex >= 4;
+      }
+    }
+
+    R3 physicalBarycentricGradients[4];
+
+    if (needsReferenceGradient || needsReferenceHessian)
+    {
+      K.Gradlambda(physicalBarycentricGradients);
+    }
+
+    // A physical operator combines reference vector derivatives before Piola.
+    // Hessian entries use the six symmetric reference derivatives exactly once.
+    double physicalDerivativeChainFactors[10][6] = {};
+    int referenceDerivativeBegins[10];
+    int referenceDerivativeCounts[10];
+
+    for (int requestedIndex = 0; requestedIndex < requestedPhysicalDerivativeCount; ++requestedIndex)
+    {
+      const int derivativeIndex = requestedPhysicalDerivatives[requestedIndex];
+
+      if (derivativeIndex == 0)
+      {
+        referenceDerivativeBegins[derivativeIndex] = 0;
+        referenceDerivativeCounts[derivativeIndex] = 1;
+        physicalDerivativeChainFactors[derivativeIndex][0] = 1.;
+      }
+
+      else if (derivativeIndex < 4)
+      {
+        referenceDerivativeBegins[derivativeIndex] = 1;
+        referenceDerivativeCounts[derivativeIndex] = 3;
+
+        for (int referenceAxis = 0; referenceAxis < 3; ++referenceAxis)
+        {
+          physicalDerivativeChainFactors[derivativeIndex][referenceAxis] =
+            physicalBarycentricGradients[referenceAxis + 1][firstPhysicalDerivativeAxis[derivativeIndex]];
+        }
+      }
+
+      else
+      {
+        referenceDerivativeBegins[derivativeIndex] = 4;
+        referenceDerivativeCounts[derivativeIndex] = 6;
+        const int firstPhysicalAxis = firstPhysicalDerivativeAxis[derivativeIndex];
+        const int secondPhysicalAxis = secondPhysicalDerivativeAxis[derivativeIndex];
+
+        for (int hessianIndex = 0; hessianIndex < 6; ++hessianIndex)
+        {
+          const int firstReferenceAxis = firstReferenceHessianAxis[hessianIndex];
+          const int secondReferenceAxis = secondReferenceHessianAxis[hessianIndex];
+          double chainFactor = physicalBarycentricGradients[firstReferenceAxis + 1][firstPhysicalAxis] *
+            physicalBarycentricGradients[secondReferenceAxis + 1][secondPhysicalAxis];
+
+          if (firstReferenceAxis != secondReferenceAxis)
+          {
+            chainFactor += physicalBarycentricGradients[secondReferenceAxis + 1][firstPhysicalAxis] *
+              physicalBarycentricGradients[firstReferenceAxis + 1][secondPhysicalAxis];
+          }
+
+          physicalDerivativeChainFactors[derivativeIndex][hessianIndex] = chainFactor;
+        }
+      }
+    }
+
+    const double referenceX = referencePoint.x;
+    const double referenceY = referencePoint.y;
+    const double referenceZ = referencePoint.z;
+    const double referenceXX = referenceX * referenceX;
+    const double referenceYY = referenceY * referenceY;
+    const double referenceZZ = referenceZ * referenceZ;
+    const double referenceMonomialValues[20] = {
+      1., referenceX, referenceY, referenceZ, referenceXX,
+      referenceX * referenceY, referenceX * referenceZ, referenceYY,
+      referenceY * referenceZ, referenceZZ, referenceXX * referenceX,
+      referenceXX * referenceY, referenceXX * referenceZ, referenceX * referenceYY,
+      referenceX * referenceY * referenceZ, referenceX * referenceZZ,
+      referenceYY * referenceY, referenceYY * referenceZ, referenceY * referenceZZ,
+      referenceZZ * referenceZ};
+    int neededReferenceDerivatives[10];
+    int neededReferenceDerivativeCount = 0;
+
+    for (int referenceDerivativeIndex = 0; referenceDerivativeIndex < 10; ++referenceDerivativeIndex)
+    {
+
+      if ((referenceDerivativeIndex == 0 && needsReferenceValues) ||
+          (referenceDerivativeIndex > 0 && referenceDerivativeIndex < 4 && needsReferenceGradient) ||
+          (referenceDerivativeIndex >= 4 && needsReferenceHessian))
+      {
+        neededReferenceDerivatives[neededReferenceDerivativeCount++] = referenceDerivativeIndex;
+      }
+    }
+
+    for (int basisIndex = 0; basisIndex < 36; ++basisIndex)
+    {
+      const int referenceBasisIndex = referenceBasisIndices[basisIndex];
+      R3 referenceBasisDerivatives[10];
+
+      for (int neededIndex = 0; neededIndex < neededReferenceDerivativeCount; ++neededIndex)
+      {
+        const int referenceDerivativeIndex = neededReferenceDerivatives[neededIndex];
+        R3 referenceBasisDerivative(0., 0., 0.);
+        const int termEnd = referenceDerivativeTermOffsets[referenceDerivativeIndex][referenceBasisIndex + 1];
+
+        for (int termIndex = referenceDerivativeTermOffsets[referenceDerivativeIndex][referenceBasisIndex];
+             termIndex < termEnd; ++termIndex)
+        {
+          const ReferencePolynomialTerm &term = referenceDerivativeTerms[termIndex];
+          referenceBasisDerivative += term.vectorCoefficient * referenceMonomialValues[term.monomialIndex];
+        }
+
+        referenceBasisDerivatives[referenceDerivativeIndex] = referenceBasisDerivative;
+      }
+
+      for (int requestedIndex = 0; requestedIndex < requestedPhysicalDerivativeCount; ++requestedIndex)
+      {
+        const int derivativeIndex = requestedPhysicalDerivatives[requestedIndex];
+        R3 referenceVectorPhysicalDerivative(0., 0., 0.);
+
+        for (int chainIndex = 0; chainIndex < referenceDerivativeCounts[derivativeIndex]; ++chainIndex)
+        {
+          referenceVectorPhysicalDerivative +=
+            referenceBasisDerivatives[referenceDerivativeBegins[derivativeIndex] + chainIndex] *
+            physicalDerivativeChainFactors[derivativeIndex][chainIndex];
+        }
+
+        const R3 physicalBasisDerivative =
+          (piolaColumns[0] * referenceVectorPhysicalDerivative.x +
+           piolaColumns[1] * referenceVectorPhysicalDerivative.y +
+           piolaColumns[2] * referenceVectorPhysicalDerivative.z) * basisOrientationSigns[basisIndex];
+        const int derivativeOperator = derivativeOperators[derivativeIndex];
+
+        for (int vectorComponent = 0; vectorComponent < 3; ++vectorComponent)
+        {
+          val(basisIndex, vectorComponent, derivativeOperator) = physicalBasisDerivative[vectorComponent];
+        }
+      }
+    }
+  }
+
  // RT1 surf
 
    class TypeOfFE_RT1_surf : public GTypeOfFE<MeshS>  {
@@ -4458,6 +5298,10 @@ namespace Fem2D {
   static TypeOfFE_RT1_3d RT1_3d;
   GTypeOfFE< Mesh3 > &RT13d(RT1_3d);
   static AddNewFE3 TypeOfFE_RT1_3d("RT13d", &RT13d);
+
+  static TypeOfFE_RT2_3d RT2_3d;
+  GTypeOfFE<Mesh3> &RT23d(RT2_3d);
+  static AddNewFE3 Add_RT23d("RT23d", &RT23d);
 
   static TypeOfFE_RT1_surf RT1_S;
   GTypeOfFE< MeshS > &RT1S(RT1_S);

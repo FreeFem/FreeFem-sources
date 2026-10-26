@@ -28,6 +28,9 @@ SUBDIRS=3rdparty src \
 	examples 
 
 EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
+	unit/test.idp \
+	unit/plugins/RT23d-moments-interpolation-derivatives-orientations.edp \
+	unit/assets/rt23d-all-face-permutations.mesh \
 	bin/keys.awk \
 	bin/mpic++.in \
 	bin/Install-MacOS.command \
@@ -153,6 +156,9 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
         examples/*/*.md \
 	examples/*/*.edp \
 	examples/CheckAllEdp \
+	unit/test.idp \
+	unit/plugins/RT23d-moments-interpolation-derivatives-orientations.edp \
+	unit/assets/rt23d-all-face-permutations.mesh \
 	examples/plugin/ch.pts \
 	examples/plugin/g.gmesh
 
