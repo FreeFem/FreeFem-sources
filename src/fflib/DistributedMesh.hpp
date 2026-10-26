@@ -40,6 +40,12 @@ public:
   pcommworld comm = nullptr;
   int rank = 0, size = 1;
 
+  // Distributed plot (mode global) : construits au premier plot, LocalMesh ne changeant pas
+  mutable bool plotOwnedBuilt = false;
+  mutable KN<int> plotOwnedElements;        // elements locaux possedes, dans l'ordre du morceau
+  mutable std::vector<char> plotOwnedMesh;  // maillage brut du morceau : nv nt nbe | xyz | vlab | tv | tlab | bv | blab
+
+
   void adoptComm(pcommworld c) {
     ffassert(!comm);
     comm = c; rank = commRank(c); size = commSize(c);
