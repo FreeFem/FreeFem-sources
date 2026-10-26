@@ -1,24 +1,120 @@
 // NBPROC 4
-// PARAM -wg -ns
+// PARAM -wg -ns -v 0
 
 // problem / solve sur un fespace distribue, ecrit comme en sequentiel.
 // La resolution passe par PETSc (load "PETSc" obligatoire).
 load "PETSc"
 
-mesh3 Th = cube(10, 10, 10);
-Dmesh3 DTh = distribute(Th, overlap = 1, keepGlobal = true);
+// Creating distributed meshes et fespaces for both physical phenomena
+real x0 = 0, y0 = 0, z0 = 0;
+real x1 = 1, y1 = 0.1, z1 = 0.1;
+int nx1 = 50, ny1 = 5, nz1 = 5;
+int nx2 = 80, ny2 = 8, nz2 = 8;
 
-fespace Udh(DTh, P1);
+mesh3 Th1 = cube(nx1, ny1, nz1, [x0 + (x1-x0)*x, y0 + (y1-y0)*y, z0 + (z1-z0)*z]);
+Dmesh3 DTh1 = distribute(Th1, overlap = 1, partmethod = "metis");
+
+mesh3 Th2 = cube(nx2, ny2, nz2, [x0 + (x1-x0)*x, y0 + (y1-y0)*y, z0 + (z1-z0)*z]);
+Dmesh3 DTh2 = distribute(Th2, overlap = 1, partmethod = "scotch");
+
+mesh3 ThL1 = DTh1.local;
+mesh3 ThL2 = DTh2.local;
+
+fespace Udh1(DTh1, P1);
+fespace Udh2(DTh2, P2);
+
+cout << "On mpirank " << mpirank << " : Local Th1 : " << ThL1.nv << " vertices, " << ThL1.nt << " tetrahedra" << endl;
+cout << "On mpirank " << mpirank << " : Local Th2 : " << ThL2.nv << " vertices, " << ThL2.nt << " tetrahedra" << endl;
+cout << "On mpirank " << mpirank << " : Udh1.ndof = " << Udh1.ndof << ", Udh2.ndof = " << Udh2.ndof << endl;
+
+int ng1 = Udh1.ndofglobal, ng2 = Udh2.ndofglobal;
+if (mpirank == 0){
+    cout << "DTh1 : " << ng1 << " dof" << endl;
+    cout << "DTh2 : " << ng2 << " dof" << endl;
+    cout << "DTh1 checkPoU : " << Udh1.checkPoU << " , DTh2 checkPoU : " << Udh2.checkPoU << endl;
+}
+
+// Thermic problem
+Udh1 T, Told;
+Udh1 w;
+real rhoc = 3.6e6, k = 50, hc = 10, Tc = 368, Text = 293;
+real dt = 60;
+real tf = 3600;
+int nt = ceil(tf/dt);
+real vol = int3d(DTh1)(1);
+
+macro grad(u) [dx(u),dy(u),dz(u)]//EOM
+
+int it = 0;
+problem chaleur(T, w, init = it, solver = CG, eps = 1e-10)
+    = int3d(DTh1)(rhoc*T*w/dt + k*grad(T)'*grad(w))
+    + int2d(DTh1, 1, 3, 5, 6)(hc*T*w)
+    - int2d(DTh1, 1, 3, 5, 6)(hc*Text*w)
+    - int3d(DTh1)(rhoc*Told*w/dt)
+    +on(4, T = Tc);
+
+T = Text;
+for (it = 0; it < nt; ++it) {
+    Told = T;
+    chaleur;
+    real Tmoy = int3d(DTh1)(T)/vol;
+    real inFlux = -int2d(DTh1, 4)(k*dx(T));
+    real outFlux = int2d(DTh1, 1, 3, 5, 6)(hc*(T-Text));
+    real t = (it+1)*dt;
+    if (mpirank == 0){
+        cout << "Average temperature at time " << t << " s is " << Tmoy << " K." << endl;
+        cout << "Incoming flux at face x = 0 at time " << t << " s is " << inFlux << " W." << endl;
+        cout << "Outgoing flux at other faces at time " << t << " s is " << outFlux << " W." << endl;
+    }
+}
+
+// Transfer on distributed meshes
+Udh2 T2 = T;
+real vol2 = int3d(DTh2)(1);
+real Tmoy1 = int3d(DTh1)(T)/vol;
+real Tmoy2 = int3d(DTh2)(T2)/vol2;
+if (mpirank == 0){
+    cout << "Average temperature at tf " << tf << " s is " << Tmoy1 << " on mesh 1." << endl;
+    cout << "Average temperature at tf " << tf << " s is " << Tmoy2 << " on mesh 2." << endl;
+}
+
+// Thermal dilatation
+fespace Wdh(DTh2, [P2, P2, P2]);
+macro div(u) (dx(u#1) + dy(u#2) + dz(u#3))//EOM
+macro Eps(u) [dx(u#1), dy(u#2), dz(u#3),
+              (dz(u#2) + dy(u#3))/sqrt(2.),
+              (dz(u#1) + dx(u#3))/sqrt(2.),
+              (dy(u#1) + dx(u#2))/sqrt(2.)]//EOM
+
+real E = 210e9, nu = 0.3, alpha = 12e-6;
+real lambda = E*nu/((1+nu)*(1-2*nu));
+real mu = E/(2*(1+nu));
+
+Wdh [u1, u2, u3], [v1, v2, v3];
+
+solve dilatation([u1, u2, u3], [v1, v2, v3], solver = sparsesolver)
+    = int3d(DTh2)(lambda*div(u)*div(v) + 2.*mu*(Eps(u)'*Eps(v)))
+    - int3d(DTh2)((3*lambda + 2*mu)*alpha*(T2-Text)*div(v))
+    + on(4, u1 = 0, u2 = 0, u3 = 0);
+
+real uBout = int2d(DTh2, 2)(u1) / int2d(DTh2, 2)(1.);
+real u1D = alpha*int3d(DTh2)(T2-Text)/((y1-y0)*(z1-z0));
+if (mpirank == 0) {
+    cout << "Elongation at x = " << x1 << " : " << uBout*1e3 << " mm (1D estimate : " << u1D*1e3 << " mm)" << endl;
+}
+/*
+fespace Udh(DTh1, P1);
 Udh u = 0, v;
 Udh f = 1;
-problem p(u, v, solver = CG, eps = 1e-10) =int3d(DTh)(dx(u) * dx(v) + dy(u) * dy(v) + dz(u) * dz(v)) - int3d(DTh)(f * v) + on(1, 2, 3, 4, u = 0);
+problem p(u, v, solver = CG, eps = 1e-10) =int3d(DTh1)(dx(u) * dx(v) + dy(u) * dy(v) + dz(u) * dz(v)) - int3d(DTh1)(f * v) + on(1, 2, 3, 4, u = 0);
 p;
 
 // verification : meme probleme sur le maillage global
-fespace Uh(Th, P1);
+fespace Uh(Th1, P1);
 Uh us, vs;
-solve ps(us, vs) = int3d(Th)(dx(us) * dx(vs) + dy(us) * dy(vs) + dz(us) * dz(vs)) - int3d(Th)(1. * vs) + on(1, 2, 3, 4, us = 0);
-real errL = sqrt(int3d(DTh)(square(u - us))) / sqrt(int3d(Th)(square(us))), errG;
+solve ps(us, vs) = int3d(Th1)(dx(us) * dx(vs) + dy(us) * dy(vs) + dz(us) * dz(vs)) - int3d(Th1)(1. * vs) + on(1, 2, 3, 4, us = 0);
+real errL = sqrt(int3d(DTh1)(square(u - us))) / sqrt(int3d(Th1)(square(us))), errG;
 mpiAllReduce(errL, errG, mpiCommWorld, mpiMAX);
 if (mpirank == 0) cout << "ecart relatif distribue / sequentiel = " << errG << endl;
 assert(errG < 1e-7);   // eps = 1e-10 transmis a PETSc (sans lui : ~1e-6)
+*/

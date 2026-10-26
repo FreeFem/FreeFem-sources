@@ -116,6 +116,28 @@ public:
   PlotStream & operator << (const Fem2D::MeshS& Th) { Th.GSave(TheStream); return *this;}
   PlotStream & operator << (const Fem2D::MeshL& Th) { Th.GSave(TheStream); return *this;}
     
+  // Ecrit un maillage au format GSave depuis des tableaux bruts (indices 0-based)
+  // nve / nvbe : sommets par element / par element de bord
+  template<int nve, int nvbe>
+  void writeGSaveArrays(const string& gsbegin, const string& gsend,
+                        int nnv, const double* xyz, const int* vlab,
+                        int nnt, const int* tv, const int* tlab,
+                        int nnbe, const int* bv, const int* blab, int offset = 0) {
+    *this << gsbegin;
+    *this << nnv << nnt << nnbe;
+    for (int k = 0; k < nnv; ++k) *this << xyz[3*k] << xyz[3*k+1] << xyz[3*k+2] << vlab[k];
+    for (int k = 0; k < nnt; ++k) {
+      for (int i = 0; i < nve; ++i) *this << tv[nve*k+i] + offset;
+      *this << tlab[k];
+    }
+    for (int k = 0; k < nnbe; ++k) {
+      for (int i = 0; i < nvbe; ++i) *this << bv[nvbe*k+i] + offset;
+      *this << blab[k];
+    }
+    *this << gsend;
+  }
+
+
   void read( void *data,size_t l) {
 	char * p= (char*)data;
 	for(int i=0;i<l;++i)	

@@ -1023,7 +1023,14 @@ namespace Fem2D
         f << Gsend;
     }
     
-    
+    void Mesh3::GSaveArrays(FILE * ff, int nnv, const double *xyz, const int *vlab, int nnt, const int *tv,
+                            const int *tlab, int nnbe, const int *bv, const int *blab, int offset)
+    {
+        PlotStream f(ff);
+        f.writeGSaveArrays<Element::nv, BorderElement::nv>(Gsbegin, Gsend, nnv, xyz, vlab, nnt, tv, tlab,
+                                                           nnbe, bv, blab, offset);
+    }
+
     
     void Mesh3::GRead(FILE * ff,int offset)
     {

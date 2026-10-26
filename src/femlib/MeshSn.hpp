@@ -139,6 +139,10 @@ typedef GenericVertex<R3> Vertex3;
         int Save(const string & filename);
         void flipSurfaceMeshS(int surface_orientation);
         void GSave(FILE * f,int offset=0) const ;
+        // GSave depuis des tableaux bruts (plot distribue) : xyz 3*nnv, tv 3*nnt, bv 2*nnbe
+        static void GSaveArrays(FILE *f, int nnv, const double *xyz, const int *vlab, int nnt, const int *tv,
+                          const int *tlab, int nnbe, const int *bv, const int *blab, int offset = 0);
+
         void GRead(FILE * f,int offset);
         double hmin() const;
         int Save(const string & filename) const;
