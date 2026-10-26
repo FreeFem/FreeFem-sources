@@ -156,6 +156,10 @@ public:
   MeshS *meshS;
   int nEdges;
   void GSave(FILE * f,int offset=0) const ;
+  // GSave depuis des tableaux bruts (plot distribue) : xyz 3*nnv, tv 4*nnt, bv 3*nnbe
+  static void GSaveArrays(FILE *f, int nnv, const double *xyz, const int *vlab, int nnt, const int *tv,
+                          const int *tlab, int nnbe, const int *bv, const int *blab, int offset = 0);
+
   void GRead(FILE * f,int offset);
   int Save(const string & filename) const ;
   int SaveSurface(const string & filename) const ;  
