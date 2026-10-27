@@ -117,7 +117,7 @@ m4_define([TOOL_PARAMETERS],
     [
 	AC_ARG_WITH($1_include,AS_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
     AC_ARG_WITH($1_ldflags,AS_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
-	AC_ARG_ENABLE(download-$1,AS_HELP_STRING([--enable-download_$1],[force the download of $1]))
+	AC_ARG_ENABLE(download-$1,AS_HELP_STRING([--enable-download-$1],[force the download of $1]))
 
     if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
     then
