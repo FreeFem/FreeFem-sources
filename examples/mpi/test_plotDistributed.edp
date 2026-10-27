@@ -1,0 +1,173 @@
+// NBPROC 4
+// PARAM -ns -fglut /dev/null
+
+// =====================================================================
+//  plot sur maillages distribues (Dmesh3, DmeshS, DmeshL)
+//
+//  Le flux graphique est envoye vers /dev/null (-fglut) : le rang 0 du
+//  monde a donc un flux ouvert et tout le chemin distribue est execute
+//  (racine, rassemblement, fusion, ecriture). Le contenu du flux n'est
+//  pas verifie ici ; on verifie le comportement collectif :
+//   P  chaque plot va au bout sur TOUS les rangs (pas de blocage, pas
+//      d'erreur), pour chaque type d'item et chaque mode ;
+//   R  les erreurs sont refusees sur TOUS les rangs concernes.
+//
+//  Modes : plot(u) image globale (elements possedes, maillage fusionne),
+//  plot(u, byrank = 1) un plot par rang, plot(u, rank = r) un seul rang.
+//
+//  COMMUNICATEURS (-np 4)
+//   W  mpiCommWorld
+//   P  monde permute : la racine de plot (rang 0 du monde) est le rang
+//      mpisize-1 de cP
+//   H  deux moities : seule celle qui contient le rang 0 du monde trace,
+//      l'autre avertit et passe sans communication
+//   X  monde sans le rang 0 : rien a tracer, avertissement, pas de blocage
+// =====================================================================
+
+int ntot = 0, npass = 0;
+
+macro CHK(COMM, TG, LBL, E, TOL) {
+  real chkL = E, chkG = 0;
+  mpiAllReduce(chkL, chkG, COMM, mpiMAX);
+  bool chkOk = (chkG <= TOL);
+  ntot++; if (chkOk) npass++;
+  if (mpiRank(COMM) == 0)
+    cout << "  [" << TG << "] " << LBL << " => " << (chkOk ? "PASS" : "FAIL") << endl;
+}// EOM
+
+// P : l'instruction PLT s'execute sans erreur sur tous les rangs de COMM
+macro PASSES(COMM, TG, LBL, PLT) {
+  int pok = 1;
+  try { PLT; } catch (...) { pok = 0; }
+  real pe = 1 - pok;
+  CHK(COMM, TG, LBL, pe, 0)
+}// EOM
+
+// R : l'instruction PLT est refusee sur tous les rangs de COMM
+macro REFUSED(COMM, TG, LBL, PLT) {
+  int rok = 0;
+  try { PLT; } catch (...) { rok = 1; }
+  real re = 1 - rok;
+  CHK(COMM, TG, LBL, re, 0)
+}// EOM
+
+func fr = sin(2*pi*x)*cos(pi*y) + z;
+func fi = x*y - z;
+
+int colH = 0;
+if (mpirank >= mpisize/2) colH = 1;
+int colX = 0;
+if (mpirank == 0) colX = mpiUndefined;
+mpiComm cP(mpiCommWorld, 0, mpisize - 1 - mpirank);
+mpiComm cH(mpiCommWorld, colH, mpirank);
+mpiComm cX(mpiCommWorld, colX, mpirank);
+
+// ---------------------------------------------------------------------
+//  VOL : Dmesh3 sur COMM, tous les items et tous les modes
+// ---------------------------------------------------------------------
+macro VOL(COMM, TG, OV, SCAT) {
+  if (COMM) {
+    mesh3 Th;
+    if (!SCAT || mpiRank(COMM) == 0) Th = cube(5, 5, 5, [x, y, z + 0.2*sin(pi*x)*sin(pi*y)]);
+    Dmesh3 DTh = distribute(Th, overlap = OV, comm = COMM, scatter = SCAT);
+    fespace Udh(DTh, P2);
+    fespace Wdh(DTh, [P1, P1, P1]);
+    Udh u = fr;
+    Udh<complex> uc = fr + 1i*fi;
+    Wdh [w1, w2, w3] = [y - 0.5, 0.5 - x, 0.3];
+    PASSES(COMM, TG, "plot(u)                  ", plot(u, wait = 0))
+    PASSES(COMM, TG, "plot(u) deux fois (cache)", plot(u, wait = 0); plot(u, wait = 0))
+    PASSES(COMM, TG, "plot(u, byrank = 1)      ", plot(u, byrank = 1, wait = 0))
+    PASSES(COMM, TG, "plot(u, rank = 1)        ", plot(u, rank = 1, wait = 0))
+    PASSES(COMM, TG, "plot(DTh)                ", plot(DTh, wait = 0))
+    PASSES(COMM, TG, "plot(DTh, byrank = 1)    ", plot(DTh, byrank = 1, wait = 0))
+    PASSES(COMM, TG, "plot(uc) complexe        ", plot(uc, wait = 0))
+    PASSES(COMM, TG, "plot([w1, w2, w3])       ", plot([w1, w2, w3], wait = 0))
+    PASSES(COMM, TG, "plot(DTh, u, uc, [w])    ", plot(DTh, u, uc, [w1, w2, w3], wait = 0))
+    PASSES(COMM, TG, "idem byrank              ", plot(DTh, u, uc, [w1, w2, w3], byrank = 1, wait = 0))
+    PASSES(COMM, TG, "plot(DTh.local) (classique)", plot(DTh.local, wait = 0))
+    REFUSED(COMM, TG, "plot(u, rank = 7)        ", plot(u, rank = 7, wait = 0))
+    Udh un;
+    REFUSED(COMM, TG, "fonction non initialisee ", plot(un, wait = 0))
+    Dmesh3 DTh2 = distribute(Th, overlap = OV, comm = COMM, scatter = SCAT);
+    fespace Udh2(DTh2, P1);
+    Udh2 v2 = x;
+    REFUSED(COMM, TG, "vecteur sur deux Dmesh   ", plot([w1, v2, w3], wait = 0))
+  }
+}// EOM
+
+// ---------------------------------------------------------------------
+//  SURF : DmeshS ; CURV : DmeshL
+// ---------------------------------------------------------------------
+macro SURF(COMM, TG) {
+  if (COMM) {
+    meshS Th = square3(10, 10, [x, y, 0.2*sin(pi*x)*sin(pi*y)]);
+    DmeshS DTh = distribute(Th, overlap = 1, comm = COMM);
+    fespace Udh(DTh, P1);
+    fespace Wdh(DTh, [P1, P1, P1]);
+    Udh u = fr;
+    Udh<complex> uc = fr + 1i*fi;
+    Wdh [w1, w2, w3] = [y - 0.5, 0.5 - x, 0.3];
+    PASSES(COMM, TG, "S plot(u)                ", plot(u, wait = 0))
+    PASSES(COMM, TG, "S plot(u, byrank = 1)    ", plot(u, byrank = 1, wait = 0))
+    PASSES(COMM, TG, "S plot(DTh)              ", plot(DTh, wait = 0))
+    PASSES(COMM, TG, "S plot(uc) complexe      ", plot(uc, wait = 0))
+    PASSES(COMM, TG, "S plot([w1, w2, w3])     ", plot([w1, w2, w3], wait = 0))
+  }
+}// EOM
+
+macro CURV(COMM, TG) {
+  if (COMM) {
+    meshL Th = segment(40, [cos(1.5*pi*x), sin(1.5*pi*x), 0.5*x]);
+    DmeshL DTh = distribute(Th, overlap = 1, comm = COMM);
+    fespace Udh(DTh, P1);
+    Udh u = fr;
+    Udh<complex> uc = fr + 1i*fi;
+    PASSES(COMM, TG, "L plot(u)                ", plot(u, wait = 0))
+    PASSES(COMM, TG, "L plot(u, byrank = 1)    ", plot(u, byrank = 1, wait = 0))
+    PASSES(COMM, TG, "L plot(DTh)              ", plot(DTh, wait = 0))
+    PASSES(COMM, TG, "L plot(uc) complexe      ", plot(uc, wait = 0))
+  }
+}// EOM
+
+if (mpirank == 0) cout << "===== W : mpiCommWorld" << endl;
+VOL(mpiCommWorld, "W", 1, 0)
+SURF(mpiCommWorld, "W")
+CURV(mpiCommWorld, "W")
+if (mpirank == 0) cout << "===== W : overlap 0, mode scatter" << endl;
+VOL(mpiCommWorld, "W/ov0", 0, 0)
+VOL(mpiCommWorld, "W/scatter", 1, 1)
+if (mpirank == 0) cout << "===== P : monde permute" << endl;
+VOL(cP, "P", 1, 0)
+SURF(cP, "P")
+if (mpirank == 0) cout << "===== H : deux moities (une seule trace)" << endl;
+VOL(cH, "H", 1, 0)
+CURV(cH, "H")
+if (mpirank == 0) cout << "===== X : monde sans le rang 0 (rien a tracer)" << endl;
+VOL(cX, "X", 1, 0)
+
+// Types et communicateurs melanges dans un meme plot
+if (mpirank == 0) cout << "===== M : types et communicateurs melanges" << endl;
+{
+  mesh3 T3 = cube(4, 4, 4);
+  meshS TS = square3(8, 8, [x + 1.5, y, 0.2*sin(pi*x)]);
+  meshL TL = segment(20, [cos(pi*x) - 1, sin(pi*x), 0]);
+  Dmesh3 D3 = distribute(T3, overlap = 1);
+  DmeshS DS = distribute(TS, overlap = 1, comm = cP);
+  DmeshL DL = distribute(TL, overlap = 1);
+  fespace US(DS, P1);
+  US uS = fr;
+  PASSES(mpiCommWorld, "M", "plot(D3, uS, DL)         ", plot(D3, uS, DL, wait = 0))
+  PASSES(mpiCommWorld, "M", "idem byrank              ", plot(D3, uS, DL, byrank = 1, wait = 0))
+  DmeshS DSn;
+  REFUSED(mpiCommWorld, "M", "Dmesh non distribue      ", plot(DSn, wait = 0))
+}
+
+// tous les rangs du monde doivent arriver ici
+int arrived = 1, arrivedG = 0;
+mpiAllReduce(arrived, arrivedG, mpiCommWorld, mpiSUM);
+real eArr = mpisize - arrivedG;
+CHK(mpiCommWorld, "W", "tous les rangs au bout   ", eArr, 0)
+
+if (mpirank == 0) cout << "===== " << npass << " / " << ntot << " PASS" << endl;
+assert(npass == ntot);
