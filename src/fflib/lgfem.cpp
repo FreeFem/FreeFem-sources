@@ -4788,6 +4788,7 @@ static void fusePieces(const vector< DistPlotPiece > &P, DistPlotPiece &f) {
 template< class Mesh >
 static int distPlotRoot(const DistributedMesh< Mesh > &D, long onlyRank) {
   pcommworld comm = D.comm;
+  if (onlyRank >= commSize(comm)) distributedError(comm, "plot: rank= must be in [0, mpiSize(comm)[");
   const int me = commRank(comm);
   const int root = plotRoot(comm);
   if (root < 0) {
@@ -4797,7 +4798,6 @@ static int distPlotRoot(const DistributedMesh< Mesh > &D, long onlyRank) {
     return -1;
   }
   if (!bcastInt(me == root ? (ThePlotStream != 0) : 0, root, comm)) return -1;    // pas de flux : rien
-  if (onlyRank >= commSize(comm)) distributedError(comm, "plot: rank= must be in [0, mpiSize(comm)[");
   return root;
 }
 
@@ -4837,8 +4837,6 @@ template< class Mesh, class K >
 static bool gatherDistItem(FEbase< K, v_dfes< Mesh > > *const *fe, const int *cmp, int nc, long what, long onlyRank,
                            bool owned, DistPlotItem< Mesh > &out) {
   const DistributedMesh< Mesh > *D = (*fe[0]->pVh)->DTh;
-  const int root = distPlotRoot(*D, onlyRank);
-  if (root < 0) return false;
   int bad = 0;
   for (int c = 0; c < nc; ++c) {
     if ((*fe[c]->pVh)->DTh != D) bad = max(bad, 2);
@@ -4847,6 +4845,9 @@ static bool gatherDistItem(FEbase< K, v_dfes< Mesh > > *const *fe, const int *cm
   bad = agreeOnStatus(bad, D->comm);
   if (bad == 2) distributedError(D->comm, "plot: the components of a distributed vector must be on the same distributed mesh");
   if (bad) distributedError(D->comm, "plot: distributed FE function not initialized");
+
+  const int root = distPlotRoot(*D, onlyRank);
+  if (root < 0) return false;
 
   int lg;
   KN< typename Mesh::RdHat > Psub;
