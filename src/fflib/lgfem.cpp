@@ -3235,6 +3235,19 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         bool bpttab = BCastTo< pttab >((*a)[0]);
         bool bpferarray = BCastTo< pferarray >((*a)[0]);
         bool bpfecarray = BCastTo< pfecarray >((*a)[0]);
+        bool bpd3r = BCastTo< pdf3r >((*a)[0]), bpd3c = BCastTo< pdf3c >((*a)[0]);
+        bool bpdSr = BCastTo< pdfSr >((*a)[0]), bpdSc = BCastTo< pdfSc >((*a)[0]);
+        bool bpdL = BCastTo< pdfLr >((*a)[0]) || BCastTo< pdfLc >((*a)[0]);
+        if (bpdL) CompileError("plot: vector of distributed FE functions on a DmeshL is not supported");
+        if (bpd3r || bpd3c || bpdSr || bpdSc) {    // vecteur de fonctions EF distribuees
+          if (asizea != 3) CompileError("plot: a vector of distributed FE functions must have 3 components");
+          l[i].dist = (bpd3r || bpd3c) ? 3 : 2;
+          l[i].what = bpd3r ? 7 : bpd3c ? 17 : bpdSr ? 9 : 19;
+          for (int j = 0; j < 3; j++)
+            l[i][j] = bpd3r ? CastTo< pdf3r >((*a)[j]) : bpd3c ? CastTo< pdf3c >((*a)[j])
+                    : bpdSr ? CastTo< pdfSr >((*a)[j]) : CastTo< pdfSc >((*a)[j]);
+        } else
+
         if (bpfer && asizea < 3) {
           l[i].what = asizea;
           for (int j = 0; j < a->size( ); j++) l[i][j] = CastTo< pfer >((*a)[j]);
@@ -3343,6 +3356,24 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].dist = 1;
         l[i][0] = CastTo< const DistributedMesh< MeshL > ** >(args[i]);
       }
+      else if (BCastTo< pdf3c >(args[i])) {    // fonction EF distribuee complexe (Dmesh3)
+        l[i].composant = false;
+        l[i].what = 16;
+        l[i].dist = 3;
+        l[i][0] = CastTo< pdf3c >(args[i]);
+      }
+      else if (BCastTo< pdfSc >(args[i])) {    // fonction EF distribuee complexe (DmeshS)
+        l[i].composant = false;
+        l[i].what = 18;
+        l[i].dist = 2;
+        l[i][0] = CastTo< pdfSc >(args[i]);
+      }
+      else if (BCastTo< pdfLc >(args[i])) {    // fonction EF distribuee complexe (DmeshL)
+        l[i].composant = false;
+        l[i].what = 20;
+        l[i].dist = 1;
+        l[i][0] = CastTo< pdfLc >(args[i]);
+      }
       else if (BCastTo< pf3r >(args[i])) {    // [[file:lgmesh3.hpp::pf3r]]
         l[i].composant = false;
         l[i].what = 6;    //  real iso value 3D volume
@@ -3352,7 +3383,6 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].what = 16;    //  complex iso value 3D volume
         l[i][0] = CastTo< pf3c >(args[i]);
       }
-
       else if (BCastTo< pfSr >(args[i])) {    // [[file:lgmesh3.hpp::pfSr]]
         l[i].composant = false;
         l[i].what = 8;    //  real iso value 3D surface
@@ -4580,6 +4610,7 @@ struct DistPlotPiece {
 template< class Mesh >
 struct DistPlotItem {
   long what = 6;
+  int ncomp = 1;
   KN< typename Mesh::RdHat > Psub;    // sous-decoupage commun a tous les rangs
   KN< int > Ksub;
   vector< DistPlotPiece > pieces;
@@ -4592,6 +4623,8 @@ struct DistPlotRef {
 };
 // Item maillage seul (5, 50, 55) : ni Psub, ni Ksub, ni valeurs dans le flux
 static inline bool distPlotMeshOnly(long what) { return what == 5 || what == 50 || what == 55; }
+// Items complexes : 16, 17 (volume), 18, 19 (surface), 20, 21 (courbe)
+static inline bool distPlotComplex(long what) { return what >= 16 && what <= 21; }
 
 template< class T >
 static void putPOD(vector< char > &b, const T &x) {
@@ -4797,22 +4830,44 @@ static bool gatherDistPieces(const DistributedMesh< Mesh > &D, int root, bool ow
   return true;
 }
 
-// Phase A d'une fonction EF distribuee. Retourne true sur la racine de plot quand l'item doit etre trace.
-template< class Mesh >
-static bool gatherDistItem(FEbase< double, v_dfes< Mesh > > *fe, int cmp, long what, long onlyRank, bool owned,
-                           DistPlotItem< Mesh > &out) {
-  const DistributedMesh< Mesh > *D = (*fe->pVh)->DTh;
+// Phase A d'une fonction EF distribuee : scalaire (nc = 1) ou vecteur (nc = 3), reelle ou complexe.
+// Valeurs transmises en doubles (2 par complexe, ncomp) et entrelacees par point comme dans Send3d.
+// Retourne true sur la racine de plot quand l'item doit etre trace.
+template< class Mesh, class K >
+static bool gatherDistItem(FEbase< K, v_dfes< Mesh > > *const *fe, const int *cmp, int nc, long what, long onlyRank,
+                           bool owned, DistPlotItem< Mesh > &out) {
+  const DistributedMesh< Mesh > *D = (*fe[0]->pVh)->DTh;
   const int root = distPlotRoot(*D, onlyRank);
   if (root < 0) return false;
-  const int bad = (!fe->x( ) || !fe->Vh || &fe->Vh->Th != D->LocalMesh) ? 1 : 0;
-  if (agreeOnStatus(bad, D->comm)) distributedError(D->comm, "plot: distributed FE function not initialized");
+  int bad = 0;
+  for (int c = 0; c < nc; ++c) {
+    if ((*fe[c]->pVh)->DTh != D) bad = max(bad, 2);
+    else if (!fe[c]->x( ) || !fe[c]->Vh || &fe[c]->Vh->Th != D->LocalMesh) bad = max(bad, 1);
+  }
+  bad = agreeOnStatus(bad, D->comm);
+  if (bad == 2) distributedError(D->comm, "plot: the components of a distributed vector must be on the same distributed mesh");
+  if (bad) distributedError(D->comm, "plot: distributed FE function not initialized");
 
   int lg;
   KN< typename Mesh::RdHat > Psub;
   KN< int > Ksub;
-  KN< double > V = fe->Vh->newSaveDraw(*fe->x( ), cmp, lg, Psub, Ksub, 0);
-  if (!gatherDistPieces(*D, root, owned, V, out)) return false;
+  KN< K > V0 = fe[0]->Vh->newSaveDraw(*fe[0]->x( ), cmp[0], lg, Psub, Ksub, 0);
+  KN< K > V(nc * V0.N( ));
+  for (long j = 0; j < V0.N( ); ++j) V[nc * j] = V0[j];
+  for (int c = 1; c < nc; ++c) {
+    KN< typename Mesh::RdHat > Pc;
+    KN< int > Kc;
+    KN< K > Vc = fe[c]->Vh->newSaveDraw(*fe[c]->x( ), cmp[c], lg, Pc, Kc, 0);
+    ffassert(Vc.N( ) == V0.N( ));
+    for (long j = 0; j < V0.N( ); ++j) V[nc * j + c] = Vc[j];
+  }
+  const int ncomp = sizeof(K) / sizeof(double);
+  KN< double > Vd(ncomp * V.N( ));
+  if (V.N( )) memcpy((double *)Vd, (K *)V, V.N( ) * sizeof(K));
+
+  if (!gatherDistPieces(*D, root, owned, Vd, out)) return false;
   out.what = what;
+  out.ncomp = ncomp;
   out.Psub.resize(Psub.N( )); out.Psub = Psub;
   out.Ksub.resize(Ksub.N( )); out.Ksub = Ksub;
   return true;
@@ -4831,16 +4886,28 @@ static bool gatherDistMesh(const DistributedMesh< Mesh > *D, long what, long onl
   return true;
 }
 
+// Phase A d'une fonction EF distribuee de type K, 1 a 3 composantes (e.e[0..2])
+template< class Mesh, class K >
+static bool gatherDistFE(const Plot::Expression2 &e, Stack s, long onlyRank, bool byrank, DistPlotItem< Mesh > &it) {
+  typedef pair< FEbase< K, v_dfes< Mesh > > *, int > pdf;
+  FEbase< K, v_dfes< Mesh > > *fe[3] = {0, 0, 0};
+  int cmp[3] = {-1, -1, -1}, nc = 0;
+  for (; nc < 3 && e.e[nc]; ++nc) {
+    pdf p = GetAny< pdf >((*e.e[nc])(s));
+    fe[nc] = p.first;
+    cmp[nc] = p.second;
+  }
+  return gatherDistItem< Mesh, K >(fe, cmp, nc, e.what, onlyRank, !byrank, it);
+}
 
 // Phase A d'un item distribue quelconque (fonction EF ou maillage seul) sur un Dmesh de type Mesh
 template< class Mesh >
 static bool gatherDistAny(const Plot::Expression2 &e, Stack s, long onlyRank, bool byrank, DistPlotItem< Mesh > &it) {
-  typedef pair< FEbase< double, v_dfes< Mesh > > *, int > pdf;
   if (distPlotMeshOnly(e.what))
     return gatherDistMesh< Mesh >(*GetAny< const DistributedMesh< Mesh > ** >((*e.e[0])(s)), e.what, onlyRank,
                                   !byrank, it);
-  pdf p = GetAny< pdf >((*e.e[0])(s));
-  return gatherDistItem< Mesh >(p.first, p.second, e.what, onlyRank, !byrank, it);
+  if (distPlotComplex(e.what)) return gatherDistFE< Mesh, Complex >(e, s, onlyRank, byrank, it);
+  return gatherDistFE< Mesh, double >(e, s, onlyRank, byrank, it);
 }
 
 template< class Mesh >
@@ -4877,7 +4944,13 @@ static void writeDistItems(PlotStream &theplot, const vector< DistPlotRef< Mesh 
   for (size_t k = 0; k < refs.size( ); ++k) {
     const DistPlotRef< Mesh > &d = refs[k];
     theplot << d.item->what << d.mesh;
-    if (!distPlotMeshOnly(d.item->what)) theplot << d.item->Psub << d.item->Ksub << d.piece->V;
+    if (!distPlotMeshOnly(d.item->what)) {
+      theplot << d.item->Psub << d.item->Ksub;
+      const KN< double > &V = d.piece->V;    // ncomp doubles par valeur (2 pour un complexe)
+      theplot << (long)(V.N( ) / d.item->ncomp);
+      for (long j = 0; j < V.N( ); ++j) theplot << V[j];
+    }
+
   }
 }
 
