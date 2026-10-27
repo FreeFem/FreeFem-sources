@@ -3319,7 +3319,30 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].dist = 3;
         l[i][0] = CastTo< const DistributedMesh< Mesh3 > ** >(args[i]);
       }
-
+      else if (BCastTo< pdfSr >(args[i])) {    // fonction EF distribuee (DmeshS)
+        l[i].composant = false;
+        l[i].what = 8;
+        l[i].dist = 2;
+        l[i][0] = CastTo< pdfSr >(args[i]);
+      }
+      else if (BCastTo< pdfLr >(args[i])) {    // fonction EF distribuee (DmeshL)
+        l[i].composant = false;
+        l[i].what = 14;
+        l[i].dist = 1;
+        l[i][0] = CastTo< pdfLr >(args[i]);
+      }
+      else if (BCastTo< const DistributedMesh< MeshS > ** >(args[i])) {    // maillage distribue (DmeshS)
+        l[i].composant = true;
+        l[i].what = 50;
+        l[i].dist = 2;
+        l[i][0] = CastTo< const DistributedMesh< MeshS > ** >(args[i]);
+      }
+      else if (BCastTo< const DistributedMesh< MeshL > ** >(args[i])) {    // maillage distribue (DmeshL)
+        l[i].composant = true;
+        l[i].what = 55;
+        l[i].dist = 1;
+        l[i][0] = CastTo< const DistributedMesh< MeshL > ** >(args[i]);
+      }
       else if (BCastTo< pf3r >(args[i])) {    // [[file:lgmesh3.hpp::pf3r]]
         l[i].composant = false;
         l[i].what = 6;    //  real iso value 3D volume
@@ -4561,11 +4584,14 @@ struct DistPlotItem {
   KN< int > Ksub;
   vector< DistPlotPiece > pieces;
 };
-struct DistPlotRef3 {
-  const DistPlotItem< Mesh3 > *item;
+template< class Mesh >
+struct DistPlotRef {
+  const DistPlotItem< Mesh > *item;
   const DistPlotPiece *piece;
   long mesh;    // numero de maillage dans le plot
 };
+// Item maillage seul (5, 50, 55) : ni Psub, ni Ksub, ni valeurs dans le flux
+static inline bool distPlotMeshOnly(long what) { return what == 5 || what == 50 || what == 55; }
 
 template< class T >
 static void putPOD(vector< char > &b, const T &x) {
@@ -4652,7 +4678,9 @@ static void buildOwnedPlotMesh(const DistributedMesh< Mesh > &D) {
     if (!own[k]) continue;
     bool trueBoundary = true;
     if (haveCover) {
-      // la face f est opposee au sommet f : on retrouve ce sommet dans l'element du cover
+      // face f : opposee au sommet f (tetraedre, triangle) ou sommet f lui-meme (segment). Dans les deux cas
+      // la face du cover porte le numero du sommet du cover qui correspond au sommet f.
+
       const int kc = D.localToCoverElement[k];
       const Rd P = Th[k][f];
       int fc = 0;
@@ -4804,6 +4832,55 @@ static bool gatherDistMesh(const DistributedMesh< Mesh > *D, long what, long onl
 }
 
 
+// Phase A d'un item distribue quelconque (fonction EF ou maillage seul) sur un Dmesh de type Mesh
+template< class Mesh >
+static bool gatherDistAny(const Plot::Expression2 &e, Stack s, long onlyRank, bool byrank, DistPlotItem< Mesh > &it) {
+  typedef pair< FEbase< double, v_dfes< Mesh > > *, int > pdf;
+  if (distPlotMeshOnly(e.what))
+    return gatherDistMesh< Mesh >(*GetAny< const DistributedMesh< Mesh > ** >((*e.e[0])(s)), e.what, onlyRank,
+                                  !byrank, it);
+  pdf p = GetAny< pdf >((*e.e[0])(s));
+  return gatherDistItem< Mesh >(p.first, p.second, e.what, onlyRank, !byrank, it);
+}
+
+template< class Mesh >
+static size_t distPlotMaxPieces(const vector< DistPlotItem< Mesh > > &items) {
+  size_t n = 0;
+  for (size_t k = 0; k < items.size( ); ++k) n = max(n, items[k].pieces.size( ));
+  return n;
+}
+
+// Phase B : numero de maillage de chaque morceau de ce plot (tous si pr < 0, sinon celui du rang pr)
+template< class Mesh >
+static void distPlotRefs(const vector< DistPlotItem< Mesh > > &items, int pr, long &kth,
+                         vector< DistPlotRef< Mesh > > &refs) {
+  for (size_t k = 0; k < items.size( ); ++k)
+    for (size_t r = 0; r < items[k].pieces.size( ); ++r)
+      if (pr < 0 || (int)r == pr) {
+        DistPlotRef< Mesh > d = {&items[k], &items[k].pieces[r], ++kth};
+        refs.push_back(d);
+      }
+}
+
+template< class Mesh >
+static void writeDistMeshes(PlotStream &theplot, const vector< DistPlotRef< Mesh > > &refs) {
+  for (size_t k = 0; k < refs.size( ); ++k) {
+    const DistPlotPiece &p = *refs[k].piece;
+    theplot << refs[k].mesh;
+    Mesh::GSaveArrays(theplot.TheStream, p.nv, (double *)p.xyz, (int *)p.vlab, p.nt, (int *)p.tv, (int *)p.tlab,
+                      p.nbe, (int *)p.bv, (int *)p.blab);
+  }
+}
+
+template< class Mesh >
+static void writeDistItems(PlotStream &theplot, const vector< DistPlotRef< Mesh > > &refs) {
+  for (size_t k = 0; k < refs.size( ); ++k) {
+    const DistPlotRef< Mesh > &d = refs[k];
+    theplot << d.item->what << d.mesh;
+    if (!distPlotMeshOnly(d.item->what)) theplot << d.item->Psub << d.item->Ksub << d.piece->V;
+  }
+}
+
 //  missing function
 inline void NewSetColorTable(int nb, float *colors = 0, int nbcolors = 0, bool hsv = true) {
   if (colors && nbcolors)
@@ -4942,24 +5019,24 @@ AnyType Plot::operator( )(Stack s) const {
   const long onlyRank = nargs[47] ? GetAny< long >((*nargs[47])(s)) : -1;
   const bool byrank = onlyRank >= 0 || (nargs[46] && GetAny< bool >((*nargs[46])(s)));
   vector< DistPlotItem< Mesh3 > > dItems3;    // racine de plot seulement
-  for (size_t i = 0; i < l.size( ); i++)
+  vector< DistPlotItem< MeshS > > dItemsS;
+  vector< DistPlotItem< MeshL > > dItemsL;
+  for (size_t i = 0; i < l.size( ); i++)    // ordre des arguments : meme ordre des collectifs sur tous les rangs
     if (l[i].dist == 3) {
       DistPlotItem< Mesh3 > it;
-      bool ok;
-      if (l[i].what == 5)
-        ok = gatherDistMesh< Mesh3 >(*GetAny< const DistributedMesh< Mesh3 > ** >((*l[i].e[0])(s)), 5, onlyRank,
-                                     !byrank, it);
-      else {
-        pdf3r p = GetAny< pdf3r >((*l[i].e[0])(s));
-        ok = gatherDistItem< Mesh3 >(p.first, p.second, l[i].what, onlyRank, !byrank, it);
-      }
-      if (ok) dItems3.push_back(it);
+      if (gatherDistAny(l[i], s, onlyRank, byrank, it)) dItems3.push_back(it);
+    } else if (l[i].dist == 2) {
+      DistPlotItem< MeshS > it;
+      if (gatherDistAny(l[i], s, onlyRank, byrank, it)) dItemsS.push_back(it);
+    } else if (l[i].dist == 1) {
+      DistPlotItem< MeshL > it;
+      if (gatherDistAny(l[i], s, onlyRank, byrank, it)) dItemsL.push_back(it);
     }
+
 
   if (ThePlotStream) {
     // byrank : un plot complet par rang de comm (ou le seul rang demande) ; sinon un seul plot
-    size_t nRanks = 0;
-    for (size_t k = 0; k < dItems3.size( ); ++k) nRanks = max(nRanks, dItems3[k].pieces.size( ));
+    size_t nRanks = max(distPlotMaxPieces(dItems3), max(distPlotMaxPieces(dItemsS), distPlotMaxPieces(dItemsL)));
     const int nPlots = (byrank && nRanks) ? (onlyRank >= 0 ? 1 : (int)nRanks) : 1;
     for (int ip = 0; ip < nPlots; ++ip) {
     const int pr = (byrank && nRanks) ? (onlyRank >= 0 ? (int)onlyRank : ip) : -1;
@@ -5142,14 +5219,14 @@ AnyType Plot::operator( )(Stack s) const {
       if (thS && (mapthS.find(thS) == mapthS.end( ))) mapthS[thS] = ++kthS;
       if (thL && (mapthL.find(thL) == mapthL.end( ))) mapthL[thL] = ++kthL;
     }
-      // Distributed pieces of this plot : tous (pr < 0) ou celui du rang pr (byrank)
-    vector< DistPlotRef3 > dRef3;
-    for (size_t k = 0; k < dItems3.size( ); ++k)
-      for (size_t r = 0; r < dItems3[k].pieces.size( ); ++r)
-        if (pr < 0 || (int)r == pr) {
-          DistPlotRef3 d = {&dItems3[k], &dItems3[k].pieces[r], ++kth3};
-          dRef3.push_back(d);
-        }
+    // Distributed pieces of this plot : tous (pr < 0) ou celui du rang pr (byrank)
+    vector< DistPlotRef< Mesh3 > > dRef3;
+    vector< DistPlotRef< MeshS > > dRefS;
+    vector< DistPlotRef< MeshL > > dRefL;
+    distPlotRefs(dItems3, pr, kth3, dRef3);
+    distPlotRefs(dItemsS, pr, kthS, dRefS);
+    distPlotRefs(dItemsL, pr, kthL, dRefL);
+
 
     // send of meshes 2d
     theplot.SendMeshes( );
@@ -5164,31 +5241,27 @@ AnyType Plot::operator( )(Stack s) const {
       theplot << kth3;
       for (map< const Mesh3 *, long >::const_iterator i = mapth3.begin( ); i != mapth3.end( ); ++i)
         theplot << i->second << *i->first;
-        for (size_t k = 0; k < dRef3.size( ); ++k) {
-          const DistPlotPiece &p = *dRef3[k].piece;
-          theplot << dRef3[k].mesh;
-          Mesh3::GSaveArrays(theplot.TheStream, p.nv, (double *)p.xyz, (int *)p.vlab, p.nt, (int *)p.tv,
-                            (int *)p.tlab, p.nbe, (int *)p.bv, (int *)p.blab);
-      }
-
+        writeDistMeshes(theplot, dRef3);
     }
     if (kthS) {
       theplot.SendMeshesS( );
       theplot << kthS;
       for (map< const MeshS *, long >::const_iterator i = mapthS.begin( ); i != mapthS.end( ); ++i)
         theplot << i->second << *i->first;
+      writeDistMeshes(theplot, dRefS);
     }
     if (kthL) {
       theplot.SendMeshesL( );
       theplot << kthL;
       for (map< const MeshL *, long >::const_iterator i = mapthL.begin( ); i != mapthL.end( ); ++i)
         theplot << i->second << *i->first;
+      writeDistMeshes(theplot, dRefL);
     }
 
     // end of what ploting for meshes
     theplot.SendPlots( );
 
-    theplot << (long)(ll.size( ) + dRef3.size( ));
+    theplot << (long)(ll.size( ) + dRef3.size( ) + dRefS.size( ) + dRefL.size( ));
     for (size_t ii = 0; ii < ll.size( ); ii++) {
       int i = ll[ii].i;
       long what = ll[ii].what;
@@ -5288,12 +5361,10 @@ AnyType Plot::operator( )(Stack s) const {
         theplot << -1L << (long)i;
       }
     }
-    // Distributed items (meme format que Send3d)
-    for (size_t k = 0; k < dRef3.size( ); ++k) {
-      const DistPlotRef3 &d = dRef3[k];
-      theplot << d.item->what << d.mesh;
-      if (d.item->what != 5) theplot << d.item->Psub << d.item->Ksub << d.piece->V;    // maillage seul : rien de plus
-    }
+    // Distributed items (meme format que Send3d / SendS / SendL)
+    writeDistItems(theplot, dRef3);
+    writeDistItems(theplot, dRefS);
+    writeDistItems(theplot, dRefL);
     theplot.SendEndPlot( ); 
   }
   }
