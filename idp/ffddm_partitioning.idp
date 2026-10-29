@@ -72,15 +72,43 @@ if (prmesh#isincomm)
       }
       ENDIFMACRO
 
-      prmesh#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
       IFMACRO(prmesh#partcubes,1)
       real[int] bbg(6);
       boundingbox(overlapName,bbg);
       ENDIFMACRO
-      overlapName = trunc(overlapName, suppSmooth > 0.001, label=9999);
 
-      supp = supp;
-      suppSmooth = suppSmooth;
+      if (!busen2o) {
+        prmesh#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
+        overlapName = trunc(overlapName, suppSmooth > 0.001, label=9999);
+        supp = supp;
+        suppSmooth = suppSmooth;
+      }
+      else {
+        prmesh#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit, new2old = prmesh#n2oG);
+        int[int] n2o(1);
+        prmesh#meshN overlapNameG = overlapName;
+        IFMACRO(!prmesh#periodic)
+        fespace VhGlobalffG(overlapNameG, P1);
+        ENDIFMACRO
+        IFMACRO(prmesh#periodic)
+        fespace VhGlobalffG(overlapNameG, P1, periodic=prmesh#periodic);
+        ENDIFMACRO
+        VhGlobalffG suppSmoothG = suppSmooth;
+        fespace PhGlobalffG(overlapNameG, P0);
+        PhGlobalffG partG = part, suppG = supp;
+        overlapName = trunc(overlapNameG, suppSmooth > 0.001, label=9999, new2old = n2o);
+        int[int] renumGP0 = restrict(PhGlobalff, PhGlobalffG, n2o);
+        int[int] renumGP1 = restrict(VhGlobalff, VhGlobalffG, n2o);
+
+        part = 0;
+        part[] = partG[](renumGP0);
+
+        supp = 0;
+        supp[] = suppG[](renumGP0);
+
+        suppSmooth = 0;
+        suppSmooth[] = suppSmoothG[](renumGP1);
+      }
 
       prmesh#meshN borderName;
       if (sizeoverlaps > 0) {
@@ -186,7 +214,16 @@ if (prmesh#isincomm)
         ENDIFMACRO
 
         IFMACRO(!prmesh#partcubes)
-        prmesh#Thi = trunc(prmesh#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
+        if (!busen2o)
+          prmesh#Thi = trunc(prmesh#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
+        else {
+          int[int] n2oi(1), n2og(1);
+          prmesh#Thi = trunc(prmesh#Thi, suppSmooth> 0.501, label = ffddminterfacelabel, new2old = n2oi);
+          n2og.resize(n2oi.n);
+          for [i,bi: n2og] bi = prmesh#n2oG[n2oi[i]];
+          prmesh#n2oG.resize(n2og.n);
+          prmesh#n2oG = n2og;
+        }
         if (prmesh#Thi.nt != overlapName.nt)
           borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
         ENDIFMACRO
@@ -336,18 +373,24 @@ if (prmesh#isincomm)
       if(!bnoGlob)
       {
         fespace prmesh#VhglobP1(prmesh#Thglob,P1);
-        prmesh#RihP1[ii]=interpolate(prmesh#VhiP1,prmesh#VhglobP1);
-        
-        
-        int[int] I(1),J(1);
-        real[int] Kc(1);
-        [I,J,Kc] = prmesh#RihP1[ii];
-        for (int i=0;i<Kc.n;i++)
-        if (Kc[i] > 0.99)
-        Kc[i] = 1.;
-        prmesh#RihP1[ii] = [I,J,Kc];
-        
-        prmesh#RihP1[ii].thresholding(1e-10);
+        if (!busen2o) {
+          prmesh#RihP1[ii]=interpolate(prmesh#VhiP1,prmesh#VhglobP1);
+          int[int] I(1),J(1);
+          real[int] Kc(1);
+          [I,J,Kc] = prmesh#RihP1[ii];
+          for (int i=0;i<Kc.n;i++)
+          if (Kc[i] > 0.99)
+          Kc[i] = 1.;
+          prmesh#RihP1[ii] = [I,J,Kc];
+          prmesh#RihP1[ii].thresholding(1e-10);
+        }
+        else {
+          int[int] renumGP1 = restrict(prmesh#VhiP1, prmesh#VhglobP1, prmesh#n2oG);
+          int[int] I = (0:prmesh#VhiP1.ndof-1);
+          real[int] Kc(prmesh#VhiP1.ndof);
+          Kc = 1;
+          prmesh#RihP1[ii] = [I,renumGP1,Kc];
+        }
         prmesh#RihP1[ii].resize(prmesh#VhiP1.ndof,prmesh#VhglobP1.ndof);
       }	
       
@@ -529,6 +572,7 @@ prmesh#meshN[int] prmesh#aThborder(prmesh#npart);
 
 real[int] prmesh#partAug(1);
 real[int] prmesh#partloc(1);
+int[int] prmesh#n2oG(1);
 
 NewMacro prmesh#meshinit()1 EndMacro
 ENDIFMACRO
@@ -1029,15 +1073,26 @@ if (prmsh#isincomm && !prmsh#excluded)
     prfe#Dih[ii] = Dihreal;
 
     if(!bnoGlob) {
-      matrix Rihreal=interpolate(prfe#Vhi,prfe#Vhglob);
-      int[int] I(1),J(1);
-      real[int] Kc(1);
-      [I,J,Kc] = Rihreal;
-      for (int i=0;i<Kc.n;i++)
-      if (Kc[i] > 0.99)
-      Kc[i] = 1.;
-      Rihreal = [I,J,Kc];    
-      Rihreal.thresholding(1e-10);
+      matrix Rihreal;
+      if (!busen2o) {
+        Rihreal = interpolate(prfe#Vhi,prfe#Vhglob);
+        int[int] I(1),J(1);
+        real[int] Kc(1);
+        [I,J,Kc] = Rihreal;
+        for (int i=0;i<Kc.n;i++)
+        if (Kc[i] > 0.99)
+        Kc[i] = 1.;
+        Rihreal = [I,J,Kc];
+        Rihreal.thresholding(1e-10);
+      }
+      else {
+        int[int] renumG = restrict(prfe#Vhi, prfe#Vhglob, prmsh#n2oG);
+        int[int] I = (0:prfe#Vhi.ndof-1);
+        real[int] Kc(prfe#Vhi.ndof);
+        Kc = 1;
+        Rihreal = [I,renumG,Kc];
+      }
+
       prfe#Rih[ii] = Rihreal;
       prfe#Rih[ii].resize(prfe#Vhi.ndof, prfe#Vhglob.ndof);
     }
