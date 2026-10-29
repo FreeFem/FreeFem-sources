@@ -39,7 +39,7 @@ for f in  $dst/$ff_prefix_dir_lib/*.dylib $dst/$ff_prefix_dir_lib_mpi/*.dylib ; 
   for l in `cat /tmp/BaseSearchdylib`; do
   for i in `grep $pwd3lib $ooo` ; do
 	  l=`basename $i`
-	  li=`egrep "/$l$" /tmp/Searchdylib|wc`
+	  li=`grep -E "/$l$" /tmp/Searchdylib|wc`
 	  if [ "$li" -ge 1 ]; then
 		  $fl=$ff_prefix_dir_lib/$l
 		  echo $i "->" $fl

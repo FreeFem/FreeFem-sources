@@ -13,7 +13,7 @@
 (echo export DYLD_PRINT_LIBRARIES=1;ls plugin/mpi/*.dylib|grep -v fflapack| awk '{print "src/mpi/FreeFem++-mpi -check_plugin ",$0}' )|sh 2>&1|awk '$1 ~ /dyld:/  {print $4}'| sort -u
 )| sort -u | grep .dylib > etc/list-dylib
 
-egrep -v '/usr/lib/|/System/|./plugin/' etc/list-dylib >etc/list-dylib-no-os
+grep -E -v '/usr/lib/|/System/|./plugin/' etc/list-dylib >etc/list-dylib-no-os
 echo "list extern lib use by ff++"
 cat etc/list-dylib-no-os
 echo build file etc/list-dylib-no-os etc/list-dylib

@@ -317,15 +317,15 @@ ListFiles-natives: .FORCE
 	test `uname` != Darwin || $(MAKE)  FreeFem++-CoCoa
 	echo $(FF_EXAMPLES_FILES) >$@
 	echo ./3rdparty/fftw/Makefile ./3rdparty/fftw/Makefile.am  >>$@
-	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o -name '*.pgm'  |egrep  '[.]/examples/examples' >>$@
-	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples/examples' >>$@
+	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o -name '*.pgm'  | grep -E  '[.]/examples/examples' >>$@
+	find .   -name '*.h*' -o -name '*.cpp'  | grep -E '[.]/examples/examples' >>$@
 List-agl-dylib: src/nw/FreeFem++
-	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
+	otool -L src/nw/FreeFem++| grep -E -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
 CheckMacLib.sh: src/nw/FreeFem++
-	echo "for i in `otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	echo "for i in `otool -L src/nw/FreeFem++| grep -E -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
 	chmod a+x $@
 CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
-	echo "for i in `otool -L src/mpi/FreeFem++-mpi|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	echo "for i in `otool -L src/mpi/FreeFem++-mpi | grep -E -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
 	chmod a+x $@
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives

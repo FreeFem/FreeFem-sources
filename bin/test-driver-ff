@@ -2,7 +2,7 @@
 # test-driver-ff from test-driver - basic testsuite driver script.
 # modif F. Hecht UPMC.
 
-scriptversion=2025-02-21.16; # UTC
+scriptversion=2026-10-23.09; # UTC
 
 # Copyright (C) 2011-2013 Free Software Foundation, Inc.
 #
@@ -123,7 +123,7 @@ test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
 ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
 estatus=$?
 echo "status " $estatus >>$log_file 
-FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i 'Cputime limit exceeded|MPIEXEC_TIMEOUT|APPLICATION TIMED OUT|Timeout after'|wc -l`
+FAIL_CPU_LIMIT=`tail -100 $log_file | grep -E -i 'Cputime limit exceeded|MPIEXEC_TIMEOUT|APPLICATION TIMED OUT|Timeout after'|wc -l`
 fi
 # Catch ulimit timeout on Linux
 if [ $estatus -eq 137 ]; then
