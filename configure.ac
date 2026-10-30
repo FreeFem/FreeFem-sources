@@ -567,7 +567,6 @@ fi
 # -------------------------------------------------------------------
 
 AC_ARG_ENABLE(cygwindll,[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
-AC_ARG_ENABLE(mingw64,[  --enable-mingw64	Uses mingw64 compilers on Cygwin])
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes
@@ -588,10 +587,6 @@ CYGWIN*|MINGW*|MSYS_NT*)
 	ff_suffix_dylib="dll";
 	ff_suffix_dylib_a="dll.a";
         ff_win32=yes;
-    # echo "ff win 32 --------------------------------------------"
-	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
-	# (which creates thousands of duplicate definitions for sytem calls like time()).
-
 
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
@@ -1013,9 +1008,9 @@ AC_ARG_WITH(petsc,[ --with-petsc=/usr/local/petsc/conf/petscvariables --without-
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=directory where all PETSc/SLEPc will be installed if you download ])
 if test -z "${prefix_petsc}"; then prefix_petsc="${prefix}/ff-petsc"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
-if test "ff_win32" = yes ; then
+if test "$ff_win32" = yes ; then
 	prefix_petsc_win32=`cygpath -w "$prefix_petsc"`
-	AC_SUBST([FF_prefix_petsc_win32],"$prefix_petsc")
+	AC_SUBST([FF_prefix_petsc_win32],"$prefix_petsc_win32")
 	
 fi
 AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")

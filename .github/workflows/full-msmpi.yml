@@ -65,10 +65,17 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-freeglut
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-freeglut
+            mingw-w64-ucrt-x86_64-gcc-fortran
+            mingw-w64-ucrt-x86_64-autotools
+            mingw-w64-ucrt-x86_64-openblas
+            mingw-w64-ucrt-x86_64-msmpi
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ntldd
             make
             m4
             patch
@@ -76,15 +83,9 @@ jobs:
             flex
             bison
             unzip
-            mingw-w64-x86_64-gcc-fortran
-            mingw-w64-x86_64-openblas
-            autoconf
-            automake-wrapper
             pkg-config
             pkgfile
             tar
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-msmpi
             python
 
       # Otherwise PETSc doesn't know which python to use and returns error at
@@ -94,8 +95,8 @@ jobs:
           # Only remove the packages that are actually installed (the runner
           # image may or may not ship gdb-multiarch), otherwise pacman fails
           # with "target not found".
-          { pacman -Qq mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
-              mingw-w64-x86_64-gdb-multiarch 2>/dev/null || true; } \
+          { pacman -Qq mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-gdb \
+              mingw-w64-ucrt-x86_64-gdb-multiarch 2>/dev/null || true; } \
             | xargs -r pacman -R --noconfirm
 
       - uses: actions/checkout@v6
@@ -135,7 +136,6 @@ jobs:
           autoreconf -i
           ./configure ${{ steps.flags.outputs.configure-flags }} --enable-download \
           --enable-maintainer-mode --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o PETSc
 
       - name: PETSc
         if: steps.cache-petsc.outputs.cache-hit != 'true'
