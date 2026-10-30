@@ -110,3 +110,72 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [Augmented Lagrangian preconditioner for large-scale hydrodynamic stability analysis](https://www.sciencedirect.com/science/article/pii/S0045782519301914)                                          | [GitHub repository](https://github.com/prj-/moulin2019al)     |
 | [A multilevel Schwarz preconditioner based on a hierarchy of robust coarse spaces](https://hal.archives-ouvertes.fr/hal-02151184/document)                                                          | [GitHub repository](https://github.com/prj-/aldaas2019multi)  |
 | [KSPHPDDM and PCHPDDM: extending PETSc with advanced Krylov methods and robust multilevel overlapping Schwarz preconditioners](https://www.sciencedirect.com/science/article/pii/S0898122121000055) | [GitHub repository](https://github.com/prj-/jolivet2020petsc) |
+
+## PCHPDDM with subdomains shared by MPI processes
+
+[schwarz-2d-PETSc.edp](schwarz-2d-PETSc.edp) exercises PCGASM with shared
+subdomains and PCASM with several subdomains per process.
+[schwarz-neumann-2d-PETSc.edp](schwarz-neumann-2d-PETSc.edp) builds distributed
+Neumann auxiliary matrices, checks them against sequential references, solves
+a manufactured reaction-diffusion problem with PCHPDDM, and plots the solution.
+
+The PCHPDDM example requires these matching development branches:
+
+| Project | Repository and branch | Tested commit |
+| --- | --- | --- |
+| FreeFEM | this repository, `jolivet/pchpddm-with-gasm` | this branch |
+| PETSc | [indiano68/petsc](https://gitlab.com/indiano68/petsc), `ci-test` | `99ef6b11cb3cc2132929c8460223fd2384e5b7ba` |
+| HPDDM | [prj-/hpddm-dev](https://github.com/prj-/hpddm-dev), `fabrizzi/multprocpersub` | `4f83feb526fb22484bcbb76cc30765a65e01ff01` |
+
+Build PETSc with real, double-precision scalars, shared libraries, SLEPc, MUMPS,
+and the HPDDM revision above. Use the same MPI installation for PETSc, FreeFEM,
+and the launcher. For example, add these options to the PETSc configuration
+appropriate for the target machine:
+
+```sh
+./configure --with-scalar-type=real --with-precision=double \
+  --with-shared-libraries=1 --download-slepc --download-mumps \
+  --download-scalapack --download-metis --download-parmetis \
+  --download-hpddm=https://github.com/prj-/hpddm-dev/archive/4f83feb526fb22484bcbb76cc30765a65e01ff01.tar.gz
+```
+
+After building PETSc, configure and rebuild FreeFEM against that installation.
+For an in-place PETSc build, export `PETSC_DIR` and the target's `PETSC_ARCH`,
+then add this option to the usual FreeFEM configuration:
+
+```sh
+./configure --with-petsc="${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/petscvariables"
+```
+
+For a prefix-installed PETSc, use its `lib/petsc/conf/petscvariables` instead.
+FreeFEM takes the matching HPDDM include directory from this file; rebuild its
+PETSc plugin after changing either dependency. The examples load `PETSc` and
+`macro_ddm.idp` through FreeFEM's normal search paths, with no architecture name,
+library suffix, or installation directory embedded in their source.
+
+From this directory, run four subdomains on eight processes:
+
+```sh
+ff-mpirun -np 8 -nw schwarz-neumann-2d-PETSc.edp \
+  -global 24 -subdomains 4 -hpddm_setup -ksp_view \
+  -pc_hpddm_levels_1_eps_view \
+  -pc_hpddm_levels_1_sub_mat_mumps_icntl_4 2 \
+  -fglut solution.ffglut
+```
+
+The example enables inertia with an absolute eigenvalue threshold of `0.1`,
+MUMPS Cholesky/LDLT, and `-pc_hpddm_levels_1_st_share_sub_ksp`. There is no fixed
+eigenvector count. The views show the negative-pivot counts, the requested
+numbers of eigenvectors, and whether the subdomain KSP is shared.
+
+Change `-np` and `-subdomains` independently: tested pairs are `8/4`, `4/4`,
+`4/2`, `4/3`, and `1/1`. PCHPDDM infers the grouping from the auxiliary matrices,
+including unequal group sizes; do not also specify
+`-pc_hpddm_total_subdomains`. The Neumann example requires one active subdomain
+per rank, so the subdomain count must not exceed the process count. In serial,
+PETSc uses a single level and does not need the eigensolver options.
+
+`-fglut` enables plotting with `-nw` and saves a replayable graphics stream.
+The final plot is also saved as `schwarz-neumann-solution.eps` in the current
+directory; choose another relative filename with `-plot solution.eps`.
+Without `-nw`, the usual FreeFEM graphical viewer displays the solution.

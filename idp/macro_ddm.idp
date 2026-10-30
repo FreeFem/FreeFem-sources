@@ -1176,6 +1176,163 @@ ENDIFMACRO
 }
 EndMacro
 
+// Build Schwarz index sets after MatCreate(), independently of matrix ownership.
+// SubdomainsName is an int[int][int], indexed by global subdomain number;
+// each entry contains local PkName dofs, or is empty on nonparticipating ranks.
+// Every rank in ThName#Comm must have a nonempty local finite-element space.
+// With at most one subdomain per rank, contiguous groups of ranks share a
+// subdomain (PCGASM), inheriting the overlap of the distributed mesh. Otherwise,
+// partition each local mesh and add OverlapName vertex layers (PCASM).
+// Pass the result to set(A, subdomains = SubdomainsName, sparams = "-pc_type ...").
+macro SchwarzCreate(ThName, SubdomainsName, PkName, CountName, OverlapName)
+{
+IFMACRO(!ThName#Comm)
+    NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!meshN)
+IFMACRO(dimension,3)
+IFMACRO(!meshtype)
+    NewMacro meshtype()V EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,V)
+    NewMacro meshN()mesh3 EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,S)
+    NewMacro meshN()meshS EndMacro
+ENDIFMACRO
+IFMACRO(meshtype,L)
+    NewMacro meshN()meshL EndMacro
+ENDIFMACRO
+ENDIFMACRO
+ENDIFMACRO
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro
+ENDIFMACRO
+    int privateCount = CountName;
+    int privateOverlap = OverlapName;
+    int privateSize = mpiSize(ThName#Comm);
+    int privateRank = mpiRank(ThName#Comm);
+    assert(privateCount > 0 && privateOverlap >= 0);
+    SubdomainsName.resize(privateCount);
+    for(int i = 0; i < privateCount; ++i)
+        SubdomainsName[i].resize(0);
+    fespace WhSchwarzPrivate(ThName, PkName);
+    if(privateCount <= privateSize) {
+        int privateId = privateRank * privateCount / privateSize;
+        SubdomainsName[privateId].resize(WhSchwarzPrivate.ndof);
+        if(WhSchwarzPrivate.ndof)
+            SubdomainsName[privateId] = 0:WhSchwarzPrivate.ndof - 1;
+    }
+    else if(ThName.nt) {
+        int privateFirst = privateRank * privateCount / privateSize;
+        int privateLast = (privateRank + 1) * privateCount / privateSize;
+        assert(privateLast - privateFirst <= ThName.nt);
+        fespace PhSchwarzPrivate(ThName, P0);
+        fespace VhSchwarzPrivate(ThName, P1);
+        PhSchwarzPrivate privatePart, privateSupport;
+        VhSchwarzPrivate privateSmooth;
+        partitionerSeq(privatePart[], ThName, privateLast - privateFirst);
+        partitionerPar(privatePart[], ThName, mpiCommSelf, privateLast - privateFirst);
+        for(int i = privateFirst; i < privateLast; ++i) {
+            privateSupport = abs(privatePart - (i - privateFirst)) < 0.1;
+            if(privateOverlap)
+                AddLayers(VhSchwarzPrivate, privateSupport[], privateOverlap, privateSmooth[]);
+            int[int] privateN2O;
+            meshN privateSubmesh = trunc(ThName, privateSupport > 0.1, new2old = privateN2O);
+            fespace WhSubdomainPrivate(privateSubmesh, PkName);
+            int[int] privateRestriction = restrict(WhSubdomainPrivate, WhSchwarzPrivate, privateN2O);
+            SubdomainsName[i].resize(privateRestriction.n);
+            SubdomainsName[i] = privateRestriction;
+        }
+    }
+}
+EndMacro
+
+// Create one auxiliary Neumann mesh/matrix per rank group. ThGlobalName is the
+// original replicated mesh and ThName#N2O maps the parent local elements to it.
+// MatName must already be assembled, with its parent PETSc numbering available.
+// SubdomainsName uses SchwarzCreate's global IDs, with one active ID per rank.
+// ThNeumannName must be a fresh mesh variable. This macro declares NeumannName
+// after its communicator so the Mat is destroyed before that communicator.
+// It defines ThNeumannName#Comm and ThNeumannName#N2O (relative to ThGlobalName).
+// The auxiliary matrix and index set are registered on MatName automatically.
+// Assemble the desired Neumann bilinear form into NeumannName afterwards;
+// the usual set(MatName, sparams = "-pc_type hpddm ...") attaches them to PCHPDDM.
+// NumberingName maps auxiliary local FE dofs to parent PETSc global rows.
+macro SchwarzNeumannCreate(ThName, MatName, ThGlobalName, SubdomainsName, ThNeumannName, NeumannName, PkName, NumberingName)
+IFMACRO(!ThName#Comm)
+NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!ThName#N2O)
+cout << "SchwarzNeumannCreate requires " << Stringification(ThName) << "N2O before MatCreate" << endl;
+assert(0);
+ENDIFMACRO
+IFMACRO(ThName#N2O)
+int privateSchwarz#ThNeumannName#Id = -1;
+{
+    int privateActive = 0;
+    for(int i = 0; i < SubdomainsName.n; ++i)
+        if(SubdomainsName[i].n) {
+            privateSchwarz#ThNeumannName#Id = i;
+            ++privateActive;
+        }
+    assert(privateActive == 1);
+    assert(ThName#N2O.n == ThName.nt);
+    assert(ThName#N2O.min >= 0 && ThName#N2O.max < ThGlobalName.nt);
+}
+mpiComm privateSchwarz#ThNeumannName#Comm(ThName#Comm, privateSchwarz#ThNeumannName#Id, mpiRank(ThName#Comm));
+NewMacro ThNeumannName#Comm()privateSchwarz#ThNeumannName#Comm EndMacro
+int[int] privateSchwarz#ThNeumannName#N2O;
+NewMacro ThNeumannName#N2O()privateSchwarz#ThNeumannName#N2O EndMacro
+DmeshInitialize(ThNeumannName)
+Mat<PetscScalar> NeumannName;
+{
+    fespace WhParentPrivate(ThName, PkName);
+    fespace WhOriginalPrivate(ThGlobalName, PkName);
+    int[int] privateParentRestriction = restrict(WhParentPrivate, WhOriginalPrivate, ThName#N2O);
+    int[int] privateParentNumbering;
+    GlobalNumbering(MatName, privateParentNumbering);
+    assert(privateParentNumbering.n == WhParentPrivate.ndof);
+    int[int] privateLocalNumbering(WhOriginalPrivate.ndof), privateGlobalNumbering(WhOriginalPrivate.ndof);
+    privateLocalNumbering = -1;
+    for[i, j : privateParentRestriction] privateLocalNumbering[j] = privateParentNumbering[i];
+    mpiAllReduce(privateLocalNumbering, privateGlobalNumbering, ThName#Comm, mpiMAX);
+    assert(privateGlobalNumbering.min >= 0);
+
+    int[int] privateMember(WhParentPrivate.ndof);
+    privateMember = 0;
+    for[j, value : SubdomainsName[privateSchwarz#ThNeumannName#Id]] {
+        assert(value >= 0 && value < privateMember.n);
+        privateMember[value] = 1;
+    }
+    real[int] privateLocalSupport(ThGlobalName.nt), privateGroupSupport(ThGlobalName.nt);
+    privateLocalSupport = 0;
+    for(int k = 0; k < ThName.nt; ++k) {
+        bool privateIncluded = true;
+        for(int j = 0; j < WhParentPrivate.ndofK; ++j)
+            if(!privateMember[WhParentPrivate(k, j)]) privateIncluded = false;
+        if(privateIncluded) privateLocalSupport[ThName#N2O[k]] = 1;
+    }
+    /* MAX preserves the outer overlap while counting each original element
+       once, even when it occurs on several parent ranks. */
+    mpiAllReduce(privateLocalSupport, privateGroupSupport, ThNeumannName#Comm, mpiMAX);
+    fespace PhOriginalPrivate(ThGlobalName, P0);
+    PhOriginalPrivate privateSupport;
+    privateSupport[] = privateGroupSupport;
+    int[int] privateGroupN2O;
+    ThNeumannName = trunc(ThGlobalName, privateSupport > 0.5, label = -111111, new2old = privateGroupN2O);
+    MatCreate(ThNeumannName, NeumannName, PkName);
+    int[int] privateComposedN2O = privateGroupN2O(ThNeumannName#N2O);
+    ThNeumannName#N2O = privateComposedN2O;
+    fespace WhNeumannPrivate(ThNeumannName, PkName);
+    int[int] privateRestriction = restrict(WhNeumannPrivate, WhOriginalPrivate, ThNeumannName#N2O);
+    NumberingName.resize(WhNeumannPrivate.ndof);
+    NumberingName = privateGlobalNumbering(privateRestriction);
+    MatSetNeumann(MatName, NeumannName, NumberingName);
+}
+ENDIFMACRO
+EndMacro
+
 macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
 IFMACRO(!def)
     NewMacro def(i)i EndMacro

@@ -3,6 +3,13 @@
 
 #define HPDDM_PETSC   1
 
+#include <petscksp.h>
+#if PETSC_VERSION_GE(3, 26, 0)
+// HPDDM needs this declaration, but petsc/private/petschpddm.h also enables
+// PETSc's internal HPDDM API, which is incompatible with this plugin.
+PETSC_INTERN PetscErrorCode KSPHPDDMConvergenceSetUp_Private(KSP, PetscInt, const PetscReal[], const PetscReal[]);
+#endif
+
 #include "common_hpddm.hpp"
 
 namespace PETSc {

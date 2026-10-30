@@ -56,6 +56,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	coupled-physics-2d-PETSc.md \
 	diffusion-2d-PETSc.edp \
 	diffusion-cartesian-2d-PETSc.edp \
+	schwarz-2d-PETSc.edp \
 	diffusion-3d-PETSc.edp \
 	diffusion-periodic-2d-PETSc.edp \
 	elasticity-2d-PETSc.edp \
@@ -132,6 +133,8 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	stokes-2d-SLEPc.edp \
 	mf-2d-SLEPc.edp
 
+TESTS_PETSC_SLEPC_MUMPS = schwarz-neumann-2d-PETSc.edp
+
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-2d-PETSc-complex.edp \
 	helmholtz-mg-2d-PETSc-complex.edp
@@ -182,6 +185,9 @@ endif MSHMET
 endif PARMMG
 if SLEPC
 CONDITIONAL_PETSC_SLEPC = $(TESTS_PETSC_SLEPC)
+if MUMPS
+CONDITIONAL_PETSC_SLEPC_MUMPS = $(TESTS_PETSC_SLEPC_MUMPS)
+endif MUMPS
 endif SLEPC
 endif PETSC
 
@@ -216,6 +222,7 @@ TESTS = $(TESTS_MPI) \
 	$(TESTS_PETSC_PARMMG) \
 	$(TESTS_PETSC_PARMMG_MSHMET) \
 	$(TESTS_PETSC_SLEPC) \
+	$(TESTS_PETSC_SLEPC_MUMPS) \
 	$(TESTS_PETSCCOMPLEX) \
 	$(TESTS_PETSCCOMPLEX_MUMPS) \
 	$(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX) \
@@ -233,6 +240,7 @@ LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_PETSC_PARMMG) \
 	$(CONDITIONAL_PETSC_PARMMG_MSHMET) \
 	$(CONDITIONAL_PETSC_SLEPC) \
+	$(CONDITIONAL_PETSC_SLEPC_MUMPS) \
 	$(CONDITIONAL_PETSCCOMPLEX) \
 	$(CONDITIONAL_PETSCCOMPLEX_MUMPS) \
 	$(CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX) \

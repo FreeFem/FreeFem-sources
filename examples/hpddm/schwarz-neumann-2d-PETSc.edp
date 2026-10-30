@@ -1,0 +1,220 @@
+// Run with MPI: ff-mpirun -np 8 -nw schwarz-neumann-2d-PETSc.edp -subdomains 4
+// NBPROC 4
+// Requires the matching PETSc/HPDDM branches, SLEPc, and MUMPS; see README.md.
+// Run with any number of MPI processes and -subdomains N (1 <= N <= mpisize).
+// Build and check Neumann subdomains, solve with PCHPDDM, and plot the solution.
+// SchwarzNeumannCreate registers the auxiliary matrix and index set with A.
+// Check pure diffusion first, then attach the reaction-diffusion operator
+// matching A, with natural boundary conditions on each subdomain interface.
+// PCHPDDM infers the grouping from these matrices; no separate
+// -pc_hpddm_total_subdomains option is needed.
+// -hpddm_setup explicitly sets up the solver before the solve.
+// With -nw, add -fglut solution.ffglut to enable the saved solution plot.
+
+load "PETSc"
+include "macro_ddm.idp"
+
+int count = getARGV("-subdomains", min(2, mpisize));
+if(count <= 0 || count > mpisize) {
+    if(mpirank == 0) cout << "-subdomains must be between 1 and " << mpisize << endl;
+    exit(1);
+}
+func Pk = P2;
+mesh ThGlobal = square(getARGV("-global", 12), getARGV("-global", 12));
+mesh Th = ThGlobal;
+int[int] n2o;
+macro ThN2O()n2o//
+Mat A;
+MatCreate(Th, A, Pk);
+fespace Vh(Th, Pk);
+fespace VhGlobal(ThGlobal, Pk);
+varf vParent(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v) + u * v);
+A = vParent(Vh, Vh);
+// Creating the solver populates PETSc's preconditioner registry.
+set(A, setup = false);
+if(!HasType("PC", "hpddm")) {
+    if(mpirank == 0) cout << "Skipping Neumann attachment: PCHPDDM is unavailable" << endl;
+    exit(0);
+}
+
+int[int][int] subdomains;
+SchwarzCreate(Th, subdomains, Pk, count, 1);
+mesh ThN;
+int[int] numbering;
+// The macro declares N after its subgroup communicator, preserving lifetime,
+// and registers its matrix and parent numbering with A before assembly.
+SchwarzNeumannCreate(Th, A, ThGlobal, subdomains, ThN, N, Pk, numbering);
+fespace VhN(ThN, Pk);
+assert(numbering.n == VhN.ndof);
+assert(ThNN2O.n == ThN.nt);
+varf vNeumann(u, v) = int2d(ThN)(dx(u) * dx(v) + dy(u) * dy(v));
+N = vNeumann(VhN, VhN);
+
+// Independently recover the parent numbering on the original finite elements.
+int[int] parentRestriction = restrict(Vh, VhGlobal, n2o);
+int[int] parentRange = A.range;
+real[int] ownedParentIds(A.n), parentIds(Vh.ndof);
+for(int i = 0; i < ownedParentIds.n; ++i)
+    ownedParentIds[i] = parentRange[0] + i;
+ChangeNumbering(A, parentIds, ownedParentIds, inverse = true, exchange = true);
+int[int] localParentIds(VhGlobal.ndof), globalParentIds(VhGlobal.ndof);
+localParentIds = -1;
+for[i, j : parentRestriction] localParentIds[j] = parentIds[i];
+mpiAllReduce(localParentIds, globalParentIds, mpiCommWorld, mpiMAX);
+assert(globalParentIds.min >= 0);
+int[int] auxRestriction = restrict(VhN, VhGlobal, ThNN2O);
+for[i, j : auxRestriction] assert(numbering[i] == globalParentIds[j]);
+int[int] localCoverage(VhGlobal.ndof), groupCoverage(VhGlobal.ndof);
+localCoverage = 0;
+for[i, j : numbering] localCoverage[j] = 1;
+mpiAllReduce(localCoverage, groupCoverage, ThNComm, mpiMAX);
+for(int i = parentRange[0]; i < parentRange[1]; ++i) assert(groupCoverage[i] == 1);
+
+// Construct a sequential reference from the union of the auxiliary elements.
+// Taking a union avoids counting the overlap between group ranks twice.
+real[int] localSupport(ThGlobal.nt), unionSupport(ThGlobal.nt);
+localSupport = 0;
+for(int k = 0; k < ThNN2O.n; ++k) localSupport[ThNN2O[k]] = 1;
+mpiAllReduce(localSupport, unionSupport, ThNComm, mpiMAX);
+fespace PhGlobal(ThGlobal, P0);
+PhGlobal support;
+support[] = unionSupport;
+int[int] referenceN2O;
+mesh ThReference = trunc(ThGlobal, support > 0.5, new2old = referenceN2O);
+fespace VhReference(ThReference, Pk);
+int localRows = N.n, rows;
+mpiAllReduce(localRows, rows, ThNComm, mpiSUM);
+assert(rows == VhReference.ndof);
+real area = int2d(ThReference)(1.0);
+
+VhN one = 1, xx = x, yy = y, probe = 1 + x^2 + 2 * y^2;
+real[int] rowSums = N * one[];
+real localNullError = rowSums.linfty, nullError;
+mpiAllReduce(localNullError, nullError, ThNComm, mpiMAX);
+assert(nullError < 1e-10);
+real[int] Nx = N * xx[], Ny = N * yy[];
+real[int] xOwned, yOwned, NxOwned, NyOwned;
+ChangeNumbering(N, xx[], xOwned);
+ChangeNumbering(N, yy[], yOwned);
+ChangeNumbering(N, Nx, NxOwned);
+ChangeNumbering(N, Ny, NyOwned);
+real[int] localEnergy = [xOwned' * NxOwned, yOwned' * NyOwned, xOwned' * NyOwned];
+real[int] energy(3);
+mpiAllReduce(localEnergy, energy, ThNComm, mpiSUM);
+assert(abs(energy[0] - area) < 1e-10 && abs(energy[1] - area) < 1e-10);
+assert(abs(energy[2]) < 1e-10);
+
+real[int] action = N * probe[];
+real[int] transposeAction = N' * probe[];
+transposeAction -= action;
+real localSymmetryError = transposeAction.linfty, symmetryError;
+mpiAllReduce(localSymmetryError, symmetryError, ThNComm, mpiMAX);
+assert(symmetryError < 1e-10);
+
+// Compare the complete distributed action with an independently assembled
+// reference; symmetry and a constant nullspace alone miss duplicated elements.
+int[int] oldToReference(ThGlobal.nt), auxToReference(ThN.nt);
+oldToReference = -1;
+for[i, j : referenceN2O] oldToReference[j] = i;
+for(int k = 0; k < ThN.nt; ++k) auxToReference[k] = oldToReference[ThNN2O[k]];
+int[int] referenceRestriction = restrict(VhN, VhReference, auxToReference);
+real[int] actionOwned;
+ChangeNumbering(N, action, actionOwned);
+ChangeNumbering(N, action, actionOwned, inverse = true, exchange = false);
+real[int] contribution(VhReference.ndof), assembledAction(VhReference.ndof);
+contribution = 0;
+for[i, j : referenceRestriction] contribution[j] = action[i];
+mpiAllReduce(contribution, assembledAction, ThNComm, mpiSUM);
+varf vReference(u, v) = int2d(ThReference)(dx(u) * dx(v) + dy(u) * dy(v));
+matrix reference = vReference(VhReference, VhReference);
+VhReference probeReference = 1 + x^2 + 2 * y^2;
+real[int] referenceAction = reference * probeReference[];
+assembledAction -= referenceAction;
+assert(assembledAction.linfty < 1e-9);
+if(mpiRank(ThNComm) == 0)
+    cout << "Neumann matrix on " << mpiSize(ThNComm) << " ranks: " << rows
+         << " rows, area = " << area << ", nullspace error = " << nullError
+         << ", reference action error = " << assembledAction.linfty << endl;
+
+// PCHPDDM needs the same operator as A, with natural interface conditions.
+// Add its reaction term after checking the pure-diffusion nullspace above.
+varf vAuxiliary(u, v) = int2d(ThN)(dx(u) * dx(v) + dy(u) * dy(v) + u * v);
+N = vAuxiliary(VhN, VhN);
+varf vAuxiliaryReference(u, v) = int2d(ThReference)(dx(u) * dx(v) + dy(u) * dy(v) + u * v);
+reference = vAuxiliaryReference(VhReference, VhReference);
+referenceAction = reference * probeReference[];
+action = N * probe[];
+ChangeNumbering(N, action, actionOwned);
+ChangeNumbering(N, action, actionOwned, inverse = true, exchange = false);
+contribution = 0;
+for[i, j : referenceRestriction] contribution[j] = action[i];
+mpiAllReduce(contribution, assembledAction, ThNComm, mpiSUM);
+assembledAction -= referenceAction;
+assert(assembledAction.linfty < 1e-9);
+real[int] oneOwned, NOneOwned;
+rowSums = N * one[];
+ChangeNumbering(N, one[], oneOwned);
+ChangeNumbering(N, rowSums, NOneOwned);
+real localMass = oneOwned' * NOneOwned, mass;
+mpiAllReduce(localMass, mass, ThNComm, mpiSUM);
+assert(abs(mass - area) < 1e-10);
+
+// Inertia selects the eigenvector count; share the MUMPS LDL^T factorization
+// between the eigensolver and the subdomain solver.
+set(A, setup = false,
+    sparams = "-pc_type hpddm -pc_hpddm_has_neumann -pc_hpddm_define_subdomains"
+            + " -pc_hpddm_levels_1_eps_threshold_absolute 0.1 -pc_hpddm_levels_1_eps_use_inertia"
+            + " -pc_hpddm_levels_1_st_share_sub_ksp -pc_hpddm_levels_1_sub_pc_type cholesky"
+            + " -pc_hpddm_levels_1_sub_pc_factor_mat_solver_type mumps"
+            + " -pc_hpddm_coarse_pc_type lu -pc_hpddm_coarse_pc_factor_mat_solver_type mumps"
+            + " -ksp_type fgmres -ksp_rtol 1e-10 -ksp_error_if_not_converged");
+if(mpirank == 0)
+    cout << "Attached " << count << " Neumann subdomains to PCHPDDM" << endl;
+if(usedARGV("-hpddm_setup") != -1) {
+    set(A, setup = true);
+    if(mpirank == 0) cout << "PCHPDDM setup completed" << endl;
+}
+
+// Check the actual grouping, including groups of unequal size.
+int[int] testLocalParticipants(count), testParticipants(count);
+for(int i = 0; i < count; ++i) testLocalParticipants[i] = subdomains[i].n > 0;
+mpiAllReduce(testLocalParticipants, testParticipants, mpiCommWorld, mpiSUM);
+for(int i = 0; i < count; ++i) {
+    int expected = ((i + 1) * mpisize + count - 1) / count
+                 - (i * mpisize + count - 1) / count;
+    assert(testParticipants[i] == expected);
+}
+assert(mpiSize(ThNComm) == testParticipants[mpirank * count / mpisize]);
+string testLayout = count + " subdomains on " + mpisize + " ranks";
+Vh testExact = 1 + x^2 + 2*y^2, testSolution;
+real[int] testRhs = A * testExact[];
+real[int] testOwnedRhs, testOwnedSolution;
+ChangeNumbering(A, testRhs, testOwnedRhs);
+KSPSolve(A, testOwnedRhs, testOwnedSolution);
+assert(KSPGetConvergedReason(A) > 0);
+ChangeNumbering(A, testSolution[], testOwnedSolution, inverse = true, exchange = true);
+real[int] testDifference = testSolution[];
+testDifference -= testExact[];
+real testLocalError = testDifference.linfty, testError;
+mpiAllReduce(testLocalError, testError, mpiCommWorld, mpiMAX);
+real[int] testResidual = A * testSolution[];
+testResidual -= testRhs;
+real testLocalResidual = testResidual.linfty, testResidualNorm;
+real testLocalRhs = testRhs.linfty, testRhsNorm;
+mpiAllReduce(testLocalResidual, testResidualNorm, mpiCommWorld, mpiMAX);
+mpiAllReduce(testLocalRhs, testRhsNorm, mpiCommWorld, mpiMAX);
+assert(testError < 1e-7);
+assert(testResidualNorm / testRhsNorm < 1e-8);
+if(mpirank == 0)
+    cout << "PCHPDDM solve: " << testLayout << ", iterations = " << KSPGetIterationNumber(A)
+         << ", solution max error = " << testError
+         << ", true relative infinity residual = " << testResidualNorm / testRhsNorm << endl;
+
+// Gather the distributed solution for a single plot on rank zero.
+macro testPlotDef(u)u//
+NewMacro testPlotOptions()
+    cmm = "PCHPDDM solution: " + testLayout,
+    fill = true, value = true, wait = false,
+    ps = getARGV("-plot", "schwarz-neumann-solution.eps")
+EndMacro
+plotMPI(Th, testSolution, Pk, testPlotDef, real, testPlotOptions);

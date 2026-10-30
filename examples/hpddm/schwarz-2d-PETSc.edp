@@ -1,0 +1,173 @@
+// Run with graphics: ff-mpirun -np 4 -win schwarz-2d-PETSc.edp
+// NBPROC 4
+// With four ranks, the default run checks 1, 2, and 3 distributed GASM
+// subdomains, and 4, 8, and 7 process-local ASM subdomains.
+// Select a single case with -subdomains N.
+// A serial run with -subdomains 3 also exercises several local subdomains.
+// All decomposition views keep the original domain coordinates.
+// The distributed solution shows rank boundaries; a separate plot colors MPI ranks
+// in the original domain coordinates (overlap is drawn in rank order).
+// The distributed solution is also gathered onto the original sequential mesh.
+// Press Enter in the sequential solution window to advance; -nw skips plots.
+
+load "PETSc"
+include "macro_ddm.idp"
+
+int requested = getARGV("-subdomains", 0);
+int overlap = getARGV("-overlap", 1);
+int[int] counts = [1, max(1, mpisize / 2), mpisize, 2 * mpisize,
+                   max(1, mpisize - 1), max(3, 2 * mpisize - 1)];
+if(requested > 0) {
+    counts.resize(1);
+    counts[0] = requested;
+}
+func Pk = P2;
+func exact = 1 + x^2 + 2 * y^2;
+macro scalar(u)u//
+
+for(int test = 0; test < counts.n; ++test) {
+    int count = counts[test];
+    mesh Th = square(getARGV("-global", 16), getARGV("-global", 16));
+    mesh ThGlobal = Th;
+    int[int] n2o;
+    macro ThN2O()n2o//
+    Mat A;
+    MatCreate(Th, A, Pk);
+    assert(n2o.n == Th.nt);
+    fespace Vh(Th, Pk);
+    fespace VhGlobal(ThGlobal, Pk);
+    Vh u, reference = exact;
+
+    if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
+        real[int] rankColors(mpisize + 1);
+        for[i, value : rankColors] value = i - 0.5;
+        NewMacro initialPlot()fill = true, value = true, boundary = true, wait = false,
+            viso = rankColors, WindowIndex = 0, dim = 3,
+            cmm = "Initial decomposition: " + mpisize + " MPI processes (overlap drawn in rank order)" EndMacro
+        plotDmesh(Th, initialPlot);
+    }
+
+    // -Delta(exact) + exact = exact - 6, with its exact normal flux.
+    varf vPb(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v) + u * v)
+                  + int2d(Th)((exact - 6) * v)
+                  + int1d(Th, 1, 2, 3, 4)((2 * x * N.x + 4 * y * N.y) * v);
+    A = vPb(Vh, Vh);
+    real[int] rhs = vPb(0, Vh);
+
+    int[int][int] subdomains;
+    SchwarzCreate(Th, subdomains, Pk, count, overlap);
+    assert(subdomains.n == count);
+    int[int] localParticipants(count), participants(count);
+    for(int i = 0; i < count; ++i)
+        localParticipants[i] = subdomains[i].n > 0;
+    mpiAllReduce(localParticipants, participants, mpiCommWorld, mpiSUM);
+    assert(participants.min > 0);
+    if(count < mpisize) {
+        assert(localParticipants.sum == 1);
+        assert(participants.max > 1);
+    }
+    else
+        assert(participants.max == 1);
+
+    string pc = count < mpisize ? "gasm" : "asm";
+    if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
+        mesh[int] pieces(count);
+        mesh ThSubdomain;
+        fespace PhSubdomain(ThSubdomain, P0);
+        PhSubdomain[int] subdomainId(count);
+        fespace PhGlobal(ThGlobal, P0);
+        PhGlobal support;
+        int[int] member(Vh.ndof);
+        real[int] localSupport(ThGlobal.nt), globalSupport(ThGlobal.nt);
+        for(int i = 0; i < count; ++i) {
+            localSupport = 0;
+            if(subdomains[i].n) {
+                member = 0;
+                for(int j = 0; j < subdomains[i].n; ++j)
+                    member[subdomains[i][j]] = 1;
+                // Recover the actual outer support on the original mesh.
+                for(int k = 0; k < Th.nt; ++k) {
+                    bool included = true;
+                    for(int j = 0; j < Vh.ndofK; ++j)
+                        if(!member[Vh(k, j)]) included = false;
+                    if(included) localSupport[n2o[k]] = 1;
+                }
+            }
+            // Unite GASM pieces across ranks without internal rank boundaries.
+            mpiReduce(localSupport, globalSupport, processor(0), mpiMAX);
+            if(mpirank == 0) {
+                support[] = globalSupport;
+                pieces[i] = trunc(ThGlobal, support > 0.5);
+                ThSubdomain = pieces[i];
+                subdomainId[i][] = i;
+            }
+        }
+        real[int] subdomainColors(count + 1);
+        for[i, value : subdomainColors] value = i - 0.5;
+        // Keep overlapping meshes separate and draw them at their actual positions.
+        if(mpirank == 0)
+            plot(subdomainId, fill = true, value = true, boundary = true, wait = false, dim = 3,
+                 viso = subdomainColors, WindowIndex = 1,
+                 cmm = "Final " + pc + " decomposition: " + count + " subdomains on " + mpisize
+                     + " MPI processes (overlap drawn in subdomain order)");
+    }
+    set(A, subdomains = subdomains,
+        sparams = "-pc_type " + pc
+                + " -ksp_type fgmres -ksp_rtol 1e-10 -ksp_max_it 300"
+                + " -sub_ksp_type gmres -sub_ksp_rtol 1e-12"
+                + " -sub_ksp_max_it 500 -sub_pc_type lu"
+                + " -ksp_error_if_not_converged");
+    u[] = A^-1 * rhs;
+    assert(KSPGetConvergedReason(A) > 0);
+
+    real[int] error = u[] - reference[];
+    real localError = error.linfty, globalError;
+    mpiAllReduce(localError, globalError, mpiCommWorld, mpiMAX);
+    assert(globalError < 1e-7);
+
+    real[int] residual = A * u[];
+    exchange(A, rhs, scaled = true);
+    residual -= rhs;
+    real localResidual = residual.linfty, globalResidual;
+    real localRhs = rhs.linfty, globalRhs;
+    mpiAllReduce(localResidual, globalResidual, mpiCommWorld, mpiMAX);
+    mpiAllReduce(localRhs, globalRhs, mpiCommWorld, mpiMAX);
+    assert(globalResidual / globalRhs < 1e-8);
+
+    // N2O maps local elements to the original mesh. Lift it to P2 dofs and
+    // gather only owned entries, so overlapping copies are not counted twice.
+    int[int] restriction = restrict(Vh, VhGlobal, n2o);
+    real[int] owned = u[], petsc;
+    ChangeNumbering(A, owned, petsc);
+    ChangeNumbering(A, owned, petsc, inverse = true, exchange = false);
+    real[int] contribution(VhGlobal.ndof);
+    contribution = 0;
+    for[i, j : restriction] contribution[j] = owned[i];
+    VhGlobal uSequential, referenceSequential = exact;
+    mpiReduce(contribution, uSequential[], processor(0), mpiSUM);
+    if(mpirank == 0) {
+        real[int] sequentialError = uSequential[] - referenceSequential[];
+        assert(sequentialError.linfty < 1e-7);
+        cout << pc << ": " << count << " subdomains on " << mpisize
+             << " ranks, error = " << globalError
+             << ", relative residual = " << globalResidual / globalRhs
+             << ", sequential error = " << sequentialError.linfty << endl;
+    }
+    NewMacro solutionPlot()fill = true, value = true, boundary = true, wait = false, dim = 3,
+        WindowIndex = 2, cmm = "Final distributed solution: " + pc + ", " + count
+            + " subdomains on " + mpisize + " MPI processes (rank boundaries shown)" EndMacro
+    plotMPI(Th, u, Pk, scalar, real, solutionPlot);
+    if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
+        real[int] rankColors(mpisize + 1);
+        for[i, value : rankColors] value = i - 0.5;
+        NewMacro rankPlot()fill = true, value = true, boundary = true, wait = false, dim = 3,
+            viso = rankColors, WindowIndex = 3,
+            cmm = "MPI rank on the distributed mesh: 0 to " + (mpisize - 1)
+                + " (overlap drawn in rank order)" EndMacro
+        plotDmesh(Th, rankPlot);
+    }
+    if(mpirank == 0 && (!NoGraphicWindow || usedARGV("-fglut") != -1))
+        plot(uSequential, fill = true, value = true, boundary = false, wait = true,
+             WindowIndex = 4, cmm = "Final sequential solution reconstructed with N2O: " + pc
+                 + ", " + count + " subdomains on " + mpisize + " MPI processes");
+}

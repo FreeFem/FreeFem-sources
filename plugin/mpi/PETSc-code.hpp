@@ -824,7 +824,9 @@ namespace PETSc {
                   PCGetType(pc, &type);
                   PetscBool isType;
                   PetscStrcmp(type, PCHPDDM, &isType);
-                  if(isType) {
+                  Mat neumann = nullptr;
+                  PetscObjectQuery((PetscObject)ptA->_petsc, "_FreeFem_HPDDM_Neumann_Mat", (PetscObject*)&neumann);
+                  if(isType && !neumann) {
                       const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                       Mat aux = ff_to_PETSc(A);
                       Mat N;
@@ -1057,6 +1059,10 @@ namespace PETSc {
     } else {
       MatType type;
       PetscBool isType = PETSC_FALSE;
+      if (ptA->_petsc) {
+        PetscObjectCompose((PetscObject)ptA->_petsc, "_FreeFem_HPDDM_Neumann_Mat", nullptr);
+        PetscObjectCompose((PetscObject)ptA->_petsc, "_FreeFem_HPDDM_Neumann_IS", nullptr);
+      }
       if (ptB->_petsc) {
         MatGetType(ptB->_petsc, &type);
         PetscStrcmp(type, MATNEST, &isType);
@@ -2151,7 +2157,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 22;
+      static const int n_name_param = 23;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(nullptr), P(nullptr), c(d) {
@@ -2206,7 +2212,8 @@ namespace PETSc {
     {"setup", &typeid(bool)},                                                                     // 18
     {"monitor", &typeid(Polymorphic*)},                                                           // 19
     {"deflation", &typeid(FEbaseArrayKn<upscaled_type<PetscScalar>>*)},                           // 20
-    {"transposenullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)}                           // 21
+    {"transposenullspace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                          // 21
+    {"subdomains", &typeid(KN< KN< long > >*)}                                                   // 22
   };
   class ShellInjection;
   template< class Type >
@@ -2472,6 +2479,220 @@ namespace PETSc {
     mat->apply(it, rnorm);
     PetscFunctionReturn(PETSC_SUCCESS);
   }
+  template< class Type >
+  static PetscErrorCode setSchwarzSubdomains(Type* A, PC pc, const KN< KN< long > >& subdomains) {
+    PetscErrorCode ierr;
+    MPI_Comm comm = PetscObjectComm((PetscObject)A->_petsc);
+    PetscBool gasm, asmpc;
+    PetscInt first, last;
+    PetscFunctionBeginUser;
+    ierr = PetscObjectTypeCompare((PetscObject)pc, PCGASM, &gasm);CHKERRQ(ierr);
+    ierr = PetscObjectTypeCompare((PetscObject)pc, PCASM, &asmpc);CHKERRQ(ierr);
+    if (!gasm && !asmpc) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "subdomains requires -pc_type asm or -pc_type gasm");
+    ierr = MatGetOwnershipRange(A->_petsc, &first, &last);CHKERRQ(ierr);
+    long count = subdomains.N(), bounds[2] = { count, -count };
+    MPI_Allreduce(MPI_IN_PLACE, bounds, 2, MPI_LONG, MPI_MAX, comm);
+    if (count <= 0 || bounds[0] != -bounds[1]) SETERRQ(comm, PETSC_ERR_ARG_SIZ, "subdomains must have the same positive number of entries on all MPI ranks");
+
+    // Entries use local finite-element numbering; their positions are global subdomain IDs.
+    std::vector< std::vector<PetscInt> > indices(count);
+    std::vector<PetscInt> owner(last - first, -1);
+    int valid = A->_A && (A->_num || !A->_A->getDof());
+    for (long i = 0; valid && i < count; ++i) {
+      for (long j = 0; j < subdomains[i].N(); ++j) {
+        long local = subdomains[i][j];
+        if (local < 0 || local >= A->_A->getDof()) {
+          valid = 0;
+          break;
+        }
+        PetscInt global = A->_num[local];
+        indices[i].push_back(global);
+        if (global >= first && global < last && owner[global - first] < 0) owner[global - first] = i;
+      }
+      std::sort(indices[i].begin(), indices[i].end());
+      indices[i].erase(std::unique(indices[i].begin(), indices[i].end()), indices[i].end());
+    }
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_OUTOFRANGE, "subdomains contains an invalid local finite-element index or the matrix has no finite-element numbering");
+    valid = std::find(owner.begin(), owner.end(), -1) == owner.end();
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "subdomains must cover all locally owned matrix rows");
+    valid = std::any_of(indices.begin(), indices.end(), [](const std::vector<PetscInt>& index) { return !index.empty(); });
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "each MPI rank must participate in at least one nonempty subdomain");
+    int rank;
+    MPI_Comm_rank(comm, &rank);
+    PetscMPIInt number;
+    ierr = PetscMPIIntCast(count, &number);CHKERRQ(ierr);
+    std::vector<int> participants(count);
+    for (long i = 0; i < count; ++i) participants[i] = !indices[i].empty();
+    MPI_Allreduce(MPI_IN_PLACE, participants.data(), number, MPI_INT, MPI_SUM, comm);
+    for (int n : participants) {
+      if (!n) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "each global subdomain must have at least one participating MPI rank");
+      if (asmpc && n != 1) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "PCASM subdomains must belong to one MPI rank; use PCGASM for shared subdomains");
+    }
+
+    std::vector<IS> outer, inner;
+    for (long i = 0; i < count; ++i) {
+      MPI_Comm subcomm = PETSC_COMM_SELF;
+      if (gasm) MPI_Comm_split(comm, indices[i].empty() ? MPI_UNDEFINED : 0, rank, &subcomm);
+      if (indices[i].empty()) continue;
+      std::vector<PetscInt> local;
+      for (PetscInt index : indices[i])
+        if (index >= first && index < last && owner[index - first] == i) local.push_back(index);
+      if (gasm) {
+        // A distributed IS must contain each global index only once. Keep owned
+        // entries on their owner, and assign other overlap entries to the first participant.
+        int size, rank, n;
+        MPI_Comm_size(subcomm, &size);
+        MPI_Comm_rank(subcomm, &rank);
+        ierr = PetscMPIIntCast(indices[i].size(), &n);CHKERRQ(ierr);
+        std::vector<int> sizes(size), offsets(size + 1, 0);
+        MPI_Allgather(&n, 1, MPI_INT, sizes.data(), 1, MPI_INT, subcomm);
+        for (int j = 0; j < size; ++j) {
+          ierr = PetscMPIIntCast(static_cast<PetscInt64>(offsets[j]) + sizes[j], &offsets[j + 1]);CHKERRQ(ierr);
+        }
+        std::vector<PetscInt> gathered(offsets.back()), ranges(2 * size);
+        PetscInt range[2] = { first, last };
+        MPI_Allgather(range, 2, MPIU_INT, ranges.data(), 2, MPIU_INT, subcomm);
+        MPI_Allgatherv(indices[i].data(), n, MPIU_INT, gathered.data(), sizes.data(), offsets.data(), MPIU_INT, subcomm);
+        std::map<PetscInt, int> assignment;
+        for (int j = 0; j < size; ++j) {
+          for (int k = offsets[j]; k < offsets[j + 1]; ++k) {
+            PetscInt index = gathered[k];
+            bool owned = index >= ranges[2 * j] && index < ranges[2 * j + 1];
+            auto inserted = assignment.emplace(index, j);
+            if (owned) inserted.first->second = j;
+          }
+        }
+        indices[i].clear();
+        for (const auto& entry : assignment)
+          if (entry.second == rank) indices[i].push_back(entry.first);
+      }
+      IS is, loc;
+      ierr = ISCreateGeneral(subcomm, indices[i].size(), indices[i].data(), PETSC_COPY_VALUES, &is);CHKERRQ(ierr);
+      ierr = ISCreateGeneral(subcomm, local.size(), local.data(), PETSC_COPY_VALUES, &loc);CHKERRQ(ierr);
+      outer.push_back(is);
+      inner.push_back(loc);
+      if (gasm) MPI_Comm_free(&subcomm);
+    }
+    PetscInt n = outer.size();
+    if (gasm) {
+      ierr = PCGASMSetSubdomains(pc, n, inner.data(), outer.data());CHKERRQ(ierr);
+    } else {
+      ierr = PCASMSetLocalSubdomains(pc, n, outer.data(), inner.data());CHKERRQ(ierr);
+    }
+    for (PetscInt i = 0; i < n; ++i) {
+      ierr = ISDestroy(&outer[i]);CHKERRQ(ierr);
+      ierr = ISDestroy(&inner[i]);CHKERRQ(ierr);
+    }
+    PetscFunctionReturn(PETSC_SUCCESS);
+  }
+  static PetscErrorCode registerDistributedNeumann(Dmat* A, Dmat* N, const KN< long >* numbering) {
+    PetscErrorCode ierr;
+    MPI_Comm comm = PetscObjectComm((PetscObject)A->_petsc);
+    PetscFunctionBeginUser;
+    int valid = N && N->_petsc && N->_petsc != A->_petsc && N->_A && numbering &&
+                numbering->N() == N->_A->getDof() && (N->_num || !numbering->N());
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "MatSetNeumann requires a distinct finite-element auxiliary Mat and one parent global index per local auxiliary finite-element degree of freedom");
+
+    PetscInt size, rows, columns, first, last, cfirst, clast, bs;
+    ierr = MatGetSize(A->_petsc, &size, nullptr);CHKERRQ(ierr);
+    ierr = MatGetSize(N->_petsc, &rows, &columns);CHKERRQ(ierr);
+    ierr = MatGetOwnershipRange(N->_petsc, &first, &last);CHKERRQ(ierr);
+    ierr = MatGetOwnershipRangeColumn(N->_petsc, &cfirst, &clast);CHKERRQ(ierr);
+    ierr = MatGetBlockSize(N->_petsc, &bs);CHKERRQ(ierr);
+    valid = rows == columns && first == cfirst && last == clast;
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "MatSetNeumann requires a square auxiliary Mat with matching row and column ownership");
+
+    MPI_Comm subcomm = PetscObjectComm((PetscObject)N->_petsc);
+    MPI_Group parentGroup, auxiliaryGroup;
+    int participants;
+    MPI_Comm_size(subcomm, &participants);
+    MPI_Comm_group(comm, &parentGroup);
+    MPI_Comm_group(subcomm, &auxiliaryGroup);
+    std::vector<int> ranks(participants), translated(participants);
+    std::iota(ranks.begin(), ranks.end(), 0);
+    MPI_Group_translate_ranks(auxiliaryGroup, participants, ranks.data(), parentGroup, translated.data());
+    MPI_Group_free(&auxiliaryGroup);
+    MPI_Group_free(&parentGroup);
+    valid = std::find(translated.begin(), translated.end(), MPI_UNDEFINED) == translated.end();
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "the auxiliary Mat communicator must be a subgroup of the parent Mat communicator");
+
+    // Preserve the auxiliary row ordering: sorting these parent indices would
+    // change their correspondence with the rows of the supplied Neumann matrix.
+    std::vector<PetscInt> indices(last - first, -1);
+    valid = 1;
+    for (long i = 0; i < numbering->N(); ++i) {
+      PetscInt row = N->_num[i];
+      long parent = (*numbering)[i];
+      if (row < 0 || row >= rows || parent < 0 || parent >= size) {
+        valid = 0;
+        break;
+      }
+      if (row >= first && row < last) {
+        PetscInt& index = indices[row - first];
+        if (index >= 0 && index != parent) valid = 0;
+        index = parent;
+      }
+    }
+    valid = valid && std::find(indices.begin(), indices.end(), -1) == indices.end();
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_OUTOFRANGE, "MatSetNeumann numbering must map every auxiliary owned row consistently to a valid parent global row");
+
+    IS is;
+    PetscBool unique;
+    ierr = ISCreateGeneral(subcomm, indices.size(), indices.data(), PETSC_COPY_VALUES, &is);CHKERRQ(ierr);
+    ierr = ISSetBlockSize(is, bs);CHKERRQ(ierr);
+    ierr = ISGetInfo(is, IS_UNIQUE, IS_GLOBAL, PETSC_TRUE, &unique);CHKERRQ(ierr);
+    valid = unique;
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) {
+      ierr = ISDestroy(&is);CHKERRQ(ierr);
+      SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "MatSetNeumann numbering maps distinct auxiliary rows to the same parent global row");
+    }
+    // MatCreate has already fixed the auxiliary layout. Its coefficients can
+    // be assembled later: these references follow in-place matrix updates.
+    ierr = PetscObjectCompose((PetscObject)A->_petsc, "_FreeFem_HPDDM_Neumann_Mat", (PetscObject)N->_petsc);CHKERRQ(ierr);
+    ierr = PetscObjectCompose((PetscObject)A->_petsc, "_FreeFem_HPDDM_Neumann_IS", (PetscObject)is);CHKERRQ(ierr);
+    ierr = ISDestroy(&is);CHKERRQ(ierr);
+    PetscFunctionReturn(PETSC_SUCCESS);
+  }
+  static long MatSetNeumann(Dmat* const& A, Dmat* const& N, KN< long >* const& numbering) {
+    if (!A || !A->_petsc) ExecError("MatSetNeumann requires an initialized parent Mat");
+    PetscErrorCode ierr = registerDistributedNeumann(A, N, numbering);
+    if (ierr) ExecError("Failed to register the Neumann auxiliary Mat");
+    return 0L;
+  }
+#if defined(PETSC_HAVE_HPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
+  template< class Type >
+  static PetscErrorCode setDistributedNeumann(Type* A, PC pc, Mat N) {
+    PetscErrorCode ierr;
+    MPI_Comm comm = PetscObjectComm((PetscObject)A->_petsc);
+    IS is = nullptr;
+    PetscFunctionBeginUser;
+    ierr = PetscObjectQuery((PetscObject)A->_petsc, "_FreeFem_HPDDM_Neumann_IS", (PetscObject*)&is);CHKERRQ(ierr);
+    int valid = N && is;
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "the registered Neumann auxiliary Mat must have a matching index set on every parent MPI rank");
+    PetscInt rows, localRows, columns, localColumns, size, localSize;
+    ierr = MatGetSize(N, &rows, &columns);CHKERRQ(ierr);
+    ierr = MatGetLocalSize(N, &localRows, &localColumns);CHKERRQ(ierr);
+    ierr = ISGetSize(is, &size);CHKERRQ(ierr);
+    ierr = ISGetLocalSize(is, &localSize);CHKERRQ(ierr);
+    valid = rows == columns && localRows == localColumns && rows == size && localRows == localSize;
+    MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
+    if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "the registered Neumann auxiliary Mat layout must still match its index set");
+    ierr = PCHPDDMSetAuxiliaryMat(pc, is, N, nullptr, nullptr);CHKERRQ(ierr);
+    ierr = PCSetFromOptions(pc);CHKERRQ(ierr);
+    ierr = PCHPDDMHasNeumannMat(pc, PETSC_TRUE);CHKERRQ(ierr);
+    ierr = PetscObjectCompose((PetscObject)pc, "_FreeFem_HPDDM_Neumann_Mat", (PetscObject)N);CHKERRQ(ierr);
+    PetscFunctionReturn(PETSC_SUCCESS);
+  }
+#endif
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -2798,6 +3019,45 @@ namespace PETSc {
           PCType type;
           PCGetType(pc, &type);
           PetscBool isType;
+          Mat neumann = nullptr;
+#if defined(PETSC_HAVE_HPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
+          PetscObjectTypeCompare((PetscObject)pc, PCHPDDM, &isType);
+          if (isType) {
+            PetscObjectQuery((PetscObject)ptA->_petsc, "_FreeFem_HPDDM_Neumann_Mat", (PetscObject*)&neumann);
+            int registered = neumann != nullptr;
+            MPI_Allreduce(MPI_IN_PLACE, &registered, 1, MPI_INT, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
+            if (registered) {
+              int valid = neumann && !nargs[15] && !nargs[20] && !nargs[22] && !nargs[17];
+              MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, PetscObjectComm((PetscObject)ptA->_petsc));
+              if (!valid) ExecError("registered Neumann matrices are required on every parent rank and cannot be combined with O, deflation, subdomains, or precon");
+              PetscErrorCode ierr = setDistributedNeumann(ptA, pc, neumann);
+              if (ierr) ExecError("Failed to attach the registered Neumann auxiliary Mat to PCHPDDM");
+              Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
+                nargs[12] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
+              int auxiliarySize;
+              MPI_Comm_size(PetscObjectComm((PetscObject)neumann), &auxiliarySize);
+              valid = !(ptK && ptK->A) || auxiliarySize == 1;
+              MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, PetscObjectComm((PetscObject)ptA->_petsc));
+              if (!valid) ExecError("a sequential aux matrix cannot be combined with a distributed Neumann matrix");
+              if (ptK && ptK->A) {
+                MatriceMorse< upscaled_type<PetscScalar> >* mA =
+                  static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                Mat aux = ff_to_PETSc(B);
+                ierr = PCHPDDMSetRHSMat(pc, aux);
+                MatDestroy(&aux);
+                delete B;
+                if (ierr) ExecError("Failed to attach the PCHPDDM right-hand side auxiliary Mat");
+              }
+            }
+          } else PetscObjectCompose((PetscObject)pc, "_FreeFem_HPDDM_Neumann_Mat", nullptr);
+#endif
+          if (nargs[22]) {
+            ffassert(assembled && !nargs[15]);
+            KN< KN< long > >* subdomains = GetAny< KN< KN< long > >* >((*nargs[22])(stack));
+            PetscErrorCode ierr = setSchwarzSubdomains(ptA, pc, *subdomains);
+            ffassert(!ierr);
+          }
           KNM< upscaled_type<PetscReal> >* coordinates =
             nargs[13] ? GetAny< KNM< upscaled_type<PetscReal> >* >((*nargs[13])(stack)) : nullptr;
           Dmat* G = nargs[14] ? GetAny< Dmat* >((*nargs[14])(stack)) : nullptr;
@@ -2808,7 +3068,7 @@ namespace PETSc {
             if (isType) PCHYPRESetDiscreteGradient(pc, G->_petsc);
           }
 #endif
-          if (assembled && ptA->_A && ptA->_num) {
+          if (assembled && ptA->_A && ptA->_num && !neumann) {
             PetscInt* idx;
             PetscMalloc1(ptA->_A->getDof(), &idx);
             std::copy_n(ptA->_num, ptA->_A->getDof(), idx);
@@ -3031,8 +3291,16 @@ namespace PETSc {
         }
       }
     }
-    if(nargs[18] && GetAny< bool >((*nargs[18])(stack)))
-        KSPSetUp(ksp);
+    if(nargs[18] && GetAny< bool >((*nargs[18])(stack))) {
+        PetscErrorCode ierr = KSPSetUp(ksp);
+        if (ierr) {
+            PC pc;
+            Mat neumann = nullptr;
+            KSPGetPC(ksp, &pc);
+            PetscObjectQuery((PetscObject)pc, "_FreeFem_HPDDM_Neumann_Mat", (PetscObject*)&neumann);
+            if (neumann) ExecError("PETSc setup failed with the supplied Neumann auxiliary Mat");
+        }
+    }
     return 0L;
   }
 
@@ -6872,6 +7140,7 @@ static void Init_PETSc( ) {
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));
   Global.Add("MatDestroy", "(", new OneOperator1< long, Dmat* >(PETSc::destroyCSR));
+  Global.Add("MatSetNeumann", "(", new OneOperator3_< long, Dmat*, Dmat*, KN< long >* >(PETSc::MatSetNeumann));
   zzzfff->Add("PetscScalar", atype<std::conditional<std::is_same<PetscScalar, PetscReal>::value, double, Complex>::type*>());
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   Add< Dmat* >("n", ".", new OneOperator1< long, Dmat* >(PETSc::Dmat_n));
