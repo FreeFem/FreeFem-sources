@@ -221,7 +221,7 @@ visualcheck: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
-# Also copy mingw .dlls
+# Also copy MSYS2 .dlls
 win32: WindowsPackage.iss FreeFEM-documentation.pdf
 	ldd src/bin-win32/*.{dll,exe} | grep -vi /windows | grep -v /bin-win32 | grep -v libff.dll | grep '=>' | awk '{print "cp",$$3,"./src/bin-win32/"}' | sort -u | grep -v '[?]' | sh
 	rm -rf plugin/include-tmp
@@ -229,7 +229,7 @@ win32: WindowsPackage.iss FreeFEM-documentation.pdf
 	cp -r 3rdparty/include/. plugin/include-tmp/.
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 6/ISCC.exe "`cygpath.exe WindowsPackage.iss`"
 WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
-	sed -i 's;/mingw64/ff-petsc;/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
+	sed -i 's;$(FF_prefix_petsc);/c/Program\\ Files/FreeFem++/ff-petsc;g' plugin/seq/WHERE_LIBRARY-config
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
 	-DHOSTOS='$(host_os)' -DFFPETSC='$(FF_prefix_petsc_win32)' \

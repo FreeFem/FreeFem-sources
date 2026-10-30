@@ -110,11 +110,12 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2
         with:
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-gcc-fortran
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-autotools
+            mingw-w64-ucrt-x86_64-gcc-fortran
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-autotools
             make
             m4
             patch
@@ -122,7 +123,7 @@ jobs:
             flex
             bison
             unzip
-            mingw-w64-x86_64-lapack
+            mingw-w64-ucrt-x86_64-lapack
 
       - uses: actions/checkout@v6
 
