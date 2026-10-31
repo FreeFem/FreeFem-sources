@@ -2602,7 +2602,7 @@ namespace PETSc {
     ierr = MatGetSize(N->_petsc, &rows, &columns);CHKERRQ(ierr);
     ierr = MatGetOwnershipRange(N->_petsc, &first, &last);CHKERRQ(ierr);
     ierr = MatGetOwnershipRangeColumn(N->_petsc, &cfirst, &clast);CHKERRQ(ierr);
-    ierr = MatGetBlockSize(N->_petsc, &bs);CHKERRQ(ierr);
+    ierr = MatGetBlockSize(A->_petsc, &bs);CHKERRQ(ierr);
     valid = rows == columns && first == cfirst && last == clast;
     MPI_Allreduce(MPI_IN_PLACE, &valid, 1, MPI_INT, MPI_MIN, comm);
     if (!valid) SETERRQ(comm, PETSC_ERR_ARG_INCOMP, "MatSetNeumann requires a square auxiliary Mat with matching row and column ownership");
@@ -2646,6 +2646,7 @@ namespace PETSc {
     IS is;
     PetscBool unique;
     ierr = ISCreateGeneral(subcomm, indices.size(), indices.data(), PETSC_COPY_VALUES, &is);CHKERRQ(ierr);
+    ierr = MatSetBlockSize(N->_petsc, bs);CHKERRQ(ierr);
     ierr = ISSetBlockSize(is, bs);CHKERRQ(ierr);
     ierr = ISGetInfo(is, IS_UNIQUE, IS_GLOBAL, PETSC_TRUE, &unique);CHKERRQ(ierr);
     valid = unique;
