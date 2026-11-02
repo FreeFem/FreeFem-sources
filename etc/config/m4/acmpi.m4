@@ -145,6 +145,7 @@ then
 	    AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
 	    AC_MSG_CHECKING(for MPICXX)
 	fi
+	test -f "$MPICXX.exe" && MPICXX="$MPICXX.exe"
 	ff_mpicxx="eval $MPICXX"
 	CXX=$ff_mpicxx
 	LIBS="$LIBS $ff_MPI_LIB"
@@ -210,6 +211,7 @@ fi
 	      if test -z "$MPIFC" ; then
 		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
 	      fi
+	      test -f "$MPIFC.exe" && MPIFC="$MPIFC.exe"
 	      AC_SUBST(MPIFC)
 	  fi
 
@@ -258,6 +260,7 @@ fi
 	if test -z "$MPICC" ; then
 	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	fi
+	test -f "$MPICC.exe" && MPICC="$MPICC.exe"
 	AC_SUBST(MPICC,$MPICC)
 
 	if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
