@@ -127,7 +127,17 @@ then
 	dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
 	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
-	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
+	    *)
+		case "$ff_uname" in
+		    CYGWIN*|MINGW*|MSYS_NT*)
+			# With MS-MPI, the runtime (mpiexec) and the compilers
+			# wrappers (mpicxx/mpif90/... from the MSYS2 msmpi package)
+			# are located in different directories, so search PATH instead
+			# of MPIRUN's directory.
+			ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
+		    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
+		esac
+		;;
 	    dnl if also  add $PATH they  could be missing some different mpi version...
 	esac
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
