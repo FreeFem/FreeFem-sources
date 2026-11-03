@@ -216,11 +216,12 @@ fi
 	  fi
 
 #	echo " ********************ffmpi= '$ff_mpi' *************   "
-	ff_MPI_INCLUDE="$with_mpiinc"
-	if test -z "$ff_mpitype" ; then
-           test -n "$MPICXX" && ff_mpishow=`$MPICXX -show` 2>/dev/null
-           test -n "$MPICC" && ff_mpicshow=`$MPICC -show` 2>/dev/null
-           test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+	 ff_MPI_INCLUDE="$with_mpiinc"
+	 if test -z "$ff_mpitype" ; then
+           test -n "$MPICXX" && ff_mpishow=`$MPICXX -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+           test -n "$MPICC" && ff_mpicshow=`$MPICC -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+           test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+
 	   if test "$with_mpiinc" = no -o -z "$with_mpiinc" ; then
 	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n' | sed '1 d'| grep -E '^[-/][^WLlOgpf]|^-Wp,'|tr '\n' ' '`]
 	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
