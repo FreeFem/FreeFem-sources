@@ -31,7 +31,7 @@ varf vA(u,v) = int2d(Th)(grad(u)' * grad(v)) + on(1, 3, 4, u = 0);
     matrix A = vA(Vh, Vh, tgv = -2);
     Mat dA(A);
     int[int] I;
-    ExtractDofsonBorder(2, Vh, I, 1);
+    ExtractDofsonBorder(2, Vh, I, 1, 1);
     real[int] list(Vh.ndof);
     for [j, ij : I] list[ij] = j + 1;
     real[int, int] S(1, 1);
