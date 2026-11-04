@@ -223,7 +223,7 @@ visualcheck: all
 # number as well.
 # Also copy MSYS2 .dlls
 win32: WindowsPackage.iss FreeFEM-documentation.pdf
-	ldd src/bin-win32/*.{dll,exe} | grep -vi /windows | grep -v /bin-win32 | grep -v libff.dll | grep '=>' | awk '{print "cp",$$3,"./src/bin-win32/"}' | sort -u | grep -v '[?]' | sh
+	ntldd -R src/bin-win32/*.{dll,exe} | grep -oiE '[A-Za-z0-9_.+-]+\.dll' | sort -u | while read d; do [ -f /ucrt64/bin/"$$d" ] && echo "cp -p /ucrt64/bin/$$d ./src/bin-win32/"; done | sh
 	rm -rf plugin/include-tmp
 	cd plugin; mkdir include-tmp; cp -Lr seq/include/* */*.h include-tmp
 	cp -r 3rdparty/include/. plugin/include-tmp/.
