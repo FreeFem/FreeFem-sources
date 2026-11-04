@@ -1422,8 +1422,7 @@ public:
 };
 
 /// <<ListOfInst>>
-class Block ;
-extern Block *currentblock;
+
 class ListOfInst :
   public E_F0mps // [[E_F0mps]]
 { 
@@ -1431,15 +1430,17 @@ class ListOfInst :
   Expression   *   list;
   int   *   linenumber;
   int * lsldel;
+  int * linelo;  // debugger only (ff_dbg_active): first source line of each statement
+  int * fileid;  // debugger only (ff_dbg_active): source file id of each statement, see ff_dbg_registerFile
   const int nx;
   vectorOfInst * atclose;  // Sep 2017 FH
     // add sep. 2016 FH
-    Block *cbk;
+
 public:
-   
-    ListOfInst():n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(10),atclose(nullptr),cbk(currentblock){}
-  ListOfInst(int nn):n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),nx(nn?nn:10),atclose(nullptr),cbk(currentblock) {}
-  void Add(const C_F0 & ins);
+
+  ListOfInst():n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),linelo(nullptr),fileid(nullptr),nx(10),atclose(nullptr){}
+  ListOfInst(int nn):n(0),list(nullptr),linenumber(nullptr),lsldel(nullptr),linelo(nullptr),fileid(nullptr),nx(nn?nn:10),atclose(nullptr) {}
+  void Add(const C_F0 & ins); 
 
   /// <<ListOfInst::operator()>> implemented at [[file:AFunction2.cpp::ListOfInst::operator()]]
 
@@ -1460,8 +1461,12 @@ public:
     list=nullptr;
     if(linenumber)  delete[] linenumber;
     if(lsldel)      delete[] lsldel;
+    if(fileid)      delete[] fileid;
+    if(linelo)      delete[] linelo;
     linenumber=nullptr;
     lsldel=nullptr;
+    fileid=nullptr;
+    linelo=nullptr;
   }
 };
 
@@ -2267,6 +2272,48 @@ template<class T>
 // running script. capturedBlock is nullptr for that interrupt case (no
 // compile-time Block exists for an asynchronously requested break point).
 void RunPauseConsole(Stack stack, Block *capturedBlock);
+
+// ---- VSCode debugger support (implemented in AFunction.cpp) --------------
+// Off unless the environment variable FF_DEBUG_SOCKET names a Unix socket
+// that a debug adapter is listening on (see vscode/README.md for the
+// wire protocol). When off, the only cost anywhere is one test of this bool
+// per statement in ListOfInst::operator().
+extern bool ff_dbg_active;
+// The script's top-level scope (kept alive after parsing, see Block::open) and
+// the stack of a pause()/debugger snippet while one is compiling (else null).
+extern Block *ff_dbg_rootBlock;
+extern Stack ff_pauseNestedStack;
+// Set by the grammar's `instructions` actions right before a statement is
+// added to its list: was a lookahead token already read by the parser?
+extern bool ff_dbg_lookahead;
+// Number of statements added to any ListOfInst so far (debugger only): lets the
+// lexer/Add tell whether a statement contains other statements.
+extern long ff_dbg_addCount;
+// Registers a source file name (as given to the lexer) and returns its id.
+int  ff_dbg_registerFile(const std::string &name);
+// Called once per executed statement when ff_dbg_active: [lo,hi] is the
+// range of source lines the statement itself covers (lo = its first token's
+// line, hi = the line recorded at parse time, i.e. its last), and gaplo is
+// the line just after the previous statement (used only for breakpoint
+// hit-testing). nested: the statement contains other statements (for, if,
+// blocks...), which are stops of their own, so a breakpoint on one of THEIR
+// lines must not also stop here: only the header part counts for it.
+void ff_dbg_statement(Stack s,int fileid,int lo,int hi,int gaplo,bool nested);
+// Call-stack bookkeeping mirrored from E_Routine::operator() (debugstack).
+void ff_dbg_pushCall();
+void ff_dbg_popCall();
+// Sends "exited" to the adapter when the top-level statement list ends:
+// the first ListOfInst executed once debugging is on IS the top-level one.
+// It also counts how deeply ListOfInst::operator() calls are nested.
+bool ff_dbg_enter(const void *list);   // returns true iff this is the top-level list
+void ff_dbg_leave(bool top);
+struct FFDbgTopGuard {
+  bool counted, top;
+  explicit FFDbgTopGuard(const void *list) : counted(false), top(false) {
+    if (ff_dbg_active) { counted=true; top=ff_dbg_enter(list); }
+  }
+  ~FFDbgTopGuard() { if (counted) ff_dbg_leave(top); }
+};
 
 
 

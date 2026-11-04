@@ -626,6 +626,29 @@ int mylex::scan(int lvl)
 
     if (! lexdebug && echo && lvl==0 ) print(cout);
 
+    if (ff_dbg_active && lvl==0) {
+        // Debugger: remember the first line of every statement. A token
+        // starts a statement when the previous one was ';', '{' or '}'
+        // (a ';' inside parentheses, i.e. a for(;;) header, doesn't count;
+        // neither do 'else'/'catch', which continue the statement before).
+        // Starts are kept per brace depth so a compound statement
+        // (for/if/func ... { ... }) still reports its own first line after
+        // the statements inside it were parsed. stmtBefore is the value as
+        // it stood before this token: the parser may add a statement to its
+        // list only after reading one token past its end (the lookahead),
+        // see ff_dbg_lookahead in lg.ypp.
+        const int ln=linenumber; // line this token is on
+        const int d=stmtDepth<63?stmtDepth:63;
+        stmtBefore=stmtStart[d]; stmtAddBefore=stmtAddStart[d];
+        if (stmtAtStart && ret!=ELSE && ret!=CATCH) { stmtStart[d]=ln; stmtAddStart[d]=ff_dbg_addCount; }
+        if (ret=='(') ++stmtParen;
+        else if (ret==')') { if (stmtParen>0) --stmtParen; }
+        else if (ret=='{') ++stmtDepth;
+        else if (ret=='}') { if (stmtDepth>0) --stmtDepth; }
+        if (ret==ELSE || ret==CATCH) stmtAtStart=false; // the branch that follows belongs to the same compound statement
+        else stmtAtStart = (stmtParen==0 && (ret==';' || ret=='{' || ret=='}'));
+    }
+
     return ret;
 }
 

@@ -496,9 +496,22 @@ CC_F0  Block::close(Block *& c,C_F0  ins)
 
    Block * Block::open(Block *& cb)
    {
+    const bool isScriptRoot = (cb==nullptr && ff_pauseNestedStack==nullptr);
     Block *  ncb = new Block(cb);
     if(verbosity>99) cout << " Block::open  " << ncb <<  " " << cb << endl;
-
+    // Keep the script's OUTERMOST scope alive and registered in
+    // tables_of_identifier after it closes at the end of parsing, so the
+    // Ctrl-C console and the debugger can resolve top-level variables even
+    // when the script has no pause() call (a pause() call is otherwise what
+    // keeps a scope alive, see Block::keepAliveForPause). It costs one small
+    // leaked Block, and nothing reads tables_of_identifier once parsing is
+    // over except those consoles. Inner scopes are deliberately NOT kept:
+    // leaving them registered would change how later code parses (stale
+    // names would still resolve).
+    if (isScriptRoot) {
+        ncb->keepAliveForPause=true;
+        ff_dbg_rootBlock=ncb;
+    }
     return cb = ncb;
    }
 
@@ -712,6 +725,7 @@ E_Routine::~E_Routine() {
     delete [] param;}
 AnyType E_Routine::operator()(Stack s)  const  {
    debugstack->push_back(pair<const E_Routine*,int>(this,TheCurrentLine));
+   if (ff_dbg_active) ff_dbg_pushCall();
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
@@ -739,6 +753,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       memcpy(s,save,lgsave);  // restore
       TheCurrentLine=debugstack->back().second;
       debugstack->pop_back();
+      if (ff_dbg_active) ff_dbg_popCall();
 
       throw ;
      }
@@ -748,6 +763,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
     memcpy(s,save,lgsave);  // restore
     TheCurrentLine=debugstack->back().second;
     debugstack->pop_back();
+    if (ff_dbg_active) ff_dbg_popCall();
 
    // il faudrait que les variable locale soit detruire apres le return
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
@@ -766,20 +782,39 @@ void ListOfInst::Add(const C_F0 & ins) {
             Expression   *  l = new Expression [n+nx];
             int * ln =  new int [n+nx];
             int * lsd =  new int [n+nx];
+            int * fid =  new int [n+nx];
+            int * llo =  new int [n+nx];
             for (int i=0;i<n;i++) {
                 l[i]=list[i];
                 ln[i]=linenumber[i];
                 lsd[i]=lsldel[i];
+                fid[i]=fileid[i];
+                llo[i]=linelo[i];
             }
             delete [] list;
             delete [] linenumber;
             delete [] lsldel;
+            delete [] fileid;
+            delete [] linelo;
             list =l;
             linenumber=ln;
             lsldel=lsd;
+            fileid=fid;
+            linelo=llo;
         }
         throwassert(list);
         linenumber[n]= TheCurrentLine;
+        // debugger: which source file this statement came from (-1 = unknown)
+        fileid[n]= ff_dbg_active ? ff_dbg_registerFile(string(zzzfff->filename())) : -1;
+        { // first line of the statement (the lexer tracks it, see mylex::scan)
+          int lo = ff_dbg_active ? zzzfff->stmtStartLine(ff_dbg_lookahead) : 0;
+          lo = (lo<=0 || lo>TheCurrentLine) ? TheCurrentLine : lo;
+          // contains other statements <=> some were added since it began; that
+          // flag rides in the sign of linelo[] (decoded in operator())
+          const bool nested = ff_dbg_active && ff_dbg_addCount > zzzfff->stmtAddCount(ff_dbg_lookahead);
+          if (ff_dbg_active) ++ff_dbg_addCount;
+          linelo[n]= nested ? -lo : lo;
+        }
         lsldel[n]=currentblock->nIdWithDelete();
         list[n++] = ins;
     }
@@ -792,13 +827,18 @@ AnyType ListOfInst::operator()(Stack s) const {
     int i;
     double s0=CPUtime(),s1=s0,ss0=s0;
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+    FFDbgTopGuard dbgTop(this); // debugger: tells the adapter when the script ends
     try { // modif FH oct 2006
 	for (i=0;i<n;i++)
 	{
 	    TheCurrentLine=linenumber[i]  ;
+            if (ff_dbg_active) { // VSCode debugger: breakpoints / stepping / async pause
+                const bool nest=linelo[i]<0; const int lo=nest?-linelo[i]:linelo[i];
+                ff_dbg_statement(s,fileid[i],lo,linenumber[i],i>0?linenumber[i-1]+1:lo,nest);
+            }
             if (ff_ctrlCRequested) { // Ctrl-C hit: halt here, like a pause()
                 ff_ctrlCRequested=0;
-                RunPauseConsole(s,cbk); // see AFunction.hpp
+                RunPauseConsole(s,ff_dbg_rootBlock); // see AFunction.hpp
             }
             r=(*list[i])(s);
 	    sptr->clean(); // modif FH mars 2006  clean Ptr

@@ -70,6 +70,7 @@ class mylex : public CodeAlloc {
   char buf[1024];
   int typetoken;
   bool echo;
+  bool stmtAtStart=true; int stmtDepth=0, stmtParen=0, stmtBefore=0; int stmtStart[64]={0}; long stmtAddStart[64]={0}, stmtAddBefore=0; // debugger: see scan()
   stack<char *> strdata;
 
   struct xxxx { 
@@ -139,6 +140,20 @@ class mylex : public CodeAlloc {
       return  pilesource[level].filename ? pilesource[level].filename->c_str() : " -- in macro -- ";
     return "-- unknown --";}
     
+  // Debugger/pause console: turn the source-line echo (see scan()) off for
+  // the duration of a nested snippet; returns the previous setting.
+  bool setecho(bool e) { bool old=echo; echo=e; return old; }
+  // Debugger only: first line of the statement currently being parsed at
+  // the current brace depth (see scan()); read by ListOfInst::Add.
+  // lookahead=true when the parser had already read one token beyond the
+  // statement's end: then the state BEFORE that token is the right one.
+  // ListOfInst::Add count when the statement began: statements added since
+  // then are nested inside it (same lookahead rule as stmtStartLine).
+  long stmtAddCount(bool lookahead) const { return lookahead ? stmtAddBefore : stmtAddStart[stmtDepth<63?stmtDepth:63]; }
+  int stmtStartLine(bool lookahead) const { return lookahead ? stmtBefore : stmtStart[stmtDepth<63?stmtDepth:63]; }
+  // Drops every still-open input source (unread tokens left behind by a
+  // snippet that failed to parse), see ff_nestedCleanup in AFunction.cpp.
+  void closeAll() { while (level>=0) close(); }
   void input(const char *  filename,int ts=0) ;
   void input(const string &str,const string *name=nullptr,int lg=0);
   bool close() ;

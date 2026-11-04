@@ -79,6 +79,19 @@ double myjn(long n, double x){ return jn((int) n,x);}
 #ifdef HAVE_TIMES
 #include <ctime>
 #endif
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <poll.h>
+#include <fcntl.h>
+#include <climits>
+#endif
+#include <cerrno>
+#include <set>
+#include <map>
+#include <sstream>
 long storageused()
 {
 #if HAVE_MSTATS
@@ -196,6 +209,96 @@ Stack  ff_pauseNestedStack  = nullptr;
 extern int Compile();
 extern Block *currentblock;
 
+// Run after every nested Compile() (pause console, debugger eval). When the
+// snippet failed to parse, the lexer still holds its unread tokens and the
+// parser never closed the scopes it had opened: left alone, the NEXT snippet
+// would first re-read that leftover text (a spurious syntax error) and could
+// still resolve names declared by the failed one. So drop every open source,
+// and close scopes back down to `father` (the vectorOfInst that snewclose
+// returns is only a list of destructor calls for the half-built scope; it is
+// deliberately leaked here, being tiny and rare).
+static void ff_nestedCleanup(Block *father)
+{
+  zzzfff->closeAll();
+  for (int guard=0; currentblock && currentblock!=father && guard<1000; ++guard)
+    Block::snewclose(currentblock);
+  currentblock = nullptr;
+}
+
+// Readable type name, and (for scalars only) the current value, of a script
+// variable: used by the console's `vars` and by the debugger's variables
+// panel. Values only for int/real/bool/complex: reading a mesh or fespace
+// that has not been constructed yet would dereference garbage.
+// FreeFEM prints a type as its C++ typeid name in angle brackets (libc++
+// mangling), e.g. <PPKN5Fem2D4MeshE>. Translate the ones a script can declare.
+static string ffFriendlyType(const string &printed)
+{
+  string t=printed;
+  if (t.size()>=2 && t[0]=='<' && t[t.size()-1]=='>') t=t.substr(1,t.size()-2);
+  static const char *tab[][2] = {
+    {"PPKN5Fem2D4MeshE","mesh"}, {"PPKN5Fem2D5Mesh3E","mesh3"},
+    {"2KNIPKN5Fem2D4MeshEE","mesh[int]"}, {"2KNIPKN5Fem2D5Mesh3EE","mesh3[int]"},
+    {"PP5v_fes","fespace"},
+    {"NSt3__14pairIP6FEbaseId5v_fesEiEE","fe function"},
+    {"NSt3__14pairIP11FEbaseArrayId5v_fesEiEE","fe function array"},
+    {"P2KNIdE","real[int]"}, {"P2KNIlE","int[int]"}, {"P2KNINSt3__17complexIdEEE","complex[int]"},
+    {"P3KNMIdE","real[int,int]"}, {"P3KNMIlE","int[int,int]"}, {"P3KNMINSt3__17complexIdEEE","complex[int,int]"},
+    {"14Matrice_CreuseIdE","matrix"}, {"14Matrice_CreuseINSt3__17complexIdEEE","complex matrix"},
+    {"7Problem","problem"}, {"8E_Border","border"}, {"6C_args","varf"},
+    {"11Polymorphic","func"}, {"d","func"},
+    {"PPNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE","string"},
+  };
+  for (size_t i=0;i<sizeof(tab)/sizeof(tab[0]);++i) if (t==tab[i][0]) return tab[i][1];
+  return printed;
+}
+static string ffVarType(aType ty)
+{
+  if (ty==atype<long*>()) return "int";
+  if (ty==atype<double*>()) return "real";
+  if (ty==atype<bool*>()) return "bool";
+  if (ty==atype<Complex*>()) return "complex";
+  ostringstream t; t << *ty; return ffFriendlyType(t.str());
+}
+static string ffVarValue(aType ty, E_F0 *e, Stack s)
+{
+  if (!e || !s) return "";
+  try {
+    ostringstream o; o.precision(15);
+    if (ty==atype<long*>()) o << *GetAny<long*>((*e)(s));
+    else if (ty==atype<bool*>()) o << ((*GetAny<bool*>((*e)(s))) ? "true" : "false");
+    else if (ty==atype<double*>()) o << *GetAny<double*>((*e)(s));
+    else if (ty==atype<Complex*>()) o << *GetAny<Complex*>((*e)(s));
+    return o.str();
+  } catch (...) { return "<error>"; }
+}
+
+// Lists the script's variables on cout, one per line: name : type [= value].
+// ::Find() (AFunction2.cpp) resolves identifiers by walking tables_of_identifier,
+// not Block::fatherblock, so that list is also the right thing to walk here.
+// Global is FreeFEM's built-in operator/function namespace (thousands of
+// entries), not anything the script declared, so it is skipped; so are the
+// internal "[u]" array entries FreeFEM creates next to each finite-element
+// function.
+static void ffPrintVars(Stack stack)
+{
+  if (mpirank!=0) return;
+  bool any=false;
+  for (list<TableOfIdentifier*>::const_iterator bi=tables_of_identifier.begin();
+       bi!=tables_of_identifier.end(); ++bi)
+  {
+    if (*bi == &Global) continue;
+    for (TableOfIdentifier::const_iterator vi=(*bi)->m.begin(); vi!=(*bi)->m.end(); ++vi)
+    {
+      if (vi->first[0]=='[') continue;
+      string v=ffVarValue(vi->second.first,vi->second.second,stack);
+      cout << "  " << vi->first << " : " << ffVarType(vi->second.first)
+           << (v.empty() ? "" : " = "+v) << endl;
+      any=true;
+    }
+  }
+  if (!any) cout << "  (no script variables currently visible)" << endl;
+}
+
 // Shared entry point for the debug console: used both by pause() (E_pause
 // below, capturedBlock = the live Block at the pause() call site) and by
 // the Ctrl-C (SIGINT) interrupt check in AFunction2.cpp's
@@ -210,7 +313,10 @@ void RunPauseConsole(Stack stack, Block *capturedBlock)
     cout << "\n-- pause() : FreeFEM debug console -- type one FreeFEM "
          << "statement per line (ending in ';'), 'resume' alone to "
          << "continue the script, 'vars' alone to list the script's "
-         << "variables, or 'kill' alone to end FreeFEM --" << capturedBlock << " line "<< TheCurrentLine << endl;
+         << "variables, or 'kill' alone to end FreeFEM --" << endl;
+  // Show the variables right away, as if `vars` had been typed.
+  if (mpirank==0) cout << "variables:" << endl;
+  ffPrintVars(stack);
   string line;
   while (true)
   {
@@ -221,41 +327,12 @@ void RunPauseConsole(Stack stack, Block *capturedBlock)
     size_t e = line.find_last_not_of(" \t\r");
     string trimmed = line.substr(b,e-b+1);
     if (trimmed=="resume" || trimmed=="resume;") break;
-      if (trimmed=="step" || trimmed=="step;")
-      {ff_ctrlCRequested=1;break;} // break at next  step.
     if (trimmed=="kill" || trimmed=="kill;") {
       if (mpirank==0) cout << "-- kill: ending FreeFEM --" << endl;
       ff_finalize();
       exit(1);
     }
-      if (trimmed=="stack" || trimmed=="stack;") {
-          extern void ShowDebugStack();
-          ShowDebugStack();
-          continue;
-      }
-    if (trimmed=="vars" || trimmed=="vars;") {
-      // ::Find() (AFunction2.cpp) resolves every identifier by walking this
-      // same global list of currently-open-or-kept-alive scopes -- not
-      // Block::fatherblock -- so it doubles as the right thing to walk to
-      // list "the script's variables". Global itself is FreeFEM's built-in
-      // operator/function namespace (thousands of entries), not anything
-      // the script declared, so it's skipped.
-      if (mpirank==0) {
-        bool any=false;
-        for (list<TableOfIdentifier*>::const_iterator bi=tables_of_identifier.begin();
-             bi!=tables_of_identifier.end(); ++bi)
-        {
-          if (*bi == &Global) continue;
-          for (TableOfIdentifier::const_iterator vi=(*bi)->m.begin(); vi!=(*bi)->m.end(); ++vi)
-          {
-            cout << "  " << vi->first << " : " << *(vi->second.first) << endl;
-            any=true;
-          }
-        }
-        if (!any) cout << "  (no script variables currently visible)" << endl;
-      }
-      continue;
-    }
+    if (trimmed=="vars" || trimmed=="vars;") { ffPrintVars(stack); continue; }
 
     ff_pauseNestedFather = capturedBlock;
     ff_pauseNestedStack  = stack;
@@ -264,6 +341,7 @@ void RunPauseConsole(Stack stack, Block *capturedBlock)
     // pointer passed to input() -- must be heap-allocated.
     zzzfff->input(src,new string("pause console"));
     Compile(); // parse+eval errors are reported by Compile() itself
+    ff_nestedCleanup(capturedBlock);
     ff_pauseNestedFather = nullptr;
     ff_pauseNestedStack  = nullptr;
     // Compile()'s own final check ("Error:a block is not close") runs
@@ -275,6 +353,371 @@ void RunPauseConsole(Stack stack, Block *capturedBlock)
     currentblock = nullptr;
   }
 }
+
+// =========================================================================
+// VSCode debugger support (see vscode/README.md for the protocol).
+//
+// Active only when the environment variable FF_DEBUG_SOCKET names a Unix
+// socket a debug adapter is listening on. The interpreter connects to it
+// at the first statement it executes and stops there ("entry"), then talks
+// a line-based protocol, one message per line, fields separated by TAB,
+// free text escaped (\\ \n \t \r):
+//
+//   interpreter -> adapter                    adapter -> interpreter
+//   hello 1 <pid>                             setbreaks <path> <l1,l2,..>
+//   stopped <reason> <path> <lo> <hi>         go | next | stepin | stepout
+//   frame <i> <name> <path> <lo> <hi> ...end  stack
+//   var <name> <type> <value> ...end          vars
+//   result <rc> <text> end                    eval <statement text>
+//   exited                                    pause | quit
+//
+// reason is entry|breakpoint|step|pause. While running, only setbreaks,
+// pause and quit are honoured (polled every 64 statements); the rest are
+// answered only while stopped. A stop covers source lines [lo,hi]: hi is
+// the line recorded when the statement was parsed (its LAST line) and lo
+// just follows the previous statement, so a breakpoint on any line of a
+// multi-line statement -- or on a blank/comment line before it -- hits it.
+// The adapter shows the first real code line of [lo,hi].
+//
+// eval/vars run through the same nested-Compile machinery as pause(), so
+// they see the script's top-level variables (Block::open keeps that scope
+// alive in debug mode). Variables panel values are produced only for
+// scalar types (int, real, bool, complex): reading a mesh/fespace that has
+// not been constructed yet would dereference garbage.
+// =========================================================================
+bool ff_dbg_lookahead=false;
+long ff_dbg_addCount=0;
+#ifdef _WIN32
+bool ff_dbg_active=false;
+Block *ff_dbg_rootBlock=nullptr;
+int  ff_dbg_registerFile(const std::string &) { return -1; }
+void ff_dbg_statement(Stack,int,int,int,int,bool) {}
+void ff_dbg_pushCall() {}
+void ff_dbg_popCall() {}
+bool ff_dbg_enter(const void *) { return false; }
+void ff_dbg_leave(bool) {}
+#else
+bool ff_dbg_active = (getenv("FF_DEBUG_SOCKET") != nullptr);
+Block *ff_dbg_rootBlock = nullptr;
+extern void ff_finalize(); // lg.ypp (global scope: must not be declared inside the namespace below)
+
+namespace {
+struct DbgFile { string name, canon; bool real; const set<int> *bps; };
+vector<DbgFile> dbgFiles;
+map<string,int> dbgFileByName;
+map<string,set<int> > dbgBreaks; // canonical path -> breakpoint lines
+int dbgFd=-1;
+string dbgBuf;
+bool dbgConnected=false, dbgStarted=false, dbgInside=false, dbgDead=false;
+enum DbgMode { DBG_RUN, DBG_STEPIN, DBG_NEXT, DBG_STEPOUT };
+DbgMode dbgMode=DBG_RUN;
+size_t dbgStepDepth=0;
+Stack dbgStack=nullptr; // stack of the statement we are stopped at
+int dbgCurFile=-1, dbgCurLo=0, dbgCurHi=0;
+struct DbgCall { int file,lo,hi; };
+vector<DbgCall> dbgCalls; // mirrors debugstack: where each routine was called from
+const void *dbgTopList=nullptr;
+unsigned dbgPollCount=0;
+int dbgListDepth=0; // nesting of ListOfInst::operator() calls
+// Location of the previous statement hook, to drop the duplicate stop that
+// FreeFEM's own scope wrapper causes: a for(...) loop is a one-statement
+// list (Block::close) nested inside the enclosing list, so the loop shows up
+// twice with identical lines, one list level deeper the second time.
+int dbgPrevFile=-1, dbgPrevLo=0, dbgPrevHi=0, dbgPrevListDepth=-100;
+
+string dbgEsc(const string &s) {
+  string r;
+  for (size_t i=0;i<s.size();++i) {
+    char c=s[i];
+    if (c=='\\') r+="\\\\"; else if (c=='\n') r+="\\n";
+    else if (c=='\t') r+="\\t"; else if (c=='\r') r+="\\r"; else r+=c;
+  }
+  return r;
+}
+string dbgUnesc(const string &s) {
+  string r;
+  for (size_t i=0;i<s.size();++i) {
+    if (s[i]=='\\' && i+1<s.size()) {
+      char c=s[++i];
+      r += (c=='n') ? '\n' : (c=='t') ? '\t' : (c=='r') ? '\r' : c;
+    } else r+=s[i];
+  }
+  return r;
+}
+vector<string> dbgSplit(const string &s) {
+  vector<string> f; size_t p=0;
+  for (;;) {
+    size_t q=s.find('\t',p);
+    if (q==string::npos) { f.push_back(s.substr(p)); break; }
+    f.push_back(s.substr(p,q-p)); p=q+1;
+  }
+  return f;
+}
+void dbgSend(const string &msg) {
+  if (dbgFd<0 || dbgDead) return;
+  string m=msg+"\n"; size_t off=0;
+  while (off<m.size()) {
+    ssize_t n=write(dbgFd,m.data()+off,m.size()-off);
+    if (n<0) { if (errno==EINTR) continue; dbgDead=true; return; }
+    off+=(size_t)n;
+  }
+}
+void dbgQuit() { ff_finalize(); exit(1); }
+bool dbgReadLine(string &out,bool block) {
+  for (;;) {
+    size_t p=dbgBuf.find('\n');
+    if (p!=string::npos) { out=dbgBuf.substr(0,p); dbgBuf.erase(0,p+1); return true; }
+    if (dbgDead || dbgFd<0) return false;
+    if (!block) {
+      struct pollfd pf; pf.fd=dbgFd; pf.events=POLLIN; pf.revents=0;
+      if (poll(&pf,1,0)<=0) return false;
+    }
+    char tmp[4096];
+    ssize_t n=read(dbgFd,tmp,sizeof tmp);
+    if (n>0) dbgBuf.append(tmp,(size_t)n);
+    else if (n==0 || (errno!=EINTR && errno!=EAGAIN)) { dbgDead=true; return false; }
+  }
+}
+string dbgCanon(const string &name,bool *real) {
+  struct stat st; char buf[PATH_MAX];
+  bool r=(stat(name.c_str(),&st)==0 && S_ISREG(st.st_mode));
+  if (real) *real=r;
+  if (r && realpath(name.c_str(),buf)) return string(buf);
+  return name;
+}
+void dbgRefreshBreaks() {
+  for (size_t i=0;i<dbgFiles.size();++i) {
+    map<string,set<int> >::const_iterator it=dbgBreaks.find(dbgFiles[i].canon);
+    dbgFiles[i].bps = (it==dbgBreaks.end()) ? nullptr : &it->second;
+  }
+}
+void dbgSetBreaks(const string &path,const string &csv) {
+  string canon=dbgCanon(path,nullptr);
+  set<int> s;
+  size_t p=0;
+  while (p<csv.size()) {
+    size_t q=csv.find(',',p); if (q==string::npos) q=csv.size();
+    if (q>p) s.insert(atoi(csv.substr(p,q-p).c_str()));
+    p=q+1;
+  }
+  if (s.empty()) dbgBreaks.erase(canon); else dbgBreaks[canon]=s;
+  dbgRefreshBreaks();
+}
+bool dbgConnect() {
+  const char *path=getenv("FF_DEBUG_SOCKET");
+  if (!path) return false;
+  string spath=path;
+  // Don't let child processes (system(), ffglut, a nested FreeFem++) try to
+  // attach to the same debugger.
+  unsetenv("FF_DEBUG_SOCKET");
+  int fd=socket(AF_UNIX,SOCK_STREAM,0);
+  if (fd<0) return false;
+  struct sockaddr_un a; memset(&a,0,sizeof a);
+  a.sun_family=AF_UNIX;
+  strncpy(a.sun_path,spath.c_str(),sizeof(a.sun_path)-1);
+  if (connect(fd,(struct sockaddr*)&a,sizeof a)!=0) {
+    cerr << " -- debugger: cannot connect to " << spath << " (" << strerror(errno)
+         << "); running without it --" << endl;
+    close(fd); return false;
+  }
+  fcntl(fd,F_SETFD,FD_CLOEXEC);
+#ifdef SO_NOSIGPIPE
+  { int one=1; setsockopt(fd,SOL_SOCKET,SO_NOSIGPIPE,&one,sizeof one); }
+#endif
+  dbgFd=fd; dbgConnected=true;
+  dbgSend("hello\t1\t"+to_string((long)getpid()));
+  return true;
+}
+
+void dbgSendStack() {
+  size_t m = debugstack ? debugstack->size() : 0;
+  for (size_t k=0;k<=m;k++) {
+    int file,lo,hi;
+    if (k==0) { file=dbgCurFile; lo=dbgCurLo; hi=dbgCurHi; }
+    else {
+      if (m-k>=dbgCalls.size()) break;
+      const DbgCall &c=dbgCalls[m-k]; file=c.file; lo=c.lo; hi=c.hi;
+    }
+    string name="(script)";
+    if (k<m) {
+      const E_Routine *r=(*debugstack)[m-1-k].first;
+      if (r && r->name) name=r->name;
+    }
+    string path = (file>=0 && file<(int)dbgFiles.size()) ? dbgFiles[file].canon : "";
+    dbgSend("frame\t"+to_string((long)k)+"\t"+dbgEsc(name)+"\t"+dbgEsc(path)
+            +"\t"+to_string((long)lo)+"\t"+to_string((long)hi));
+  }
+  dbgSend("end");
+}
+
+void dbgSendVars() {
+  for (list<TableOfIdentifier*>::const_iterator bi=tables_of_identifier.begin();
+       bi!=tables_of_identifier.end(); ++bi)
+  {
+    if (*bi == &Global) continue;
+    for (TableOfIdentifier::const_iterator vi=(*bi)->m.begin(); vi!=(*bi)->m.end(); ++vi)
+      dbgSend("var\t"+dbgEsc(string(vi->first))+"\t"+dbgEsc(ffVarType(vi->second.first))
+              +"\t"+dbgEsc(ffVarValue(vi->second.first,vi->second.second,dbgStack)));
+  }
+  dbgSend("end");
+}
+
+void dbgEval(const string &expr) {
+  stringstream cap;
+  // In FreeFEM's headers cerr IS cout (&cout==&cerr), so swapping both would
+  // save the already-swapped buffer as "cerr's original" and restore the
+  // dangling one: swap (and restore) the shared stream once.
+  const bool sameStream=(&cout==&cerr);
+  streambuf *oc=cout.rdbuf(cap.rdbuf());
+  streambuf *oe=sameStream ? nullptr : cerr.rdbuf(cap.rdbuf());
+  long vsave=verbosity; verbosity=0;
+  bool esave=zzzfff->setecho(false);
+  dbgInside=true;
+  // Father = the script's root scope, so variables declared at the prompt
+  // are allocated beyond the script's own (see RunPauseConsole's note).
+  ff_pauseNestedFather=ff_dbg_rootBlock;
+  ff_pauseNestedStack=dbgStack;
+  int rc=0;
+  try {
+    string src=expr; src+="\n";
+    zzzfff->input(src,new string("debug console")); // name is delete'd by the lexer
+    rc=Compile();
+  } catch (...) { rc=-1; }
+  ff_nestedCleanup(ff_dbg_rootBlock);
+  ff_pauseNestedFather=nullptr;
+  ff_pauseNestedStack=nullptr;
+  dbgInside=false;
+  zzzfff->setecho(esave);
+  verbosity=vsave;
+  cout.rdbuf(oc);
+  if (!sameStream) cerr.rdbuf(oe);
+  dbgSend("result\t"+to_string((long)rc)+"\t"+dbgEsc(cap.str()));
+  dbgSend("end");
+}
+
+void dbgCommandLoop() {
+  string line;
+  for (;;) {
+    if (!dbgReadLine(line,true)) dbgQuit(); // adapter went away
+    vector<string> f=dbgSplit(line);
+    if (f.empty()) continue;
+    const string &c=f[0];
+    size_t depth = debugstack ? debugstack->size() : 0;
+    if (c=="go") { dbgMode=DBG_RUN; return; }
+    else if (c=="stepin") { dbgMode=DBG_STEPIN; return; }
+    else if (c=="next") { dbgMode=DBG_NEXT; dbgStepDepth=depth; return; }
+    else if (c=="stepout") { dbgMode=DBG_STEPOUT; dbgStepDepth=depth; return; }
+    else if (c=="setbreaks" && f.size()>=2) dbgSetBreaks(dbgUnesc(f[1]), f.size()>2?f[2]:"");
+    else if (c=="stack") dbgSendStack();
+    else if (c=="vars") dbgSendVars();
+    else if (c=="eval" && f.size()>=2) dbgEval(dbgUnesc(f[1]));
+    else if (c=="quit") dbgQuit();
+  }
+}
+
+void dbgStopAt(const char *reason) {
+  ff_ctrlCRequested=0; // a Ctrl-C that arrived meanwhile must not stop us a second time
+  dbgSend(string("stopped\t")+reason+"\t"+dbgFiles[dbgCurFile].canon
+          +"\t"+to_string((long)dbgCurLo)+"\t"+to_string((long)dbgCurHi));
+  // The terminal is NOT where input goes while stopped (this process is
+  // waiting on the debugger, not on stdin): say so, or it just looks hung.
+  if (string(reason)=="breakpoint" || string(reason)=="pause") {
+    const string &f=dbgFiles[dbgCurFile].canon;
+    size_t sl=f.rfind('/');
+    cout << "\n-- stopped at " << (sl==string::npos ? f : f.substr(sl+1)) << ":" << dbgCurLo
+         << " -- type statements in VSCode's Debug Console (not here); F5 continues, F10 steps --" << endl;
+  }
+  dbgCommandLoop();
+}
+
+bool dbgPoll() { // while running: true if the adapter asked us to pause
+  string line; bool pause=false;
+  while (dbgReadLine(line,false)) {
+    vector<string> f=dbgSplit(line);
+    if (f.empty()) continue;
+    if (f[0]=="setbreaks" && f.size()>=2) dbgSetBreaks(dbgUnesc(f[1]), f.size()>2?f[2]:"");
+    else if (f[0]=="pause") pause=true;
+    else if (f[0]=="quit") dbgQuit();
+  }
+  if (dbgDead) dbgQuit();
+  return pause;
+}
+} // namespace
+
+int ff_dbg_registerFile(const std::string &name) {
+  if (name.empty()) return -1;
+  map<string,int>::const_iterator it=dbgFileByName.find(name);
+  if (it!=dbgFileByName.end()) return it->second;
+  DbgFile f; f.name=name; f.canon=dbgCanon(name,&f.real); f.bps=nullptr;
+  dbgFiles.push_back(f);
+  int id=(int)dbgFiles.size()-1;
+  dbgFileByName[name]=id;
+  dbgRefreshBreaks();
+  return id;
+}
+
+void ff_dbg_statement(Stack s,int fid,int lo,int hi,int gaplo,bool nested) {
+  if (dbgInside || !ff_dbg_active) return;
+  // Only statements from real files on disk are user-visible source;
+  // macro expansions and pause()/debugger snippets are skipped.
+  if (fid<0 || fid>=(int)dbgFiles.size() || !dbgFiles[fid].real) return;
+  dbgStack=s; dbgCurFile=fid; dbgCurLo=lo; dbgCurHi=hi;
+  const bool dup = (fid==dbgPrevFile && lo==dbgPrevLo && hi==dbgPrevHi
+                    && dbgListDepth==dbgPrevListDepth+1);
+  dbgPrevFile=fid; dbgPrevLo=lo; dbgPrevHi=hi; dbgPrevListDepth=dbgListDepth;
+  if (dup) return;
+  if (!dbgStarted) {
+    dbgStarted=true;
+    if (!dbgConnect()) { ff_dbg_active=false; return; }
+    dbgStopAt("entry");
+    return;
+  }
+  const char *reason=nullptr;
+  const set<int> *b=dbgFiles[fid].bps;
+  if (b && !b->empty()) {
+    // hit-test the statement's lines AND the gap after the previous
+    // statement (blank/comment lines, func/border definitions, which
+    // produce no statement of their own), so a breakpoint there moves
+    // to the next statement like in any other debugger.
+    set<int>::const_iterator it=b->lower_bound(gaplo<lo?gaplo:lo);
+    // a statement that contains others only owns its header (gap..lo): the
+    // lines inside belong to the nested statements, which stop on their own
+    if (it!=b->end() && *it<=(nested ? lo : hi)) reason="breakpoint";
+  }
+  if (!reason) {
+    size_t depth = debugstack ? debugstack->size() : 0;
+    if (dbgMode==DBG_STEPIN
+        || (dbgMode==DBG_NEXT && depth<=dbgStepDepth)
+        || (dbgMode==DBG_STEPOUT && depth<dbgStepDepth)) reason="step";
+  }
+  if (!reason && ff_ctrlCRequested) { ff_ctrlCRequested=0; reason="pause"; }
+  if (!reason && ((++dbgPollCount)&63)==0 && dbgPoll()) reason="pause";
+  if (reason) dbgStopAt(reason);
+}
+
+void ff_dbg_pushCall() {
+  DbgCall c; c.file=dbgCurFile; c.lo=dbgCurLo; c.hi=dbgCurHi;
+  dbgCalls.push_back(c);
+}
+void ff_dbg_popCall() {
+  if (dbgCalls.empty()) return;
+  DbgCall c=dbgCalls.back(); dbgCalls.pop_back();
+  dbgCurFile=c.file; dbgCurLo=c.lo; dbgCurHi=c.hi;
+}
+bool ff_dbg_enter(const void *list) {
+  ++dbgListDepth;
+  if (dbgInside) return false;
+  if (!dbgTopList) dbgTopList=list;
+  return list==dbgTopList;
+}
+void ff_dbg_leave(bool top) {
+  --dbgListDepth;
+  if (!top) return;
+  if (dbgConnected) dbgSend("exited");
+  ff_dbg_active=false;
+  if (dbgFd>=0) { close(dbgFd); dbgFd=-1; }
+}
+#endif // !_WIN32
 
 class OneOperatorPause : public OneOperator {
 public:
