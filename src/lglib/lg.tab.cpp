@@ -856,22 +856,22 @@ static const yytype_uint16 yyrline[] =
      543,   547,   548,   549,   550,   551,   552,   556,   557,   562,
      563,   564,   565,   566,   567,   568,   571,   572,   577,   578,
      580,   581,   583,   584,   587,   590,   594,   595,   598,   598,
-     599,   600,   601,   603,   602,   619,   618,   628,   629,   633,
-     635,   639,   639,   642,   644,   645,   646,   648,   649,   650,
-     651,   652,   653,   655,   654,   660,   661,   665,   666,   667,
-     668,   673,   675,   678,   682,   686,   693,   696,   704,   712,
-     719,   720,   724,   725,   726,   727,   728,   732,   733,   734,
-     735,   736,   737,   738,   739,   744,   745,   746,   747,   751,
-     752,   753,   754,   755,   756,   757,   758,   759,   760,   761,
-     762,   763,   764,   765,   766,   767,   768,   769,   770,   774,
-     775,   776,   777,   782,   786,   787,   788,   789,   790,   791,
-     792,   793,   794,   795,   796,   797,   798,   799,   800,   801,
-     804,   807,   808,   811,   812,   813,   814,   815,   816,   817,
-     818,   819,   820,   821,   822,   823,   824,   825,   829,   830,
-     834,   835,   836,   840,   841,   849,   853,   854,   855,   856,
-     861,   863,   864,   865,   866,   867,   868,   869,   870,   871,
-     872,   873,   874,   875,   876,   877,   878,   879,   888,   896,
-     897,   898,   899
+     599,   600,   601,   603,   602,   619,   618,   634,   635,   639,
+     641,   645,   645,   648,   650,   651,   652,   654,   655,   656,
+     657,   658,   659,   661,   660,   666,   667,   671,   672,   673,
+     674,   679,   681,   684,   688,   692,   699,   702,   710,   718,
+     725,   726,   730,   731,   732,   733,   734,   738,   739,   740,
+     741,   742,   743,   744,   745,   750,   751,   752,   753,   757,
+     758,   759,   760,   761,   762,   763,   764,   765,   766,   767,
+     768,   769,   770,   771,   772,   773,   774,   775,   776,   780,
+     781,   782,   783,   788,   792,   793,   794,   795,   796,   797,
+     798,   799,   800,   801,   802,   803,   804,   805,   806,   807,
+     810,   813,   814,   817,   818,   819,   820,   821,   822,   823,
+     824,   825,   826,   827,   828,   829,   830,   831,   835,   836,
+     840,   841,   842,   846,   847,   855,   859,   860,   861,   862,
+     867,   869,   870,   871,   872,   873,   874,   875,   876,   877,
+     878,   879,   880,   881,   882,   883,   884,   885,   894,   902,
+     903,   904,   905
 };
 #endif
 
@@ -2394,12 +2394,12 @@ yyreduce:
 
   case 4:
 #line 460 "lg.ypp"
-    {(yyval.cinst) = (yyvsp[(1) - (1)].cexp);;}
+    {ff_dbg_lookahead=(yychar!=YYEMPTY);(yyval.cinst) = (yyvsp[(1) - (1)].cexp);;}
     break;
 
   case 5:
 #line 461 "lg.ypp"
-    {(yyval.cinst) = ((yyvsp[(1) - (2)].cinst)+=(yyvsp[(2) - (2)].cexp));;}
+    {ff_dbg_lookahead=(yychar!=YYEMPTY);(yyval.cinst) = ((yyvsp[(1) - (2)].cinst)+=(yyvsp[(2) - (2)].cexp));;}
     break;
 
   case 6:
@@ -2882,103 +2882,109 @@ yyreduce:
   case 106:
 #line 621 "lg.ypp"
     {  //$<cinst>$=currentblock->close(currentblock);
-                         (yyval.cinst).setclose(Block::snewclose(currentblock));// Sep 2016 FH.
+                         // The destroy list is never evaluated for a one-expression
+                         // function/varf body, so it is just dropped. (The original
+                         // code did `$<cinst>$.setclose(...)` here, but $$ is the
+                         // FUNCTION token, i.e. a *type* object, not a ListOfInst: it
+                         // scribbled `atclose` over some field of that type, harmless
+                         // only by luck of the ListOfInst layout.)
+                         Block::snewclose(currentblock);
                          (yyval.cexp)=currentblock->NewID((yyvsp[(1) - (9)].type),(yyvsp[(2) - (9)].str),(yyvsp[(8) - (9)].cexp),*(yyvsp[(4) - (9)].clist_id));
                          delete (yyvsp[(4) - (9)].clist_id); //  FH 23032005
                          ;}
     break;
 
   case 107:
-#line 628 "lg.ypp"
+#line 634 "lg.ypp"
     {  Block::open(currentblock);;}
     break;
 
   case 108:
-#line 629 "lg.ypp"
+#line 635 "lg.ypp"
     { (yyval.endb)=Block::snewclose(currentblock);
 //  $$=currentblock->close(currentblock);
 ;}
     break;
 
   case 109:
-#line 633 "lg.ypp"
+#line 639 "lg.ypp"
     {ffassert(inloopcount<sizeStackOfLoop);  // modif FH july 2005
                 StackOfLoop[inloopcount++]=currentblock;;}
     break;
 
   case 110:
-#line 635 "lg.ypp"
+#line 641 "lg.ypp"
     {ffassert(inloopcount<sizeStackOfLoop);
                 StackOfLoop[inloopcount++]=currentblock;;}
     break;
 
   case 111:
-#line 639 "lg.ypp"
+#line 645 "lg.ypp"
     {dcltype=(yyvsp[(1) - (1)].type); Block::open(currentblock);  ;}
     break;
 
   case 112:
-#line 640 "lg.ypp"
+#line 646 "lg.ypp"
     {(yyval.cexp)=(yyvsp[(3) - (3)].cexp);;}
     break;
 
   case 113:
-#line 642 "lg.ypp"
+#line 648 "lg.ypp"
     { Block::open(currentblock);;}
     break;
 
   case 114:
-#line 644 "lg.ypp"
+#line 650 "lg.ypp"
     { (yyval.clist_id) = new ListOfId(); (yyval.clist_id)->push_back(UnId((yyvsp[(1) - (1)].str)));Block::open(currentblock); ;}
     break;
 
   case 115:
-#line 645 "lg.ypp"
+#line 651 "lg.ypp"
     { (yyval.clist_id) = new ListOfId(); (yyval.clist_id)->push_back(UnId((yyvsp[(1) - (3)].str)));(yyval.clist_id)->push_back(UnId((yyvsp[(3) - (3)].str)));Block::open(currentblock); ;}
     break;
 
   case 116:
-#line 646 "lg.ypp"
+#line 652 "lg.ypp"
     { (yyval.clist_id) = new ListOfId(); (yyval.clist_id)->push_back(UnId((yyvsp[(1) - (5)].str)));(yyval.clist_id)->push_back(UnId((yyvsp[(3) - (5)].str)));(yyval.clist_id)->push_back(UnId((yyvsp[(5) - (5)].str)));Block::open(currentblock); ;}
     break;
 
   case 117:
-#line 648 "lg.ypp"
+#line 654 "lg.ypp"
     {(yyval.cexp)=0;;}
     break;
 
   case 118:
-#line 649 "lg.ypp"
+#line 655 "lg.ypp"
     {zzzfff->input((yyvsp[(2) - (2)].str));(yyval.cexp)= 0; ;}
     break;
 
   case 119:
-#line 650 "lg.ypp"
+#line 656 "lg.ypp"
     {load((yyvsp[(2) - (2)].str));(yyval.cexp)= 0; ;}
     break;
 
   case 120:
-#line 651 "lg.ypp"
+#line 657 "lg.ypp"
     {(yyval.cexp)=Try((yyvsp[(3) - (5)].cinst),currentblock->close(currentblock,(yyvsp[(5) - (5)].cexp)));;}
     break;
 
   case 121:
-#line 652 "lg.ypp"
+#line 658 "lg.ypp"
     {(yyval.cexp)=(yyvsp[(1) - (2)].cexp);;}
     break;
 
   case 122:
-#line 653 "lg.ypp"
+#line 659 "lg.ypp"
     {(yyval.cexp)=(yyvsp[(1) - (1)].cexp);;}
     break;
 
   case 123:
-#line 655 "lg.ypp"
+#line 661 "lg.ypp"
     {(yyvsp[(5) - (6)].cexp)=ForAll(currentblock,(yyvsp[(3) - (6)].clist_id),(yyvsp[(5) - (6)].cexp));;}
     break;
 
   case 124:
-#line 656 "lg.ypp"
+#line 662 "lg.ypp"
     {
                     inloopcount--;
                     (yyval.cexp)=Block::close(currentblock,C_F0(ForAll((yyvsp[(5) - (8)].cexp),(yyvsp[(8) - (8)].cexp))));
@@ -2986,34 +2992,34 @@ yyreduce:
     break;
 
   case 125:
-#line 660 "lg.ypp"
+#line 666 "lg.ypp"
     {inloopcount--; (yyval.cexp)=For((yyvsp[(3) - (9)].cexp),(yyvsp[(5) - (9)].cexp),(yyvsp[(7) - (9)].cexp),(yyvsp[(9) - (9)].cexp));;}
     break;
 
   case 126:
-#line 662 "lg.ypp"
+#line 668 "lg.ypp"
     {inloopcount--;
                  (yyval.cexp)=Block::close(currentblock,C_F0(For((yyvsp[(3) - (9)].cexp),(yyvsp[(5) - (9)].cexp),(yyvsp[(7) - (9)].cexp),(yyvsp[(9) - (9)].cexp))));
                 ;}
     break;
 
   case 127:
-#line 665 "lg.ypp"
+#line 671 "lg.ypp"
     {inloopcount--;(yyval.cexp)=While((yyvsp[(3) - (5)].cexp),(yyvsp[(5) - (5)].cexp));;}
     break;
 
   case 128:
-#line 666 "lg.ypp"
+#line 672 "lg.ypp"
     {(yyval.cexp)=FIf((yyvsp[(3) - (5)].cexp),(yyvsp[(5) - (5)].cexp));;}
     break;
 
   case 129:
-#line 667 "lg.ypp"
+#line 673 "lg.ypp"
     {(yyval.cexp)=FIf((yyvsp[(3) - (7)].cexp),(yyvsp[(5) - (7)].cexp),(yyvsp[(7) - (7)].cexp));;}
     break;
 
   case 130:
-#line 668 "lg.ypp"
+#line 674 "lg.ypp"
     { /* [[begin:]] [[end:]] */
              (yyvsp[(2) - (3)].cinst).setclose((yyvsp[(3) - (3)].endb));
              (yyval.cexp)=(yyvsp[(2) - (3)].cinst);
@@ -3022,19 +3028,19 @@ yyreduce:
     break;
 
   case 131:
-#line 673 "lg.ypp"
+#line 679 "lg.ypp"
     { /* <<BORDER_ID>> */
                       (yyval.cexp)=0;currentblock->NewID(atype<const E_Border *>(),(yyvsp[(2) - (3)].str),C_F0(TheOperators,"[border]",(yyvsp[(3) - (3)].args)));;}
     break;
 
   case 132:
-#line 675 "lg.ypp"
+#line 681 "lg.ypp"
     {
                       (yyval.cexp)=0;currentblock->NewID(atype<const E_Border *>(),(yyvsp[(2) - (6)].str),C_F0(TheOperators,"[border]",(yyvsp[(4) - (6)].args)));;}
     break;
 
   case 133:
-#line 678 "lg.ypp"
+#line 684 "lg.ypp"
     {
                     if(inloopcount)
                       (yyval.cexp)= C_F0(new E_throw(E_exception::e_break),atype<void>());
@@ -3042,7 +3048,7 @@ yyreduce:
     break;
 
   case 134:
-#line 682 "lg.ypp"
+#line 688 "lg.ypp"
     {
                     if(inloopcount)
                         (yyval.cexp)= C_F0(new E_throw(E_exception::e_continue),atype<void>()) ;
@@ -3050,7 +3056,7 @@ yyreduce:
     break;
 
   case 135:
-#line 686 "lg.ypp"
+#line 692 "lg.ypp"
     {
                     if (kkembtype>=0)
                       (yyval.cexp)= C_F0(new E_throw(E_exception::e_return,(rettype[kkembtype]->CastTo((yyvsp[(2) - (3)].cexp))).OnReturn()) ,atype<void>());
@@ -3058,12 +3064,12 @@ yyreduce:
     break;
 
   case 136:
-#line 693 "lg.ypp"
+#line 699 "lg.ypp"
     {(yyval.cexp) =  (yyvsp[(7) - (7)].cexp); ;}
     break;
 
   case 137:
-#line 696 "lg.ypp"
+#line 702 "lg.ypp"
     {
    Block::open(currentblock);
    (yyval.args) = currentblock->NewVar<LocalVariable>((yyvsp[(2) - (7)].str),atype<double*>());
@@ -3073,7 +3079,7 @@ yyreduce:
     break;
 
   case 138:
-#line 704 "lg.ypp"
+#line 710 "lg.ypp"
     {
     Block::open(currentblock);
     (yyval.args) = currentblock->NewVar<LocalVariable>((yyvsp[(2) - (9)].str),atype<double*>());
@@ -3083,7 +3089,7 @@ yyreduce:
     break;
 
   case 139:
-#line 712 "lg.ypp"
+#line 718 "lg.ypp"
     {
     //currentblock->close(currentblock;);
    (yyval.args) = ((yyvsp[(1) - (2)].args) += currentblock->close(currentblock,(yyvsp[(2) - (2)].cexp)));
@@ -3091,484 +3097,484 @@ yyreduce:
     break;
 
   case 141:
-#line 720 "lg.ypp"
+#line 726 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 148:
-#line 733 "lg.ypp"
+#line 739 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 149:
-#line 734 "lg.ypp"
+#line 740 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"+=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 150:
-#line 735 "lg.ypp"
+#line 741 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"-=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 151:
-#line 736 "lg.ypp"
+#line 742 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"*=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 152:
-#line 737 "lg.ypp"
+#line 743 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"/=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 153:
-#line 738 "lg.ypp"
+#line 744 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,".*=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 154:
-#line 739 "lg.ypp"
+#line 745 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"./=",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 156:
-#line 745 "lg.ypp"
+#line 751 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"?:",(yyvsp[(1) - (5)].cexp),(yyvsp[(3) - (5)].cexp),(yyvsp[(5) - (5)].cexp));;}
     break;
 
   case 157:
-#line 746 "lg.ypp"
+#line 752 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"::",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 158:
-#line 747 "lg.ypp"
+#line 753 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,"::",(yyvsp[(1) - (5)].cexp),(yyvsp[(3) - (5)].cexp),(yyvsp[(5) - (5)].cexp));;}
     break;
 
   case 160:
-#line 752 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 161:
-#line 753 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 162:
-#line 754 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 163:
-#line 755 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 164:
-#line 756 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 165:
-#line 757 "lg.ypp"
-    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
-    break;
-
-  case 166:
 #line 758 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 167:
+  case 161:
 #line 759 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 168:
+  case 162:
 #line 760 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 169:
+  case 163:
 #line 761 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 170:
+  case 164:
 #line 762 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 171:
+  case 165:
 #line 763 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 172:
+  case 166:
 #line 764 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 173:
+  case 167:
 #line 765 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 174:
+  case 168:
 #line 766 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 175:
+  case 169:
 #line 767 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 176:
+  case 170:
 #line 768 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 177:
+  case 171:
 #line 769 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 178:
+  case 172:
 #line 770 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
-  case 179:
+  case 173:
+#line 771 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 174:
+#line 772 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 175:
+#line 773 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 176:
 #line 774 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 177:
+#line 775 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 178:
+#line 776 "lg.ypp"
+    {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
+    break;
+
+  case 179:
+#line 780 "lg.ypp"
     {(yyval.cexp)=(yyvsp[(1) - (1)].cexp);;}
     break;
 
   case 180:
-#line 775 "lg.ypp"
+#line 781 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,":");;}
     break;
 
   case 181:
-#line 776 "lg.ypp"
+#line 782 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,":",(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 182:
-#line 777 "lg.ypp"
+#line 783 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,":",(yyvsp[(1) - (5)].cexp),(yyvsp[(3) - (5)].cexp),(yyvsp[(5) - (5)].cexp));;}
     break;
 
   case 183:
-#line 782 "lg.ypp"
+#line 788 "lg.ypp"
     {
       (yyval.args) = (yyvsp[(1) - (3)].cexp);
       (yyval.args) += (yyvsp[(3) - (3)].args); ;}
     break;
 
   case 184:
-#line 786 "lg.ypp"
+#line 792 "lg.ypp"
     {(yyval.args) = 0;;}
     break;
 
   case 185:
-#line 787 "lg.ypp"
+#line 793 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 186:
-#line 788 "lg.ypp"
+#line 794 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 187:
-#line 789 "lg.ypp"
+#line 795 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 188:
-#line 790 "lg.ypp"
+#line 796 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 189:
-#line 791 "lg.ypp"
+#line 797 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 190:
-#line 792 "lg.ypp"
+#line 798 "lg.ypp"
     {(yyval.args) = Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 191:
-#line 793 "lg.ypp"
+#line 799 "lg.ypp"
     {(yyval.args) = make_pair<const char *,const C_F0>((const char *) (yyvsp[(1) - (3)].str),(C_F0) (yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 192:
-#line 794 "lg.ypp"
+#line 800 "lg.ypp"
     {(yyval.args) = (yyvsp[(1) - (1)].cexp);;}
     break;
 
   case 193:
-#line 795 "lg.ypp"
+#line 801 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 194:
-#line 796 "lg.ypp"
+#line 802 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 195:
-#line 797 "lg.ypp"
+#line 803 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 196:
-#line 798 "lg.ypp"
+#line 804 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 197:
-#line 799 "lg.ypp"
+#line 805 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 198:
-#line 800 "lg.ypp"
+#line 806 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
   case 199:
-#line 801 "lg.ypp"
+#line 807 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += (yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 200:
-#line 804 "lg.ypp"
+#line 810 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (5)].args)+= make_pair<const char *,const C_F0>((const char *)(yyvsp[(3) - (5)].str),(C_F0) (yyvsp[(5) - (5)].cexp)));;}
     break;
 
   case 201:
-#line 807 "lg.ypp"
+#line 813 "lg.ypp"
     {(yyval.args)=(yyvsp[(1) - (1)].cexp);;}
     break;
 
   case 202:
-#line 808 "lg.ypp"
+#line 814 "lg.ypp"
     {(yyval.args) = ((yyvsp[(1) - (3)].args) += (yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 203:
-#line 811 "lg.ypp"
+#line 817 "lg.ypp"
     { (yyval.args)=Find((yyvsp[(1) - (1)].str));}
     break;
 
   case 204:
-#line 812 "lg.ypp"
+#line 818 "lg.ypp"
     { (yyval.args)=Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 205:
-#line 813 "lg.ypp"
+#line 819 "lg.ypp"
     { (yyval.args)=Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 206:
-#line 814 "lg.ypp"
+#line 820 "lg.ypp"
     { (yyval.args)=Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 207:
-#line 815 "lg.ypp"
+#line 821 "lg.ypp"
     { (yyval.args)=Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 208:
-#line 816 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 209:
-#line 817 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 210:
-#line 818 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 211:
-#line 819 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 212:
-#line 820 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 213:
-#line 821 "lg.ypp"
-    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
-    break;
-
-  case 214:
 #line 822 "lg.ypp"
     { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
-  case 215:
+  case 209:
 #line 823 "lg.ypp"
     { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
-  case 216:
+  case 210:
 #line 824 "lg.ypp"
     { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
-  case 217:
+  case 211:
 #line 825 "lg.ypp"
     { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
     break;
 
-  case 219:
+  case 212:
+#line 826 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 213:
+#line 827 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 214:
+#line 828 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 215:
+#line 829 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 216:
 #line 830 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 217:
+#line 831 "lg.ypp"
+    { (yyval.args) = ((yyvsp[(1) - (3)].args) += Find((yyvsp[(3) - (3)].str)));;}
+    break;
+
+  case 219:
+#line 836 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(1) - (2)].oper),(yyvsp[(2) - (2)].cexp));;}
     break;
 
   case 221:
-#line 835 "lg.ypp"
+#line 841 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 222:
-#line 836 "lg.ypp"
+#line 842 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (3)].oper),(yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].cexp));;}
     break;
 
   case 224:
-#line 841 "lg.ypp"
+#line 847 "lg.ypp"
     {(yyval.cexp)=C_F0(TheOperators,(yyvsp[(2) - (2)].oper),(yyvsp[(1) - (2)].cexp));;}
     break;
 
   case 225:
-#line 849 "lg.ypp"
+#line 855 "lg.ypp"
     {(yyval.cexp)=Find((yyvsp[(1) - (1)].str));;}
     break;
 
   case 226:
-#line 853 "lg.ypp"
+#line 859 "lg.ypp"
     {(yyval.cexp)= CConstant((yyvsp[(1) - (1)].lnum));;}
     break;
 
   case 227:
-#line 854 "lg.ypp"
+#line 860 "lg.ypp"
     {(yyval.cexp)= CConstant((yyvsp[(1) - (1)].dnum));;}
     break;
 
   case 228:
-#line 855 "lg.ypp"
+#line 861 "lg.ypp"
     {(yyval.cexp)= CConstant(complex<double>(0,(yyvsp[(1) - (1)].dnum)));;}
     break;
 
   case 229:
-#line 856 "lg.ypp"
+#line 862 "lg.ypp"
     {(yyval.cexp)= CConstant<const char *>((yyvsp[(1) - (1)].str));;}
     break;
 
   case 230:
-#line 861 "lg.ypp"
+#line 867 "lg.ypp"
     {(yyval.cexp)=C_F0((yyvsp[(1) - (4)].cexp),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args));;}
     break;
 
   case 231:
-#line 863 "lg.ypp"
+#line 869 "lg.ypp"
     {(yyval.cexp)=C_F0((yyvsp[(1) - (4)].cexp),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].cexp));;}
     break;
 
   case 232:
-#line 864 "lg.ypp"
+#line 870 "lg.ypp"
     {(yyval.cexp)=C_F0((yyvsp[(1) - (6)].cexp),(yyvsp[(2) - (6)].oper),(yyvsp[(3) - (6)].cexp),(yyvsp[(5) - (6)].cexp));;}
     break;
 
   case 233:
-#line 865 "lg.ypp"
+#line 871 "lg.ypp"
     {(yyval.cexp)=C_F0((yyvsp[(1) - (3)].cexp),"[]");;}
     break;
 
   case 234:
-#line 866 "lg.ypp"
+#line 872 "lg.ypp"
     { (yyval.cexp)=C_F0((yyvsp[(1) - (3)].cexp),(yyvsp[(3) - (3)].str)) ;;}
     break;
 
   case 235:
-#line 867 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
-    break;
-
-  case 236:
-#line 868 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
-    break;
-
-  case 237:
-#line 869 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
-    break;
-
-  case 238:
-#line 870 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
-    break;
-
-  case 239:
-#line 871 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
-    break;
-
-  case 240:
-#line 872 "lg.ypp"
-    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
-    break;
-
-  case 241:
 #line 873 "lg.ypp"
     { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
     break;
 
-  case 242:
+  case 236:
 #line 874 "lg.ypp"
     { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
     break;
 
-  case 243:
+  case 237:
 #line 875 "lg.ypp"
     { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
     break;
 
-  case 244:
+  case 238:
 #line 876 "lg.ypp"
     { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
     break;
 
-  case 245:
+  case 239:
 #line 877 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
+    break;
+
+  case 240:
+#line 878 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
+    break;
+
+  case 241:
+#line 879 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
+    break;
+
+  case 242:
+#line 880 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
+    break;
+
+  case 243:
+#line 881 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (3)].str)),(yyvsp[(3) - (3)].str)) ;;}
+    break;
+
+  case 244:
+#line 882 "lg.ypp"
+    { (yyval.cexp)=C_F0(Find((yyvsp[(1) - (4)].str)),(yyvsp[(2) - (4)].oper),(yyvsp[(3) - (4)].args)) ;;}
+    break;
+
+  case 245:
+#line 883 "lg.ypp"
     {(yyval.cexp)=C_F0(TheRightOperators,(yyvsp[(2) - (2)].oper),(yyvsp[(1) - (2)].cexp));;}
     break;
 
   case 246:
-#line 878 "lg.ypp"
+#line 884 "lg.ypp"
     {(yyval.cexp)=C_F0(TheRightOperators,(yyvsp[(2) - (2)].oper),(yyvsp[(1) - (2)].cexp));;}
     break;
 
   case 247:
-#line 879 "lg.ypp"
+#line 885 "lg.ypp"
     {
              if ((yyvsp[(1) - (4)].type)->right()->CastingFrom((yyvsp[(3) - (4)].cexp).left()) )
                 (yyval.cexp)=(yyvsp[(1) - (4)].type)->right()->CastTo((yyvsp[(3) - (4)].cexp))  ;
@@ -3581,7 +3587,7 @@ yyreduce:
     break;
 
   case 248:
-#line 888 "lg.ypp"
+#line 894 "lg.ypp"
     {
            { (yyval.cexp)=(yyvsp[(1) - (4)].type)->right()->Find("<--",basicAC_F0_wa((yyvsp[(3) - (4)].args)));
            if (!(yyval.cexp).left()) { cerr << " no wait to change (args) in " <<
@@ -3592,28 +3598,28 @@ yyreduce:
     break;
 
   case 249:
-#line 896 "lg.ypp"
+#line 902 "lg.ypp"
     {(yyval.cexp)=(yyvsp[(2) - (3)].cexp);;}
     break;
 
   case 250:
-#line 897 "lg.ypp"
+#line 903 "lg.ypp"
     { (yyval.cexp)=C_F0(TheOperators,"[]",(yyvsp[(2) - (3)].args));;}
     break;
 
   case 251:
-#line 898 "lg.ypp"
+#line 904 "lg.ypp"
     { (yyval.cexp)=C_F0(TheOperators,"<>",(yyvsp[(2) - (3)].args));;}
     break;
 
   case 252:
-#line 899 "lg.ypp"
+#line 905 "lg.ypp"
     { (yyval.cexp)=C_F0(TheOperators,"<>",(yyvsp[(1) - (1)].args));;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 3617 "lg.tab.cpp"
+#line 3623 "lg.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3827,7 +3833,7 @@ yyreturn:
 }
 
 
-#line 903 "lg.ypp"
+#line 909 "lg.ypp"
 
 
 
