@@ -473,34 +473,37 @@ namespace PETSc {
   }
 
   template<class MMesh>
-  void buildShellFromDfes(Dmat& B, v_dfes<MMesh>* f, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
-    buildShellFromData(B, &f->dofIntersectionDof, &f->Ddof, f->DTh->comm, ndof, sym, ucomm, bs);
+  void buildShellFromDfes(Dmat& B, const DGFESpace<MMesh>& V, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
+    buildShellFromData(B, &V.dofIntersectionDof, &V.Ddof, V.DTh().comm, ndof, sym, ucomm, bs);
   }
 
 
   template<class MMesh>
-  void checkMatMatchesDfes(Dmat& B, v_dfes<MMesh>* f, int ndof) {
+  void checkMatMatchesDfes(Dmat& B, const DGFESpace<MMesh>& V, int ndof) {
     int bad = 0;
+    pcommworld comm = V.DTh().comm;
     if (B._petsc) {
       MPI_Comm mc = PetscObjectComm((PetscObject)B._petsc);   // copie interne PETSc : CONGRUENT
       int r;
-      MPI_Comm_compare(mc, *static_cast<MPI_Comm*>(f->DTh->comm), &r);
+      MPI_Comm_compare(mc, *static_cast<MPI_Comm*>(comm), &r);
       if (r != MPI_IDENT && r != MPI_CONGRUENT) bad = 2;
     }
     if (!bad && B._A->getDof() != ndof) bad = 1;
-    bad = agreeOnStatus(bad, f->DTh->comm);
+    bad = agreeOnStatus(bad, comm);
     if (bad == 2)
-      distributedError(f->DTh->comm, "A = varf(Udh, Udh): the Mat was built on another communicator than the distributed mesh of Udh; use Mat A(Udh)");
+      distributedError(comm, "A = varf(Udh, Udh): the Mat was built on another communicator than the distributed mesh of Udh; use Mat A(Udh)");
     if (bad == 1)
-      distributedError(f->DTh->comm, "A = varf(Udh, Udh): the Mat was built for another fespace (local size differs); use Mat A(Udh)");
+      distributedError(comm, "A = varf(Udh, Udh): the Mat was built for another fespace (local size differs); use Mat A(Udh)");
   }
 
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   buildShellIfNeeded(Dmat& B, typename fes1::pfes* pUh, int ndof, Data_Sparse_Solver& ds){
-    v_dfes<MMesh>* f = *pUh;
-    if (B._A) { checkMatMatchesDfes<MMesh>(B, f, ndof); return; }
-    buildShellFromDfes(B, f, ndof, ds.sym, static_cast<MPI_Comm*>(ds.commworld));
+    GFESpace<MMesh>* fes = **pUh;
+    ffassert(fes);
+    const DGFESpace<MMesh>& V = dist(*fes);
+    if (B._A) { checkMatMatchesDfes<MMesh>(B, V, ndof); return; }
+    buildShellFromDfes(B, V, ndof, ds.sym, static_cast<MPI_Comm*>(ds.commworld));
   }
 
   template<class MMesh, class fes1>
@@ -516,8 +519,10 @@ namespace PETSc {
   template<class MMesh, class fes1, class R>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
     assembleWithoutOverlap(Dmat& B, typename fes1::pfes* pUh, MatriceMorse<R>* mA) {
-    v_dfes<MMesh>* f = *pUh;
-    if (f->DTh) assembleWithoutOverlapData(B, f->DTh->overlap, mA);
+    GFESpace<MMesh>* fes = **pUh;
+    ffassert(fes);
+    const DGFESpace<MMesh>& V = dist(*fes);
+    assembleWithoutOverlapData(B, V.DTh().overlap, mA);
   }
 
   template<class R>
@@ -569,8 +574,8 @@ namespace PETSc {
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   checkDistributedEval(DistributedEvalScope& scope, typename fes1::pfes* pUh) {
-    v_dfes<MMesh>* f = *pUh;
-    scope.check(f->DTh ? f->DTh->comm : nullptr);
+    GFESpace<MMesh>* fes = **pUh;
+    scope.check(fes ? dist(*fes).DTh().comm : nullptr);
   }
 
   template<class MMesh, class fes1>
@@ -1694,12 +1699,12 @@ namespace PETSc {
       AnyType operator()(Stack stack) const {
         Dmat* ptA = GetAny<Dmat*>((*A)(stack));
         pfes* pUh = GetAny<pfes*>((*U)(stack));
-        const FESpace* Vh = (FESpace*)**pUh;          // 1.3 : construit intersection et D
-        ffassert(Vh && (*pUh)->DTh);
+        const FESpace* Vh = (FESpace*)**pUh;
+        ffassert(Vh);
         MPI_Comm* ucomm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : nullptr;
         bool sym = nargs[1] && GetAny<bool>((*nargs[1])(stack));
         PetscInt bs = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : 1;
-        buildShellFromDfes<MMesh>(*ptA, *pUh, Vh->NbOfDF, sym, ucomm, bs);
+        buildShellFromDfes<MMesh>(*ptA, dist(*Vh), Vh->NbOfDF, sym, ucomm, bs);
         return ptA;
       }
     };

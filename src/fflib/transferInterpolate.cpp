@@ -1287,13 +1287,14 @@ long transferP1(const DistributedMesh<Mesh>** const & Dsrc, KN<double>* const & 
 }
 
 template<class Mesh, class R>
-static int interpolateFE(v_dfes<Mesh>* pSrc, const GFESpace<Mesh>& srcVh, const KN<R>& uSrc, v_dfes<Mesh>* pDst, const GFESpace<Mesh>& dstVh, KN<R>& uDst){
-    ffassert(pSrc && pDst && pSrc->DTh && pDst->DTh);
-    if (!sameComm(pSrc->DTh->comm, pDst->DTh->comm))
-        distributedError(pSrc->DTh->comm, "transfer between distributed meshes on different communicators "
+static int interpolateFE(const GFESpace<Mesh>& srcVh, const KN<R>& uSrc, const GFESpace<Mesh>& dstVh, KN<R>& uDst){
+    const DistributedMesh<Mesh>& Ds = dist(srcVh).DTh();
+    const DistributedMesh<Mesh>& Dd = dist(dstVh).DTh();
+    if (!sameComm(Ds.comm, Dd.comm))
+        distributedError(Ds.comm, "transfer between distributed meshes on different communicators "
                   "(they must have the same ranks in the same order)");
     ffassert(uSrc.n == srcVh.NbOfDF && uDst.n == dstVh.NbOfDF);
-    return interpolateDistributed(*pSrc->DTh, srcVh, uSrc, *pDst->DTh, dstVh, uDst);
+    return interpolateDistributed(Ds, srcVh, uSrc, Dd, dstVh, uDst);
 }
 
 template<class Mesh, class R>
@@ -1303,11 +1304,10 @@ long interpolateD(v_dfes<Mesh>** const & ppSrc, KN<R>* const & uSrc,
     throwassert(ppSrc && *ppSrc && ppDst && *ppDst && uSrc && uDst);
     v_dfes<Mesh>* pSrc = *ppSrc;
     v_dfes<Mesh>* pDst = *ppDst;
+    const GFESpace<Mesh>* Vs = *pSrc; const GFESpace<Mesh>* Vd = *pDst;
+    throwassert(Vs && Vd);
 
-    const GFESpace<Mesh>& srcVh = **pSrc;           // operator FESpace*() : lgfem.hpp:427
-    const GFESpace<Mesh>& dstVh = **pDst;
-
-    int xfer = interpolateFE(pSrc, srcVh, *uSrc, pDst, dstVh, *uDst);
+    int xfer = interpolateFE(*Vs, *uSrc, *Vd, *uDst);
     return (long)xfer;
 }
 
@@ -1318,13 +1318,16 @@ const TransferPlan<Mesh>* makeTransferPlan(v_dfes<Mesh>** const& ppSrc,
     throwassert(ppSrc && *ppSrc && ppDst && *ppDst);
     v_dfes<Mesh>* pSrc = *ppSrc;
     v_dfes<Mesh>* pDst = *ppDst;
-    throwassert(pSrc->DTh && pDst->DTh);
-    if (!sameComm(pSrc->DTh->comm, pDst->DTh->comm))
-        distributedError(pSrc->DTh->comm, "transfer between distributed meshes on different communicators "
+    const GFESpace<Mesh>* Vs = *pSrc;      // operator FESpace*
+    const GFESpace<Mesh>* Vd = *pDst;
+    throwassert(Vs && Vd);
+    const DistributedMesh<Mesh>& Ds = dist(*Vs).DTh();
+    const DistributedMesh<Mesh>& Dd = dist(*Vd).DTh();
+
+    if (!sameComm(Ds.comm, Dd.comm))
+        distributedError(Ds.comm, "transfer between distributed meshes on different communicators "
                   "(they must have the same ranks in the same order)");
-    const GFESpace<Mesh>& srcVh = **pSrc;      // operator FESpace*() : lgfem.hpp:428
-    const GFESpace<Mesh>& dstVh = **pDst;
-    return buildTransferPlan(*pSrc->DTh, srcVh, *pDst->DTh, dstVh);
+    return buildTransferPlan(Ds, *Vs, Dd, *Vd);
 }
 
 template<class Mesh, class R>
@@ -1402,8 +1405,9 @@ long interpolateMat(const TransferPlan<Mesh>** const & ppP, KN<long>* const& src
 
 template<class Mesh>
 static bool sameDistributedSpace(const v_dfes<Mesh>* a, const GFESpace<Mesh>& Va, const v_dfes<Mesh>* b, const GFESpace<Mesh>& Vb) {
-    if (a==b) return true;
-    return (a->DTh && a->DTh == b->DTh && a->nbcperiodic == 0 && b->nbcperiodic == 0 && Va.TFE.N() == 1 && Vb.TFE.N() == 1 && Va.TFE[0] == Vb.TFE[0]);
+    if (&Va==&Vb) return true;
+    return (&dist(Va).DTh() == &dist(Vb).DTh() && a->nbcperiodic == 0 && b->nbcperiodic == 0
+            && Va.TFE.N() == 1 && Vb.TFE.N() == 1 && Va.TFE[0] == Vb.TFE[0]);
 }
 
 template<class Mesh, class R>
@@ -1411,10 +1415,12 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     if (dst == src) return;
 
     v_dfes<Mesh>* pS = *src->pVh; v_dfes<Mesh>* pD = *dst->pVh;
-    ffassert(pS && pS->DTh);
-    ffassert(pD && pD->DTh);
+    ffassert(pS && pD);
+    GFESpace<Mesh>* fS = *pS;
+    ffassert(fS);
+    pcommworld comm = dist(*fS).DTh().comm;
 
-    if (pS->N != pD->N) distributedError(pS->DTh->comm, "u = v: incompatible number of components");
+    if (pS->N != pD->N) distributedError(comm, "u = v: incompatible number of components");
 
     KN<R>* xs = src->x();
     if (!xs) {
@@ -1425,7 +1431,7 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     const GFESpace<Mesh>& VhS = (src->Vh) ? *src->Vh : *src->newVh();
     const GFESpace<Mesh>& VhD = *dst->newVh();
     int bad = (xs->N() != VhS.NbOfDF) ? 1 : 0;
-    if (agreeOnStatus(bad, pS->DTh->comm)) distributedError(pS->DTh->comm, "u = v: outdated source FE function");
+    if (agreeOnStatus(bad, comm)) distributedError(comm, "u = v: outdated source FE function");
 
     if (sameDistributedSpace(pS, VhS, pD, VhD)) {
         *dst = new KN<R>(*xs);
@@ -1433,7 +1439,7 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     }
 
     KN<R>* y = new KN<R>(VhD.NbOfDF);
-    try { interpolateFE(pS, VhS, *xs, pD, VhD, *y); }
+    try { interpolateFE(VhS, *xs, VhD, *y); }
     catch (...) { delete y; throw; }
     *dst = y;
     return;
@@ -1442,7 +1448,11 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
 template<class Mesh, class R>
 static std::pair<FEbase<R, v_dfes<Mesh>>*, int>
 setFEDistributed(const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& dst, const std::pair<FEbase<R, v_dfes<Mesh>>*, int>& src) {
-    if ((*src.first->pVh)->N != 1 || (*dst.first->pVh)->N != 1) distributedError((*src.first->pVh)->DTh->comm, "b1 = a1 on a vector FE function: use [b1,...]=[a1,...]");
+    if ((*src.first->pVh)->N != 1 || (*dst.first->pVh)->N != 1) {
+        GFESpace<Mesh>* fS = **src.first->pVh;
+        ffassert(fS);
+        distributedError(dist(*fS).DTh().comm, "b1 = a1 on a vector FE function: use [b1,...]=[a1,...]");
+    }
     assignFEDistributed<Mesh, R>(dst.first, src.first);
     return dst;
 }

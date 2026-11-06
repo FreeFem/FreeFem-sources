@@ -475,15 +475,7 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   operator FESpace *( ) {
     throwassert(dHat == Mesh::RdHat::d);
-    if (!pVh || *ppTh != &pVh->Th) { 
-      pVh = CountPointer< FESpace >(update( ), true); 
-      dofDataBuilt = false; loc2globBuilt = false; numberingBuilt = false; pouResidual = -1;
-      if (exchangeHandle) {
-        g_distributedBackend->destroyExchangeHandle(exchangeHandle);
-        exchangeHandle = nullptr;
-      }
-    }
-    if (DTh && !dofDataBuilt) { buildDistributedDofData(*pVh); dofDataBuilt = true; }
+    if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpace >(update( ), true);
     return pVh;
   }
   

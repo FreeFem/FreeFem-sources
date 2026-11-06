@@ -4840,11 +4840,15 @@ static bool gatherDistPieces(const DistributedMesh< Mesh > &D, int root, bool ow
 template< class Mesh, class K >
 static bool gatherDistItem(FEbase< K, v_dfes< Mesh > > *const *fe, const int *cmp, int nc, long what, long onlyRank,
                            bool owned, DistPlotItem< Mesh > &out) {
-  const DistributedMesh< Mesh > *D = (*fe[0]->pVh)->DTh;
+  GFESpace<Mesh> *f0 = **fe[0]->pVh;
+  ffassert(f0);
+  const DistributedMesh< Mesh > *D = &dist(*f0).DTh();
   int bad = 0;
   for (int c = 0; c < nc; ++c) {
-    if ((*fe[c]->pVh)->DTh != D) bad = max(bad, 2);
-    else if (!fe[c]->x( ) || !fe[c]->Vh || &fe[c]->Vh->Th != D->LocalMesh) bad = max(bad, 1);
+    GFESpace<Mesh> *fc = **fe[c]->pVh;
+    ffassert(fc);
+    if (&dist(*fc).DTh() != D) bad = max(bad, 2);
+    else if (!fe[c]->x( ) || !fe[c]->Vh || &dist(*fe[c]->Vh).DTh() != D) bad = max(bad, 1);
   }
   bad = agreeOnStatus(bad, D->comm);
   if (bad == 2) distributedError(D->comm, "plot: the components of a distributed vector must be on the same distributed mesh");
