@@ -404,6 +404,14 @@ class Data_Sparse_Solver;
 template<class TypeIndex, class TypeScalaire>
 class HashMatrix;
 
+// Forward declaration of DistributedMesh and DGFESpace and dist() and factory
+template<class M> class DistributedMesh;
+template<class Mesh> class DGFESpace;
+
+template<class Mesh> const DGFESpace<Mesh>& dist(const GFESpace<Mesh>& Vh);
+
+template<class Mesh> GFESpace<Mesh>* newDistributedFESpace(const DistributedMesh<Mesh>& DTh, const GTypeOfFE<Mesh>& tfe, int nbequibe = 0, int* equibe = nullptr);
+
 // parametres de solve/problem ecrits par l'utilisateur (DistSolveArgs::given)
 enum { DIST_GIVEN_SOLVER = 1, DIST_GIVEN_EPS = 2, DIST_GIVEN_NBITER = 4, DIST_GIVEN_DIMKRYLOV = 8 };
 
@@ -437,7 +445,6 @@ class DistributedBackend {
 extern DistributedBackend* g_distributedBackend;
 
 // FE space distribué
-template<class M> class DistributedMesh;
 template<class Mesh> class v_dfes : public generic_v_fes {
  public:
   typedef v_dfes<Mesh>* pfes;

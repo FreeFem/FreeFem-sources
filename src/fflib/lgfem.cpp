@@ -4605,6 +4605,9 @@ struct DistPlotPiece {
   int nv = 0, nt = 0, nbe = 0;
   KN< double > xyz, V;
   KN< int > vlab, tv, tlab, bv, blab;
+  DistPlotPiece( ) = default;
+  DistPlotPiece(const DistPlotPiece &) = default;              // copie : chaque KN est alloue a la bonne taille
+  DistPlotPiece &operator=(const DistPlotPiece &) = delete;    // KN::operator= ne redimensionne pas (cf. fusion)
 };
 // Item distribue rassemble sur la racine ; pieces indexe par rang de comm
 template< class Mesh >

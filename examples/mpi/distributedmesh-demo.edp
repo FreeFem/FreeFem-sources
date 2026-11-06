@@ -4,6 +4,7 @@
 // problem / solve sur un fespace distribue, ecrit comme en sequentiel.
 // La resolution passe par PETSc (load "PETSc" obligatoire).
 load "PETSc"
+include "getARGV.idp"
 
 // Creating distributed meshes et fespaces for both physical phenomena
 real x0 = 0, y0 = 0, z0 = 0;
@@ -13,9 +14,12 @@ int nx2 = 80, ny2 = 8, nz2 = 8;
 
 mesh3 Th1 = cube(nx1, ny1, nz1, [x0 + (x1-x0)*x, y0 + (y1-y0)*y, z0 + (z1-z0)*z]);
 Dmesh3 DTh1 = distribute(Th1, overlap = 1, partmethod = "metis");
+DTh1 = distribute(Th1, overlap = 2, partmethod = "metis");
+plot(DTh1, byrank = 0,wait = 1, cmm = "Distributed mesh 1");
 
 mesh3 Th2 = cube(nx2, ny2, nz2, [x0 + (x1-x0)*x, y0 + (y1-y0)*y, z0 + (z1-z0)*z]);
 Dmesh3 DTh2 = distribute(Th2, overlap = 1, partmethod = "scotch");
+plot(DTh2, byrank = 1, wait = 1, cmm = "Distributed mesh 2");
 
 mesh3 ThL1 = DTh1.local;
 mesh3 ThL2 = DTh2.local;
@@ -45,39 +49,6 @@ real vol = int3d(DTh1)(1);
 
 macro grad(u) [dx(u),dy(u),dz(u)]//EOM
 
-int it = 0;
-problem chaleur(T, w, init = it, solver = CG, eps = 1e-10)
-    = int3d(DTh1)(rhoc*T*w/dt + k*grad(T)'*grad(w))
-    + int2d(DTh1, 1, 3, 5, 6)(hc*T*w)
-    - int2d(DTh1, 1, 3, 5, 6)(hc*Text*w)
-    - int3d(DTh1)(rhoc*Told*w/dt)
-    +on(4, T = Tc);
-
-T = Text;
-for (it = 0; it < nt; ++it) {
-    Told = T;
-    chaleur;
-    real Tmoy = int3d(DTh1)(T)/vol;
-    real inFlux = -int2d(DTh1, 4)(k*dx(T));
-    real outFlux = int2d(DTh1, 1, 3, 5, 6)(hc*(T-Text));
-    real t = (it+1)*dt;
-    if (mpirank == 0){
-        cout << "Average temperature at time " << t << " s is " << Tmoy << " K." << endl;
-        cout << "Incoming flux at face x = 0 at time " << t << " s is " << inFlux << " W." << endl;
-        cout << "Outgoing flux at other faces at time " << t << " s is " << outFlux << " W." << endl;
-    }
-}
-
-// Transfer on distributed meshes
-Udh2 T2 = T;
-real vol2 = int3d(DTh2)(1);
-real Tmoy1 = int3d(DTh1)(T)/vol;
-real Tmoy2 = int3d(DTh2)(T2)/vol2;
-if (mpirank == 0){
-    cout << "Average temperature at tf " << tf << " s is " << Tmoy1 << " on mesh 1." << endl;
-    cout << "Average temperature at tf " << tf << " s is " << Tmoy2 << " on mesh 2." << endl;
-}
-
 // Thermal dilatation
 fespace Wdh(DTh2, [P2, P2, P2]);
 macro div(u) (dx(u#1) + dy(u#2) + dz(u#3))//EOM
@@ -90,18 +61,98 @@ real E = 210e9, nu = 0.3, alpha = 12e-6;
 real lambda = E*nu/((1+nu)*(1-2*nu));
 real mu = E/(2*(1+nu));
 
+Udh2 T2;
 Wdh [u1, u2, u3], [v1, v2, v3];
 
-solve dilatation([u1, u2, u3], [v1, v2, v3], solver = sparsesolver)
+// Transfer plan between meshes
+real tPlan = mpiWtime();
+Dtransfer3 P = transferPlan(Udh1, Udh2); // source, destination
+tPlan = mpiWtime() - tPlan;
+
+int it = 0;
+problem chaleur(T, w, init = it, solver = CG, eps = 1e-10)
+    = int3d(DTh1)(rhoc*T*w/dt + k*grad(T)'*grad(w))
+    + int2d(DTh1, 1, 3, 5, 6)(hc*T*w)
+    - int2d(DTh1, 1, 3, 5, 6)(hc*Text*w)
+    - int3d(DTh1)(rhoc*Told*w/dt)
+    +on(4, T = Tc);
+
+problem dilatation([u1, u2, u3], [v1, v2, v3], init=it, solver = sparsesolver)
     = int3d(DTh2)(lambda*div(u)*div(v) + 2.*mu*(Eps(u)'*Eps(v)))
     - int3d(DTh2)((3*lambda + 2*mu)*alpha*(T2-Text)*div(v))
     + on(4, u1 = 0, u2 = 0, u3 = 0);
 
-real uBout = int2d(DTh2, 2)(u1) / int2d(DTh2, 2)(1.);
-real u1D = alpha*int3d(DTh2)(T2-Text)/((y1-y0)*(z1-z0));
-if (mpirank == 0) {
-    cout << "Elongation at x = " << x1 << " : " << uBout*1e3 << " mm (1D estimate : " << u1D*1e3 << " mm)" << endl;
+T = Text;
+real uBout, u1D, aire = int2d(DTh2, 2)(1.);
+int every = 10;
+int usePlan = getARGV("-plan", 1); // -plan 0 : T2 = T at each step, without the transfer plan
+real tTher = 0, tTrans = 0, tDil0 = 0, tDil = 0;
+for (it = 0; it < nt; ++it) {
+    Told = T;
+    real t0 = mpiWtime();
+    chaleur;
+    real t1 = mpiWtime();
+    if (usePlan) interpolateD(P, T[], T2[]);
+    else T2 = T;
+    real t2 = mpiWtime();
+    dilatation;
+    real t3 = mpiWtime();
+    tTher += t1 - t0;
+    tTrans += t2 - t1;
+    if (it == 0) tDil0 = t3 - t2; // assembly + factorization
+    else tDil += t3 - t2;         // matrix reused (init = it)
+    real Tmoy = int3d(DTh1)(T)/vol;
+    real inFlux = -int2d(DTh1, 4)(k*dx(T));
+    real outFlux = int2d(DTh1, 1, 3, 5, 6)(hc*(T-Text));
+    uBout = int2d(DTh2, 2)(u1) / aire;
+    u1D = alpha*int3d(DTh2)(T2-Text)/((y1-y0)*(z1-z0));
+    real t = (it+1)*dt;
+    if ((it+1)%every == 0){
+        if (mpirank == 0){
+            cout << "Average temperature at time " << t << " s is " << Tmoy << " K." << endl;
+            cout << "Incoming flux at face x = 0 at time " << t << " s is " << inFlux << " W." << endl;
+            cout << "Outgoing flux at other faces at time " << t << " s is " << outFlux << " W." << endl;
+            cout << "Elongation at x = " << x1 << " : " << uBout*1e3 << " mm (1D estimate : " << u1D*1e3 << " mm)" << endl;
+        }
+    }
 }
+
+real vol2 = int3d(DTh2)(1);
+real Tmoy1 = int3d(DTh1)(T)/vol;
+real Tmoy2 = int3d(DTh2)(T2)/vol2;
+if (mpirank == 0){
+    cout << "Average temperature at tf " << tf << " s is " << Tmoy1 << " on mesh 1." << endl;
+    cout << "Average temperature at tf " << tf << " s is " << Tmoy2 << " on mesh 2." << endl;
+}
+
+// Computation times (max over the ranks)
+real[int] times = [tPlan, tTher, tTrans, tDil0, tDil], timesMax(5);
+mpiAllReduce(times, timesMax, mpiCommWorld, mpiMAX);
+if (mpirank == 0){
+    cout << "Transfer plan : " << timesMax[0] << " s." << endl;
+    cout << "Thermic problem, " << nt << " steps : " << timesMax[1] << " s." << endl;
+    if (usePlan) cout << "Transfers with the plan, " << nt << " steps : " << timesMax[2] << " s." << endl;
+    else cout << "Transfers without the plan, " << nt << " steps : " << timesMax[2] << " s." << endl;
+    cout << "Dilatation, first step (assembly + factorization) : " << timesMax[3] << " s." << endl;
+    cout << "Dilatation, next " << nt-1 << " steps : " << timesMax[4] << " s." << endl;
+}
+
+// x profile
+int ns = 50;
+real dxs = (x1-x0)/ns;
+real[int] xs(ns), Ts(ns);
+for (int i = 0; i < ns; ++i){
+    xs[i] = x0 + (i+0.5)*dxs;
+    Ts[i] = int3d(DTh1)(T*(abs(x-xs[i]) < dxs/2.))/int3d(DTh1)(abs(x-xs[i]) < dxs/2.);
+}
+if (mpirank == 0) plot([xs, Ts, Ts, Ts], value = 1, cmm = "Temperature profile T(x) [K], x in [0, 1]m", wait = 1);
+plot([u1, u2, u3], cmm = "Displacement", wait = 1, value = 1, fill = 1); 
+
+
+real[int] vT = 295:5:365;
+plot(T, cmm = "Temperature", viso = vT, value = 1, fill = 1);
+
+
 /*
 fespace Udh(DTh1, P1);
 Udh u = 0, v;

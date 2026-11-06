@@ -1,0 +1,118 @@
+// NBPROC 1
+// PARAM -wg -ns -v 0
+
+//load "MUMPS" // for optimisation
+load "PETSc"
+
+int m=20;// 1/h 
+int withadapmesh=1; 
+real  g=-9.81, nuf=1./100., nus=10000, rhof=0.1, rhos = 10, dt=0.025, T= 100;
+
+real L=6,XM=2, r1=0.3, r2=0.05, xc=0.5, yc=L-0.3, omega=30.*pi/180.;
+real Ladp = 0.5, dhhh = 0.1/Ladp, hmax= 1./4; 
+int lrec =1, lellipse=2; // labels of B.C. 
+// This is a rectangle (0,1)x(0,L)
+border a1(t=0,XM){x=t;y=0;label=lrec;}
+border a2(t=0,L){x=XM; y=t;label=lrec;}
+border a3(t=XM,0){x=t; y=L;label=lrec;}
+border a4(t=L,0){x=0;y=t;label=lrec;}
+// This is an ellipse centered at (xc,yc), of radii r1,r2 and rotated by omega
+border disk(t=0,2*pi){ 
+                       x=xc+r1*cos(t)*cos(omega)+r2*sin(t)*sin(omega);
+					   y=yc-r1*cos(t)*sin(omega)+r2*sin(t)*cos(omega);
+					   label=lellipse; }
+//plot( a1(m) + a2(3*m) +a3(m)+a4(3*m)+disk(2*m), wait=1);
+func Boundary =  a1(m*XM) + a2(m*L) +a3(m*XM)+a4(m*L)+disk( 8*(r1+r2)*m); 
+
+func Xr =  (x-xc)*cos(-omega)+(y-yc)*sin(-omega);
+func Yr = -(x-xc)*sin(-omega)+(y-yc)*cos(-omega);
+
+real hmin = 0.03;
+real dhmin = 0.005;
+
+//func dellipse2 = sqr(Xr/r1)+sqr(Yr/r2)-1;  
+func hellipse = min( 1./m + (max(abs(y-yc),Ladp)-Ladp)*dhhh , hmax);
+//min(hmin + abs(dellipse2)*dhmin,0.3);
+
+mesh Th2=buildmesh( Boundary);
+Th2=adaptmesh(Th2,hellipse,IsMetric=1);
+// This is the characteristic function of the inside of the ellipse
+meshS ThS = movemesh23(Th2, transfo = [x,y,0]);
+int regionellipse= ThS(xc,yc,0).region; 
+DmeshS Th = distribute(ThS, overlap = 1, partmethod = "metis", keepGlobal = true);
+plot(Th,wait=1);
+fespace Wh(Th,[P1b,P1b,P1]);
+fespace Qh(Th,P0);
+
+
+Qh nu,rho, phi;
+
+Wh [u1,u2,p],[v1,v2,q], [u1old,u2old,pold]=[0,0,0];
+Wh [ua, ub, uc];
+
+macro div(u1,u2) (dx(u1)+dy(u2))//
+macro D(u1,u2)  [ dx(u1), (dx(u2)+dy(u1))*0.5, (dx(u2)+dy(u1))*0.5, dy(u2)]//
+
+// Navier-Stokes equations with gravity force, integrated in the rectangle, 
+// with varying density rho and varying viscosity but div(u)=0 in each triangle
+problem NStokes ([u1,u2,p],[v1,v2,q], sparams="-pc_type lu -pc_factor_mat_solver_type mumps")
+ =
+    int2d(Th)( rho*(u1*v1+u2*v2)/dt 
+    		  + 2.*nu*(D(u1,u2)'*D(v1,v2) )
+              - p*q*1e-8  - p*div(v1,v2) - q*div(u1,u2)
+             )
+    -int2d(Th)(
+              + rho*g*v2  
+       		  + rho*(u1old)*v1/dt
+       		  + rho*(u2old)*v2/dt
+              )
+    + on(lrec,u1=0,u2=0);
+
+//real J=rhos*pi*r1*r2*(r1^2+r2^2)/4;
+verbosity=0; 
+for(real t=0;t<T; t+=dt)
+{
+    real aellipse= int2d(Th,regionellipse)(1.); 
+    real rellipse= int2d(Th,regionellipse)(sqr(y-yc)+sqr(x-xc)); // J 
+   
+    phi = regionellipse==region;
+    // nu  is very large inside the ellipse
+    nu = nus*phi + nuf*(1-phi);
+    // rho inside ellipse is the larger because ellipse is heavier
+    rho = rhos*phi + rhof*(1-phi);
+    // [u1,u2,p]=[(y-yc),-(x-xc),0]; //  rotating field  for test  
+	 NStokes;
+	// Ellipse center and angle omega updated 
+	// mean speed of the ellipse
+	real du1 = int2d(Th,regionellipse)(u1)/aellipse;
+	real du2 = int2d(Th,regionellipse)(u2)/aellipse;
+	//  mean rotation  of ellipse after mov. 
+	real domega = int2d(Th,regionellipse)((u1-du1)*(y-yc)-(u2-du2)*(x-xc))/rellipse;
+	xc=xc+dt*du1;
+	yc=yc+dt*du2;
+	omega=omega+dt*domega;
+	// bound 	
+    xc = min(xc,  XM - 0.9*(abs(cos(omega))*r1 +abs(sin(omega)*r2)) ) ; 
+    xc = max(xc,  0  + 0.9*(abs(cos(omega))*r1 +abs(sin(omega)*r2)) ) ; 
+   if ( yc < 1*(abs(sin(omega))*r1 +abs(cos(omega)*r2))) break; 
+	cout << " mov : "<< du1 << " "<< du2 << "  " << domega << " / " << xc << " " << yc << " " << omega*180/pi << endl;
+    [ua, ub, uc]=[u1,u2,0];
+    plot(coef=0.1,cmm=" [u1,u2] et p  ",p,[ua, ub, uc], value=true,wait=false, dim = 2);
+    plot(a1(m) + a2(3*m) +a3(m)+a4(3*m)+disk(2*m),WindowIndex=1);
+
+	// Mesh is rebuilt with new ellipse position
+    [u1old,u2old,pold]=[u1,u2,p];
+	
+    mesh Th3 = buildmesh( Boundary);
+    cout << "Th3 : " << Th3.nv << " vertices, " << Th3.nt << " triangles" << endl;
+    Th3=adaptmesh(Th3, hellipse, IsMetric=1);
+    cout << "Th3 adapted : " << Th3.nv << " vertices, " << Th3.nt << " triangles" << endl;
+    meshS Th3S = movemesh23(Th3, transfo = [x,y,0]);
+    regionellipse= Th3S(xc,yc,0).region;  
+    cout << Wh.ndofglobal  << endl;
+    Th = distribute(Th3S, overlap = 1, partmethod = "metis", keepGlobal = true);
+    cout << Wh.ndofglobal  << endl;
+    [u1,u2,p] = [0,0,0];
+    [v1,v2,q] = [0,0,0];
+}
+plot(coef=0.1,cmm=" [u1,u2] et p  ",p,u1, value=true,wait=false, dim=2);

@@ -1,0 +1,38 @@
+// NBPROC 1
+// PARAM -wg -ns -v 0
+
+// problem / solve sur un fespace distribue, ecrit comme en sequentiel.
+// La resolution passe par PETSc (load "PETSc" obligatoire).
+load "PETSc"
+include "getARGV.idp"
+
+
+mesh3 Th1 = cube(5,5,5);
+Dmesh3 DTh1 = distribute(Th1, overlap = 1, partmethod = "metis", keepGlobal = true);
+DTh1 = distribute(Th1, overlap = 2, partmethod = "metis", keepGlobal = true);
+//plot(DTh1, byrank = 0,wait = 1, cmm = "Distributed mesh 1");
+
+mesh3 Th2 = cube(10,10,10);
+Dmesh3 DTh2 = distribute(Th2, overlap = 1, partmethod = "scotch", keepGlobal = true);
+//plot(DTh2, byrank = 1, wait = 1, cmm = "Distributed mesh 2");
+
+fespace Udh1(DTh1, P1);
+fespace Udh2(DTh2, P2);
+
+cout << Udh1.ndofglobal << " dof on DTh1" << endl;
+cout << Udh1.ndof << " dof on DTh1 local" << endl;
+DTh1 = distribute(Th2, overlap = 1, partmethod = "metis", keepGlobal = true);
+cout << Udh1.ndofglobal << " dof on DTh1" << endl;
+cout << Udh1.ndof << " dof on DTh1 local" << endl;
+
+mesh3 ThL1 = DTh1.local;
+mesh3 ThL2 = DTh2.local;
+
+
+Udh1 u,v;
+
+Udh2 w = x;
+u = w;
+plot(u);
+
+v = v;

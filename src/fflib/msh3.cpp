@@ -10393,65 +10393,8 @@ AnyType DistributeMesh_Op<Mesh>::operator( )(Stack stack) const {
 
   Add2StackOfPtr2FreeRC(stack, DTh);
   return DTh;
-
- // Mesh * Tht = truncmesh(Th, 1, split, 0, 111, precis_mesh, orientation, cleanmesh, removeduplicate);
-
-
-  //Tht->BuildGTree( );
-  //Add2StackOfPtr2FreeRC(stack, T_Th);
-  //DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(Tht);
-
-/*
-  V *v= new V[nbv];
-  T *t= new T[nbt];
-  B *b= new B[neb];
-  V *vv=v;
-  for (int i=0;i<nbv;i++) {
-    vv->x=Th(i).x;
-    vv->y=Th(i).y;
-    vv->lab = Th(i).lab;
-    vv++;
-  }
-
-  // copy elements
-  for (int it = 0; it < Th.nt; ++it) {
-    const T &K = (Th[it]);
-    int iv[T::nea];
-    for (int i = 0; i < T::nea; i++) iv[i] = Th.operator( )(K[i]);
-    // cp element
-    t[it].set(v, iv, K.lab);
-  }
-  // copy border elements
-  for (int ibe = 0; ibe < Th.nbe; ++ibe) {
-    const B &K(Th.be(ibe));
-    int iv[B::nea];
-    for (int i = 0; i < B::nea; i++) iv[i] = Th.operator( )(K[i]);
-    // cp border element
-    b[ibe].set(v, iv, K.lab);
-  }
-
-  Mesh * T_Th = new Mesh(nbv,nbt,neb,v,t,b,cleanmesh, removeduplicate,
-                          rebuildboundary, orientation, precis_mesh);
-
-	T_Th->BuildGTree( );
-	//Add2StackOfPtr2FreeRC(stack, T_Th);
-  DistributedMesh<Mesh> * DTh = new DistributedMesh<Mesh>(T_Th);
-
-	*mp = mps;
-	return DTh;
-*/
-
 }
-/*
-template< class K >
-AnyType AddIncrement(Stack stack, const AnyType &a) {
-  K m = GetAny< K >(a);
-  m->increment( );
-  Add2StackOfPtr2FreeRC(stack, m);
-  if (verbosity > 1) cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
-  return a;
-}
-*/
+
 template<class Mesh>
 const Mesh* get_localmesh(Stack stack, const DistributedMesh<Mesh>** const & DTh)
 { throwassert(DTh && *DTh) ;
