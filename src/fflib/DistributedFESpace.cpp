@@ -1,5 +1,4 @@
 #include "ff++.hpp"
-#include "DistributedFESpace.hpp"
 
 // Utility functions for building distributed dof data
 namespace {

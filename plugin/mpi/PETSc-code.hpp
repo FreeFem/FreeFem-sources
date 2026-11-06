@@ -448,7 +448,7 @@ namespace PETSc {
     Matrice_Creuse<upscaled_type<PetscScalar>>*);
 
   // Shell of a distributed Mat from raw distributed data (intersections, D, comm)
-  inline void buildShellFromData(Dmat& B, KN<KN<long>>* inter, KN<double>* Ddof, pcommworld comm,
+  inline void buildShellFromData(Dmat& B, const KN<KN<long>>* inter, const KN<double>* Ddof, pcommworld comm,
                                  int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
     MPI_Comm* dcomm = static_cast<MPI_Comm*>(comm);
     if (ucomm && dcomm) {
@@ -465,9 +465,10 @@ namespace PETSc {
         distributedError(comm, "Mat A(Udh, bs = k): block size must divide the number of dof; \n"
                                " mixed or non-nodal elements ([P2, P2, P1]): use bs = 1");
     }
+    // inter always const 
     KN<double> Dscratch(*Ddof);        // restriction() ecrase son argument : jamais Ddof
     buildDistributedShell< true, HpSchwarz<PetscScalar> >(
-      &B, 1, inter, &Dscratch, nullptr, ndof, bs,
+      &B, 1, const_cast<KN<KN<long>>*>(inter), &Dscratch, nullptr, ndof, bs,
       dcomm ? dcomm : ucomm, nullptr, 0, sym ? PETSC_TRUE : PETSC_FALSE, false, nullptr);
   }
 
@@ -2027,7 +2028,7 @@ namespace PETSc {
         }
   }
 
-  static void distributedExchangeHookD(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<double>* xx, bool scaled) {
+  static void distributedExchangeHookD(void ** handle, const KN<KN<long>>* dofIntersectionDof, const KN<double>* Ddof, pcommworld comm, KN_<double>* xx, bool scaled) {
     auto* sub = static_cast<HpSchwarz<PetscScalar>*>(*handle);
     if (!sub) {
       sub = new HpSchwarz<PetscScalar>();
@@ -2045,7 +2046,7 @@ namespace PETSc {
     delete static_cast<HpSchwarz<PetscScalar>*>(h);
   }
 
-  static void distributedExchangeHookC(void ** handle, KN<KN<long>>* dofIntersectionDof, KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled) {
+  static void distributedExchangeHookC(void ** handle, const KN<KN<long>>* dofIntersectionDof, const KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled) {
     auto* sub = static_cast<HpSchwarz<PetscScalar>*>(*handle);
     if (!sub) {
       sub = new HpSchwarz<PetscScalar>();

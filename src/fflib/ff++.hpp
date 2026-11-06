@@ -52,6 +52,7 @@ using namespace std;
 #include "lgfem.hpp"
 #include "lgmesh3.hpp"
 #include "DistributedMesh.hpp"
+#include "DistributedFESpace.hpp"
 
 #include "problem.hpp"
 

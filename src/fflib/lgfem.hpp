@@ -393,8 +393,8 @@ typedef void* pcommworld;
 template<class R>
 struct DistExchangeArgs {
   void ** handle;
-  KN<KN<long>>* dofIntersectionDof;
-  KN<double>* Ddof;
+  const KN<KN<long>>* dofIntersectionDof;
+  const KN<double>* Ddof;
   pcommworld comm;
   KN_<R>* xx;
   bool scaled;
@@ -418,8 +418,8 @@ enum { DIST_GIVEN_SOLVER = 1, DIST_GIVEN_EPS = 2, DIST_GIVEN_NBITER = 4, DIST_GI
 template<class R>
 struct DistSolveArgs {
   void ** handle;
-  KN<KN<long>>* dofIntersectionDof;
-  KN<double>* Ddof;
+  const KN<KN<long>>* dofIntersectionDof;
+  const KN<double>* Ddof;
   pcommworld comm;
   int overlap;
   HashMatrix<int, R>* A;

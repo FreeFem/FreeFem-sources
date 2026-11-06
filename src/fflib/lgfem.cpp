@@ -68,6 +68,7 @@
 #include "array_resize.hpp"
 #include "PlotStream.hpp"
 #include "DistributedMesh.hpp"
+#include "DistributedFESpace.hpp"
 
 using namespace std;
 

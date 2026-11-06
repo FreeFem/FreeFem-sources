@@ -1415,19 +1415,23 @@ maybeDistributedExchange(v_fes* const& f, KN_<R>& xx) {
 }
 
 template<class MMesh>
-inline bool distributedExchangeScaled(const v_dfes<MMesh>* f) {
-  return !f->DTh || f->DTh->overlap > 0;
+inline bool distributedExchangeScaled(const DGFESpace<MMesh>& V) {
+  return V.DTh().overlap > 0;
 }
 
 template<class MMesh, class R>
 void distributedExchangeDispatch(v_dfes<MMesh>* f, KN_<R>& xx) {
+  GFESpace<MMesh>* fes = *f;
+  ffassert(fes);
+  const DGFESpace<MMesh>& V = dist(*fes);
+  ffassert(xx.N() == V.NbOfDF);
   DistExchangeArgs<R> a;
-  a.handle = &f->exchangeHandle;
-  a.dofIntersectionDof = &f->dofIntersectionDof;
-  a.Ddof = &f->Ddof;
-  a.comm = f->DTh->comm;
+  a.handle = &V.exchangeHandle;
+  a.dofIntersectionDof = &V.dofIntersectionDof;
+  a.Ddof = &V.Ddof;
+  a.comm = V.DTh().comm;
   a.xx = &xx;
-  a.scaled = distributedExchangeScaled(f);
+  a.scaled = distributedExchangeScaled(V);
   g_distributedBackend->exchange(a);
 }
 
@@ -1438,7 +1442,8 @@ maybeDistributedEvalCheck(v_fes* const&, DistributedEvalScope&) {}
 template<class MMesh, class v_fes>
 typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value >::type
 maybeDistributedEvalCheck(v_fes* const& f, DistributedEvalScope& scope) {
-  scope.check(f->DTh ? f->DTh->comm : nullptr);
+  GFESpace<MMesh>* fes = *f;
+  scope.check(fes ? dist(*fes).DTh().comm : nullptr);
 }
 
 // solve/problem on a distributed fespace : controle collectif, echange du second
@@ -1456,14 +1461,18 @@ maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, Mat
   v_fes* f = *(u_h[0]->pVh);
   if (Nb != 1 || *(u_h[1]->pVh) != f)
     ExecError("solve/problem on a distributed fespace: unknown and test functions must belong to the same fespace");
-  scope.check(f->DTh->comm);                       // collectif : avant l'echange
+  
+  GFESpace<MMesh>* fes = *f;
+  ffassert(fes);
+  const DGFESpace<MMesh>& V = dist(*fes);
+  scope.check(V.DTh().comm);                       // collectif : avant l'echange
   maybeDistributedExchange<MMesh, v_fes>(f, *B);   // apres AssembleBC, comme rhs = varf(0, Udh)
   DistSolveArgs<R> a;
   a.handle = handle;
-  a.dofIntersectionDof = &f->dofIntersectionDof;
-  a.Ddof = &f->Ddof;
-  a.comm = f->DTh->comm;
-  a.overlap = f->DTh->overlap;
+  a.dofIntersectionDof = &V.dofIntersectionDof;
+  a.Ddof = &V.Ddof;
+  a.comm = V.DTh().comm;
+  a.overlap = V.DTh().overlap;
   a.A = A ? dynamic_cast<HashMatrix<int, R>*>(A) : nullptr;
   a.B = B;
   a.X = X;

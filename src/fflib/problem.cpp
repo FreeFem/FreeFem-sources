@@ -42,6 +42,7 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "DistributedMesh.hpp"
+#include "DistributedFESpace.hpp"
 #include "problem.hpp"
 #include <set>
 
