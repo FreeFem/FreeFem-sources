@@ -735,7 +735,7 @@ class pfesS_tefk : public v_fesS {
   }
 };
 
-// 3D surface distributed
+// 3D distributed
 template<class Mesh, class TypeOfFE>
 class pdfes_tef : public v_dfes<Mesh> {
  public:
@@ -748,9 +748,9 @@ class pdfes_tef : public v_dfes<Mesh> {
     this->operator FESpace *( );
   }
   FESpace *buildupdate(KN< int > &ndfe) {
-    return *this->ppTh ? new FESpace(**this->ppTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
+    return *this->ppTh ? newDistributedFESpace(*this->DTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpace *buildupdate( ) { return *this->ppTh ? new FESpace(**this->ppTh, *tef) : nullptr; }
+  FESpace *buildupdate( ) { return *this->ppTh ? newDistributedFESpace(*this->DTh, *tef) : nullptr; }
 };
 
 template<class Mesh, class TypeOfFE>
@@ -778,11 +778,11 @@ class pdfes_tefk : public v_dfes<Mesh> {
     this->operator FESpace *( );
   }
   FESpace *buildupdate( ) {
-    return *this->ppTh ? new FESpace(**this->ppTh, tefs) : nullptr;
+    return *this->ppTh ? newDistributedFESpace(*this->DTh, tefs) : nullptr;
   }
   virtual ~pdfes_tefk( ) { delete[] tef; }
   FESpace *buildupdate(KN< int > &ndfe) {
-    return *this->ppTh ? new FESpace(**this->ppTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
+    return *this->ppTh ? newDistributedFESpace(*this->DTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 
