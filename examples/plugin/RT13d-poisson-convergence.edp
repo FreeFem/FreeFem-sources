@@ -37,7 +37,8 @@ for (int level = 0; level < subdivisions.n; ++level)
 
     solve MixedPoisson([fluxX, fluxY, fluxZ, pressure],
                        [testFluxX, testFluxY, testFluxZ, testPressure],
-                       solver=UMFPACK) =
+                       // Avoid default-tolerance GMRES when UMFPACK is unavailable.
+                       solver=HaveUMFPACK ? UMFPACK : LU) =
         int3d(physicalMesh, qfV=qfVp7)(
             fluxX*testFluxX + fluxY*testFluxY + fluxZ*testFluxZ
           + pressure*(dx(testFluxX) + dy(testFluxY) + dz(testFluxZ))
