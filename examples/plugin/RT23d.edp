@@ -1,0 +1,35 @@
+// RT2 on tetrahedra: 6 face moments and 12 interior moments per element.
+// Run with the rebuilt Element_Mixte3d plugin on the FreeFem load path.
+load "Element_Mixte3d"
+load "msh3"
+
+mesh3 Th = cube(2, 2, 2);
+Th = movemesh3(Th, transfo=[1. + 1.2*x + 0.3*y,
+                            -0.5 + 0.2*x + 0.9*y + 0.1*z,
+                            0.4 + 0.2*y + 1.1*z]);
+fespace Vh(Th, RT23d);
+Vh [ux, uy, uz];
+
+// x*q belongs to the cubic enrichment of RT2, with homogeneous quadratic q.
+func q = x*x + 2.*y*y + 3.*z*z;
+[ux, uy, uz] = [x*q, y*q, z*q];
+
+real fieldError = sqrt(int3d(Th, qfV=qfV5)(
+    (ux-x*q)^2 + (uy-y*q)^2 + (uz-z*q)^2));
+// div(x*q) = 3*q + x.grad(q) = 5*q by homogeneity.
+real divergenceError = sqrt(int3d(Th, qfV=qfV5)(
+    (dx(ux) + dy(uy) + dz(uz) - 5.*q)^2));
+// The same field also illustrates physical second derivatives.
+real secondDerivativeError = sqrt(int3d(Th, qfV=qfV5)(
+    (dxx(ux) + dyy(ux) + dzz(ux) - 16.*x)^2
+  + (dxx(uy) + dyy(uy) + dzz(uy) - 20.*y)^2
+  + (dxx(uz) + dyy(uz) + dzz(uz) - 24.*z)^2
+  + (dxy(ux) - 4.*y)^2 + (dxz(ux) - 6.*z)^2 + dyz(ux)^2));
+
+cout << "RT23d: global DOFs = " << Vh.ndof << endl;
+cout << "interpolation L2 error = " << fieldError << endl;
+cout << "divergence L2 error = " << divergenceError << endl;
+cout << "second derivative L2 error = " << secondDerivativeError << endl;
+assert(fieldError < 1.e-9);
+assert(divergenceError < 1.e-8);
+assert(secondDerivativeError < 1.e-8);

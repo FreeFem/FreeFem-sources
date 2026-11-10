@@ -1,0 +1,526 @@
+include "test.idp"
+load "Element_Mixte3d"
+load "msh3"
+load "qf11to25"
+
+/** @file
+ * @brief RT23d verification with physical polynomial and exact moment oracles.
+ * Run from unit as plugins/RT23d-moments-interpolation-derivatives-orientations.edp.
+ * An absolute script path also locates the fixture when running elsewhere.
+ * The source Element_Mixte3d plugin must precede installed plugins on loadpath.
+ */
+verbosity = 0;
+string permutationMeshPath = "assets/rt23d-all-face-permutations.mesh";
+string testScriptName = "RT23d-moments-interpolation-derivatives-orientations.edp";
+
+for (int argument = 0; argument < ARGV.n; ++argument)
+{
+    int scriptNamePosition = ARGV[argument].rfind(testScriptName);
+
+    if (scriptNamePosition > 0)
+    {
+        string scriptArgument = ARGV[argument];
+        permutationMeshPath = scriptArgument(0:scriptNamePosition-1)
+                            + "../assets/rt23d-all-face-permutations.mesh";
+    }
+    else if (scriptNamePosition == 0)
+    {
+        permutationMeshPath = "../assets/rt23d-all-face-permutations.mesh";
+    }
+}
+
+/** @brief Verify RT23d on a sheared cube mesh and six permuted tetrahedra.
+ * @param facePermutationMeshPath Path to the three-bipyramid mesh. Region k+1
+ * selects tetrahedron k; the six interior-side local vertex orders cover S3.
+ * @return Zero after every assertion passes; test() exits on the first failure.
+ * The standalone call below also runs when this file is included by CI. A caller
+ * can invoke this named function again with an explicit fixture path.
+ */
+func int TestRT23dMomentsInterpolationDerivativesOrientations(string facePermutationMeshPath)
+{
+    cout << functionDEFINITION << "RT23d moments, interpolation, derivatives, orientations" << endl;
+    mesh3 permutationMesh = readmesh3(facePermutationMeshPath);
+    test(permutationMesh.nt == 6 && permutationMesh.nv == 15 && permutationMesh.nbe == 18);
+
+    /** Each rank triple records the positions of the three local face vertices
+     * in increasing global vertex-ID order. Coverage is measured on interior faces
+     * themselves, so boundary-face permutations cannot satisfy this assertion.
+     * FreeFem's local face vertex order is 321,023,310,012.
+     */
+    int[int, int] localFaceVertices = [[3,2,1], [0,2,3], [3,1,0], [0,1,2]];
+    int[int] facePermutationCounts(27);
+    facePermutationCounts = 0;
+    int interiorSides = 0;
+
+    for (int cell = 0; cell < permutationMesh.nt; ++cell)
+    {
+        for (int face = 0; face < 4; ++face)
+        {
+            int neighborFace = face;
+            int neighbor = permutationMesh[cell].adj(neighborFace);
+
+            if (neighbor >= 0 && neighbor != cell)
+            {
+                int[int] globalFaceVertexIds(3), faceVertexRanks(3);
+
+                for (int localVertex = 0; localVertex < 3; ++localVertex)
+                {
+                    globalFaceVertexIds[localVertex] =
+                        permutationMesh[cell][localFaceVertices(face, localVertex)];
+                }
+
+                for (int localVertex = 0; localVertex < 3; ++localVertex)
+                {
+                    faceVertexRanks[localVertex] = 0;
+
+                    for (int other = 0; other < 3; ++other)
+                    {
+                        faceVertexRanks[localVertex] +=
+                            globalFaceVertexIds[other] < globalFaceVertexIds[localVertex];
+                    }
+                }
+
+                facePermutationCounts[9*faceVertexRanks[0] + 3*faceVertexRanks[1]
+                                      + faceVertexRanks[2]]++;
+                interiorSides++;
+            }
+        }
+    }
+
+    int permutations = 0;
+
+    for (int code = 0; code < facePermutationCounts.n; ++code)
+    {
+        permutations += facePermutationCounts[code] > 0;
+    }
+
+    cout << "RT23d interior face permutations = " << permutations
+         << ", interior sides = " << interiorSides << endl;
+    test(permutations == 6 && interiorSides == 6);
+
+    /** A full nonsymmetric affine map mixes every physical coordinate with every
+     * reference coordinate. Translation exercises lower-degree terms produced by
+     * moving homogeneous cubics; positive determinant preserves cell orientation.
+     */
+    permutationMesh = movemesh3(permutationMesh, transfo=[0.4 + 0.23*x + 0.31*y + 0.13*z,
+                                          -0.3 + 0.11*x + 0.91*y + 0.17*z,
+                                          0.2 + 0.07*x + 0.19*y + 1.07*z]);
+    real worstValue = 0.;
+    real worstGradient = 0.;
+    real worstHessian = 0.;
+    real worstIdempotence = 0.;
+    real worstNormalJump = 0.;
+
+    for (int meshCase = 0; meshCase < 2; ++meshCase)
+    {
+        mesh3 physicalMesh = permutationMesh;
+
+        if (meshCase == 0)
+        {
+            physicalMesh = cube(2, 2, 2);
+            physicalMesh = movemesh3(physicalMesh, transfo=[0.4 + 1.23*x + 0.31*y + 0.13*z,
+                                        -0.3 + 0.11*x + 0.91*y + 0.17*z,
+                                        0.2 + 0.07*x + 0.19*y + 1.07*z]);
+        }
+
+        fespace Vh(physicalMesh, RT23d);
+        fespace Cell(physicalMesh, P0);
+        Vh [ux, uy, uz], [vx, vy, vz];
+        int boundaryFaces = physicalMesh.nbe;
+        int allFaces = (4*physicalMesh.nt + boundaryFaces)/2;
+        test(Vh.ndof == 6*allFaces + 12*physicalMesh.nt);
+
+        /** Physical spanning fields 0..29 are e_c times
+         * 1,x,y,z,x*x,x*y,x*z,y*y,y*z,z*z; fields 30..35 are
+         * (x,y,z) times x*x,x*y,x*z,y*y,y*z,z*z. These are 36 independent
+         * fields: distinct component monomials span [P2]^3, while the six
+         * homogeneous cubic fields are independent modulo [P2]^3.
+         * Derivatives below use the explicit quadratic gradient/Hessian and the
+         * product rule D_ab(X_c*q)=delta_ca D_b q+delta_cb D_a q+X_c D_ab q.
+         * Thus the analytical oracle consists of explicit physical-coordinate
+         * polynomial formulas evaluated through the product rule above.
+         */
+        real[int] monomialCoefficients(10);
+        int spanningFieldIndex = 0;
+        func quadraticPolynomial = monomialCoefficients[0] + monomialCoefficients[1]*x
+            + monomialCoefficients[2]*y + monomialCoefficients[3]*z
+            + monomialCoefficients[4]*x*x + monomialCoefficients[5]*x*y
+            + monomialCoefficients[6]*x*z + monomialCoefficients[7]*y*y
+            + monomialCoefficients[8]*y*z + monomialCoefficients[9]*z*z;
+        func quadraticDx = monomialCoefficients[1] + 2.*monomialCoefficients[4]*x
+                         + monomialCoefficients[5]*y + monomialCoefficients[6]*z;
+        func quadraticDy = monomialCoefficients[2] + monomialCoefficients[5]*x
+                         + 2.*monomialCoefficients[7]*y + monomialCoefficients[8]*z;
+        func quadraticDz = monomialCoefficients[3] + monomialCoefficients[6]*x
+                         + monomialCoefficients[8]*y + 2.*monomialCoefficients[9]*z;
+        real[int] squaredOperatorErrors(10), squaredExactNorms(10);
+
+        /** @brief Accumulate squared component errors for value and nine derivatives.
+         * @param U Interpolated physical vector component.
+         * @param X Physical coordinate x, y or z for that component.
+         * @param C Vector component index 0, 1 or 2.
+         * Entries are ordered value,x,y,z,xx,yy,zz,xy,xz,yz. The degree-seven
+         * qfVp7 rule integrates the squared polynomial errors and exact norms
+         * (degree at most six) exactly, up to floating-point roundoff. The analytical
+         * component and derivative formulas supply the expectations independently
+         * of the plugin's basis construction.
+         */
+        macro CheckComponent(U, X, C)
+        {
+            real componentSelected = (spanningFieldIndex < 30) && (spanningFieldIndex/10 == C);
+            real radialCubicSelected = spanningFieldIndex >= 30;
+            func coordinateFactor = componentSelected + radialCubicSelected*X;
+            func exact = coordinateFactor*quadraticPolynomial;
+            func exactx = coordinateFactor*quadraticDx
+                    + radialCubicSelected*(C == 0)*quadraticPolynomial;
+            func exacty = coordinateFactor*quadraticDy
+                    + radialCubicSelected*(C == 1)*quadraticPolynomial;
+            func exactz = coordinateFactor*quadraticDz
+                    + radialCubicSelected*(C == 2)*quadraticPolynomial;
+            func exactxx = coordinateFactor*2.*monomialCoefficients[4]
+                     + 2.*radialCubicSelected*(C == 0)*quadraticDx;
+            func exactyy = coordinateFactor*2.*monomialCoefficients[7]
+                     + 2.*radialCubicSelected*(C == 1)*quadraticDy;
+            func exactzz = coordinateFactor*2.*monomialCoefficients[9]
+                     + 2.*radialCubicSelected*(C == 2)*quadraticDz;
+            func exactxy = coordinateFactor*monomialCoefficients[5]
+                     + radialCubicSelected*((C == 0)*quadraticDy + (C == 1)*quadraticDx);
+            func exactxz = coordinateFactor*monomialCoefficients[6]
+                     + radialCubicSelected*((C == 0)*quadraticDz + (C == 2)*quadraticDx);
+            func exactyz = coordinateFactor*monomialCoefficients[8]
+                     + radialCubicSelected*((C == 1)*quadraticDz + (C == 2)*quadraticDy);
+            squaredOperatorErrors[0] += int3d(physicalMesh, qfV=qfVp7)((U - exact)^2);
+            squaredOperatorErrors[1] += int3d(physicalMesh, qfV=qfVp7)((dx(U) - exactx)^2);
+            squaredOperatorErrors[2] += int3d(physicalMesh, qfV=qfVp7)((dy(U) - exacty)^2);
+            squaredOperatorErrors[3] += int3d(physicalMesh, qfV=qfVp7)((dz(U) - exactz)^2);
+            squaredOperatorErrors[4] += int3d(physicalMesh, qfV=qfVp7)((dxx(U) - exactxx)^2);
+            squaredOperatorErrors[5] += int3d(physicalMesh, qfV=qfVp7)((dyy(U) - exactyy)^2);
+            squaredOperatorErrors[6] += int3d(physicalMesh, qfV=qfVp7)((dzz(U) - exactzz)^2);
+            squaredOperatorErrors[7] += int3d(physicalMesh, qfV=qfVp7)((dxy(U) - exactxy)^2);
+            squaredOperatorErrors[8] += int3d(physicalMesh, qfV=qfVp7)((dxz(U) - exactxz)^2);
+            squaredOperatorErrors[9] += int3d(physicalMesh, qfV=qfVp7)((dyz(U) - exactyz)^2);
+            squaredExactNorms[0] += int3d(physicalMesh, qfV=qfVp7)(exact^2);
+            squaredExactNorms[1] += int3d(physicalMesh, qfV=qfVp7)(exactx^2);
+            squaredExactNorms[2] += int3d(physicalMesh, qfV=qfVp7)(exacty^2);
+            squaredExactNorms[3] += int3d(physicalMesh, qfV=qfVp7)(exactz^2);
+            squaredExactNorms[4] += int3d(physicalMesh, qfV=qfVp7)(exactxx^2);
+            squaredExactNorms[5] += int3d(physicalMesh, qfV=qfVp7)(exactyy^2);
+            squaredExactNorms[6] += int3d(physicalMesh, qfV=qfVp7)(exactzz^2);
+            squaredExactNorms[7] += int3d(physicalMesh, qfV=qfVp7)(exactxy^2);
+            squaredExactNorms[8] += int3d(physicalMesh, qfV=qfVp7)(exactxz^2);
+            squaredExactNorms[9] += int3d(physicalMesh, qfV=qfVp7)(exactyz^2);
+        } //
+
+        for (spanningFieldIndex = 0; spanningFieldIndex < 36; ++spanningFieldIndex)
+        {
+            monomialCoefficients = 0.;
+            int monomialIndex = spanningFieldIndex < 30 ? spanningFieldIndex%10 : spanningFieldIndex - 26;
+            monomialCoefficients[monomialIndex] = 1.;
+            [ux, uy, uz] = [((spanningFieldIndex < 30 && spanningFieldIndex/10 == 0)
+                             + (spanningFieldIndex >= 30)*x)*quadraticPolynomial,
+                            ((spanningFieldIndex < 30 && spanningFieldIndex/10 == 1)
+                             + (spanningFieldIndex >= 30)*y)*quadraticPolynomial,
+                            ((spanningFieldIndex < 30 && spanningFieldIndex/10 == 2)
+                             + (spanningFieldIndex >= 30)*z)*quadraticPolynomial];
+            squaredOperatorErrors = 0.;
+            squaredExactNorms = 0.;
+            CheckComponent(ux, x, 0)
+            CheckComponent(uy, y, 1)
+            CheckComponent(uz, z, 2)
+
+            for (int operatorIndex = 0; operatorIndex < 10; ++operatorIndex)
+            {
+                real relative = sqrt(squaredOperatorErrors[operatorIndex]
+                                    /max(1., squaredExactNorms[operatorIndex]));
+
+                if (operatorIndex == 0)
+                {
+                    worstValue = max(worstValue, relative);
+                }
+                else if (operatorIndex < 4)
+                {
+                    worstGradient = max(worstGradient, relative);
+                }
+                else
+                {
+                    worstHessian = max(worstHessian, relative);
+                }
+
+                if (relative >= 2.e-8)
+                {
+                    cout << "Polynomial failure: mesh=" << meshCase << ", field=" << spanningFieldIndex
+                         << ", operator=" << operatorIndex << ", relative L2=" << relative << endl;
+                }
+
+                test(relative < 2.e-8);
+            }
+        }
+
+        /** Three dense deterministic coefficient vectors populate shared faces and
+         * cell interiors independently. Reinterpolation must preserve every global
+         * coefficient. Normal jump is integrated from the two element traces;
+         * positive tangential jump confirms that the samples exercise discontinuous
+         * vector fields rather than only globally continuous polynomials.
+         * nTonEdge is one on boundary faces and two on interior faces; multiplying
+         * by nTonEdge-1 restricts both integrals to the two-sided interior traces.
+         * Each interior face is visited twice. This common factor cancels in the
+         * normal-to-vector jump ratio, and the squared vector jump stays positive.
+         */
+        for (int sample = 0; sample < 3; ++sample)
+        {
+            for (int dof = 0; dof < Vh.ndof; ++dof)
+            {
+                ux[][dof] = sin((dof + 1.)*(sample + 1.)*0.731)
+                           + 0.37*cos((dof + 2.)*(sample + 2.)*0.413);
+            }
+
+            [vx, vy, vz] = [ux, uy, uz];
+            real[int] difference = vx[] - ux[];
+            real coefficientError = difference.linfty/max(1., ux[].linfty);
+            worstIdempotence = max(worstIdempotence, coefficientError);
+            test(coefficientError < 2.e-10);
+            varf normalJump(dummy, probe) = intallfaces(physicalMesh, qforder=7)(
+                (nTonEdge-1)*(jump(ux)*N.x + jump(uy)*N.y + jump(uz)*N.z)^2*mean(probe));
+            varf vectorJump(dummy, probe) = intallfaces(physicalMesh, qforder=7)(
+                (nTonEdge-1)*(jump(ux)^2 + jump(uy)^2 + jump(uz)^2)*mean(probe));
+            real[int] cellNormalJumpSquared = normalJump(0, Cell);
+            real[int] cellVectorJumpSquared = vectorJump(0, Cell);
+            real normalSquared = cellNormalJumpSquared.sum;
+            real vectorSquared = cellVectorJumpSquared.sum;
+            real relativeJump = sqrt(abs(normalSquared)/max(1., vectorSquared));
+            worstNormalJump = max(worstNormalJump, relativeJump);
+            test(vectorSquared > 1.e-6);
+            test(relativeJump < 2.e-10);
+        }
+
+        cout << "RT23d mesh " << meshCase << ": " << physicalMesh.nt << " tetrahedra, "
+             << Vh.ndof << " DOFs; 36 spanning fields and 3 dense vectors passed" << endl;
+    }
+
+    /** Independent integral checks on each of the six oriented tetrahedra.
+     * A single-cell mesh allows int2d to integrate all four local face traces.
+     * Face weights are Bernstein P2 in increasing vertex-ID order, and the face
+     * normal is the outward unit normal multiplied by the parity of that order.
+     * The local coefficient is the physical flux integral over the face area.
+     * Interior moment (c,b) is 6 int_K (grad(lambda[c+1]).u) lambda[b] dV:
+     * det(J) J^-1 is the pullback and reference quadrature weights sum to one.
+     * The factor six therefore follows from |Khat|=1/6, independently of J.
+     */
+    real worstDuality = 0.;
+    real worstMoment = 0.;
+    real nonPolynomialError = 0.;
+    int dualityChecks = 0;
+    int momentChecks = 0;
+    int[int, int] faceBernsteinVertexPairs = [[0,0], [1,1], [2,2], [0,1], [0,2], [1,2]];
+
+    for (int cell = 0; cell < permutationMesh.nt; ++cell)
+    {
+        test(permutationMesh[cell].region == cell + 1);
+        mesh3 singleCellMesh = trunc(permutationMesh, region == cell + 1);
+        test(singleCellMesh.nt == 1 && singleCellMesh.nbe == 4);
+        fespace LocalRT(singleCellMesh, RT23d);
+        fespace Linear(singleCellMesh, P1);
+        LocalRT [ux, uy, uz];
+        Linear barycentricWeight;
+        test(LocalRT.ndof == 36);
+        int[int] globalCoefficientVisits(LocalRT.ndof);
+        globalCoefficientVisits = 0;
+
+        /** @brief Verify that local basis excitation uses every global coefficient.
+         * LocalRT(0,j) is the global coefficient index for local moment j. Distinct
+         * indices in range 0..35 establish a bijection on the single tetrahedron.
+         */
+        for (int localMomentIndex = 0; localMomentIndex < 36; ++localMomentIndex)
+        {
+            int globalCoefficientIndex = LocalRT(0,localMomentIndex);
+            test(globalCoefficientIndex >= 0 && globalCoefficientIndex < LocalRT.ndof);
+            globalCoefficientVisits[globalCoefficientIndex]++;
+        }
+
+        test(globalCoefficientVisits.min == 1 && globalCoefficientVisits.max == 1);
+        real[int] physicalVertexX(4), physicalVertexY(4), physicalVertexZ(4);
+
+        for (int localVertex = 0; localVertex < 4; ++localVertex)
+        {
+            physicalVertexX[localVertex] = singleCellMesh[0][localVertex].x;
+            physicalVertexY[localVertex] = singleCellMesh[0][localVertex].y;
+            physicalVertexZ[localVertex] = singleCellMesh[0][localVertex].z;
+        }
+
+        /** Linear nodal barycentric functions give physical gradients through P1
+         * differentiation, independently of the RT23d Jacobian/chain-rule code.
+         * Averaging each constant P1 derivative gives its physical gradient.
+         */
+        real[int] barycentricGradientX(4), barycentricGradientY(4), barycentricGradientZ(4);
+        real cellVolume = int3d(singleCellMesh, qfV=qfVp7)(1.);
+
+        for (int barycentricVertex = 0; barycentricVertex < 4; ++barycentricVertex)
+        {
+            barycentricWeight[] = 0.;
+            barycentricWeight[][Linear(0,barycentricVertex)] = 1.;
+            barycentricGradientX[barycentricVertex] = int3d(singleCellMesh, qfV=qfVp7)(dx(barycentricWeight))/cellVolume;
+            barycentricGradientY[barycentricVertex] = int3d(singleCellMesh, qfV=qfVp7)(dy(barycentricWeight))/cellVolume;
+            barycentricGradientZ[barycentricVertex] = int3d(singleCellMesh, qfV=qfVp7)(dz(barycentricWeight))/cellVolume;
+        }
+
+        /** Lambda formulas use only physical P1 gradients and physical vertex
+         * positions. Their values select a face and its Bernstein weight through
+         * the affine identity lambda_i(X)=delta_i0+grad(lambda_i).(X-X_0).
+         */
+        int interiorWeightVertex = 0, firstFaceWeightVertex = 0, secondFaceWeightVertex = 0;
+        int oppositeFaceVertex = 0;
+        func interiorLambda = (interiorWeightVertex == 0)
+            + barycentricGradientX[interiorWeightVertex]*(x - physicalVertexX[0])
+            + barycentricGradientY[interiorWeightVertex]*(y - physicalVertexY[0])
+            + barycentricGradientZ[interiorWeightVertex]*(z - physicalVertexZ[0]);
+        func firstFaceLambda = (firstFaceWeightVertex == 0)
+            + barycentricGradientX[firstFaceWeightVertex]*(x - physicalVertexX[0])
+            + barycentricGradientY[firstFaceWeightVertex]*(y - physicalVertexY[0])
+            + barycentricGradientZ[firstFaceWeightVertex]*(z - physicalVertexZ[0]);
+        func secondFaceLambda = (secondFaceWeightVertex == 0)
+            + barycentricGradientX[secondFaceWeightVertex]*(x - physicalVertexX[0])
+            + barycentricGradientY[secondFaceWeightVertex]*(y - physicalVertexY[0])
+            + barycentricGradientZ[secondFaceWeightVertex]*(z - physicalVertexZ[0]);
+        func oppositeFaceLambda = (oppositeFaceVertex == 0)
+            + barycentricGradientX[oppositeFaceVertex]*(x - physicalVertexX[0])
+            + barycentricGradientY[oppositeFaceVertex]*(y - physicalVertexY[0])
+            + barycentricGradientZ[oppositeFaceVertex]*(z - physicalVertexZ[0]);
+        func smoothFieldX = sin(0.23*x + 0.19*y - 0.17*z) + 0.13*y*z;
+        func smoothFieldY = exp(0.11*x - 0.07*y + 0.09*z) + 0.21*x*z;
+        func smoothFieldZ = cos(0.17*x + 0.13*y + 0.11*z) + 0.17*x*y;
+
+        /** Samples 0..35 are every local moment-dual basis function, with expected
+         * integral moments delta_ij. Sample 36 is interpolation of a smooth
+         * nonpolynomial field: all 36 residual moments must be small. Its quadrature
+         * approximation to the L2 error must remain positive, ensuring that the
+         * field exercises interpolation beyond polynomial reproduction.
+         * qforder=9 uses a higher-order face rule than the plugin's degree-five
+         * triangle rule. The degree-seven qfVp7 volume rule supplies an independent,
+         * higher-degree reference for the plugin's degree-five Tet_5 interpolation
+         * rule. Nonpolynomial residuals reflect the plugin's quadrature truncation
+         * error relative to these reference rules, together with reference-rule
+         * truncation and roundoff; exact zero is not expected. Polynomial duality
+         * has independently known Kronecker expectations: face and volume moment
+         * integrands have degree at most four and are integrated exactly by these
+         * rules, up to roundoff. LocalRT(0,sample) maps a tetrahedron-local DOF to its
+         * global coefficient index; the expected delta refers to the local sample,
+         * irrespective of that map. trunc may renumber vertices, so face weights
+         * use singleCellMesh's own global IDs. The six-permutation assertion above
+         * and reproduction/jump checks use the original connected mesh and
+         * therefore exercise its original shared faces.
+         */
+        for (int sample = 0; sample <= 36; ++sample)
+        {
+            if (sample < 36)
+            {
+                ux[] = 0.;
+                ux[][LocalRT(0,sample)] = 1.;
+            }
+            else
+            {
+                [ux, uy, uz] = [smoothFieldX, smoothFieldY, smoothFieldZ];
+                nonPolynomialError += int3d(singleCellMesh, qfV=qfVp7)(
+                    (ux - smoothFieldX)^2 + (uy - smoothFieldY)^2 + (uz - smoothFieldZ)^2);
+            }
+
+            real subtractSmoothField = sample == 36;
+
+            for (oppositeFaceVertex = 0; oppositeFaceVertex < 4; ++oppositeFaceVertex)
+            {
+                int[int] faceLocalVerticesByGlobalId(3);
+                int faceOrientationSign = 1;
+
+                for (int localVertex = 0; localVertex < 3; ++localVertex)
+                {
+                    faceLocalVerticesByGlobalId[localVertex] =
+                        localFaceVertices(oppositeFaceVertex,localVertex);
+                }
+
+                for (int left = 0; left < 3; ++left)
+                {
+                    for (int right = left + 1; right < 3; ++right)
+                    {
+                        if (int(singleCellMesh[0][faceLocalVerticesByGlobalId[left]])
+                            > int(singleCellMesh[0][faceLocalVerticesByGlobalId[right]]))
+                        {
+                            int temporaryLocalVertex = faceLocalVerticesByGlobalId[left];
+                            faceLocalVerticesByGlobalId[left] = faceLocalVerticesByGlobalId[right];
+                            faceLocalVerticesByGlobalId[right] = temporaryLocalVertex;
+                            faceOrientationSign = -faceOrientationSign;
+                        }
+                    }
+                }
+
+                for (int moment = 0; moment < 6; ++moment)
+                {
+                    firstFaceWeightVertex = faceLocalVerticesByGlobalId[faceBernsteinVertexPairs(moment,0)];
+                    secondFaceWeightVertex = faceLocalVerticesByGlobalId[faceBernsteinVertexPairs(moment,1)];
+                    real bernsteinFactor = firstFaceWeightVertex == secondFaceWeightVertex ? 1. : 2.;
+                    real observed = int2d(singleCellMesh, qforder=9)(
+                        (abs(oppositeFaceLambda) < 1.e-8)*faceOrientationSign
+                        *bernsteinFactor*firstFaceLambda*secondFaceLambda
+                        *((ux - subtractSmoothField*smoothFieldX)*N.x
+                          + (uy - subtractSmoothField*smoothFieldY)*N.y
+                          + (uz - subtractSmoothField*smoothFieldZ)*N.z));
+                    real expected = sample < 36 && sample == 6*oppositeFaceVertex + moment;
+                    real difference = abs(observed - expected);
+
+                    if (sample < 36)
+                    {
+                        worstDuality = max(worstDuality, difference);
+                        dualityChecks++;
+                        test(difference < 2.e-9);
+                    }
+                    else
+                    {
+                        worstMoment = max(worstMoment, difference);
+                        momentChecks++;
+                        test(difference < 2.e-8);
+                    }
+                }
+            }
+
+            for (int component = 0; component < 3; ++component)
+            {
+                for (interiorWeightVertex = 0; interiorWeightVertex < 4; ++interiorWeightVertex)
+                {
+                    real observed = 6.*int3d(singleCellMesh, qfV=qfVp7)(interiorLambda*(
+                          barycentricGradientX[component + 1]*(ux - subtractSmoothField*smoothFieldX)
+                        + barycentricGradientY[component + 1]*(uy - subtractSmoothField*smoothFieldY)
+                        + barycentricGradientZ[component + 1]*(uz - subtractSmoothField*smoothFieldZ)));
+                    real expected = sample < 36 && sample == 24 + 4*component + interiorWeightVertex;
+                    real difference = abs(observed - expected);
+
+                    if (sample < 36)
+                    {
+                        worstDuality = max(worstDuality, difference);
+                        dualityChecks++;
+                        test(difference < 2.e-9);
+                    }
+                    else
+                    {
+                        worstMoment = max(worstMoment, difference);
+                        momentChecks++;
+                        test(difference < 2.e-8);
+                    }
+                }
+            }
+        }
+    }
+
+    test(dualityChecks == 6*36*36);
+    test(momentChecks == 6*36);
+    test(nonPolynomialError > 1.e-14);
+    cout << "RT23d maximum relative L2 errors: value=" << worstValue
+         << ", gradient=" << worstGradient << ", Hessian=" << worstHessian << endl;
+    cout << "RT23d coefficient idempotence=" << worstIdempotence
+         << ", relative normal jump=" << worstNormalJump << endl;
+    cout << "RT23d integral duality: " << dualityChecks << " checks, max error=" << worstDuality << endl;
+    cout << "RT23d nonpolynomial moments: " << momentChecks << " checks, max residual=" << worstMoment
+         << ", L2 interpolation error=" << sqrt(nonPolynomialError) << endl;
+    cout << "RT23d targeted verification: PASS" << endl;
+
+    return 0;
+}
+
+TestRT23dMomentsInterpolationDerivativesOrientations(permutationMeshPath);

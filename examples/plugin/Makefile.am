@@ -77,7 +77,14 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	ppm2rnm.edp \
 	provadxw.edp \
 	ref.edp \
+	RT13d-poisson-manufactured.edp \
+	RT13d-poisson-convergence.edp \
+	RT13d-verify-moments-interpolation-derivatives-orientations.edp \
 	RT2-ff.edp \
+	RT23d.edp \
+	RT23d-poisson-manufactured.edp \
+	RT23d-poisson-convergence.edp \
+	RT23d-verify-moments-interpolation-derivatives-orientations.edp \
 	SaveHB_sample_z.edp \
 	SaveHB_sample.edp \
 	shell.edp \
@@ -272,6 +279,7 @@ EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.
 freefem++.pref: Makefile
 	echo loadpath = "../../plugin/seq/" > freefem++.pref
 	echo includepath = "../../idp/" >> freefem++.pref
+	echo includepath += "../../unit/" >> freefem++.pref
 
 clean-local:
 	-rm -r include include.done *.pdf *.mesh* *.ppm *.vtk *.hb *.vtu *.data *.dt *.ps *.dx
