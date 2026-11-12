@@ -389,17 +389,17 @@ bool  v_fesL::buildperiodic(Stack stack, KN<int> & ndfe) {
 
 template<>
 bool v_dfes<MeshS>::buildperiodic(Stack stack, KN<int>& ndfe) {
-    return BuildPeriodic2(nbcperiodic, periodic, **ppTh, stack, ndfe);
+    return BuildPeriodic2(nbcperiodic, periodic, *(*ppDTh)->LocalMesh, stack, ndfe);
 }
 
 template<>
 bool v_dfes<Mesh3>::buildperiodic(Stack stack, KN<int> &ndfe) {
-  return BuildPeriodic3(nbcperiodic, periodic, **ppTh, stack, ndfe);
+  return BuildPeriodic3(nbcperiodic, periodic, *(*ppDTh)->LocalMesh, stack, ndfe);
 }
 
 template<> 
 bool v_dfes<MeshL>::buildperiodic(Stack stack, KN<int>& ndfe) {
-    return BuildPeriodic1(nbcperiodic, periodic, **ppTh, stack, ndfe);
+    return BuildPeriodic1(nbcperiodic, periodic, *(*ppDTh)->LocalMesh, stack, ndfe);
 }
 
 

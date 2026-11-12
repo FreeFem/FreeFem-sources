@@ -1600,8 +1600,7 @@ struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
 //      const  int dHatfe = TypeOfFE::RdHat::d;
       const int dfe = TypeOfFE::RdHat::d;
 
-      DistributedMesh<Mesh> **ppDTh = GetAny<  DistributedMesh<Mesh> ** >((*eppDTh)(s));
-      Mesh *  *ppTh = &((**ppDTh).LocalMesh);
+      const DistributedMesh<Mesh> **ppDTh = GetAny< const DistributedMesh<Mesh> ** >((*eppDTh)(s));
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
       for (int i = 0; i < atef.size( ); i++) {
@@ -1629,7 +1628,7 @@ struct OpMake_Dpfes : public OneOperator, public OpMake_pfes_np {
       pfes *ppfes = GetAny< pfes * >(r);
       bool same = true;
       for (int i = 1; i < atef.size( ); i++) same &= atef[i].LeftValue( ) == atef[1].LeftValue( );
-      *ppfes = new pfes_tefk(ppTh, tef, atef.size( ), *ppDTh, s, nbcperiodic, periodic);
+      *ppfes = new pfes_tefk(ppDTh, tef, atef.size( ), s, nbcperiodic, periodic);
       return r;
     }
   };
@@ -1877,8 +1876,7 @@ class OP_MakeDPtr {
       A p   = GetAny<A>((*a)(s));
       B dth = GetAny<B>((*b)(s));
       C tef = GetAny<C>((*c)(s));
-      const Mesh* const *ppTh = &((**dth).LocalMesh);
-      *p = new pdfes_tefType(ppTh, tef, *dth, s, nbcperiodic, periodic);
+      *p = new pdfes_tefType(dth, tef, s, nbcperiodic, periodic);
       return SetAny<R>(p);
     }
   };

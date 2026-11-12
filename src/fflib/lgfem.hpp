@@ -449,22 +449,10 @@ template<class Mesh> class v_dfes : public generic_v_fes {
  public:
   typedef v_dfes<Mesh>* pfes;
   typedef GFESpace<Mesh> FESpace;
-  typedef const Mesh* pmeshT;
-  const DistributedMesh<Mesh>* DTh = nullptr;
-  bool dofDataBuilt = false;
-  bool loc2globBuilt = false;
-  bool numberingBuilt = false;
-  // Results DDL
-  KN<KN<long>> dofIntersectionDof;
-  KN<double> Ddof;
-  KN<long> loc2globDof;
-  KN<long> numberingDof;
-  long globalNdof = 0;
-  double pouResidual = -1.0;
 
   static const int dHat = Mesh::RdHat::d, d = Mesh::Rd::d;
   const int N;
-  const pmeshT *ppTh;    // adr du maillage
+  const DistributedMesh<Mesh>* const *ppDTh;    // adr de la case Dmesh
 
   CountPointer< FESpace > pVh;
 
@@ -475,13 +463,13 @@ template<class Mesh> class v_dfes : public generic_v_fes {
 
   operator FESpace *( ) {
     throwassert(dHat == Mesh::RdHat::d);
-    if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpace >(update( ), true);
+    if (!pVh || &dist(*pVh).DTh( ) != *ppDTh) pVh = CountPointer< FESpace >(update( ), true);
     return pVh;
   }
   
   FESpace *update( ){
     assert(dHat == Mesh::RdHat::d);
-    if (!*ppTh) return nullptr;
+    if (!*ppDTh) return nullptr;
     if (nbcperiodic) {
       assert(periodic);
       KN< int > ndfe;
@@ -492,32 +480,17 @@ template<class Mesh> class v_dfes : public generic_v_fes {
     }
   }
 
-  v_dfes(int NN, const pmeshT *t, const DistributedMesh<Mesh>* dth, Stack s, int n, Expression *p)    /// TODO
-    : N(NN), ppTh(t), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(dth) {
-      if (DTh) DTh->increment();
-    }    // take a pmesh3 and use the pmeshS
+  v_dfes(int NN, const DistributedMesh<Mesh>* const * ppdth, Stack s, int n, Expression *p)
+    : N(NN), ppDTh(ppdth), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) { }
   v_dfes(int NN, const v_dfes *f, Stack s, int n, Expression *p)
-    : N(NN), ppTh(f->ppTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p), DTh(f->DTh) {
-      if (DTh) DTh->increment();
-    }
+    : N(NN), ppDTh(f->ppDTh), pVh(nullptr), stack(s), nbcperiodic(n), periodic(p) {}
 
-  void buildDistributedDofData(FESpace& Vhi);
-  void buildLoc2globIfNeeded(FESpace& Vhi);
-  void buildNumberingIfNeeded(FESpace& Vhi);
-  void* exchangeHandle = nullptr;
-
-  // void destroy(){ ppTh=0;pVh=0; delete this;}
-  virtual ~v_dfes( ) {
-    if (exchangeHandle) {
-      g_distributedBackend->destroyExchangeHandle(exchangeHandle);
-    }
-    if (DTh) DTh->destroy();
-  }
+  virtual ~v_dfes( ) { }
   bool buildperiodic(Stack stack, KN< int > &ndfe);
   virtual FESpace *buildupdate(KN< int > &) { return nullptr; }
   virtual FESpace *buildupdate( ) { return nullptr; }
 
-  const void * getppTh(){ return ppTh; } // Morice : get the pointer on the pointer of the mesh
+  const void * getppTh(){ return ppDTh; } // Morice : get the pointer on the pointer of the mesh
   void * getpVh(){ return pVh; }         // Morice : get the pointer of FESpace
   void * getpVh()const{ return pVh; }         // Morice : get the pointer of FESpac
   int getN(){ return N;}               
@@ -735,20 +708,19 @@ class pdfes_tef : public v_dfes<Mesh> {
   typedef GFESpace<Mesh> FESpace;
   const TypeOfFE *tef;
 
-  pdfes_tef(const pmeshT *t, const TypeOfFE *tt, const DistributedMesh<Mesh>* dth = nullptr, Stack s = NullStack, int n = 0, Expression *p = nullptr)
-    : v_dfes<Mesh>(tt->N, t, dth, s, n, p), tef(tt) {
+  pdfes_tef(const DistributedMesh<Mesh>* const* ppdth, const TypeOfFE *tt, Stack s = NullStack, int n = 0, Expression *p = nullptr)
+    : v_dfes<Mesh>(tt->N, ppdth, s, n, p), tef(tt) {
     this->operator FESpace *( );
   }
   FESpace *buildupdate(KN< int > &ndfe) {
-    return *this->ppTh ? newDistributedFESpace(*this->DTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
+    return *this->ppDTh ? newDistributedFESpace(**this->ppDTh, *tef, ndfe.size( ) / 2, ndfe) : nullptr;
   }
-  FESpace *buildupdate( ) { return *this->ppTh ? newDistributedFESpace(*this->DTh, *tef) : nullptr; }
+  FESpace *buildupdate( ) { return *this->ppDTh ? newDistributedFESpace(**this->ppDTh, *tef) : nullptr; }
 };
 
 template<class Mesh, class TypeOfFE>
 class pdfes_tefk : public v_dfes<Mesh> {
  public:
-  typedef const Mesh* pmeshT;
   typedef GFESpace<Mesh> FESpace;
   const TypeOfFE **tef;
   const int k;
@@ -761,20 +733,20 @@ class pdfes_tefk : public v_dfes<Mesh> {
     return r;
   }
 
-  pdfes_tefk(const pmeshT *t, const TypeOfFE **tt, int kk, const DistributedMesh<Mesh>* dth = nullptr, Stack s = NullStack, int n = 0,
+  pdfes_tefk(const DistributedMesh<Mesh>* const * ppdth, const TypeOfFE **tt, int kk, Stack s = NullStack, int n = 0,
              Expression *p = nullptr)
-    : v_dfes<Mesh>(sum(tt, &TypeOfFE::N, kk), t, dth, s, n, p), tef(tt),
+    : v_dfes<Mesh>(sum(tt, &TypeOfFE::N, kk), ppdth, s, n, p), tef(tt),
       k(kk), atef(kk, tt), tefs(atef)
 
   {
     this->operator FESpace *( );
   }
   FESpace *buildupdate( ) {
-    return *this->ppTh ? newDistributedFESpace(*this->DTh, tefs) : nullptr;
+    return *this->ppDTh ? newDistributedFESpace(**this->ppDTh, tefs) : nullptr;
   }
   virtual ~pdfes_tefk( ) { delete[] tef; }
   FESpace *buildupdate(KN< int > &ndfe) {
-    return *this->ppTh ? newDistributedFESpace(*this->DTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
+    return *this->ppDTh ? newDistributedFESpace(**this->ppDTh, tefs, ndfe.size( ) / 2, ndfe) : nullptr;
   }
 };
 
