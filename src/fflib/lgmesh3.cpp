@@ -2313,16 +2313,18 @@ template<class Mesh>
 const Mesh* pVhd_Th(v_dfes<Mesh>** p) {
   throwassert(p && *p);
   GFESpace<Mesh>* fes = **p;
-  throwassert(fes);
+  if (!fes) ExecError("fespace on an empty Dmesh");
   return &fes->Th;
 }
 
 template<class Mesh>
 KN<double>* pVhd_D(Stack stack, v_dfes<Mesh>** const& p) {
   throwassert(p);
-  v_dfes<Mesh>* f = *p;
   GFESpace<Mesh>* fes = **p;
-  if (!fes) return new KN<double>(0);
+  if (!fes) {
+    KN<double>* r = new KN<double>(0);
+    Add2StackOfPtr2Free(stack, r); return r;
+  }
   const DGFESpace<Mesh>& V = dist(*fes);
   KN<double>* r = new KN<double>(V.Ddof);
   Add2StackOfPtr2Free(stack, r); return r;
@@ -2330,8 +2332,12 @@ KN<double>* pVhd_D(Stack stack, v_dfes<Mesh>** const& p) {
 template<class Mesh>
 KN<KN<long>>* pVhd_intersection(Stack stack, v_dfes<Mesh>** const& p) {
   throwassert(p);
-  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p;
-  if (!fes) return new KN<KN<long>>(0);
+  GFESpace<Mesh>* fes = **p;
+  if (!fes) {
+    KN<KN<long>>* r = new KN<KN<long>>(0);
+    Add2StackOfPtr2Free(stack, r);
+    return r;
+  }
   const DGFESpace<Mesh>& V = dist(*fes);
   KN<KN<long>>* r = new KN<KN<long>>(V.dofIntersectionDof);
   Add2StackOfPtr2Free(stack, r); return r;
@@ -2339,8 +2345,12 @@ KN<KN<long>>* pVhd_intersection(Stack stack, v_dfes<Mesh>** const& p) {
 template<class Mesh>
 KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
   throwassert(p);
-  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p;
-  if (!fes) return new KN<long>(0);
+  GFESpace<Mesh>* fes = **p;
+  if (!fes) {
+    KN<long>* r = new KN<long>(0);
+    Add2StackOfPtr2Free(stack, r);
+    return r;
+  }
   const DGFESpace<Mesh>& V = dist(*fes);
   V.ensureLoc2glob();
   KN<long>* r = new KN<long>(V.loc2globDof);
@@ -2350,8 +2360,12 @@ KN<long>* pVhd_loc2glob(Stack stack, v_dfes<Mesh>** const& p) {
 template<class Mesh>
 KN<long>* pVhd_numbering(Stack stack, v_dfes<Mesh>** const& p){
   throwassert(p);
-  v_dfes<Mesh>* f = *p; GFESpace<Mesh>* fes = **p;
-  if (!fes) return new KN<long>(0);
+  GFESpace<Mesh>* fes = **p;
+  if (!fes) {
+    KN<long>* r = new KN<long>(0);
+    Add2StackOfPtr2Free(stack, r);
+    return r;
+  }
   const DGFESpace<Mesh>& V = dist(*fes);
   V.ensureNumbering();
   KN<long>* r = new KN<long>(V.numberingDof);
@@ -2362,7 +2376,6 @@ KN<long>* pVhd_numbering(Stack stack, v_dfes<Mesh>** const& p){
 template<class Mesh>
 long pVhd_ndofglobal(v_dfes<Mesh>** p){
   throwassert(p && *p);
-  v_dfes<Mesh>* f = *p;
   GFESpace<Mesh>* fes = **p;
   if (!fes) return 0;
   const DGFESpace<Mesh>& V = dist(*fes);
@@ -2373,7 +2386,6 @@ long pVhd_ndofglobal(v_dfes<Mesh>** p){
 template<class Mesh>
 double pVhd_checkPoU(v_dfes<Mesh>** p){
   throwassert(p && *p);
-  v_dfes<Mesh>* f = *p;
   GFESpace<Mesh>* fes = **p;
   if (!fes) return 0.0;
   return dist(*fes).pouResidual;
