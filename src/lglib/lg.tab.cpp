@@ -3046,7 +3046,7 @@ yyreduce:
 
   case 138:
 #line 622 "lg.ypp"
-                                             {(yyval.cexp)=Try((yyvsp[-2].cinst),currentblock->close(currentblock,(yyvsp[0].cexp)));}
+                                             {(yyval.cexp)=currentblock->close(currentblock,Try((yyvsp[-2].cinst), (yyvsp[0].cexp)));}
 #line 3051 "lg.tab.cpp"
     break;
 

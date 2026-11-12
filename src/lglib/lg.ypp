@@ -619,7 +619,7 @@ IDfor:     id  { $$ = new ListOfId(); $$->push_back(UnId($1));Block::open(curren
 instruction:   ';' {$$=0;}
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
-         |  try  '{' instructions '}' catchs {$$=Try($3,currentblock->close(currentblock,$5));}
+         |  try  '{' instructions '}' catchs {$$currentblock->close(currentblock,Try($3,$5));}
          |  Expr ';' {$$=$1;} /*[[Expr:]]*/
          |  declaration  {$$=$1;} /*[[declaration:]]*/
          |  for_loop  '[' IDfor  ':' primary ']'
