@@ -942,8 +942,6 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     TransferPlan<Mesh>* P = new TransferPlan<Mesh>();
     P->Dsrc = &Dsrc; Dsrc.increment();
     P->Ddst = &Ddst; Ddst.increment();
-    P->srcVh = &srcVh; P->srcTh = &srcVh.Th;
-    P->dstVh = &dstVh; P->dstTh = &dstVh.Th;
     P->nSrcDof = srcVh.NbOfDF;
     P->nDstDof = dstVh.NbOfDF;
     P->comm = Dsrc.comm;

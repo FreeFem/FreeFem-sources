@@ -90,11 +90,7 @@ struct FragOp {
 template<class Mesh>
 struct TransferPlan : public RefCounter {
     const DistributedMesh<Mesh>* Dsrc  = nullptr;  
-    const DistributedMesh<Mesh>* Ddst  = nullptr;  
-    const GFESpace<Mesh>*        srcVh = nullptr;   
-    const GFESpace<Mesh>*        dstVh = nullptr;
-    const Mesh*                  srcTh = nullptr;
-    const Mesh*                  dstTh = nullptr;
+    const DistributedMesh<Mesh>* Ddst  = nullptr;
     int        nSrcDof = 0, nDstDof = 0;
     int        path = XFER_GENERAL;
     pcommworld comm = nullptr;
