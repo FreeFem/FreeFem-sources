@@ -4845,11 +4845,13 @@ static bool gatherDistItem(FEbase< K, v_dfes< Mesh > > *const *fe, const int *cm
   for (int c = 0; c < nc; ++c) {
     GFESpace<Mesh> *fc = **fe[c]->pVh;
     ffassert(fc);
-    if (&dist(*fc).DTh() != D) bad = max(bad, 2);
-    else if (!fe[c]->x( ) || !fe[c]->Vh || &dist(*fe[c]->Vh).DTh() != D) bad = max(bad, 1);
+    if (&dist(*fc).DTh() != D) bad = max(bad, 3);
+    else if (!fe[c]->x( ) || !fe[c]->Vh) bad = max(bad, 1);
+    else if (&dist(*fe[c]->Vh).DTh() != D) bad = max(bad, 2);
   }
   bad = agreeOnStatus(bad, D->comm);
-  if (bad == 2) distributedError(D->comm, "plot: the components of a distributed vector must be on the same distributed mesh");
+  if (bad == 3) distributedError(D->comm, "plot: the components of a distributed vector must be on the same distributed mesh");
+  if (bad == 2) distributedError(D->comm, "plot: distributed FE function is outdated (Dmesh reassigned): use u=u first");
   if (bad) distributedError(D->comm, "plot: distributed FE function not initialized");
 
   const int root = distPlotRoot(*D, onlyRank);
