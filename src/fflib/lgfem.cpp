@@ -2273,6 +2273,7 @@ AnyType set_fe(Stack s, Expression ppfe, Expression e) {
     // write   u = u*2; if same memory => bug !
     // so new array F.H. 5/11/25
   KN_< R > &yy(*y);
+  try {
   KN< R > Viso(100);
   for (int i = 0; i < Viso.N( ); i++) Viso[i] = 0.01 * i;
 
@@ -2321,6 +2322,11 @@ AnyType set_fe(Stack s, Expression ppfe, Expression e) {
       for (int df = 0; df < nbdf; df++) (*y)[K(df)] = gg[df];
       sptr->clean( );    // modif FH mars 2006  clean Ptr
     }
+  } catch (...) {
+    delete y;
+    *mps = mp;
+    throw;
+  }
   *mps = mp;
   if(change) fe = y;// change the array pointeur
   else {
@@ -2360,6 +2366,7 @@ AnyType set_feoX_1(Stack s, Expression ppfeX_1, Expression e) {    // inutile
 
   throwassert(Vh.N == 1);
   KN< R > *y = new KN< R >(Vh.NbOfDF);
+  try {
   for (int t = 0; t < Th.nt; t++) {
     FElement K(Vh[t]);
     int nbdf = K.NbDoF( );
@@ -2370,6 +2377,7 @@ AnyType set_feoX_1(Stack s, Expression ppfeX_1, Expression e) {    // inutile
     for (int df = 0; df < nbdf; df++) (*y)[K(df)] = gg[df];
     sptr->clean( );    // modif FH mars 2006  clean Ptr
   }
+} catch (...) { delete y; *MeshPointStack(s) = mp; throw; }
   *MeshPointStack(s) = mp;
   fe = y;
   if (verbosity > 1)
@@ -2461,7 +2469,14 @@ AnyType E_set_fev< K >::Op2d(Stack s) const {
       copt[i] = static_cast< K * >(static_cast< void * >((char *)s + offset));
       *(copt[i]) = 0;
     }
-    if (optiexp0) (*optiexp0)(s);    // init
+    if (optiexp0) {
+      try {
+        (*optiexp0)(s);
+      } catch (...) {
+        delete[] copt;
+        throw;
+      }
+    }     // init
   }
 
 #ifdef OLDPih
@@ -2477,6 +2492,7 @@ AnyType E_set_fev< K >::Op2d(Stack s) const {
   KN< K > *y = new KN< K >(Vh.NbOfDF);
   KN< K > &yy(*y);
 
+  try {
   FElement::aIPJ ipj(Vh[0].Pi_h_ipj( ));
   FElement::aR2 PtHat(Vh[0].Pi_h_R2( ));
 
@@ -2542,6 +2558,12 @@ AnyType E_set_fev< K >::Op2d(Stack s) const {
 
       for (int df = 0; df < nbdf; df++) yy[Kt(df)] = gg[df];
     }
+  } catch (...) { 
+    delete y;
+    if (copt) delete[] copt;
+    *mps = mp;
+    throw;
+  }
   if(change)
     fe = y;
   else {

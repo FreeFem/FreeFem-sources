@@ -1762,6 +1762,7 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
   KN<R> * y=new  KN<R>(Vh.NbOfDF);
   KN<R> & yy(*y);
   // interpoler
+  try {
   int npPh = Vh.maxNbPtforInterpolation;
   KNM<R>   Vp(npPh,1);
   KN<R>  Vdf(Vh.MaxNbDFPerElement);
@@ -1809,6 +1810,7 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 	  sptr->clean(); // modif FH mars 2006  clean Ptr	
 	}
     }
+  } catch ( ... ) { delete y; *mps = mp; throw ;}
   *mps=mp;
   if(change) fe = y;// change the array pointeur
   else {
@@ -1819,7 +1821,7 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
   kkth = Mesh::kthrough -kkth;
   
   if(verbosity>1)
-    ShowBound(*y,cout) 
+    ShowBound(*fe.x(),cout) 
       << " " << kkth << "/" << kkff << " =  " << double(kkth)/Max<double>(1.,kkff) << endl;
   return SetAny<FEbase<R,v_fes>*>(&fe); 
 }
@@ -1828,21 +1830,6 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 #pragma clang diagnostic pop
 #endif
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 template<class K,class v_fes>
 E_set_fev3<K,v_fes>::E_set_fev3(const E_Array * a,Expression pp) 
@@ -1939,6 +1926,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 
   KN<K> * y=new  KN<K>(Vh.NbOfDF);
   KN<K> & yy(*y);
+  try {
   int npPh = Vh.maxNbPtforInterpolation;
   KNM<K>   Vp(npPh,dim);
   KN<K>  Vdf(Vh.MaxNbDFPerElement);
@@ -2004,6 +1992,13 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 	   sptr->clean(); // modif FH mars 2006  clean Ptr          
 	 } 
     }
+  } catch (...)
+  {
+    delete y;
+    if (copt) delete [] copt;
+    *mps = mp;
+    throw;
+  }
   if(change) fe = y;// change the array pointeur
   else {
       *fe.x() = yy;//  copy value in new value in old vector
@@ -2012,7 +2007,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   if (copt) delete [] copt;
   *MeshPointStack(s) = mp;
   if(verbosity>1)
-    ShowBound(*y,cout) << endl ;
+    ShowBound(*fe.x(),cout) << endl ;
   return Nothing;
 }
 
