@@ -1410,7 +1410,10 @@ static bool sameDistributedSpace(const v_dfes<Mesh>* a, const GFESpace<Mesh>& Va
 
 template<class Mesh, class R>
 static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<Mesh>>* src){
-    if (dst == src) return;
+    if (dst == src) {
+        GFESpace<Mesh>* cur = **src->pVh; // current space rebuilt if Dmesh has changed
+        if (!src->x( ) || (GFESpace<Mesh>*)src->Vh == cur) return; // already up to date or nothing to transfer
+    }
 
     v_dfes<Mesh>* pS = *src->pVh; v_dfes<Mesh>* pD = *dst->pVh;
     ffassert(pS && pD);
@@ -1429,7 +1432,7 @@ static void assignFEDistributed(FEbase<R, v_dfes<Mesh>>* dst, FEbase<R, v_dfes<M
     const GFESpace<Mesh>& VhS = (src->Vh) ? *src->Vh : *src->newVh();
     const GFESpace<Mesh>& VhD = *dst->newVh();
     int bad = (xs->N() != VhS.NbOfDF) ? 1 : 0;
-    if (agreeOnStatus(bad, comm)) distributedError(comm, "u = v: outdated source FE function");
+    if (agreeOnStatus(bad, comm)) distributedError(comm, "u = v: inconsistent source FE function (values do not match its own fespace)");
 
     if (sameDistributedSpace(pS, VhS, pD, VhD)) {
         *dst = new KN<R>(*xs);
