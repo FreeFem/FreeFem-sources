@@ -1038,6 +1038,34 @@ int loadSol_popen_bin(pMesh mesh, char *filename, int numsol) {
       }
     }
 
+    /* FreeFEM sends the solution at the elements of a meshL (edges) or of a meshS (triangles)
+       with the keyword SolAtTetrahedra */
+    if (mesh->dim == 3 && !mesh->ntet && KwdCod == GmfSolAtTetrahedra) {
+      int nelt = mesh->nt ? mesh->nt : mesh->na;
+
+      natureread = "SolAtElements";
+      ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+      if (ret == 0) printf("fread error\n");
+      ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+      if (ret == 0) printf("fread error\n");
+
+      if (nel && nel != nelt) {
+        fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
+        retcode = 0;
+        goto Lret;
+      }
+
+      mesh->typage = 1;
+      key = GmfSolAtTetrahedra;
+
+      /*  type,size,typetab  */
+      read_TypeSizeTyptab_bin(&type, &size, typtab);
+      printf("sol: %s; type %i; size%i;\n", natureread, type, size);
+
+      /* Reading solutions */
+      loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
+    }
+
     if (mesh->dim == 3 && mesh->nhex) {
       if (KwdCod == GmfSolAtHexahedra) {
         natureread = "SolAtHexahedra";

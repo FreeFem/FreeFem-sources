@@ -34,8 +34,29 @@ extern "C" {
 #define SINPI15 .2079116908177593
 
 /* draw a vector in 3D: u = unit vector */
+/* length of the arrows (keys a and A, as in ffglut) */
+double vecscale = 1.0;
+
+/* the arrows c times longer: the lists of the vectors are built again */
+void vecLength(pScene sc, pMesh mesh, double c) {
+  int i;
+
+  vecscale *= c;
+  for (i = 0; i < MAX_LIST; i++) {
+    if (sc->vlist[i]) glDeleteLists(sc->vlist[i], 1);
+
+    sc->vlist[i] = 0;
+  }
+
+  if (sc->isotyp & S_VECTOR) doIsoLists(sc, mesh, 0);
+
+  if (sc->overlay) doOverlay(sc); /* the arrows of the other windows */
+}
+
 void drawVector3D(float p[3], double u[3], double scale) {
   double c[3], cc[3], m[9], dd, scal5;
+
+  scale *= vecscale;
 
   /* local frame */
   m[0] = u[0];
@@ -104,6 +125,8 @@ void drawVector3D(float p[3], double u[3], double scale) {
 void drawVector2D(float p[2], double u[2], double scale) {
   double c[2], dx, dy;
 
+  scale *= vecscale;
+
   u[0] *= scale;
   u[1] *= scale;
   c[0] = p[0] + u[0];
@@ -120,6 +143,93 @@ void drawVector2D(float p[2], double u[2], double scale) {
   dy = (SINPI15 * u[0] + COSPI15 * u[1]) / 3.0;
   glVertex2dv(c);
   glVertex2d(c[0] - dx, c[1] - dy);
+}
+
+/* all the vectors of a volume mesh (used without clipping plane): one arrow by vertex (or by
+   element if the solution is given at the elements), color = norm, length proportional to the norm */
+GLuint listMeshVector3d(pMesh mesh) {
+  pPoint ppt;
+  pSolution ps0;
+  pScene sc;
+  double rgb[3], u[3], iso, kc, dd, h, vmax;
+  float cp[3];
+  GLuint dlist = 0;
+  int ia, k, i, n;
+  static double hsv[3] = {0.0f, 1.0f, 0.80f};
+
+  if (!mesh->nbb || !(mesh->ntet + mesh->nhex)) return (0);
+
+  sc = cv.scene[currentScene( )];
+  if (egal(sc->iso.val[0], sc->iso.val[MAXISO - 1])) return (0);
+
+  /* typical distance between 2 arrows */
+  n = mesh->typage == 2 ? mesh->np : mesh->ntet;
+  if (n < 1 || (mesh->typage != 2 && !mesh->ntet)) return (0);
+
+  h = (mesh->xmax - mesh->xmin) * (mesh->ymax - mesh->ymin) * (mesh->zmax - mesh->zmin);
+  h = pow(fabs(h) / n, 1.0 / 3.0);
+  vmax = sc->iso.val[MAXISO - 1];
+  if (!(h > 0.0) || !(vmax > 0.0)) return (0);
+
+  dlist = glGenLists(1);
+  glNewList(dlist, GL_COMPILE);
+  if (glGetError( )) return (0);
+
+  glLineWidth(2.0);
+  glBegin(GL_LINES);
+
+  for (k = 1; k <= n; k++) {
+    if (mesh->typage == 2) {
+      ppt = &mesh->point[k];
+      if (ppt->tag == M_UNUSED) continue;
+
+      cp[0] = ppt->c[0];
+      cp[1] = ppt->c[1];
+      cp[2] = ppt->c[2];
+    } else {
+      pTetra pt = &mesh->tetra[k];
+
+      if (!pt->v[0]) continue;
+
+      cp[0] = cp[1] = cp[2] = 0.0;
+
+      for (i = 0; i < 4; i++) {
+        ppt = &mesh->point[pt->v[i]];
+        cp[0] += 0.25 * ppt->c[0];
+        cp[1] += 0.25 * ppt->c[1];
+        cp[2] += 0.25 * ppt->c[2];
+      }
+    }
+
+    ps0 = &mesh->sol[k];
+    dd = iso = sqrt(ps0->m[0] * ps0->m[0] + ps0->m[1] * ps0->m[1] + ps0->m[2] * ps0->m[2]);
+    if (dd < 1.e-4 * vmax) continue;
+
+    /* color = norm */
+    if (iso < sc->iso.val[0])
+      iso = sc->iso.val[0];
+    else if (iso > sc->iso.val[MAXISO - 1])
+      iso = sc->iso.val[MAXISO - 1];
+
+    for (ia = 1; ia < MAXISO - 1; ia++) {
+      if (iso < sc->iso.val[ia]) break;
+    }
+
+    kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
+    hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
+    hsvrgb(hsv, rgb);
+    glColor3dv(rgb);
+
+    u[0] = ps0->m[0] / dd;
+    u[1] = ps0->m[1] / dd;
+    u[2] = ps0->m[2] / dd;
+    drawVector3D(cp, u, h * max(1.2 * dd / vmax, 0.2));
+  }
+
+  glEnd( );
+  glLineWidth(1.0);
+  glEndList( );
+  return (dlist);
 }
 
 GLuint listClipTetraVector(pMesh mesh) {

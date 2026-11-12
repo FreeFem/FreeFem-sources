@@ -35,6 +35,10 @@ extern ubyte option, infogl, fullscreen, dosurf, stereoMode;
 extern ubyte dpopen;
 extern ubyte dpopenbin;
 extern ubyte dpopensol;
+/*  server mode: one window for all the plots of FreeFEM (see medit.c) */
+extern char *ffserver;
+extern int ffwait;
+extern char graphopt[1024]; /* options of the 1d graph (see items.c) */
 
 void usage( ) {
   fprintf(stdout, "Usage: medit [options] [f1 .. fn]\n");
@@ -115,7 +119,13 @@ int parsar(int argc, char *argv[]) {
 
     }
     // Fin Rajout de popen
-    else if (!strcmp(argv[i], "-i")) {
+    else if (!strcmp(argv[i], "-server") && i + 1 < argc) {
+      ffserver = argv[++i];
+    } else if (!strcmp(argv[i], "-graph") && i + 1 < argc) {
+      strncpy(graphopt, argv[++i], sizeof(graphopt) - 1);
+    } else if (!strcmp(argv[i], "-wait") && i + 1 < argc) {
+      ffwait = atoi(argv[++i]);
+    } else if (!strcmp(argv[i], "-i")) {
       infogl = TRUE;
     } else if (!strcmp(argv[i], "-fs")) {
       fullscreen = TRUE;

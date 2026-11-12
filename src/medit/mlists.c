@@ -190,6 +190,76 @@ void cutTriangle(pScene sc, triangle t) {
 
 /* metric map: use linear interpolation on values
  * rather than color interpolation ! */
+/* solution at the elements of a volume mesh (P0): the solution is numbered by tetrahedron, so
+   we need the tetrahedron of each triangle of the surface (0 if none). The array must be freed. */
+typedef struct {
+  int v[3], tet;
+} FaceTet;
+
+static int cmpFaceTet(const void *a, const void *b) {
+  const FaceTet *fa = (const FaceTet *)a, *fb = (const FaceTet *)b;
+  int i;
+
+  for (i = 0; i < 3; i++)
+    if (fa->v[i] != fb->v[i]) return (fa->v[i] < fb->v[i] ? -1 : 1);
+
+  return (0);
+}
+
+static void sort3(int *v) {
+  int t;
+
+  if (v[0] > v[1]) t = v[0], v[0] = v[1], v[1] = t;
+  if (v[1] > v[2]) t = v[1], v[1] = v[2], v[2] = t;
+  if (v[0] > v[1]) t = v[0], v[0] = v[1], v[1] = t;
+}
+
+static int *triaTets(pMesh mesh) {
+  FaceTet *ft, key, *res;
+  int *tt, k, i, j, n = 0;
+
+  if (!mesh->ntet || !mesh->nt) return (NULL);
+
+  ft = (FaceTet *)malloc(4 * (size_t)mesh->ntet * sizeof(FaceTet));
+  tt = (int *)calloc(mesh->nt + 1, sizeof(int));
+  if (!ft || !tt) {
+    free(ft);
+    free(tt);
+    return (NULL);
+  }
+
+  for (k = 1; k <= mesh->ntet; k++) {
+    pTetra ptt = &mesh->tetra[k];
+
+    if (!ptt->v[0]) continue;
+
+    for (i = 0; i < 4; i++) {
+      int l = 0;
+
+      for (j = 0; j < 4; j++)
+        if (j != i) ft[n].v[l++] = ptt->v[j];
+
+      sort3(ft[n].v);
+      ft[n++].tet = k;
+    }
+  }
+
+  qsort(ft, n, sizeof(FaceTet), cmpFaceTet);
+
+  for (k = 1; k <= mesh->nt; k++) {
+    pTriangle pt = &mesh->tria[k];
+
+    for (i = 0; i < 3; i++) key.v[i] = pt->v[i];
+
+    sort3(key.v);
+    res = (FaceTet *)bsearch(&key, ft, n, sizeof(FaceTet), cmpFaceTet);
+    if (res) tt[k] = res->tet;
+  }
+
+  free(ft);
+  return (tt);
+}
+
 GLuint listTriaMap(pScene sc, pMesh mesh) {
   pMaterial pm;
   pTriangle pt;
@@ -200,6 +270,7 @@ GLuint listTriaMap(pScene sc, pMesh mesh) {
   float cx, cy, cz, n[3];
   int m, is0, is1, is2;
   triangle t;
+  int *tt = NULL; /* P0 on a volume mesh: the tet of each triangle */
 
   /* default */
   if (!mesh->nt) return (0);
@@ -212,6 +283,8 @@ GLuint listTriaMap(pScene sc, pMesh mesh) {
   dlist = glGenLists(1);
   glNewList(dlist, GL_COMPILE);
   if (glGetError( )) return (0);
+
+  if (mesh->typage == 1 && mesh->ntet) tt = triaTets(mesh);
 
   /* build list */
   for (m = 0; m < sc->par.nbmat; m++) {
@@ -290,7 +363,7 @@ GLuint listTriaMap(pScene sc, pMesh mesh) {
           t.vb = ps1->bb;
           t.vc = ps2->bb;
         } else {
-          ps0 = &mesh->sol[k];
+          ps0 = &mesh->sol[tt ? (tt[k] ? tt[k] : 1) : k];
           t.va = t.vb = t.vc = ps0->bb;
         }
 
@@ -403,7 +476,7 @@ GLuint listTriaMap(pScene sc, pMesh mesh) {
           t.vb = ps1->bb;
           t.vc = ps2->bb;
         } else {
-          ps0 = &mesh->sol[k];
+          ps0 = &mesh->sol[tt ? (tt[k] ? tt[k] : 1) : k];
           t.va = t.vb = t.vc = ps0->bb;
         }
 
@@ -414,6 +487,8 @@ GLuint listTriaMap(pScene sc, pMesh mesh) {
       glEnd( );
     }
   }
+
+  if (tt) free(tt);
 
   glEndList( );
   return (dlist);
@@ -863,6 +938,81 @@ GLuint listHexaMap(pScene sc, pMesh mesh, ubyte clip) {
     glEnd( );
   }
 
+  glEndList( );
+  return (dlist);
+}
+
+/* the edges of the 2d mesh on the elevation map (same coordinates as alt2dList, to do after it) */
+GLuint alt2dMesh(pScene sc, pMesh mesh, float shrink, float altcoef) {
+  pMaterial pm;
+  pPoint pp[4];
+  pSolution ps[4];
+  GLuint dlist;
+  float cx, cy, cz, c[4][3];
+  int k, m, i, typ, nv;
+
+  if (!mesh->nt && !mesh->nq) return (0);
+
+  if (egal(sc->iso.val[0], sc->iso.val[MAXISO - 1])) return (0);
+
+  dlist = glGenLists(1);
+  glNewList(dlist, GL_COMPILE);
+  if (glGetError( )) return (0);
+
+  glBegin(GL_LINES);
+
+  for (typ = 0; typ < 2; typ++) {
+    /* typ = 0 triangles, 1 quads */
+    nv = typ ? 4 : 3;
+
+    for (m = 0; m < sc->par.nbmat; m++) {
+      pm = &sc->material[m];
+      k = pm->depmat[typ ? LQuad : LTria];
+      if (!k || pm->flag) continue;
+
+      while (k != 0) {
+        int *v, nxt;
+
+        if (typ) {
+          v = mesh->quad[k].v;
+          nxt = mesh->quad[k].nxt;
+        } else {
+          v = mesh->tria[k].v;
+          nxt = mesh->tria[k].nxt;
+        }
+
+        if (!v[0]) {
+          k = nxt;
+          continue;
+        }
+
+        cx = cy = cz = 0.0;
+
+        for (i = 0; i < nv; i++) {
+          pp[i] = &mesh->point[v[i]];
+          ps[i] = mesh->typage == 1 ? &mesh->sol[k] : &mesh->sol[v[i]];
+          cx += pp[i]->c[0] / nv;
+          cy += pp[i]->c[1] / nv;
+          cz += ps[i]->bb / nv;
+        }
+
+        for (i = 0; i < nv; i++) {
+          c[i][0] = shrink * (pp[i]->c[0] - cx) + cx;
+          c[i][1] = shrink * (pp[i]->c[1] - cy) + cy;
+          c[i][2] = shrink * (altcoef * ps[i]->bb - cz) + cz - 0.25 * mesh->ztra;
+        }
+
+        for (i = 0; i < nv; i++) {
+          glVertex3fv(c[i]);
+          glVertex3fv(c[(i + 1) % nv]);
+        }
+
+        k = nxt;
+      }
+    }
+  }
+
+  glEnd( );
   glEndList( );
   return (dlist);
 }

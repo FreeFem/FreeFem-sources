@@ -225,10 +225,16 @@ typedef struct scene {
   GLuint glist, nlist;     /* geometry lists */
   GLuint grid;
   GLuint picklist;
+  /* overlay: the data of the other scenes (same mesh) in this scene (key U) */
+#define MAX_OVER 8
+  GLuint olist[MAX_OVER];
+  ubyte otyp[MAX_OVER]; /* 0 lines (vectors, iso-lines), 1 surfaces (iso-surfaces) */
+  ubyte overlay;
   int *matsort;
   short idwin, idmesh; /* window, mesh id */
   short master, slave;
   ubyte item; /* display items */
+  ubyte axes; /* graduated axes x, y (and z) with the values (key T) */
   ubyte mode; /* render mode */
   ubyte type;
   ubyte isotyp;

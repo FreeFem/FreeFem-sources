@@ -152,6 +152,47 @@ GLuint geomList(pScene sc, pMesh mesh) {
   }
 }
 
+/* 2d elevation (key 3): the border of the domain on the surface z = u, as in ffglut
+   (same height as the map, see alt2dList: z = altcoef * u - 0.25 * ztra) */
+void drawAltBorder(pScene sc, pMesh mesh) {
+  extern GLfloat altcoef;
+  static float red[4] = {1.0, 0.0, 0.0, 1.0};
+  static float yellow[4] = {1.0, 1.0, 0.0, 1.0};
+  int k;
+
+  if (!mesh->na || !mesh->nbb || mesh->typage != 2) return;
+
+  glLineWidth(sc->par.linewidth);
+  glBegin(GL_LINES);
+
+  for (k = 1; k <= mesh->na; k++) {
+    pEdge pr = &mesh->edge[k];
+    pPoint pp0, pp1;
+    pMaterial pm;
+
+    if (pr->v[0] > mesh->np || pr->v[1] > mesh->np) continue;
+
+    if (pr->tag & M_RIDGE)
+      glColor3fv(pr->tag & M_TAG ? yellow : red);
+    else if (!pr->ref)
+      glColor3fv(sc->par.edge);
+    else {
+      pm = &sc->material[matRef(sc, pr->ref)];
+      glColor3fv(pm->dif);
+    }
+
+    if (sc->par.linc == 1) glColor3fv(sc->par.edge);
+
+    pp0 = &mesh->point[pr->v[0]];
+    pp1 = &mesh->point[pr->v[1]];
+    glVertex3f(pp0->c[0], pp0->c[1], altcoef * mesh->sol[pr->v[0]].bb - 0.25 * mesh->ztra);
+    glVertex3f(pp1->c[0], pp1->c[1], altcoef * mesh->sol[pr->v[1]].bb - 0.25 * mesh->ztra);
+  }
+
+  glEnd( );
+  glLineWidth(1.0);
+}
+
 #ifdef __cplusplus
 }
 #endif

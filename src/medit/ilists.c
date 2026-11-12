@@ -28,10 +28,18 @@ extern "C" {
 #include "extern.h"
 #include "sproto.h"
 
+extern GLfloat altcoef;
+/* 2d elevation: the iso-lines are on the elevation map (see alt2dList) */
+#define ISOELEV(sc, mesh) ((mesh)->dim == 2 && ((sc)->mode & S_ALTITUDE))
+#define ISOZ(mesh, iso) (altcoef * (iso)-0.25 * (mesh)->ztra)
+
 #define BASETR 0.2
 #define NBCOL 9
 
 /* build lists for iso-surfaces */
+/* number of iso lines between two values of the palette (keys n, N as in ffglut) */
+int isoncol = 5; /* about 20 iso lines, as in ffglut */
+
 GLuint listTriaIso(pScene sc, pMesh mesh) {
   GLuint dlist = 0;
   pTriangle pt;
@@ -58,7 +66,7 @@ GLuint listTriaIso(pScene sc, pMesh mesh) {
 
   /* build list */
   glBegin(GL_LINES);
-  ncol = NBCOL;
+  ncol = isoncol;
 
   for (i = 0; i <= ncol * (MAXISO - 1); i++) {
     if (i < ncol * (MAXISO - 1)) {
@@ -72,6 +80,9 @@ GLuint listTriaIso(pScene sc, pMesh mesh) {
     }
 
     hsvrgb(hsv, rgb);
+    /* on the colors of the solution (key f): dark iso lines, as in ffglut */
+    if (sc->mode & S_MAP) rgb[0] = rgb[1] = rgb[2] = 0.15;
+
     glColor3dv(rgb);
 
     for (m = 0; m < sc->par.nbmat; m++) {
@@ -106,7 +117,12 @@ GLuint listTriaIso(pScene sc, pMesh mesh) {
             cy = p0->c[1] + cc * (p1->c[1] - p0->c[1]);
             nc++;
             if (mesh->dim == 2) {
-              glVertex2f(cx, cy);
+              {
+              if (ISOELEV(sc, mesh))
+                glVertex3f(cx, cy, ISOZ(mesh, iso));
+              else
+                glVertex2f(cx, cy);
+            }
             } else {
               cz = p0->c[2] + cc * (p1->c[2] - p0->c[2]);
               glVertex3f(cx, cy, cz);
@@ -114,8 +130,14 @@ GLuint listTriaIso(pScene sc, pMesh mesh) {
           } else if (ps0->bb == iso && ps1->bb == iso) {
             nc = 2;
             if (mesh->dim == 2) {
-              glVertex2f(p0->c[0], p0->c[1]);
-              glVertex2f(p1->c[0], p1->c[1]);
+              if (ISOELEV(sc, mesh)) {
+                glVertex3f(p0->c[0], p0->c[1], ISOZ(mesh, iso));
+                glVertex3f(p1->c[0], p1->c[1], ISOZ(mesh, iso));
+              } else {
+                glVertex2f(p0->c[0], p0->c[1]);
+                glVertex2f(p1->c[0], p1->c[1]);
+              }
+
               break;
             } else {
               glVertex3f(p0->c[0], p0->c[1], p0->c[2]);
@@ -127,7 +149,12 @@ GLuint listTriaIso(pScene sc, pMesh mesh) {
 
         if (nc > 0 && nc != 2) {
           if (mesh->dim == 2)
-            glVertex2f(cx, cy);
+            {
+              if (ISOELEV(sc, mesh))
+                glVertex3f(cx, cy, ISOZ(mesh, iso));
+              else
+                glVertex2f(cx, cy);
+            }
           else
             glVertex3f(cx, cy, cz);
         }
@@ -169,7 +196,7 @@ GLuint listQuadIso(pScene sc, pMesh mesh) {
 
   /* build list */
   glBegin(GL_LINES);
-  ncol = NBCOL;
+  ncol = isoncol;
 
   for (i = 0; i <= ncol * (MAXISO - 1); i++) {
     if (i < ncol * (MAXISO - 1)) {
@@ -183,6 +210,9 @@ GLuint listQuadIso(pScene sc, pMesh mesh) {
     }
 
     hsvrgb(hsv, rgb);
+    /* on the colors of the solution (key f): dark iso lines, as in ffglut */
+    if (sc->mode & S_MAP) rgb[0] = rgb[1] = rgb[2] = 0.15;
+
     glColor3dv(rgb);
 
     for (m = 0; m < sc->par.nbmat; m++) {
@@ -213,7 +243,12 @@ GLuint listQuadIso(pScene sc, pMesh mesh) {
             cx = p0->c[0] + cc * (p1->c[0] - p0->c[0]);
             cy = p0->c[1] + cc * (p1->c[1] - p0->c[1]);
             if (mesh->dim == 2) {
-              glVertex2f(cx, cy);
+              {
+              if (ISOELEV(sc, mesh))
+                glVertex3f(cx, cy, ISOZ(mesh, iso));
+              else
+                glVertex2f(cx, cy);
+            }
             } else {
               cz = p0->c[2] + cc * (p1->c[2] - p0->c[2]);
               glVertex3f(cx, cy, cz);

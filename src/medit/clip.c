@@ -150,29 +150,10 @@ void updateClip(pClip clip, pMesh mesh) {
     if (clip->active & C_REDO) clipVertices(mesh, sc, clip);
 
     /* clip->active |= C_REDO;*/
-  } else if (clip->active & C_FREEZE) {
-    glPushMatrix( );
-    glLoadMatrixf(view->matrix);
-    glTranslatef(sc->cx, sc->cy, sc->cz);
-    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-    glPopMatrix( );
-    invertMatrix(matrix, inv);
-    inv[3] = inv[7] = inv[11] = 0.0;
-    inv[15] = 1.0;
-
-    glPushMatrix( );
-    glLoadMatrixf(inv);
-    glMultMatrixf(view->oldmat);
-    glTranslatef(sc->cx, sc->cy, sc->cz);
-    glMultMatrixf(cliptr->matrix);
-    glGetFloatv(GL_MODELVIEW_MATRIX, cliptr->matrix);
-    glPopMatrix( );
-
-    /* compute plane equation */
-    invertMatrix(cliptr->matrix, inv);
-    transformPoint(clip->eqn, plane, inv);
-    clip->active |= C_REDO;
   }
+  /* C_FREEZE (F3): the plane is fixed on the object, the mouse turns the object with the plane
+     (as in ffglut): nothing to compute, the plane equation is in the coordinates of the mesh.
+     Before, the plane was kept fixed on the screen when the view turned. */
 
   if (!cliptr->manim) {
     cliptr->angle = 0.0;

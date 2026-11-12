@@ -90,6 +90,8 @@ void doMapLists(pScene sc, pMesh mesh, int reset) {
   if (sc->mode & S_ALTITUDE) {
     sc->mlist[LTria] = alt2dList(sc, mesh, LTria, sc->shrink, altcoef);
     sc->mlist[LQuad] = alt2dList(sc, mesh, LQuad, sc->shrink, altcoef);
+    /* the mesh on the elevation map (the list of the tets is free for a 2d mesh) */
+    if (mesh->dim == 2) sc->mlist[LTets] = alt2dMesh(sc, mesh, sc->shrink, altcoef);
   } else if (sc->mode & S_MAP) {
     if (mesh->nt && !sc->mlist[LTria]) sc->mlist[LTria] = listTriaMap(sc, mesh);
 
@@ -168,10 +170,15 @@ void doIsoLists(pScene sc, pMesh mesh, int reset) {
       if (mesh->ntet + mesh->nhex == 0) {
         sc->vlist[LTria] = listTria3dVector(mesh);
       } else {
-        if (mesh->ntet && !sc->vlist[LTets])
-          sc->vlist[LTets] = listClipTetraVector(mesh);
-        else if (mesh->nhex && !sc->vlist[LHexa])
-          sc->vlist[LHexa] = listClipHexaVector(mesh);
+        /* without clipping plane: all the vectors of the mesh */
+        if (!sc->vlist[LTria]) sc->vlist[LTria] = listMeshVector3d(mesh);
+
+        if (sc->clip->active & C_ON) {
+          if (mesh->ntet && !sc->vlist[LTets])
+            sc->vlist[LTets] = listClipTetraVector(mesh);
+          else if (mesh->nhex && !sc->vlist[LHexa])
+            sc->vlist[LHexa] = listClipHexaVector(mesh);
+        }
       }
     }
   }
@@ -208,8 +215,66 @@ void doIsoLists(pScene sc, pMesh mesh, int reset) {
   checkErrors( );
 }
 
+/* overlay (key U): the data of the other scenes on the same mesh are plotted in this scene:
+   iso-surfaces (or iso-lines in 2d) of a scalar solution, arrows of a vector field.
+   Ex: medit("u v",Th,u,[vx,vy,vz]) gives 2 windows, U in one of them shows both. */
+void doOverlay(pScene sc) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+  int j, n = 0;
+
+  for (j = 0; j < MAX_OVER; j++) {
+    if (sc->olist[j]) glDeleteLists(sc->olist[j], 1);
+
+    sc->olist[j] = (GLuint)0;
+  }
+
+  if (!sc->overlay) return;
+
+  for (j = 0; j < cv.nbs && n < MAX_OVER; j++) {
+    pScene scj = cv.scene[j];
+    pMesh mj;
+
+    if (!scj || scj == sc) continue;
+
+    mj = cv.mesh[scj->idmesh];
+    if (!mj->nbb || mj->np != mesh->np || mj->dim != mesh->dim) continue;
+
+    if (mj->nfield == 1) {
+      if (mj->ntet) {
+        sc->olist[n] = listTetraIso(scj, mj);
+        sc->otyp[n] = 1;
+      } else if (mj->dim == 2 && mj->nt) {
+        sc->olist[n] = listTriaIso(scj, mj);
+        sc->otyp[n] = 0;
+      }
+    } else if (mj->nfield == mj->dim) {
+      /* the lists of vectors use the palette of the current scene */
+      Iso iso = sc->iso;
+
+      sc->iso = scj->iso;
+      if (mj->dim == 2)
+        sc->olist[n] = listTria2dVector(mj);
+      else if (mj->ntet + mj->nhex)
+        sc->olist[n] = listMeshVector3d(mj);
+
+      sc->iso = iso;
+      sc->otyp[n] = 0;
+    }
+
+    if (sc->olist[n]) n++;
+  }
+
+  if (!n && !graph1dMesh(mesh)) fprintf(stdout, "  ## Overlay: no other solution on the same mesh.\n");
+}
+
 void resetLists(pScene sc, pMesh mesh) {
   int kk;
+
+  for (kk = 0; kk < MAX_OVER; kk++) {
+    if (sc->olist[kk]) glDeleteLists(sc->olist[kk], 1);
+
+    sc->olist[kk] = (GLuint)0;
+  }
 
   for (kk = 0; kk < MAX_LIST; kk++) {
     if (sc->dlist[kk]) glDeleteLists(sc->dlist[kk], 1);
@@ -350,7 +415,75 @@ void keyFile(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuFile(int item) { keyFile((unsigned char)item, 0, 0); }
+/* The actions of the menus are deferred to the next display of the window: in a menu
+   callback, the OpenGL context of the window is not always the current one (GLUT on macOS),
+   so the display lists built by the action (vectors, iso-surfaces, ...) were lost. */
+typedef void (*MenuAction)(unsigned char, int, int);
+static struct {
+  int win;
+  MenuAction f;
+  unsigned char key;
+} menupend[16];
+static int nmenupend = 0;
+
+static void menuDefer(MenuAction f, int item) {
+  extern int mouseWindow(void);
+  int w = glutGetWindow( ), wm = mouseWindow( ), k;
+
+  /* the window of the menu = the window under the mouse (glutGetWindow can be another
+     window when several windows are open) */
+  for (k = 0; k < MAX_SCENE; k++)
+    if (cv.scene[k] && cv.scene[k]->idwin == wm) break;
+
+  if (wm > 0 && k < MAX_SCENE && wm != w) {
+    fprintf(stdout, "  menu: window %d (GLUT current window %d)\n", wm, w);
+    w = wm;
+    glutSetWindow(w);
+  }
+
+  if (nmenupend < 16) {
+    menupend[nmenupend].win = w;
+    menupend[nmenupend].f = f;
+    menupend[nmenupend].key = (unsigned char)item;
+    nmenupend++;
+  }
+
+  glutPostRedisplay( );
+}
+
+/* run the deferred actions of the current window (at the beginning of its display): 1 if any */
+int menuRun(void) {
+  int w = glutGetWindow( ), i, j, ran = 0;
+
+  for (i = 0; i < nmenupend;) {
+    if (menupend[i].win == w) {
+      MenuAction f = menupend[i].f;
+      unsigned char key = menupend[i].key;
+
+      for (j = i + 1; j < nmenupend; j++) menupend[j - 1] = menupend[j];
+
+      nmenupend--;
+      f(key, 0, 0);
+      ran = 1;
+      if (glutGetWindow( ) != w) glutSetWindow(w);
+    } else {
+      i++;
+    }
+  }
+
+  return (ran);
+}
+
+/* keyScene from a menu: no modifier (glutGetModifiers is only valid in the input callbacks) */
+static void keySceneMenu(unsigned char key, int x, int y) {
+  extern int menukey;
+
+  menukey = 1;
+  keyScene(key, x, y);
+  menukey = 0;
+}
+
+void menuFile(int item) { menuDefer(keyFile, item); }
 
 void keyItem(unsigned char key, int x, int y) {
   pScene sc;
@@ -391,6 +524,9 @@ void keyItem(unsigned char key, int x, int y) {
     case 'F': /* toggle face nums */
       sc->item ^= S_NUMF;
       break;
+    case 'T': /* graduated axes (key j) */
+      sc->axes = !sc->axes;
+      break;
     case 'g': /* const. items */
       if (!sc->glist) post = FALSE;
 
@@ -422,7 +558,7 @@ void keyItem(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuItem(int item) { keyItem((unsigned char)item, 0, 0); }
+void menuItem(int item) { menuDefer(keyItem, item); }
 
 void keyAnim(unsigned char key, int x, int y) {
   pScene sc;
@@ -559,7 +695,7 @@ void keyAnim(unsigned char key, int x, int y) {
   if (post == TRUE) glutPostRedisplay( );
 }
 
-void menuAnim(int item) { keyAnim((unsigned char)item, 0, 0); }
+void menuAnim(int item) { menuDefer(keyAnim, item); }
 
 void keyTrajet(unsigned char key, int x, int y) {
   pScene sc;
@@ -590,7 +726,7 @@ void keyTrajet(unsigned char key, int x, int y) {
   glutPostRedisplay( );
 }
 
-void menuTrajet(int item) { keyTrajet((unsigned char)item, 0, 0); }
+void menuTrajet(int item) { menuDefer(keyTrajet, item); }
 
 void keyMode(unsigned char key, int x, int y) {
   pScene sc;
@@ -654,9 +790,12 @@ void keyMode(unsigned char key, int x, int y) {
   if (post == TRUE) glutPostRedisplay( );
 }
 
-void menuMode(int item) { keyMode((unsigned char)item, 0, 0); }
+void menuMode(int item) { menuDefer(keyMode, item); }
 
-void menuScene(int item) { keyScene((unsigned char)item, 0, 0); }
+void menuScene(int item) {
+  if (item == 'X') menuOld(item); /* X is now a key of ffglut: the old action of medit */
+  else menuKey(item);
+}
 
 void keyView(unsigned char key, int x, int y) {
   pScene sc, sc1;
@@ -739,7 +878,7 @@ void keyView(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuView(int item) { keyView((unsigned char)item, 0, 0); }
+void menuView(int item) { menuDefer(keyView, item); }
 
 void keyColor(unsigned char key, int x, int y) {
   pScene sc;
@@ -807,7 +946,7 @@ void keyColor(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuColor(int item) { keyColor((unsigned char)item, 0, 0); }
+void menuColor(int item) { menuDefer(keyColor, item); }
 
 void keyClip(unsigned char key, int x, int y) {
   pScene sc;
@@ -870,7 +1009,7 @@ void keyClip(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuClip(int item) { keyClip((unsigned char)item, 0, 0); }
+void menuClip(int item) { menuDefer(keyClip, item); }
 
 void keyCube(unsigned char key, int x, int y) {
   pScene sc;
@@ -972,7 +1111,7 @@ void keyFeature(unsigned char key, int x, int y) {
   if (post == TRUE) glutPostRedisplay( );
 }
 
-void menuFeature(int item) { keyFeature((unsigned char)item, 0, 0); }
+void menuFeature(int item) { menuDefer(keyFeature, item); }
 
 void menuImage(int item) { imgtype = item; }
 
@@ -1081,9 +1220,6 @@ void keyMetric(unsigned char key, int x, int y) {
       }
 
       sc->isotyp ^= S_VECTOR;
-      if (mesh->dim == 3)
-        if (mesh->ntet + mesh->nhex && !(sc->clip->active & C_ON)) return;
-
       doIsoLists(sc, mesh, 0);
       break;
 
@@ -1094,13 +1230,20 @@ void keyMetric(unsigned char key, int x, int y) {
       if (altcoef == 0.0) {
         float maxd;
 
+        float maxb;
+
         maxd = max(mesh->xmax - mesh->xmin, mesh->ymax - mesh->ymin);
-        altcoef = 0.3 * maxd / mesh->bbmax;
+        /* the greatest absolute value (bbmax can be null or negative) */
+        maxb = max(fabs(mesh->bbmin), fabs(mesh->bbmax));
+        altcoef = maxb > 0.0 ? 0.3 * maxd / maxb : 1.0;
       }
 
       if (!(sc->mode & S_ALTITUDE)) sc->type |= S_RESET;
 
       doMapLists(sc, mesh, 1);
+      /* the iso-lines are on the elevation map */
+      if (sc->isotyp & S_ISOLINE) doIsoLists(sc, mesh, 1);
+
       break;
     case 'K': /* elevation coeff */
       fprintf(stdout, "elevation coeff (%.2f): ", altcoef);
@@ -1121,14 +1264,23 @@ void keyMetric(unsigned char key, int x, int y) {
       if (!mesh->nbb) return;
 
       sc->mode ^= S_MAP;
-      doMapLists(sc, mesh, 1);
-      if (sc->mode & S_MAP) {
-        if (sc->clip->active & C_ON) sc->clip->active |= C_REDO;
+      if (sc->mode & S_MAP) sc->mode |= S_FILL;
 
-        if (!(sc->item & S_PALETTE)) sc->item ^= S_PALETTE;
-      } else if (sc->item & S_PALETTE) {
-        sc->item ^= S_PALETTE;
+      doMapLists(sc, mesh, 1);
+      /* the iso lines: dark on the colors (as in ffglut), in color without them */
+      {
+        int i;
+
+        for (i = 0; i < MAX_LIST; i++) {
+          if (sc->ilist[i]) glDeleteLists(sc->ilist[i], 1);
+
+          sc->ilist[i] = 0;
+        }
+
+        if (sc->isotyp) doIsoLists(sc, mesh, 0);
       }
+      /* as in ffglut: the palette is shown only with the key v (not with the colors) */
+      if (sc->mode & S_MAP && sc->clip->active & C_ON) sc->clip->active |= C_REDO;
 
       break;
     case 'p': /* toggle palette */
@@ -1145,11 +1297,26 @@ void keyMetric(unsigned char key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
-void menuMetric(int item) { keyMetric((unsigned char)item, 0, 0); }
+void menuMetric(int item) { menuDefer(keyMetric, item); }
+
+/* menu entry = the same action as the key */
+void menuKey(int item) { menuDefer(keySceneMenu, item); }
+
+/* menu entry = the old action of medit for this key (its letter is now a key of ffglut) */
+static void keySceneOld(unsigned char key, int x, int y) {
+  extern int menukey, oldkey;
+
+  menukey = oldkey = 1;
+  keyScene(key, x, y);
+  menukey = oldkey = 0;
+}
+
+void menuOld(int item) { menuDefer(keySceneOld, item); }
 
 int createMenus(pScene sc, pMesh mesh) {
   int amenu, fmenu, femenu, vmenu, mmenu, smenu;
-  int clmenu, cmenu, vwmenu;
+  int clmenu, cmenu, vwmenu, gmenu = 0;
+  extern char *ffserver; /* FreeFEM server mode: n and p = next and previous plot */
 
   /* default */
   if (ddebug) printf("create menus\n");
@@ -1158,11 +1325,11 @@ int createMenus(pScene sc, pMesh mesh) {
 
   /* File management menu */
   fmenu = glutCreateMenu(menuFile);
-  glutAddMenuEntry("[L] Load prefs", 'L');
-  glutAddMenuEntry("[W] Save prefs", 'W');
+  glutAddMenuEntry("    Load prefs", 'L');
+  glutAddMenuEntry("    Save prefs", 'W');
   glutAddMenuEntry("    Update mesh", 'R');
   glutAddMenuEntry("    Save mesh", 'S');
-  glutAddMenuEntry("[H] Hardcopy PPM", 'H');
+  glutAddMenuEntry("[w] Hardcopy PPM", 'H');
   glutAddMenuEntry("    Hardcopy EPS (Color)", 'C');
   glutAddMenuEntry("    Hardcopy EPS (Grey)", 'G');
   glutAddMenuEntry("    Hardcopy EPS (B/W)", 'B');
@@ -1175,54 +1342,109 @@ int createMenus(pScene sc, pMesh mesh) {
   glutAddMenuEntry("Hidden lines", 'H');
   glutAddMenuEntry("Shading", 'S');
   glutAddMenuEntry("Shading+lines", 'P');
-  if (mesh->nvn > 0) glutAddMenuEntry("[n] Toggle Normals", 'n');
+  if (mesh->nvn > 0) glutAddMenuEntry("    Smooth / flat normals", 'n');
+
+  glutCreateMenu(menuKey);
+  glutAddMenuEntry("[L] Toggle facets", 'L');
+  glutAddMenuEntry("[m] Toggle mesh", 'm');
+  glutAddMenuEntry("[l] Toggle lighting", 'l');
+  {
+    int kmenu = glutGetMenu( );
+
+    glutSetMenu(mmenu);
+    glutAddSubMenu("Facets, lines", kmenu);
+  }
 
   /* color & material menu */
   cmenu = glutCreateMenu(menuColor);
   glutAddMenuEntry("[b] Toggle backcolor", 'b');
-  glutAddMenuEntry("[e] Toggle matcolors", 'e');
-  glutAddMenuEntry("[E] Edit   matcolors", 'E');
-  glutAddMenuEntry("[r] Hide   material", 'r');
-  glutAddMenuEntry("[R] Reset  materials", 'R');
+  glutAddMenuEntry("    Toggle matcolors", 'e');
+  glutAddMenuEntry("    Edit   matcolors", 'E');
+  glutAddMenuEntry("    Hide   material", 'r');
+  glutAddMenuEntry("    Reset  materials", 'R');
 
   /* metric */
   if (mesh->nbb > 0) {
     smenu = glutCreateMenu(menuMetric);
-    glutAddMenuEntry("[m] Toggle metric", 'm');
-    glutAddMenuEntry("[p] Toggle palette", 'p');
+    glutAddMenuEntry("[f] Fill (solution in colors)", 'm');
+    glutAddMenuEntry("[v] Toggle palette", 'p');
     if (mesh->typage == 2) glutAddMenuEntry("[o] Toggle iso-lines", 'l');
 
     if (mesh->ntet + mesh->nhex > 0 && mesh->nfield == 1)
-      glutAddMenuEntry("    Toggle iso-surfaces", 's');
+      glutAddMenuEntry("[s] Toggle iso-surfaces", 's');
 
     if (mesh->nfield == mesh->dim) {
-      glutAddMenuEntry("[w]  Toggle vector/tensor", 'w');
+      glutAddMenuEntry("[V]  Toggle vector/tensor", 'w');
+      {
+        int dm = glutGetMenu( ), am = glutCreateMenu(menuKey);
+
+        glutAddMenuEntry("[a] Shorter arrows", 'a');
+        glutAddMenuEntry("[A] Longer arrows", 'A');
+        glutSetMenu(dm);
+        glutAddSubMenu("Arrow length", am);
+      }
       glutAddMenuEntry("     Toggle displacement", 'd');
-      glutAddMenuEntry("[v]  Toggle streamlines", 'v');
+      glutAddMenuEntry("     Toggle streamlines", 'v');
       glutAddMenuEntry("     Flush streamlines", 'f');
       glutAddMenuEntry("     Particle advection", 'u');
       if (mesh->dim == 2) glutAddMenuEntry("     Critical points", 'c');
     }
 
-    if (mesh->dim == 2) {
-      glutAddMenuEntry("[k]  Toggle elevation", 'k');
-      glutAddMenuEntry("[K]  Elevation coeff", 'K');
+    if (mesh->cplx) {
+      int dm = glutGetMenu( ), cm = glutCreateMenu(menuKey);
+
+      glutAddMenuEntry("[k] Real / imaginary part / modulus / argument", 'k');
+      glutSetMenu(dm);
+      glutAddSubMenu("Complex solution", cm);
     }
+
+    if (mesh->dim == 2) {
+      glutAddMenuEntry("[3]  Toggle elevation", 'k');
+      glutAddMenuEntry("[K]  Elevation coeff (h, H: lower, higher)", 'K');
+    }
+
+    glutCreateMenu(menuKey);
+    glutAddMenuEntry("[P] Value under the mouse", 'P');
+    glutAddMenuEntry("[U] Overlay of the other windows", 'U');
+    {
+      int kmenu = glutGetMenu( );
+
+      glutSetMenu(smenu);
+      glutAddSubMenu("Probe, overlay", kmenu);
+    }
+  }
+
+  /* 1d graph (solution on a mesh of edges along x) */
+  if (graph1dMesh(mesh)) {
+    gmenu = glutCreateMenu(menuKey);
+    glutAddMenuEntry("[k] Lines / lines+points / points", 'k');
+    glutAddMenuEntry("[G] Grid", 'G');
+    glutAddMenuEntry("[F] Bold text", 'F');
+    glutAddMenuEntry("[x] Log scale in x", 'x');
+    glutAddMenuEntry("[y] Log scale in y", 'y');
+    glutAddMenuEntry("[z] Zoom in", 'z');
+    glutAddMenuEntry("[Z] Zoom out", 'Z');
+    glutAddMenuEntry("[A] Freeze / free the axes", 'A');
+    glutAddMenuEntry("[i] Automatic axes", 'i');
+    glutAddMenuEntry("[b] Black / white background", 'b');
   }
 
   /* Show misc. items */
   vmenu = glutCreateMenu(menuItem);
-  glutAddMenuEntry("[A] Axis", 'A');
-  glutAddMenuEntry("[B] Bounding box", 'B');
-  glutAddMenuEntry("[G] Grid ", 'G');
-  if (sc->glist) glutAddMenuEntry("[g] Geometric items", 'g');
+  glutAddMenuEntry("    Axis (arrows)", 'A');
+  glutAddMenuEntry("    Bounding box", 'B');
+  glutAddMenuEntry("[j] Graduated axes", 'T');
+  if (mesh->dim == 3) glutAddMenuEntry("[D] Selection cube", 'D');
 
-  glutAddMenuEntry("[j] Toggle Info", 'j');
-  glutAddMenuEntry("[P] Toggle Point num", 'P');
-  glutAddMenuEntry("[F] Toggle Face num", 'F');
+  glutAddMenuEntry("[G] Grid ", 'G');
+  if (sc->glist) glutAddMenuEntry("[B] Border (geometric items)", 'g');
+
+  glutAddMenuEntry("    Toggle Info", 'j');
+  glutAddMenuEntry("    Toggle Point num", 'P');
+  glutAddMenuEntry("    Toggle Face num", 'F');
   if (mesh->nvn) {
-    glutAddMenuEntry("[N] Toggle normals", 'N');
-    glutAddMenuEntry("[O] Revert normals", 'O');
+    glutAddMenuEntry("[T] Toggle normals", 'N');
+    glutAddMenuEntry("    Revert normals", 'O');
   }
 
   /* clipping menu */
@@ -1253,15 +1475,34 @@ int createMenus(pScene sc, pMesh mesh) {
 
   /* view handler menu */
   vwmenu = glutCreateMenu(menuView);
-  glutAddMenuEntry("[i] Reset", 'R');
+  glutAddMenuEntry("[=] Reset", 'R');
   glutAddMenuEntry("[Alt-c] Copy", 'C');
   glutAddMenuEntry("[Alt-p] Paste", 'P');
   glutAddMenuEntry("[Alt+l] Link", 'L');
   glutAddMenuEntry("[Alt+u] Unlink", 'U');
+  glutAddMenuEntry("[Alt+d] Duplicate", 'D');
+
+  glutCreateMenu(menuOld);
+  glutAddMenuEntry("[z] Zoom in", 'z');
+  glutAddMenuEntry("[Z] Zoom out", 'Z');
+  glutAddMenuEntry("[+] Scale object up", '+');
+  glutAddMenuEntry("[-] Scale object down", '-');
+  glutAddMenuEntry("    Toggle interactive", 'I');
+  if (mesh->dim == 3 || sc->mode & S_ALTITUDE) glutAddMenuEntry("[J] Toggle flight", 'J');
+
+  glutAddMenuEntry("    Center on the picked item", 'V');
+  glutAddMenuEntry("[#] Select entity (terminal)", '#');
+  {
+    int kmenu = glutGetMenu( );
+
+    glutSetMenu(vwmenu);
+    glutAddSubMenu("Zoom, center", kmenu);
+  }
 
   /* animation menu */
   amenu = glutCreateMenu(menuAnim);
-  glutAddMenuEntry("[a] Toggle Anim", 'A');
+  glutAddMenuEntry("    Toggle Anim", 'A');
+  glutAddMenuEntry("[S] Play animation", 'S');
   glutAddMenuEntry("Toggle ImgSave", 'I');
   if (option == SEQUENCE || option == SEQUENCE + PARTICLE) {
     glutAddMenuEntry("Play  sequence", 'S');
@@ -1291,6 +1532,8 @@ int createMenus(pScene sc, pMesh mesh) {
   glutAddSubMenu("Colors, Materials", cmenu);
   if (mesh->nbb) glutAddSubMenu("Data", smenu);
 
+  if (gmenu) glutAddSubMenu("Graph 1D", gmenu);
+
   glutAddSubMenu("Items", vmenu);
   if (mesh->dim == 3) glutAddSubMenu("Clipping", clmenu);
 
@@ -1298,8 +1541,14 @@ int createMenus(pScene sc, pMesh mesh) {
   glutAddSubMenu("View", vwmenu);
   glutAddSubMenu("Animation", amenu);
   glutAddMenuEntry("", '\0');
-  glutAddMenuEntry("Close window", 'X');
-  glutAddMenuEntry("Quit", 'q');
+  if (ffserver) {
+    glutAddMenuEntry("[Enter] Next plot (or continue)", '\r');
+    glutAddMenuEntry("[p] Previous plot", 'p');
+  }
+
+  glutAddMenuEntry("[?] Help (in the terminal)", '?');
+  glutAddMenuEntry("    Close window", 'X');
+  glutAddMenuEntry("[Esc] Quit", 27);
 
   return (1);
 }

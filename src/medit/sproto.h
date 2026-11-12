@@ -130,6 +130,19 @@ GLuint listTetraIso(pScene, pMesh);
 
 /* items.c */
 void drawAxis(pScene, int);
+void drawAxesTics(pScene, pMesh);
+void probeMotion(int, int);
+void probeEntry(int);
+void probeMatrices(void);
+void drawProbe(pScene);
+void menuKey(int);
+void menuOld(int);
+int menuRun(void);
+void drawAltBorder(pScene, pMesh);
+void ffDefaults(pScene, pMesh);
+void vecLength(pScene, pMesh, double);
+void cplxMesh(pMesh, int);
+void cplxSet(pMesh);
 void drawBox(pScene, pMesh, int);
 void drawCube(pScene, pMesh);
 void drawGrid(pScene, pMesh);
@@ -206,6 +219,13 @@ GLuint listTetraMap(pScene, pMesh, ubyte);
 GLuint listHexaMap(pScene, pMesh, ubyte);
 void cutTriangle(pScene, triangle);
 GLuint alt2dList(pScene, pMesh, int, float, float);
+GLuint alt2dMesh(pScene, pMesh, float, float);
+GLuint listMeshVector3d(pMesh);
+void doOverlay(pScene);
+int graph1dMesh(pMesh);
+void drawGraph1d(pScene);
+int graphKey(pScene, unsigned char);
+int graphSpecial(pScene, int);
 void setupPalette(pScene, pMesh);
 GLuint drawPalette(pScene);
 
@@ -280,6 +300,9 @@ void drawModel(pScene sc);
 void drawScene(pScene);
 void redrawScene( );
 void deleteScene(pScene sc);
+/* medit.c: server mode */
+int srvKey(unsigned char key);
+void resetLists(pScene, pMesh);
 void initGrafix(pScene sc, pMesh mesh);
 int createScene(pScene sc, int idmesh);
 void streamIdle( );

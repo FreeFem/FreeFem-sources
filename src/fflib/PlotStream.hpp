@@ -118,8 +118,15 @@ public:
     
   void read( void *data,size_t l) {
 	char * p= (char*)data;
-	for(int i=0;i<l;++i)	
+	//  getc locks the stream at each byte (very slow with a fine mesh): ffglut locks the stream
+	//  once for the reading of a plot (flockfile in ReadOnePlot), so we can use getc_unlocked
+#ifdef _WIN32
+	for(int i=0;i<l;++i)
 	  *p++ = (char) getc(TheStream);
+#else
+	for(int i=0;i<l;++i)
+	  *p++ = (char) getc_unlocked(TheStream);
+#endif
 	//	fread(  p++,1,1,TheStream);
 	//       read(data,l);
 }

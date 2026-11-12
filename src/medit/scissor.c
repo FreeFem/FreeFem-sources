@@ -37,6 +37,12 @@ void scissorScene( ) {
   /* default */
   if (ddebug) printf("enable scissoring\n");
 
+  /* the actions of the menus (see menuDefer) */
+  if (menuRun( )) {
+    glutPostRedisplay( );
+    return;
+  }
+
   sc = cv.scene[currentScene( )];
   view = sc->view;
   p = sc->persp;

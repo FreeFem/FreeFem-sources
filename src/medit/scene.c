@@ -305,9 +305,15 @@ static void displayScene(pScene sc, int mode, int clip) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_POLYGON_OFFSET_FILL);
         if (sc->mode & S_MAP) {
+          /* 2d elevation: the map is pushed back, for the mesh and the iso-lines on the map */
+          if (sc->mode & S_ALTITUDE && cv.mesh[sc->idmesh]->dim == 2) glPolygonOffset(1.0, 2.0);
+
           glEnable(GL_COLOR_MATERIAL);
           drawList(sc, clip, map);
           glDisable(GL_COLOR_MATERIAL);
+          glPolygonOffset(1.0, 1.0 / (float)0x10000);
+        } else if (sc->mode & S_ALTITUDE && cv.mesh[sc->idmesh]->dim == 2) {
+          ; /* 2d elevation without the map: only the mesh on the surface (see below) */
         } else {
           glColor4fv(sc->par.back);
           drawList(sc, clip, 0);
@@ -332,10 +338,20 @@ static void displayScene(pScene sc, int mode, int clip) {
       if (sc->mode & S_MAP) {
         if (sc->mode & S_FILL) {
           glColor4fv(sc->par.line);
-          drawList(sc, clip, 0);
+          if (sc->mode & S_ALTITUDE && cv.mesh[sc->idmesh]->dim == 2) {
+            /* 2d elevation: the mesh on the map (see alt2dMesh), not in the plane z=0 */
+            glLineWidth(1.0);
+            if (sc->mlist[LTets]) glCallList(sc->mlist[LTets]);
+          } else
+            drawList(sc, clip, 0);
         } else {
           drawList(sc, clip, map);
         }
+      } else if (sc->mode & S_ALTITUDE && cv.mesh[sc->idmesh]->dim == 2) {
+        /* 2d elevation without the map: the mesh on the surface (see alt2dMesh) */
+        glColor4fv(sc->par.line);
+        glLineWidth(1.0);
+        if (sc->mlist[LTets]) glCallList(sc->mlist[LTets]);
       } else if (sc->mode & S_ALTITUDE) {
         glColor4fv(sc->par.line);
         drawList(sc, clip, map);
@@ -350,6 +366,22 @@ static void displayScene(pScene sc, int mode, int clip) {
 }
 
 static void displayData(pScene sc, pMesh mesh) {
+  int ko;
+  /* overlay in 3d without clipping plane: the data are seen through the surface of the mesh */
+  ubyte through = sc->overlay && mesh->dim == 3 && !(sc->clip->active & C_ON);
+
+  /* overlay: the iso-surfaces of the other scenes */
+  if (sc->overlay) {
+    if (through) glClear(GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    for (ko = 0; ko < MAX_OVER; ko++)
+      if (sc->olist[ko] && sc->otyp[ko] == 1) glCallList(sc->olist[ko]);
+  }
+
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
 
@@ -378,6 +410,11 @@ static void displayData(pScene sc, pMesh mesh) {
         if (sc->vlist[LHexa]) glCallList(sc->vlist[LHexa]);
       } else if (mesh->ntet + mesh->nhex == 0) {
         if (sc->vlist[LTria]) glCallList(sc->vlist[LTria]);
+      } else if (sc->vlist[LTria]) {
+        /* volume mesh without clipping plane: all the vectors, seen through the surface */
+        glDisable(GL_DEPTH_TEST);
+        glCallList(sc->vlist[LTria]);
+        glEnable(GL_DEPTH_TEST);
       }
     }
   }
@@ -399,8 +436,11 @@ static void displayData(pScene sc, pMesh mesh) {
     glDisable(GL_COLOR_MATERIAL);
   }
 
-  /* iso-surfaces */
+  /* iso-surfaces: without clipping plane, seen through the surface of the mesh (they are inside,
+     and the surface is opaque with the colors m) */
   if (sc->isotyp & S_ISOSURF) {
+    if (mesh->dim == 3 && !(sc->clip->active & C_ON)) glClear(GL_DEPTH_BUFFER_BIT);
+
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -410,6 +450,19 @@ static void displayData(pScene sc, pMesh mesh) {
 
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
+  }
+
+  /* overlay: the vectors and the iso-lines of the other scenes */
+  if (sc->overlay) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (mesh->dim == 3) glDisable(GL_DEPTH_TEST);
+
+    for (ko = 0; ko < MAX_OVER; ko++)
+      if (sc->olist[ko] && sc->otyp[ko] == 0) glCallList(sc->olist[ko]);
+
+    if (mesh->dim == 3) glEnable(GL_DEPTH_TEST);
+
+    glLineWidth(1.0);
   }
 }
 
@@ -542,13 +595,18 @@ void drawModel(pScene sc) {
       glPointSize(5);
 
     glDisable(GL_COLOR_MATERIAL);
-    glCallList(sc->glist);
+    if (mesh->dim == 2 && sc->mode & S_ALTITUDE && mesh->nbb && mesh->typage == 2)
+      drawAltBorder(sc, mesh); /* the border on the elevation */
+    else
+      glCallList(sc->glist);
   }
 
   glDisable(GL_CLIP_PLANE0);
   if (clip->active & C_EDIT || sc->item & S_BOX) drawBox(sc, mesh, 0);
 
   if (sc->item & S_AXIS) drawAxis(sc, mesh->dim);
+
+  if (sc->axes) drawAxesTics(sc, mesh);
 
   if ((mesh->dim == 3 || sc->mode & S_ALTITUDE) && sc->item & S_GRID) drawBase(sc, mesh);
 
@@ -658,9 +716,27 @@ void redrawScene( ) {
   pTransform view;
   pPersp p;
 
+  /* the actions of the menus, with the OpenGL context of this window (see menuDefer) */
+  if (menuRun( )) {
+    glutPostRedisplay( );
+    return;
+  }
+
   sc = cv.scene[currentScene( )];
   view = sc->view;
   p = sc->persp;
+
+  /* 1d graph: scalar solution on a mesh of edges along the x axis */
+  if (graph1dMesh(cv.mesh[sc->idmesh])) {
+    glDrawBuffer(GL_BACK_LEFT);
+    glClearColor(sc->par.back[0], sc->par.back[1], sc->par.back[2], sc->par.back[3]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawGraph1d(sc);
+    glutSwapBuffers( );
+    if (saveimg && !(sc->type & S_SCISSOR)) keyFile('H', 0, 0);
+
+    return;
+  }
 
   if (stereoMode == MONO || !hasStereo) {
     glDrawBuffer(GL_BACK_LEFT);
@@ -674,8 +750,10 @@ void redrawScene( ) {
     setupView(sc);
     glMultMatrixf(view->matrix);
     glTranslatef(sc->cx, sc->cy, sc->cz);
+    probeMatrices( );
     drawModel(sc);
     if (sc->type & S_DECO) redrawStatusBar(sc);
+    drawProbe(sc); /* value under the mouse (after the model: the depth of the pixel) */
   } else {
     double ndfl, ratio, top, bottom;
     double left, right, nnear, ffar;
@@ -857,6 +935,7 @@ int createScene(pScene sc, int idmesh) {
   if (!sc->mode) sc->mode = HIDDEN;
 
   sc->item = 0;
+  sc->axes = 1;
   sc->shrink = 1.0;
   sc->slave = sc->master = -1;
   sc->picked = 0;
@@ -939,6 +1018,8 @@ int createScene(pScene sc, int idmesh) {
   }
 
   glutReshapeFunc(reshapeScene);
+  glutPassiveMotionFunc(probeMotion); /* value of the solution under the mouse */
+  glutEntryFunc(probeEntry);
   glutKeyboardFunc(keyScene);
   glutSpecialFunc(special);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -958,6 +1039,12 @@ int createScene(pScene sc, int idmesh) {
   /* color list */
   setupPalette(sc, mesh);
   sc->stream = NULL;
+
+  /* the display of ffglut at the opening (iso lines and border of a 2d function) */
+  ffDefaults(sc, mesh);
+  if (sc->mode & S_MAP) doMapLists(sc, mesh, 1);
+
+  if (sc->isotyp) doIsoLists(sc, mesh, 0);
 
   initGrafix(sc, mesh);
   return (1);

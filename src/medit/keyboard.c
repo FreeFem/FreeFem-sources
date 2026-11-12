@@ -31,6 +31,8 @@ extern "C" {
 extern int refmat, reftype, refitem;
 int *pilmat, ipilmat;
 int refpick = -1;
+int menukey = 0; /* 1: keyScene called by a menu entry (see menuKey in menus.c) */
+int oldkey = 0;  /* 1: the old action of medit for this key (menu entries, see menuOld) */
 GLfloat dazim = 1.0;
 GLfloat delev = 1.0;
 extern void mouseCamera(int button, int state, int x, int y);
@@ -38,34 +40,19 @@ extern void motionCamera(int x, int y);
 extern GLboolean picking;
 static void usage( ) {
   fprintf(stdout, "\n");
-  fprintf(stdout, "-- Medit: OnLine Help --\n");
-
-  fprintf(stdout, "** Rendering options (toggle):\n");
-  fprintf(stdout, "f - facets        l - lines          g - const. entities\n");
-  fprintf(stdout, "c - obj. color    e - material       b - back color\n");
-  fprintf(stdout, "A - axis          B - box            G - grid\n");
-  fprintf(stdout, "C - capping       r(R) - hide (show) refs.\n");
-  fprintf(stdout, "n - smooth/flat shading\n");
-
-  fprintf(stdout, "\n** Controls options:\n");
-  fprintf(stdout, "i - reset view    a - animate        I - interactive\n");
-  fprintf(stdout, "h - online help   q - quit           X - close window\n");
-
-  fprintf(stdout, "\n** View controls (ALT + key):\n");
-  fprintf(stdout, "c - copy   d - duplicate p - paste  l - link   u - unlink\n");
-  fprintf(stdout, "J - toggle flight        y - change axis\n");
-
-  fprintf(stdout, "\n** Misc. features\n");
-  fprintf(stdout, "L - load prefs    W - save prefs\n");
-  fprintf(stdout, "H - hardcopy PPM\n");
-  fprintf(stdout, "F - face nums     P - point nums     # - select entity\n");
-  fprintf(stdout, "N - normals       O - oppos. normals ! - select plane\n");
-  fprintf(stdout, "m - data          o - iso-lines      w - tensor/vector\n");
-  fprintf(stdout, "v - streamlines   k - toggle elev.   K - elev. coeff.\n");
-  fprintf(stdout, "j - toggle deco   p - palette        S - play animation\n");
-
-  fprintf(stdout, "+/- scale object  z/Z scale view\n");
-  fprintf(stdout, "F1,F2,F3 - clipping: On/Off, Edit, Freeze\n");
+  fprintf(stdout, "-- Medit: OnLine Help (the keys of ffglut) --\n");
+  fprintf(stdout, "Enter - next plot (FreeFEM)  p - previous plot   Esc - quit   ? - help\n");
+  fprintf(stdout, "f - fill (solution in colors)   o - iso lines   n/N - fewer/more iso lines\n");
+  fprintf(stdout, "m - mesh        B - border      l - lighting    L - facets / wire\n");
+  fprintf(stdout, "v - palette     P - value under the mouse       j - graduated axes\n");
+  fprintf(stdout, "3 - 2d elevation   h/H - lower/higher elevation   k - complex part\n");
+  fprintf(stdout, "s - iso-surfaces (3d)   V - arrows   a/A - shorter/longer arrows\n");
+  fprintf(stdout, "e/E - exploded view (shrink)   T - normals   U - overlay of the windows\n");
+  fprintf(stdout, "F1 clip plane  F2 edit it (mouse)  F3 freeze it on the object  F4 vclip\n");
+  fprintf(stdout, "= - reset view   z/Z - zoom   +/- scale object   arrows - translate\n");
+  fprintf(stdout, "w - hardcopy PPM   b - back color   G - grid   r - refresh\n");
+  fprintf(stdout, "1d graph: k lines/points  G grid  F bold  x y log  z Z zoom  A axes  i auto\n");
+  fprintf(stdout, "the other actions of medit: right button (menus)\n");
 }
 
 /* special keys CAMERA mode */
@@ -251,6 +238,9 @@ void special(int key, int x, int y) {
 
   view = sc->view;
   mesh = cv.mesh[sc->idmesh];
+  /* 1d graph: the arrows translate the graph */
+  if (graph1dMesh(mesh) && graphSpecial(sc, key)) return;
+
   clip = sc->clip;
   cube = sc->cube;
   keyact = glutGetModifiers( );
@@ -357,6 +347,200 @@ void special(int key, int x, int y) {
   if (post) glutPostRedisplay( );
 }
 
+/* complex solution (key k): real part, imaginary part, modulus, argument */
+static void cplxKey(pScene sc, pMesh mesh) {
+  extern int cplxpart;
+  extern const char *cplxname[4];
+  char title[512];
+  double delta;
+  int j;
+
+  cplxpart = (cplxpart + 1) % 4;
+  cplxSet(mesh);
+  delta = mesh->bbmax - mesh->bbmin;
+  for (j = 0; j < MAXISO; j++) sc->iso.val[j] = mesh->bbmin + j * delta / (MAXISO - 1);
+
+  setupPalette(sc, mesh);
+  resetLists(sc, mesh);
+  doLists(sc, mesh);
+  sc->glist = geomList(sc, mesh);
+  if (sc->mode & (S_MAP | S_ALTITUDE)) doMapLists(sc, mesh, 1);
+
+  if (sc->isotyp) doIsoLists(sc, mesh, 1);
+
+  fprintf(stdout, "  complex solution: %s\n", cplxname[cplxpart]);
+  snprintf(title, sizeof(title), "Medit - [%s, %s]", mesh->name, cplxname[cplxpart]);
+  glutSetWindowTitle(title);
+}
+
+/* the display at the opening, as plot(u) in ffglut: for a 2d function the colored iso lines and
+   the border of the domain (no mesh, no filling), for a 3d function the colors on the surface of
+   the domain (no mesh), for a vector field the arrows */
+void ffDefaults(pScene sc, pMesh mesh) {
+  if (!mesh->nbb || graph1dMesh(mesh)) return;
+
+  sc->isotyp &= ~(S_ISOLINE | S_VECTOR | S_ISOSURF);
+  if (mesh->dim == 2) {
+    sc->mode = S_FILL; /* the interior in the color of the background: no edge of the mesh */
+    sc->item |= S_GEOM; /* the border of the domain */
+    if (mesh->nfield == 1 && mesh->typage == 2)
+      sc->isotyp |= S_ISOLINE;
+    else if (mesh->nfield == mesh->dim)
+      sc->isotyp |= S_VECTOR;
+  } else if (mesh->ntet + mesh->nhex > 0) {
+    if (mesh->nfield == 1) {
+      sc->mode = S_FILL + S_MAP; /* the solution in colors on the surface, no mesh */
+    } else if (mesh->nfield == mesh->dim) {
+      sc->mode = HIDDEN; /* the mesh of the surface, the arrows inside */
+      sc->isotyp |= S_VECTOR;
+    }
+  }
+}
+
+/* the keys of ffglut (same letter, same action): 1 if the key is used */
+static int ffKey(pScene sc, pMesh mesh, unsigned char key) {
+  extern int probeon;
+  extern GLfloat altcoef;
+  extern int isoncol;
+  int i;
+
+  switch (key) {
+    case 'f': /* fill: the solution in colors (the iso lines stay) */
+      if (!mesh->nbb) return (1);
+
+      sc->mode |= S_FILL;
+      keyMetric('m', 0, 0);
+      /* the iso lines: dark on the colors, in color without them */
+      for (i = 0; i < MAX_LIST; i++) {
+        if (sc->ilist[i]) glDeleteLists(sc->ilist[i], 1);
+
+        sc->ilist[i] = 0;
+      }
+
+      if (sc->isotyp) doIsoLists(sc, mesh, 0);
+
+      return (1);
+    case 'm': /* the mesh */
+      sc->mode ^= S_BDRY;
+      break;
+    case 'B': /* the border of the domain */
+      if (sc->glist) sc->item ^= S_GEOM;
+
+      break;
+    case 'o': /* iso lines */
+      if (mesh->nbb) keyMetric('l', 0, 0);
+
+      return (1);
+    case 'n': /* fewer or more iso lines */
+    case 'N':
+      isoncol = key == 'n' ? max(1, isoncol - 1) : min(20, isoncol + 1);
+      for (i = 0; i < MAX_LIST; i++) {
+        if (sc->ilist[i]) glDeleteLists(sc->ilist[i], 1);
+
+        sc->ilist[i] = 0;
+      }
+
+      if (sc->isotyp) doIsoLists(sc, mesh, 0);
+
+      break;
+    case 's': /* 3d: iso-surfaces */
+      if (mesh->nbb && mesh->ntet + mesh->nhex > 0 && mesh->nfield == 1) keyMetric('s', 0, 0);
+
+      return (1);
+    case 'v': /* the values of the colors (palette) */
+      if (mesh->nbb) keyMetric('p', 0, 0);
+
+      return (1);
+    case 'P': /* the value under the mouse */
+      probeon = !probeon;
+      break;
+    case 'j': /* graduated axes */
+      sc->axes = !sc->axes;
+      break;
+    case '3': /* 2d: elevation (3d view of the 2d function) */
+      if (mesh->dim == 2 && mesh->nbb) keyMetric('k', 0, 0);
+
+      return (1);
+    case 'h': /* height of the elevation */
+    case 'H':
+      if (!(sc->mode & S_ALTITUDE)) return (1);
+
+      altcoef *= key == 'H' ? 1.2 : 1.0 / 1.2;
+      doMapLists(sc, mesh, 1);
+      if (sc->isotyp) doIsoLists(sc, mesh, 1);
+
+      break;
+    case 'k': /* complex solution: real part, imaginary part, modulus, argument */
+      if (mesh->cplx) cplxKey(sc, mesh);
+
+      break;
+    case 'l': /* lighting */
+      sc->mode ^= S_COLOR;
+      break;
+    case 'e': /* exploded view: the elements smaller */
+    case 'E':
+      if (key == 'e')
+        sc->shrink = sc->shrink > 0.99 ? 0.95 : max(0.1, sc->shrink - 0.05);
+      else if (sc->shrink < 0.99)
+        sc->shrink = sc->shrink + 0.05 > 0.96 ? 1.0 : sc->shrink + 0.05;
+
+      doLists(sc, mesh);
+      if (sc->mode & S_MAP) doMapLists(sc, mesh, 1);
+
+      break;
+    case '=': /* reset the view */
+      keyView('R', 0, 0);
+      return (1);
+    case 'w': /* hardcopy (PPM) */
+    case 'W':
+      keyFile('H', 0, 0);
+      return (1);
+    case 'r': /* refresh */
+      break;
+    case 'T': /* the normals */
+      if (mesh->nvn) keyItem('N', 0, 0);
+
+      return (1);
+    case 'V': /* the arrows of a vector field (no key in ffglut: the arrows are always drawn) */
+      if (mesh->nbb) keyMetric('w', 0, 0);
+
+      return (1);
+    case 'L': /* faces filled or not (no key in ffglut) */
+      sc->mode ^= S_FILL;
+      break;
+    /* the old keys of medit which are other keys of ffglut: nothing */
+    case 'c':
+    case 'g':
+    case 'i':
+    case 'I':
+    case 'q':
+    case 'Q':
+    case 'R':
+    case 'C':
+    case 't':
+    case '.':
+    case 'x':
+    case 'X':
+    case 'y':
+    case 'Y':
+    case 'F':
+    case 'O':
+    case '<':
+    case '>':
+    case ',':
+    case '[':
+    case ']':
+    case '*':
+    case '2':
+      return (1);
+    default:
+      return (0);
+  }
+
+  glutPostRedisplay( );
+  return (1);
+}
+
 void keyScene(unsigned char key, int x, int y) {
   pMaterial pm;
   pTetra ptt;
@@ -374,10 +558,15 @@ void keyScene(unsigned char key, int x, int y) {
 
   if (idw < 0) exit(0);
 
-  /* ESC = end medit */
-  if (key == 'q' || key == 27)
+#ifndef WIN32
+  /* server mode: n (or return) = next plot, p = previous plot */
+  if (srvKey(key)) return;
+#endif
+
+  /* ESC = end medit, ? = help (q and h are other keys of ffglut) */
+  if (key == 27)
     exit(0);
-  else if (key == 'h' || key == '?')
+  else if (key == '?')
     usage( );
 
   /* default */
@@ -387,7 +576,23 @@ void keyScene(unsigned char key, int x, int y) {
   cube = sc->cube;
   p = sc->persp;
 
-  keyact = glutGetModifiers( );
+  /* 1d graph: its own keys */
+  if (graph1dMesh(mesh) && graphKey(sc, key)) return;
+
+  if (key == 'U') {
+    /* overlay: the data of the other scenes (same mesh) in this scene */
+    sc->overlay = !sc->overlay;
+    doOverlay(sc);
+    glutPostRedisplay( );
+    return;
+  }
+
+  /* the same keys as ffglut (not for the old actions of medit asked by a menu entry) */
+  if (!oldkey && ffKey(sc, mesh, key)) return;
+
+  /* a key sent by a menu entry (see menuKey): no modifier, glutGetModifiers is only valid
+     in the keyboard and mouse callbacks */
+  keyact = menukey ? 0 : glutGetModifiers( );
   if (key == ' ') {
     if (option == MORPHING) {
       morphMesh(sc, mesh);
@@ -404,8 +609,9 @@ void keyScene(unsigned char key, int x, int y) {
     post = TRUE;
   } else if (islower(key)) {
     switch (key) {
-      case 'a': /* toggle animate */
-        keyAnim('A', 0, 0);
+      case 'a': /* shorter arrows (as in ffglut; the animation is in the menu) */
+        vecLength(sc, mesh, 1.0 / 1.2);
+        post = TRUE;
         break;
       case 'b': /* backcolor */
         keyColor('b', 0, 0);
@@ -524,7 +730,9 @@ void keyScene(unsigned char key, int x, int y) {
         dolist = TRUE;
         post = TRUE;
         break;
-      case 't': /* toggle texture */
+      case 't': /* iso-surfaces (3d scalar solution) */
+        if (mesh->nbb && mesh->ntet + mesh->nhex > 0 && mesh->nfield == 1) keyMetric('s', 0, 0);
+
         break;
       case 'u':
         if (keyact & GLUT_ACTIVE_ALT) keyView('U', 0, 0);
@@ -612,8 +820,9 @@ void keyScene(unsigned char key, int x, int y) {
     }
   } else if (isupper(key)) {
     switch (key) {
-      case 'A': /* toggle axis */
-        keyItem('A', 0, 0);
+      case 'A': /* longer arrows (as in ffglut; the axis are in the menu) */
+        vecLength(sc, mesh, 1.2);
+        post = TRUE;
         break;
       case 'B': /* toggle box */
         keyItem('B', 0, 0);
@@ -683,7 +892,8 @@ void keyScene(unsigned char key, int x, int y) {
       case 'P': /* toggle point nums */
         keyItem('P', 0, 0);
         break;
-      case 'Q':
+      case 'Q': /* palette (p is the previous plot with FreeFEM) */
+        keyMetric('p', 0, 0);
         break;
       case 'R':
         if (ipilmat < 1) return;
@@ -697,6 +907,10 @@ void keyScene(unsigned char key, int x, int y) {
         break;
       case 'S': /* softcopy */
         keyAnim('S', 0, 0);
+        break;
+      case 'T': /* graduated axes x, y (and z) with the values */
+        sc->axes = !sc->axes;
+        post = TRUE;
         break;
       case 'V': /* change center of scene */
         if (!refitem) return;
@@ -784,6 +998,14 @@ void keyScene(unsigned char key, int x, int y) {
     }
   } else {
     switch (key) {
+      case '.': /* value of the solution under the mouse */
+      {
+        extern int probeon;
+
+        probeon = !probeon;
+        post = TRUE;
+        break;
+      }
       case '-':
         if (keyact & GLUT_ACTIVE_ALT) {
           keyAnim('p', 0, 0);

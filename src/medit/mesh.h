@@ -103,6 +103,7 @@ typedef struct mesh {
   int ne, nt, nq, ntet, nhex;
   int np, nc, nr, na, nre, nri;
   int nvn, ntg, dim, ver, nbb, typage, nfield;
+  int cplx; /* complex solution of FreeFEM: m[0] real part, m[1] imaginary part (key c) */
   uShort mark;
   char name[256], typ;
   pPoint point;

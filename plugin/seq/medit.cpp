@@ -936,10 +936,34 @@ AnyType datasolMesh3_Op< v_fes >::operator( )(Stack stack) const {
 //
 // *************************
 
+// wait = 0 or 1 if the parameter wait= is given (-1 otherwise): ffmedit shows all the plots
+// in the same window, and with wait=1 the script continues when the user asks for the next plot
+// gextra = other options of the 1d graph (ex. bb)
 static char *meditcmd(long filebin, int nbsol, int smedit, const string &meditff,
-                      const string &ffnn) {
+                      const string &ffnn, int wait = -1, const string &gextra = "") {
   string meditcmm = meditff;
   int ddebug = 0;
+
+  if (wait >= 0) meditcmm += wait ? " -wait 1" : " -wait 0";
+
+  // options of the 1d graph of ffmedit, after a | in the names of the solutions:
+  //   medit("u w | title=... | xlabel=... | ylabel=... | legend=a,b | logy", ThL, u, w);
+  string names = ffnn, gopt;
+  size_t ibar = ffnn.find('|');
+  if (ibar != string::npos) {
+    names = ffnn.substr(0, ibar);
+    gopt = ffnn.substr(ibar + 1);
+  }
+  gopt += gextra;
+  if (gopt.size( )) {
+    meditcmm += " -graph '";
+    for (size_t i = 0; i < gopt.size( ); i++)
+      if (gopt[i] == '\'')
+        meditcmm += "'\\''";
+      else
+        meditcmm += gopt[i];
+    meditcmm += "'";
+  }
 
   if (ddebug) {
     meditcmm += ' ';
@@ -964,8 +988,8 @@ static char *meditcmd(long filebin, int nbsol, int smedit, const string &meditff
 
   meditcmm += ' ';
 
-  KN< char > ret1(ffnn.size( ) + 1);
-  strcpy(ret1, ffnn.c_str( ));
+  KN< char > ret1(names.size( ) + 1);
+  strcpy(ret1, names.c_str( ));
 
   int nbstrings = 1;
   char *tictac;
@@ -1038,6 +1062,90 @@ void writetabsol(const int &tsize, const int &nbofsol, const KN< double > &v1,
   }
 }
 
+// complex solution of medit: sent to ffmedit as the vector (real part, imaginary part), and
+// "complex=mask" in the options (-graph): ffmedit shows the real part, the imaginary part,
+// the modulus or the argument (key c)
+class MeditComplexPart : public E_F0mps {
+ public:
+  Expression e;
+  int part;    // 0 real part, 1 imaginary part
+  MeditComplexPart(Expression ee, int p) : e(ee), part(p) {}
+  AnyType operator( )(Stack stack) const {
+    Complex c = GetAny< Complex >((*e)(stack));
+    return SetAny< double >(part ? c.imag( ) : c.real( ));
+  }
+  operator aType( ) const { return atype< double >( ); }
+};
+
+// the options of the complex solutions for ffmedit: "|complex=0101" (1 = solution i is complex)
+static string meditComplexOpt(const vector< char > &cplx, size_t nbsol) {
+  string m;
+  bool any = false;
+  for (size_t i = 1; i <= nbsol && i < cplx.size( ); i++) {
+    m += cplx[i] ? '1' : '0';
+    any = any || cplx[i];
+  }
+  return any ? "|complex=" + m : string( );
+}
+
+// order= not given: a vector field (solution s) constant on each element (P0) is sent at the
+// elements (order 0), so ffmedit draws one arrow at the barycenter of each element and not one
+// arrow at each vertex; the other solutions keep their order (nvk = vertices of an element)
+//  the values are taken inside the element (near the vertices): the plugin works on a copy of the
+//  mesh, so at a vertex FreeFEM looks for the element by the position, and takes any element
+template< class RdHat, class MMesh, class LL >
+static bool meditSolP0(const MMesh &Th, const LL &l, size_t offset, const int *numTht, int s,
+                       int nvk, Stack stack) {
+  MeshPoint *mp(MeshPointStack(stack));
+  RdHat c = RdHat::diag(1. / nvk);
+
+  for (int it = 0; it < Th.nt; it++) {
+    size_t j = s + 1 + offset * numTht[it];
+    double v0[6];
+    const typename MMesh::Element &K(Th[it]);
+
+    for (int iv = 0; iv < nvk; iv++) {
+      RdHat Ph = c + (RdHat::KHat[iv] - c) * 0.8;
+      mp->set(Th, K(Ph), Ph, K, K.lab);
+      for (int ic = 0; ic < l[j].nbfloat && ic < 6; ic++) {
+        double x = l[j].eval(ic, stack);
+        if (iv == 0)
+          v0[ic] = x;
+        else if (fabs(x - v0[ic]) > 1e-10 * (1. + fabs(v0[ic])))
+          return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// parameter bb=[[xmin,ymin],[xmax,ymax]] of medit: the bound of the axis of the 1d graph of ffmedit
+struct MeditBB {
+  Expression e[4];
+  MeditBB( ) { e[0] = e[1] = e[2] = e[3] = 0; }
+  void init(Expression bb) {
+    if (!bb) return;
+    const E_Array *a = dynamic_cast< const E_Array * >(bb);
+    if (!a || a->size( ) != 2) CompileError("medit: bb=[[xmin,ymin],[xmax,ymax]]");
+    for (int i = 0; i < 2; i++) {
+      const E_Array *ai = dynamic_cast< const E_Array * >((*a)[i].LeftValue( ));
+      if (!ai || ai->size( ) != 2) CompileError("medit: bb=[[xmin,ymin],[xmax,ymax]]");
+      e[2 * i] = to< double >((*ai)[0]);
+      e[2 * i + 1] = to< double >((*ai)[1]);
+    }
+  }
+  // the option of the graph: " | bb=xmin,ymin,xmax,ymax"
+  string eval(Stack stack) const {
+    if (!e[0]) return "";
+    char buf[256];
+    snprintf(buf, sizeof(buf), " | bb=%.17g,%.17g,%.17g,%.17g", GetAny< double >((*e[0])(stack)),
+             GetAny< double >((*e[1])(stack)), GetAny< double >((*e[2])(stack)),
+             GetAny< double >((*e[3])(stack)));
+    return buf;
+  }
+};
+
 class PopenMeditMesh_Op : public E_F0mps {
  public:
   typedef long Result;
@@ -1073,9 +1181,11 @@ class PopenMeditMesh_Op : public E_F0mps {
   };
   vector< Expression2 > l;
 
-  static const int n_name_param = 5;
+  static const int n_name_param = 6;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
+  MeditBB bb;
+  vector< char > cplx;    // cplx[jj]: the solution jj is complex
   long arg(int i, Stack stack, long a) const {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
@@ -1092,6 +1202,7 @@ class PopenMeditMesh_Op : public E_F0mps {
     char *tictac;
 
     args.SetNameParam(n_name_param, name_param, nargs);
+    bb.init(nargs[5]);
 
     if (BCastTo< string * >(args[0])) {
       filename = CastTo< string * >(args[0]);
@@ -1133,6 +1244,15 @@ class PopenMeditMesh_Op : public E_F0mps {
         l[jj].what = 0;
         l[jj].nbfloat = 0;
         l[jj][0] = CastTo< pmesh >(args[i]);
+      } else if (BCastTo< Complex >(args[i])) {
+        // complex solution: the vector (real part, imaginary part, 0)
+        if (cplx.size( ) < l.size( )) cplx.resize(l.size( ), 0);
+        Expression ec = to< Complex >(args[i]);
+        cplx[jj] = 1;
+        l[jj].what = 2;
+        l[jj].nbfloat = ddim;
+        l[jj][0] = new MeditComplexPart(ec, 0);
+        l[jj][1] = new MeditComplexPart(ec, 1);
       } else {
         CompileError("medit in 2D: Sorry no way to save this kind of data");
       }
@@ -1198,7 +1318,8 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[] = {{"order", &typeid(l
                                                              {"meditff", &typeid(string *)},
                                                              {"save", &typeid(string *)},
                                                              {"wait", &typeid(bool)},
-                                                             {"bin", &typeid(long)}};
+                                                             {"bin", &typeid(long)},
+                                                             {"bb", &typeid(E_Array)}};
 AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
   if (NoGraphicWindow) {
     return Nothing;
@@ -1223,7 +1344,9 @@ AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
   string *meditff(arg(1, stack, &stringffmedit));
   long filebin(arg(4, stack, 1));
   int smedit = max(1, nbsol);
-  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname);
+  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname,
+                               nargs[3] ? (int)GetAny< bool >((*nargs[3])(stack)) : -1,
+                               bb.eval(stack) + meditComplexOpt(cplx, nbsol));
   printf("version de medit %s\n", commandline);
 
   // lecture des differents maillages
@@ -1294,6 +1417,19 @@ AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
   Mesh *pTh = new Mesh(nv, nt, nbe, v, t, b);
   Mesh &Th = *pTh;
 
+  // a P0 vector field without order=: sent at the elements (order 0), so ffmedit draws one arrow
+  // at the barycenter of each element; the other solutions keep their order
+  long order0 = order;
+  vector< char > solp0(max(nbsol, 1), 0);
+  bool anyp0 = false;
+  if (!nargs[0] && !nargs[2])
+    for (int s = 0; s < nbsol; s++)
+      if (l[s + 1].what == 2 && meditSolP0< R2 >(Th, l, offset, numTht, s, 3, stack)) {
+        solp0[s] = 1;
+        anyp0 = true;
+        if (verbosity > 1) cout << "medit: the solution " << s + 1 << " is P0: order=0" << endl;
+      }
+
   // determination of the number of elements to represent the solution
   int datasize;
   if (order == 0) {
@@ -1303,6 +1439,8 @@ AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
   if (order == 1) {
     datasize = nv;
   }
+
+  if (anyp0) datasize = max(nt, nv);    // the arrays for all the solutions
 
   // cas de sauvegarde
   bool boolsave = false;
@@ -1341,6 +1479,11 @@ AnyType PopenMeditMesh_Op::operator( )(Stack stack) const {
   int jojo1;
 
   for (int jojo = 0; jojo < smedit; jojo++) {
+    if (anyp0) {    // the order of this solution
+      order = solp0[jojo] ? 0 : order0;
+      datasize = order == 0 ? nt : nv;
+    }
+
     if (filebin) {
       int cod = 1;
       int KwdCod;
@@ -1815,9 +1958,11 @@ class PopenMeditMesh3_Op : public E_F0mps {
   };
   vector< Expression2 > l;
 
-  static const int n_name_param = 5;
+  static const int n_name_param = 6;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
+  MeditBB bb;
+  vector< char > cplx;    // cplx[jj]: the solution jj is complex
   long arg(int i, Stack stack, long a) const {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
@@ -1833,6 +1978,7 @@ class PopenMeditMesh3_Op : public E_F0mps {
     int stsize = 6;
 
     args.SetNameParam(n_name_param, name_param, nargs);
+    bb.init(nargs[5]);
 
     if (BCastTo< string * >(args[0])) {
       filename = CastTo< string * >(args[0]);
@@ -1873,6 +2019,15 @@ class PopenMeditMesh3_Op : public E_F0mps {
         l[jj].what = 0;
         l[jj].nbfloat = 0;
         l[jj][0] = CastTo< pmesh3 >(args[i]);
+      } else if (BCastTo< Complex >(args[i])) {
+        // complex solution: the vector (real part, imaginary part, 0)
+        if (cplx.size( ) < l.size( )) cplx.resize(l.size( ), 0);
+        Expression ec = to< Complex >(args[i]);
+        cplx[jj] = 1;
+        l[jj].what = 2;
+        l[jj].nbfloat = ddim;
+        l[jj][0] = new MeditComplexPart(ec, 0);
+        l[jj][1] = new MeditComplexPart(ec, 1);
       } else {
         CompileError("medit 3d: Sorry no way to save this kind of data");
       }
@@ -1917,7 +2072,8 @@ basicAC_F0::name_and_type PopenMeditMesh3_Op< v_fes >::name_param[] = {
   {"meditff", &typeid(string *)},
   {"save", &typeid(string *)},
   {"wait", &typeid(bool)},
-  {"bin", &typeid(long)}};
+  {"bin", &typeid(long)},
+  {"bb", &typeid(E_Array)}};
 
 template< class v_fes >
 AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
@@ -1946,7 +2102,9 @@ AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
   string *meditff(arg(1, stack, &stringffmedit));
   long filebin(arg(4, stack, 1L));
   int smedit = max(1, nbsol);
-  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname);
+  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname,
+                               nargs[3] ? (int)GetAny< bool >((*nargs[3])(stack)) : -1,
+                               bb.eval(stack) + meditComplexOpt(cplx, nbsol));
 
   printf("version de medit %s\n", commandline);
   if (verbosity > 2) {
@@ -2033,6 +2191,19 @@ AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
   Mesh3 *pTh = new Mesh3(nv, nt, nbe, v, t, b);
   Mesh3 &Th = *pTh;
 
+  // a P0 vector field without order=: sent at the elements (order 0), so ffmedit draws one arrow
+  // at the barycenter of each element; the other solutions keep their order
+  long order0 = order;
+  vector< char > solp0(max(nbsol, 1), 0);
+  bool anyp0 = false;
+  if (!nargs[0] && !nargs[2])
+    for (int s = 0; s < nbsol; s++)
+      if (l[s + 1].what == 2 && meditSolP0< R3 >(Th, l, offset, numTht, s, 4, stack)) {
+        solp0[s] = 1;
+        anyp0 = true;
+        if (verbosity > 1) cout << "medit: the solution " << s + 1 << " is P0: order=0" << endl;
+      }
+
   // determination of the number of elements to represent the solution
   int datasize;
   if (order == 0) {
@@ -2042,6 +2213,8 @@ AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
   if (order == 1) {
     datasize = nv;
   }
+
+  if (anyp0) datasize = max(nt, nv);    // the arrays for all the solutions
 
   // cas de sauvegarde
   bool boolsave = false;
@@ -2082,6 +2255,11 @@ AnyType PopenMeditMesh3_Op< v_fes >::operator( )(Stack stack) const {
   int jojo1;
 
   for (int jojo = 0; jojo < smedit; jojo++) {
+    if (anyp0) {    // the order of this solution
+      order = solp0[jojo] ? 0 : order0;
+      datasize = order == 0 ? nt : nv;
+    }
+
     if (filebin) {
       int cod = 1;
       int KwdCod;
@@ -2585,9 +2763,11 @@ class PopenMeditMeshT_Op : public E_F0mps {
   };
   vector< Expression2 > l;
 
-  static const int n_name_param = 5;
+  static const int n_name_param = 6;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
+  MeditBB bb;
+  vector< char > cplx;    // cplx[jj]: the solution jj is complex
   long arg(int i, Stack stack, long a) const {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
@@ -2603,6 +2783,7 @@ class PopenMeditMeshT_Op : public E_F0mps {
     int stsize = 3;
 
     args.SetNameParam(n_name_param, name_param, nargs);
+    bb.init(nargs[5]);
 
     if (BCastTo< string * >(args[0])) {
       filename = CastTo< string * >(args[0]);
@@ -2643,6 +2824,15 @@ class PopenMeditMeshT_Op : public E_F0mps {
         l[jj].what = 0;
         l[jj].nbfloat = 0;
         l[jj][0] = CastTo< ppmesh >(args[i]);
+      } else if (BCastTo< Complex >(args[i])) {
+        // complex solution: the vector (real part, imaginary part, 0)
+        if (cplx.size( ) < l.size( )) cplx.resize(l.size( ), 0);
+        Expression ec = to< Complex >(args[i]);
+        cplx[jj] = 1;
+        l[jj].what = 2;
+        l[jj].nbfloat = ddim;
+        l[jj][0] = new MeditComplexPart(ec, 0);
+        l[jj][1] = new MeditComplexPart(ec, 1);
       } else {
         CompileError("medit 3d: Sorry no way to save this kind of data");
       }
@@ -2687,14 +2877,16 @@ basicAC_F0::name_and_type PopenMeditMeshT_Op< MeshS, v_fesS >::name_param[] = {
   {"meditff", &typeid(string *)},
   {"save", &typeid(string *)},
   {"wait", &typeid(bool)},
-  {"bin", &typeid(long)}};
+  {"bin", &typeid(long)},
+  {"bb", &typeid(E_Array)}};
 template<>
 basicAC_F0::name_and_type PopenMeditMeshT_Op< MeshL, v_fesL >::name_param[] = {
   {"order", &typeid(long)},
   {"meditff", &typeid(string *)},
   {"save", &typeid(string *)},
   {"wait", &typeid(bool)},
-  {"bin", &typeid(long)}};
+  {"bin", &typeid(long)},
+  {"bb", &typeid(E_Array)}};
 
 template< class MMesh, class v_fes >
 AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
@@ -2729,7 +2921,9 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
   string *meditff(arg(1, stack, &stringffmedit));
   long filebin(arg(4, stack, 1L));
   int smedit = max(1, nbsol);
-  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname);
+  char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname,
+                               nargs[3] ? (int)GetAny< bool >((*nargs[3])(stack)) : -1,
+                               bb.eval(stack) + meditComplexOpt(cplx, nbsol));
   printf("version de medit %s\n", commandline);
   if (verbosity > 2) cout << "number of solution = " << offset - 1 << endl;
 
@@ -2798,11 +2992,26 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
   MMesh *pTh = new MMesh(nv, nt, nbe, v, t, b);
   MMesh &Th = *pTh;
 
+  // a P0 vector field without order=: sent at the elements (order 0), so ffmedit draws one arrow
+  // at the barycenter of each element; the other solutions keep their order
+  long order0 = order;
+  vector< char > solp0(max(nbsol, 1), 0);
+  bool anyp0 = false;
+  if (!nargs[0] && !nargs[2])
+    for (int s = 0; s < nbsol; s++)
+      if (l[s + 1].what == 2 && meditSolP0< TRdHat >(Th, l, offset, numTht, s, T::nv, stack)) {
+        solp0[s] = 1;
+        anyp0 = true;
+        if (verbosity > 1) cout << "medit: the solution " << s + 1 << " is P0: order=0" << endl;
+      }
+
   // determination of the number of elements to represent the solution
   int datasize;
   if (order == 0) datasize = nt;
 
   if (order == 1) datasize = nv;
+
+  if (anyp0) datasize = max(nt, nv);    // the arrays for all the solutions
 
   // cas de sauvegarde
   bool boolsave = false;
@@ -2839,6 +3048,11 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
   // mesh
   int jojo1;
   for (int jojo = 0; jojo < smedit; jojo++) {
+    if (anyp0) {    // the order of this solution
+      order = solp0[jojo] ? 0 : order0;
+      datasize = order == 0 ? nt : nv;
+    }
+
     if (filebin) {
       int cod = 1;
       int KwdCod;

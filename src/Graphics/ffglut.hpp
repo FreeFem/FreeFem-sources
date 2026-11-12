@@ -18,6 +18,59 @@ void hsvToRgb (float h, float s, float v, float & r, float & g, float & b);
 class ThePlot;
 class OneWindow;
 
+//  a grid of buckets to find quickly the element which contains a point (value under the mouse)
+struct FFGrid {
+    R3 a,h;
+    int n[3];
+    vector<int> head,nxt,elem;
+    bool built;
+    FFGrid() : a(0.,0.,0.), h(1.,1.,1.), built(false) { n[0]=n[1]=n[2]=1;}
+    int cell(int i,int j,int k) const { return (k*n[1]+j)*n[0]+i;}
+    void ijk(const R3 & P,int c[3]) const
+    {
+        R p[3]={(P.x-a.x)/h.x,(P.y-a.y)/h.y,(P.z-a.z)/h.z};
+        for(int d=0;d<3;++d) c[d]=max(0,min(n[d]-1,(int) floor(p[d])));
+    }
+    void build(const vector<R3> & bmn,const vector<R3> & bmx)
+    { //  the element e is in all the cells of its bounding box [bmn[e],bmx[e]]
+        built=true;
+        int ne=bmn.size();
+        if(!ne) return;
+        R3 pmn=bmn[0],pmx=bmx[0];
+        for(int e=1;e<ne;++e) { pmn=Minc(pmn,bmn[e]); pmx=Maxc(pmx,bmx[e]);}
+        R D[3]={pmx.x-pmn.x,pmx.y-pmn.y,pmx.z-pmn.z};
+        R Dm=max(D[0],max(D[1],D[2]));
+        int dim=0;
+        R vol=1;
+        for(int d=0;d<3;++d) if(D[d]>1e-9*Dm) dim++, vol*=D[d];
+        R side = dim ? pow(vol/max(1.,ne/2.),1./dim) : 1.;
+        R hh[3];
+        for(int d=0;d<3;++d)
+        {
+            n[d] = (D[d]>1e-9*Dm) ? max(1,min(2000,(int) ceil(D[d]/side))) : 1;
+            hh[d] = (D[d]>1e-9*Dm) ? D[d]/n[d] : 1.;
+        }
+        a=pmn;
+        h=R3(hh[0],hh[1],hh[2]);
+        head.assign(n[0]*n[1]*n[2],-1);
+        for(int e=0;e<ne;++e)
+        {
+            int c0[3],c1[3];
+            ijk(bmn[e],c0);
+            ijk(bmx[e],c1);
+            for(int k=c0[2];k<=c1[2];++k)
+                for(int j=c0[1];j<=c1[1];++j)
+                    for(int i=c0[0];i<=c1[0];++i)
+                    {
+                        int c=cell(i,j,k);
+                        elem.push_back(e);
+                        nxt.push_back(head[c]);
+                        head[c]=elem.size()-1;
+                    }
+        }
+    }
+};
+
 struct OnePlot
 {
     int dim;
@@ -29,8 +82,14 @@ struct OnePlot
     GLint gllists;
     KN<int> oklist;
     int setgllists;
+    int num; // number of the curve in the 1d graph (color)
+    // true if the plot can be drawn in a 1d graph a la gnuplot, and add the bound of the graph
+    //  lx, ly: log scale in x, y (then the bound are the log10 of the positive values)
+    virtual bool Graph1d(R2 & Pmn,R2 & Pmx,bool lx=false,bool ly=false) const {return false;}
     virtual void Draw(OneWindow *win) =0;
     virtual bool NextCase() {return false;}
+    //  the value of the function at the point P (under the mouse): ncomp = 1 (val) or 2, 3 (vec, val = norm)
+    virtual bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp) {return false;}
     void bb(R3 & Pmn,R3 &Pmx) const
     {
         Pmn=Minc(Pmin,Pmn);
@@ -54,7 +113,7 @@ struct OnePlot
     Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
     fmin(dinfty),fmax(-dinfty),vmax2(0),
     what(w),ngllists(nbgllist),gllists(0),
-    oklist(nbgllist),setgllists(0){
+    oklist(nbgllist),setgllists(0),num(0){
     }
     
     void initlist()
@@ -97,8 +156,13 @@ struct OnePlotMesh : public OnePlot
 struct OnePlotMesh3 : public OnePlot
 {
     const Mesh3 *Th;
+    //  cut plane: the section of the elements
+    bool cutok;
+    R3 lastcutN;
+    R lastcutc;
+    void DrawSection(ThePlot & plot,R3 N,R c);
     OnePlotMesh3(const Mesh3 *T)
-    : OnePlot(0,3,3),Th(T)
+    : OnePlot(0,3,3),Th(T),cutok(false),lastcutc(0)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -145,6 +209,13 @@ struct OnePlotFE: public OnePlot
     int cas; // in cas of complex  chaage interpertation of complex value
     OnePlotFE(const Mesh *T,long w,PlotStream & f);
     void Draw(OneWindow *win);
+    void DrawPretty(OneWindow *win,bool elev);
+    FFGrid grid;
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);
+    //  pretty rendering: the values of the iso lines (keys n, N), marks on the color bar
+    vector<R> isovals;
+    bool showisovals;
+    void DrawMeshOnSurface(ThePlot & plot,bool border);
     void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
     bool  vc2v();
     bool  NextCase() { cas++; return vc2v();}
@@ -160,8 +231,48 @@ struct OnePlotFE3: public OnePlot
     KN<int> Ksub;
     int cas; // in cas of complex  chaage interpertation of complex value
     
+    // the boundary faces of the mesh ( 4*k+e : face e of the tet k) to plot the function on the boundary
+    vector<int> bfaces;
+    vector<int> bedges;// the sharp edges of the boundary (2 vertices by edge), to see the shape of the domain
+    //  pretty rendering: the gradient of the function at the vertices (normal of the isosurfaces)
+    vector<R3> gradv;
+    void ComputeGradV();
+    void DrawBoundaryPretty(OneWindow *win,bool plotmesh);
+    void DrawBoundaryMesh();
+    FFGrid grid;
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);
+    bool ProbeRay(const R3 & A,const R3 & B,OneWindow *win,R3 & P,R & val);
+    bool bfacesok;
+    bool bconstant;// the function is (nearly) constant on the boundary => isosurfaces by default
+    R bval;// the value on the boundary if bconstant
+    //  pretty rendering: the values of the isosurfaces (marks on the color bar), shown or not
+    vector<R> isovals;
+    bool showisovals;
+    //  p0: the function is constant on each element => one color by element (no iso line, no isosurface),
+    //  and the isosurfaces are replaced by the elements with a value greater than a threshold
+    bool p0;
+    R lastthreshold;
+    //  exploded view of a P0 function: the elements with the same value are moved away from the center
+    //  (each element if there are too many values), expdir = the direction of the move of each element
+    vector<R3> expdir;
+    R lastexplode;
+    void BuildExplode();
+    void DrawThreshold(OneWindow *win,R thr,bool plotmesh,R explode);
+    void BoundaryConstant();
+    void DrawBoundaryEdges(ThePlot & plot);
+    //  cut plane (N,P) = c : the function on the section of the mesh
+    int lastcutaxis,lastcutmode;
+    R lastcutpos;
+    R3 lastcutN;
+    void DrawSection(OneWindow *win,R3 N,R c,bool plotmesh,R thr);
+    int lastmode;// to rebuild the graphic list if the kind of plot change
+    void BuildBoundaryFaces();
+    void DrawBoundary(OneWindow *win,bool plotmesh);
+    void DrawIsoSurfaces(OneWindow *win);
+    void DrawArrows(OneWindow *win);
+
     OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
-    :OnePlot(w,3,5),Th(T),cas(2)
+    :OnePlot(w,3,5),Th(T),cas(2),bfacesok(false),bconstant(false),bval(0),showisovals(false),p0(false),lastthreshold(0),lastexplode(0),lastmode(-1),lastcutaxis(0),lastcutmode(-1),lastcutpos(-1)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -194,6 +305,8 @@ struct OnePlotFES: public OnePlot
     KN<int> Ksub;
     int cas; // in cas of complex  chaage interpertation of complex value
     
+    FFGrid grid;
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);
     OnePlotFES(const MeshS *T,long w,PlotStream & f)
     :OnePlot(w,3,5),Th(T),cas(2)
     {
@@ -246,6 +359,8 @@ struct OnePlotFEL: public OnePlot
         
     }
     void Draw(OneWindow *win);
+    void DrawGraph(OneWindow *win);
+    bool Graph1d(R2 & Pmn,R2 & Pmx,bool lx=false,bool ly=false) const;
     bool  vc2v();
     bool  NextCase() { cas++; return vc2v();}
 };
@@ -253,6 +368,7 @@ struct OnePlotFEL: public OnePlot
 struct OnePlotCurve: public OnePlot {
     KN<double> xx,yy,zz,cc;
     int cas;
+    bool Graph1d(R2 & Pmn,R2 & Pmx,bool lx=false,bool ly=false) const;
     OnePlotCurve(PlotStream & f,int nfield=2,ThePlot *theplot=0);
     void Draw(OneWindow *win);
     void  dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const;
@@ -395,6 +511,17 @@ public:
     bool blockwin, plotNormalT, changePlotdim;
     R theta, phi, dcoef, focal;
     int datadim;
+    // 1d graph a la gnuplot (true if the plot contains only 2d curves
+    //  or scalar FE functions on a meshL along the x axis)
+    bool graph1d;
+    int nbcurves;
+    bool GraphBound(R2 & Pmn,R2 & Pmx,bool lx=false,bool ly=false) const;
+    //  options of the 1d graph given in the comment (cmm=) of the plot:
+    //    cmm="title | xlabel=... | ylabel=... | legend=name1,name2,... | logx | logy"
+    string gtitle,gxlabel,gylabel;
+    vector<string> glegend;
+    int glogx,glogy;// -1 not given, 1 log scale
+    void GraphOptions();
     // 2D
     long winnum;
     bool NextCase();
@@ -420,6 +547,8 @@ public:
     
     void Draw(OneWindow *win) ;
     void DrawHelp(OneWindow *win) ;
+    void DrawHelpAll(OneWindow *win) ;
+    void PrettyPlots(OneWindow *win,bool & prettyiso,bool & prettyarrow) const;
     
     struct RGB  { float r,g,b;
         void set(int k,int nb,ThePlot *theplot )
@@ -442,6 +571,10 @@ public:
         glColor4f(c.r,c.g,c.b,alpha);
     }
     void  SetColorTable(int nb);
+    //  pretty rendering: the colors of the iso lines in the colormap (cmap >=0), see colorv
+    int cmap;
+    R cmapfmn,cmapfmx;
+    void colorv(int i,R val);
     void SetDefIsoV(int niso=0,int narr=0,R fmn=1.,R fmx=-1.,R vmn=1.,R vmx=-1.);
     void DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
@@ -466,7 +599,9 @@ public:
     R zmin,zmax;
     R hpixel;// taille pixel en coordonne x,y,z
     int xold,yold;
-    bool windowdump,help;
+    bool windowdump,windowdumppng,help;
+    bool helpall;// ? once: the help of the current plot, ? twice: all the keys
+    int showhx;// spacing of the lines of Show (0: default)
     
     GLdouble modelMatrix[16];
     GLdouble projMatrix[16];
@@ -480,6 +615,48 @@ public:
     bool withlight;
     bool changearrow,changeiso;// to rebuild de graphic list if neccessary
     bool keepPV,init,pNormalT,changePlotdim;
+    // 1d graph a la gnuplot
+    bool graphgrid,graphkey;// show the grid, the key
+    //  pretty rendering of the 3d plots (key R): continuous colors (texture of the colormap),
+    //  smooth normals, specular light, gradient background, color bar (key v), colormap (key C)
+    bool pretty,prettybar;
+    int cmapkind;// 0 turbo, 1 viridis, 2 cool to warm, 3 rainbow of FreeFEM, 4 grey
+    GLuint cmaptex;
+    int cmaptexkind;
+    bool Pretty3d() const { return pretty && plotdim==3 && !Graph1d();}
+    bool PrettyOn() const { return pretty && !Graph1d();}// 2d and 3d
+    bool probe;// show the value of the function under the mouse (key P)
+    bool isolines;// pretty rendering 2d with fill: the iso lines on the colors (key o)
+    bool axes;// the axes x, y (and z in 3d) with the tics and the values (key j)
+    void DrawAxes();
+    void DrawAxis(const R3 & A,const R3 & B,R vmin,R vmax,const R2 & C,R gap,const char *name);
+    void DrawProbe();
+    GLuint ColormapTexture();
+    void DrawBackground();
+    void DrawColorBar(R fmn,R fmx,R x0,const char *title,const vector<R> *marks=0);
+    int graphstyle;// 0 lines, 1 lines and points, 2 points
+    bool graphlogx,graphlogy;// log scale
+    int userlogx,userlogy;// log scale asked with the keys x, y (-1: no, so the option of the plot)
+    //  cut plane of the 3d function: cutaxis = 0 no cut, 1,2,3 plane orthogonal to the axis x,y,z at the beginning
+    //  cutN = the normal of the plane (can be rotated)
+    //  cutpos = position of the plane in the bounding box of the mesh (between 0 and 1)
+    int cutaxis;
+    R cutpos;
+    R3 cutN;
+    void RotateCut(R ah,R av);
+    //  the keys of medit: F1 cut plane on/off, F2 edit (the left button rotates the plane),
+    //  F3 freeze (the plane is fixed on the object: the mouse turns the object and the plane)
+    bool cutedit,cutfreeze;
+    R explode;// 3d P0 function: coefficient of the exploded view (0 no)
+    bool SetCutPlane(const R3 & Pmn,const R3 & Pmx,R3 & N,R & c);
+    GLdouble cuteq[4];// the equation of the clip plane (kept side: >= 0), when cutaxis
+    void zoomat(int w,int h,R coef);
+    R threshold;// 3d P0 function: plot the elements with a value > min + threshold*(max-min)
+    bool isosurf;// 3d scalar function: switch between the isosurfaces and the function on the boundary of the mesh
+    int xmouse,ymouse;// mouse position in pixel (to show the coordinates)
+    bool Graph1d() const { return theplot && theplot->graph1d && plotdim==2;}
+    void GraphBox(int &x0,int &y0,int &x1,int &y1) const;// the box of the axis in pixel
+    void DrawGraph();
     //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
     OneWindow(int h,int w,ThePlot *p);
     void DefaultView(int state) ;
