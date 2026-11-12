@@ -474,7 +474,7 @@ void GTypeOfFESum<Mesh>::Build()
     if(verbosity>5)
     cout << npp;
     this->NbPtforInterpolation=npp;
-    this->PtInterpolation.init(npp);
+    this->PtInterpolation.resize(npp);
     for(int i=0;i<kkk;++i)// correction bug ..
       this->PtInterpolation[numPtInterpolation[i]]=Ptt[i];
   }
