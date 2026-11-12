@@ -1,0 +1,286 @@
+// NBPROC 4
+// PARAM -ns
+
+// =====================================================================
+//  Reaffectation d'un Dmesh : le fespace distribue suit sa variable Dmesh
+//
+//  fespace Vh(D, P1) retient la CASE de la variable D, pas le maillage
+//  qu'elle contient a la declaration. Apres D = distribute(...), l'espace
+//  est reconstruit au premier usage (collectif). Une fonction EF garde son
+//  ancien espace ("en retard") jusqu'a sa prochaine affectation : u = u la
+//  transporte sur le nouveau maillage.
+//
+//   T1  Vh.ndofglobal suit la reaffectation de D
+//   T2  u = u : transfert d'une fonction en retard (P1, exact sur x+2y-z)
+//   T3  w = u et Wh w = u avec u en retard, w sur un autre Dmesh
+//   T4  [a1, a2] = [a1, a2] sur [P1, P1]
+//   T5  plot(u) refuse si u est en retard, accepte apres u = u
+//   T6  fespace sur un Dmesh vide, affecte apres la declaration
+//   T7  problem, Mat A = varf(Vh, Vh) et rhs avant / apres reaffectation
+//   T8  reaffectations dans une boucle (-nloop n, defaut 10)
+//   T9  fespace periodique (np = 1 seulement : limitation de distribute)
+//
+//  Options : -nloop <n>  nombre d'iterations de T8
+// =====================================================================
+
+load "PETSc"
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+
+func int argInt(string key, int def) {
+  for (int i = 0; i < ARGV.n - 1; ++i)
+    if (ARGV[i] == key) return atoi(ARGV[i + 1]);
+  return def;
+}
+int nloop = argInt("-nloop", 10);
+
+int ntot = 0, npass = 0;
+
+macro CHK(COMM, TG, LBL, E, TOL) {
+  real chkL = E, chkG = 0;
+  mpiAllReduce(chkL, chkG, COMM, mpiMAX);
+  bool chkOk = (chkG <= TOL);
+  ntot++; if (chkOk) npass++;
+  if (mpiRank(COMM) == 0)
+    cout << "  [" << TG << "] " << LBL << " : ecart = " << chkG
+         << "   => " << (chkOk ? "PASS" : "FAIL") << endl;
+}// EOM
+
+// l'instruction INS passe sur tous les rangs de COMM
+macro PASSES(COMM, TG, LBL, INS) {
+  int pok = 1;
+  try { INS; } catch (...) { pok = 0; }
+  real pe = 1 - pok;
+  CHK(COMM, TG, LBL, pe, 0)
+}// EOM
+
+// l'instruction INS est refusee sur tous les rangs de COMM
+macro REFUSED(COMM, TG, LBL, INS) {
+  int rok = 0;
+  try { INS; } catch (...) { rok = 1; }
+  real re = 1 - rok;
+  CHK(COMM, TG, LBL, re, 0)
+}// EOM
+
+macro DIST(TH) distribute(TH, overlap = 1, partmethod = "metis", keepGlobal = true)// EOM
+
+func fx = x + 2*y - z;     // P1 la represente exactement : transfert exact
+
+mesh3 Th1 = cube(5, 5, 5);
+mesh3 Th2 = cube(10, 10, 10);
+fespace Uh1(Th1, P1);      // references sequentielles
+fespace Uh2(Th2, P1);
+
+Dmesh3 D = DIST(Th1);
+fespace Vh(D, P1);
+
+// ---------------------------------------------------------------------
+//  T1 : le fespace suit la variable Dmesh
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T1 : ndofglobal suit D" << endl;
+  real e1 = abs(Vh.ndofglobal - Uh1.ndof);
+  CHK(mpiCommWorld, "T1", "ndofglobal initial (Th1)    ", e1, 0)
+  D = DIST(Th2);
+  real e2 = abs(Vh.ndofglobal - Uh2.ndof);
+  CHK(mpiCommWorld, "T1", "ndofglobal apres D = Th2    ", e2, 0)
+  D = DIST(Th1);
+  real e3 = abs(Vh.ndofglobal - Uh1.ndof);
+  CHK(mpiCommWorld, "T1", "ndofglobal apres D = Th1    ", e3, 0)
+}
+
+// ---------------------------------------------------------------------
+//  T2 : u = u transporte une fonction en retard
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T2 : u = u" << endl;
+  D = DIST(Th1);
+  Vh u = fx;
+  int nOld = Vh.ndof;
+  D = DIST(Th2);
+  int nNew = Vh.ndof;
+  real eLate = (u[].n == nOld && nOld != nNew) ? 0 : 1;
+  CHK(mpiCommWorld, "T2", "u en retard (ancienne taille)", eLate, 0)
+  u = u;
+  real eSize = abs(u[].n - Vh.ndof);
+  CHK(mpiCommWorld, "T2", "taille apres u = u          ", eSize, 0)
+  Vh ue = fx;
+  ue[] -= u[];
+  real eVal = ue[].linfty;
+  CHK(mpiCommWorld, "T2", "valeurs apres u = u         ", eVal, 1e-10)
+  real eInt = sqrt(int3d(D)(square(u - fx)));
+  CHK(mpiCommWorld, "T2", "int3d(D)((u - fx)^2)^(1/2)  ", eInt, 1e-10)
+  u = u;   // deja a jour : rien ne change
+  ue = fx; ue[] -= u[];
+  real eNop = ue[].linfty;
+  CHK(mpiCommWorld, "T2", "u = u sur une fonction a jour", eNop, 1e-10)
+}
+
+// ---------------------------------------------------------------------
+//  T3 : w = u avec u en retard, w sur un autre Dmesh
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T3 : w = u (source en retard)" << endl;
+  D = DIST(Th1);
+  Vh u = fx;
+  D = DIST(Th2);
+  Dmesh3 D2 = distribute(Th2, overlap = 2, partmethod = "metis", keepGlobal = true);
+  fespace Wh(D2, P1);
+  Wh w = u;                        // initialisation depuis une source en retard
+  Wh we = fx;
+  we[] -= w[];
+  real e1 = we[].linfty;
+  CHK(mpiCommWorld, "T3", "Wh w = u (u en retard)      ", e1, 1e-10)
+  w = 0;
+  w = u;                           // affectation depuis une source en retard
+  we = fx; we[] -= w[];
+  real e2 = we[].linfty;
+  CHK(mpiCommWorld, "T3", "w = u (u en retard)         ", e2, 1e-10)
+  real eSrc = (u[].n == Vh.ndof) ? 1 : 0;   // la source n'a pas bouge
+  CHK(mpiCommWorld, "T3", "u reste en retard           ", eSrc, 0)
+}
+
+// ---------------------------------------------------------------------
+//  T4 : [a1, a2] = [a1, a2] sur [P1, P1]
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T4 : [a1, a2] = [a1, a2]" << endl;
+  D = DIST(Th1);
+  fespace Xh(D, [P1, P1]);
+  Xh [a1, a2] = [fx, 3*z - y];
+  D = DIST(Th2);
+  [a1, a2] = [a1, a2];
+  Xh [b1, b2] = [fx, 3*z - y];
+  real eSize = abs(a1[].n - Xh.ndof);
+  CHK(mpiCommWorld, "T4", "taille apres transfert      ", eSize, 0)
+  b1[] -= a1[];
+  real eVal = b1[].linfty;
+  CHK(mpiCommWorld, "T4", "valeurs apres transfert     ", eVal, 1e-10)
+}
+
+// ---------------------------------------------------------------------
+//  T5 : plot d'une fonction en retard
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T5 : plot" << endl;
+  D = DIST(Th1);
+  Vh p = fx;
+  PASSES(mpiCommWorld, "T5", "plot(u) a jour              ", plot(p, wait = 0))
+  D = DIST(Th2);
+  REFUSED(mpiCommWorld, "T5", "plot(u) en retard           ", plot(p, wait = 0))
+  p = p;
+  PASSES(mpiCommWorld, "T5", "plot(u) apres u = u         ", plot(p, wait = 0))
+}
+
+// ---------------------------------------------------------------------
+//  T6 : fespace sur un Dmesh vide, affecte ensuite
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T6 : Dmesh vide a la declaration" << endl;
+  Dmesh3 E;
+  fespace Eh(E, P1);
+  E = DIST(Th1);
+  real e1 = abs(Eh.ndofglobal - Uh1.ndof);
+  CHK(mpiCommWorld, "T6", "ndofglobal apres E = Th1    ", e1, 0)
+  Eh v = fx;
+  real e2 = sqrt(int3d(E)(square(v - fx)));
+  CHK(mpiCommWorld, "T6", "fonction sur E              ", e2, 1e-10)
+}
+
+// ---------------------------------------------------------------------
+//  T7 : problem, Mat et rhs avant / apres reaffectation
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T7 : resolutions" << endl;
+  Uh1 r1, t1;
+  solve ps1(r1, t1) = int3d(Th1)(grad(r1)' * grad(t1)) - int3d(Th1)(t1) + on(1, 2, 3, 4, 5, 6, r1 = 0);
+  Uh2 r2, t2;
+  solve ps2(r2, t2) = int3d(Th2)(grad(r2)' * grad(t2)) - int3d(Th2)(t2) + on(1, 2, 3, 4, 5, 6, r2 = 0);
+  real n1 = sqrt(int3d(Th1)(square(r1))), n2 = sqrt(int3d(Th2)(square(r2)));
+
+  D = DIST(Th1);
+  Vh s, t;
+  problem pb(s, t, solver = CG, eps = 1e-10)
+    = int3d(D)(grad(s)' * grad(t)) - int3d(D)(t) + on(1, 2, 3, 4, 5, 6, s = 0);
+  varf vPb(s, t) = int3d(D)(grad(s)' * grad(t)) + int3d(D)(t) + on(1, 2, 3, 4, 5, 6, s = 0);
+
+  pb;
+  real e1 = sqrt(int3d(D)(square(s - r1))) / n1;
+  CHK(mpiCommWorld, "T7", "problem sur Th1             ", e1, 1e-7)
+  {
+    Mat A = vPb(Vh, Vh);
+    set(A, sparams = "-ksp_type cg -ksp_rtol 1e-12");
+    Vh b, q;
+    b[] = vPb(0, Vh);
+    q[] = A^-1 * b[];
+    real e = sqrt(int3d(D)(square(q - r1))) / n1;
+    CHK(mpiCommWorld, "T7", "Mat + rhs sur Th1           ", e, 1e-7)
+  }
+
+  D = DIST(Th2);
+  pb;                                    // l'inconnue s etait en retard
+  real e2 = sqrt(int3d(D)(square(s - r2))) / n2;
+  CHK(mpiCommWorld, "T7", "problem apres D = Th2       ", e2, 1e-7)
+  real eS = abs(s[].n - Vh.ndof);
+  CHK(mpiCommWorld, "T7", "s sur le nouvel espace      ", eS, 0)
+  {
+    Mat A = vPb(Vh, Vh);
+    set(A, sparams = "-ksp_type cg -ksp_rtol 1e-12");
+    Vh b, q;
+    b[] = vPb(0, Vh);
+    q[] = A^-1 * b[];
+    real e = sqrt(int3d(D)(square(q - r2))) / n2;
+    CHK(mpiCommWorld, "T7", "Mat + rhs apres D = Th2     ", e, 1e-7)
+  }
+}
+
+// ---------------------------------------------------------------------
+//  T8 : reaffectations dans une boucle
+// ---------------------------------------------------------------------
+{
+  if (mpirank == 0) cout << "===== T8 : " << nloop << " reaffectations" << endl;
+  Vh u = fx;
+  real eMax = 0;
+  for (int i = 0; i < nloop; ++i) {
+    if (i % 2) D = DIST(Th1);
+    else       D = DIST(Th2);
+    int nref = (i % 2) ? Uh1.ndof : Uh2.ndof;
+    real dn = abs(Vh.ndofglobal - nref);
+    eMax = max(eMax, dn);
+    u = u;
+    Vh ue = fx;
+    ue[] -= u[];
+    eMax = max(eMax, ue[].linfty);
+  }
+  CHK(mpiCommWorld, "T8", "ndofglobal et u = u a chaque tour", eMax, 1e-10)
+}
+
+// ---------------------------------------------------------------------
+//  T9 : fespace periodique (np = 1 : distribute ignore la periodicite)
+// ---------------------------------------------------------------------
+if (mpisize == 1) {
+  if (mpirank == 0) cout << "===== T9 : fespace periodique" << endl;
+  int[int] rup = [0, 5], rdown = [0, 6], rmid = [4, 1, 2, 2, 1, 3, 3, 4];
+  mesh Tq1 = square(4, 4, region = 0), Tq2 = square(6, 6, region = 0);
+  mesh3 ThP1 = buildlayers(Tq1, 4, zbound = [0, 1], labelmid = rmid, reffaceup = rup, reffacelow = rdown);
+  mesh3 ThP2 = buildlayers(Tq2, 6, zbound = [0, 1], labelmid = rmid, reffaceup = rup, reffacelow = rdown);
+  macro PERIO() periodic = [[1, y, z], [2, y, z], [3, x, z], [4, x, z], [5, x, y], [6, x, y]]// EOM
+  fespace UP1(ThP1, P1, PERIO);
+  fespace UP2(ThP2, P1, PERIO);
+  Dmesh3 DP = DIST(ThP1);
+  fespace VP(DP, P1, PERIO);
+  real e1 = abs(VP.ndof - UP1.ndof);
+  CHK(mpiCommWorld, "T9", "ndof periodique (ThP1)      ", e1, 0)
+  DP = DIST(ThP2);
+  real e2 = abs(VP.ndof - UP2.ndof);
+  CHK(mpiCommWorld, "T9", "ndof periodique apres DP = ThP2", e2, 0)
+}
+
+// tous les rangs du monde doivent arriver ici
+int arrived = 1, arrivedG = 0;
+mpiAllReduce(arrived, arrivedG, mpiCommWorld, mpiSUM);
+real eArr = mpisize - arrivedG;
+CHK(mpiCommWorld, "W", "tous les rangs au bout      ", eArr, 0)
+
+if (mpirank == 0) cout << "===== " << npass << " / " << ntot << " PASS" << endl;
+assert(npass == ntot);

@@ -150,7 +150,7 @@
 //   Deux Dmesh du meme maillage sur cX, partitions en tranches decalees d'un
 //   rang : les maillages locaux ne se recouvrent pas, le transfert prend le
 //   chemin general (avec echanges), verifie par un temoin.
-//   E7  w = u, u[] agrandi d'un element sur un rang ("outdated source").
+//   E7  w = u, u[] agrandi d'un element sur un rang.
 //   E8  interpolateD(plan, x, y), x agrandi sur un rang ("outdated plan").
 //   E9  interpolateMat(plan, num, M, col), num agrandi sur un rang.
 //   Exige mpisize >= 3 (cX de taille >= 2). A lancer SOUS TIMEOUT, un
