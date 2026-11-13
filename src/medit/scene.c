@@ -68,7 +68,7 @@ void farclip(GLboolean b) {
   sc = cv.scene[idw];
   p = sc->persp;
   c = sc->camera;
-  ratio = (GLfloat)sc->par.xs / sc->par.ys;
+  ratio = (GLfloat)sc->par.xs / max(1, sc->par.ys - cutPanel(sc)); /* the graph of the cut line */
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity( );
@@ -271,7 +271,8 @@ static void displayScene(pScene sc, int mode, int clip) {
     case SIZEMAP + S_MATERIAL:
       if (ddebug) printf("display sizemap\n");
 
-      glEnable(GL_LIGHTING);
+      /* flat 2d: no lighting, the colors of the map stay the same with the mesh (key m) */
+      if (cv.mesh[sc->idmesh]->dim == 3) glEnable(GL_LIGHTING);
       glEnable(GL_COLOR_MATERIAL);
       glEnable(GL_POLYGON_OFFSET_FILL);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -743,6 +744,8 @@ void redrawScene( ) {
     glClearColor(sc->par.back[0], sc->par.back[1], sc->par.back[2], sc->par.back[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /* the model above the panel of the graph of the cut line (key c) */
+    glViewport(0, cutPanel(sc), sc->par.xs, sc->par.ys - cutPanel(sc));
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity( );
     gluLookAt(0., 0., -p->depth, 0., 0., 0., 0.0, 1.0, 0.0);
@@ -754,6 +757,8 @@ void redrawScene( ) {
     drawModel(sc);
     if (sc->type & S_DECO) redrawStatusBar(sc);
     drawProbe(sc); /* value under the mouse (after the model: the depth of the pixel) */
+    drawCut2d(sc); /* the cut line and the 1d graph of the solution along it */
+    glViewport(0, 0, sc->par.xs, sc->par.ys);
   } else {
     double ndfl, ratio, top, bottom;
     double left, right, nnear, ffar;
@@ -936,6 +941,8 @@ int createScene(pScene sc, int idmesh) {
 
   sc->item = 0;
   sc->axes = 1;
+  sc->cut2d = sc->cutdrag = 0;
+  sc->cutpos = 0.5;
   sc->shrink = 1.0;
   sc->slave = sc->master = -1;
   sc->picked = 0;

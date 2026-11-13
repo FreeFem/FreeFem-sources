@@ -150,6 +150,9 @@ void zoomMotion(int x, int y) {
   glutPostRedisplay( );
 }
 
+/* the segment of the cut line (shift + left button, see cutMouse) */
+static void cutMotion(int x, int y) { cutMouse(cv.scene[currentScene( )], 2, x, y); }
+
 void mouse(int button, int state, int x, int y) {
   pScene sc;
   pTransform tr;
@@ -182,7 +185,11 @@ void mouse(int button, int state, int x, int y) {
     lasttime = glutGet(GLUT_ELAPSED_TIME);
 
     if (button == GLUT_LEFT_BUTTON) {
-      if (keyact == GLUT_ACTIVE_SHIFT) {
+      if (keyact == GLUT_ACTIVE_SHIFT && cutMouse(sc, GLUT_DOWN, x, y)) {
+        /* 2d cut line: a segment */
+        glutMotionFunc(cutMotion);
+        return;
+      } else if (keyact == GLUT_ACTIVE_SHIFT) {
         /* entity designation */
         picking = GL_TRUE;
         if (sc->picklist) glDeleteLists(sc->picklist, 1);
@@ -221,6 +228,12 @@ void mouse(int button, int state, int x, int y) {
     point2Vect(x, y, sc->par.xs, sc->par.ys, tr->pos);
     glutSetCursor(GLUT_CURSOR_INFO);
   } else if (state == GLUT_UP) {
+    if (button == GLUT_LEFT_BUTTON && cutMouse(sc, GLUT_UP, x, y)) {
+      glutMotionFunc(motion);
+      tracking = GL_FALSE;
+      return;
+    }
+
     if (button == GLUT_LEFT_BUTTON) {
       if (keyact == GLUT_ACTIVE_CTRL) {
         /* rubberband selection */

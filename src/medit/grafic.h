@@ -234,7 +234,12 @@ typedef struct scene {
   short idwin, idmesh; /* window, mesh id */
   short master, slave;
   ubyte item; /* display items */
-  ubyte axes; /* graduated axes x, y (and z) with the values (key T) */
+  ubyte axes; /* graduated axes x, y (and z) with the values (key j) */
+  /* 2d: cut line (key c, as in ffglut): 0 no, 1 horizontal, 2 vertical, 3 segment cutA cutB
+     (shift + left button); the 1d graph of the solution along the line at the bottom */
+  ubyte cut2d, cutdrag;
+  float cutpos;
+  double cutA[2], cutB[2];
   ubyte mode; /* render mode */
   ubyte type;
   ubyte isotyp;

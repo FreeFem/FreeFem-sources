@@ -107,6 +107,7 @@ static void graphParse( ) {
       }
     } else if (!strncmp(f, "complex=", 8)) {
       ; /* the complex solutions (see cplxMesh) */
+
     } else if (!strncmp(f, "bb=", 3)) {
       double b[4];
 
@@ -1678,9 +1679,10 @@ void drawProbe(pScene sc) {
 
   if (!(mesh->dim == 3 ? mesh->ntet : mesh->nt)) return;
 
+  /* window coordinates (the viewport of the model is above the panel of the cut line) */
   xp = probex;
-  yp = pvp[3] - 1 - probey;
-  if (xp < 0 || yp < 0 || xp >= pvp[2] || yp >= pvp[3]) return;
+  yp = sc->par.ys - 1 - probey;
+  if (xp < pvp[0] || yp < pvp[1] || xp >= pvp[0] + pvp[2] || yp >= pvp[1] + pvp[3]) return;
 
   glReadPixels(xp, yp, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
   gluUnProject(xp, yp, 0.0, pmv, ppj, pvp, &ax, &ay, &az);
@@ -1803,3 +1805,339 @@ void drawProbe(pScene sc) {
 #ifdef __cplusplus
 }
 #endif
+
+/* ---------------------------------------------------------------------------------------
+   2d cut line (key c, as in ffglut): the solution along a horizontal line u(x), a vertical
+   line u(y) or a segment (shift + left button, then drag), plotted y = f(x) in a panel at the
+   bottom of the window; keys < > (or , .) move the line
+   --------------------------------------------------------------------------------------- */
+#define CUT_N 400
+
+static int cutOn(pScene sc) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+
+  return (sc->cut2d && mesh->dim == 2 && mesh->nt && mesh->nbb && !graph1dMesh(mesh));
+}
+
+/* height of the panel of the graph (0 if no cut) */
+int cutPanel(pScene sc) {
+  int h;
+
+  if (!cutOn(sc)) return (0);
+
+  h = (int)(0.3 * sc->par.ys);
+  if (h < 140) h = 140;
+  if (h > sc->par.ys / 2) h = sc->par.ys / 2;
+
+  return (h);
+}
+
+/* the ends of the line (real coordinates) and the name of the abscissa */
+static void cutLine(pScene sc, double *A, double *B, const char **xname) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+
+  if (sc->cut2d == 1) {
+    A[0] = mesh->xmin;
+    B[0] = mesh->xmax;
+    A[1] = B[1] = mesh->ymin + sc->cutpos * (mesh->ymax - mesh->ymin);
+    *xname = "x";
+  } else if (sc->cut2d == 2) {
+    A[0] = B[0] = mesh->xmin + sc->cutpos * (mesh->xmax - mesh->xmin);
+    A[1] = mesh->ymin;
+    B[1] = mesh->ymax;
+    *xname = "y";
+  } else {
+    A[0] = sc->cutA[0];
+    A[1] = sc->cutA[1];
+    B[0] = sc->cutB[0];
+    B[1] = sc->cutB[1];
+    *xname = "s";
+  }
+}
+
+/* keys of the cut line: 1 if the key is used */
+int cutKey(pScene sc, unsigned char key) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+
+  if (mesh->dim != 2 || !mesh->nbb || graph1dMesh(mesh)) return (0);
+
+  switch (key) {
+    case 'c': /* horizontal, vertical, no cut */
+      sc->cut2d = sc->cut2d == 1 ? 2 : (sc->cut2d == 2 ? 0 : 1);
+      sc->cutdrag = 0;
+      break;
+    case '<':
+    case ',':
+    case '>':
+    case '.':
+      if (sc->cut2d != 1 && sc->cut2d != 2) return (1);
+
+      sc->cutpos += (key == '<' || key == ',') ? -0.02 : 0.02;
+      if (sc->cutpos < 0.0) sc->cutpos = 0.0;
+      if (sc->cutpos > 1.0) sc->cutpos = 1.0;
+      break;
+    default:
+      return (0);
+  }
+
+  farclip(GL_TRUE); /* the aspect ratio of the model changes with the panel */
+  glutPostRedisplay( );
+  return (1);
+}
+
+/* the point of the plane z = 0 under the mouse (real coordinates) */
+static int cutPoint(pScene sc, int x, int y, double *P) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+  GLdouble ax, ay, az, bx, by, bz, t;
+  double yw = sc->par.ys - 1 - y;
+
+  if (yw < pvp[1]) return (0); /* in the panel */
+
+  gluUnProject(x, yw, 0.0, pmv, ppj, pvp, &ax, &ay, &az);
+  gluUnProject(x, yw, 1.0, pmv, ppj, pvp, &bx, &by, &bz);
+  if (fabs(bz - az) < 1e-30) return (0);
+
+  t = -az / (bz - az);
+  P[0] = ax + t * (bx - ax) + mesh->xtra;
+  P[1] = ay + t * (by - ay) + mesh->ytra;
+  return (1);
+}
+
+/* shift + left button: a segment (state GLUT_DOWN, GLUT_UP, or 2 = motion); 1 if used */
+int cutMouse(pScene sc, int state, int x, int y) {
+  double P[2];
+
+  if (state == GLUT_DOWN) {
+    if (!cutOn(sc) || !cutPoint(sc, x, y, P)) return (0);
+
+    sc->cutA[0] = sc->cutB[0] = P[0];
+    sc->cutA[1] = sc->cutB[1] = P[1];
+    sc->cutdrag = 1;
+    return (1);
+  }
+
+  if (!sc->cutdrag) return (0);
+
+  if (cutPoint(sc, x, y, P)) {
+    sc->cutB[0] = P[0];
+    sc->cutB[1] = P[1];
+  }
+
+  if (state == GLUT_UP) {
+    sc->cutdrag = 0;
+    /* a click without drag: nothing */
+    if (hypot(sc->cutB[0] - sc->cutA[0], sc->cutB[1] - sc->cutA[1]) > 0.0) sc->cut2d = 3;
+  }
+
+  glutPostRedisplay( );
+  return (1);
+}
+
+void drawCut2d(pScene sc) {
+  pMesh mesh = cv.mesh[sc->idmesh];
+  extern GLfloat altcoef;
+  static double s[CUT_N + 1], v[CUT_N + 1];
+  static ubyte in[CUT_N + 1];
+  double A[2], B[2], len, vmin = 1e300, vmax = -1e300, smin, smax, tics[64], minors[256];
+  double x0, x1, y0, y1, cx, cy, P[3], vec[3], fg[3];
+  char lab[64][24], buf[128];
+  const char *xname;
+  int i, j, n, nminor, H = cutPanel(sc), nin = 0, elev = sc->mode & S_ALTITUDE, line;
+
+  if (!H) return;
+
+  cutLine(sc, A, B, &xname);
+  len = hypot(B[0] - A[0], B[1] - A[1]);
+  line = sc->cut2d != 3 || len > 0.0;
+  for (i = 0; i < 3; i++) fg[i] = 1.0 - sc->par.back[i];
+
+  /* the values along the line (display coordinates: the mesh is centered on 0) */
+  for (i = 0; i <= CUT_N && line; i++) {
+    double t = (double)i / CUT_N;
+
+    P[0] = A[0] + t * (B[0] - A[0]) - mesh->xtra;
+    P[1] = A[1] + t * (B[1] - A[1]) - mesh->ytra;
+    P[2] = 0.0;
+    s[i] = sc->cut2d == 1 ? A[0] + t * (B[0] - A[0])
+                          : (sc->cut2d == 2 ? A[1] + t * (B[1] - A[1]) : t * len);
+    in[i] = probeValue(mesh, P, &v[i], vec) > 0;
+    if (in[i]) {
+      vmin = min(vmin, v[i]);
+      vmax = max(vmax, v[i]);
+      nin++;
+    }
+  }
+
+  /* the line on the model (on the surface with the elevation) */
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glLineWidth(2.0);
+  glColor3f(1.0, 0.1, 0.1);
+  if (line && sc->cut2d == 3 && sc->cutdrag) {
+    glBegin(GL_LINES);
+    glVertex3d(A[0] - mesh->xtra, A[1] - mesh->ytra, 0.0);
+    glVertex3d(B[0] - mesh->xtra, B[1] - mesh->ytra, 0.0);
+    glEnd( );
+  } else if (line) {
+    glBegin(GL_LINE_STRIP);
+    for (i = 0; i <= CUT_N; i++) {
+      double t = (double)i / CUT_N;
+
+      if (!in[i]) {
+        glEnd( );
+        glBegin(GL_LINE_STRIP);
+        continue;
+      }
+
+      glVertex3d(A[0] + t * (B[0] - A[0]) - mesh->xtra, A[1] + t * (B[1] - A[1]) - mesh->ytra,
+                 elev ? altcoef * v[i] - 0.25 * mesh->ztra : 0.0);
+    }
+
+    glEnd( );
+  }
+
+  glLineWidth(1.0);
+
+  /* the panel at the bottom of the window */
+  glViewport(0, 0, sc->par.xs, H);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix( );
+  glLoadIdentity( );
+  gluOrtho2D(0., sc->par.xs, 0., H);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix( );
+  glLoadIdentity( );
+
+  x0 = 70.0;
+  x1 = sc->par.xs - 20.0;
+  y0 = 36.0;
+  y1 = H - 24.0;
+
+  /* separation with the model */
+  glColor3f(0.5 * fg[0] + 0.5 * sc->par.back[0], 0.5 * fg[1] + 0.5 * sc->par.back[1],
+            0.5 * fg[2] + 0.5 * sc->par.back[2]);
+  glBegin(GL_LINES);
+  glVertex2d(0.0, H - 0.5);
+  glVertex2d(sc->par.xs, H - 0.5);
+  glEnd( );
+
+  glColor3dv(fg);
+  if (sc->cut2d == 1)
+    snprintf(buf, sizeof(buf), "cut y = %.4g :  u(x)", A[1]);
+  else if (sc->cut2d == 2)
+    snprintf(buf, sizeof(buf), "cut x = %.4g :  u(y)", A[0]);
+  else
+    snprintf(buf, sizeof(buf), "cut (%.4g, %.4g) - (%.4g, %.4g) :  u(s), s = length", A[0], A[1],
+             B[0], B[1]);
+
+  graphText(0.5 * (x0 + x1), H - 16.0, buf, 1);
+
+  if (!line || x1 - x0 < 40.0 || y1 - y0 < 20.0) goto done;
+
+  /* the scale: constant values (or outside the domain) -> the range of the solution */
+  smin = s[0];
+  smax = s[CUT_N];
+  if (smax < smin) {
+    double tmp = smin;
+
+    smin = smax;
+    smax = tmp;
+  }
+
+  /* constant along the line (up to the round-off) compared with the range of the solution */
+  if (!nin || !(vmax - vmin > 1e-6 * max(mesh->bbmax - mesh->bbmin, 1e-12 * max(fabs(vmin), fabs(vmax))))) {
+    if (mesh->bbmax > mesh->bbmin && (!nin || (vmin >= mesh->bbmin && vmin <= mesh->bbmax))) {
+      vmin = mesh->bbmin;
+      vmax = mesh->bbmax;
+    } else {
+      double c = nin ? vmin : 0.0, d = max(1.0, fabs(c));
+
+      vmin = c - 0.5 * d;
+      vmax = c + 0.5 * d;
+    }
+  } else {
+    double d = 0.05 * (vmax - vmin);
+
+    vmin -= d;
+    vmax += d;
+  }
+
+  if (!(smax > smin)) smax = smin + 1.0;
+
+  cx = (x1 - x0) / (smax - smin);
+  cy = (y1 - y0) / (vmax - vmin);
+
+  /* frame, tics and grid */
+  glColor3dv(fg);
+  glBegin(GL_LINE_LOOP);
+  glVertex2d(x0, y0);
+  glVertex2d(x1, y0);
+  glVertex2d(x1, y1);
+  glVertex2d(x0, y1);
+  glEnd( );
+
+  n = graphTics(smin, smax, (int)((x1 - x0) / 80.0), 0, tics, lab, minors, &nminor);
+  for (j = 0; j < n; j++) {
+    double xt = x0 + (tics[j] - smin) * cx;
+
+    glColor3d(0.75 * sc->par.back[0] + 0.25 * fg[0], 0.75 * sc->par.back[1] + 0.25 * fg[1],
+              0.75 * sc->par.back[2] + 0.25 * fg[2]);
+    glBegin(GL_LINES);
+    glVertex2d(xt, y0);
+    glVertex2d(xt, y1);
+    glEnd( );
+    glColor3dv(fg);
+    glBegin(GL_LINES);
+    glVertex2d(xt, y0);
+    glVertex2d(xt, y0 + 5.0);
+    glEnd( );
+    graphText(xt, y0 - 15.0, lab[j], 1);
+  }
+
+  graphText(x1, y0 - 30.0 < 2.0 ? 2.0 : y0 - 30.0, xname, 2);
+
+  n = graphTics(vmin, vmax, (int)((y1 - y0) / 30.0), 0, tics, lab, minors, &nminor);
+  for (j = 0; j < n; j++) {
+    double yt = y0 + (tics[j] - vmin) * cy;
+
+    glColor3d(0.75 * sc->par.back[0] + 0.25 * fg[0], 0.75 * sc->par.back[1] + 0.25 * fg[1],
+              0.75 * sc->par.back[2] + 0.25 * fg[2]);
+    glBegin(GL_LINES);
+    glVertex2d(x0, yt);
+    glVertex2d(x1, yt);
+    glEnd( );
+    glColor3dv(fg);
+    glBegin(GL_LINES);
+    glVertex2d(x0, yt);
+    glVertex2d(x0 + 5.0, yt);
+    glEnd( );
+    graphText(x0 - 6.0, yt - 4.0, lab[j], 2);
+  }
+
+  /* the curve, broken outside the domain */
+  glEnable(GL_SCISSOR_TEST);
+  glScissor((int)x0, (int)y0, (int)(x1 - x0) + 1, (int)(y1 - y0) + 1);
+  glLineWidth(2.0);
+  glColor3f(1.0, 0.1, 0.1);
+  glBegin(GL_LINE_STRIP);
+  for (i = 0; i <= CUT_N; i++) {
+    if (!in[i]) {
+      glEnd( );
+      glBegin(GL_LINE_STRIP);
+      continue;
+    }
+
+    glVertex2d(x0 + (s[i] - smin) * cx, y0 + (v[i] - vmin) * cy);
+  }
+
+  glEnd( );
+  glLineWidth(1.0);
+  glDisable(GL_SCISSOR_TEST);
+
+done:
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix( );
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix( );
+  glEnable(GL_DEPTH_TEST);
+}

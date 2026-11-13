@@ -46,6 +46,7 @@ static void usage( ) {
   fprintf(stdout, "m - mesh        B - border      l - lighting    L - facets / wire\n");
   fprintf(stdout, "v - palette     P - value under the mouse       j - graduated axes\n");
   fprintf(stdout, "3 - 2d elevation   h/H - lower/higher elevation   k - complex part\n");
+  fprintf(stdout, "c - 2d cut line u(x) / u(y) / none   < > (or , .) move it   shift+drag: segment\n");
   fprintf(stdout, "s - iso-surfaces (3d)   V - arrows   a/A - shorter/longer arrows\n");
   fprintf(stdout, "e/E - exploded view (shrink)   T - normals   U - overlay of the windows\n");
   fprintf(stdout, "F1 clip plane  F2 edit it (mouse)  F3 freeze it on the object  F4 vclip\n");
@@ -509,7 +510,13 @@ static int ffKey(pScene sc, pMesh mesh, unsigned char key) {
       sc->mode ^= S_FILL;
       break;
     /* the old keys of medit which are other keys of ffglut: nothing */
-    case 'c':
+    case 'c': /* 2d: cut line, the 1d graph of the solution along the line (see cutKey) */
+    case '<':
+    case '>':
+    case ',':
+    case '.':
+      cutKey(sc, key);
+      return (1);
     case 'g':
     case 'i':
     case 'I':
@@ -518,16 +525,12 @@ static int ffKey(pScene sc, pMesh mesh, unsigned char key) {
     case 'R':
     case 'C':
     case 't':
-    case '.':
     case 'x':
     case 'X':
     case 'y':
     case 'Y':
     case 'F':
     case 'O':
-    case '<':
-    case '>':
-    case ',':
     case '[':
     case ']':
     case '*':

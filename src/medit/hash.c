@@ -126,7 +126,7 @@ int hashTetra(pMesh mesh) {
     maxs = max(maxs, pt->v[i3]);
 
     /* accross link */
-    ll = -link[l];
+    ll = link[l] == INT_MIN ? INT_MIN : -link[l]; /* -INT_MIN: overflow (undefined) */
     pp = 0;
     link[l] = 0;
     hvoy[l] = 0;
@@ -159,7 +159,7 @@ int hashTetra(pMesh mesh) {
       }
 
       pp = ll;
-      ll = -link[ll];
+      ll = link[ll] == INT_MIN ? INT_MIN : -link[ll];
     }
   }
 
@@ -260,7 +260,7 @@ int hashHexa(pMesh mesh) {
     opps = ph->v[ch[i][i1]];
 
     /* accross link */
-    ll = -link[l];
+    ll = link[l] == INT_MIN ? INT_MIN : -link[l]; /* -INT_MIN: overflow (undefined) */
     pp = 0;
     link[l] = 0;
     hvoy[l] = 0;
@@ -294,7 +294,7 @@ int hashHexa(pMesh mesh) {
       }
 
       pp = ll;
-      ll = -link[ll];
+      ll = link[ll] == INT_MIN ? INT_MIN : -link[ll];
     }
   }
 
@@ -379,7 +379,7 @@ int hashTria(pMesh mesh) {
     maxs = max(pt->v[i1], pt->v[i2]);
 
     /* accross link */
-    ll = -link[l];
+    ll = link[l] == INT_MIN ? INT_MIN : -link[l]; /* -INT_MIN: overflow (undefined) */
     pp = 0;
     link[l] = 0;
     hvoy[l] = 0;
@@ -405,7 +405,7 @@ int hashTria(pMesh mesh) {
       }
 
       pp = ll;
-      ll = -link[ll];
+      ll = link[ll] == INT_MIN ? INT_MIN : -link[ll];
     }
   }
 

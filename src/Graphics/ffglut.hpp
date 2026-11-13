@@ -641,6 +641,17 @@ public:
     //  cutN = the normal of the plane (can be rotated)
     //  cutpos = position of the plane in the bounding box of the mesh (between 0 and 1)
     int cutaxis;
+    //  2d: cut line of the function (key c): 0 no, 1 horizontal (u(x) at y = const), 2 vertical,
+    //  3 segment cutA cutB (shift + left button); the 1d graph of the function along the line in a
+    //  panel at the bottom of the window
+    int cut2d;
+    R2 cutA,cutB;
+    bool cutdrag;
+    bool Cut2d() const { return cut2d && plotdim==2 && !Graph1d();}
+    int Cut2dPanel() const;// height (pixel) of the panel of the graph, 0 without cut line
+    bool Cut2dLine(R2 & A,R2 & B) const;
+    R2 ScreenToWorld2(int x,int y) const;
+    void DrawCut2d();
     R cutpos;
     R3 cutN;
     void RotateCut(R ah,R av);

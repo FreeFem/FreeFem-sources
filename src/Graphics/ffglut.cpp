@@ -3963,7 +3963,7 @@ height(h),width(w),theplot(0),hpixel(1),
 Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
 windowdump(false),windowdumppng(false),help(false),helpall(false),showhx(0), rapz0(-1.),rapz(1),withlight(false),
 changearrow(true),changeiso(true), keepPV(false),init(false),
-graphgrid(false),graphkey(true),graphstyle(0),graphlogx(false),graphlogy(false),pretty(true),probe(true),isolines(true),axes(true),prettybar(true),cmapkind(0),cmaptex(0),cmaptexkind(-1),userlogx(-1),userlogy(-1),explode(0),cutaxis(0),cutpos(0.5),cutN(1.,0.,0.),cutedit(false),cutfreeze(false),threshold(0.5),isosurf(false),xmouse(-1),ymouse(-1)
+graphgrid(false),graphkey(true),graphstyle(0),graphlogx(false),graphlogy(false),pretty(true),probe(true),isolines(true),axes(true),prettybar(true),cmapkind(0),cmaptex(0),cmaptexkind(-1),userlogx(-1),userlogy(-1),explode(0),cutaxis(0),cut2d(0),cutA(0.,0.),cutB(1.,0.),cutdrag(false),cutpos(0.5),cutN(1.,0.,0.),cutedit(false),cutfreeze(false),threshold(0.5),isosurf(false),xmouse(-1),ymouse(-1)
 {
 
     add(p);
@@ -4250,6 +4250,7 @@ void  OneWindow::SetView()
             ml = min(70.*s + (pi && pa ? 120.*s : 0.),0.3*width);// the bar of the arrows is on the left
             mb = min(50.*s,0.3*height);
         }
+        mb += Cut2dPanel();// the graph of the cut line
         if(mr+ml+mb>0)
         { //  the box Bmin, Bmax in the window without the margins (same scale in x and y if aspectratio)
             R wi=width-ml-mr, hi=height-mb;
@@ -4559,6 +4560,7 @@ void OneWindow::DrawColorBar(R fmn,R fmx,R x0,const char *title,const vector<R> 
     ColormapTexture();
     SetScreenView();
     R x1=x0+18*s, y0=0.22*height, y1=0.78*height;
+    if(Cut2dPanel()) y0=max(y0,(R)Cut2dPanel()+60.*s);// above the graph of the cut line
     glDisable(GL_LIGHTING);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     glEnable(GL_TEXTURE_1D);
@@ -4697,6 +4699,153 @@ void OneWindow::DrawAxis(const R3 & A,const R3 & B,R vmin,R vmax,const R2 & C,R 
     R half=0.5*(fabs(o.x)*GraphTextWidth(name)+fabs(o.y)*fh);
     R2 N = M + o*(gap+9*s+ext+6*s+half);
     AxisText(N.x,N.y-fh/2.,name,1);
+}
+
+int OneWindow::Cut2dPanel() const
+{ //  height of the panel of the 1d graph of the cut line (bottom of the window)
+    if(!Cut2d()) return 0;
+    return (int) min(0.36*height,280.*GraphScale());
+}
+
+bool OneWindow::Cut2dLine(R2 & A,R2 & B) const
+{ //  the cut line in the domain: horizontal or vertical at cutpos in the box, or the segment
+    if(!theplot) return false;
+    R3 P0=theplot->Pmin, P1=theplot->Pmax;
+    if(cut2d==1)
+    {
+        R y=P0.y+cutpos*(P1.y-P0.y);
+        A=R2(P0.x,y); B=R2(P1.x,y);
+    }
+    else if(cut2d==2)
+    {
+        R x=P0.x+cutpos*(P1.x-P0.x);
+        A=R2(x,P0.y); B=R2(x,P1.y);
+    }
+    else { A=cutA; B=cutB;}
+    return R2(A,B).norme() > 0;
+}
+
+R2 OneWindow::ScreenToWorld2(int x,int y) const
+{ //  2d view: the point of the domain under the pixel x, y (y from the top of the window)
+    GLdouble wx,wy,wz;
+    gluUnProject(x,height-1-y,0.5,modelMatrix,projMatrix,viewport,&wx,&wy,&wz);
+    return R2(wx,wy);
+}
+
+void OneWindow::DrawCut2d()
+{ //  2d: the cut line on the plot and the 1d graph of the function along it, below the plot
+    R2 A,B;
+    if(!theplot || !Cut2dLine(A,B)) return;
+    int s=GraphScale(), fh=GraphFontHeight();
+    //  the values along the line (the first function of the plot)
+    const int n=400;
+    vector<R> ts,vs;
+    for(int i=0;i<=n;++i)
+    {
+        R2 P=A+(B-A)*((R)i/n);
+        R val=0; R3 vec; int nc=0;
+        for (list<OnePlot *>::iterator it= theplot->plots.begin();it != theplot->plots.end() && !nc; ++it)
+        {
+            OnePlotFE<Mesh2> *f2=dynamic_cast<OnePlotFE<Mesh2> *>(*it);
+            OnePlotFE<Mesh> *f1=dynamic_cast<OnePlotFE<Mesh> *>(*it);
+            if(f2 && !f2->Probe(R3(P.x,P.y,0.),val,vec,nc)) nc=0;
+            if(f1 && !f1->Probe(R3(P.x,P.y,0.),val,vec,nc)) nc=0;
+        }
+        if(!nc) continue;// outside the domain
+        //  abscissa: x (horizontal line), y (vertical line), the length along the segment
+        ts.push_back(cut2d==1 ? P.x : (cut2d==2 ? P.y : R2(A,P).norme()));
+        vs.push_back(val);
+    }
+    //  the line on the plot (in pixel: no depth clipping)
+    GLdouble x,y,z;
+    gluProject(A.x,A.y,0.,modelMatrix,projMatrix,viewport,&x,&y,&z);
+    R2 SA(x,y);
+    gluProject(B.x,B.y,0.,modelMatrix,projMatrix,viewport,&x,&y,&z);
+    R2 SB(x,y);
+    SetScreenView();
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_CLIP_PLANE0);
+    glColor3d(0.,0.,0.);
+    glLineWidth(2*s);
+    glBegin(GL_LINES);
+    glVertex2d(SA.x,SA.y); glVertex2d(SB.x,SB.y);
+    glEnd();
+    glPointSize(6*s);
+    glBegin(GL_POINTS);
+    glVertex2d(SA.x,SA.y); glVertex2d(SB.x,SB.y);
+    glEnd();
+    //  the panel of the graph
+    int H=Cut2dPanel();
+    R x0=75*s, x1=width-30*s, y0=40*s, y1=H-30*s;
+    bool pi=false,pa=false;
+    if(PrettyOn() && prettybar) theplot->PrettyPlots(this,pi,pa);
+    if(pi || pa) x1=width-135*s;// the color bar
+    if(x1-x0<40 || y1-y0<30) return;
+    glColor3d(1.,1.,1.);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    glBegin(GL_QUADS);
+    glVertex2d(x0,y0); glVertex2d(x1,y0); glVertex2d(x1,y1); glVertex2d(x0,y1);
+    glEnd();
+    glColor3d(0.,0.,0.);
+    glLineWidth(s);
+    glBegin(GL_LINE_LOOP);
+    glVertex2d(x0,y0); glVertex2d(x1,y0); glVertex2d(x1,y1); glVertex2d(x0,y1);
+    glEnd();
+    char buf[128];
+    if(cut2d==1) snprintf(buf,sizeof(buf),"cut y = %.4g  (c: next, <) >): move, shift + left button: segment)",A.y);
+    else if(cut2d==2) snprintf(buf,sizeof(buf),"cut x = %.4g  (c: next, <) >): move, shift + left button: segment)",A.x);
+    else snprintf(buf,sizeof(buf),"cut from (%.4g, %.4g) to (%.4g, %.4g)",A.x,A.y,B.x,B.y);
+    GraphText(x0,y1+8*s,buf);
+    if(ts.size()<2) { GraphText(x0+10*s,(y0+y1)/2,"the line is outside the domain"); return;}
+    R tmn=ts.front(), tmx=ts.back();
+    if(tmn>tmx) swap(tmn,tmx);
+    R vmn=*min_element(vs.begin(),vs.end()), vmx=*max_element(vs.begin(),vs.end());
+    //  a constant along the line (ex. the round-off of a zero): the scale of the whole function
+    R scale=max(max(fabs(theplot->fmin),fabs(theplot->fmax)),max(fabs(vmn),fabs(vmx)));
+    if(!(vmx-vmn > 1e-8*scale))
+    {
+        R c=(vmn+vmx)/2, d = scale>0 ? 0.05*scale : 0.5;
+        if(fabs(c) < 1e-8*scale) c=0.;
+        vmn=c-d; vmx=c+d;
+    }
+    R dv=0.05*(vmx-vmn); vmn-=dv; vmx+=dv;
+    if(!(tmx>tmn)) tmx=tmn+1;
+    R ax=(x1-x0)/(tmx-tmn), ay=(y1-y0)/(vmx-vmn);
+    //  tics and values
+    vector<R> tics; int prec;
+    GraphTics(tmn,tmx,max(2,(int)((x1-x0)/(80*s))),tics,prec);
+    glBegin(GL_LINES);
+    for(size_t i=0;i<tics.size();++i) { R X=x0+(tics[i]-tmn)*ax; glVertex2d(X,y0); glVertex2d(X,y0+5*s);}
+    glEnd();
+    for(size_t i=0;i<tics.size();++i)
+    {
+        snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
+        GraphText(x0+(tics[i]-tmn)*ax,y0-8*s-fh,buf,1);
+    }
+    GraphText((x0+x1)/2,y0-20*s-fh*2,cut2d==1 ? "x" : (cut2d==2 ? "y" : "s (length along the segment)"),1);
+    GraphTics(vmn,vmx,max(2,(int)((y1-y0)/(45*s))),tics,prec);
+    glBegin(GL_LINES);
+    for(size_t i=0;i<tics.size();++i) { R Y=y0+(tics[i]-vmn)*ay; glVertex2d(x0,Y); glVertex2d(x0+5*s,Y);}
+    glEnd();
+    for(size_t i=0;i<tics.size();++i)
+    {
+        snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
+        GraphText(x0-6*s,y0+(tics[i]-vmn)*ay-fh/2.,buf,2);
+    }
+    //  the curve (a jump of the abscissa = outside the domain: the curve is cut)
+    glColor3d(0.1,0.3,0.8);
+    glLineWidth(2*s);
+    R dtmax=3.5*fabs(ts.back()-ts.front())/n;
+    glBegin(GL_LINE_STRIP);
+    for(size_t i=0;i<ts.size();++i)
+    {
+        if(i && fabs(ts[i]-ts[i-1])>dtmax) { glEnd(); glBegin(GL_LINE_STRIP);}
+        glVertex2d(x0+(ts[i]-tmn)*ax,y0+(vs[i]-vmn)*ay);
+    }
+    glEnd();
+    glLineWidth(kscreenscale);
+    glColor3d(0.,0.,0.);
 }
 
 void OneWindow::DrawAxes()
@@ -5088,6 +5237,8 @@ void ThePlot::DrawHelp(OneWindow *win)
         win->Show("   f) fill   n) N) fewer or more iso values   v) values of the colors   m) mesh   B) border",i++);
     if(fe2s && pretty)
         win->Show("   o) iso lines on the colors on/off (with fill)",i++);
+    if(fe2 && !view3)
+        win->Show("   c) cut line and graph of the function: horizontal, vertical, no   <) >) move   shift + left button) segment",i++);
     if(fe2v || fe3v || fesv)
         win->Show("   a) A) shorter or longer arrows   v) values of the colors",i++);
     if(mesh2 && !fe2) win->Show("   B) border of the mesh",i++);
@@ -5163,6 +5314,7 @@ void ThePlot::DrawHelpAll(OneWindow *win)
     win->Show("P)  show the value of the function under the mouse (bottom left) on/off",i++);
     win->Show("j)  axes x, y (and z in 3d) with the values on/off",i++);
     win->Show("?)  the help of the current plot only, ? again: this complete help",i++);
+    win->Show("c)  2d: cut line and 1d graph of the function (horizontal, vertical, no; shift + left button: segment)",i++);
     win->Show("o)  2d with fill: the iso lines on the colors on/off   (n, N: number of iso lines)",i++);
     win->Show("R)  pretty rendering on/off (smooth colors and shading)   C) colormap   v) color bar",i++);
     win->Show("F1) 3d function or 3d mesh: cut plane on/off   F2) edit with the mouse   F3) freeze   <) >) move",i++);
@@ -5296,6 +5448,13 @@ void ThePlot::Draw(OneWindow *win)
     if(win->axes)
     {
         win->DrawAxes();
+        win->SetView();
+    }
+
+    //  2d: the cut line and the 1d graph of the function along it (key c)
+    if(win->Cut2d())
+    {
+        win->DrawCut2d();
         win->SetView();
     }
 
@@ -5832,6 +5991,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         {
             p=new OnePlotHMatrix(what,fin);
         }
+
         else
         {
             cout << "Bizarre unknown what :  " << what<< endl;
@@ -6660,6 +6820,22 @@ static void Mouse( int button,int state,int x,int y )
     {
         case GLUT_LEFT_BUTTON:
             casemouse=GLUT_LEFT_BUTTON;
+            //  2d: shift + left button draws the segment of the cut line (key c)
+            if(win && win->theplot && win->plotdim==2 && !win->Graph1d() && (keyact & GLUT_ACTIVE_SHIFT)
+               && state == GLUT_DOWN)
+            {
+                win->cutA = win->cutB = win->ScreenToWorld2(x,y);
+                win->cutdrag = true;
+                win->xold=x,win->yold=y;
+                return;
+            }
+            if(win && win->cutdrag && state == GLUT_UP)
+            {
+                win->cutdrag = false;
+                if(R2(win->cutA,win->cutB).norme() > 0) { win->cut2d = 3; win->changearrow=true;}
+                glutPostRedisplay();
+                return;
+            }
             if(win)
             {
                 if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
@@ -6699,6 +6875,12 @@ static void MotionMouse(int x,int y )
                 win->Bmax += D2;
                 win->xold=x;
                 win->yold=y;
+                glutPostRedisplay();
+            }
+            else if(win && win->cutdrag)
+            { // 2d: the segment of the cut line
+                win->cutB = win->ScreenToWorld2(x,y);
+                if(R2(win->cutA,win->cutB).norme() > 0) win->cut2d = 3;
                 glutPostRedisplay();
             }
             else if(win && win->cutaxis && (win->cutedit || ((keyact & GLUT_ACTIVE_SHIFT) && !win->cutfreeze)))
@@ -6915,6 +7097,13 @@ static void Key( unsigned char key, int x, int y )
             break;
         case ']':
             win->threshold = min(win->threshold+0.05,1.);
+            break;
+        case 'c': // 2d: cut line of the function: horizontal, vertical, no
+            if(win->plotdim==2 && !win->Graph1d())
+            {
+                win->cut2d = win->cut2d==0 ? 1 : (win->cut2d==1 ? 2 : 0);
+                win->changearrow=true;// the size of the pixel changes with the panel
+            }
             break;
         case 'x': // 1d graph: log scale in x, otherwise rotation of the cut plane of 5 degree
             if(win->Graph1d())

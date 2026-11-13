@@ -1401,6 +1401,9 @@ int createMenus(pScene sc, pMesh mesh) {
     if (mesh->dim == 2) {
       glutAddMenuEntry("[3]  Toggle elevation", 'k');
       glutAddMenuEntry("[K]  Elevation coeff (h, H: lower, higher)", 'K');
+      glutAddMenuEntry("[c]  Cut line u(x) / u(y) / none (shift+drag: segment)", 'c');
+      glutAddMenuEntry("[<]  Move the cut line down / left", '<');
+      glutAddMenuEntry("[>]  Move the cut line up / right", '>');
     }
 
     glutCreateMenu(menuKey);
