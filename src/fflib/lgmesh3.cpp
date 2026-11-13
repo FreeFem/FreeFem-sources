@@ -1910,7 +1910,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
         copt[i]= static_cast<K *>(static_cast<void *>((char*)s+offset));
         *(copt[i])=0;
       }
-    if (optiexp0) (*optiexp0)(s); // init 
+    if (optiexp0) { try { (*optiexp0)(s); } catch (...) { delete[] copt; throw; } }     // init 
   }
   
   ffassert(dim<100);
