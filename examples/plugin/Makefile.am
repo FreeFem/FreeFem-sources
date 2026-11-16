@@ -142,7 +142,7 @@ TESTS_MSHMET = aniso.edp
 TESTS_MUMPS_seq = LapMUMPS_seq.edp \
 	Helmholtz_FD.edp
 
-TESTS_MUMPS_SUPERLU = lap-solvers.edp
+TESTS_MUMPS_SUPERLU = lap-solvers.edp test-solvers.edp 
 
 TESTS_NLOPT = VarIneq2.edp
 
