@@ -41,11 +41,12 @@ struct TheFFSolver {
         virtual ~OneFFSlver() {}
         virtual OneFFSlver *clone()=0;
     };
-    
+ 
     template<class VS>
     struct OneFFSlverVS:public OneFFSlver  {
         OneFFSlverVS(int pp) :OneFFSlver(pp,VS::orTypeSol) {
-           if(verbosity>9 ) cout << " OneFFSlverVS " << this-> orTypeSol << " " << VS::orTypeSol<< endl;
+            // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+           if(verbosity>9 ) cout << " OneFFSlverVS " << bitset<8>(this->orTypeSol) << " " << VS::orTypeSol<< endl;
              ffassert(this->orTypeSol);}
         virtual VirtualSolver<Z,K> * create(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
         { return new VS(A,ds,stack);}
@@ -55,7 +56,20 @@ struct TheFFSolver {
     typedef pair<string,OneFFSlver *>  MValue;
     typedef  map<string,OneFFSlver *> MAPSF;
     static MAPSF ffsolver;
+    static void list(ostream & f) {
+        cout << " \n\nList of available sparse solvers: index "<< typeid(Z).name() << " value "<<typeid(K).name() << endl;
+        cout << " typesol binary digit : 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi"<< endl;
+        for( auto i=ffsolver.begin(); i!= ffsolver.end();i++)
+        {
+            const auto ps=i->second;
 
+            if(ps)
+              f << i->first << " pref: "<< ps->p << " typesol "<< std::bitset<8>(ps->orTypeSol) << endl;
+            else
+            f << i->first << " no solver ! "<< endl;
+        }
+        cout << "\n\n";
+    }
     static void  ChangeSolver( string name, string  from)
     {
         std::transform(name.begin(), name.end(), name.begin(), static_cast<int(*)(int)>(std::toupper));
@@ -198,5 +212,11 @@ template<class R>
 void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R>  & A,const  Data_Sparse_Solver & ds);
 
 void init_SparseLinearSolver();
+
+ostream * ListSolvers(ostream  *f);
+//{
+  //  TheFFSolver<int,R>::list(f);
+  //  TheFFSolver<int,Complex>::list(f);
+//}
 
 #endif

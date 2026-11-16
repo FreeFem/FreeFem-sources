@@ -204,3 +204,10 @@ template void SetSolver(Stack stack,bool VF,VirtualMatrix<int,C> & A, const     
 
 template void DefSolver(Stack stack, VirtualMatrix<int,R>  & A,const Data_Sparse_Solver & ds);
 template void DefSolver(Stack stack, VirtualMatrix<int,C> & A,const  Data_Sparse_Solver & ds);
+
+ostream * ListSolvers(ostream  *f)
+{
+    TheFFSolver<int,R>::list(*f);
+    TheFFSolver<int,Complex>::list(*f);
+    return f;
+}

@@ -1,6 +1,6 @@
 #ifndef GETPROG_UNIX_HPP_
 #define GETPROG_UNIX_HPP_
-
+#include "environment.hpp"
 #include "mode_open.hpp"
 #if _WIN32
 #include "ff-win32.cpp"
@@ -199,6 +199,9 @@ check_plugin=0; // no pluging to check ..
         NoGraphicWindow = false;
         }
       }
+      else if (strcmp(argv[i], "-rc") == 0 && i + 1 < argc) {
+          EnvironmentInsert("init-files",argv[++i],"$");
+      }
       else if (strcmp(argv[i], "-check_plugin") == 0 && i + 1 < argc) {
           check_plugin=argv[++i];
         ;// BUG because freefem++ is not initial .. so do after ..
@@ -328,7 +331,8 @@ check_plugin=0; // no pluging to check ..
     cout << "\t-fglut: [filename]  redirect graphics in file" << endl;
     cout << "\t-glut:  [command]   use custom glut" << endl;
     cout << "\t-gff:   [command]   use custom glut (with space quoting)" << endl;
-    cout << "\t-check_plugin [plugin1,plugin2,...]        just try if this plugins are correct" <<endl;
+    cout << "\t-rc:   init-pref file to  change loadpath or includepath " << endl;
+      cout << "\t-check_plugin [plugin1,plugin2,...]        just try if this plugins are correct" <<endl;
     cout << "\t-?:                 show help" << endl << endl;
 
     if (noffglut) cout << "without default ffglut: " << ffglut << endl;

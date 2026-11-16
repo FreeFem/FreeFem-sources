@@ -3223,6 +3223,8 @@ R ffpscal(Matrice_Creuse<R> * const & pM,  KN_<R>  const & a,  KN_<R>  const & b
     if( phm) s = phm->pscal(a,b);
     return s;
 }
+void ListSolvers(ostream  &f);
+
 template <class R>
 void AddSparseMat()
 {
@@ -3342,6 +3344,7 @@ TheOperators->Add("+",
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
  TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
  TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,R>(set_mat_coef<R>) );
+
 
  Global.Add("set","(",new SetMatrix<R>);
  Global.Add("setBC","(",new OneOperator3_<long,Matrice_Creuse<R> *,KN_<double>,double>(Set_BC));
@@ -4020,7 +4023,7 @@ void  init_lgmat()
     // construction of complex matrix form a double matrix
  init_UMFPack_solver();
  init_HashMatrix ();
-
+    Global.Add("ListSolvers","(",new OneOperator1<ostream *,ostream* >(ListSolvers) );
  Global.Add("renumbering", "(", new removeDOF<double>);
  Global.Add("renumbering", "(", new removeDOF<Complex>);
     Global.Add("renumbering", "(", new removeDOF<double>(1));
