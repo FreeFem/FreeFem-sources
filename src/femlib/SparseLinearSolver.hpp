@@ -11,7 +11,7 @@
 #include <map>
 #include <vector>
 #include <cstring>
-
+#include <bitset>
 #include "ffstack.hpp"
 
 extern string *def_solver, *def_solver_sym, *def_solver_sym_dp;

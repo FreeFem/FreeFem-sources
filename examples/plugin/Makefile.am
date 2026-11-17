@@ -110,7 +110,8 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	RT0dc.edp testFE-P1nc3d.edp \
 	test_GrundmannMoller.edp \
 	test_PKLagrange.edp \
-	convergence_PkLagrange3d.edp
+	convergence_PkLagrange3d.edp \
+	convergence_PkLagrangeS.edp
 
 TESTS_FFTW3 = dfft.edp dfft-3d.edp
 

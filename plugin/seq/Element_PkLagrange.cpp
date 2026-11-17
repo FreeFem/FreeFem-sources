@@ -218,6 +218,253 @@ void TypeOfFE_PkLagrange::FB(const bool *whatd, const Mesh &, const Triangle &K,
         }
     }
 }
+////////////////////////////////////////////////////////////////////////
+///////////////////////////////  S  ///////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+class TypeOfFE_PKLagrange_S : public GTypeOfFE< MeshS > {
+public:
+    typedef MeshS Mesh;
+    typedef MeshS::Element Element;
+    typedef GFElement< MeshS > FElement;
+    typedef Mesh::RdHat RdHat;
+    typedef Mesh::Rd Rd;
+    int kp; // The degree
+    int ndf; // Number of DOfs
+    vector<double> Pi_h_coef;
+    // Polynomial parameters(Basis fcts):
+    //nn for the barycentric function, aa for the shifts, and ff for the denominator
+    vector<vector<long>> nn; //[ndf][k];
+    vector<vector<long>> aa; //[ndf][k];
+    vector<long> ff;         //[ndf];
+    // Points coordinates
+    vector<long> il; //[ndf];
+    vector<long> jl; //[ndf];
+    vector<long> kl; //[ndf];
+    // Constuctor
+    TypeOfFE_PKLagrange_S(int PK) : GTypeOfFE< Mesh >(Preparedfon(PK), 1, PK, false, false)
+       {
+        kp = PK;
+        ndf = (kp + 2) * (kp + 1) / 2;
+        nn.resize(ndf);
+        aa.resize(ndf);
+        for (long i = 0; i < ndf; i++) {
+            aa[i].resize(kp, -1);
+            nn[i].resize(kp, -1);
+        }
+        ff.resize(ndf, -1);
+        il.resize(ndf, -1);
+        jl.resize(ndf, -1);
+        kl.resize(ndf, -1);
+        // Fill Data Lagrange
+        // FillDataLagrange( kp, Data, Pi_h_coef );
+        Pi_h_coef.resize(ndf, 1.);
+
+        // Fill ff,il,jl,kl,nn,aa
+        BasisFctPK(kp, nn, aa, ff, il, jl, kl);
+        vector<R2> Ptv = PtConstruction(kp);
+        //
+        vector<int> other(ndf, 0); //[ndf] = {-1, -1, -1, 4, 3, 6, 5, 8, 7, -1}; in P3//
+        FillOther(other, kp, ndf);
+
+        int kk = 0;
+        R2 *Pt = this->PtInterpolation;
+
+        for (int i = 0; i < NbDoF; i++) {
+            this->pInterpolation[i] = i;
+            this->cInterpolation[i] = 0;
+            this->dofInterpolation[i] = i;
+            this->coefInterpolation[i] = 1.;
+         
+            Pt[i] = Ptv[i];
+        }
+        assert(P_Pi_h.N() == NbDoF);
+        assert(pij_alpha.N() == kk);
+    }
+
+ 
+    static int *Preparedfon(int PK) {
+      // Fct needed in the parent class constructor
+      static int locdfon[4];
+      // Fill data
+      locdfon[0] = 1;                                     // 1 dof per vertice
+      locdfon[1] = PK - 1;                                // dof per edge
+      locdfon[2] = (PK - 1) * (PK - 2) / 2;               // dof on the surface
+      locdfon[3] = 0;    // dof in the volume
+      return locdfon;
+    }
+    void FB(const What_d whatd, const Mesh &Th, const MeshS::Element &K, const RdHat &PHat, RNMK_ &val) const;
+    void set(const MeshS &Th, const Element &K, InterpolationMatrix< RdHat > &M, int ocoef, int odf,
+             int *nump) const;
+
+};  // end of Class
+
+
+void TypeOfFE_PKLagrange_S::FB(const What_d whatd, const MeshS &Th, const MeshS::Element &K, const RdHat &PHat, RNMK_ &val) const
+{
+    R L[3];
+    PHat.toBary(L);
+    L[0] *= kp;
+    L[1] *= kp;
+    L[2] *= kp;
+    /*throwassert(val.N( ) >= 10);
+    throwassert(val.M( ) == 1);*/
+    vector<int> p(ndf, 0);
+
+    for (int i = 0; i < ndf; ++i) {
+        p[i] = i;
+    }
+// compute permutation ...
+    int nbpe = kp-1; // nb internal point on edge
+    int kk = 3;// 3 vertex
+    for (int i = 0; i < 3; i++) {
+        if (K.EdgeOrientation(i) < 0) {
+            for (int j = 0  ; j< nbpe/2; ++j) {
+                int i1 = kk+j, i2 = kk+nbpe-1-j;
+                assert(i1 < i2) ;
+                Exchange(p[i1],p[i2]);
+            }
+        }
+        kk += nbpe;
+    }
+    val = 0;
+
+    if (whatd & Fop_id) {
+        RN_ f0(val('.', 0, op_id));
+
+        for (int df = 0; df < ndf; df++) {
+            int pdf = p[df];
+            R f = 1. / ff[df];
+            for (int i = 0; i < kp; ++i) {
+                f *= L[nn[df][i]] - aa[df][i];
+            }
+            f0[pdf] = f;
+        }
+    }
+
+    if (whatd & (Fop_D1|Fop_D2)) {
+        R3 D[3] ;
+        K.Gradlambda(D);
+        D[0]*= kp;
+        D[1]*= kp;
+        D[2]*= kp;
+
+        if (whatd & (Fop_D1)) {
+            for (int df = 0; df < ndf; df++) {
+                int pdf = p[df];
+                R fx = 0., fy = 0., fz=0, f = 1. / ff[df];
+
+                for (int i = 0; i < kp; ++i) {
+                    int n = nn[df][i];
+                    R Ln = L[n] - aa[df][i];
+                    fx = fx * Ln + f * D[n].x;
+                    fy = fy * Ln + f * D[n].y;
+                    fz = fz * Ln + f * D[n].z;
+                    f *= Ln;
+                }
+
+                if (whatd &Fop_dx) {
+                    val(pdf, 0, op_dx) = fx;
+                }
+
+                if (whatd & Fop_dy) {
+                    val(pdf, 0, op_dy) = fy;
+                }
+                if (whatd &Fop_dz) {
+                    val(pdf, 0, op_dz) = fz;
+                }
+            }
+        }
+
+        if (whatd & (Fop_D2)) {
+            for (int df = 0; df < ndf; df++) {
+                int pdf = p[df];
+                R fx = 0., fy = 0., fz = 0, f = 1. / ff[df];
+                R fxx = 0., fyy = 0., fxy = 0.;
+                R fzz = 0., fzx = 0., fzy = 0.;
+                 
+                for (int i = 0; i < kp; ++i) {
+                    int n = nn[df][i];
+                    R Ln = L[n] - aa[df][i];
+                    fxx = fxx * Ln + 2. * fx * D[n].x;
+                    fyy = fyy * Ln + 2. * fy * D[n].y;
+                    fzz = fzz * Ln + 2. * fz * D[n].z;
+                    fxy = fxy * Ln + fx * D[n].y + fy * D[n].x;
+                    fzx = fzx * Ln + fz * D[n].x + fx * D[n].z;
+                    fzy = fzy * Ln + fz * D[n].y + fy * D[n].z;
+                    fx = fx * Ln + f * D[n].x;
+                    fy = fy * Ln + f * D[n].y;
+                    fz = fz * Ln + f * D[n].z;
+                    f *= Ln;
+
+                }
+
+                if (whatd & (Fop_dxx)) {
+                    val(pdf, 0, op_dxx) = fxx;
+                }
+
+                if (whatd & (Fop_dyy)) {
+                    val(pdf, 0, op_dyy) = fyy;
+                }
+                if (whatd & (Fop_dzz)) {
+                    val(pdf, 0, op_dzz) = fzz;
+                }
+
+                if (whatd & (Fop_dxy))  {
+                    val(pdf, 0, op_dxy) = fxy;
+                }
+                if (whatd & (Fop_dzx))  {
+                    val(pdf, 0, op_dzx) = fzx;
+                }
+                if (whatd & (Fop_dzy))  {
+                    val(pdf, 0, op_dzy) = fzy;
+                }
+            }
+        }
+    }
+}
+void TypeOfFE_PKLagrange_S::set(const MeshS &Th, const TypeOfFE_PKLagrange_S::Element &K, InterpolationMatrix< TypeOfFE_PKLagrange_S::RdHat > &M,
+                        int ocoef, int odf, int *nump) const {
+    int Np = M.p.N( );
+    int n = this->NbDoF;
+    int *p = M.p;
+
+    for (int i = 0; i < n; ++i) {
+      M.p[i] = i;
+    }
+
+    if (verbosity > 9) {
+      cout << " PK  set:" << odf << " : ";
+    }
+
+ 
+    int dof = odf;
+
+    int nbrPermAxis = (kp % 2) ? (kp - 1) : (kp - 2);             // Number of permutation per edge
+    vector< pair< int, int > > ExId = ExchangeidxVector3D(kp);    // indices to exchange
+
+    for (int e = 0; e < 3; ++e) {
+      int oe = K.EdgeOrientation(e);
+      for (int j = e * nbrPermAxis / 2; j < (e + 1) * nbrPermAxis / 2; j++) {
+        int i1 = dof + ExId[j].first;
+        int i2 = dof + ExId[j].second;
+        // cout << e <<"  "<< i1 << " " << i2 << "  , " << oe <<"  p: " <<  p[i1] << " " <<  p[i2] <<" " << Np << endl;
+        ffassert(i1 >= 0 && i2 >= 0);
+        ffassert(i1 < Np && i2 < Np);
+
+        if ((oe < 0) && (p[i1] < p[i2])) {
+          swap(p[i1], p[i2]);
+        } else if ((oe > 0) && (p[i1] > p[i2])) {
+          swap(p[i1], p[i2]);
+        }
+      }
+    }
+
+    if (verbosity > 99) {
+      cout << " " << M.p << endl;
+      ;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////  3D  ///////////////////////////////////
@@ -539,27 +786,50 @@ static TypeOfFE_PkLagrange PKLagrange11(11);
   static TypeOfFE_PKLagrange_3d PKLagrangeP4(4);
   GTypeOfFE< Mesh3 > &Elm_PKL4_3d(PKLagrangeP4);
   */
+static TypeOfFE_PKLagrange_S PKLagrangeP1S(1);
+GTypeOfFE< MeshS > &Elm_PKL1_S(PKLagrangeP1S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP5(5);
-  GTypeOfFE< Mesh3 > &Elm_PKL5_3d(PKLagrangeP5);
+  static TypeOfFE_PKLagrange_S PKLagrangeP5S(5);
+  GTypeOfFE< MeshS > &Elm_PKL5_S(PKLagrangeP5S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP6(6);
-  GTypeOfFE< Mesh3 > &Elm_PKL6_3d(PKLagrangeP6);
+  static TypeOfFE_PKLagrange_S PKLagrangeP6S(6);
+  GTypeOfFE< MeshS > &Elm_PKL6_S(PKLagrangeP6S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP7(7);
-  GTypeOfFE< Mesh3 > &Elm_PKL7_3d(PKLagrangeP7);
+  static TypeOfFE_PKLagrange_S PKLagrangeP7S(7);
+  GTypeOfFE< MeshS > &Elm_PKL7_S(PKLagrangeP7S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP8(8);
-  GTypeOfFE< Mesh3 > &Elm_PKL8_3d(PKLagrangeP8);
+  static TypeOfFE_PKLagrange_S PKLagrangeP8S(8);
+  GTypeOfFE< MeshS > &Elm_PKL8_S(PKLagrangeP8S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP9(9);
-  GTypeOfFE< Mesh3 > &Elm_PKL9_3d(PKLagrangeP9);
+  static TypeOfFE_PKLagrange_S PKLagrangeP9S(9);
+  GTypeOfFE< MeshS > &Elm_PKL9_S(PKLagrangeP9S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP10(10);
-  GTypeOfFE< Mesh3 > &Elm_PKL10_3d(PKLagrangeP10);
+  static TypeOfFE_PKLagrange_S PKLagrangeP10S(10);
+  GTypeOfFE< MeshS > &Elm_PKL10_S(PKLagrangeP10S);
 
-  static TypeOfFE_PKLagrange_3d PKLagrangeP11(11);
-  GTypeOfFE< Mesh3 > &Elm_PKL11_3d(PKLagrangeP11);
+  static TypeOfFE_PKLagrange_S PKLagrangeP11S(11);
+  GTypeOfFE< MeshS > &Elm_PKL11_S(PKLagrangeP11S);
+// Mesh3
+static TypeOfFE_PKLagrange_3d PKLagrangeP5(5);
+GTypeOfFE< Mesh3 > &Elm_PKL5_3d(PKLagrangeP5);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP6(6);
+GTypeOfFE< Mesh3 > &Elm_PKL6_3d(PKLagrangeP6);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP7(7);
+GTypeOfFE< Mesh3 > &Elm_PKL7_3d(PKLagrangeP7);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP8(8);
+GTypeOfFE< Mesh3 > &Elm_PKL8_3d(PKLagrangeP8);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP9(9);
+GTypeOfFE< Mesh3 > &Elm_PKL9_3d(PKLagrangeP9);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP10(10);
+GTypeOfFE< Mesh3 > &Elm_PKL10_3d(PKLagrangeP10);
+
+static TypeOfFE_PKLagrange_3d PKLagrangeP11(11);
+GTypeOfFE< Mesh3 > &Elm_PKL11_3d(PKLagrangeP11);
 
 static void init() {
 
@@ -582,6 +852,15 @@ static void init() {
     AddNewFE3("P33d",  &Elm_PKL3_3d,  "P3");
     AddNewFE3("P43d",  &Elm_PKL4_3d,  "P4");
     */
+    AddNewFES("P1SS",  &Elm_PKL1_S);
+   AddNewFES("P5S",  &Elm_PKL5_S,  "P5");
+    AddNewFES("P6S",  &Elm_PKL6_S,  "P6");
+    AddNewFES("P7S",  &Elm_PKL7_S,  "P7");
+    AddNewFES("P8S",  &Elm_PKL8_S,  "P8");
+    AddNewFES("P9S",  &Elm_PKL9_S,  "P9");
+    AddNewFES("P10S", &Elm_PKL10_S, "P10");
+    AddNewFES("P11S", &Elm_PKL11_S, "P11");
+
     AddNewFE3("P53d",  &Elm_PKL5_3d,  "P5");
     AddNewFE3("P63d",  &Elm_PKL6_3d,  "P6");
     AddNewFE3("P73d",  &Elm_PKL7_3d,  "P7");
