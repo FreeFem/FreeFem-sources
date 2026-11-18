@@ -278,8 +278,6 @@ public:
          
             Pt[i] = Ptv[i];
         }
-        assert(P_Pi_h.N() == NbDoF);
-        assert(pij_alpha.N() == kk);
     }
 
  
