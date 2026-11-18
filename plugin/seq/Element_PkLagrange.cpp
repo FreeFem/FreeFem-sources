@@ -860,7 +860,7 @@ static void init() {
     AddNewFE3("P43d",  &Elm_PKL4_3d,  "P4");
     */
     AddNewFEL("P5L", &P5_L, "P5");
-    AddNewFEL("P6L", &P6 _L, "P6");
+    AddNewFEL("P6L", &P6_L, "P6");
     AddNewFEL("P7L", &P7_L, "P7");
     AddNewFEL("P8L", &P8_L, "P8");
     AddNewFEL("P9L", &P9_L, "P9");
