@@ -1,0 +1,102 @@
+// for the make check:
+// PARAM -npmax 1
+
+load "qf11to25"
+load "GrundmannMoller"
+load "Element_PkLagrange"
+
+include "getARGV.idp"
+
+func uex = 1./(2*pi^2)*sin(pi*x)*sin(pi*y);
+func f = sin(pi*x)*sin(pi*y);
+
+macro Grad(u) [dx(u),dy(u), dz(u)] // EOM
+
+int qorder = 9;
+// verif..
+   real[int] xx = [0,1,0], yy=[0,0,1];
+    mesh Th= triangulate(xx,yy);
+ //  savemesh(Th,"/tmp/Th.mesh");
+
+    meshS ThG = movemesh23(Th,transfo=[x,y,0]);//square3(1,1,[x,y,0],flags=2);
+    plot(ThG,wait=1);
+  // savemesh(ThG,"/tmp/Th.mesh");
+    //mesh Th = square(1,1);
+    fespace Uh(Th,P1);
+    fespace UhG(ThG,P1SS);
+    UhG vg,wg ;
+    vg=x;
+    real err=0;//int2d(ThG)(abs(vg-x));
+    UhG v=1.;
+    //cout << v[] << endl;
+    cout << v(0.,1.,0.)<<  endl;
+    err += abs(v(0,1,0.)-1);
+    cout <<  err <<endl;
+    assert(err<1e-10 );
+    for(int i =0; i< vg[].n; ++i)
+     {
+      vg[] =0; vg[][i]=1;
+       wg = vg; 
+       wg[] -= vg[];
+       cout << " i "<< wg[].linfty << wg[] <<endl;
+       assert(wg[].linfty < 1e-10);
+     }
+   
+
+
+//macro mqf()qforder=qorder//
+macro mqf()qforder=qorder//
+
+NewMacro MacroCvrgce (PK)
+for (int npts = 3; npts <= getARGV("-npmax",20); npts *= 2){
+    meshS ThG = square3(npts,npts,[x,y,0]);
+    mesh Th = square(npts,npts);
+    fespace Uh(Th,PK);
+    fespace UhG(ThG,PK);
+    UhG u,v;
+    Uh u2,v2;
+
+    solve pphG(u,v) =
+        int2d(ThG,mqf)(Grad(u)'*Grad(v))-int2d(ThG,mqf)(f*v)
+        +on(1,2,3,4, u=0);
+    solve pph(u2,v2) =
+        int2d(Th,mqf)(Grad(u2)'*Grad(v2))-int2d(Th,mqf)(f*v2)
+        +on(1,2,3,4, u2=0);
+
+    real Err= (sqrt(int2d(ThG,mqf)((u-u2)^2)));
+    real NormRef=(sqrt(int2d(ThG,mqf)((u2)^2)));
+    plot(u,u2,cmm="u "+npts);
+    cout<<"Error= "<<Err/NormRef<<endl;
+    assert(Err/NormRef < 1e-8);
+}
+EndMacro
+
+MacroCvrgce (P5);
+MacroCvrgce (P6);
+
+// Curved (rotated) surface: the surface solution must match the 2D one
+// evaluated at (x, sqrt(y^2+z^2)).
+NewMacro MacroCvrgceRot (PK)
+for (int npts = 3; npts <= getARGV("-npmax",4); npts *= 2){
+    real theta = pi/5;
+    meshS ThG = movemesh23(square(npts,npts), transfo=[x, cos(theta)*y, sin(theta)*y]);
+    mesh Th = square(npts,npts);
+    fespace Uh(Th,PK);
+    fespace UhG(ThG,PK);
+    UhG u,v;
+    Uh u2,v2;
+    func fr = sin(pi*x)*sin(pi*sqrt(y^2+z^2));
+    solve pphGr(u,v) =
+        int2d(ThG,mqf)(Grad(u)'*Grad(v))-int2d(ThG,mqf)(fr*v)
+        +on(1,2,3,4, u=0);
+    solve pphr(u2,v2) =
+        int2d(Th,mqf)(Grad(u2)'*Grad(v2))-int2d(Th,mqf)(f*v2)
+        +on(1,2,3,4, u2=0);
+    real Err= (sqrt(int2d(ThG,mqf)((u-u2(x,sqrt(y^2+z^2)))^2)));
+    real NormRef=(sqrt(int2d(ThG,mqf)((u2(x,sqrt(y^2+z^2)))^2)));
+    cout<<"Error rot= "<<Err/NormRef<<endl;
+    assert(Err/NormRef < 1e-8);
+}
+EndMacro
+
+MacroCvrgceRot (P5);
