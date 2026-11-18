@@ -784,6 +784,15 @@ static TypeOfFE_PkLagrange PKLagrange11(11);
   static TypeOfFE_PKLagrange_3d PKLagrangeP4(4);
   GTypeOfFE< Mesh3 > &Elm_PKL4_3d(PKLagrangeP4);
   */
+// MeshL
+static TypeOfFE_Pk_L P5_L(5);
+static TypeOfFE_Pk_L P6_L(6);
+static TypeOfFE_Pk_L P7_L(7);
+static TypeOfFE_Pk_L P8_L(8);
+static TypeOfFE_Pk_L P9_L(9);
+static TypeOfFE_Pk_L P10_L(10);
+static TypeOfFE_Pk_L P11_L(11);
+// MeshS
 static TypeOfFE_PKLagrange_S PKLagrangeP1S(1);
 GTypeOfFE< MeshS > &Elm_PKL1_S(PKLagrangeP1S);
 
@@ -850,6 +859,14 @@ static void init() {
     AddNewFE3("P33d",  &Elm_PKL3_3d,  "P3");
     AddNewFE3("P43d",  &Elm_PKL4_3d,  "P4");
     */
+    AddNewFEL("P5L", &P5_L, "P5");
+    AddNewFEL("P6L", &P6 _L, "P6");
+    AddNewFEL("P7L", &P7_L, "P7");
+    AddNewFEL("P8L", &P8_L, "P8");
+    AddNewFEL("P9L", &P9_L, "P9");
+    AddNewFEL("P10L", &P10_L, "P10");
+    AddNewFEL("P11L", &P11_L, "P11");
+    
     AddNewFES("P1SS",  &Elm_PKL1_S);
    AddNewFES("P5S",  &Elm_PKL5_S,  "P5");
     AddNewFES("P6S",  &Elm_PKL6_S,  "P6");
