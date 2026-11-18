@@ -93,10 +93,9 @@ debian/freefem++-x11
 debian/tmp
 AppDir/
 3rdparty/arpack/ARPACK/
-3rdparty/arpack/arpack96.tar.gz
+3rdparty/arpack/prefix/
 3rdparty/arpack/arpack++
 3rdparty/arpack/arpack++.tar.gz
-3rdparty/arpack/patch.tar.gz
 3rdparty/bin/
 3rdparty/blacs/BLACS/
 3rdparty/blacs/Bmake.inc

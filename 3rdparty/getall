@@ -77,14 +77,10 @@ if ( -x "../getall" ) { chdir ".." }
 system "mkdir -p pkg";
 my @downloads;
 
-download('ARPACK','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/arpack96.tar.gz',
- 	'https://www.ljll.fr/hecht/pkg',
-	'arpack96.tar.gz',
-	'fffaa970198b285676f4156cebc8626e');
-download('ARPACK','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/patch.tar.gz',
-	'https://www.ljll.fr/hecht/pkg',
-	'patch.tar.gz',
-	'14830d758f195f272b8594a493501fa2');
+download('ARPACK','https://github.com/opencollab/arpack-ng/archive/refs/tags/3.9.1.tar.gz',
+	'https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main',
+	'arpack-ng-3.9.1.tar.gz',
+	'8f66485ae9d7e676b42aeead2bf5757e');
 download('BLAS','http://www.netlib.org/blas/blas-3.7.1.tgz',
 	'http://www.netlib.org/blas',
 	'blas-3.7.1.tgz',
