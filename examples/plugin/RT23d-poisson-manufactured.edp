@@ -1,0 +1,79 @@
+load "Element_Mixte3d"
+load "msh3"
+load "qf11to25"
+
+/** @file
+ * @brief Exact RT23d/P2dc mixed Poisson solution on a sheared tetrahedral mesh.
+ * For p=x^2+2y^2+3z^2+xy+xz+yz+1, u=grad(p), div(u)=12.
+ * Prescribe the potential on the entire boundary through its natural term:
+ * (u,v)+(p,div(v))=<p,v.n>, (div(u),q)=(12,q).
+ * These equations determine the pressure without a nullspace or a penalty.
+ * The exact flux lies in [P1]^3 and the exact pressure lies in P2dc.
+ * Degree-seven volume quadrature integrates RT23d mass products (degree six)
+ * exactly; degree-five face quadrature integrates p*(v.n) (degree four).
+ * Each absolute L2 tolerance is 1e-8, allowing direct-solve roundoff while
+ * requiring reproduction of the independently specified polynomial fields.
+ */
+verbosity = 0;
+cout.precision(12);
+mesh3 physicalMesh = cube(2, 2, 2);
+physicalMesh = movemesh3(physicalMesh,
+    transfo=[0.2 + 1.1*x + 0.2*y + 0.1*z,
+             -0.3 + 0.1*x + 0.9*y + 0.2*z,
+             0.4 + 0.2*x + 0.1*y + 1.2*z]);
+
+fespace FluxSpace(physicalMesh, RT23d);
+fespace PressureSpace(physicalMesh, P2dc);
+FluxSpace [fluxX, fluxY, fluxZ], [testFluxX, testFluxY, testFluxZ];
+PressureSpace pressure, testPressure;
+func exactPressure = x*x + 2.*y*y + 3.*z*z + x*y + x*z + y*z + 1.;
+func exactFluxX = 2.*x + y + z;
+func exactFluxY = x + 4.*y + z;
+func exactFluxZ = x + y + 6.*z;
+
+solve MixedPoisson([fluxX, fluxY, fluxZ, pressure],
+                   [testFluxX, testFluxY, testFluxZ, testPressure],
+                   // Avoid default-tolerance GMRES when UMFPACK is unavailable.
+                   solver=HaveUMFPACK ? UMFPACK : LU) =
+    int3d(physicalMesh, qfV=qfVp7)(
+        fluxX*testFluxX + fluxY*testFluxY + fluxZ*testFluxZ
+      + pressure*(dx(testFluxX) + dy(testFluxY) + dz(testFluxZ))
+      + (dx(fluxX) + dy(fluxY) + dz(fluxZ))*testPressure)
+  - int3d(physicalMesh, qfV=qfVp7)(12.*testPressure)
+  - int2d(physicalMesh, qforder=6)(
+        exactPressure*(testFluxX*N.x + testFluxY*N.y + testFluxZ*N.z));
+
+real fluxL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (fluxX-exactFluxX)^2 + (fluxY-exactFluxY)^2 + (fluxZ-exactFluxZ)^2));
+real pressureL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (pressure-exactPressure)^2));
+real divergenceL2Error = sqrt(int3d(physicalMesh, qfV=qfVp7)(
+    (dx(fluxX) + dy(fluxY) + dz(fluxZ) - 12.)^2));
+
+/** Independently integrate the computed normal trace, its volume divergence,
+ * and the prescribed source. All equal 12*volume; boundary/source comparison
+ * checks the solved balance, and boundary/divergence checks assembled traces.
+ * The relative tolerance 1e-10 is scaled by the nonzero exact source integral.
+ */
+real boundaryFlux = int2d(physicalMesh, qforder=6)(
+    fluxX*N.x + fluxY*N.y + fluxZ*N.z);
+real volumeDivergence = int3d(physicalMesh, qfV=qfVp7)(
+    dx(fluxX) + dy(fluxY) + dz(fluxZ));
+real sourceIntegral = int3d(physicalMesh, qfV=qfVp7)(12.);
+real sourceBalanceError = abs(boundaryFlux-sourceIntegral)/abs(sourceIntegral);
+real divergenceTheoremError = abs(boundaryFlux-volumeDivergence)/abs(sourceIntegral);
+
+cout << "RT23d manufactured: tetrahedra=" << physicalMesh.nt
+     << ", mixed DOFs=" << FluxSpace.ndof + PressureSpace.ndof << endl;
+cout << "L2 errors: flux=" << fluxL2Error << ", pressure=" << pressureL2Error
+     << ", divergence=" << divergenceL2Error << endl;
+cout << "conservation: boundary=" << boundaryFlux << ", divergence="
+     << volumeDivergence << ", source=" << sourceIntegral
+     << ", source balance=" << sourceBalanceError
+     << ", divergence theorem=" << divergenceTheoremError << endl;
+assert(fluxL2Error < 1.e-8);
+assert(pressureL2Error < 1.e-8);
+assert(divergenceL2Error < 1.e-8);
+assert(sourceBalanceError < 1.e-10);
+assert(divergenceTheoremError < 1.e-10);
+cout << "RT23d manufactured mixed Poisson: PASS" << endl;
