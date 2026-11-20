@@ -279,7 +279,6 @@ EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.
 freefem++.pref: Makefile
 	echo loadpath = "../../plugin/seq/" > freefem++.pref
 	echo includepath = "../../idp/" >> freefem++.pref
-	echo includepath += "../../unit/" >> freefem++.pref
 
 clean-local:
 	-rm -r include include.done *.pdf *.mesh* *.ppm *.vtk *.hb *.vtu *.data *.dt *.ps *.dx
