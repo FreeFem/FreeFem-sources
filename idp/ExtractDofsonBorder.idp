@@ -10,31 +10,76 @@
    - int[int]  doflabs  (resize array)               (out)  
    - int orient : orientation of the border direct (1) or in direct -1 (in)
 */
-macro ExtractDofsonBorder(labs,Wh,doflabs,orient)
+macro ExtractDofsonBorder(labs,Wh,doflabs,orient,opt)
 {
-mesh Th=Wh.Th;
-fespace VhExtractDofsonBorder(Th,P1);
-VhExtractDofsonBorder abslabs,onlon,atest;
-real lenborder = int1d(Th,labs,qfe=qf1pElump)(1.);
-if( lenborder >0) 
-{
-if(orient)
-solve Pbabciss(abslabs,atest,solver=GMRES) 
-= int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-8/area)
-  +  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs),dy(abslabs)]'*[-N.y,+N.x]*atest)
-  -  int1d(Th,labs,qfe=qf1pElump)(orient*atest);
-  else abslabs= 1.; /* no sorting*/ 
-  real abslabsmax = abs(2*abslabs[].max);
-  varf vlabsneg(u,v) = on(labs,u=abslabs-abslabsmax);
-  if(0)  plot(abslabs,wait=1);
-  real[int] absc=vlabsneg(0,Wh);
-  doflabs.resize(Wh.ndof);
-  doflabs=0:Wh.ndof-1;
-  sort(absc,doflabs);
-  absc= absc? 1:0;
-  doflabs.resize(absc.sum+0.5);
-}
-else 
- doflabs.resize(0);	
+	mesh Th = Wh.Th;
+	real lenborder = int1d(Th,labs,qfe=qf1pElump)(1.);
+	if (lenborder > 0) {
+		if (opt == 1) {
+			fespace VhExtractDofsonBorder(Th,P1);
+			VhExtractDofsonBorder abslabs,onlon,atest;
+			if (orient) {
+				solve Pbabciss(abslabs,atest,solver=GMRES)
+					= int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-8/area)
+					+  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs),dy(abslabs)]'*[-N.y,+N.x]*atest)
+					-  int1d(Th,labs,qfe=qf1pElump)(orient*atest);
+			}
+			else abslabs = 1.; /* no sorting */
+			real abslabsmax = abs(2*abslabs[].max);
+			varf vlabsneg(unused,v) = on(labs,unused=abslabs-abslabsmax);
+			if(0) plot(abslabs,wait=1);
+			real[int] absc=vlabsneg(0,Wh);
+			doflabs.resize(Wh.ndof);
+			doflabs=0:Wh.ndof-1;
+			sort(absc,doflabs);
+			absc= absc? 1:0;
+			doflabs.resize(absc.sum+0.5);
+		} else if (opt == 2) {
+			fespace VhExtractDofsonBorder(Th,[P1,P1]);
+			VhExtractDofsonBorder [abslabs1,abslabs2],[onlon1,onlon2],[atest1,atest2];
+			if (orient) {
+				solve Pbabciss([abslabs1,abslabs2],[atest1,atest2],solver=GMRES)
+					= int2d(Th,qft=qf1pTlump)([abslabs1,abslabs2]'*[atest1,atest2]*1e-8/area)
+					+  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs1),dy(abslabs1)]'*[-N.y,+N.x]*atest1
+							+ [dx(abslabs2),dy(abslabs2)]'*[-N.y,+N.x]*atest2)
+					-  int1d(Th,labs,qfe=qf1pElump)([orient,orient]'*[atest1,atest2]);
+			}
+			else [abslabs1, abslabs2] = [1., 1.]; /* no sorting */
+			real abslabsmax = abs(2*abslabs1[].max);
+			varf vlabsneg([unused1,unused2],[uu,vv])
+				= on(labs,unused1=abslabs1-abslabsmax,unused2=abslabs2-abslabsmax);
+			if(0) plot([abslabs1, abslabs2],wait=1);
+			real[int] absc=vlabsneg(0,Wh);
+			doflabs.resize(Wh.ndof);
+			doflabs=0:Wh.ndof-1;
+			sort(absc,doflabs);
+			absc= absc? 1:0;
+			doflabs.resize(absc.sum+0.5);
+		} else {
+			fespace VhExtractDofsonBorder(Th,[P1,P1,P1]);
+			VhExtractDofsonBorder [abslabs1,abslabs2,abslabs3],[onlon1,onlon2,onlon3],[atest1,atest2,atest3];
+			if (orient) {
+				solve Pbabciss([abslabs1,abslabs2,abslabs3],[atest1,atest2,atest3],solver=GMRES)
+					= int2d(Th,qft=qf1pTlump)([abslabs1,abslabs2,abslabs3]'*[atest1,atest2,atest3]*1e-8/area)
+					+  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs1),dy(abslabs1)]'*[-N.y,+N.x]*atest1
+							+ [dx(abslabs2),dy(abslabs2)]'*[-N.y,+N.x]*atest2
+							+ [dx(abslabs3),dy(abslabs3)]'*[-N.y,+N.x]*atest3)
+					-  int1d(Th,labs,qfe=qf1pElump)([orient,orient,orient]'*[atest1,atest2,atest3]);
+			}
+			else [abslabs1, abslabs2, abslabs3] = [1., 1., 1.]; /* no sorting */
+			real abslabsmax = abs(2*abslabs1[].max);
+			varf vlabsneg([unused1,unused2,unused3],[uu,vv,pp])
+				= on(labs,unused1=abslabs1-abslabsmax,unused2=abslabs2-abslabsmax,unused3=abslabs3-abslabsmax);
+			if(0) plot(abslabs1,wait=1);
+			real[int] absc=vlabsneg(0,Wh);
+			doflabs.resize(Wh.ndof);
+			doflabs=0:Wh.ndof-1;
+			sort(absc,doflabs);
+			absc= absc? 1:0;
+			doflabs.resize(absc.sum+0.5);
+		}
+	} else {
+		doflabs.resize(0);
+	}
 } 
 //
