@@ -1,5 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
+// PARAM -wg -ns -v 0
 
 load "PETSc"                        // PETSc plugin
 include "macro_ddm.idp"             // additional DDM functions

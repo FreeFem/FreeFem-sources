@@ -21,7 +21,7 @@ load "mshmet"
 load "medit"
 load "mmg"
 
-int nn  = 6;
+int nn  = 20; //20
 
 int[int] lc=[1,2,2,1,1,2]; //  label numbering 
 
@@ -48,7 +48,9 @@ for(int ii=0; ii<4; ii++) //  BUG trap  in interation 3
   [m11,m21,m22,m31,m32,m33]=[0,0,0,0,0,0];
   cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
   real cc=(u[].max-u[].min);// rescale coefficiant 
- 
+  
+  //Th3 = cube(40,40,40);
+
   real[int] met=mshmet(Th3,u,hmin=1e-3,hmax=0.2,err=lerr,aniso=1);
   m11[]=met;
   Th3=mmg3d(Th3,metric=m11[],hgrad=2.3);//("oo/Th3.o.mesh");

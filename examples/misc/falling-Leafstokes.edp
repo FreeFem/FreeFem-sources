@@ -1,9 +1,4 @@
-// NBPROC 1
-// PARAM -wg -ns -v 0
-
-//load "MUMPS" // for optimisation
-load "PETSc"
-
+load "MUMPS_seq" // for optimisation
 int m=20;// 1/h 
 int withadapmesh=1; 
 real  g=-9.81, nuf=1./100., nus=10000, rhof=0.1, rhos = 10, dt=0.025, T= 100;
@@ -34,12 +29,8 @@ real dhmin = 0.005;
 func hellipse = min( 1./m + (max(abs(y-yc),Ladp)-Ladp)*dhhh , hmax);
 //min(hmin + abs(dellipse2)*dhmin,0.3);
 
-mesh Th2=buildmesh( Boundary);
-Th2=adaptmesh(Th2,hellipse,IsMetric=1);
-// This is the characteristic function of the inside of the ellipse
-meshS ThS = movemesh23(Th2, transfo = [x,y,0]);
-int regionellipse= ThS(xc,yc,0).region; 
-DmeshS Th = distribute(ThS, overlap = 1, partmethod = "metis", keepGlobal = true);
+mesh Th=buildmesh( Boundary);
+Th=adaptmesh(Th,hellipse,IsMetric=1);
 plot(Th,wait=1);
 fespace Wh(Th,[P1b,P1b,P1]);
 fespace Qh(Th,P0);
@@ -48,14 +39,13 @@ fespace Qh(Th,P0);
 Qh nu,rho, phi;
 
 Wh [u1,u2,p],[v1,v2,q], [u1old,u2old,pold]=[0,0,0];
-Wh [ua, ub, uc];
 
 macro div(u1,u2) (dx(u1)+dy(u2))//
 macro D(u1,u2)  [ dx(u1), (dx(u2)+dy(u1))*0.5, (dx(u2)+dy(u1))*0.5, dy(u2)]//
 
 // Navier-Stokes equations with gravity force, integrated in the rectangle, 
 // with varying density rho and varying viscosity but div(u)=0 in each triangle
-problem NStokes ([u1,u2,p],[v1,v2,q], sparams="-pc_type lu -pc_factor_mat_solver_type mumps")
+problem NStokes ([u1,u2,p],[v1,v2,q])
  =
     int2d(Th)( rho*(u1*v1+u2*v2)/dt 
     		  + 2.*nu*(D(u1,u2)'*D(v1,v2) )
@@ -72,6 +62,8 @@ problem NStokes ([u1,u2,p],[v1,v2,q], sparams="-pc_type lu -pc_factor_mat_solver
 verbosity=0; 
 for(real t=0;t<T; t+=dt)
 {
+    // This is the characteristic function of the inside of the ellipse
+    int regionellipse= Th(xc,yc).region; 
     real aellipse= int2d(Th,regionellipse)(1.); 
     real rellipse= int2d(Th,regionellipse)(sqr(y-yc)+sqr(x-xc)); // J 
    
@@ -96,23 +88,14 @@ for(real t=0;t<T; t+=dt)
     xc = max(xc,  0  + 0.9*(abs(cos(omega))*r1 +abs(sin(omega)*r2)) ) ; 
    if ( yc < 1*(abs(sin(omega))*r1 +abs(cos(omega)*r2))) break; 
 	cout << " mov : "<< du1 << " "<< du2 << "  " << domega << " / " << xc << " " << yc << " " << omega*180/pi << endl;
-    [ua, ub, uc]=[u1,u2,0];
-    plot(coef=0.1,cmm=" [u1,u2] et p  ",p,[ua, ub, uc], value=true,wait=false, dim = 2);
+    plot(coef=0.1,cmm=" [u1,u2] et p  ",p,[u1,u2], value=true,wait=false);
     plot(a1(m) + a2(3*m) +a3(m)+a4(3*m)+disk(2*m),WindowIndex=1);
 
 	// Mesh is rebuilt with new ellipse position
     [u1old,u2old,pold]=[u1,u2,p];
 	
-    mesh Th3 = buildmesh( Boundary);
-    cout << "Th3 : " << Th3.nv << " vertices, " << Th3.nt << " triangles" << endl;
-    Th3=adaptmesh(Th3, hellipse, IsMetric=1);
-    cout << "Th3 adapted : " << Th3.nv << " vertices, " << Th3.nt << " triangles" << endl;
-    meshS Th3S = movemesh23(Th3, transfo = [x,y,0]);
-    regionellipse= Th3S(xc,yc,0).region;  
-    cout << Wh.ndofglobal  << endl;
-    Th = distribute(Th3S, overlap = 1, partmethod = "metis", keepGlobal = true);
-    cout << Wh.ndofglobal  << endl;
-    [u1,u2,p] = [0,0,0];
-    [v1,v2,q] = [0,0,0];
+	Th=buildmesh( Boundary ) ;	
+	Th=adaptmesh(Th,hellipse, IsMetric=1);
+    
 }
-plot(coef=0.1,cmm=" [u1,u2] et p  ",p,u1, value=true,wait=false, dim=2);
+plot(coef=0.1,cmm=" [u1,u2] et p  ",p,[u1,u2], value=true,wait=false);

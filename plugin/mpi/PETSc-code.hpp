@@ -395,10 +395,69 @@ namespace PETSc {
     KSPSetFromOptions(B._ksp);
   }
 
+  class ScopedSparams {
+  struct Saved { std::string name; bool had; bool hasValue; std::string value; };
+  std::vector<Saved> saved_;
+  public:
+    explicit ScopedSparams(const std::string& s) {
+      if (s.empty()) return;
+      // 1. extraire les clés de s
+      PetscOptions tmp; PetscInt n; char **names, **values;
+      PetscOptionsCreate(&tmp);
+      PetscOptionsInsertString(tmp, s.c_str());
+      PetscOptionsLeftGet(tmp, &n, &names, &values);
+      // 2. mémoriser l'état actuel de chaque clé dans la base globale
+      for (PetscInt i = 0; i < n; ++i) {
+        Saved sv; sv.name = std::string("-") + names[i];
+        const char* v = nullptr; PetscBool set = PETSC_FALSE;
+        PetscOptionsFindPair(NULL, NULL, sv.name.c_str(), &v, &set);
+        sv.had = set; sv.hasValue = (v != nullptr); if (v) sv.value = v;
+        saved_.push_back(sv);
+      }
+      PetscOptionsLeftRestore(tmp, &n, &names, &values);
+      PetscOptionsDestroy(&tmp);
+      // 3. insertion réelle dans la base globale
+      PetscOptionsInsertString(NULL, s.c_str());
+    }
+    ~ScopedSparams() {                       // ne doit pas lever d'exception
+      for (auto it = saved_.rbegin(); it != saved_.rend(); ++it) {
+        if (it->had) PetscOptionsSetValue(NULL, it->name.c_str(), it->hasValue ? it->value.c_str() : nullptr);
+        else         PetscOptionsClearValue(NULL, it->name.c_str());
+      }
+    }
+    ScopedSparams(const ScopedSparams&) = delete;
+    ScopedSparams& operator=(const ScopedSparams&) = delete;
+  };
+
+  template<class R>
+  void configureProblemKSP(Dmat& M, const DistSolveArgs<R>& a) {
+    if (!M._petsc) return;
+    bool created = false;
+    if (!M._ksp) {
+      KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
+      KSPSetOperators(M._ksp, M._petsc, M._petsc);
+      created = true;
+    }
+    if (created || !a.ds->sparams.empty()) KSPSetFromOptions(M._ksp);
+    applyProblemOptions(M, a);   // solver=, eps=… gardent la priorité
+  }
+
+
+  inline void ensureKSP(Dmat& M, const Data_Sparse_Solver& ds) {
+    if (M._ksp ||!M._petsc) return;
+    KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
+    KSPSetOperators(M._ksp, M._petsc, M._petsc);
+    if (!ds.sparams.empty()) {
+      PetscOptionsInsertString(NULL, ds.sparams.c_str());
+    }
+    KSPSetFromOptions(M._ksp);
+  }
+
   template<class MMesh, class fes1>
   typename std::enable_if< std::is_same<fes1, v_dfes<MMesh> >::value >::type
   applyVarfSparams(Dmat& B, const Data_Sparse_Solver& ds) {
-    applySparams(B, ds);
+    if (!B._ksp) ensureKSP(B, ds);
+    else applySparams(B, ds);
   }
 
   template<class MMesh, class fes1>
@@ -649,10 +708,10 @@ namespace PETSc {
           AssembleBC<upscaled_type<K>>(stack, *((MMesh*)&PUh->Th), Uh, Vh, ds.sym, A.A, nullptr, nullptr, b->largs, ds.tgv);
       }
       checkDistributedEval<MMesh, fes1>(dscope, pUh);   // avant changeOperatorSimple (collectif)
+      applyVarfSparams<MMesh, fes1>(B, ds);
       changeOperatorSimple(&B, &A);
       assembleWithoutOverlap<MMesh, fes1>(B, pUh,
           A.A ? static_cast<MatriceMorse<upscaled_type<K>>*>(&*A.A) : nullptr);
-      applyVarfSparams<MMesh, fes1>(B, ds);
 
       if(B._A)
           B._A->setMatrix(nullptr);
@@ -5795,11 +5854,6 @@ namespace PETSc {
   void applyProblemOptions(Dmat& M, const DistSolveArgs<R>& a) {
     if (!a.given || !M._petsc) return;
     const Data_Sparse_Solver& ds = *a.ds;
-    if (!M._ksp) {                        // comme InvPETSc : ligne de commande prise en compte
-      KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
-      KSPSetOperators(M._ksp, M._petsc, M._petsc);
-      KSPSetFromOptions(M._ksp);
-    }
     KSP ksp = M._ksp;
     if (a.given & DIST_GIVEN_SOLVER) {
       const std::string& s = ds.solver;   // deja en majuscules (Init_sym_positive_var)
@@ -5843,6 +5897,7 @@ namespace PETSc {
   // matrice locale du coeur -> Mat PETSc, puis resolution par InvPETSc (A^-1 * b)
   template<class R, typename std::enable_if< std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
   void distributedSolve(DistSolveArgs<R>& a) {
+    ScopedSparams scope(a.ds->sparams); 
     Dmat* M = static_cast<Dmat*>(*a.handle);
     if (!M) {
       M = new Dmat;
@@ -5853,10 +5908,9 @@ namespace PETSc {
     if (a.A) {
       Matrice_Creuse<R> mc;
       mc.A = a.A;                         // reference partagee : la matrice reste au Problem
+      configureProblemKSP(*M, a);
       changeOperatorSimple(M, &mc);
       assembleWithoutOverlapData(*M, a.overlap, a.A);
-      applySparams(*M, *a.ds);
-      applyProblemOptions(*M, a);
       if (M->_A) M->_A->setMatrix(nullptr);   // la matrice HPDDM enveloppe les tableaux de a.A
     }
     InvPETSc< pwr<Dmat>, KN<R>*, PetscScalar, 'N' > inv(pwr<Dmat>(nullptr, M, -1L), a.B);

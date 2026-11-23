@@ -1,5 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
-// NBPROC 4
+// NBPROC 1
+// PARAM -wg -ns -v 0
 
 load "PETSc"                        // PETSc plugin
 include "macro_ddm.idp"             // additional DDM functions
@@ -18,12 +19,11 @@ fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
 real[int] rhs = vPb(0, Wh);
 
-set(A, sparams = "-ksp_view");
 Wh<real> u;                         // local solution
-
+set(A, sparams = "-pc_type hpddm -pc_hpddm_coarse_sub_pc_type lu -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -ksp_monitor -ksp_view");
 A = vPb(Wh, Wh);
 real memory = PetscMemoryGetCurrentUsage();
-u[] = A^-1 * rhs;
+//u[] = A^-1 * rhs;
 memory = PetscMemoryGetCurrentUsage() - memory;
 if(mpirank == 0)
     cout << memory << " bytes of memory in usage" << endl;
@@ -40,7 +40,6 @@ plotMPI(Th, u, Pk, def, real, cmm = "Global residual");
 
 Wh<real> Rb[1];
 Rb[0] = 1;
-set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
 u[] = 0.0;
 u[] = A^-1 * rhs;
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution");
