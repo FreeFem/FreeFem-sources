@@ -534,6 +534,8 @@ namespace PETSc {
   template<class MMesh>
   void buildShellFromDfes(Dmat& B, const DGFESpace<MMesh>& V, int ndof, bool sym, MPI_Comm* ucomm, PetscInt bs = 1) {
     buildShellFromData(B, &V.dofIntersectionDof, &V.Ddof, V.DTh().comm, ndof, sym, ucomm, bs);
+    V.DTh().increment();
+    B._dmesh = &V.DTh();
   }
 
 
@@ -548,7 +550,10 @@ namespace PETSc {
       if (r != MPI_IDENT && r != MPI_CONGRUENT) bad = 2;
     }
     if (!bad && B._A->getDof() != ndof) bad = 1;
+    if (B._dmesh && B._dmesh != &V.DTh()) bad = 3;
     bad = agreeOnStatus(bad, comm);
+    if (bad == 3)
+      distributedError(comm, "A = varf(Udh, Udh): the Mat was built before the last distribute; declare a new Mat A(Udh)");
     if (bad == 2)
       distributedError(comm, "A = varf(Udh, Udh): the Mat was built on another communicator than the distributed mesh of Udh; use Mat A(Udh)");
     if (bad == 1)
@@ -1355,6 +1360,7 @@ namespace PETSc {
         if (ptA->_petsc)
           MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc),
                            PetscObjectComm((PetscObject)ptB->_petsc), &flag);
+        KSPDestroy(&ptB->_ksp); // before MatHeaderReplace: KSP holds ref on the Mat
         if (!ptA->_petsc || (flag != MPI_CONGRUENT && flag != MPI_IDENT)) {
           MatDestroy(&ptA->_petsc);
           if (ptB->_petsc) {
@@ -1366,7 +1372,6 @@ namespace PETSc {
           }
         } else
           MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
-        KSPDestroy(&ptB->_ksp);
         ptA->_A = ptB->_A;
         ptB->_A = nullptr;
         ptA->_num = ptB->_num;
@@ -1380,6 +1385,8 @@ namespace PETSc {
         ptB->_exchange = nullptr;
         ptA->_D = ptB->_D;
         ptB->_D = nullptr;
+        ptA->_dmesh = ptB->_dmesh;
+        ptB->_dmesh = nullptr;
       }
     }
   }
