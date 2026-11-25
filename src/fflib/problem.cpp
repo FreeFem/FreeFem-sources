@@ -43,6 +43,8 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include <set>
+#include <unordered_map>
+
 
 basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "qft", &typeid(const Fem2D::QuadratureFormular *)},
