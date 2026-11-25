@@ -606,8 +606,8 @@ class TypeOfFE_P1ttdc : public  TypeOfFE { public:
    
 } ;
     const R2 TypeOfFE_P1ttdc::G(1./3.,1./3.);   
-    const R TypeOfFE_P1ttdc::cshrink=1-1e-2;   
-    const R TypeOfFE_P1ttdc::cshrink1=1./TypeOfFE_P1ttdc::cshrink;   
+    const R TypeOfFE_P1ttdc::cshrink=1-1e-4;
+    const R TypeOfFE_P1ttdc::cshrink1=1./TypeOfFE_P1ttdc::cshrink;
     
 class TypeOfFE_P2ttdc : public  TypeOfFE { public:  
   static int Data[];
@@ -639,8 +639,8 @@ double TypeOfFE_P1ttdc::Pi_h_coef[]={1.,1.,1.};
 double TypeOfFE_P2ttdc::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
     
 const R2 TypeOfFE_P2ttdc::G(1./3.,1./3.);   
-const R TypeOfFE_P2ttdc::cshrink=1-1e-2;   
-const R TypeOfFE_P2ttdc::cshrink1=1./TypeOfFE_P2ttdc::cshrink;   
+const R TypeOfFE_P2ttdc::cshrink=1-1e-4;   
+const R TypeOfFE_P2ttdc::cshrink1=1./TypeOfFE_P2ttdc::cshrink;
     
  
 R TypeOfFE_P1ttdc::operator()(const FElement & K,const  R2 & P1Hat,const KN_<R> & u,int componante,int op) const 

@@ -1,0 +1,59 @@
+//    Discontinous Galerlin Method
+//   based on paper from 
+// Riviere, Beatrice; Wheeler, Mary F.; Girault, Vivette
+// title: 
+// A priori error estimates for finite element 
+// methods based on discontinuous approximation spaces
+//  for elliptic problems.
+//  SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
+//  ---------------------------------
+//  Formulation given by Vivette Girault
+//  ------ 
+// Author: F. Hecht , Nov 2026
+// -------------------------------
+//   nonsymetric bilinear form
+//   ------------------------
+//  solve $ -\Delta u = f$ on $\Omega$ and $u= g$ on $\Gamma$
+//  on intalledges :
+// the edge are see nTonEdge times so we / nTonEdge
+// remark: nTonEdge =1 on border edge and =2 on internal 
+// we are in a triangle normal is the exterior normal
+// def: jump = external - internal value,     on border extern  - internal value
+//      mean = (external + internal value)/2, on border just mean internal value
+include "MeshSurface.idp"
+macro grad(u) [dx(u),dy(u),dz(u)]//
+macro dn(u) (grad(u)'*N) //  def the normal derivative 
+int nn= 10;
+meshS Th = change(Sphere20 (1,10,1,0),rmInternalEdges=1,fregion=1);;//(10,10); // unite square 
+plot(Th,wait=1);
+
+fespace Vh(Th,P1dc);     // Discontinous P2 finite element
+fespace Xh(Th,P1); //P2 continuous 
+//  if pena = 0 => Vh must be P2 otherwise we need some penalisation  
+real pena=0; // a parameter to add penalisation 
+
+func f=x+2*y+3*z;
+
+Vh u,v;
+Xh uu,vv;
+solve A(u,v,solver=sparsesolver) = 
+   int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)+dz(u)*dz(v) +u*v )
+ + intalledges(Th)(//  loop on all  edge of all triangle 
+          ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
+          + pena*jump(u)*jump(v) ) / nTonEdge 
+          ) 
+- int2d(Th)(f*v) 
+ 
+;
+solve A1(uu,vv,solver=CG) 
+= 
+ int2d(Th)(dx(uu)*dx(vv)+dy(uu)*dy(vv)+dz(uu)*dz(vv)+uu*vv) - int2d(Th)(f*vv) ;
+ 
+plot(u,cmm="Discontinue Galerkin",wait=1,value=1,fill=1);
+plot(uu,cmm="continue Galerkin uu",wait=1,value=1,fill=1);
+Vh eh= u-uu;//  error 
+real err =eh[].linfty/u[].linfty; 
+cout << " ||err|| relative: " << err << " " <<uu[].linfty  <<  endl;
+
+assert( err < 1e-2);
+
