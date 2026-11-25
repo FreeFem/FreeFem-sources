@@ -5841,6 +5841,23 @@ namespace PETSc {
 # define FF_PETSC_KEEP PETSC_DEFAULT
 #endif
 
+static void warnOnce(pcommworld comm, const std::string& msg) {
+  static std::set<std::string> done;
+  if (done.insert(msg).second && commRank(comm) == 0)
+    cerr << "Warning: solve/problem on a distributed fespace: " << msg << endl;
+}
+
+// solver = replaces a different option given in sparams or in command line
+static void warnReplaced(pcommworld comm, KSP ksp, const char* opt, const char* type, const std::string& solver) {
+  const char* prefix = nullptr;
+  char val[64] = "";
+  PetscBool set = PETSC_FALSE;
+  KSPGetOptionsPrefix(ksp, &prefix);
+  PetscOptionsGetString(NULL, prefix, opt, val, sizeof(val), &set);
+  if (set && strcmp(val,type))
+    warnOnce(comm, "solver = "+solver+" replaces "+ opt+" "+ val);
+}
+
   // solve/problem : solver=, eps=, nbiter=, dimKrylov= -> KSP. Appele par configureProblemKSP, après KSPSetFromOptions:
   // les parametres ecrits dans le problem l'emportent sur sparams et la ligne de commande.
   template<class R>
@@ -5850,23 +5867,26 @@ namespace PETSc {
     KSP ksp = M._ksp;
     if (a.given & DIST_GIVEN_SOLVER) {
       const std::string& s = ds.solver;   // deja en majuscules (Init_sym_positive_var)
-      if (s == "CG")
-        KSPSetType(ksp, KSPCG);
-      else if (s == "GMRES")
-        KSPSetType(ksp, KSPGMRES);
+      if (s == "CG" || s == "GMRES") {
+        KSPType type = s == "CG" ? KSPCG : KSPGMRES;
+        warnReplaced(a.comm, ksp, "-ksp_type", type, s);
+        KSPSetType(ksp, type);
+      }
       else if (s == "LU" || s == "UMFPACK" || s == "SPARSESOLVER" || s == "SPARSESOLVERSYM" ||
-               s == "CHOLESKY" || s == "CROUT" || s == "MUMPS") {
+               s == "CHOLESKY" || s == "CROUT" || s == "CHOLMOD" || s == "MUMPS") {
+        PCType type = ds.sym ? PCCHOLESKY : PCLU;
+        warnReplaced(a.comm, ksp, "-ksp_type", KSPPREONLY, s);
+        warnReplaced(a.comm, ksp, "-pc_type", type, s);
         PC pc;
         KSPSetType(ksp, KSPPREONLY);
         KSPGetPC(ksp, &pc);
-        PCSetType(pc, ds.sym ? PCCHOLESKY : PCLU);
+        PCSetType(pc, type);
 #if defined(PETSC_HAVE_MUMPS)
         PCFactorSetMatSolverType(pc, MATSOLVERMUMPS);
 #endif
       }
-      else if (commRank(a.comm) == 0)
-        cerr << "Warning: solve/problem on a distributed fespace: solver = " << s
-             << " has no PETSc equivalent, PETSc default used (see sparams = \"-ksp_type ...\")" << endl;
+      else
+        warnOnce(a.comm, "solver = "+s+" has no PETSc equivalent, PETSc default used (see sparams = \"-ksp_type ...\")");
     }
     if (a.given & (DIST_GIVEN_EPS | DIST_GIVEN_NBITER)) {
       PetscReal rtol = FF_PETSC_KEEP, atol = FF_PETSC_KEEP;
@@ -5879,10 +5899,10 @@ namespace PETSc {
       KSPSetTolerances(ksp, rtol, atol, FF_PETSC_KEEP, maxits);
     }
     if (a.given & DIST_GIVEN_DIMKRYLOV) {
-      KSPType t;
-      KSPGetType(ksp, &t);
-      if (!t) KSPSetType(ksp, KSPGMRES);  // le redemarrage n'a de sens que pour GMRES
-      KSPGMRESSetRestart(ksp, ds.NbSpace);
+      PetscBool gmres = PETSC_FALSE;
+      PetscObjectTypeCompareAny((PetscObject)ksp, &gmres, KSPGMRES, KSPFGMRES, KSPLGMRES, KSPPGMRES, KSPDGMRES, "");
+      if (gmres) KSPGMRESSetRestart(ksp, ds.NbSpace);
+      else warnOnce(a.comm, "dimKrylov ignored (not a GMRES solver)");
     }
   }
 
