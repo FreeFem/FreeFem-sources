@@ -5915,8 +5915,14 @@ static void warnReplaced(pcommworld comm, KSP ksp, const char* opt, const char* 
       KSPSetOperators(M._ksp, M._petsc, M._petsc);
       created = true;
     }
-    if (created || !a.ds->sparams.empty()) KSPSetFromOptions(M._ksp);
+    if (created || !a.ds->sparams.empty()) {
+      KSPSetInitialGuessNonzero(M._ksp, PETSC_TRUE);
+      KSPSetFromOptions(M._ksp);
+    }
     applyProblemOptions(M, a);   // solver=, eps=… gardent la priorité
+    PetscBool direct = PETSC_FALSE;
+    PetscObjectTypeCompareAny((PetscObject)M._ksp, &direct, KSPPREONLY, "none", "");
+    if (direct) KSPSetInitialGuessNonzero(M._ksp, PETSC_FALSE);
   }
 
   // solve/problem on a distributed fespace : Dmat du Problem (cree au premier appel),
