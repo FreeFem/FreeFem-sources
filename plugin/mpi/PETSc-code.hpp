@@ -584,6 +584,19 @@ namespace PETSc {
     assembleWithoutOverlapData(B, V.DTh().overlap, mA);
   }
 
+  // GenEO demande : -pc_type hpddm avec -pc_hpddm_has_neumann
+  inline bool usesNeumann(KSP ksp) {
+    if (!ksp) return false;
+    PC pc;
+    const char* prefix = nullptr;
+    PetscBool hpddm = PETSC_FALSE, neumann = PETSC_FALSE;
+    KSPGetPC(ksp, &pc);
+    PetscObjectTypeCompare((PetscObject)pc, "hpddm", &hpddm);
+    KSPGetOptionsPrefix(ksp, &prefix);
+    PetscOptionsGetBool(NULL, prefix, "-pc_hpddm_has_neumann", &neumann, NULL);
+    return hpddm && neumann;
+  }
+
   template<class R>
   void assembleWithoutOverlapData(Dmat& B, int overlap, MatriceMorse<R>* mA) {
     if (overlap != 0 || !B._petsc || !B._num || !mA) return;
@@ -592,6 +605,8 @@ namespace PETSc {
     PetscMPIInt size;
     MPI_Comm_size(comm, &size);
     if (size == 1) return;
+    if (usesNeumann(B._ksp))
+      distributedError(&comm, "GenEO (-pc_hpddm_has_neumann) needs the elements of the overlap: use distribute(..., overlap = 1) or -pc_type asm -sub_pc_type lu");
     const PetscInt n = mA->n;
     std::vector<PetscInt> nnz(n, 0);
     for (size_t k = 0; k < mA->nnz; ++k) {
