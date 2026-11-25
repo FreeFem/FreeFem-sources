@@ -524,7 +524,7 @@ void  Element_OpVF(MatriceElementairePleine<R,FESpaceS> & mat,
         R2 Pt(T.PBord(ie,p1));
         R2 PP_t(TT.PBord(iie,p11));// T(Pt) == TT(PP_t) ????
         R3 err =T(Pt) -TT(PP_t);
-        assert (err.l2() < 1e-10);
+        assert (err.norm2() < 1e-10);
         Ku.BF(Dop,Pt,fu);
         if(!sameT) KKu.BF(Dop,PP_t,ffu);
         if (!same) {
