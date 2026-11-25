@@ -2111,27 +2111,13 @@ namespace PETSc {
     delete static_cast<HpSchwarz<PetscScalar>*>(h);
   }
 
+  // Linear exchange with real weights (real and imaginary parts independent)
   static void distributedExchangeHookC(void ** handle, const KN<KN<long>>* dofIntersectionDof, const KN<double>* Ddof, pcommworld comm, KN_<Complex>* xx, bool scaled) {
-    auto* sub = static_cast<HpSchwarz<PetscScalar>*>(*handle);
-    if (!sub) {
-      sub = new HpSchwarz<PetscScalar>();
-      auto* dA = new HPDDM::MatrixCSR<PetscScalar>(xx->n, xx->n, 0, nullptr, nullptr, nullptr, false);
-      KN_<KN<long>> sub_lists = (*dofIntersectionDof)(FromTo(1, dofIntersectionDof->N()-1));
-      sub->HPDDM::Subdomain<PetscScalar>::initialize(dA, STL<long>(dofIntersectionDof->operator[](0)), sub_lists, (MPI_Comm*)comm);
-      sub->initialize(&Ddof->operator[](0));
-      *handle = sub;
-    }
-    // KNOWN LIMITATION: exchange_dispatched<Complex> does not type-check
-    // against HpSchwarz<PetscScalar> when PetscScalar is real: likely: only supported when
-    // PetscScalar itself is complex, i.e. the PETSc-complex plugin).
-    static bool warnedComplex = false;
-    if (!warnedComplex && commRank(comm) == 0) {
-      cout << "Warning: automatic exchange of a Complex distributed rhs is not "
-           << "implemented for this PETSc build (real PetscScalar) -- rhs[] "
-           << "stays LOCAL ONLY for Complex forms; use the manual exchange() "
-           << "pattern instead." << endl;
-      warnedComplex = true;
-    }
+    KN<double> re(xx->n), im(xx->n);
+    for (int i = 0; i < xx->n; ++i) { re[i] = (*xx)[i].real(); im[i] = (*xx)[i].imag(); }
+    distributedExchangeHookD(handle, dofIntersectionDof, Ddof, comm, &re, scaled);
+    distributedExchangeHookD(handle, dofIntersectionDof, Ddof, comm, &im, scaled);
+    for (int i = 0; i < xx->n; ++i) (*xx)[i] = Complex(re[i], im[i]);
   }
 
   class PETScBackend : public DistributedBackend {
