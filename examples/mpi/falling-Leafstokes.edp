@@ -1,4 +1,4 @@
-// NBPROC 2
+// NBPROC 4
 // PARAM -wg -ns -v 0
 
 //load "MUMPS" // for optimisation
@@ -40,7 +40,7 @@ Th2=adaptmesh(Th2,hellipse,IsMetric=1);
 meshS ThS = movemesh23(Th2, transfo = [x,y,0]);
 // Th2=adaptmesh(Th2,hellipse,IsMetric=1);
 int regionellipse= ThS(xc,yc,0).region; 
-DmeshS Th = distribute(ThS, overlap = 4, partmethod = "metis", keepGlobal = true);
+DmeshS Th = distribute(ThS, overlap = 1, partmethod = "metis", keepGlobal = true);
 plot(Th,wait=1);
 fespace Wh(Th,[P1b,P1b,P1]);
 fespace Qh(Th,P0);
@@ -84,6 +84,7 @@ for(real t=0;t<T; t+=dt)
     rho = rhos*phi + rhof*(1-phi);
     // [u1,u2,p]=[(y-yc),-(x-xc),0]; //  rotating field  for test  
 	 NStokes;
+     exit(0);
 	// Ellipse center and angle omega updated 
 	// mean speed of the ellipse
 	real du1 = int2d(Th,regionellipse)(u1)/aellipse;
@@ -112,7 +113,7 @@ for(real t=0;t<T; t+=dt)
     meshS Th3S = movemesh23(Th3, transfo = [x,y,0]);
     regionellipse= Th3S(xc,yc,0).region;  
     cout << Wh.ndofglobal  << endl;
-    Th = distribute(Th3S, overlap = 1, partmethod = "metis", keepGlobal = true);
+    Th = distribute(Th3S, overlap = 4, partmethod = "metis", keepGlobal = true);
     [u1old,u2old,pold]=[u1old,u2old,pold];
     cout << Wh.ndofglobal  << endl;
     //[u1,u2,p] = [0,0,0];

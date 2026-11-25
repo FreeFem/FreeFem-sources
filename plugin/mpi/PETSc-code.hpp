@@ -396,8 +396,9 @@ namespace PETSc {
   }
 
   class ScopedSparams {
-  struct Saved { std::string name; bool had; bool hasValue; std::string value; };
-  std::vector<Saved> saved_;
+  private :
+    struct Saved { std::string name; bool had; bool hasValue; std::string value; };
+    std::vector<Saved> saved_;
   public:
     explicit ScopedSparams(const std::string& s) {
       if (s.empty()) return;
@@ -411,7 +412,8 @@ namespace PETSc {
         Saved sv; sv.name = std::string("-") + names[i];
         const char* v = nullptr; PetscBool set = PETSC_FALSE;
         PetscOptionsFindPair(NULL, NULL, sv.name.c_str(), &v, &set);
-        sv.had = set; sv.hasValue = (v != nullptr); if (v) sv.value = v;
+        PetscBool exact = PETSC_FALSE; PetscOptionsUsed(NULL, names[i], &exact);
+        sv.had = set && exact; sv.hasValue = (v != nullptr); if (v) sv.value = v;
         saved_.push_back(sv);
       }
       PetscOptionsLeftRestore(tmp, &n, &names, &values);
@@ -427,24 +429,22 @@ namespace PETSc {
     }
     ScopedSparams(const ScopedSparams&) = delete;
     ScopedSparams& operator=(const ScopedSparams&) = delete;
+
+    // Unread options
+    void warnUnused(pcommworld comm) const {
+      static std::set<std::string> checked;
+      for (const Saved& sv : saved_) {
+        PetscBool used = PETSC_FALSE;
+        PetscOptionsUsed(NULL, sv.name.c_str() + 1, &used);
+        if (checked.insert(sv.name).second && !used && commRank(comm) == 0)
+          cerr << "Warning: solve/problem: sparams option " << sv.name << " not used" << endl;
+      }
+    }
   };
 
-  template<class R>
-  void configureProblemKSP(Dmat& M, const DistSolveArgs<R>& a) {
-    if (!M._petsc) return;
-    bool created = false;
-    if (!M._ksp) {
-      KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
-      KSPSetOperators(M._ksp, M._petsc, M._petsc);
-      created = true;
-    }
-    if (created || !a.ds->sparams.empty()) KSPSetFromOptions(M._ksp);
-    applyProblemOptions(M, a);   // solver=, eps=… gardent la priorité
-  }
-
-
+  // varf path: KSP creation before changeOperatorSimple
   inline void ensureKSP(Dmat& M, const Data_Sparse_Solver& ds) {
-    if (M._ksp ||!M._petsc) return;
+    if (M._ksp || !M._petsc) return;
     KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
     KSPSetOperators(M._ksp, M._petsc, M._petsc);
     if (!ds.sparams.empty()) {
@@ -2102,9 +2102,10 @@ namespace PETSc {
       sub->initialize(&Ddof->operator[](0));
       *handle = sub;
     }
-    KN<double> tmp(*xx);
-    exchange_dispatched<double>(sub, &tmp, scaled);
-    *xx = tmp;
+    KN<upscaled_type<PetscScalar>> tmp(xx->n);
+    for (int i = 0; i < xx->n; ++i) tmp[i] = (*xx)[i];
+    exchange_dispatched<PetscScalar>(sub, &tmp, scaled);
+    for (int i = 0; i < xx->n; ++i) (*xx)[i] = std::real(tmp[i]);
   }
   static void distributedExchangeHandleDtor(void *h) {
     delete static_cast<HpSchwarz<PetscScalar>*>(h);
@@ -5848,11 +5849,17 @@ namespace PETSc {
     }
 };
 
-  // solve/problem : solver=, eps=, nbiter=, dimKrylov= -> KSP. Appele apres applySparams :
+#if PETSC_VERSION_GE(3, 22, 0)
+# define FF_PETSC_KEEP PETSC_CURRENT
+#else
+# define FF_PETSC_KEEP PETSC_DEFAULT
+#endif
+
+  // solve/problem : solver=, eps=, nbiter=, dimKrylov= -> KSP. Appele par configureProblemKSP, après KSPSetFromOptions:
   // les parametres ecrits dans le problem l'emportent sur sparams et la ligne de commande.
   template<class R>
   void applyProblemOptions(Dmat& M, const DistSolveArgs<R>& a) {
-    if (!a.given || !M._petsc) return;
+    if (!a.given || !M._petsc || !M._ksp) return;
     const Data_Sparse_Solver& ds = *a.ds;
     KSP ksp = M._ksp;
     if (a.given & DIST_GIVEN_SOLVER) {
@@ -5876,14 +5883,14 @@ namespace PETSc {
              << " has no PETSc equivalent, PETSc default used (see sparams = \"-ksp_type ...\")" << endl;
     }
     if (a.given & (DIST_GIVEN_EPS | DIST_GIVEN_NBITER)) {
-      PetscReal rtol = PETSC_CURRENT, atol = PETSC_CURRENT;
-      PetscInt maxits = PETSC_CURRENT;
+      PetscReal rtol = FF_PETSC_KEEP, atol = FF_PETSC_KEEP;
+      PetscInt maxits = FF_PETSC_KEEP;
       if (a.given & DIST_GIVEN_EPS) {
         if (ds.epsilon > 0) rtol = ds.epsilon;            // relatif, comme en sequentiel
         else { rtol = 0; atol = -ds.epsilon; }            // eps < 0 : test absolu
       }
       if (a.given & DIST_GIVEN_NBITER) maxits = ds.itmax;
-      KSPSetTolerances(ksp, rtol, atol, PETSC_CURRENT, maxits);
+      KSPSetTolerances(ksp, rtol, atol, FF_PETSC_KEEP, maxits);
     }
     if (a.given & DIST_GIVEN_DIMKRYLOV) {
       KSPType t;
@@ -5893,11 +5900,24 @@ namespace PETSc {
     }
   }
 
+  template<class R>
+  void configureProblemKSP(Dmat& M, const DistSolveArgs<R>& a) {
+    if (!M._petsc) return;
+    bool created = false;
+    if (!M._ksp) {
+      KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
+      KSPSetOperators(M._ksp, M._petsc, M._petsc);
+      created = true;
+    }
+    if (created || !a.ds->sparams.empty()) KSPSetFromOptions(M._ksp);
+    applyProblemOptions(M, a);   // solver=, eps=… gardent la priorité
+  }
+
   // solve/problem on a distributed fespace : Dmat du Problem (cree au premier appel),
   // matrice locale du coeur -> Mat PETSc, puis resolution par InvPETSc (A^-1 * b)
   template<class R, typename std::enable_if< std::is_same<R, upscaled_type<PetscScalar>>::value >::type* = nullptr>
   void distributedSolve(DistSolveArgs<R>& a) {
-    ScopedSparams scope(a.ds->sparams); 
+    ScopedSparams scope(a.ds->sparams);
     Dmat* M = static_cast<Dmat*>(*a.handle);
     if (!M) {
       M = new Dmat;
@@ -5915,6 +5935,7 @@ namespace PETSc {
     }
     InvPETSc< pwr<Dmat>, KN<R>*, PetscScalar, 'N' > inv(pwr<Dmat>(nullptr, M, -1L), a.B);
     inv.solve(a.X);
+    if (a.A) scope.warnUnused(a.comm);
     if (M->_ksp) {
       KSPConvergedReason reason;
       PetscInt its;
