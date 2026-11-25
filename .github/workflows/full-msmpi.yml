@@ -91,8 +91,12 @@ jobs:
       # configure
       - name: Remove packages
         run: |
-          pacman -R --noconfirm mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
-          mingw-w64-x86_64-gdb-multiarch
+          # Only remove the packages that are actually installed (the runner
+          # image may or may not ship gdb-multiarch), otherwise pacman fails
+          # with "target not found".
+          { pacman -Qq mingw-w64-x86_64-python mingw-w64-x86_64-gdb \
+              mingw-w64-x86_64-gdb-multiarch 2>/dev/null || true; } \
+            | xargs -r pacman -R --noconfirm
 
       - uses: actions/checkout@v6
 
