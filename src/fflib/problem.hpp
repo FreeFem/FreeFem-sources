@@ -509,7 +509,8 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic {
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =3+NB_NAME_PARM_MAT + NB_NAME_PARM_HMAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
+  static const int NB_NAME_PARM_DIST = 3; // prefix, fields, names
+  static const int n_name_param =3+NB_NAME_PARM_MAT + NB_NAME_PARM_HMAT + NB_NAME_PARM_DIST; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
   int Nitem,Mitem;
   const int dim;
 public:
@@ -1451,12 +1452,12 @@ maybeDistributedEvalCheck(v_fes* const& f, DistributedEvalScope& scope) {
 template<class MMesh, class v_fes, class R>
 typename std::enable_if<!std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
 maybeDistributedSolve(vector<FEbase<R, v_fes>*>&, int, void**, MatriceCreuse<R>*, KN<R>*, KN<R>*,
-                      const Data_Sparse_Solver&, unsigned, DistributedEvalScope&) { return false; }
+                      const Data_Sparse_Solver&, unsigned, const DistProblemParams&, DistributedEvalScope&) { return false; }
 
 template<class MMesh, class v_fes, class R>
 typename std::enable_if<std::is_same<v_fes, v_dfes<MMesh>>::value, bool>::type
 maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, MatriceCreuse<R>* A,
-                      KN<R>* B, KN<R>* X, const Data_Sparse_Solver& ds, unsigned given,
+                      KN<R>* B, KN<R>* X, const Data_Sparse_Solver& ds, unsigned given, const DistProblemParams& params,
                       DistributedEvalScope& scope) {
   v_fes* f = *(u_h[0]->pVh);
   if (Nb != 1 || *(u_h[1]->pVh) != f)
@@ -1478,6 +1479,7 @@ maybeDistributedSolve(vector<FEbase<R, v_fes>*>& u_h, int Nb, void** handle, Mat
   a.X = X;
   a.ds = &ds;
   a.given = given;
+  a.params = &params;
   g_distributedBackend->solve(a);
   return true;
 }

@@ -95,6 +95,10 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      */
     ,// param for bem solver
     LIST_NAME_PARM_HMAT
+    , // distributed fespace only
+    { "prefix", &typeid(string*)},
+    { "fields", &typeid(KN<double>*)},
+    { "names", &typeid(KN<String>*)}
 };
 
 struct pair_stack_double
@@ -12193,7 +12197,7 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 
 // indices of Problem parameters: save, cadna, bmat, LIST_NAME_PARM_MAT
 static const int PB_ARG_SOLVER = 4, PB_ARG_EPS = 5, PB_ARG_PRECON = 6, PB_ARG_DIMKRYLOV = 7, PB_ARG_NBITER = 13, PB_ARG_VEPS = 32;
-
+static const int PB_ARG_PREFIX = 3 + NB_NAME_PARM_MAT + NB_NAME_PARM_HMAT, PB_ARG_FIELDS = PB_ARG_PREFIX +1, PB_ARG_NAMES = PB_ARG_PREFIX + 2;
 template<class R,class FESpace,class v_fes>    // TODO if coupling FE with problem
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
                       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
@@ -12219,7 +12223,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
     if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
 
-    int np_bem = n_name_param;
+    int np_bem = n_name_param - NB_NAME_PARM_DIST;
     int np = np_bem - NB_NAME_PARM_HMAT;
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,np);
 
@@ -12375,8 +12379,14 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                    | (nargs[PB_ARG_EPS] || nargs[PB_ARG_VEPS]  ? DIST_GIVEN_EPS       : 0)
                    | (nargs[PB_ARG_NBITER]    ? DIST_GIVEN_NBITER    : 0)
                    | (nargs[PB_ARG_DIMKRYLOV] ? DIST_GIVEN_DIMKRYLOV : 0);
+    
+    DistProblemParams params;
+    if (nargs[PB_ARG_PREFIX]) params.prefix = *GetAny<string*>((*nargs[PB_ARG_PREFIX])(stack));
+    if (nargs[PB_ARG_FIELDS]) params.fields = GetAny<KN<double>*>((*nargs[PB_ARG_FIELDS])(stack));
+    if (nargs[PB_ARG_NAMES])  params.names  = GetAny<KN<String>*>((*nargs[PB_ARG_NAMES])(stack));
+    
     if (maybeDistributedSolve<MeshT, v_fes>(u_h, Nb, &data->distSolveHandle, ds.initmat ? &A : nullptr,
-                                            B, X, ds, given, dscope)) {
+                                            B, X, ds, given, params, dscope)) {
         DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
         *mps=mp;
         return SetAny<const Problem *>(this);
@@ -12570,7 +12580,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
     if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
 
-    int np_bem = n_name_param;
+    int np_bem = n_name_param - NB_NAME_PARM_DIST;
     int np = np_bem - NB_NAME_PARM_HMAT;
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,np);
     if(verbosity>3 && mpirank==0) cout << " After reads :: ds.initmat=" << ds.initmat << endl;
@@ -13909,6 +13919,8 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
         if (nargs[PB_ARG_PRECON])
             CompileError("solve/problem on a distributed fespace: precon= is not supported, use sparams = \"...\" ");
     }
+    else if (nargs[PB_ARG_PREFIX] || nargs[PB_ARG_FIELDS] || nargs[PB_ARG_NAMES])
+        CompileError("solve/problem: prefix=, fields= and names= need a distributed fespace");
 
     precon = 0; //  a changer
     if ( nargs[3+3])
@@ -13918,7 +13930,7 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
         precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false));
         ffassert(precon);
     }
-
+    
     VF=isVF(op->largs);
     // cout << " Problem ) VF = " << VF << endl;
 

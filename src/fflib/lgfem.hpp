@@ -415,6 +415,13 @@ template<class Mesh> GFESpace<Mesh>* newDistributedFESpace(const DistributedMesh
 // parametres de solve/problem ecrits par l'utilisateur (DistSolveArgs::given)
 enum { DIST_GIVEN_SOLVER = 1, DIST_GIVEN_EPS = 2, DIST_GIVEN_NBITER = 4, DIST_GIVEN_DIMKRYLOV = 8 };
 
+// parameters distributed in solve/problem
+struct DistProblemParams {
+  string prefix;
+  KN<double>* fields = nullptr;
+  KN<String>* names = nullptr;
+};
+
 template<class R>
 struct DistSolveArgs {
   void ** handle;
@@ -427,6 +434,7 @@ struct DistSolveArgs {
   KN<R>* X;
   const Data_Sparse_Solver* ds;
   unsigned given; // DIST_GIVEN_*
+  const DistProblemParams* params;
 };
 
 // Core-plugin interface providing distributed operations (PETSc)

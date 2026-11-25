@@ -5906,6 +5906,21 @@ static void warnReplaced(pcommworld comm, KSP ksp, const char* opt, const char* 
     }
   }
 
+  // fields=, names= : blocs du fieldsplit, une fois par KSP
+  template<class R>
+  void setProblemFields(Dmat& M, const DistSolveArgs<R>& a) {
+    KN<double>* fields = a.params->fields;
+    if (agreeOnStatus(fields && fields->n != a.X->n ? 1 : 0, a.comm))
+      distributedError(a.comm, "solve/problem on a distributed fespace: fields= must have one value per local dof (update it after distribute)");
+    if (!fields) return;
+    PC pc;
+    PetscBool split = PETSC_FALSE;
+    KSPGetPC(M._ksp, &pc);
+    PetscObjectTypeCompare((PetscObject)pc, PCFIELDSPLIT, &split);
+    if (split) setFieldSplitPC(&M, M._ksp, fields, a.params->names, static_cast<KN<Dmat>*>(nullptr));
+    else warnOnce(a.comm, "fields ignored (-pc_type is not fieldsplit)");
+  }
+
   template<class R>
   void configureProblemKSP(Dmat& M, const DistSolveArgs<R>& a) {
     if (!M._petsc) return;
@@ -5913,12 +5928,14 @@ static void warnReplaced(pcommworld comm, KSP ksp, const char* opt, const char* 
     if (!M._ksp) {
       KSPCreate(PetscObjectComm((PetscObject)M._petsc), &M._ksp);
       KSPSetOperators(M._ksp, M._petsc, M._petsc);
+      if (!a.params->prefix.empty()) KSPSetOptionsPrefix(M._ksp, a.params->prefix.c_str());
       created = true;
     }
     if (created || !a.ds->sparams.empty()) {
       KSPSetInitialGuessNonzero(M._ksp, PETSC_TRUE);
       KSPSetFromOptions(M._ksp);
     }
+    if (created) setProblemFields(M,a);
     applyProblemOptions(M, a);   // solver=, eps=… gardent la priorité
     PetscBool direct = PETSC_FALSE;
     PetscObjectTypeCompareAny((PetscObject)M._ksp, &direct, KSPPREONLY, "none", "");
