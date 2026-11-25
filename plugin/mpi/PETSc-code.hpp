@@ -553,7 +553,7 @@ namespace PETSc {
     if (B._dmesh && B._dmesh != &V.DTh()) bad = 3;
     bad = agreeOnStatus(bad, comm);
     if (bad == 3)
-      distributedError(comm, "A = varf(Udh, Udh): the Mat was built before the last distribute; declare a new Mat A(Udh)");
+      distributedError(comm, "A = varf(Udh, Udh): the Mat was built before the last distribute; use Mat B(Udh); A = B; and call set(A, ...) again");
     if (bad == 2)
       distributedError(comm, "A = varf(Udh, Udh): the Mat was built on another communicator than the distributed mesh of Udh; use Mat A(Udh)");
     if (bad == 1)
@@ -2154,6 +2154,7 @@ namespace PETSc {
         distributedExchangeHandleDtor(h);
       }
       bool supportsSolve() const override { return true; }
+      bool supportsScalar(bool isComplex) const override {return isComplex == HPDDM::Wrapper<PetscScalar>::is_complex; }
       void solve(DistSolveArgs<double>& a) override;
       void solve(DistSolveArgs<Complex>& a) override;
       void destroySolveHandle(void* h) override {

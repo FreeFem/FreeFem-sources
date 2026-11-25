@@ -13008,11 +13008,13 @@ static int distributedFEargKind(const C_F0 &c) {
 
 static void refuseDistributedProblem(const ListOfId &l) {
     int nDist = 0, nSeq = 0, kind = 0;
-    bool mixedKinds = false;
+    bool mixedKinds = false, isComplex = false;
     auto count = [&](const char* id) {
-        int k = distributedFEargKind(::Find(id));
+        C_F0 c = ::Find(id);
+        int k = distributedFEargKind(c);
         if (k == 0) { ++nSeq; return; }
         ++nDist;
+        if (BCastTo<pdf3c>(c) || BCastTo<pdfSc>(c) || BCastTo<pdfLc>(c)) isComplex = true;
         if (kind && k != kind) mixedKinds = true;
         kind = k;
     };
@@ -13027,6 +13029,9 @@ static void refuseDistributedProblem(const ListOfId &l) {
     if (mixedKinds) CompileError("solve/problem: distributed FESpaces on different kinds of mesh (Dmesh3, DmeshS, DmeshL) cannot be mixed");
     if (isCompositeProblem(l)) CompileError("solve/problem on a distributed FESpace cannot be used with composite FESpace");
     if (!g_distributedBackend->supportsSolve()) CompileError("solve/problem on a distributed FESpace requires a distributed backend: load \"PETSc\"");
+    if (!g_distributedBackend->supportsScalar(isComplex))
+        CompileError(isComplex ? "complex solve/problem on a distributed FESpace: load \"PETSc-complex\" instead of \"PETSc\""
+                               : "real solve/problem on a distributed FESpace: load \"PETSc\" instead of \"PETSc-complex\", or use Uh<complex>");
 }
 
 // read the arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])

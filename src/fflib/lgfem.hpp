@@ -448,7 +448,8 @@ class DistributedBackend {
     virtual bool supportsSolve() const { return false; }
     virtual void solve(DistSolveArgs<double>&);
     virtual void solve(DistSolveArgs<Complex>&);
-    virtual void destroySolveHandle(void*) {}
+    virtual void destroySolveHandle(void*) {};
+    virtual bool supportsScalar(bool isComplex) const {return true; }
 };
 extern DistributedBackend* g_distributedBackend;
 
