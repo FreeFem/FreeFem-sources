@@ -20,6 +20,7 @@
 // we are in a triangle normal is the exterior normal
 // def: jump = external - internal value,     on border extern  - internal value
 //      mean = (external + internal value)/2, on border just mean internal value
+load "mmg" 
 include "MeshSurface.idp"
 macro grad(u) [dx(u),dy(u),dz(u)]//
 macro dn(u) (grad(u)'*N) //  def the normal derivative 

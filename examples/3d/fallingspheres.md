@@ -9,6 +9,7 @@ The mesh around 2 spheres in a box is built, starting with the surface mesh of t
 ~~~freefem
 load "tetgen" 
 load "medit" 
+load "mmg"
 load "mmg3d-v4.0"
 include "MeshSurface.idp"
 

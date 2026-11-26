@@ -36,27 +36,20 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	cauchyproblem.edp \
 	periodicS.edp Connectivite-S.edp \
 	LaplaceRT1Surf.edp buildmeshS.edp \
-	LapDG2sphere.edp
+	HeatTorus.edp
 
 
-TESTS_TETGEN = HeatTorus.edp
+TESTS_MMG = Pinocchio.edp LapDG2sphere.edp
 
-TESTS_MMG = Pinocchio.edp
-
-if TETGEN
-CONDITIONAL_TETGEN = $(TESTS_TETGEN)
-endif
 
 if MMG
 CONDITIONAL_MMG = $(TESTS_MMG)
 endif
 
 TESTS = $(TESTS_OTHER) \
-	$(TESTS_TETGEN) \
 	$(TESTS_MMG)
 
 LIST_CONDITIONAL = $(TESTS_OTHER) \
-	$(CONDITIONAL_TETGEN) \
 	$(CONDITIONAL_MMG)
 
 EXTRA_DIST = *.edp all.edp

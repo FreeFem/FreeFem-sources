@@ -12,6 +12,7 @@ verbosity=1;
 
 load "tetgen"
 load "medit"
+load "mmg"
 include "MeshSurface.idp"
 
 mesh3 Th;

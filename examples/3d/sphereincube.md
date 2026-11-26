@@ -12,6 +12,7 @@ The surface mesh of the cube is built using $\texttt{SurfaceHex}$ and that of th
 verbosity=1;
 load "tetgen"
 load "medit"
+load "mmg"
 include "MeshSurface.idp"
 
 real hs = 0.1; // mesh size
