@@ -77,8 +77,7 @@ private:
 
 struct FragInj {
     int      nd = 0;   // fragVh.NbOfDF : longueur du vecteur a emettre
-    KN<int>  pos;      // indices d dans [0, nd) ayant une image
-    KN<long> src;      // inj[pos[k]], meme longueur que pos
+    KN<int> src;      // src[d] = DDL source local du DDL d du fragment, -1 si aucun (longueur nd)
 };
 
 struct FragOp {

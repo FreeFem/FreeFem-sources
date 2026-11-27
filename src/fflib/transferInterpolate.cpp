@@ -412,32 +412,26 @@ template<class Mesh, class R>
 static KN<R> fragmentDofVector(const GFESpace<Mesh>& srcVh, const Mesh& frag, const KN<int>& n2o, FragInj* injOut = nullptr)
 {
     ffassert(srcVh.TFE.N() == 1);            // espaces composites hors perimetre
-    GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]);   
-    KN<long> inj = restrictDOFPartial(fragVh, srcVh, n2o);  
+    ffassert(srcVh.NbOfDF < INT_MAX);        // FragInj::src est en int
+    GFESpace<Mesh> fragVh(frag, *srcVh.TFE[0]);
+    KN<long> inj = restrictDOFPartial(fragVh, srcVh, n2o);
     const int nd = fragVh.NbOfDF;
-    std::vector<int> vpos;
-    std::vector<long> vsrc;
-    if (injOut) { vpos.reserve(nd); vsrc.reserve(nd); }
 
-    KN<R> sub(nd);
-    for (int d = 0; d < nd; ++d) { 
-        if (inj[d] < 0) sub[d] = R();
-        else { 
-            sub[d] = R(1.0); // masque 0/1 
-            if (injOut) { vpos.push_back(d); vsrc.push_back(inj[d]); }
-        }
-    }
-    
+    long nHoles = 0;
+    for (int d = 0; d < nd; ++d) if (inj[d] < 0) ++nHoles;
+
     if (injOut) {
         injOut->nd = nd;
-        const long np = (long)vpos.size();
-        injOut->pos.resize(np);
-        injOut->src.resize(np);
-        for (long k = 0; k < np; ++k) {
-            injOut->pos[k] = vpos[k];
-            injOut->src[k] = vsrc[k];
-        }
-    }    
+        injOut->src.resize(nd);
+        for (int d = 0; d < nd; ++d) injOut->src[d] = (int)inj[d];   // -1 conserve
+    }
+
+    // Par construction (fragments = elements usable), nHoles == 0 : on n'envoie
+    // alors AUCUN masque, le recepteur prend un poids 1. Le masque 0/1 n'est
+    // construit que dans le cas degenere ou des DDL n'ont pas d'image.
+    if (nHoles == 0) return KN<R>();
+    KN<R> sub(nd);
+    for (int d = 0; d < nd; ++d) sub[d] = (inj[d] < 0) ? R() : R(1.0);
     return sub;
 }
 
@@ -858,10 +852,16 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
             F->ii[q] = cooI[j][q]; F->jj[q] = cooJ[j][q]; F->aij[q] = cooV[j][q];
         }
         Mout[j] = F;
-        // dofIn[j] = masque 0/1, un par DDl du fragment
-        if (dofIn[j].n >= (long)ndFrag[j])
+        // dofIn[j] = poids par DDL du fragment (masque 0/1, ou chi en np=1).
+        // Vide = aucun trou cote emetteur : poids 1 partout.
+        const bool hasMask = (dofIn[j].n > 0);
+        ffassert(!hasMask || dofIn[j].n >= (long)ndFrag[j]);
+        if (hasMask)
             for (long q = 0; q < nz; ++q)
                 cover[F->ii[q]] += F->aij[q] * dofIn[j][F->jj[q]];
+        else
+            for (long q = 0; q < nz; ++q)
+                cover[F->ii[q]] += F->aij[q];
     }
 
     for (int j = 0; j < nR; ++j) if (owned[j]) delete fragVh[j];
@@ -1102,9 +1102,11 @@ static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN
         for (int i = 0; i < P.sendToRanks.n; ++i) {
             const FragInj& J = P.inj[i];
             ndSend[i] = J.nd;
-            subOut[i].resize(J.nd);  if (J.nd > 0) subOut[i] = R(); 
-            for (long k = 0; k < J.pos.n; ++k)
-                subOut[i][J.pos[k]] = srcU[J.src[k]];
+            subOut[i].resize(J.nd);
+            for (int d = 0; d < J.nd; ++d) {
+                const int s = J.src[d];
+                subOut[i][d] = (s >= 0) ? srcU[s] : R();
+            }
         }
         std::vector<KN<R> > dofIn;
         exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, dofIn);
@@ -1128,9 +1130,10 @@ static void exchangeRawOnPlan(const TransferPlan<Mesh>& P, const KN<T>& srcValue
         const FragInj& J = P.inj[i];
         ndSend[i] = J.nd;
         subOut[i].resize(J.nd);
-        if (J.nd > 0) subOut[i] = fillHoles;
-        for (long k = 0; k < J.pos.n; ++k)
-            subOut[i][J.pos[k]] = srcValues[J.src[k]];
+        for (int d = 0; d < J.nd; ++d) {
+            const int s = J.src[d];
+            subOut[i][d] = (s >= 0) ? srcValues[s] : fillHoles;
+        }
     }
     exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, perFragment);
 }

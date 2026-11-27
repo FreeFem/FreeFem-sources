@@ -1,0 +1,247 @@
+// NBPROC 4
+// PARAM -ns -cl_ksp_max_it 3
+
+// =====================================================================
+//  Solveurs PETSc sur espaces distribues : non-regression
+//
+//  Les solutions sont comparees a une resolution directe (solver = LU) du
+//  meme probleme ; les iterations sont lues par getnbiteration.
+//
+//   problem
+//   S1  GenEO : deux niveaux des le premier solve
+//   S2  sparams propres a chaque problem (pas de fuite entre problems)
+//   S3  prefix= : options visees par probleme, depuis sparams ou la ligne
+//       de commande (-cl_ksp_max_it 3, voir PARAM)
+//   S4  point de depart = u (comme en sequentiel) ; solver = LU
+//   S5  GenEO apres redistribution
+//   S6  overlap = 0 : solution juste (reference sequentielle), GenEO refuse
+//   S7  second membre complexe : echange = echange de Re et Im
+//   S8  Stokes, fields= et names= : fieldsplit Schur (DmeshS) ;
+//       fields= de mauvaise taille refuse
+//   Mat (en dernier : les sparams de set() restent dans la base globale)
+//   S9  set avant la varf (GenEO), A = B
+//   S10 Mat construite avant distribute : refusee meme a partition
+//       identique, parade A = B
+//
+//  Lancer :
+//    ff-mpirun -np 4 test_distributedSolver.edp -ns -cl_ksp_max_it 3
+// =====================================================================
+
+load "PETSc"
+load "msh3"
+include "getARGV.idp"
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+
+// max global de |a - b| / max global de |b| (collectif)
+func real relErr(real[int] &a, real[int] &b) {
+  real[int] d = a - b;
+  real e = d.linfty, m = b.linfty, eg, mg;
+  mpiAllReduce(e, eg, mpiCommWorld, mpiMAX);
+  mpiAllReduce(m, mg, mpiCommWorld, mpiMAX);
+  return eg/mg;
+}
+
+// ok et info ne sont evalues que sur le rang 0 : aucun appel collectif dedans
+macro CHECK(tag, ok, info)
+if (mpirank == 0)
+  cout << "  [" << tag << "]  " << info << "   => " << ((ok) ? "PASS" : "FAIL") << endl;
+assert(ok);
+// EOM
+
+// l'erreur doit etre levee sur tous les rangs
+macro REFUSED(tag, refused)
+{
+  int rmin = 0;
+  mpiAllReduce(refused, rmin, mpiCommWorld, mpiMIN);
+  CHECK(tag, rmin == 1, "refus sur tous les rangs")
+}// EOM
+
+string geneo = "-pc_type hpddm -pc_hpddm_define_subdomains -pc_hpddm_has_neumann"
+             + " -pc_hpddm_levels_1_eps_nev 10 -pc_hpddm_levels_1_sub_pc_type lu"
+             + " -pc_hpddm_coarse_pc_type lu -ksp_rtol 1e-10";
+string onelevel = "-pc_type hpddm -pc_hpddm_define_subdomains"
+                + " -pc_hpddm_coarse_sub_pc_type lu -ksp_rtol 1e-10";
+
+mesh3 Th0 = cube(10, 10, 10);
+Dmesh3 DTh = distribute(Th0, overlap = 1, partmethod = "metis", keepGlobal = true);
+fespace Uh(DTh, P1);
+Uh u, v, w;
+int n, n1, n2;
+real e;
+
+macro Lap(u, v) int3d(DTh)(grad(u)'*grad(v) + u*v) - int3d(DTh)((1 + x)*v) + on(1, u = 0)// EOM
+problem Pref(w, v, solver = LU) = Lap(w, v);
+problem Pgeneo(u, v, sparams = geneo, getnbiteration = n) = Lap(u, v);
+problem P1lvl(u, v, sparams = onelevel, getnbiteration = n) = Lap(u, v);
+
+if (mpirank == 0) cout << "--- problem" << endl;
+// S1 : le KSP doit exister avant l'assemblage pour recevoir la matrice de Neumann
+u = 0; P1lvl; int nOne = n;
+Pref;
+u = 0; Pgeneo; n1 = n;
+e = relErr(u[], w[]);
+CHECK("S1 GenEO, 1er solve juste   ", e < 1e-6, "erreur " << e)
+u = 0; Pgeneo; n2 = n;
+CHECK("S1 GenEO, iterations        ", n1 == n2 && n1 < nOne, "1er " << n1 << ", 2e " << n2 << ", un niveau " << nOne)
+
+// S2 : Pb limite a 2 iterations ; Pa ne doit pas l'heriter
+problem Pa(u, v, sparams = "-ksp_type cg -ksp_rtol 1e-10", getnbiteration = n) = Lap(u, v);
+problem Pb(u, v, sparams = "-ksp_max_it 2", getnbiteration = n) = Lap(u, v);
+u = 0; Pa; n1 = n;
+u = 0; Pb;
+u = 0; Pa; n2 = n;
+CHECK("S2 sparams isoles           ", n1 == n2 && n2 > 2, "Pa : " << n1 << " puis " << n2)
+
+// S3 : -a_ksp_max_it ne concerne que le prefixe a_
+problem Qa(u, v, prefix = "a_", sparams = "-a_ksp_max_it 2", getnbiteration = n) = Lap(u, v);
+problem Qb(u, v, prefix = "b_", getnbiteration = n) = Lap(u, v);
+u = 0; Qa; n1 = n;
+u = 0; Qb; n2 = n;
+CHECK("S3 prefix=                  ", n1 == 2 && n2 > 2, "a_ : " << n1 << ", b_ : " << n2)
+
+// S3 : la ligne de commande vise cl_ ; des sparams la remplacent le temps d'un
+//      solve, puis sa valeur est restauree pour les problems suivants
+int clMax = getARGV("-cl_ksp_max_it", 0);
+if (clMax == 0) {
+  if (mpirank == 0) cout << "  [S3 ligne de commande       ]  -cl_ksp_max_it absent   => SKIP" << endl;
+}
+else {
+  problem Ca(u, v, prefix = "cl_", getnbiteration = n) = Lap(u, v);
+  problem Cb(u, v, prefix = "cl_", sparams = "-cl_ksp_max_it 5", getnbiteration = n) = Lap(u, v);
+  problem Cc(u, v, prefix = "cl_", getnbiteration = n) = Lap(u, v);
+  u = 0; Ca; n1 = n;
+  u = 0; Cb; n2 = n;
+  u = 0; Cc;
+  CHECK("S3 ligne de commande        ", n1 == clMax && n2 == 5 && n == clMax, "Ca : " << n1 << ", Cb : " << n2 << ", Cc : " << n)
+}
+
+// S4 : un 2e solve part de la solution ; preonly ignore le point de depart
+problem Plu(u, v, solver = LU, getnbiteration = n) = Lap(u, v);
+u = 0; Pgeneo; Pgeneo;
+CHECK("S4 depart de u              ", n == 0, n << " iteration au 2e solve")
+Plu;
+e = relErr(u[], w[]);
+CHECK("S4 solver = LU              ", n == 1 && e < 1e-12, n << " iteration, erreur " << e)
+
+// S5 : nouveau maillage distribue, le KSP est recree et doit rester a deux niveaux
+DTh = distribute(Th0, overlap = 1, partmethod = "scotch", keepGlobal = true);
+u = 0; w = 0;
+Pref;
+Pgeneo;
+e = relErr(u[], w[]);
+CHECK("S5 GenEO apres distribute   ", e < 1e-6 && n < nOne, n << " iterations, erreur " << e)
+
+// S6 : sans recouvrement, la matrice globale est la somme des matrices locales.
+//      La reference est sequentielle (un LU distribue passerait par le meme
+//      assemblage) ; comparaison par une integrale, int3d(D0) etant globale.
+{
+  Dmesh3 D0 = distribute(Th0, overlap = 0, partmethod = "metis", keepGlobal = true);
+  fespace U0(D0, P1);
+  U0 a, b;
+  macro Lap0(a, b) int3d(D0)(grad(a)'*grad(b) + a*b) - int3d(D0)((1 + x)*b) + on(1, a = 0)// EOM
+  problem P0(a, b, sparams = "-ksp_type cg -pc_type jacobi -ksp_rtol 1e-10") = Lap0(a, b);
+  problem P0geneo(a, b, sparams = geneo) = Lap0(a, b);
+  fespace Vh(Th0, P1);
+  Vh s, t;
+  solve Pseq(s, t) = int3d(Th0)(grad(s)'*grad(t) + s*t) - int3d(Th0)((1 + x)*t) + on(1, s = 0);
+  P0;
+  real Ia = int3d(D0)(a*a), Is = int3d(Th0)(s*s);
+  e = abs(Ia - Is)/Is;
+  CHECK("S6 overlap = 0, juste       ", e < 1e-6, "ecart " << e)
+  int refused = 0;
+  try { P0geneo; } catch (...) { refused = 1; }
+  REFUSED("S6 overlap = 0 + GenEO      ", refused)
+}
+
+// S7 : PETSc reel, second membre complexe
+{
+  varf vc(u, v) = int3d(DTh)(((1 + x) + 1i*(2*y - z))*v);
+  varf vr(u, v) = int3d(DTh)((1 + x)*v);
+  varf vi(u, v) = int3d(DTh)((2*y - z)*v);
+  complex[int] rc = vc(0, Uh);
+  real[int] ra = vr(0, Uh), ri = vi(0, Uh);
+  real[int] re = rc.re, im = rc.im;
+  e = max(relErr(re, ra), relErr(im, ri));
+  CHECK("S7 second membre complexe   ", e < 1e-12, "erreur " << e)
+}
+
+// S8 : champ 1 = vitesse, 2 = pression
+{
+  mesh Th2 = square(16, 16);
+  meshS ThS = movemesh23(Th2, transfo = [x, y, 0]);
+  DmeshS DS = distribute(ThS, overlap = 1, partmethod = "metis", keepGlobal = true);
+  fespace Wh(DS, [P1b, P1b, P1]);
+  Wh [u1, u2, p], [v1, v2, q], [w1, w2, r];
+  Wh [f1, f2, fp] = [1, 1, 2];
+  string[int] names = ["velocity", "pressure"];
+  macro div(a1, a2) (dx(a1) + dy(a2))// EOM
+  macro Stokes(u1, u2, p) int2d(DS)(dx(u1)*dx(v1) + dy(u1)*dy(v1) + dx(u2)*dx(v2) + dy(u2)*dy(v2)
+    - p*div(v1, v2) - q*div(u1, u2) - 1e-8*p*q) - int2d(DS)(x*v2) + on(1, 2, 3, 4, u1 = 0, u2 = 0)// EOM
+  string fs = "-ksp_type fgmres -ksp_rtol 1e-10 -pc_type fieldsplit -pc_fieldsplit_type schur"
+            + " -pc_fieldsplit_schur_fact_type full -pc_fieldsplit_schur_precondition selfp"
+            + " -fieldsplit_velocity_pc_type lu -fieldsplit_pressure_pc_type lu";
+  problem S([u1, u2, p], [v1, v2, q], fields = f1[], names = names, sparams = fs, getnbiteration = n) = Stokes(u1, u2, p);
+  problem Sref([w1, w2, r], [v1, v2, q], solver = LU) = Stokes(w1, w2, r);
+  S; Sref;
+  e = relErr(u1[], w1[]);
+  CHECK("S8 Stokes fieldsplit        ", e < 1e-6 && n <= 5, n << " iterations, erreur " << e)
+  // fields doit avoir une valeur par ddl local (a recalculer apres distribute)
+  real[int] bad(3);
+  problem Sbad([u1, u2, p], [v1, v2, q], fields = bad, names = names, sparams = fs) = Stokes(u1, u2, p);
+  int refused = 0;
+  try { Sbad; } catch (...) { refused = 1; }
+  REFUSED("S8 fields de mauvaise taille", refused)
+}
+
+if (mpirank == 0) cout << "--- Mat" << endl;
+varf vLap(u, v) = int3d(DTh)(grad(u)'*grad(v) + u*v) + int3d(DTh)((1 + x)*v) + on(1, u = 0);
+real[int] rhs = vLap(0, Uh);
+Mat R(Uh);
+set(R, sparams = "-lu_ksp_type preonly -lu_pc_type lu", prefix = "lu_");
+R = vLap(Uh, Uh);
+w[] = R^-1 * rhs;
+
+// S9 : set() avant l'assemblage, comme S1 ; puis A = B remplace operateur et KSP
+{
+  Mat A(Uh);
+  set(A, sparams = geneo);
+  A = vLap(Uh, Uh);
+  u[] = A^-1 * rhs;
+  e = relErr(u[], w[]);
+  CHECK("S9 Mat + GenEO              ", e < 1e-6, "erreur " << e)
+  Mat B(Uh);
+  B = vLap(Uh, Uh);
+  A = B;
+  u[] = A^-1 * rhs;
+  e = relErr(u[], w[]);
+  CHECK("S9 A = B                    ", e < 1e-6, "erreur " << e)
+}
+
+// S10 : une Mat ne survit pas a son maillage distribue
+{
+  Mat A(Uh);
+  A = vLap(Uh, Uh);
+  DTh = distribute(Th0, overlap = 1, partmethod = "metis", keepGlobal = true);
+  u = 0; w = 0;   // u[] garde l'ancienne taille jusqu'a la prochaine affectation
+  int refused = 0;
+  try { A = vLap(Uh, Uh); } catch (...) { refused = 1; }
+  REFUSED("S10 Mat perimee             ", refused)
+  Mat B(Uh);
+  A = B;
+  A = vLap(Uh, Uh);
+  real[int] q = vLap(0, Uh);
+  u[] = A^-1 * q;
+  Mat C(Uh);
+  set(C, sparams = "-lu_ksp_type preonly -lu_pc_type lu", prefix = "lu_");
+  C = vLap(Uh, Uh);
+  w[] = C^-1 * q;
+  e = relErr(u[], w[]);
+  CHECK("S10 parade Mat B(Uh); A = B ", e < 1e-6, "erreur " << e)
+  // meme partition, tailles locales egales : seule l'identite du maillage,
+  // transmise a A par A = B, permet la detection
+  DTh = distribute(Th0, overlap = 1, partmethod = "metis", keepGlobal = true);
+  refused = 0;
+  try { A = vLap(Uh, Uh); } catch (...) { refused = 1; }
+  REFUSED("S10 meme partition          ", refused)
+}
