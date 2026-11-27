@@ -80,10 +80,15 @@ struct FragInj {
     KN<int> src;      // src[d] = DDL source local du DDL d du fragment, -1 si aucun (longueur nd)
 };
 
-struct FragOp {
-    int        nrow = 0, ncol = 0;
-    KN<int>    ii, jj;
-    KN<double> aij;
+// Operateur de transfert : CSR en ordre de completion des lignes.
+// Bloc s = ligne destination rowId[s], coefficients [start[s], start[s+1]).
+// Colonnes = DDL des fragments concatenes (colOffset[j] + c).
+struct TransferOp {
+    int nrow = 0, ncol = 0;
+    std::vector<int>    rowId;   // ligne destination du bloc s
+    std::vector<int>    start;   // rowId.size()+1 debuts de bloc
+    std::vector<int>    col;     // colonne concatenee
+    std::vector<double> val;
 };
 
 template<class Mesh>
@@ -100,15 +105,15 @@ struct TransferPlan : public RefCounter {
 
     // reception
     KN<int> recvFromRanks;
-    std::vector<FragOp*> M;        
-    std::vector<int> ndFrag;     
+    TransferOp       op;
+    std::vector<int> ndFrag;      // nb de DDL du fragment j
+    std::vector<int> colOffset;   // nR+1 : debut des colonnes du fragment j dans op   
 
     KN<double> chi;
     KN<double> cover;
 
     TransferPlan() {};
     ~TransferPlan() {
-        for (size_t j = 0; j < M.size(); ++j) delete M[j];
         if (Dsrc) Dsrc->destroy();
         if (Ddst) Ddst->destroy();
     }

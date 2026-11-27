@@ -578,22 +578,22 @@ static void exchangeDofOnly(pcommworld comm,
                             const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
                             const std::vector<KN<R> >& subOut,
                             const std::vector<int>& ndSend,
-                            const std::vector<int>& ndFrag,
-                            std::vector<KN<R> >& dofIn)
+                            const std::vector<int>& colOffset,
+                            KN<R>& xcat)
 {
     MPI_Comm cw = ffComm(comm);
     const int nS = sendToRanks.n, nR = recvFromRanks.n;
-    ffassert((int)ndSend.size() == nS && (int)ndFrag.size() == nR);
-    dofIn.assign(nR, KN<R>());
+    ffassert((int)ndSend.size() == nS && (int)colOffset.size() == nR+1);
+    xcat.resize(colOffset[nR]);
 
     std::vector<MPI_Request> rq;
     rq.reserve(nR + nS);                       // AUCUNE reallocation ensuite
 
     for (int j = 0; j < nR; ++j) {             // tous les Irecv AVANT les Isend
-        if (ndFrag[j] == 0) continue;
-        dofIn[j].resize(ndFrag[j]);
+        const int nd = colOffset[j+1] - colOffset[j];
+        if (nd == 0) continue;
         rq.resize(rq.size() + 1);
-        MPI_Irecv((R*)dofIn[j], (int)(ndFrag[j]*sizeof(R)), MPI_BYTE,
+        MPI_Irecv((R*)xcat + colOffset[j], (int)(nd*sizeof(R)), MPI_BYTE,
                   recvFromRanks[j], TAG_XFER_DOF, cw, &rq[rq.size()-1]);
     }
     for (int i = 0; i < nS; ++i) {
@@ -610,14 +610,12 @@ template<class R>
 static void exchangeDofOnly(pcommworld, const KN<int>&, const KN<int>& recvFromRanks,
                             const std::vector<KN<R> >& subOut,
                             const std::vector<int>& ndSend,
-                            const std::vector<int>& ndFrag,
-                            std::vector<KN<R> >& dofIn)
+                            const std::vector<int>& colOffset,
+                            KN<R>& xcat)
 {
-    dofIn.assign(recvFromRanks.n, KN<R>());
-    if (recvFromRanks.n && !subOut.empty() && ndFrag[0] > 0 && ndSend[0] > 0) {
-        dofIn[0].resize(ndFrag[0]);
-        dofIn[0] = subOut[0];
-    }
+    xcat.resize(colOffset.back());
+    if (recvFromRanks.n && !subOut.empty() && ndSend[0] > 0 && colOffset[1] > 0)
+        for (int c = 0; c < colOffset[1]; ++c) xcat[c] = subOut[0][c];
 }
 #endif
 
@@ -694,9 +692,13 @@ struct SearchMethodGuard {
 };
 
 template<class R>
-static void applyPlainOp(const FragOp& F, const KN<R>& u, KN<R>& dstU){
-    for (long k = 0; k < F.ii.n; ++k)
-        dstU[F.ii[k]] += F.aij[k]*u[F.jj[k]];
+static void applyOp(const TransferOp& A, const KN_<R>& x, KN<R>& y) {
+    const int nb = (int)A.rowId.size();
+    for (int s = 0; s < nb; ++s) {
+        R acc = R();
+        for (int q = A.start[s]; q < A.start[s+1]; ++q) acc += A.val[q] * x[A.col[q]];
+        y[A.rowId[s]] += acc;
+    }
 }
 
 static void reportCoverage(const CoverStats& s, pcommworld comm, const char* where) {
@@ -731,7 +733,7 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
                                    const std::vector<Mesh*>& frags,
                                    const std::vector<KN<double> >& dofIn,
                                    const int* data,
-                                   std::vector<FragOp*>& Mout, std::vector<int>& ndFrag,
+                                   TransferOp& A, std::vector<int>& ndFrag, std::vector<int>& colOffset,
                                    KN<double>& cover, double epsNRequested = 0.0, double epsTRequested = 0.0, const FragLocator<Mesh>* preBuilt = nullptr)
 {
     typedef typename Mesh::Element          Element;
@@ -739,7 +741,8 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
     typedef typename GFESpace<Mesh>::FElement FElement;
 
     const int nR = (int)frags.size();
-    Mout.assign(nR, nullptr);
+    A = TransferOp();
+    A.nrow = dstVh.NbOfDF;
     ndFrag.assign(nR, 0);
     cover.resize(dstVh.NbOfDF); cover = 0.0;
 
@@ -764,8 +767,19 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
             ndFrag[j] = fragVh[j]->NbOfDF;
         }
 
-    std::vector<std::vector<int> >    cooI(nR), cooJ(nR);
-    std::vector<std::vector<double> > cooV(nR);
+        colOffset.assign(nR + 1, 0);
+    long totCol = 0;
+    for (int j = 0; j < nR; ++j) { totCol += ndFrag[j]; ffassert(totCol < INT_MAX); colOffset[j+1] = (int)totCol; }
+    A.ncol = colOffset[nR];
+
+    // poids par fragment pour cover : masque 0/1, chi (np=1), ou nullptr = poids 1
+    std::vector<const double*> wFrag(nR, nullptr);
+    for (int j = 0; j < nR; ++j)
+        if (dofIn[j].n > 0) { ffassert(dofIn[j].n >= (long)ndFrag[j]); wFrag[j] = &dofIn[j][0]; }
+    
+    struct Stage { int ldf; int col; double v; }; // ldf = DDL local de l'élément destination
+    std::vector< Stage > stage, sorted;
+    std::vector<int> cnt, fillAt;
 
     // parametres d'interpolation : cf. lgmat.cpp:891-896
     int op = data[1];
@@ -777,6 +791,14 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
     const int nbdfVK = tfeSrc->NbDoF;
     const int NVh    = tfeSrc->N;
     const int sfb1   = NVh * last_operatortype * nbdfVK;
+
+    // Estimation : une ligne recoit au plus les DDL scalaires de sa composante.
+    // Exacte pour [Pk]^N ; sous-estimee pour [P2,P2,P1] (le vector grandit, resultat juste).
+    // Les pages reservees jamais ecrites ne sont pas residentes (RSS).
+    const long est = (long)dstVh.NbOfDF * std::max(1, nbdfVK / std::max(1, NVh));
+    A.col.reserve(est); A.val.reserve(est);
+    A.rowId.reserve(dstVh.NbOfDF); A.start.reserve(dstVh.NbOfDF + 1);
+    A.start.push_back(0);
 
     InterpolationMatrix<RdHat> ipmat(dstVh);
     const int nbp = ipmat.np;
@@ -827,43 +849,39 @@ static void buildFragmentOperators(const GFESpace<Mesh>& dstVh, const GFESpace<M
                 if (std::abs(fbj[idfv]) > eps) {
                     const double c = fbj[idfv] * aipj;
                     if (std::abs(c) > eps) {
-                        cooI[j].push_back(dfu);
-                        cooJ[j].push_back(KV(idfv));
-                        cooV[j].push_back(c);
+                        stage.push_back({ipmat.dofe[i], colOffset[j] + KV(idfv), c});
+                        cover[dfu] += c * (wFrag[j] ? wFrag[j][KV(idfv)] : 1.0);
                     }
                 }
         }
 
+        // vidage du tampon : tri par comptage STABLE sur le DDL local, puis
+        // une ligne CSR par DDL local touche (l'ordre interne de la ligne est conserve)
+        if (!stage.empty()) {
+            const int nl = KU.NbDoF();
+            cnt.assign(nl + 1, 0);
+            for (const Stage& e : stage) cnt[e.ldf + 1]++;
+            for (int l = 0; l < nl; ++l) cnt[l + 1] += cnt[l];
+            fillAt.assign(cnt.begin(), cnt.end() - 1);
+            sorted.resize(stage.size());
+            for (const Stage& e : stage) sorted[fillAt[e.ldf]++] = e;
+            for (int l = 0; l < nl; ++l) {
+                if (cnt[l + 1] == cnt[l]) continue;
+                A.rowId.push_back(KU(l));
+                for (int q = cnt[l]; q < cnt[l + 1]; ++q) {
+                    A.col.push_back(sorted[q].col);
+                    A.val.push_back(sorted[q].v);
+                }
+                A.start.push_back((int)A.col.size());
+            }
+            stage.clear();
+        }
         // marquage INCONDITIONNEL de tous les DDL de l'element : cf.
         // lgmat.cpp:967-971. Ne marquer que les DDL resolus resoudrait
         // davantage de lignes et ferait bouger les comptes de couverture.
         for (int df = 0; df < KU.NbDoF(); ++df) fait[KU(df)] = true;
     }
-
-    // compactage en FragOp + cover = somme_j M_j * chi_j
-    for (int j = 0; j < nR; ++j) {
-        if (cooI[j].empty()) continue;
-        FragOp* F = new FragOp;
-        F->nrow = dstVh.NbOfDF;
-        F->ncol = ndFrag[j];
-        const long nz = (long)cooI[j].size();
-        F->ii.resize(nz); F->jj.resize(nz); F->aij.resize(nz);
-        for (long q = 0; q < nz; ++q) {
-            F->ii[q] = cooI[j][q]; F->jj[q] = cooJ[j][q]; F->aij[q] = cooV[j][q];
-        }
-        Mout[j] = F;
-        // dofIn[j] = poids par DDL du fragment (masque 0/1, ou chi en np=1).
-        // Vide = aucun trou cote emetteur : poids 1 partout.
-        const bool hasMask = (dofIn[j].n > 0);
-        ffassert(!hasMask || dofIn[j].n >= (long)ndFrag[j]);
-        if (hasMask)
-            for (long q = 0; q < nz; ++q)
-                cover[F->ii[q]] += F->aij[q] * dofIn[j][F->jj[q]];
-        else
-            for (long q = 0; q < nz; ++q)
-                cover[F->ii[q]] += F->aij[q];
-    }
-
+    ffassert(A.col.size() < (size_t)INT_MAX); // start est en int
     for (int j = 0; j < nR; ++j) if (owned[j]) delete fragVh[j];
 }
 
@@ -919,17 +937,20 @@ static bool detectTolerances(const GFESpace<Mesh>& dstVh, const std::vector<Mesh
     return true;
 }
 
-static FragOp* morseToFragOp(const MatriceMorse<double>& A) {
-    ffassert(A.fortran == 0 && A.half == 0);
-    FragOp* F = new FragOp;
-    F->nrow = A.n;
-    F->ncol = A.m;
-    const long nz = (long)A.nnz;
-    F->ii.resize(nz); F->jj.resize(nz); F->aij.resize(nz);
-    for (long k = 0; k < nz; ++k) {
-        F->ii[k] = A.i[k]; F->jj[k] = A.j[k]; F->aij[k] = A.aij[k];
-    }
-    return F;
+static void morseToTransferOp(const MatriceMorse<double>& M, TransferOp& A) {
+    ffassert(M.fortran == 0 && M.half == 0);
+    const int n = M.n; const long nz = (long)M.nnz;
+    ffassert(nz < INT_MAX);
+    std::vector<int> cnt(n + 1, 0);
+    for (long k = 0; k < nz; ++k) cnt[M.i[k] + 1]++;
+    for (int r = 0; r < n; ++r) cnt[r + 1] += cnt[r];
+    std::vector<int> at(cnt.begin(), cnt.end() - 1);
+    A = TransferOp(); A.nrow = n; A.ncol = M.m;
+    A.col.resize(nz); A.val.resize(nz);
+    for (long k = 0; k < nz; ++k) { const int q = at[M.i[k]]++; A.col[q] = M.j[k]; A.val[q] = M.aij[k]; }
+    A.start.push_back(0);
+    for (int r = 0; r < n; ++r)
+        if (cnt[r + 1] > cnt[r]) { A.rowId.push_back(r); A.start.push_back(cnt[r + 1]); }
 }
 
 template<class Mesh>
@@ -950,9 +971,10 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
 
     if (&Dsrc == &Ddst && &srcVh.Th == &dstVh.Th) {
         MatriceMorse<double>* A = buildInterpolationMatrixT(dstVh, srcVh, (int*)data);
-        P->M.assign(1, morseToFragOp(*A));
+        morseToTransferOp(*A, P->op);
         delete A;
         P->ndFrag.assign(1, srcVh.NbOfDF);
+        P->colOffset = {0, srcVh.NbOfDF};
         P->path = XFER_LOCAL;
         return P;
     }
@@ -982,14 +1004,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
         std::vector<Mesh*> one1(1, const_cast<Mesh*>(&srcVh.Th));
         std::vector<KN<double>> mask1(1);
         mask1[0].resize(srcVh.NbOfDF); mask1[0] = P->chi;
-        buildFragmentOperators(dstVh, srcVh, one1, mask1, data, P->M, P->ndFrag, P->cover, tolN, tolT);
-        if (P->M.empty())  P->M.assign(1, (FragOp*)nullptr);
-        if (!P->M[0]) {
-            FragOp* F0 = new FragOp;
-            F0->nrow = P->nDstDof;
-            F0->ncol = srcVh.NbOfDF;
-            P->M[0] = F0;
-        }
+        buildFragmentOperators(dstVh, srcVh, one1, mask1, data, P->op, P->ndFrag, P->colOffset, P->cover, tolN, tolT);
         reportCoverage(coverageOf(P->cover), P->comm, "interpolateD");
         P->path = XFER_SINGLE_RANK;
         return P;        
@@ -1020,14 +1035,14 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     }
     #endif
 
-    std::vector<FragOp*> Mtry;
-    std::vector<int>     ndTry;
+    TransferOp opTry;
+    std::vector<int>     ndTry, offTry;
     KN<double>           coverTry;
     int globalOK = 0;
     if (globalCand) {
         mask[0].resize(srcVh.NbOfDF); mask[0] = 1.0;
         buildFragmentOperators(dstVh, srcVh, one, mask, data,
-                               Mtry, ndTry, coverTry,
+                               opTry, ndTry, offTry, coverTry,
                                tolN, tolT, haveLv ? &Lv : nullptr);
         const int localOK = coversAll(coverageOf(coverTry)) ? 1 : 0;
         globalOK = localOK;
@@ -1041,14 +1056,15 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
 
 
     if (globalOK) {
-        P->M = Mtry;
+        P->op = std::move(opTry);
         P->ndFrag = ndTry;
+        P->colOffset = offTry;
         P->path = XFER_LOCAL;
         P->chi.resize(0);
         P->cover.resize(0);
         return P;
     }
-    for (size_t j = 0; j < Mtry.size(); ++j) delete Mtry[j];
+    opTry = TransferOp();
 
     std::vector<Mesh*>        keepFrags;
     std::vector<KN<double> >  keepDof;
@@ -1061,7 +1077,7 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     if (autoTol) detectTolerances(dstVh, keepFrags, Dsrc.comm, tolN, tolT);
     try {
         buildFragmentOperators(dstVh, srcVh, keepFrags, keepDof, data,
-                               P->M, P->ndFrag, P->cover,
+                               P->op, P->ndFrag, P->colOffset, P->cover,
                                tolN, tolT);
     }
     catch (...) {
@@ -1072,7 +1088,11 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     for (size_t j = 0; j < keepFrags.size(); ++j)
         if (keepFrags[j]) keepFrags[j]->destroy();
 
-    ffassert((int)P->M.size() == P->recvFromRanks.n);
+    if (P->op.col.capacity() > P->op.col.size() + P->op.col.size()/10) {
+        std::vector<int>(P->op.col).swap(P->op.col);
+        std::vector<double>(P->op.val).swap(P->op.val);
+    }
+    ffassert((int)P->colOffset.size() == P->recvFromRanks.n+1);
     ffassert((int)P->ndFrag.size() == P->recvFromRanks.n);
 
     reportCoverage(coverageOf(P->cover), P->comm, "transferPlan");
@@ -1087,14 +1107,14 @@ static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN
     dstU = R();
 
     if (P.path == XFER_LOCAL) {                     // ni chi ni renormalisation
-        applyPlainOp(*P.M[0], srcU, dstU);
+        applyOp(P.op, srcU, dstU);
         return;
     }
 
     if (P.path == XFER_SINGLE_RANK) {
         KN<R> scaledU(srcU.n);
         for (int d = 0; d < srcU.n; ++d) scaledU[d] = srcU[d] * P.chi[d];
-        applyPlainOp(*P.M[0], scaledU, dstU); 
+        applyOp(P.op, scaledU, dstU); 
     } else {
         std::vector<KN<R> > subOut(P.sendToRanks.n);
         std::vector<int> ndSend(P.sendToRanks.n, 0);
@@ -1108,10 +1128,9 @@ static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN
                 subOut[i][d] = (s >= 0) ? srcU[s] : R();
             }
         }
-        std::vector<KN<R> > dofIn;
-        exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, dofIn);
-        for (int j = 0; j < P.recvFromRanks.n; ++j)
-            if (P.M[j]) applyPlainOp(*P.M[j], dofIn[j], dstU);
+        KN<R> xcat;
+        exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.colOffset, xcat);
+        applyOp(P.op, xcat, dstU);
     }
 
     for (int i = 0; i < dstU.n; ++i)
@@ -1119,7 +1138,7 @@ static void applyTransferPlan(const TransferPlan<Mesh>& P, const KN<R>& srcU, KN
 }
 
 template<class Mesh, class T>
-static void exchangeRawOnPlan(const TransferPlan<Mesh>& P, const KN<T>& srcValues, T fillHoles, std::vector<KN<T> >& perFragment) {
+static void exchangeRawOnPlan(const TransferPlan<Mesh>& P, const KN<T>& srcValues, T fillHoles, KN<T>& xcat) {
     ffassert(srcValues.n == P.nSrcDof);
     ffassert(P.path == XFER_GENERAL);
 
@@ -1135,7 +1154,7 @@ static void exchangeRawOnPlan(const TransferPlan<Mesh>& P, const KN<T>& srcValue
             subOut[i][d] = (s >= 0) ? srcValues[s] : fillHoles;
         }
     }
-    exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.ndFrag, perFragment);
+    exchangeDofOnly(P.comm, P.sendToRanks, P.recvFromRanks, subOut, ndSend, P.colOffset, xcat);
 }
 
 namespace {
@@ -1151,35 +1170,19 @@ static MatriceMorse<double>* assembleTransferMatrix(const TransferPlan<Mesh>& P,
     const bool weighted = (P.path != XFER_LOCAL);
 
     std::vector<XTrip> T;
-
-    if (P.path == XFER_GENERAL) {
-        std::vector<KN<long> > globFrag;
-        exchangeRawOnPlan(P, srcNumbering, -1L, globFrag);
-
-        for (int j = 0; j < P.recvFromRanks.n; ++j) {
-            if (!P.M[j]) continue;
-            const FragOp& F = *P.M[j];
-            for (long k = 0; k < F.ii.n; ++k) {
-                const int c = F.jj[k];
-                const long g = globFrag[j][c];
-                if (g < 0) continue;          // trou : c'est le masque, poids nul
-                XTrip t; t.i = F.ii[k]; t.g = g; t.v = F.aij[k];   // poids 1
-                T.push_back(t);
-            }
-        }
-    }
-    
-    else {
-        ffassert(P.M.size() == 1 && P.M[0]);
-        const FragOp& F = *P.M[0];
-        for (long k = 0; k < F.ii.n; ++k) {
-            const int c = F.jj[k];
-            const double w = weighted ? P.chi[c] : 1.0;
-            if (w == 0.0) continue;
-            XTrip t; t.i = F.ii[k]; t.g = srcNumbering[c]; t.v = F.aij[k]*w;
+    KN<long> globCat;
+    if (P.path == XFER_GENERAL) exchangeRawOnPlan(P, srcNumbering, -1L, globCat);
+    const TransferOp& Op = P.op;
+    T.reserve(Op.col.size());
+    for (size_t s = 0; s < Op.rowId.size(); ++s)
+        for (int q = Op.start[s]; q < Op.start[s+1]; ++q) {
+            const int c = Op.col[q];
+            long g; double w;
+            if (P.path == XFER_GENERAL) { g = globCat[c]; w = 1.0; if (g < 0) continue; }   // trou : poids nul
+            else { g = srcNumbering[c]; w = weighted ? P.chi[c] : 1.0; if (w == 0.0) continue; }
+            XTrip t; t.i = Op.rowId[s]; t.g = g; t.v = Op.val[q] * w;
             T.push_back(t);
         }
-    }
 
     std::sort(T.begin(), T.end(), xtripLess);
 
@@ -1356,17 +1359,15 @@ long probeRawTransfer(const TransferPlan<Mesh>** const& ppP,
     out->resize(5); *out = 0L; (*out)[3] = LONG_MAX; (*out)[4] = -1L;
     if (P.path != XFER_GENERAL) return (long)P.path;
 
-    std::vector<KN<long> > globFrag;
-    exchangeRawOnPlan(P, *srcNumbering, -1L, globFrag);
-
-    for (int j = 0; j < P.recvFromRanks.n; ++j)
-        for (long c = 0; c < globFrag[j].n; ++c) {
-            const long g = globFrag[j][c];
-            (*out)[0]++;
-            if (g < 0) { (*out)[1]++; continue; }
-            (*out)[3] = std::min((*out)[3], g);
-            (*out)[4] = std::max((*out)[4], g);
-        }
+    KN<long> globCat;
+    exchangeRawOnPlan(P, *srcNumbering, -1L, globCat);
+    for (long c = 0; c < globCat.n; ++c) {
+        const long g = globCat[c];
+        (*out)[0]++;
+        if (g < 0) { (*out)[1]++; continue; }
+        (*out)[3] = std::min((*out)[3], g);
+        (*out)[4] = std::max((*out)[4], g);
+    }
     return (long)P.path;
 }
 
