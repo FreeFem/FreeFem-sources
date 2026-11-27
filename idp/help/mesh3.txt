@@ -1,0 +1,4 @@
+mesh3 Th; : a 3D mesh of tetrahedra (int3d(Th), fespace Vh(Th, P1), ...).
+  Built by cube, buildlayers, tetg (load "tetgen"), readmesh3, movemesh,
+  trunc, ...
+  Example: mesh3 Th = cube(10, 10, 10);

@@ -1,0 +1,91 @@
+// 2D advection on the dual mesh (control volumes of fvdualmesh, P1 unknown), parallel version
+// (domain decomposition, PETSc) of freevol_advectiondm.edp, written like freevol_advection2d_ddm.edp:
+// the same rotation of a Gaussian, the same scheme (Heun)
+//   the mesh is partitioned by createMat (overlap of 3 layers of triangles: the stencil of order 2
+//   on the dual mesh, one layer more than on the primal mesh, because the control volumes of the vertices
+//   on the boundary of the local mesh are cut and their centroids, used for the slopes in the
+//   triangles, change; 1 layer is enough at order 1), the velocity, the dual mesh Thstar and fvscheme on the
+//   local mesh (meshdual Thstar = builddualmesh(Th), found by fvscheme from Th); the interfaces (label -111111): Neumann (the default), their
+//   vertices are overlap vertices, updated by the exchange
+//   at each step: the time step is the min over all processes, then exchange(A,ur,scaled=true)
+//   mass, min, max, L2 norm, L2 error: on the solution gathered on the global mesh ThG (the partition
+//   of unity A.D and the local <- global interpolation matrix: each vertex counts once)
+// plots on the dual mesh (plugin fvdualmesh, like test_meshD.edp): the solution gathered on ThG, plotted by
+//   process 0 on the dual mesh ThstarG of ThG, one value per control volume, with the modified ffglut:
+//     ff-mpirun -np 4 freevol_advectiondm2d_ddm.edp -wg -glut ../../../../FreeFem_test/ffglut_1D
+//     keys: m) polygon edges  3) stepped relief  v) palette  P) value under the mouse  c) cut
+//   (macro plotdual()0: the usual plots by plotMPI)
+// run: ff-mpirun -np 4 freevol_advectiondm2d_ddm.edp -wg   (options: -n, -ordre (2 by default, or 1), -nw: no plot)
+load "PETSc"// PETSc plugin
+include "macro_ddm.idp"// additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=1,value=1,wait=1,dim=3,cmm = // for plotMPI
+include "getARGV.idp"
+macro plotdual()1// 1: plots on the dual mesh (process 0, gathered solution), 0: plots by plotMPI
+int Np=getARGV("-n",100), ordre=getARGV("-ordre",2);
+real xp=-1.5, yp=-1.5, R=5., width=3.;
+border C(t=0,2.*pi) { x=R*cos(t); y=R*sin(t); label = 1;}
+border IB(t=0.,2.) {x=0.;y=(t-1.)*R;label = 33;}
+mesh Th = buildmesh(C(Np)+IB(Np/4),fixedborder=1,splitpbedge=1);
+mesh ThG = Th;                             // the global mesh (for the output)
+Mat A;
+macro ThOverlap()3//                       // overlap of 3 layers (order 2 on the dual mesh)
+createMat(Th, A, P1)                       // Th: the local mesh (with overlap)
+meshdual Thstar = builddualmesh(Th);       // the dual mesh of the local mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+func u0 = exp(-dist(x-xp,y-yp)^2/width^2);
+Vh u = u0, up, ur = 0, uBC = 0;
+Vh V1 = -y, V2 = x;                        // rotation around the origin
+int[int] labBC = [1,1];                    // the interfaces (-111111): Neumann, the default
+fvscheme FV([V1,V2], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre);
+// the local solution gathered on the global mesh (each vertex counts once)
+fespace VhG(ThG, P1);
+Vh D; D[] = A.D;                           // the partition of unity
+matrix IG = interpolate(Vh, VhG);          // local <- global
+macro gather(uloc,uglob){ real[int] tl=uloc[].*D[]; real[int] tg=IG'*tl;
+  mpiAllReduce(tg,uglob[],mpiCommWorld,mpiSUM); }//
+VhG uG;
+gather(u,uG)
+IFMACRO(plotdual,1)
+meshdual ThstarG;                                // the dual mesh of the global mesh, built by process 0
+if (!mpirank) ThstarG = builddualmesh(ThG);
+ENDIFMACRO
+real mass0 = int2d(ThG)(uG);
+real t = 0, dt, dtsub, dtl, CFL = 0.9, Tf = 4.;
+IFMACRO(plotdual,1)
+if (!mpirank) {
+  plot(ThG, ThstarG, cmm="the mesh and its dual mesh (the control volumes)", wait=1);
+  plot(ThstarG, uG[], value=1, cmm="dual mesh: initial data", wait=1);
+}
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plotMPI(Th, u, P1, def1, real, PARAMS "dual mesh: initial data")
+ENDIFMACRO
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {
+    dtl = fluxupdate(FV, [u], [ur], [uBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+    exchange(A, ur[], scaled=true);        // ur of the overlap vertices: that of their process
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+gather(u,uG)
+func uex = exp(-dist(cos(t)*x+sin(t)*y-xp,-sin(t)*x+cos(t)*y-yp)^2/width^2);
+real mass = int2d(ThG)(uG), l2 = sqrt(int2d(ThG)(uG^2)), err = sqrt(int2d(ThG)((uG-uex)^2));
+if (!mpirank) cout << "dual mesh (" << mpisize << " processes): t = " << t << " , " << it << " steps , mass = " << mass
+                   << " (error " << mass-mass0 << ") , min u = " << uG[].min << " , max u = " << uG[].max
+                   << " , L2 norm = " << l2 << " , L2 error = " << err << endl;
+IFMACRO(plotdual,1)
+if (!mpirank) {
+  plot(ThstarG, uG[], value=1, cmm="dual mesh: solution at t = " + t + " (m, 3, c, P)", wait=1);
+  plot(ThG, ThstarG, uG[], value=1, cmm="solution at t = " + t + ", with the primal mesh", wait=1);
+}
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plotMPI(Th, u, P1, def1, real, PARAMS "dual mesh: solution at t = " + t)
+ENDIFMACRO

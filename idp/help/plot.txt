@@ -1,0 +1,45 @@
+plot(obj1, obj2, ..., parameters) : draws in the ffglut window.
+
+  Objects: a mesh (mesh, mesh3, meshS, meshL), a finite element function u,
+  a vector field [ux,uy] or [ux,uy,uz], a curve [x,y] (real[int] arrays).
+
+  Main parameters:
+    wait=true          waits for a key before continuing the script
+    cmm="text"         title (see the 1D graph options below)
+    fill=true          filled isovalues
+    value=true         legend of the color values
+    nbiso=n            number of isovalues (20 by default)
+    viso=tab           given isovalues (real[int])
+    nbarrow=n, varrow=tab   same for the arrows
+    coef=c             arrow length
+    dim=3              3D view of a 2D solution
+    bb=[[xmin,ymin],[xmax,ymax]]   bounding box (fixed axes of a 1D graph)
+    aspectratio=true   same scale in x and y
+    boundary=false     without the mesh boundary
+    bw=true, grey=true black and white, grey levels
+    hsv=tab            color palette (h,s,v triplets)
+    ps="f.eps", pdf="f.pdf", svg="f.svg"   saves to a file
+    prev=true          keeps the view point of the previous plot
+
+  1D graph (curves [x,y] or a function on a meshL): options in cmm,
+  separated by | :
+    cmm="title | xlabel=... | ylabel=... | legend=a,b | logx | logy | loglog
+         | xrange=a:b | yrange=a:b"   (xrange, yrange: fixed bounds of an axis)
+
+  Keys in the window: ? help, enter next plot, p previous plot,
+  f fill, m mesh, v values, 3 2D/3D view, k lines/points or complex
+  part, G grid, x y log scale (1D graph), s surface/isosurfaces (3D),
+  F1 cutting plane (3D), F2 move it with the mouse, F3 fix it on the object,
+  c 2D cut: graph u(x) / u(y) below the view, < > move the line,
+  shift + drag an arbitrary segment,
+  w PPM capture, W PNG capture, Esc quit.
+  Enhanced 2D and 3D rendering (default): R on/off, C change palette
+  (turbo, viridis, cool to warm, rainbow, grey), v color bar,
+  n N fewer/more isocontours (2D) or isosurfaces (3D), o 2D isocontours
+  shown or hidden, P value of the function under the mouse (2D and 3D).
+  For a ParaView rendering: include "ffparaview.idp" then paraview("u", Th, u);
+
+  Examples:
+    plot(Th, wait=1);
+    plot(u, fill=1, value=1, cmm="solution");
+    plot([x,y1], [x,y2], cmm="Title | xlabel=t | legend=a,b");

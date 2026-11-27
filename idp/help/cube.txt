@@ -1,0 +1,3 @@
+cube(nx, ny, nz, [fx,fy,fz], flags=, label=, region=) : 3D mesh of the unit
+  cube (load "msh3" if needed).
+  Example: mesh3 Th = cube(10, 10, 10);

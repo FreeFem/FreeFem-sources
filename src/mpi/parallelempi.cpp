@@ -2587,6 +2587,32 @@ void f_end_parallele()
     if(verbosity> 2 || (verbosity>1&&mpirank ==0)) cout << "FreeFem++-mpi finalize correctly .\n" << flush ;
     else if(verbosity>5)  cout << '.' << endl ;
 }
+// parallel plot (plot(..., global=true), lgfem.cpp): the MPI communications, on MPI_COMM_WORLD
+extern void (*ff_plot_allgather_long)(const long *mine, long n, long *all);
+extern void (*ff_plot_gather_bytes)(const std::string &mine, std::vector< std::string > &all);
+static void ffPlotAllgatherLong(const long *mine, long n, long *all)
+{
+  MPI_Allgather((void *)mine, (int)n, MPI_LONG, all, (int)n, MPI_LONG, MPI_COMM_WORLD);
+}
+// the bytes of all the processes on process 0 (all[r]: the bytes of process r)
+static void ffPlotGatherBytes(const std::string &mine, std::vector< std::string > &all)
+{
+  int n = (int)mine.size(), size = (int)mpisize, rank = (int)mpirank;
+  std::vector< int > cnt(size, 0), dsp(size + 1, 0);
+  MPI_Gather(&n, 1, MPI_INT, cnt.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+  std::vector< char > buf;
+  if (rank == 0) {
+    for (int r = 0; r < size; r++) dsp[r + 1] = dsp[r] + cnt[r];
+    buf.resize(dsp[size] + 1);
+  }
+  MPI_Gatherv((void *)mine.data(), n, MPI_CHAR, buf.data(), cnt.data(), dsp.data(), MPI_CHAR, 0, MPI_COMM_WORLD);
+  all.clear();
+  if (rank == 0) {
+    all.resize(size);
+    for (int r = 0; r < size; r++) all[r].assign(buf.data() + dsp[r], cnt[r]);
+  }
+}
+
 void f_initparallele(int &argc, char **& argv)
 {
   /// FFCS: MPI_Init() needs to be called earlier (in ffcs/src/server.cpp)
@@ -2601,6 +2627,8 @@ void f_initparallele(int &argc, char **& argv)
   if(verbosity> 2 || (verbosity>1&&mpirank ==0))
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
   ff_atend(f_end_parallele); // set end MPI //
+  ff_plot_allgather_long = ffPlotAllgatherLong;    // plot(..., global=true)
+  ff_plot_gather_bytes = ffPlotGatherBytes;
 }
 
 double ffMPI_Wtime() {return MPI_Wtime();}

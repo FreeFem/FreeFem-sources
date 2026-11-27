@@ -1,0 +1,94 @@
+// Test case: parallelization (domain decomposition, PETSc) of a finite volume code on the dual mesh
+// FreeFEM does not decompose a dual mesh, and it is not needed: each control volume is attached to
+// a vertex of the primal mesh, so
+//   1) we decompose the PRIMAL mesh Th (DmeshCreate, overlap of 3 layers of triangles at order 2: the
+//      control volumes of the vertices on the boundary of the local mesh are cut, those of the next layer must
+//      be complete for their slopes)
+//   2) each process builds the dual of ITS local mesh: meshdual Thstar = builddualmesh(Th)
+//   3) the unknowns are P1 on the local Th (one value per vertex = per control volume): the exchange between
+//      processes (exchange) uses the decomposition matrix of the primal P1 (MatCreate(Th, dA0, P1))
+//   4) the cut control volumes (overlap vertices) are reset by the exchange and do not count in
+//      the time step (fvscheme knows it: label -111111 of the interfaces): the same computation as in sequential
+//   5) the P0 finite element of the dual on the local dual, fespace Phstar(Thstar, P0), is used for the output: the exact
+//      scheme mass (sum |C_i| u_i) computed in parallel with the partition of unity (zero on the cut
+//      vertices), the plot of the control volumes
+// the case: advection of a Gaussian by the rotation V = (-y, x) in a disk (freevol_advectiondm.edp), Tf = 4
+//   ff-mpirun -np 4 freevol_dual_ddm.edp -nw     (ff-mpirun -np 1: the sequential computation; the same result to all
+//   digits with 1, 2, 4 processes, the parallel mass = the mass on the dual of the whole mesh; the mass
+//   changes by 1e-6: the velocity is not exactly tangent to the boundary chords, Neumann lets flow in and out)
+load "PETSc"
+include "macro_ddm.idp"
+
+int Np = 100;
+real xp = -1.5, yp = -1.5, R = 5., width = 3.;
+border C(t=0, 2.*pi) { x = R*cos(t); y = R*sin(t); label = 1; }
+mesh Th = buildmesh(C(Np), fixedborder=1, splitpbedge=1);
+mesh ThG = Th;                            // the whole mesh (the output)
+
+// 1) the decomposition of the primal mesh
+macro ThOverlap()3//
+DmeshCreate(Th)
+Mat dA0;
+MatCreate(Th, dA0, P1);
+// 2) the dual of the local mesh
+meshdual Thstar = builddualmesh(Th);
+// 3) the P1 unknowns on the local mesh, the scheme on the local dual
+fespace Vh(Th, P1);
+Vh u = exp(-dist(x-xp, y-yp)^2/width^2), up, ur = 0, uBC = 0;
+Vh V1 = -y, V2 = x;
+int[int] labBC = [1, 1];                  // the disk boundary: Neumann; the interfaces (-111111): Neumann
+fvscheme FV([V1, V2], eq="advectiondm", labelBC=labBC, numflux=2, order=2);
+
+// 5) the scheme mass in parallel: sum over the processes of int2d(Thstar)(D u), D the partition of unity
+fespace Phstar(Thstar, P0);                // the P0 of the local dual
+Vh Dunity;
+Dunity[] = dA0.D;
+func real massddm(real[int] &uu) {
+  Vh uD;
+  uD[] = uu .* Dunity[];
+  Phstar w;
+  dualtoP0(w[], Thstar, uD[]);
+  real ml = int2d(Thstar)(w), m;
+  mpiAllReduce(ml, m, mpiCommWorld, mpiSUM);
+  return m;
+}
+real mass0 = massddm(u[]);
+
+real t = 0, dt, dtl, dtsub, CFL = .9, Tf = 4.;
+int iter;
+for (iter = 0; t < Tf - 1.e-10; iter++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtl = fluxupdate(FV, [u], [ur], [uBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);// 4) the time step: the min over the processes
+    exchange(dA0, ur[], scaled=true);     // 3) ur of the overlap vertices: that of their process
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+real mass1 = massddm(u[]);
+
+// the solution gathered on the whole mesh ThG (each vertex once: the partition of unity)
+fespace VhG(ThG, P1);
+VhG uG;
+{
+  matrix IG = interpolate(Vh, VhG);       // local <- global
+  real[int] tl = u[] .* Dunity[], tg = IG'*tl;
+  mpiAllReduce(tg, uG[], mpiCommWorld, mpiSUM);
+}
+// the same mass computed on the dual of the whole mesh: must equal the parallel mass
+meshdual ThstarG = builddualmesh(ThG);
+fespace PhstarG(ThstarG, P0);
+PhstarG wG;
+dualtoP0(wG[], ThstarG, uG[]);
+func uex = exp(-dist(cos(t)*x+sin(t)*y-xp, -sin(t)*x+cos(t)*y-yp)^2/width^2);
+real err = sqrt(int2d(ThG)((uG-uex)^2));
+if (mpirank == 0) {
+  cout.precision(12);
+  cout << mpisize << " processes: " << iter << " steps, t = " << t << " , L2 error = " << err << endl;
+  cout << "  scheme mass (parallel, Phstar on the local duals): t = 0 : " << mass0 << " , t = " << t << " : " << mass1 << endl;
+  cout << "  mass on the dual of the whole mesh int2d(ThstarG)(wG): " << int2d(ThstarG)(wG) << endl;
+  plot(wG, fill=1, value=1, wait=1, cmm="u at t = " + t + " on the dual (" + mpisize + " processes)");
+}

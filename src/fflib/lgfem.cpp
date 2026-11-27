@@ -123,6 +123,20 @@ extern bool NoGraphicWindow;
 
 extern long verbosity;
 extern FILE *ThePlotStream;    //  Add for new plot. FH oct 2008
+// parallel plot (plot(..., global=true)): MPI functions set by FreeFem++-mpi (parallelempi.cpp), null in FreeFem++
+extern void (*ff_plot_allgather_long)(const long *mine, long n, long *all);
+extern void (*ff_plot_gather_bytes)(const std::string &mine, std::vector< std::string > &all);
+extern long mpisize;
+// the bytes written in a temporary file (a block of the plot stream of a process), the file closed
+static std::string PlotTmpBytes(FILE *f) {
+  fflush(f);
+  long n = ftell(f);
+  std::string b(n > 0 ? n : 0, '\0');
+  rewind(f);
+  if (n > 0) ffassert(fread(&b[0], 1, n, f) == (size_t)n);
+  fclose(f);
+  return b;
+}
 void init_lgmesh( );
 
 basicAC_F0::name_and_type OpCall_FormBilinear_np::name_param[] = {
@@ -1406,6 +1420,25 @@ FESpace *pfes_tef::update( ) {
 }
 #endif
 
+// plot(w) with w in fespace Wstar(Thstar, P0), 2D (fvdualmesh.cpp): the plot of the dual mesh (its polygons)
+bool IsDualSubP0(const Mesh *th, long ndof);
+bool DualPlotP0(PlotStream &theplot, const Mesh *th, const KN_< double > &w);
+const Mesh3 *DualSub3Primal(const Mesh3 *th, long ndof);// 3D: the primal mesh3 of the dual mesh
+bool DualPlotP0_3(PlotStream &theplot, const Mesh3 *th, const KN_< double > &w, long imesh);
+const MeshS *DualSubSPrimal(const MeshS *th, long ndof);// surface: the primal meshS of the dual mesh
+bool DualPlotP0_S(PlotStream &theplot, const MeshS *th, const KN_< double > &w, long imesh);
+// the P0 finite element of the dual mesh (fvdualmesh.cpp): in fespace Wstar(Thstar, P0) with Thstar a meshdual,
+// meshdualL, meshdual3 or meshdualS (cast to the mesh of its control volumes), P0 is replaced by P0dual, interpolated at the
+// vertex of the control volume (the vertex 0 of its elements): a function constant on each control volume
+extern const TypeOfFE *P0dualFE2;
+extern const TypeOfFE3 *P0dualFE3;
+extern const TypeOfFEL *P0dualFEL;
+extern const TypeOfFES *P0dualFES;
+static const TypeOfFE *DualP0(const TypeOfFE *t) { return t == &P0Lagrange ? P0dualFE2 : t; }
+static const TypeOfFE3 *DualP0(const TypeOfFE3 *t) { return t == &DataFE< Mesh3 >::P0 ? P0dualFE3 : t; }
+static const TypeOfFEL *DualP0(const TypeOfFEL *t) { return t == &DataFE< MeshL >::P0 ? P0dualFEL : t; }
+static const TypeOfFES *DualP0(const TypeOfFES *t) { return t == &DataFE< MeshS >::P0 ? P0dualFES : t; }
+
 struct OpMake_pfes_np {
   static const int n_name_param = 1;
   static basicAC_F0::name_and_type name_param[];
@@ -1481,9 +1514,10 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     int nbcperiodic;
     Expression *periodic;
     KN< int > tedim;
+    bool ondual;// the mesh is a dual mesh: P0 -> P0dual
     Op(Expression ppfes, Expression ppTh, const E_Array &aatef, int nbp, Expression *pr,
-       KN< int > &ttedim)
-      : eppTh(ppTh), eppfes(ppfes), atef(aatef), nbcperiodic(nbp), periodic(pr), tedim(ttedim) {}
+       KN< int > &ttedim, bool ondl)
+      : eppTh(ppTh), eppfes(ppfes), atef(aatef), nbcperiodic(nbp), periodic(pr), tedim(ttedim), ondual(ondl) {}
     ~Op( ) {
       if (periodic) delete[] periodic;
     }
@@ -1527,6 +1561,8 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       pfes *ppfes = GetAny< pfes * >(r);
       bool same = true;
       for (int i = 1; i < atef.size( ); i++) same &= atef[i].LeftValue( ) == atef[1].LeftValue( );
+      if (ondual)
+        for (int i = 0; i < atef.size( ); i++) tef[i] = DualP0(tef[i]);
       *ppfes = new pfes_tefk(ppTh, tef, atef.size( ), s, nbcperiodic, periodic);
       return r;
     }
@@ -1561,7 +1597,8 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       else
         CompileError(sdim + " We wait an array of  Type of Element ");
     //    ffassert(0);
-    return new Op(args[0], args[1], *a2, nbcperiodic, periodic, tedim);
+    return new Op(args[0], to< const Mesh ** >(args[1]), *a2, nbcperiodic, periodic, tedim,
+                  args[1].left( ) != atype< const Mesh ** >( ));// the mesh, or a type cast to it (a dual mesh)
   }
   OpMake_pfes( )
     : OneOperator(atype< pfes * >( ), atype< pfes * >( ), atype< const Mesh ** >( ),
@@ -1636,12 +1673,14 @@ class OP_MakePtr2 {
     Expression a, b, c;
     int nbcperiodic;
     Expression *periodic;
+    bool ondual;// the mesh is a dual mesh: P0 -> P0dual
     Op(const basicAC_F0 &args);
 
     AnyType operator( )(Stack s) const {
       A p = GetAny< A >((*a)(s));
       B th = GetAny< B >((*b)(s));
       C tef = GetAny< C >((*c)(s));
+      if (ondual) tef = const_cast< C >(DualP0(tef));
       *p = new pfes_tef(th, tef, s, nbcperiodic, periodic);
       return SetAny< R >(p);
     }
@@ -1668,12 +1707,14 @@ class OP_MakePtr3 {
     Expression a, b, c;
     int nbcperiodic;
     Expression *periodic;
+    bool ondual;// the mesh is a dual mesh: P0 -> P0dual
     Op(const basicAC_F0 &args);
 
     AnyType operator( )(Stack s) const {
       A p = GetAny< A >((*a)(s));
       B th = GetAny< B >((*b)(s));
       C tef = GetAny< C >((*c)(s));
+      if (ondual) tef = const_cast< C >(DualP0(tef));
       *p = new pfes3_tef(th, tef, s, nbcperiodic, periodic);
       return SetAny< R >(p);
     }
@@ -1701,12 +1742,14 @@ class OP_MakePtrS {
     Expression a, b, c;
     int nbcperiodic;
     Expression *periodic;
+    bool ondual;// the mesh is a dual mesh: P0 -> P0dual
     Op(const basicAC_F0 &args);
 
     AnyType operator( )(Stack s) const {
       A p = GetAny< A >((*a)(s));
       B th = GetAny< B >((*b)(s));
       C tef = GetAny< C >((*c)(s));
+      if (ondual) tef = const_cast< C >(DualP0(tef));
       *p = new pfesS_tef(th, tef, s, nbcperiodic, periodic);
       return SetAny< R >(p);
     }
@@ -1734,12 +1777,14 @@ class OP_MakePtrL {
     Expression a, b, c;
     int nbcperiodic;
     Expression *periodic;
+    bool ondual;// the mesh is a dual mesh: P0 -> P0dual
     Op(const basicAC_F0 &args);
 
     AnyType operator( )(Stack s) const {
       A p = GetAny< A >((*a)(s));
       B th = GetAny< B >((*b)(s));
       C tef = GetAny< C >((*c)(s));
+      if (ondual) tef = const_cast< C >(DualP0(tef));
       *p = new pfesL_tef(th, tef, s, nbcperiodic, periodic);
       return SetAny< R >(p);
     }
@@ -1785,6 +1830,7 @@ void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&p
 
 OP_MakePtr2::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
+  ondual = args[1].left( ) != atype< B >( );// a dual mesh (cast to the mesh of its control volumes)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
@@ -1793,6 +1839,7 @@ OP_MakePtr2::Op::Op(const basicAC_F0 &args)
 // 3D volume
 OP_MakePtr3::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
+  ondual = args[1].left( ) != atype< B >( );// a dual mesh (cast to the mesh of its control volumes)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
@@ -1801,6 +1848,7 @@ OP_MakePtr3::Op::Op(const basicAC_F0 &args)
 // 3D surface
 OP_MakePtrS::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
+  ondual = args[1].left( ) != atype< B >( );// a dual mesh (cast to the mesh of its control volumes)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
@@ -1809,6 +1857,7 @@ OP_MakePtrS::Op::Op(const basicAC_F0 &args)
 // 3D curve
 OP_MakePtrL::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
+  ondual = args[1].left( ) != atype< B >( );// a dual mesh (cast to the mesh of its control volumes)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
@@ -3044,7 +3093,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
   /// <<number_of_distinct_named_parameters_for_plot>> FFCS: added new parameters for VTK graphics.
   /// See
   /// [[Plot_name_param]] for new parameter names
-  static const int n_name_param = 46; // modified by fujiwara
+  static const int n_name_param = 47; // modified by fujiwara; 46: global (parallel plot)
 
   Expression bb[4];
 
@@ -3327,7 +3376,10 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
 // after FFCS !!!!
   {"pNormalT", &typeid(bool)} ,                        //43
   {"pdf", &typeid(string*)}, // 44, add by fujiwara modif FH 09/01/23
-  {"svg", &typeid(string*)} // 45, add by fujiwara
+  {"svg", &typeid(string*)}, // 45, add by fujiwara
+  {"global", &typeid(bool)} // 46: FreeFem++-mpi, several processes: true (default) the local pieces of all the processes
+                            // gathered and plotted together on process 0 (as plotD, plotDP0, plotDmesh of macro_ddm.idp),
+                            // false the old plot (local piece of process 0; a plot called by process 0 only)
 
 };
 
@@ -4494,7 +4546,15 @@ AnyType Plot::operator( )(Stack s) const {
     }
   }
 
-  if (ThePlotStream) {
+  // global plot (the default with FreeFem++-mpi on several processes, global=false: the old plot, the local piece of
+  // process 0 only): each process writes its local piece (meshes and items, the mesh numbers shifted by the ones of
+  // the previous processes) in temporary blocks, process 0 gathers them and sends one plot to ffglut (the same as
+  // plot(uTab) of plotD/plotDP0/plotDmesh). Collective: all the processes must call plot (a plot called by process 0
+  // only, ex. in if(mpirank == 0), needs global=false). FreeFem++ (sequential) or one process: the usual plot.
+  bool gplot = true;
+  if (nargs[46]) gplot = GetAny< bool >((*nargs[46])(s));
+  gplot = gplot && mpisize > 1 && ff_plot_allgather_long && ff_plot_gather_bytes;
+  if (ThePlotStream || gplot) {
     /*
      les different item of the plot are given by the number what:
      what = 0 -> mesh
@@ -4530,6 +4590,7 @@ AnyType Plot::operator( )(Stack s) const {
     pfLrbase feL[3] = {0, 0, 0};
     double echelle = 1;
     int cmp[3] = {-1, -1, -1};
+    if (ThePlotStream) {    // the arguments of the plot: on the stream of ffglut only (process 0)
     theplot.SendNewPlot( );
     if (nargs[0]) (theplot << 0L) <= GetAny< double >((*nargs[0])(s));
     if (nargs[1]) (theplot << 1L) <= GetAny< string * >((*nargs[1])(s));
@@ -4609,6 +4670,11 @@ AnyType Plot::operator( )(Stack s) const {
     if (nargs[45]) (theplot << 45L) <= GetAny< string * >((*nargs[45])(s));
 
     theplot.SendEndArgPlot( );
+    }
+    // global plot: skip[ii] = 1 for an item not sent by this process (an empty local mesh, or a curve / border
+    // except on process 0); hasFE: a FE function in the plot (otherwise a mesh is drawn as plotDmesh: P0 = process)
+    vector< char > skip(ll.size( ), 0);
+    bool hasFE = false;
     map< const Mesh *, long > mapth;
     map< const Mesh3 *, long > mapth3;
     map< const MeshS *, long > mapthS;
@@ -4637,6 +4703,8 @@ AnyType Plot::operator( )(Stack s) const {
         if (fe[0]->x( ) && !th) th = &fe[0]->Vh->Th;
         if (fe[1] && fe[1]->x( ) && !th) th = &fe[1]->Vh->Th;
         if (fe[1] && fe[1]->x( )) ffassert(th == &fe[1]->Vh->Th);
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0)): the dual mesh is sent in its item
+        if (what == 1 && !fe[1] && fe[0]->x( ) && IsDualSubP0(th, fe[0]->x( )->N( ))) th = 0;
       }
       // Prepare for the sending 3D volume iso values for ffglut
       else if (what == 6 || what == 7 || what == 16 || what == 17) {
@@ -4646,6 +4714,11 @@ AnyType Plot::operator( )(Stack s) const {
         if (fe[2] && fe3[2]->x( ) &&!th3) th3 = &fe3[1]->Vh->Th;
         if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
         if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0), Thstar a meshdual3): its primal mesh3 is sent
+        if (what == 6 && !fe3[1] && fe3[0]->x( )) {
+          const Mesh3 *pp = DualSub3Primal(th3, fe3[0]->x( )->N( ));
+          if (pp) th3 = pp;
+        }
 
       }
       // Prepare for the sending 3D surface iso values for ffglut
@@ -4655,6 +4728,11 @@ AnyType Plot::operator( )(Stack s) const {
         if (feS[1] && feS[1]->x( )  &&!thS) thS = &feS[1]->Vh->Th;
         if (feS[1] && feS[1]->x( )) ffassert(thS == &feS[1]->Vh->Th);
         if (feS[2] && feS[2]->x( )) ffassert(thS == &feS[2]->Vh->Th);
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0), Thstar a meshdualS): its primal meshS is sent
+        if (what == 8 && !feS[1] && feS[0]->x( )) {
+          const MeshS *pp = DualSubSPrimal(thS, feS[0]->x( )->N( ));
+          if (pp) thS = pp;
+        }
       }
       // Prepare for the sending 3D curve iso values for ffglut
       else if (what == 14 || what == 15 || what == 20 || what == 21) {
@@ -4664,44 +4742,85 @@ AnyType Plot::operator( )(Stack s) const {
         if (feL[1] && feL[1]->x( )) ffassert(thL == &feL[1]->Vh->Th);
         if (feL[2] && feL[2]->x( )) ffassert(thL == &feL[2]->Vh->Th);
       }
+      if (!(what == 0 || what == 3 || what == 4 || what == 13 || what == 5 || what == 50 || what == 55)) hasFE = true;
+      if (gplot) {
+        bool empty = (th && th->nv == 0) || (th3 && th3->nv == 0) || (thS && thS->nv == 0) || (thL && thL->nv == 0);
+        // a mesh not defined on this process (null pointer)
+        if ((what == 0 && !th) || (what == 5 && !th3) || (what == 50 && !thS) || (what == 55 && !thL)) empty = true;
+        // a FE function of an empty local mesh: no array of values
+        if (what == 1 || what == 2 || what == 11 || what == 12)
+          empty = empty || !fe[0]->x( ) || !fe[0]->x( )->N( );
+        else if (what == 6 || what == 7 || what == 16 || what == 17)
+          empty = empty || !fe3[0]->x( ) || !fe3[0]->x( )->N( );
+        else if (what == 8 || what == 9 || what == 18 || what == 19)
+          empty = empty || !feS[0]->x( ) || !feS[0]->x( )->N( );
+        else if (what == 14 || what == 15 || what == 20 || what == 21)
+          empty = empty || !feL[0]->x( ) || !feL[0]->x( )->N( );
+        if (empty || ((what == 3 || what == 4 || what == 13) && mpirank)) {
+          skip[ii] = 1;
+          continue;
+        }
+      }
       // test on the type meshes --- 2D, 3D volume and 3D surface
       if (th && mapth.find(th) == mapth.end( )) mapth[th] = ++kth;
       if (th3 && (mapth3.find(th3) == mapth3.end( ))) mapth3[th3] = ++kth3;
       if (thS && (mapthS.find(thS) == mapthS.end( ))) mapthS[thS] = ++kthS;
       if (thL && (mapthL.find(thL) == mapthL.end( ))) mapthL[thL] = ++kthL;
     }
-    // send of meshes 2d
-    theplot.SendMeshes( );
-    theplot << kth;
-
-    for (map< const Mesh *, long >::const_iterator i = mapth.begin( ); i != mapth.end( ); ++i)
-      theplot << i->second << *i->first;
-
-    // only send of volume meshes 3D if completed mesh3 (meshS!=NULL or/and !=meshL!=NULL)
-    if (kth3) {
-      theplot.SendMeshes3( );
-      theplot << kth3;
+    // the pairs (number, mesh) of each type, and the items of the plot (parameter theplot: the stream of ffglut, or
+    // a temporary block in a global plot)
+    auto sendMeshes2 = [&](PlotStream &theplot) {
+      for (map< const Mesh *, long >::const_iterator i = mapth.begin( ); i != mapth.end( ); ++i)
+        theplot << i->second << *i->first;
+    };
+    auto sendMeshes3 = [&](PlotStream &theplot) {
       for (map< const Mesh3 *, long >::const_iterator i = mapth3.begin( ); i != mapth3.end( ); ++i)
         theplot << i->second << *i->first;
-    }
-    if (kthS) {
-      theplot.SendMeshesS( );
-      theplot << kthS;
+    };
+    auto sendMeshesS = [&](PlotStream &theplot) {
       for (map< const MeshS *, long >::const_iterator i = mapthS.begin( ); i != mapthS.end( ); ++i)
         theplot << i->second << *i->first;
-    }
-    if (kthL) {
-      theplot.SendMeshesL( );
-      theplot << kthL;
+    };
+    auto sendMeshesL = [&](PlotStream &theplot) {
       for (map< const MeshL *, long >::const_iterator i = mapthL.begin( ); i != mapthL.end( ); ++i)
         theplot << i->second << *i->first;
-    }
-
-    // end of what ploting for meshes
-    theplot.SendPlots( );
-
-    theplot << (long)ll.size( );
+    };
+    auto sendItems = [&](PlotStream &theplot) {
     for (size_t ii = 0; ii < ll.size( ); ii++) {
+      if (skip[ii]) continue;
+      if (gplot && !hasFE && (ll[ii].what == 0 || ll[ii].what == 5 || ll[ii].what == 50)) {
+        // a mesh alone in a global plot: the P0 function "number of the process" on the piece (as plotDmesh)
+        long w = ll[ii].what;
+        if (w == 0) {
+          const Mesh *pm = ll[ii].th( );
+          KN< R2 > Psub(3);
+          Psub[0] = R2(0, 0), Psub[1] = R2(1, 0), Psub[2] = R2(0, 1);
+          KN< int > Ksub(3);
+          Ksub[0] = 0, Ksub[1] = 1, Ksub[2] = 2;
+          KN< double > V((long)pm->nt * 3);
+          V = (double)mpirank;
+          theplot << 1L << mapth[pm] << Psub << Ksub << V;
+        } else if (w == 5) {
+          const Mesh3 *pm = ll[ii].th3( );
+          KN< R3 > Psub(4);
+          Psub[0] = R3(0, 0, 0), Psub[1] = R3(1, 0, 0), Psub[2] = R3(0, 1, 0), Psub[3] = R3(0, 0, 1);
+          KN< int > Ksub(4);
+          Ksub[0] = 0, Ksub[1] = 1, Ksub[2] = 2, Ksub[3] = 3;
+          KN< double > V((long)pm->nt * 4);
+          V = (double)mpirank;
+          theplot << 6L << mapth3[pm] << Psub << Ksub << V;
+        } else {
+          const MeshS *pm = ll[ii].thS( );
+          KN< R2 > Psub(3);
+          Psub[0] = R2(0, 0), Psub[1] = R2(1, 0), Psub[2] = R2(0, 1);
+          KN< int > Ksub(3);
+          Ksub[0] = 0, Ksub[1] = 1, Ksub[2] = 2;
+          KN< double > V((long)pm->nt * 3);
+          V = (double)mpirank;
+          theplot << 8L << mapthS[pm] << Psub << Ksub << V;
+        }
+        continue;
+      }
       int i = ll[ii].i;
       long what = ll[ii].what;
       int err = 1;    //  by default we are in error
@@ -4720,8 +4839,14 @@ AnyType Plot::operator( )(Stack s) const {
         }
       }
       // send 2d iso values for ffglut
-      else if (what == 1 || what == 2)
-        err = Send2d< R, v_fes >(theplot, ll[ii], mapth);
+      else if (what == 1 || what == 2) {
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0)): the polygons of the control volumes
+        if (what == 1) ll[ii].eval(fe, cmp);
+        if (what == 1 && !fe[1] && fe[0]->x( ) && DualPlotP0(theplot, &fe[0]->Vh->Th, *fe[0]->x( )))
+          err = 0;
+        else
+          err = Send2d< R, v_fes >(theplot, ll[ii], mapth);
+      }
       else if (what == 11 || what == 12)
         err = Send2d< Complex, v_fes >(theplot, ll[ii], mapth);
 
@@ -4776,13 +4901,33 @@ AnyType Plot::operator( )(Stack s) const {
       }
 
       // send 3D volume iso values for ffglut
-      else if (what == 6 || what == 7)
-        err = Send3d< R, v_fes3 >(theplot, ll[ii], mapth3);
+      else if (what == 6 || what == 7) {
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0), Thstar a meshdual3): the control volumes
+        const Mesh3 *pp = 0;
+        if (what == 6) {
+          ll[ii].eval(fe3, cmp);
+          if (!fe3[1] && fe3[0]->x( )) pp = DualSub3Primal(&fe3[0]->Vh->Th, fe3[0]->x( )->N( ));
+        }
+        if (pp && DualPlotP0_3(theplot, &fe3[0]->Vh->Th, *fe3[0]->x( ), mapth3[pp]))
+          err = 0;
+        else
+          err = Send3d< R, v_fes3 >(theplot, ll[ii], mapth3);
+      }
       else if (what == 16 || what == 17)
         err = Send3d< Complex, v_fes3 >(theplot, ll[ii], mapth3);
       // send 3D surface iso values for ffglut
-      else if (what == 8 || what == 9)
-        err = SendS< R, v_fesS >(theplot, ll[ii], mapthS);
+      else if (what == 8 || what == 9) {
+        // a function P0 of the dual mesh (fespace Wstar(Thstar, P0), Thstar a meshdualS): the control volumes
+        const MeshS *pp = 0;
+        if (what == 8) {
+          ll[ii].eval(feS, cmp);
+          if (!feS[1] && feS[0]->x( )) pp = DualSubSPrimal(&feS[0]->Vh->Th, feS[0]->x( )->N( ));
+        }
+        if (pp && DualPlotP0_S(theplot, &feS[0]->Vh->Th, *feS[0]->x( ), mapthS[pp]))
+          err = 0;
+        else
+          err = SendS< R, v_fesS >(theplot, ll[ii], mapthS);
+      }
       else if (what == 18 || what == 19)
         err = SendS< Complex, v_fesS >(theplot, ll[ii], mapthS);
       // send 3D curve iso values for ffglut
@@ -4800,9 +4945,114 @@ AnyType Plot::operator( )(Stack s) const {
         theplot << -1L << (long)i;
       }
     }
-    theplot.SendEndPlot( );
+    };
+
+    if (!gplot) {    // the usual plot (unchanged stream)
+      // send of meshes 2d
+      theplot.SendMeshes( );
+      theplot << kth;
+      sendMeshes2(theplot);
+      // only send of volume meshes 3D if completed mesh3 (meshS!=NULL or/and !=meshL!=NULL)
+      if (kth3) {
+        theplot.SendMeshes3( );
+        theplot << kth3;
+        sendMeshes3(theplot);
+      }
+      if (kthS) {
+        theplot.SendMeshesS( );
+        theplot << kthS;
+        sendMeshesS(theplot);
+      }
+      if (kthL) {
+        theplot.SendMeshesL( );
+        theplot << kthL;
+        sendMeshesL(theplot);
+      }
+      // end of what ploting for meshes
+      theplot.SendPlots( );
+      theplot << (long)ll.size( );
+      sendItems(theplot);
+      theplot.SendEndPlot( );
+    } else {    // global plot: the blocks of all the processes concatenated on process 0
+      long nitems = 0;
+      for (size_t ii = 0; ii < ll.size( ); ii++) nitems += !skip[ii];
+      const int nb = 5;    // blocks: meshes 2d, 3d, surface, curve, items
+      long loc[nb] = {kth, kth3, kthS, kthL, nitems};
+      KN< long > all(nb * mpisize);
+      ff_plot_allgather_long(loc, nb, (long *)all);
+      long off[nb] = {0, 0, 0, 0, 0}, tot[nb] = {0, 0, 0, 0, 0};
+      for (int r = 0; r < mpisize; r++)
+        for (int b = 0; b < nb; b++) {
+          if (r < mpirank) off[b] += all[nb * r + b];
+          tot[b] += all[nb * r + b];
+        }
+      // the numbers of the meshes of this process after the ones of the previous processes
+      for (map< const Mesh *, long >::iterator i = mapth.begin( ); i != mapth.end( ); ++i) i->second += off[0];
+      for (map< const Mesh3 *, long >::iterator i = mapth3.begin( ); i != mapth3.end( ); ++i) i->second += off[1];
+      for (map< const MeshS *, long >::iterator i = mapthS.begin( ); i != mapthS.end( ); ++i) i->second += off[2];
+      for (map< const MeshL *, long >::iterator i = mapthL.begin( ); i != mapthL.end( ); ++i) i->second += off[3];
+      std::string block[nb];
+      for (int b = 0; b < nb; b++) {
+        FILE *f = tmpfile( );
+        ffassert(f);    // a temporary file for the block
+        PlotStream ps(f);
+        if (b == 0) sendMeshes2(ps);
+        else if (b == 1) sendMeshes3(ps);
+        else if (b == 2) sendMeshesS(ps);
+        else if (b == 3) sendMeshesL(ps);
+        else sendItems(ps);
+        block[b] = PlotTmpBytes(f);
+      }
+      // one message: the sizes of the blocks then the blocks
+      std::string mine;
+      for (int b = 0; b < nb; b++) {
+        long long l = block[b].size( );
+        mine.append((const char *)&l, sizeof(l));
+      }
+      for (int b = 0; b < nb; b++) mine += block[b];
+      std::vector< std::string > allb;
+      ff_plot_gather_bytes(mine, allb);
+      if (ThePlotStream) {
+        // the blocks b of the processes r, in the order of the processes
+        auto writeBlocks = [&](int b) {
+          for (int r = 0; r < mpisize; r++) {
+            const std::string &m = allb[r];
+            const long long *len = (const long long *)m.data( );
+            size_t pos = nb * sizeof(long long);
+            for (int c = 0; c < b; c++) pos += len[c];
+            if (len[b]) theplot.write(m.data( ) + pos, len[b]);
+          }
+        };
+        theplot.SendMeshes( );
+        theplot << tot[0];
+        writeBlocks(0);
+        if (tot[1]) {
+          theplot.SendMeshes3( );
+          theplot << tot[1];
+          writeBlocks(1);
+        }
+        if (tot[2]) {
+          theplot.SendMeshesS( );
+          theplot << tot[2];
+          writeBlocks(2);
+        }
+        if (tot[3]) {
+          theplot.SendMeshesL( );
+          theplot << tot[3];
+          writeBlocks(3);
+        }
+        theplot.SendPlots( );
+        theplot << tot[4];
+        writeBlocks(4);
+        theplot.SendEndPlot( );
+      }
+    }
   }
 
+  // global plot: the plot is done by ffglut on process 0 (with ps=, pdf=, svg=), from the pieces of all the processes;
+  // the old drawing below would draw (and write the ps file of) the local piece only, on every process, and it
+  // fails on an empty local mesh
+  if (gplot) return 0L;
   // begin to the post scrit procedure
   if (!withrgraphique) {
     initgraphique( );
@@ -7637,7 +7887,17 @@ aType typeFESpace(const basicAC_F0 &args) {
             if (atfe[it]->CastingFrom(tl))    // Warning  P1 can be cast in 2d or 3d FE ...
               id = it;
         }
-      } else
+      }
+      // a type cast to a mesh (ex. the dual mesh meshdual, meshdualL, meshdual3: the mesh of its control volumes)
+      else if (dm < 0 && t_m2->CastingFrom(tl))
+        dm = 2;
+      else if (dm < 0 && t_m3->CastingFrom(tl))
+        dm = 3;
+      else if (dm < 0 && t_mS->CastingFrom(tl))
+        dm = 4;
+      else if (dm < 0 && t_mL->CastingFrom(tl))
+        dm = 5;
+      else
         for (int it = 0; it < 4; ++it)
           if (atfe[it]->CastingFrom(tl)) id = it;
     }

@@ -1,0 +1,98 @@
+// solves the Euler system of gas dynamics in 3D (mesh3) over the dual mesh (P1 unknowns, the median dual mesh:
+// one control volume by vertex), the same cases as freevol_euler3d.edp (P0 unknowns):
+//   U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v,rho*w,E], E = rho*|u|^2/2+rho*e, p = (gamma-1)*rho*e
+// cases:
+//   Blast      : a ball of gas at high pressure in a box with walls (mass and energy conserved, positivity,
+//                symmetry x,y,z -> y,z,x)
+//   ShockTube1D: the Sod shock tube of freevol_euler1d.edp in a bar, compared with the exact solution
+// the same command fvscheme as in 1D and 2D, with the dual mesh built in the script (meshdual3): the dimension
+// is given by the mesh of [rho,rhou,rhov,rhow,E];
+// numflux = 2 (Suliciu/HLLC, the default) in 3D: in the frame (N,T1,T2), the velocity T2 passive
+// options: -nf (numflux), -n (cells along the bar: ShockTube1D)
+// plots on the dual mesh (as freevol_advectiondm3d.edp): plot(Thstar, rho[]) the control volumes colored on the
+//   boundary; F1: cutting plane (the cut control volumes), m: edges of the control volumes
+//   (macro plotdual()0: the usual plots of the P1 functions)
+include "getARGV.idp"
+real s0=clock();
+load "msh3"
+macro plotdual()1// 1: plots on the dual mesh, 0: plots of the P1 functions
+macro case() Blast//
+real gamma=1.4;
+int nfl=getARGV("-nf",2);
+IFMACRO(case,Blast)
+   real Tf=.2;
+   int Npx=10;
+   mesh3 Th = cube(Npx,Npx,Npx,[2*x-1,2*y-1,2*z-1]);
+   func rho0 = 1.;
+   func p0 = 1.+9.*((x^2+y^2+z^2)<.25);
+ENDIFMACRO
+IFMACRO(case,ShockTube1D)
+   real Tf=.2;
+   int Npx=getARGV("-n",100);
+   real x0=0.5, rhoL=1., uL=0., pL=1., rhoR=0.125, uR=0., pR=0.1;
+   mesh3 Th = cube(Npx,1,1,[x,0.02*y,0.02*z]);
+   func wL = (x<x0-1.e-8)+0.5*(abs(x-x0)<=1.e-8);// the vertices x = x0: the mean of the conserved variables
+   func rho0 = wL*rhoL+(1-wL)*rhoR;
+   func p0 = wL*pL+(1-wL)*pR;
+ENDIFMACRO
+real t,dt,CFL=.5;
+meshdual3 Thstar = builddualmesh(Th);// the dual mesh: the control volumes of the scheme (fvscheme finds it from the mesh Th of the unknowns)
+fespace Vh5(Th,[P1,P1,P1,P1,P1]);
+fespace Vh(Th,P1);
+Vh5 [H,Hu,Hv,Hw,E]=[rho0,0,0,0,p0/(gamma-1.)],[HBC,HuBC,HvBC,HwBC,EBC]=[0,0,0,0,0],[Hr,Hur,Hvr,Hwr,Er]=[0,0,0,0,0];
+Vh5 [Hp,Hup,Hvp,Hwp,Ep];//for second order in time
+int[int] labBC=[1,2,2,2,3,2,4,2,5,2,6,2];// walls on the 6 faces of the cube
+real mass0=int3d(Th)(H), energy0=int3d(Th)(E);
+IFMACRO(plotdual,1)
+{ Vh rho=H; plot(Thstar,rho[],cmm="rho at t=0 (F1: cut, m: edges)",value=true,wait=0); }
+ENDIFMACRO
+IFMACRO(plotdual,0)
+{ Vh rho=H; plot(rho,cmm="rho at t=0",fill=true,value=true,wait=0); }
+ENDIFMACRO
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gamma];
+fvscheme FV([H,Hu,Hv,Hw,E],order=2,eq="eulerdm",labelBC=labBC,limiter=1,numflux=nfl,parameters=params);
+
+int iter=0;
+real dtsub, rmin=1e30, pmin=1e30;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu,Hv,Hw,E],[Hr,Hur,Hvr,Hwr,Er],[HBC,HuBC,HvBC,HwBC,EBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+    Vh rho=H, pr=(gamma-1.)*(E-.5*(Hu^2+Hv^2+Hw^2)/(H+1.e-13));
+    rmin=min(rmin,rho[].min); pmin=min(pmin,pr[].min);
+}//end of time loop
+Vh rho=H;
+IFMACRO(plotdual,1)
+plot(Thstar,rho[],cmm="rho at t="+t+" (F1: cut, m: edges)",value=true,wait=1);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(rho,cmm="rho at t="+t,fill=true,value=true,wait=1);
+ENDIFMACRO
+cout << "3D: " << Th.nt << " tetrahedra, " << iter << " time steps, cputime = " << clock()-s0 << endl;
+cout << "mass error = " << (int3d(Th)(H)-mass0)/mass0 << " , energy error = " << (int3d(Th)(E)-energy0)/energy0
+     << " , min rho = " << rmin << " , min p (all the steps) = " << pmin << endl;
+IFMACRO(case,Blast)
+  // symmetry of the ball and of the mesh of cube (invariant by the circular permutation of x,y,z)
+  Vh hsym=rho(y,z,x);
+  hsym[]-=rho[];
+  cout << "symmetry: max |rho(x,y,z)-rho(y,z,x)| = " << hsym[].linfty << endl;
+ENDIFMACRO
+IFMACRO(case,ShockTube1D)
+  include "freevol_euler_riemann.idp"
+  Vh xc=x, rhoe;// at the vertices: the values of the control volumes
+  for (int i=0;i<Th.nv;i++) rhoe[][i]=riemann((xc[][i]-x0)/t);
+  cout << "shock tube: L1 error on rho (per unit section) = " << int3d(Th)(abs(rho-rhoe))/0.02^2 << endl;
+ENDIFMACRO

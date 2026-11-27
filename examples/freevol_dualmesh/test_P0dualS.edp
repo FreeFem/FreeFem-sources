@@ -1,0 +1,58 @@
+// The P0 finite element on the dual mesh of a surface (meshdualS, the median dual of a meshS):
+// fespace Phstar(Thstar, P0), as in 1D, 2D, 3D (test_P0dual.edp)
+//   the meshdualS is seen as the meshS of its control volumes: each triangle cut into 6 triangles (vertex,
+//   edge midpoint, centroid), the label of an element = the number of its control volume + 1
+//   - dualtoP0(w[], Thstar, u[]): u (one value per control volume = P1 of Th) -> w constant per volume
+//   - dualfromP0(u[], Thstar, w[]): the average of w over each control volume
+//   - int2d(Thstar)(w): exact, = sum |C_i| u_i; int2d(Thstar, i+1)(...) over control volume i
+//   - plot(w): the control volumes (not the 6 triangles per triangle), like plot(Thstar, u[]);
+//     plot(Thstar), plot(Th, Thstar, u[]): the boundaries of the control volumes (key m with values)
+// options: -n (Sphere20(1, n)), -nw
+load "msh3"
+include "MeshSurface.idp"
+include "getARGV.idp"
+int nn = getARGV("-n", 6);
+meshS Th = Sphere20(1., nn, 1, 0);         // the unit sphere (no boundary)
+meshdualS Thstar = builddualmesh(Th);      // the control volumes (median dual)
+fespace Vh(Th, P1);                        // the FV unknowns: one value per vertex = per control volume
+fespace Phstar(Thstar, P0);                 // the P0 of the dual mesh
+func f = exp(-4*((x-.5)^2 + y^2 + (z-.7)^2));
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the areas of the control volumes
+cout.precision(12);
+
+// (a) the FV unknowns as a function of Phstar, and Phstar w = expression (the value at the vertex of the volume)
+Vh u = f;
+Phstar w;
+dualtoP0(w[], Thstar, u[]);
+Phstar w2 = f;                              // P0dual: the value at the vertex of the control volume
+w2[] -= w[];
+cout << "surface: " << Thstar.ncv << " control volumes, Phstar.ndof = " << Phstar.ndof << endl;
+cout << "(a) sum |C_i| u_i = " << cva'*u[] << " , int2d(Thstar)(w) = " << int2d(Thstar)(w)
+     << " , int2d(Th)(u) (P1 of Th) = " << int2d(Th)(u) << " , |Phstar w = f - dualtoP0(f)| = " << w2[].linfty << endl;
+
+// (b) the integral over a control volume: region i+1
+int i0 = Thstar.ncv/2;
+cout << "(b) control volume " << i0 << " : int2d(Thstar, " << i0+1 << ")(1) = " << int2d(Thstar, i0+1)(1.)
+     << " = its area " << cva[i0] << endl;
+
+// (c) round trip: dualfromP0(dualtoP0(u)) = u; the average of f over each control volume
+Vh u2;
+dualfromP0(u2[], Thstar, w[]);
+u2[] -= u[];
+varf vf(a, b) = int2d(Thstar, qforder=5)(f*b);
+varf vm(a, b) = int2d(Thstar)(b);
+real[int] bf = vf(0, Phstar), bm = vm(0, Phstar);
+Phstar wf;
+wf[] = bf ./ bm;
+Vh um;
+dualfromP0(um[], Thstar, wf[]);
+Phstar wm;
+dualtoP0(wm[], Thstar, um[]);
+cout << "(c) round trip |dualfromP0(dualtoP0(u)) - u| = " << u2[].linfty << " , int2d(Thstar)(wm) = " << int2d(Thstar)(wm)
+     << " = int2d(Thstar)(f) = " << int2d(Thstar, qforder=5)(f) << endl;
+
+plot(Thstar, cmm="surface: the dual mesh (the control volumes)", wait=1);
+plot(Th, Thstar, cmm="surface: the mesh and its dual", wait=1);
+plot(w, value=1, wait=1, cmm="surface: fespace Phstar(Thstar, P0), f at the vertex of each control volume");
+plot(Thstar, um[], value=1, wait=1, cmm="surface: the average of f over each control volume");

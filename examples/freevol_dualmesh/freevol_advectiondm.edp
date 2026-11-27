@@ -1,0 +1,103 @@
+// advection of a scalar by a given vector field, by the finite volume method
+// using control volumes of dualmesh (P1 functions)
+// plots on the dual mesh (plugin fvdualmesh, as test_meshD.edp): one value by control volume, with the modified
+// ffglut:  FreeFem++ -glut ../../../../FreeFem_test/ffglut_1D freevol_advectiondm.edp
+//   plot(Thstar, u[]) the control volumes colored by u, plot(Th, Thstar, u[]) with the primal mesh
+//   keys: m) edges of the polygons  3) relief in steps  v) palette  P) value under the mouse  c) cut
+//   (macro plotdual()0: the usual plots of u as a P1 function)
+// the dual mesh of F. Bouchut (the centers of the inscribed circles of the triangles), the 2D dual mesh
+real cputime=clock();
+
+include "getARGV.idp"
+macro plotdual()1// 1: plots on the dual mesh, 0: plots of u as a P1 function
+
+int Np=100;
+real xp=-1.5,yp=-1.5,R=5.;
+border C(t=0,2.*pi) { x=R*cos(t); y=R*sin(t); label = 1;}
+border IB(t=0.,2.) {x=0.;y=(t-1.)*R;label = 33;}
+mesh Th=buildmesh(C(Np)+IB(Np/4),fixedborder=1,splitpbedge=1);
+meshdual Thstar=builddualmesh(Th);// the dual mesh: the control volumes of the scheme (fvscheme finds it from the mesh Th of the unknowns), and the plots
+
+real t,dt,dtsub,CFL=.9,Tf=4.;
+int mtordre=2;
+fespace Vh(Th,P1);
+Vh u,up,ur=0;
+Vh V1=-y,V2=x;
+fespace Phstar(Thstar,P0);
+Phstar V1star, V2star = exp(-x^2/.2);
+V1star[] = V1[];
+plot(V1);
+plot(V1star);
+V2[]=V2star[];
+plot(V2);
+//help("meshdual");
+cout<<Thstar.ncv<<endl;
+cout<<Th.nv<<endl;
+exit(0);
+
+// fespace Vh2(Th,[P1,P1]);
+// Vh2 [V1,V2]=[-y,x];
+// u = dist(x-xp,y-yp)<=(R/4.);
+real width=3.;
+u=exp(-dist(x-xp,y-yp)^2/width^2);
+Vh uBC=0;
+int[int] labBC=[1,1];
+fvscheme FV([V1,V2],eq="advectiondm",labelBC=labBC,numflux=2);// the scheme on the dual mesh Thstar of Th (found by fvscheme)
+
+
+macro test()0//EOM
+IFMACRO(test,0)
+int iter=0;
+real timeSinceLastPlot = 0.;
+real plotInterval = 0.5;
+IFMACRO(plotdual,1)
+plot(Th,Thstar,cmm="the mesh and its dual mesh (the control volumes)",wait=1);
+plot(Thstar,u[],value=true,cmm="initial data",wait=0);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(u,dim=3,fill=true,wait=0,cmm="initial data");
+ENDIFMACRO
+for(t=0.; t<=Tf-1.e-10; iter++){// TIME LOOP
+   if (mtordre==2) up[]=u[];
+   for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+    dtsub = fluxupdate(FV,[u],[ur],[uBC]);
+    if (lmt==1) {
+     dt = dtsub*CFL;
+     if (t+dt>Tf) dt=Tf-t;
+    }
+    u[] -= dt*ur[];
+    if (lmt==1) t+=dt;
+    if (lmt==2) {//second-order Heun scheme in time
+      u[]+=up[];
+      u[]*=.5;
+    }
+   }//end of internal loop on lmt
+
+   cout << iter+1 << " t= " << t << endl;
+   timeSinceLastPlot += dt;
+   if(timeSinceLastPlot >= plotInterval){
+      IFMACRO(plotdual,1)
+      plot(Thstar,u[],value=true,wait=0,cmm="solution at t = "+t);
+      ENDIFMACRO
+      IFMACRO(plotdual,0)
+      plot(u,dim=3,fill=true,value=true,wait=0,cmm="solution at t = "+t);
+      ENDIFMACRO
+      timeSinceLastPlot = 0.;
+   }
+}//end of time loop
+
+//func uex=(dist(cos(t)*x+sin(t)*y-xp,-sin(t)*x+cos(t)*y-yp)<=(R/4.));
+func uex=exp(-dist(cos(t)*x+sin(t)*y-xp,-sin(t)*x+cos(t)*y-yp)^2/width^2);
+real err=sqrt(int2d(Th)((u-uex)^2));
+cout << "L2 error " << err << endl;
+
+cout<< "CPU "<<clock()-cputime<<endl;
+
+IFMACRO(plotdual,1)
+plot(Thstar,u[],value=true,wait=1,cmm="u at t = "+t+" (m, 3, c, P)");
+plot(Th,Thstar,u[],value=true,wait=1,cmm="u at t = "+t+", with the primal mesh");
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(u,dim=3,fill=true,wait=1,value=1,cmm="u");
+ENDIFMACRO
+ENDIFMACRO

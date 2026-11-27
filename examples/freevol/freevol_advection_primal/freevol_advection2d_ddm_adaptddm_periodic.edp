@@ -1,0 +1,122 @@
+// advection in 2D (mesh) by finite volumes with periodic boundary conditions, parallel version (PETSc) with
+// PARALLEL mesh adaptation, WITHOUT a global mesh: the periodic case of freevol_advection2d_periodic_ddm.edp
+// with the adaptation of freevol_advection2d_ddm_adaptddm.edp
+//   u_t + div(V u) = 0 on the unit square, V = (1, 0.5), periodic in x and in y (labels 1-3 and 2-4), the initial
+//   data a periodic gaussian: at t = 2 the solution is back to the initial data
+//   at the start: the square split by MatCreate with macro ThPeriodicity()labPeriodic// (macro_ddm.idp): the
+//   cells near the periodic boundaries on one process, so the 2 sides of a periodic boundary are in the same
+//   local mesh, where fvscheme(..., periodic=...) glues them; every nadapt iterations:
+//   - ThNew = adaptmeshddm(Th, u, up, up-u, ..., periodic=..., owned=part[]): each process remeshes its part
+//     (the periodic boundaries frozen), the interfaces are readapted by exchanging bands of triangles, then a band
+//     around the periodic boundaries is gathered on process 0 and adapted again with the periodicity (the 2 sides
+//     discretized in the same way); this band stays on process 0 at the rebalancing, the rest is cut between the
+//     other processes (the same property as ThPeriodicity, kept after each adaptation)
+//   - DmeshReconstruct(ThNew): the overlap (ThNewOverlap) and the decomposition data
+//   - remapP0ddm(Th, u[], D[], ThNew, uNew): u from the old distributed mesh to the new one, parallel
+//     conservative transfer (the total mass is conserved exactly, no new extremum), then DmeshCopy(ThNew, Th),
+//     MatCreate; the velocity set again on the new mesh (fvscheme is rebuilt)
+//   mass, L2 error: sums over the processes (partition of unity), no global mesh; the plots gather the pieces on
+//   process 0 (plotDP0 of macro_ddm.idp: the P0 values, not interpolated)
+// run: ff-mpirun -np 4 freevol_advection2d_ddm_adaptddm_periodic.edp -wg   (options: -n, -ordre, -Tf (2), -nadapt,
+//   -erru, -hmin, -hmax, -ratio, -nbvx, -lim (fvscheme limiter), -nw: no plot)
+load "PETSc"// PETSc plugin
+load "adaptmesh_ddm"// adaptmeshddm: parallel adaptmesh
+macro dimension()2// EOM
+include "macro_ddm.idp"// additional DDM functions
+include "getARGV.idp"
+int n=getARGV("-n",40), ordre=getARGV("-ordre",2), nadapt=getARGV("-nadapt",5), lim=getARGV("-lim",1);
+real erru=getARGV("-erru",0.01), hmin=getARGV("-hmin",0.01), hmax=getARGV("-hmax",0.1);
+real adaptratio=getARGV("-ratio",1.5), Tf=getARGV("-Tf",2.);
+real nbvx=getARGV("-nbvx",1.e5);// the maximal number of vertices (in total, shared between the processes)
+// the periodic initial data (the gaussian and its neighboring images)
+func real gp(real xx, real yy) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) s += exp(-((xx-0.5-i)^2+(yy-0.5-j)^2)/0.01);
+  return s;
+}
+macro ThOverlap()ordre// EOM overlap of 2 cells (order 2)
+macro ThNewOverlap()ordre// EOM the same for the adapted mesh
+int[int] labPeriodic = [1, 3, 2, 4];
+macro ThPeriodicity()labPeriodic// EOM the cells near the periodic boundaries on one process
+mesh Th = square(n, n);                    // labels 1 bottom, 2 right, 3 top, 4 left
+Mat A;
+MatCreate(Th, A, P0);                      // Th: the local mesh (with overlap)
+fespace Ph(Th, P0);
+// the mass (sum over the processes, partition of unity: each cell counted once)
+Ph Dunity;
+Dunity[] = A.D;
+NewMacro massddm(uu, m)
+{
+  real ml = int2d(Th)(Dunity*uu);
+  mpiAllReduce(ml, m, mpiCommWorld, mpiSUM);
+} EndMacro
+Ph u = gp(x, y), up = 0, ur = 0, uBC = 0;
+Ph V1 = 1, V2 = 0.5;                       // constant velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];     // no effect on the periodic boundaries; the interfaces (-111111): Neumann
+fvscheme FV([V1,V2], eq="advection", labelBC=labBC, numflux=2, order=ordre, limiter=lim,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);// rebuilt after each adaptation
+real mass0, l20;
+massddm(u, mass0)
+massddm(u^2, l20)
+l20 = sqrt(l20);
+real t = 0, dt, dtsub, dtl, CFL = 0.9;
+real t0 = mpiWtime(), tadapt = 0;          // the total computing time and the adaptation time
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(u,cmm="2D periodic: initial data",fill=1,value=1,wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if ((it+1)%nadapt == 0 && t < Tf - 1e-10) {
+    real tad0 = mpiWtime(), massb, massa;
+    massddm(u, massb)                      // the mass before the adaptation
+    Ph part = Dunity;                      // the triangles owned by this process (the P0 partition of unity)
+    mesh ThNew = adaptmeshddm(Th, u, up, up-u, err=erru, errg=7.e2, hmax=hmax, hmin=hmin, ratio=adaptratio, iso=0,
+                              nbvx=nbvx, periodic=[[1,x],[3,x],[2,y],[4,y]], owned=part[], comm=mpiCommWorld);
+    DmeshReconstruct(ThNew);
+    real[int] uNew(1);
+    remapP0ddm(Th, u[], Dunity[], ThNew, uNew);// the parallel conservative transfer
+    DmeshCopy(ThNew, Th);
+    Mat Adapt;
+    MatCreate(Th, Adapt, P0);
+    A = Adapt;
+    Dunity = 0;
+    Dunity[] = A.D;
+    u = 0; u[] = uNew;
+    V1 = 1; V2 = 0.5;                      // the velocity on the new mesh
+    massddm(u, massa)
+    if (!mpirank && verbosity > 1) cout << "  mass before/after the adaptation: " << massb << " " << massa << endl;
+    up = 0; ur = 0; uBC = 0;
+    tadapt += mpiWtime()-tad0;
+  }
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtl = fluxupdate(FV, [u], [ur], [uBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+    exchange(A, ur[], scaled=true);        // ur of the overlap cells: the one of their process
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {plot(u, cmm="2D periodic: solution at t = "+t,fill=1,value=1,wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+// the results: sums over the processes (partition of unity)
+real mass, l2, errl2, umin, umax, uminl = 1e30, umaxl = -1e30;
+massddm(u, mass)
+massddm(u^2, l2)
+l2 = sqrt(l2);
+func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t));// the initial data translated by t*(1, 0.5) (periodic)
+{ real el = int2d(Th, qforder=5)(Dunity*(u-uex)^2); mpiAllReduce(el, errl2, mpiCommWorld, mpiSUM); errl2 = sqrt(errl2); }
+for (int k = 0; k < Th.nt; k++) if (Dunity[][k] > 0.5) { uminl = min(uminl, u[][k]); umaxl = max(umaxl, u[][k]); }
+mpiAllReduce(uminl, umin, mpiCommWorld, mpiMIN);
+mpiAllReduce(umaxl, umax, mpiCommWorld, mpiMAX);
+int ntl = 0, ntg;
+for (int k = 0; k < Th.nt; k++) if (Dunity[][k] > 0.5) ntl++;
+mpiAllReduce(ntl, ntg, mpiCommWorld, mpiSUM);
+if (!mpirank) {
+  cout << "2D periodic (" << mpisize << " processes, adaptmeshddm): t = " << t << " , " << it << " steps , " << ntg << " triangles , mass = " << mass
+       << " (error " << mass-mass0 << ") , min u = " << umin << " , max u = " << umax << " , L2 norm = " << l2 << endl;
+  cout << "L2 norm: initial " << l20 << " , final " << l2 << " , ratio " << l2/l20
+       << " ; L2 error with the exact solution " << errl2 << endl;
+  cout << "computing time: total " << mpiWtime()-t0 << " s , adaptation " << tadapt << " s" << endl;
+}
+plot(u, cmm="2D periodic: solution at t = "+t,fill=1,value=1,wait=0);

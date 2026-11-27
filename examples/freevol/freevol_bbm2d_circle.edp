@@ -1,0 +1,122 @@
+// the BBM-BBM (Boussinesq) system in a circular basin: the reflection of a hump of water on the circle
+// PARAM -Tf 2
+//   (PARAM: the options of make check, bin/test-driver-ff: a short computation)
+//   A_BBM dE/dt + div([F(E),G(E)]) = 0, A_BBM = diag(I - b Delta, I - d Delta, I - d Delta), E = [eta,u,v]
+//   finite volume / finite element method with two meshes (G. Sadaka): the finite volumes on Th (P0, the
+//   values at the barycenters of the cells), the finite elements on Th1, the mesh whose vertices are the
+//   barycenters of Th (P1, the values at the vertices): the transfer P0 (Th) <-> P1 (Th1) is exact (the same
+//   values, no interpolation). At each stage of the Heun scheme:
+//     1) finite volumes (FreeVol, eq="bbm", wall on the circle): R = div([F(E),G(E)]), E P0 on Th (fluxupdate)
+//     2) R on Th1 (P1, R1 = R at the barycenters), finite elements P1 on Th1, the whole system together
+//        (as FreeVol_BBM_FB.edp, varf vBBM): A_BBM W = -R1 (the wall is in the finite volumes: natural
+//        Neumann boundary conditions on Th1); the matrix dAK1 is factorized once
+//     3) W back on Th (the values at the vertices of Th1 = the values at the barycenters of Th), E += dt*W
+//   b = d = 0: W = -R exactly, the finite volume scheme alone
+//   the solution is symmetric in y (the hump is on the x axis, the mesh Th is symmetric)
+// options: -R (radius), -h (size of the cells), -x0 (center of the hump), -Tf, -ordre, -nf, -lim, -b, -d
+include "getARGV.idp"
+real s0=clock();
+load "isoline"// extractborder
+load "Curvature"// Curve
+
+real R=getARGV("-R",20.), hm=getARGV("-h",0.2), xg=getARGV("-x0",0.), Tf=getARGV("-Tf",40.);
+int ordre=getARGV("-ordre",1), nfl=getARGV("-nf",0), lim=getARGV("-lim",1);
+real b=getARGV("-b",1./6.), d=getARGV("-d",1./6.);
+//b=0;d=0;
+// a mesh symmetric in y: the half disk y > 0, its mirror image, glued along the diameter
+border C(t=0,pi){x=R*cos(t); y=R*sin(t); label=1;}
+border D(t=-R,R){x=t; y=0; label=99;}
+mesh Thu=buildmesh(C(int(pi*R/hm))+D(int(2*R/hm)));
+mesh Thd=movemesh(Thu,[x,-y]);
+mesh Th=Thu+Thd;
+Th=change(Th,rmInternalEdges=1);// the diameter is no longer a border (the vertices on it are inside)
+func eta0 = 0.2*exp(-((x-xg)^2+y^2)/4.);// a hump of water at rest, off the center
+//func eta0 = (dist(x-xg,y-0.)<=(R/4.));
+
+fespace Ph3(Th,[P0,P0,P0]);
+fespace Ph(Th,P0);
+Ph3 [eta,u,v]=[eta0,0,0], [etaBC,uBC,vBC]=[0,0,0], [Re,Ru,Rv]=[0,0,0];
+Ph3 [etap,up,vp];// for the Heun scheme
+int[int] labBC=[1,2];// wall on the circle
+fvscheme FV([eta,u,v],order=ordre,eq="bbm",labelBC=labBC,limiter=lim,numflux=nfl);
+
+// the mesh of the finite elements Th1: the vertices are the barycenters of Th (buildmesh with the border of
+// Th and the barycenters, then the triangles touching the border are removed)
+mesh Th1;
+{
+   real[int,int] b12(1,3);
+   int[int] lab = labels(Th);
+   real l12=extractborder(Th,lab,b12);
+   b12(2,:)=0:b12.m-1;// the parameter of the curve: the number of the point
+   border BB(t=0,1){P=Curve(b12,t);label=1;};
+   Ph Px=x,Py=y;// the barycenters
+   real[int,int] PF(Px[].n,2);
+   for(int i=0;i<Px[].n;i++){ PF(i,0)=Px[](i); PF(i,1)=Py[](i); }
+   Th1=buildmesh(BB(b12.m-1),points=PF,nbvx=PF.n+Th.nbe,fixedborder=1);
+   Th1=change(Th1,fregion=0);
+   fespace Ph1(Th1,P0);
+   Ph1 order;
+   OrderVF(Th1,order[],3);// order = 1 for the triangles with a vertex on the border
+   Th1=trunc(Th1,order==2,label=1);
+}
+// k1[i]: the cell of Th whose barycenter is the vertex i of Th1 (P1 on Th1 <-> P0 on Th)
+int[int] k1(Th1.nv), seen(Th.nt); seen=0;
+for(int i=0;i<Th1.nv;i++){ k1[i]=Th(Th1(i).x,Th1(i).y).nuTriangle; seen[k1[i]]++; }
+if(Th1.nv!=Th.nt || seen.min!=1) { cout << "Th1: the vertices are not the barycenters of Th" << endl; exit(1); }
+
+// the finite element part on Th1: (Mm + b K) W = -Mm R1, K the P1 stiffness matrix on Th1, Mm the mass matrix
+//   Mm = diag(|K_k|), the areas of the cells of Th (vertex i of Th1 <-> cell k1[i] of Th): the mass of eta on Th
+//   is conserved exactly (K 1 = 0) and the symmetry in y is kept
+//   the 3 lines together (G. Sadaka, varf vBBM): one matrix dAK1 of size 3*Th1.nv on [P1,P1,P1]
+real tfe=0., tfe0=clock();// the cputime of the finite element part
+Ph ar=area;
+// the matrix of the whole system, dof 3*i+c (vertex i of Th1, component c), the same numbering
+// as [P0,P0,P0] on Th (3*k+c): K3[3*i+c] = 3*k1[i]+c
+fespace Wh(Th1,[P1,P1,P1]);
+macro grad(u)[dx(u),dy(u)]//
+varf vBBM([etah,uh,vh],[veta,vu,vv])=int2d(Th1)(b*grad(etah)'*grad(veta)+d*grad(uh)'*grad(vu)+d*grad(vh)'*grad(vv));// without the mass term
+matrix Mm3, dAK1;
+int[int] K3(3*Th1.nv);
+for(int i=0;i<Th1.nv;i++) for(int c=0;c<3;c++) K3[3*i+c]=3*k1[i]+c;
+Wh [r1e,r1u,r1v], [W1e,W1u,W1v];
+{ real[int] da3(3*Th1.nv); for(int i=0;i<Th1.nv;i++) for(int c=0;c<3;c++) da3[3*i+c]=ar[][k1[i]];
+  Mm3=[da3]; matrix K3m=vBBM(Wh,Wh); dAK1=Mm3+K3m; }
+set(dAK1,solver=sparsesolver);
+tfe+=clock()-tfe0;
+// one stage: E -> W = -A^-1 div(F(E)), dtfv the time step of the finite volumes (CFL = 1)
+macro bbmstage(dtfv){
+  dtfv=fluxupdate(FV,[eta,u,v],[Re,Ru,Rv],[etaBC,uBC,vBC]);
+  real tfe1=clock();
+  r1e[]=Re[](K3);/* [Re,Ru,Rv] on Th -> [r1e,r1u,r1v] on Th1 */
+  real[int] bb3=Mm3*r1e[]; bb3=-bb3;
+  W1e[]=dAK1^-1*bb3;
+  Re[](K3)=W1e[];/* W on Th, in [Re,Ru,Rv] */
+  tfe+=clock()-tfe1;
+}//
+macro advance(dt){ eta[]+=dt*Re[]; }// E += dt*W ([Re,Ru,Rv] = W)
+
+real m0=int2d(Th)(eta);
+real t=0., dt, dtfv, CFL=.5, tdraw=Tf/40.;
+int ntdraw=0, iter=0;
+real[int] viso(31); for(int i=0;i<31;i++) viso[i]=-0.05+0.15*i/30.;// the same colors for all the plots
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) { Ph e=eta; plot(e,fill=1,value=1,dim=3,viso=viso,cmm="eta at t="+t,wait=0); ntdraw++; }
+    etap[]=eta[];
+    bbmstage(dtfv)
+    dt=CFL*dtfv; if(t+dt > Tf) dt=Tf-t;
+    advance(dt)
+    bbmstage(dtfv)
+    advance(dt)
+    eta[]+=etap[]; eta[]*=.5;// Heun
+    t+=dt;
+}//end of time loop
+Ph etaf=eta;
+plot(etaf,fill=1,value=1,viso=viso,cmm="eta at t="+t,wait=1);
+cout << Th.nt << " triangles (Th1: " << Th1.nt << " triangles), " << iter << " time steps, cputime = " << clock()-s0 << " (finite elements: " << tfe << ")" << endl;
+cout << "mass error of eta = " << int2d(Th)(eta)-m0 << " , min eta = " << etaf[].min << " , max eta = " << etaf[].max << endl;
+// the symmetry in y: eta(x,y) = eta(x,-y) (Th is symmetric)
+Ph esym=etaf(x,-y); esym[]-=etaf[];
+cout << "symmetry: max |eta(x,y)-eta(x,-y)| = " << esym[].linfty << " (max |eta| = " << etaf[].linfty << ")" << endl;
+// the normal velocity on the circle (the wall)
+Ph uf=u, vf=v;
+cout << "normal velocity on the circle: |u.n| = " << sqrt(int1d(Th,1)((uf*N.x+vf*N.y)^2)/int1d(Th,1)(1.)) << " (rms) , max |u| = " << max(uf[].linfty,vf[].linfty) << endl;

@@ -1,0 +1,422 @@
+// plotFreeVol.idp : the plots of a "water" h above a "ground" zb with ffglut, for the FreeVol scripts
+//   plotFreeVol1d(Th, h, zb, {options of plot})  Th meshL on the x axis: the water (blue) and the ground (grey)
+//                                                filled, a 2d view (options: bb=[[x0,y0],[x1,y1]] the window)
+//   plotFreeVol1dDual(Th, h, zb, {options})      the same on the dual mesh of Th (finite volumes on the dual mesh,
+//                                                h, zb P1 on Th): one step by control volume
+//   plotFreeVol2d(Th, h, zb, {options of plot})  Th mesh of a domain (one boundary line): the water as a volume (free surface
+//                                                h+zb, sides) on the ground zb, a 3d view
+//   plotFreeVolbb([[x0,y0],[x1,y1]])             2d: the window of the domain plotted (before the first plot)
+//   h, zb: P0 on Th (or components of a P0 vector function, or a constant: zb = 0), h >= 0
+//   (shallow water: h = H; isentropic gas: h = rho, zb = 0; advection: h = u >= 0, zb = 0)
+//   options: as in plot, between braces if more than one, ex. plotFreeVol2d(Th, H, zb, {cmm="t="+t, wait=1})
+//   colors: the table hsv= below (with the modified ffglut it is the colormap of the pretty rendering; with
+//   the original ffglut, key C twice: colormap cool to warm); ffglut keys: v no color bar, j no axes
+load "msh3"
+real[int] fvvis(21); for(int i=0;i<21;i++) fvvis[i]=i/20.;// the values -> colormap: [0,1]
+// the colors (hsv) at the values 0, 0.25, 0.5, 0.75, 1: dark blue, light blue, grey, salmon, red
+real[int] fvcol=[0.64,0.70,0.75, 0.62,0.50,0.98, 0.62,0.0,0.87, 0.03,0.45,0.95, 0.0,0.90,0.70];
+
+// ============================== 1D ==============================
+// plotFreeVol1d(Th, H, zb, {options of plot}): plot in 1D (meshL Th on the x axis):
+// the water (blue) and the ground (grey) filled, with the colors hsv= below (ffglut key v: no color bar)
+//   H, zb: P0 on Th (or components of a P0 vector function)
+//   options: as in plot, between braces if more than one, ex. plotFreeVol1d(Th, H, zb, {cmm="t="+t, wait=1})
+// the water and the ground: each one a 2d mesh of the plane (x,z) under a line, closed down to the bottom of the
+// view (method of FermetureMeshLPlan, fermeture_meshL.idp, G. Sadaka): the top ThL (Th moved to H+zb, or to zb)
+// is kept as it is, the bottom of the view gets ThL.nt/4 equidistant points, the 2 vertical sides points of the
+// same size, then buildmesh of the contour (bottom, right side, ThL reversed, left side) with fixedborder;
+// the ground is plotted after the water and hides it below zb;
+// the bottom of the view: min(zb) - 1/4*(max(H+zb) - min(zb)) at the first call (fixed: it does not move
+// with the waves from a plot to the next one)
+bool fv1init1=false;// the bottom of the view fv1zbot: computed at the first call, the same for all the plots
+real fv1zbot;
+// fv1Fermeture(ThL, zf, Tp): the 2d mesh Tp of the plane (x,y=z) between the open line ThL (meshL of the plane
+// z=0, x and y vary, vertices in any order) and the bottom y=zf (under ThL), as FermetureMeshLPlan
+// (fermeture_meshL.idp) without the move to the 3d plane y=0; labels: 1 ThL (top), 2 bottom, 3 sides
+NewMacro fv1Fermeture(ThL, zf, Tp)
+{
+  int nL = ThL.nv;
+  assert(ThL.nt == nL - 1);   // one open line
+  // the neighbours of each vertex
+  int[int] fpv1(nL), fpv2(nL);
+  fpv1 = -1; fpv2 = -1;
+  for (int k = 0; k < ThL.nt; k++) {
+    int a = ThL[k][0], b = ThL[k][1];
+    if (fpv1[a] < 0) fpv1[a] = b; else fpv2[a] = b;
+    if (fpv1[b] < 0) fpv1[b] = a; else fpv2[b] = a;
+  }
+  // start at an end (one neighbour), then along the line
+  int deb = -1;
+  for (int v = 0; v < nL; v++) if (fpv2[v] < 0) { deb = v; break; }
+  assert(deb >= 0);
+  real[int] X1(nL), Z1(nL);
+  {
+    int prec = -1, cur = deb;
+    for (int i = 0; i < nL; i++) {
+      X1[i] = ThL(cur).x; Z1[i] = ThL(cur).y;
+      int nx = (fpv1[cur] != prec) ? fpv1[cur] : fpv2[cur];
+      prec = cur; cur = nx;
+    }
+  }
+  // x increasing from the first to the last vertex
+  if (X1[nL-1] < X1[0]) {
+    real[int] Xs = X1, Zs = Z1;
+    for (int i = 0; i < nL; i++) { X1[i] = Xs[nL-1-i]; Z1[i] = Zs[nL-1-i]; }
+  }
+  fv1FermeturePts(X1, Z1, zf, Tp)
+} EndMacro
+// fv1FermeturePts(X1, Z1, zf, Tp): the same with the line given by its points (X1[i], Z1[i]), x increasing
+NewMacro fv1FermeturePts(X1, Z1, zf, Tp)
+{
+  int nL = X1.n;
+  assert(zf < Z1.min);   // the bottom under the line
+  // the bottom: ThL.nt/4 equidistant points, the sides: the same size
+  real xa = X1[0], xb = X1[nL-1];
+  int M = max(1, (nL-1)/4);
+  real hb = (xb - xa)/M;
+  int nga = max(1, int((Z1[0] - zf)/hb + 0.5));
+  int ngb = max(1, int((Z1[nL-1] - zf)/hb + 0.5));
+  // the contour, direct: bottom, right side, ThL reversed, left side
+  border FpBas   (t=0, 1)     { x = xa + t*(xb - xa); y = zf;                       label = 2; }
+  border FpDroite(t=0, 1)     { x = xb; y = zf + t*(Z1[nL-1] - zf);                  label = 3; }
+  border FpHaut  (t=0, nL-1)  { int i = min(int(t + 0.5), nL-1); x = X1[nL-1-i]; y = Z1[nL-1-i]; label = 1; }
+  border FpGauche(t=0, 1)     { x = xa; y = Z1[0] + t*(zf - Z1[0]);                  label = 3; }
+  Tp = buildmesh(FpBas(M) + FpDroite(ngb) + FpHaut(nL-1) + FpGauche(nga), fixedborder=true);
+} EndMacro
+macro plotFreeVol1d(Th,H,zb,OPT){
+  fespace fv1Ph(Th,P0);
+  fv1Ph fv1E=H+zb, fv1Z=zb;
+  real[int] fv1bw(6), fv1bg(6);
+  if(!fv1init1) {
+    meshL fv1Lw0=movemeshL(Th,transfo=[x,fv1E,0]); meshL fv1Lg0=movemeshL(Th,transfo=[x,fv1Z,0]);
+    boundingbox(fv1Lw0,fv1bw); boundingbox(fv1Lg0,fv1bg);
+    fv1zbot=fv1bg[2]-0.25*(fv1bw[3]-fv1bg[2]+1.e-10); fv1init1=true;
+  }
+  meshL fv1Lw=movemeshL(Th,transfo=[x,fv1E,0]);
+  meshL fv1Lg=movemeshL(Th,transfo=[x,fv1Z,0]);
+  mesh fv1Sw, fv1Sg;
+  { fv1Fermeture(fv1Lw, fv1zbot, fv1Sw) }
+  { fv1Fermeture(fv1Lg, fv1zbot, fv1Sg) }
+  fespace fv1Vw(fv1Sw,P0); fespace fv1Vg(fv1Sg,P0);
+  fv1Vw fv1fw=0.15; fv1Vg fv1fg=0.5;
+  plot(fv1fw,fv1fg,fill=true,viso=fvvis,hsv=fvcol,aspectratio=false,OPT);
+}//
+
+// plotFreeVol1dDual(Th, H, zb, {options of plot}): the same for the finite volumes on the dual mesh of the meshL Th
+// (meshdualL, the unknowns P1 on Th: one value by vertex = by control volume): the water and the ground are stairs,
+// one step by control volume, from the middle of the segment on the left of the vertex to the middle of the one on
+// its right (the ends of Th at the ends)
+// fv1Stairs(Th, V, X1, Z1): the points of the stairs of V (P1 on Th), x increasing (a vertical step only between
+// two different values)
+NewMacro fv1Stairs(Th, V, X1, Z1)
+{
+  int nv = Th.nv;
+  real[int] xs(nv), vs(nv);
+  int[int] ps(nv);
+  for (int i = 0; i < nv; i++) { xs[i] = Th(i).x; ps[i] = i; }
+  sort(xs, ps);// the vertices along x
+  for (int i = 0; i < nv; i++) vs[i] = V[][ps[i]];
+  real sc = max(vs.max - vs.min, 1.e-30);
+  real[int] X(2*nv), Z(2*nv);
+  int n = 0;
+  X[n] = xs[0]; Z[n] = vs[0]; n++;
+  for (int i = 0; i < nv-1; i++) {
+    real m = (xs[i] + xs[i+1])/2;
+    X[n] = m; Z[n] = vs[i]; n++;
+    if (abs(vs[i+1] - vs[i]) > 1.e-9*sc) { X[n] = m; Z[n] = vs[i+1]; n++; }
+  }
+  X[n] = xs[nv-1]; Z[n] = vs[nv-1]; n++;
+  X1.resize(n); Z1.resize(n);
+  X1 = X(0:n-1); Z1 = Z(0:n-1);
+} EndMacro
+macro plotFreeVol1dDual(Th,H,zb,OPT){
+  fespace fv1Ph1(Th,P1);
+  fv1Ph1 fv1E=H+zb, fv1Z=zb;
+  real[int] fv1Xw(1), fv1Zw(1), fv1Xg(1), fv1Zg(1);
+  { fv1Stairs(Th, fv1E, fv1Xw, fv1Zw) }
+  { fv1Stairs(Th, fv1Z, fv1Xg, fv1Zg) }
+  if(!fv1init1) { fv1zbot=fv1Zg.min-0.25*(fv1Zw.max-fv1Zg.min+1.e-10); fv1init1=true; }
+  mesh fv1Sw, fv1Sg;
+  { fv1FermeturePts(fv1Xw, fv1Zw, fv1zbot, fv1Sw) }
+  { fv1FermeturePts(fv1Xg, fv1Zg, fv1zbot, fv1Sg) }
+  fespace fv1Vw(fv1Sw,P0); fespace fv1Vg(fv1Sg,P0);
+  fv1Vw fv1fw=0.15; fv1Vg fv1fg=0.5;
+  plot(fv1fw,fv1fg,fill=true,viso=fvvis,hsv=fvcol,aspectratio=false,OPT);
+}//
+
+// ============================== 2D ==============================
+// plotFreeVol2d(Th, H, zb, {options of plot}): plot in 2D (mesh Th of a domain with one boundary line),
+// the water as a volume: the free surface H+zb (light blue), the side of the water on the boundary
+// (dark blue), the ground zb and its side (grey); surfaces meshS in 3D lighted by the pretty rendering of
+// ffglut, with the colors hsv= below (ffglut keys: v no color bar, j no axes)
+//   H, zb: P0 on Th (or components of a P0 vector function)
+//   options: as in plot, between braces if more than one, ex. plotFreeVol2d(Th, H, zb, {cmm="t="+t, wait=1})
+// at the vertices (with the cells around each vertex, found once for the mesh): the ground = mean of zb on the
+// cells around, the free surface = min of H+zb on the cells around (a dry cell gives zb: the surface goes under
+// the ground at the shore and at the front of the water, the face of a dam, and never goes up a bank), plotted
+// a little lower (0.5% of the height of the view);
+// the surfaces are the mesh Th (or its triangles in the window) moved to these heights: no new mesh;
+// the side: the closure of the surfaces down to the flat bottom of the view (method of FermetureMeshS,
+// fermeture_meshL.idp, G. Sadaka): the boundary line of the surfaces (their vertices, fixed) is the top of a
+// vertical curtain unfolded in the plane (curvilinear abscissa, z): on the top the line of the water (of the
+// ground where it is dry), inside the line of the ground at the same vertices (the limit grey / blue), on the
+// bottom BdL.nt/4 equidistant points, vertical lines at the corners seen from above; buildmesh of the part under
+// the ground and of each wet run above it, glued, then folded in 3D: the curtain is conform with the two
+// surfaces (their boundary vertices are vertices of the curtain);
+// z (and y for a thin strip) are dilated for the view (computed at the first call, printed once);
+// plotFreeVolbb([[x0,y0],[x1,y1]]) before the first plot (ex. plotFreeVolbb(bbsw) with macro bbsw() [[x0,y0],[x1,y1]]//):
+// only the triangles of Th in the window [x0,x1]x[y0,y1] are plotted (trunc, the mesh is not changed), with the
+// curtain on their boundary (do not give bb= in the options: plotFreeVol2d gives it to ffglut)
+bool fv2init2=false, fv2bbset=false;
+real fv2bx0,fv2bx1,fv2by0,fv2by1;// the window given by plotFreeVolbb
+macro plotFreeVolbb(BB) { real[int,int] fv2bbt=BB; fv2bx0=min(fv2bbt(0,0),fv2bbt(1,0)); fv2bx1=max(fv2bbt(0,0),fv2bbt(1,0));
+  fv2by0=min(fv2bbt(0,1),fv2bbt(1,1)); fv2by1=max(fv2bbt(0,1),fv2bbt(1,1)); fv2bbset=true; fv2init2=false; }//
+real fv2x0,fv2x1,fv2y0,fv2y1,fv2sy,fv2ymid,fv2zbot,fv2sz,fv2dsurf;
+// the cells around the vertices (built once for the mesh): fv2Ka[j*nv+iv] the j-th cell around the vertex iv
+// (j < fv2md, the first one repeated), fv2A the matrix of the mean on the cells around the vertices
+int fv2ntK=-1, fv2md=0;
+int[int] fv2Ka(1);
+matrix fv2A;
+// the plotted part of Th (Th, or its triangles in the window) and the restriction of the P1 values to it
+mesh fv2Thw;
+matrix fv2I;
+macro fv2round2(v) (10.^(floor(log10(v))-1)*floor(v/10.^(floor(log10(v))-1)+0.5))// 2 significant digits
+
+// fv2Pts(ax, ay, bx, by, n): the points of the segment from (ax,ay) to (bx,by) cut in n, without the last one,
+// added to the closed contour (FmLX, FmLY, nl) of the curtain
+NewMacro fv2Pts(ax, ay, bx, by, n)
+{
+  for (int r = 0; r < n; r++) { FmLX[nl] = ax + r*(bx - ax)/n; FmLY[nl] = ay + r*(by - ay)/n; nl++; }
+} EndMacro
+// fv2Seg(ax, ay, bx, by, n): one more straight inside line of the curtain, from (ax,ay) to (bx,by), n segments
+NewMacro fv2Seg(ax, ay, bx, by, n)
+{
+  FmAX[ns] = ax; FmAY[ns] = ay; FmBX[ns] = bx; FmBY[ns] = by; FmNS[ns] = n; ns++;
+} EndMacro
+// fv2Mesh(Tm): buildmesh of the closed contour (FmLX, FmLY, nl points) and of the ns inside lines (FmP); the
+// contour is cut at the ends of the inside lines, one border by piece: bamg keeps a region only if a border has it
+// on its left (one border for the whole contour: the regions cut by the vertical lines of the corners are lost,
+// "missing vertices"; one border by segment: bamg fails on thin parts, "wrong direction")
+NewMacro fv2Mesh(Tm)
+{
+  FmLX[nl] = FmLX[0]; FmLY[nl] = FmLY[0];
+  int[int] FmCut(nl); FmCut = 0; FmCut[0] = 1;
+  for (int q = 0; q < ns; q++)
+    for (int j = 0; j < nl; j++)
+      if ((FmLX[j] == FmAX[q] && FmLY[j] == FmAY[q]) || (FmLX[j] == FmBX[q] && FmLY[j] == FmBY[q])) FmCut[j] = 1;
+  int npc = FmCut.sum, m = 0;
+  int[int] FmOff(npc+1), FmNL(npc);
+  for (int j = 0; j < nl; j++) if (FmCut[j]) FmOff[m++] = j;
+  FmOff[npc] = nl;
+  for (int c = 0; c < npc; c++) FmNL[c] = FmOff[c+1] - FmOff[c];
+  border FmL(t=0, 1; c){ int j = FmOff[c] + min(int(t*FmNL[c] + 0.5), FmNL[c]); x = FmLX[j]; y = FmLY[j]; label = 1; }
+  if (ns > 0) {
+    int[int] FmNSc = FmNS(0:ns-1);
+    Tm = buildmesh(FmL(FmNL) + FmP(FmNSc), fixedborder=true);
+  } else
+    Tm = buildmesh(FmL(FmNL), fixedborder=true);
+} EndMacro
+
+// fv2Rideau(Thw, ZG, ZW, zf, ThF, CF): the curtain ThF (meshS) under the boundary line of Thw, in the view
+// (y dilated); ZG, ZW: the heights (in the view) of the ground and of the water at the vertices of Thw (real[int]);
+// zf: the bottom; CF: the colors of the triangles of ThF (real[int], P0: grey under the ground, blue above)
+NewMacro fv2Rideau(Thw, ZG, ZW, zf, ThF, CF)
+{
+  real angleCoin = 30*pi/180;   // the minimal turn of a corner seen from above
+  // 1. the boundary line of Thw (the line extract gives from the surfaces: the same vertices), in order
+  int nvw = Thw.nv, nL = Thw.nbe;
+  int[int] fmv1(nvw), fmv2(nvw);
+  fmv1 = -1; fmv2 = -1;
+  for (int k = 0; k < nL; k++) {
+    int a = Thw.be(k)[0], b = Thw.be(k)[1];
+    if (fmv1[a] < 0) fmv1[a] = b; else { assert(fmv2[a] < 0); fmv2[a] = b; }   // one closed line, no pinch
+    if (fmv1[b] < 0) fmv1[b] = a; else { assert(fmv2[b] < 0); fmv2[b] = a; }
+  }
+  real[int] X1(nL+1), Y1(nL+1), G1(nL+1), T1(nL+1);
+  {
+    int a0 = Thw.be(0)[0], prec = -1, cur = a0;
+    for (int i = 0; i < nL; i++) {
+      X1[i] = Thw(cur).x; Y1[i] = fv2ymid + (Thw(cur).y - fv2ymid)*fv2sy; G1[i] = ZG[cur]; T1[i] = ZW[cur];
+      int nx = (fmv1[cur] != prec) ? fmv1[cur] : fmv2[cur];
+      prec = cur; cur = nx;
+    }
+    assert(cur == a0);   // back to the start: the line is closed
+  }
+  // direct seen from above
+  {
+    real aire = 0;
+    for (int i = 0; i < nL; i++) aire += X1[i]*Y1[(i+1)%nL] - X1[(i+1)%nL]*Y1[i];
+    if (aire < 0) {
+      real[int] Xs = X1, Ys = Y1, Gs = G1, Ts = T1;
+      for (int i = 0; i < nL; i++) { X1[i] = Xs[nL-1-i]; Y1[i] = Ys[nL-1-i]; G1[i] = Gs[nL-1-i]; T1[i] = Ts[nL-1-i]; }
+    }
+  }
+  // the top: the water where it is above the ground by more than 1e-3 of the height and 0.2 times the spacing of
+  // the vertices (seen from above: a thinner layer of water makes too thin triangles, bamg fails), else the ground
+  real epsw = 1e-3*(max(T1(0:nL-1).max, G1(0:nL-1).max) - zf);
+  {
+    real[int] Ts = T1;
+    for (int i = 0; i < nL; i++) {
+      int ip = (i + nL - 1)%nL, in = (i + 1)%nL;
+      real ds = min(sqrt((X1[i]-X1[ip])^2 + (Y1[i]-Y1[ip])^2), sqrt((X1[in]-X1[i])^2 + (Y1[in]-Y1[i])^2));
+      if (Ts[i] < G1[i] + max(epsw, 0.2*ds)) T1[i] = G1[i];
+    }
+  }
+  assert(zf < G1(0:nL-1).min);   // the bottom under the line
+  // 2. the corners seen from above: a turn of more than angleCoin
+  real Lxy = 0;
+  for (int i = 0; i < nL; i++) Lxy += sqrt((X1[(i+1)%nL]-X1[i])^2 + (Y1[(i+1)%nL]-Y1[i])^2);
+  real eps = 1e-9*Lxy;
+  int[int] coin(nL);
+  int nco = 0;
+  for (int i = 0; i < nL; i++) {
+    int ip = (i + nL - 1)%nL, in = (i + 1)%nL;
+    real ax = X1[i]-X1[ip], ay = Y1[i]-Y1[ip], bx = X1[in]-X1[i], by = Y1[in]-Y1[i];
+    real c = (ax*bx + ay*by)/max(sqrt((ax^2 + ay^2)*(bx^2 + by^2)), eps*eps);
+    if (acos(max(-1., min(1., c))) > angleCoin) coin[nco++] = i;
+  }
+  // the line starts at a corner (if any): the seam of the curtain is there
+  if (nco > 0) {
+    int d = coin[0];
+    real[int] Xs = X1, Ys = Y1, Gs = G1, Ts = T1;
+    for (int i = 0; i < nL; i++) { X1[i] = Xs[(i+d)%nL]; Y1[i] = Ys[(i+d)%nL]; G1[i] = Gs[(i+d)%nL]; T1[i] = Ts[(i+d)%nL]; }
+    for (int c = 0; c < nco; c++) coin[c] -= d;
+  }
+  X1[nL] = X1[0]; Y1[nL] = Y1[0]; G1[nL] = G1[0]; T1[nL] = T1[0];
+  // the pieces between the corners: ic[0] = 0 < ... < ic[np] = nL
+  int np = max(1, nco);
+  int[int] ic(np + 1);
+  for (int c = 0; c < np; c++) ic[c] = (nco > 0) ? coin[c] : 0;
+  ic[np] = nL;
+  // 3. the curvilinear abscissa (seen from above) and the bottom: nL/4 points, at least one segment by piece
+  real[int] S1(nL+1);
+  S1[0] = 0;
+  for (int i = 0; i < nL; i++) S1[i+1] = S1[i] + sqrt((X1[i+1]-X1[i])^2 + (Y1[i+1]-Y1[i])^2);
+  real Lp = S1[nL];
+  int M = max(3, nL/4);
+  int[int] ncm(np);
+  {
+    int tot = 0;
+    for (int c = 0; c < np; c++) { ncm[c] = max(1, int(M*(S1[ic[c+1]] - S1[ic[c]])/Lp + 0.5)); tot += ncm[c]; }
+    M = tot;
+  }
+  real hz = Lp/M;   // the size of the cells
+  // 4. the unfolded curtain, in pieces glued after (the same points on the line of the ground): the part under the
+  //    ground (region 1: contour bottom, right side, ground reversed, left side; inside: the vertical lines at the
+  //    corners), then each wet run above it (region 2: ground, top reversed, the vertical sides at the seam if wet;
+  //    inside: the vertical lines at the corners); (one buildmesh with the ground as an inside line fails when a
+  //    wet run is between dry parts: "Error in the definition of subdomain ... wrong direction")
+  real[int] FmLX(4*nL + 4*M + 8), FmLY(4*nL + 4*M + 8);
+  int nl = 0;
+  real[int] FmAX(np + 1), FmAY(np + 1), FmBX(np + 1), FmBY(np + 1);
+  int[int] FmNS(np + 1);
+  int ns = 0;
+  border FmP(t=0, 1; c){ x = (1-t)*FmAX[c] + t*FmBX[c]; y = (1-t)*FmAY[c] + t*FmBY[c]; label = 4; }// exact at t = 1
+  for (int c = 0; c < np; c++) fv2Pts(S1[ic[c]], zf, S1[ic[c+1]], zf, ncm[c])
+  fv2Pts(Lp, zf, Lp, G1[nL], max(1, int((G1[nL] - zf)/hz + 0.5)))
+  for (int i = nL; i > 0; i--) fv2Pts(S1[i], G1[i], S1[i-1], G1[i-1], 1)
+  fv2Pts(0., G1[0], 0., zf, max(1, int((G1[0] - zf)/hz + 0.5)))
+  for (int c = 1; c < np; c++) { int i = ic[c]; fv2Seg(S1[i], zf, S1[i], G1[i], max(1, int((G1[i] - zf)/hz + 0.5))) }
+  mesh FmTp;
+  fv2Mesh(FmTp)
+  FmTp = change(FmTp, fregion = 1);
+  // the wet runs: the vertices a..b with T1 > G1 (indices 0..nL, the seam not crossed), with their dry neighbours
+  int[int] FmCo(nL+1); FmCo = 0;
+  for (int c = 1; c < np; c++) FmCo[ic[c]] = 1;
+  int a = 0;
+  while (a <= nL) {
+    if (!(T1[a] > G1[a])) { a++; continue; }
+    int b = a;
+    while (b < nL) { if (T1[b+1] > G1[b+1]) b++; else break; }   // (&& is not short-circuit)
+    int p = (a > 0) ? a - 1 : a, q = (b < nL) ? b + 1 : b;
+    nl = 0; ns = 0;
+    for (int i = p; i < q; i++) fv2Pts(S1[i], G1[i], S1[i+1], G1[i+1], 1)
+    if (T1[q] > G1[q]) fv2Pts(S1[q], G1[q], S1[q], T1[q], max(1, int((T1[q] - G1[q])/hz + 0.5)))
+    for (int i = q; i > p; i--) fv2Pts(S1[i], T1[i], S1[i-1], T1[i-1], 1)
+    if (T1[p] > G1[p]) fv2Pts(S1[p], T1[p], S1[p], G1[p], max(1, int((T1[p] - G1[p])/hz + 0.5)))
+    for (int i = p + 1; i < q; i++) if (FmCo[i]) fv2Seg(S1[i], G1[i], S1[i], T1[i], max(1, int((T1[i] - G1[i])/hz + 0.5)))
+    mesh FmTu;
+    fv2Mesh(FmTu)
+    FmTu = change(FmTu, fregion = 2);
+    FmTp = FmTp + FmTu;
+    a = b + 1;
+  }
+  // 5. folded in 3D: the position (x,y) from the abscissa sigma, P1 interpolation (compiled) from a thin band
+  //    FmR, its nodes at the abscissae S1 (linear in sigma between them, as FmInterp), evaluated at its middle
+  real FmHb = Lp/nL;
+  mesh FmR = square(nL, 1, [S1[min(int(x*nL + 0.5), nL)], y*FmHb]);
+  fespace FmVR(FmR, P1);
+  FmVR FmRX, FmRY;
+  for (int j = 0; j < 2; j++)
+    for (int i = 0; i <= nL; i++) { FmRX[][i + (nL+1)*j] = X1[i]; FmRY[][i + (nL+1)*j] = Y1[i]; }
+  fespace FmVp(FmTp, P1);
+  FmVp FmPX = FmRX(x, FmHb/2), FmPY = FmRY(x, FmHb/2);
+  // the colors: ground (0.5) in the part under the ground (region 1), water (0) above (region 2)
+  fespace FmV0(FmTp, P0);
+  FmV0 FmC = (region == 1) ? 0.5 : 0.;
+  ThF = movemesh23(FmTp, transfo=[FmPX, FmPY, y], precismesh=1e-7);
+  CF.resize(FmTp.nt); CF = FmC[];
+} EndMacro
+
+macro plotFreeVol2d(Th,H,zb,OPT){
+  fespace fv2Ph(Th,P0); fespace fv2Vh(Th,P1);
+  fv2Ph fv2E=H+zb, fv2Z=zb;
+  if(Th.nt!=fv2ntK) {
+    int fv2nv=Th.nv;
+    int[int] fv2deg(fv2nv), fv2fill(fv2nv), fv2II(3*Th.nt), fv2JJ(3*Th.nt);
+    real[int] fv2CC(3*Th.nt);
+    fv2deg=0; fv2fill=0;
+    for(int k=0;k<Th.nt;k++) for(int i=0;i<3;i++) fv2deg[Th[k][i]]++;
+    fv2md=fv2deg.max;
+    fv2Ka.resize(fv2md*fv2nv);
+    for(int k=0;k<Th.nt;k++)
+      for(int i=0;i<3;i++) {
+        int iv=Th[k][i], c=3*k+i;
+        fv2Ka[fv2fill[iv]*fv2nv+iv]=k; fv2fill[iv]++;
+        fv2II[c]=iv; fv2JJ[c]=k; fv2CC[c]=1./fv2deg[iv];
+      }
+    for(int iv=0;iv<fv2nv;iv++) for(int j=fv2fill[iv];j<fv2md;j++) fv2Ka[j*fv2nv+iv]=fv2Ka[iv];
+    fv2A=[fv2II,fv2JJ,fv2CC];
+    fv2ntK=Th.nt;
+    fv2init2=false;/* a new mesh: the plotted part again */
+  }
+  fv2Vh fv2zv, fv2ev, fv2t, fv2m;
+  fv2zv[]=fv2A*fv2Z[];
+  fv2ev[]=fv2E[](fv2Ka(0:Th.nv-1));
+  for(int j=1;j<fv2md;j++) { fv2t[]=fv2E[](fv2Ka(j*Th.nv:(j+1)*Th.nv-1)); fv2m=min(fv2ev,fv2t); fv2ev[]=fv2m[]; }
+  if(!fv2init2) {
+    real[int] fv2bb(4); boundingbox(Th,fv2bb);
+    if(fv2bbset) fv2Thw=trunc(Th,(x>=fv2bx0)*(x<=fv2bx1)*(y>=fv2by0)*(y<=fv2by1));/* the triangles in the window */
+    else fv2Thw=Th;
+    { fespace fv2Vw(fv2Thw,P1); fv2I=interpolate(fv2Vw,fv2Vh); }/* the restriction of the P1 values (the same vertices) */
+    boundingbox(fv2Thw,fv2bb);
+    fv2x0=fv2bb[0]; fv2x1=fv2bb[1]; fv2y0=fv2bb[2]; fv2y1=fv2bb[3];
+    fv2ymid=(fv2y0+fv2y1)/2;
+    meshS fv2SG0=movemesh23(Th,transfo=[x,y,fv2zv]);
+    meshS fv2SW0=movemesh23(Th,transfo=[x,y,max(fv2ev,fv2zv)]);
+    real[int] fv2bg(6), fv2bw(6); boundingbox(fv2SG0,fv2bg); boundingbox(fv2SW0,fv2bw);
+    real fv2zmin=fv2bg[4], fv2zmax=fv2bw[5];
+    fv2zbot=fv2zmin-0.15*(fv2zmax-fv2zmin+1.e-10);
+    fv2dsurf=0.005*(fv2zmax-fv2zbot);
+    fv2sy=max(1.,0.25*(fv2x1-fv2x0)/(fv2y1-fv2y0)); if(fv2sy>1.) fv2sy=fv2round2(fv2sy);
+    fv2sz=max(1.,0.3*max(fv2x1-fv2x0,fv2y1-fv2y0)/(fv2zmax-fv2zbot)); if(fv2sz>1.) fv2sz=fv2round2(fv2sz);
+    if(fv2sz>1. || fv2sy>1.) cout << "plotFreeVol2d: the view is dilated: z x " << fv2sz << " , y x " << fv2sy << endl;
+    fv2init2=true;
+  }
+  fv2ev[]-=fv2dsurf;
+  /* the surfaces: the mesh fv2Thw moved, in the dilated view */
+  fespace fv2Vw(fv2Thw,P1);
+  fv2Vw fv2zw, fv2ew;
+  fv2zw[]=fv2I*fv2zv[]; fv2ew[]=fv2I*fv2ev[];
+  fv2zw[]*=fv2sz; fv2ew[]*=fv2sz;
+  meshS fv2SG=movemesh23(fv2Thw,transfo=[x,fv2ymid+(y-fv2ymid)*fv2sy,fv2zw]);
+  meshS fv2SW=movemesh23(fv2Thw,transfo=[x,fv2ymid+(y-fv2ymid)*fv2sy,fv2ew]);
+  /* the curtain under the boundary line, conform with the two surfaces */
+  meshS fv2R; real[int] fv2cR(1);
+  { fv2Rideau(fv2Thw, fv2zw[], fv2ew[], fv2zbot*fv2sz, fv2R, fv2cR) }
+  fespace fv2VG(fv2SG,P1); fespace fv2VW(fv2SW,P1); fespace fv2VR(fv2R,P0);
+  fv2VG fv2fG=0.5; fv2VW fv2fW=0.2; fv2VR fv2fR; fv2fR[]=fv2cR;
+  real fv2m0=1.e-3*(fv2x1-fv2x0);/* a margin for bb */
+  plot(fv2fG,fv2fW,fv2fR,viso=fvvis,hsv=fvcol,boundary=false,
+       bb=[[fv2x0-fv2m0,fv2ymid+(fv2y0-fv2ymid)*fv2sy-fv2m0],[fv2x1+fv2m0,fv2ymid+(fv2y1-fv2ymid)*fv2sy+fv2m0]],OPT);
+}//

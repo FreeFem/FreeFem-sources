@@ -1,0 +1,7 @@
+remapP0ddm(Tho, uo[], Do[], Th, u[]) : parallel remapP0 (load
+  "adaptmesh_ddm", MPI) between distributed local meshes: Do = 1 on the
+  cells of Tho owned by this process (the partition of unity A.D of a P0),
+  0 elsewhere; Th the new local mesh (with or without overlap). The global
+  mass is conserved exactly; m components together.
+  Example: mesh ThNew = adaptmeshddm(Th, m1, owned=part[], comm=mpiCommWorld);
+           real[int] un(1); remapP0ddm(Th, u[], D[], ThNew, un);

@@ -1,0 +1,75 @@
+// solves the advection by the finite volume method in 3D (mesh3) with periodic boundary
+// conditions, parallel version (domain decomposition, PETSc) of freevol_advection3d_periodic.edp:
+//   a gaussian transported at the velocity (1, 0.5, 0.25) in the periodic cube
+//   the partition: createMat with macro ThPeriodicity()labPeriodic// (the labels of the 6 periodic sides, macro_ddm.idp):
+//   all the elements near the periodic sides are on one process (with the overlap: 2 cells, the order 2),
+//   so the 2 sides of a periodic border are in the same local mesh, where fvscheme(..., periodic=...) glues them; the
+//   other processes have no periodic side; the cube must not be too small (n >= 16: else the band near the
+//   periodic sides is the whole cube, an empty local mesh for the other processes)
+//   at each stage: the time step is the min on all the processes, then exchange(A, ur, scaled=true)
+//   at the end, the solution is gathered on the global mesh (A.D): the same outputs as freevol_advection3d_periodic.edp with
+//   -n 16 -Tf 0.5 (the same values)
+// run: ff-mpirun -np 4 freevol_advection3d_periodic_ddm.edp -wg   (options: -n (16), -Tf (0.5), -ordre (2 or 1), -nw: without plot)
+// NBPROC 4
+load "PETSc"                               // PETSc plugin
+macro dimension()3// EOM
+include "macro_ddm.idp"                    // additional DDM functions
+include "getARGV.idp"
+real s0 = clock();
+real cx = 0.5;
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", 0.5), CFL = 0.9;
+mesh3 ThG = cube(n, n, n);                  // labels 1 y=0, 2 x=1, 3 y=1, 4 x=0, 5 z=0, 6 z=1
+func real gp(real xx, real yy, real zz) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++)
+    s += exp(-((xx-cx-i)^2+(yy-0.5-j)^2+(zz-0.5-k)^2)/0.03);
+  return s;
+}
+mesh3 Th = ThG;                            // the local mesh
+int[int] n2o;                              // local cell -> global cell
+Mat A;
+{
+  macro ThOverlap()2//
+  macro ThN2O()n2o//
+  int[int] labPeriodic = [1, 3, 2, 4, 5, 6];
+  macro ThPeriodicity()labPeriodic//       // the elements near the periodic sides on one process
+  createMat(Th, A, P0)
+}
+fespace Ph(Th, P0);
+fespace PhG(ThG, P0);
+Ph u = gp(x, y, z), up, ur = 0, uBC = 0;
+Ph V1 = 1, V2 = 0.5, V3 = 0.25;            // the velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];   // no effect on the periodic sides; the interfaces (-111111): Neumann
+fvscheme FV([V1,V2,V3], eq="advection", labelBC=labBC, numflux=2, order=ordre,
+            periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+// the local solution gathered on the global mesh (each cell counted once: the partition of unity A.D)
+Ph uD; uD[] = A.D;
+macro gather(Uloc, Uglob) { real[int] gl(Uglob[].n); gl = 0;
+  for (int k = 0; k < Th.nt; k++) for (int c = 0; c < 1; c++) gl[1*n2o[k]+c] += uD[][1*k+c]*Uloc[][1*k+c];
+  mpiAllReduce(gl, Uglob[], mpiCommWorld, mpiSUM); }//
+PhG uG0;
+gather(u, uG0)
+real t, dt, dtsub, dtl;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtl = fluxupdate(FV, [u], [ur], [uBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+    exchange(A, ur[], scaled=true);        // the overlap: the values of their process
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+PhG uG;
+gather(u, uG)
+if (!mpirank) {
+  cout << "advection 3D periodic ddm (" << mpisize << " processes, order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+  func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t), z - 0.25*t - floor(z - 0.25*t));
+  real err = sqrt(int3d(ThG, qforder=3)((uG-uex)^2));
+  cout << "  mass " << int3d(ThG)(uG) << " (difference " << int3d(ThG)(uG)-int3d(ThG)(uG0) << ") , max u " << uG[].max << " , error L2 " << err << endl;
+  cout << "cputime = " << clock()-s0 << endl;
+}

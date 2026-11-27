@@ -1358,7 +1358,7 @@ int createMenus(pScene sc, pMesh mesh) {
   /* color & material menu */
   cmenu = glutCreateMenu(menuColor);
   glutAddMenuEntry("[b] Toggle backcolor", 'b');
-  glutAddMenuEntry("    Toggle matcolors", 'e');
+  glutAddMenuEntry("[e] Toggle matcolors", 'e');
   glutAddMenuEntry("    Edit   matcolors", 'E');
   glutAddMenuEntry("    Hide   material", 'r');
   glutAddMenuEntry("    Reset  materials", 'R');

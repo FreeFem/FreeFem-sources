@@ -33,7 +33,7 @@ GLuint geomList(pScene sc, pMesh mesh) {
   pMaterial pm;
   pPoint ppt, pp0, pp1;
   float n[3];
-  int k, it = 0, nm;
+  int k, it = 0, nm, lp;
   static float red[4] = {1.0, 0.0, 0.0, 1.0};
   static float yellow[4] = {1.0, 1.0, 0.0, 1.0};
 
@@ -109,6 +109,8 @@ GLuint geomList(pScene sc, pMesh mesh) {
   /* draw edges */
   if (ddebug) printf("construct edge list\n");
 
+  lp = primalLabel(mesh);
+
   glLineWidth(sc->par.linewidth);
   glBegin(GL_LINES);
 
@@ -132,6 +134,9 @@ GLuint geomList(pScene sc, pMesh mesh) {
     }
 
     if (sc->par.linc == 1) glColor3fv(sc->par.edge);
+
+    /* dual mesh: the edges of the primal mesh (see primalLabel) in the color of the lines */
+    if (pr->ref == lp) glColor4fv(sc->par.line);
 
     pp0 = &mesh->point[pr->v[0]];
     pp1 = &mesh->point[pr->v[1]];

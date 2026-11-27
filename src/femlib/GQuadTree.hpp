@@ -238,7 +238,9 @@ public:
     friend ostream& operator <<(ostream& f, const  GTree<V> & qt);
   // add FH mars 2020 , for new search .. FH...
     int  ListNearestVertex(Vertex **lnv,int nvn,double delta,Rd P)
-          {     int hx = (int) (coef*delta);
+          {     // + 2: the radius truncated to an integer and the points rounded to the integer grid, else a
+                // point at the distance delta can be missed (2 aligned segments of a meshL: GenericDataFindBoundary)
+                int hx = (int) (coef*delta) + 2;
               hx = hx>0 ? hx:1; // bof bof ....
               return ListNearestVertex(lnv,nvn,hx,RdtoZd(P));}
           Vertex * TrueNearestVertex(Zd i2) {return NearestVertex(i2,true);}

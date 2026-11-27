@@ -1,0 +1,3 @@
+savemesh(Th, "file.msh") : saves a mesh; the extension selects the
+  format (.msh FreeFEM, .mesh medit, ...).
+  Example: savemesh(Th, "Th.msh");

@@ -1,0 +1,97 @@
+// Shallow water (Saint-Venant) with topography in 2D (mesh) with finite volumes on the dual mesh of F. Bouchut with
+// mesh adaptation
+//   U_t+div([F(U),G(U)])+(0,gr*H*zb_x,gr*H*zb_y) = 0, U=[H,Hu,Hv], unknowns [H,Hu,Hv,zb] P1 (one value per vertex
+//   = the average over its control volume, meshdual), eq="swtopodm" (hydrostatic reconstruction, MUSCL, Heun)
+//   every nadapt iterations: the mesh adapted to H and zb, its dual mesh (Thstar = builddualmesh(Th):
+//   fvscheme finds it and rebuilds itself); the transfer: [H,Hu,Hv,H+zb] (the free surface, not zb) transferred
+//   at once by remapP1(Tho, Ho[], Th, H[]) (a limited affine reconstruction in each old control
+//   volume, the same limiter for the 4 components, integrated exactly over each new control volume),
+//   then zb = z0 recomputed on the new mesh (the topography is not averaged at each adaptation: an island
+//   keeps its height) and H = max((H+zb) - zb, 0), Hu = Hv = 0 where H = 0: the lake at rest (H+zb constant,
+//   Hu = Hv = 0) stays at rest where it is wet, the shore of an island stays almost dry; the mass sum |C_i| H_i
+//   is not conserved exactly (zb recomputed, H = max(eta - zb, 0) on the shore), except on a flat bottom
+//   -cas 0: a lake at rest over a submerged bump (H+zb = 1, [0,1]^2): it must stay at rest
+//   -cas 1: circular dam break over a wet bed (case 2 of freevol_swtopodm.edp: H = 2 in the disk
+//            of radius 25, 1 elsewhere, [-100,100]^2): the mass, to compare with the fixed mesh (-adapt 0)
+//   -cas 2: a lake at rest with a dry island (H+zb = 1, zb up to 1.5, [0,1]^2): it must stay (almost) at rest
+// options: -cas (1), -adapt (1 or 0), -n (segments per side of the initial mesh), -nadapt (5), -err (0.01), -hmin,
+//          -hmax, -Tf, -nw: no plot
+include "getARGV.idp"
+int cas = getARGV("-cas", 1);
+bool adapt = getARGV("-adapt", 1);
+int nadapt = getARGV("-nadapt", 5), n;
+real gr = 9.81, CFL = 0.5, L, x0, Tf, hmin, hmax, erru = getARGV("-err", 0.01);
+if (cas != 1) { x0 = 0; L = 1; n = getARGV("-n", 16); Tf = getARGV("-Tf", 0.5); hmin = getARGV("-hmin", 0.01); hmax = getARGV("-hmax", 0.1); }
+else { x0 = -100; L = 200; n = getARGV("-n", 20); Tf = getARGV("-Tf", 5.); hmin = getARGV("-hmin", 1.); hmax = getARGV("-hmax", 20.); }
+func z0 = (cas == 0) ? 0.8*exp(-((x-0.5)^2+(y-0.5)^2)/0.02) : ((cas == 2) ? 1.5*exp(-((x-0.5)^2+(y-0.5)^2)/0.02) : -1.);
+func h0 = (cas != 1) ? max(1. - z0, 0.) : (sqrt(x^2+y^2) <= 25.) - z0;
+mesh Th = square(n, n, [x0+L*x, x0+L*y]);  // labels 1 to 4 on the sides: walls
+fespace Vh4(Th, [P1,P1,P1,P1]);
+fespace Vh(Th, P1);
+if (adapt) for (int i = 0; i < 3; i++) { Vh hh = h0, zz = z0; Th = adaptmesh(Th, hh, zz, err=erru, hmin=hmin, hmax=hmax, nbvx=100000); }
+meshdual Thstar = builddualmesh(Th);       // the dual mesh: the control volumes of the scheme
+Vh4 [H,Hu,Hv,zb] = [h0, 0, 0, z0], [HBC,HuBC,HvBC,zbBC] = [0,0,0,0], [Hr,Hur,Hvr,zbr] = [0,0,0,0], [Hp,Hup,Hvp,zbp];
+int[int] labBC = [1,2, 2,2, 3,2, 4,2];     // walls
+real[int] params = [gr];
+fvscheme FV([H,Hu,Hv,zb], order=2, eq="swtopodm", labelBC=labBC, limiter=1, numflux=2, parameters=params);
+real[int] cva(1);
+NewMacro massdual(m)                        // the mass of the finite volumes: sum |C_i| H_i
+{
+  cva.resize(Thstar.ncv);
+  dualmeshcvarea(cva, Thstar);
+  Vh hh = H;
+  m = cva'*hh[];
+} EndMacro
+real mass0; massdual(mass0)
+NewMacro plotsw(titre, w)                   // the free surface H+zb on the dual mesh
+{ Vh eta = H + zb; plot(Thstar, eta[], value=1, cmm=titre, wait=w); } EndMacro
+plotsw("H+zb at t=0 (" + Thstar.ncv + " control volumes)", 0)
+real t = 0, dt, dtsub;
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) {// adaptation to H and zb
+    mesh Tho = Th;
+    fespace Vho4(Tho, [P1,P1,P1,P1]);
+    Vho4 [Ho,Huo,Hvo,zbo];
+    Ho[] = H[];                             // the old values (the same mesh: copy of the array)
+    for (int i = 0; i < Tho.nv; i++) Ho[][4*i+3] += Ho[][4*i];// [H,Hu,Hv,H+zb]: the free surface
+    Vh hh = H, zz = zb;
+    Th = adaptmesh(Th, hh, zz, err=erru, hmin=hmin, hmax=hmax, nbvx=100000);
+    Thstar = builddualmesh(Th);             // the dual of the new mesh: fvscheme finds it
+    [H,Hu,Hv,zb] = [0,0,0,0]; remapP1(Tho, Ho[], Th, H[]);// the 4 components together
+    {                                       // zb = z0 on the new mesh, H = max((H+zb) - zb, 0)
+      Vh zn = z0;
+      for (int i = 0; i < Th.nv; i++) {
+        real eta = H[][4*i+3];
+        H[][4*i+3] = zn[][i];
+        H[][4*i] = max(eta - zn[][i], 0.);
+        if (H[][4*i] <= 0.) { H[][4*i+1] = 0.; H[][4*i+2] = 0.; }// no momentum at a dry vertex
+      }
+    }
+    [HBC,HuBC,HvBC,zbBC] = [0,0,0,0]; [Hr,Hur,Hvr,zbr] = [0,0,0,0]; [Hp,Hup,Hvp,zbp] = [0,0,0,0];// on the new mesh
+    nbad++;
+  }
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,zb], [Hr,Hur,Hvr,zbr], [HBC,HuBC,HvBC,zbBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+real mass1; massdual(mass1)
+Vh hh = H, eta = H + zb, q = sqrt(Hu^2 + Hv^2);
+cout << (adapt ? "2D dual adapted" : "2D dual fixed") << " (case " << cas << "): t = " << t << " , " << it << " steps , " << nbad
+     << " adaptations , " << Thstar.ncv << " control volumes , mass = " << mass1 << " (initial " << mass0 << ", change "
+     << mass1-mass0 << ") , H in [" << hh[].min << ", " << hh[].max << "]" << endl;
+if (cas != 1) {
+  Vh e2 = (H > 1e-2)*abs(H + zb - 1.), u2 = (H > 1e-2)*q/max(H, 1e-2), film = (zb > 1.)*H, zz = zb;
+  cout << "  lake at rest (wet vertices, H > 0.01): max |H+zb-1| " << e2[].max << " , max |u| " << u2[].max
+       << " ; the island: max zb " << zz[].max << " , the water on it max H " << film[].max << endl;
+}
+else {// the radial symmetry: H at 4 points at the same distance of the center
+  real r = 40.;
+  cout << "  H at r = " << r << " : " << hh(r, 0) << " " << hh(0, r) << " " << hh(-r, 0) << " " << hh(0, -r) << endl;
+}
+plotsw("H+zb at t=" + t + " (" + Thstar.ncv + " control volumes)", 1)

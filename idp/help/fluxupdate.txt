@@ -1,0 +1,21 @@
+dt = fluxupdate(FV, [u1, ...], [ur1, ...], [uBC1, ...]) : one evaluation of
+  the finite volume scheme FV (see help("fvscheme")).
+
+  [u...]   the unknowns (as many as the model, in its order); fluxupdate
+           may correct them: vacuum (rho < 1e-13 -> 0), dry zones (H -> 0),
+           tangent projection on meshS, mean on the periodic volumes
+  [ur...]  output: ur = (1/|K|) sum on the faces of |f| * outgoing numerical
+           flux (the topography source term included): the explicit
+           Euler step is u[] -= dt*ur[] ; for eq="bbm" ur = R
+  [uBC...] the outer state of the boundaries of type 0 (and 3) of labelBC (read
+           in the boundary cell; on the dual mesh a mean of the vertices of the
+           edge); to be given even without a Dirichlet condition (uBC = 0)
+  return   the maximal stable time step for CFL = 1 (at most 1e4): take
+           dt = CFL*fluxupdate(...) with CFL < 1
+
+  The three arrays: same size, on the current mesh of the unknowns
+  (after adaptmesh: ur = 0; uBC = ...;), ur initialized. If the unknowns are
+  on a new mesh, the scheme is built again (rebuild=true) or an error
+  is raised.
+  Example: dt = CFL*fluxupdate(FV, [H,Hu,Hv,zb], [Hr,Hur,Hvr,zbr],
+                                [HBC,HuBC,HvBC,zbBC]); H[] -= dt*Hr[];

@@ -9816,6 +9816,867 @@ class OrientNormal : public OneOperator {
   }
 };
 
+// ============================================================================================================
+// adaptmesh of a meshL (1D, a curve in 2D or 3D): ThL = adaptmesh(ThL, u [, v, [w1, w2], ...], err=..., ...)
+// the size h at the vertices from the second derivative of the functions along the curve (the P1 interpolation
+// error on a segment of length h is |u''| h^2/8 <= err), bounded by hmin and hmax, the sizes of two neighbouring
+// segments in a ratio <= ratio; the new vertices equidistribute 1/h along each piece of the curve between the
+// fixed vertices (the boundary points, the ends, the vertices with 1 or more than 2 segments, the changes of label
+// of the segments; a closed curve without fixed vertex: its first vertex), on the polyline of ThL; the size is also
+// limited by the curvature of the curve (the angle of two neighbouring segments <= thetamax: the new segments do not
+// cut the bends); the labels of the segments and of the boundary points, the orientation of the segments are kept
+// options (names of adaptmesh 2D): err (0.01), hmin (length of the mesh / nbvx), hmax (length of the mesh),
+// ratio (1.8; <= 1: no gradation), nbvx (9000: the size is increased if needed), abserror (false: each function
+// scaled by its range max - min, as rescaling in adaptmesh 2D; true: absolute error), cutoff (1e-6: the smallest
+// range), nbjacoby (0: the number of smoothings of the size), thetamax (10 degrees), verbosity
+// ============================================================================================================
+class AdaptationL : public E_F0mps {
+ public:
+  typedef pmeshL Result;
+  static basicAC_F0::name_and_type name_param[];
+  static const int n_name_param = 10;
+  Expression nargs[n_name_param];
+  Expression getmesh;
+  vector< Expression > sol;
+  double arg(int i, Stack s, double a) const { return nargs[i] ? GetAny< double >((*nargs[i])(s)) : a; }
+  long arg(int i, Stack s, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(s)) : a; }
+  bool arg(int i, Stack s, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(s)) : a; }
+  AdaptationL(const basicAC_F0 &args) {
+    args.SetNameParam(n_name_param, name_param, nargs);
+    getmesh = to< pmeshL >(args[0]);
+    for (int i = 1; i < args.size( ); i++)
+      if (args[i].left( ) == atype< E_Array >( )) {// a vector function: each component
+        const E_Array *a = dynamic_cast< const E_Array * >(args[i].LeftValue( ));
+        ffassert(a);
+        for (int j = 0; j < a->size( ); j++) sol.push_back(to< double >((*a)[j]));
+      } else
+        sol.push_back(to< double >(args[i]));
+    if (sol.empty( )) CompileError("adaptmesh(ThL, u, ...): the functions of the adaptation are missing");
+  }
+  static ArrayOfaType typeargs( ) { return ArrayOfaType(atype< pmeshL >( ), true); }
+  static E_F0 *f(const basicAC_F0 &args) { return new AdaptationL(args); }
+  AnyType operator( )(Stack s) const;
+  operator aType( ) const { return atype< pmeshL >( ); }
+};
+basicAC_F0::name_and_type AdaptationL::name_param[] = {
+  {"hmin", &typeid(double)}, {"hmax", &typeid(double)}, {"err", &typeid(double)},
+  {"nbvx", &typeid(long)}, {"ratio", &typeid(double)}, {"abserror", &typeid(bool)},
+  {"cutoff", &typeid(double)}, {"nbjacoby", &typeid(long)}, {"verbosity", &typeid(long)},
+  {"thetamax", &typeid(double)}};
+
+// the integral of 1/h on a segment of length ds, h linear from h0 to h1, and the position where it is c
+static double AdaptL_IntInvH(double ds, double h0, double h1) {
+  double dh = h1 - h0;
+  if (fabs(dh) < 1e-10*max(h0, h1)) return 2.*ds/(h0 + h1);
+  return ds/dh*log(h1/h0);
+}
+static double AdaptL_InvIntInvH(double ds, double h0, double h1, double c) {
+  double dh = h1 - h0;
+  if (fabs(dh) < 1e-10*max(h0, h1)) return c*(h0 + h1)/2.;
+  return (h0*exp(c*dh/ds) - h0)*ds/dh;
+}
+
+AnyType AdaptationL::operator( )(Stack stack) const {
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  const MeshL *pTh = GetAny< pmeshL >((*getmesh)(stack));
+  if (!pTh) ExecError("adaptmesh: the meshL is not defined");
+  const MeshL &Th = *pTh;
+  const int nv = Th.nv, nt = Th.nt, ns = sol.size( );
+  long verb = arg(8, stack, (long)verbosity);
+  // the values of the functions at the vertices
+  KNM< double > u(nv, ns);
+  KN< int > done(nv);
+  done = 0;
+  for (int k = 0; k < nt; ++k)
+    for (int l = 0; l < 2; ++l) {
+      int i = Th(k, l);
+      if (done[i]) continue;
+      done[i] = 1;
+      mp->setP(pTh, k, l);
+      for (int j = 0; j < ns; ++j) u(i, j) = GetAny< double >((*sol[j])(stack));
+    }
+  *mp = mps;
+  double len = 0;
+  for (int k = 0; k < nt; ++k) len += Th[k].mesure( );
+  const double err = arg(2, stack, 0.01), ratio = arg(4, stack, 1.8), cutoff = arg(6, stack, 1e-6);
+  const long nbvx = max(10L, arg(3, stack, 9000L)), nbjacoby = arg(7, stack, 0L);
+  const double hmax = arg(1, stack, len), hmin = min(arg(0, stack, len/nbvx), hmax);
+  const bool abserror = arg(5, stack, false);
+  const double thetamax = arg(9, stack, 10.)*M_PI/180.;
+  if (err <= 0) ExecError("adaptmesh (meshL): err must be > 0");
+  // the scaling of each function: 1/(max - min)
+  KN< double > scal(ns);
+  for (int j = 0; j < ns; ++j) {
+    double mn = 1e300, mx = -1e300;
+    for (int i = 0; i < nv; ++i) { mn = min(mn, u(i, j)); mx = max(mx, u(i, j)); }
+    scal[j] = abserror ? 1. : 1./max(mx - mn, cutoff);
+  }
+  // the segments around each vertex, the fixed vertices
+  KN< int > deg(nv + 1), adj(2*nt);
+  deg = 0;
+  for (int k = 0; k < nt; ++k) { deg[Th(k, 0) + 1]++; deg[Th(k, 1) + 1]++; }
+  for (int i = 0; i < nv; ++i) deg[i + 1] += deg[i];
+  {
+    KN< int > c(nv);
+    c = 0;
+    for (int k = 0; k < nt; ++k)
+      for (int l = 0; l < 2; ++l) { int i = Th(k, l); adj[deg[i] + c[i]++] = k; }
+  }
+  KN< int > fixed(nv);
+  fixed = 0;
+  for (int i = 0; i < nv; ++i) {
+    int nk = deg[i + 1] - deg[i];
+    if (nk != 2 || Th[adj[deg[i]]].lab != Th[adj[deg[i] + 1]].lab) fixed[i] = 1;
+  }
+  for (int ib = 0; ib < Th.nbe; ++ib) fixed[Th(Th.be(ib)[0])] = 1;
+  // the pieces of curve between fixed vertices: their vertices, the direction of the first segment
+  vector< vector< int > > chains;
+  vector< int > clab, cfwd;
+  KN< int > seen(nt);
+  seen = 0;
+  for (int pass = 0; pass < 2; ++pass)
+    for (int i0 = 0; i0 < nv; ++i0) {
+      if (pass == 0 && !fixed[i0]) continue;
+      for (int p = deg[i0]; p < deg[i0 + 1]; ++p) {
+        int k = adj[p];
+        if (seen[k]) continue;
+        if (pass == 1) fixed[i0] = 1;// a closed curve without fixed vertex
+        vector< int > c(1, i0);
+        clab.push_back(Th[k].lab);
+        cfwd.push_back(Th(k, 0) == i0);
+        int cur = i0;
+        while (true) {
+          seen[k] = 1;
+          int nx = Th(k, 0) == cur ? Th(k, 1) : Th(k, 0);
+          c.push_back(nx);
+          cur = nx;
+          if (fixed[cur]) break;
+          int kn = adj[deg[cur]] == k ? adj[deg[cur] + 1] : adj[deg[cur]];
+          k = kn;
+        }
+        chains.push_back(c);
+      }
+    }
+  // the size at the vertices of each piece: from the second derivative along the curve
+  int nc = chains.size( );
+  vector< vector< double > > hc(nc), sc(nc);
+  double nbtot = 0;
+  for (int ic = 0; ic < nc; ++ic) {
+    const vector< int > &c = chains[ic];
+    int m = c.size( ) - 1;
+    vector< double > &h = hc[ic], &sp = sc[ic];
+    h.assign(m + 1, hmax);
+    sp.assign(m, 0.);
+    for (int q = 0; q < m; ++q) sp[q] = (R3(Th(c[q])) - R3(Th(c[q + 1]))).norme( );
+    vector< double > d2(m + 1, 0.);
+    for (int q = 1; q < m; ++q)
+      for (int j = 0; j < ns; ++j) {
+        double g1 = (u(c[q], j) - u(c[q - 1], j))/sp[q - 1], g2 = (u(c[q + 1], j) - u(c[q], j))/sp[q];
+        d2[q] = max(d2[q], scal[j]*fabs(2.*(g2 - g1)/(sp[q - 1] + sp[q])));
+      }
+    if (m >= 2) { d2[0] = d2[1]; d2[m] = d2[m - 1]; }
+    for (int q = 0; q <= m; ++q) h[q] = d2[q] > 0 ? min(hmax, max(hmin, sqrt(8.*err/d2[q]))) : hmax;
+    // the curvature of the curve (the angle of the segments around the vertex / the mean of their lengths):
+    // h <= thetamax/curvature (a closed piece: also at its first = last vertex)
+    bool closed = c[0] == c[m] && m >= 2;
+    for (int q = closed ? 0 : 1; q < m; ++q) {
+      int qm = q > 0 ? q - 1 : m - 1;
+      R3 t1 = R3(Th(c[q])) - R3(Th(c[qm])), t2 = R3(Th(c[q + 1])) - R3(Th(c[q]));
+      double co = (t1, t2)/(t1.norme( )*t2.norme( ));
+      double th = acos(max(-1., min(1., co))), kappa = th/((sp[qm] + sp[q])/2.);
+      if (kappa > 0) h[q] = max(hmin, min(h[q], thetamax/kappa));
+      if (closed && q == 0) h[m] = h[0];
+    }
+    for (int it = 0; it < nbjacoby; ++it) {// smoothing
+      vector< double > h0 = h;
+      for (int q = 1; q < m; ++q) h[q] = (h0[q - 1] + 2.*h0[q] + h0[q + 1])/4.;
+    }
+    if (ratio > 1.)// gradation: h(s) <= h(s') + (ratio - 1) |s - s'|
+      for (int sweep = 0; sweep < 2; ++sweep) {
+        for (int q = 1; q <= m; ++q) h[q] = min(h[q], h[q - 1] + (ratio - 1.)*sp[q - 1]);
+        for (int q = m - 1; q >= 0; --q) h[q] = min(h[q], h[q + 1] + (ratio - 1.)*sp[q]);
+      }
+    for (int q = 0; q < m; ++q) nbtot += AdaptL_IntInvH(sp[q], h[q], h[q + 1]);
+  }
+  double coefh = nbtot > nbvx ? nbtot/nbvx : 1.;// too many vertices: larger sizes
+  if (coefh > 1. && verb > 0 && mpirank == 0)
+    cout << "  -- adaptmesh (meshL): more than nbvx = " << nbvx << " vertices, the size is multiplied by " << coefh << endl;
+  // the new vertices: the fixed ones, then the new ones of each piece
+  KN< int > newv(nv);
+  newv = -1;
+  vector< R3 > P;
+  vector< int > Plab;
+  for (int i = 0; i < nv; ++i)
+    if (fixed[i]) { newv[i] = P.size( ); P.push_back(R3(Th(i))); Plab.push_back(Th(i).lab); }
+  vector< int > E, Elab;
+  for (int ic = 0; ic < nc; ++ic) {
+    const vector< int > &c = chains[ic];
+    const vector< double > &h = hc[ic], &sp = sc[ic];
+    int m = c.size( ) - 1;
+    double I = 0;
+    vector< double > Ik(m);
+    for (int q = 0; q < m; ++q) { Ik[q] = AdaptL_IntInvH(sp[q], coefh*h[q], coefh*h[q + 1]); I += Ik[q]; }
+    int n = max(1, (int)floor(I + 0.5));
+    vector< int > nodes(1, newv[c[0]]);
+    int q = 0;
+    double cum = 0;
+    for (int r = 1; r < n; ++r) {
+      double target = r*I/n;
+      while (q < m - 1 && cum + Ik[q] < target) cum += Ik[q++];
+      double sig = AdaptL_InvIntInvH(sp[q], coefh*h[q], coefh*h[q + 1], target - cum);
+      sig = min(max(sig, 0.), sp[q]);
+      R3 A(Th(c[q])), B(Th(c[q + 1]));
+      nodes.push_back(P.size( ));
+      P.push_back(A + (B - A)*(sig/sp[q]));
+      Plab.push_back(0);
+    }
+    nodes.push_back(newv[c[m]]);
+    for (size_t r = 0; r + 1 < nodes.size( ); ++r) {// the orientation of the segments of ThL
+      E.push_back(cfwd[ic] ? nodes[r] : nodes[r + 1]);
+      E.push_back(cfwd[ic] ? nodes[r + 1] : nodes[r]);
+      Elab.push_back(clab[ic]);
+    }
+  }
+  int nvn = P.size( ), ntn = Elab.size( ), nbe = Th.nbe;
+  Vertex3 *v = new Vertex3[nvn];
+  EdgeL *t = new EdgeL[ntn];
+  BoundaryPointL *b = nbe ? new BoundaryPointL[nbe] : 0;
+  for (int i = 0; i < nvn; ++i) { v[i].x = P[i].x; v[i].y = P[i].y; v[i].z = P[i].z; v[i].lab = Plab[i]; }
+  for (int k = 0; k < ntn; ++k) { int iv[2] = {E[2*k], E[2*k + 1]}; t[k].set(v, iv, Elab[k]); }
+  for (int ib = 0; ib < nbe; ++ib) { int iv[1] = {newv[Th(Th.be(ib)[0])]}; b[ib].set(v, iv, Th.be(ib).lab); }
+  // the boundary points are the ones of ThL (no new ones at the bends: ridgeangledetection > pi)
+  MeshL *ThL = new MeshL(nvn, ntn, nbe, v, t, b, false, false, false, 1, 1e-7, false, 4.*M_PI);
+  ThL->BuildGTree( );
+  if (verb > 0 && mpirank == 0)
+    cout << "  -- adaptmesh (meshL): " << nv << " vertices, " << nt << " segments -> " << nvn << " vertices, " << ntn
+         << " segments (" << nc << " pieces of curve)" << endl;
+  Add2StackOfPtr2FreeRC(stack, ThL);
+  return SetAny< pmeshL >(ThL);
+}
+
+// remapP0(Tho, uo[], Th, u[]): u (P0 on the meshL Th) from uo (P0 on the meshL Tho), along the curve of Tho (the
+// transfer of the finite volume values after adaptmesh): uo is reconstructed affine in each segment k of Tho,
+// uo[k] + g[k] (s - s_k), s the length along k from its vertex 0, s_k its middle; g[k] the mean of the slopes to the
+// middles of the 2 neighbours (the one-sided slope at an end, 0 without neighbour: exact for an affine function along
+// the curve), limited: the values at the ends of k between the min and the max of uo on k and its neighbours (no new
+// extremum); u = the exact mean of this affine function on each segment of Th: the mass is conserved (the mean of each
+// segment of Tho is kept); each end of a segment of Th is located on Tho (its segment and its position), the mean is
+// taken on the segments of Tho between them (the shortest path in the segments of Tho); an end outside Tho: the value
+// of the nearest segment
+static double RemapP0LK(const MeshL &Tho, const KN_< double > &uo, const MeshL &Th, KN< double > &u) {
+  const int m = Tho.nt ? uo.N( )/Tho.nt : 0;// the number of components (a vector FE function [P0,...,P0])
+  if (m < 1 || uo.N( ) != m*Tho.nt) ExecError("remapP0(Tho, uo[], Th, u[]): uo must be P0 on Tho (one value by segment, or by component and segment: [P0,...,P0])");
+  u.resize(m*Th.nt);
+  // the segments of Tho around each vertex
+  const int nvo = Tho.nv, nto = Tho.nt;
+  KN< int > head(nvo + 1), adj(2*nto);
+  head = 0;
+  for (int k = 0; k < nto; ++k) { head[Tho(k, 0) + 1]++; head[Tho(k, 1) + 1]++; }
+  for (int i = 0; i < nvo; ++i) head[i + 1] += head[i];
+  {
+    KN< int > c(nvo);
+    c = 0;
+    for (int k = 0; k < nto; ++k)
+      for (int l = 0; l < 2; ++l) { int i = Tho(k, l); adj[head[i] + c[i]++] = k; }
+  }
+  // the limited slopes g[m*k+c], along each segment from its vertex 0 to its vertex 1; the same limiter for all the
+  // components of a segment (the min of their coefficients): a linear relation between the components which is
+  // constant stays constant (the lake at rest H + zb of [H,Hu,zb])
+  KN< double > g(m*nto);
+  g = 0.;
+  for (int k = 0; k < nto; ++k) {
+    double lk = Tho[k].mesure( ), a = 1.;
+    int jn[2] = {-1, -1};
+    for (int l = 0; l < 2; ++l) {// the neighbour by the vertex l (a vertex of 2 segments)
+      int iv = Tho(k, l);
+      if (head[iv + 1] - head[iv] == 2) jn[l] = adj[head[iv]] == k ? adj[head[iv] + 1] : adj[head[iv]];
+    }
+    for (int c = 0; c < m; ++c) {
+      double uk = uo[m*k + c], sg = 0, umin = uk, umax = uk;
+      int nb = 0;
+      for (int l = 0; l < 2; ++l) {
+        int j = jn[l];
+        if (j < 0) continue;
+        double D = 0.5*(lk + Tho[j].mesure( ));// from the middle of k to the middle of j
+        sg += (uo[m*j + c] - uk)/(l == 1 ? D : -D);
+        nb++;
+        umin = min(umin, uo[m*j + c]); umax = max(umax, uo[m*j + c]);
+      }
+      double gc = nb ? sg/nb : 0.;
+      g[m*k + c] = gc;
+      if (gc != 0.) a = min(a, min(umax - uk, uk - umin)/(fabs(gc)*0.5*lk));// the ends uk +- gc lk/2 in [umin, umax]
+    }
+    for (int c = 0; c < m; ++c) g[m*k + c] *= max(0., a);
+  }
+  // the mean of the affine function of the component c of the segment k between the local coordinates l0 and l1
+  auto mean = [&](int k, int c, double l0, double l1) { return uo[m*k + c] + g[m*k + c]*(0.5*(l0 + l1) - 0.5)*Tho[k].mesure( ); };
+  KN< int > prev(nto), mark(nto);
+  mark = -1;
+  vector< int > queue;
+  vector< double > su(m);
+  for (int kn = 0; kn < Th.nt; ++kn) {
+    // the ends of the segment on Tho: segment ka, kb, local coordinate la, lb (0 at the vertex 0 of the segment)
+    R3 A(Th[kn][0]), B(Th[kn][1]);
+    R1 PA, PB;
+    bool oa, ob;
+    const EdgeL *Ka = Tho.Find(A, PA, oa), *Kb = Tho.Find(B, PB, ob);
+    if (!Ka || !Kb) { for (int c = 0; c < m; ++c) u[m*kn + c] = Ka ? uo[m*Tho(*Ka) + c] : (Kb ? uo[m*Tho(*Kb) + c] : 0.); continue; }
+    int ka = Tho(*Ka), kb = Tho(*Kb);
+    double la = min(1., max(0., PA.x)), lb = min(1., max(0., PB.x));
+    if (ka == kb) { for (int c = 0; c < m; ++c) u[m*kn + c] = mean(ka, c, la, lb); continue; }
+    // the shortest path of segments from ka to kb (breadth first search, marked by kn)
+    queue.clear( );
+    queue.push_back(ka);
+    mark[ka] = kn; prev[ka] = -1;
+    for (size_t q = 0; q < queue.size( ) && mark[kb] != kn; ++q) {
+      int k = queue[q];
+      for (int l = 0; l < 2; ++l) {
+        int iv = Tho(k, l);
+        for (int p = head[iv]; p < head[iv + 1]; ++p) {
+          int k2 = adj[p];
+          if (mark[k2] == kn) continue;
+          mark[k2] = kn; prev[k2] = k;
+          queue.push_back(k2);
+        }
+      }
+    }
+    if (mark[kb] != kn) { for (int c = 0; c < m; ++c) u[m*kn + c] = 0.5*(uo[m*ka + c] + uo[m*kb + c]); continue; }// not connected
+    vector< int > path;
+    for (int k = kb; k >= 0; k = prev[k]) path.push_back(k);
+    std::reverse(path.begin( ), path.end( ));
+    // the length of each segment of the path between A and B: the first one from A to the vertex shared with the
+    // next one, the last one from the vertex shared with the previous one to B, the others entirely
+    double sl = 0;
+    for (int c = 0; c < m; ++c) su[c] = 0;
+    int np = path.size( );
+    for (int q = 0; q < np; ++q) {
+      int k = path[q];
+      double len = Tho[k].mesure( ), part = 1.;
+      if (q == 0 || q == np - 1) {
+        int other = q == 0 ? path[1] : path[np - 2];
+        // the local coordinate of the vertex shared with the other segment (0 or 1)
+        double ls = (Tho(k, 0) == Tho(other, 0) || Tho(k, 0) == Tho(other, 1)) ? 0. : 1.;
+        part = fabs((q == 0 ? la : lb) - ls);
+        for (int c = 0; c < m; ++c) su[c] += part*len*mean(k, c, q == 0 ? la : lb, ls);
+      }
+      else for (int c = 0; c < m; ++c) su[c] += part*len*uo[m*k + c];
+      sl += part*len;
+    }
+    for (int c = 0; c < m; ++c) u[m*kn + c] = sl > 0 ? su[c]/sl : uo[m*ka + c];
+  }
+  return 0.;
+}
+static double RemapP0L(const MeshL *const &pTho, KN_< double > const &uo, const MeshL *const &pTh, KN< double > *const &pu) {
+  if (!pTho || !pTh) ExecError("remapP0: a meshL is not defined");
+  return RemapP0LK(*pTho, uo, *pTh, *pu);
+}
+
+// the part of the convex polygon P (n points, counterclockwise) on the left of the line a -> b (Sutherland-Hodgman)
+static int RemapClipHalfPlane(const R2 *P, int n, const R2 &a, const R2 &b, R2 *Q) {
+  int m = 0;
+  for (int i = 0; i < n; ++i) {
+    const R2 &p = P[i], &q = P[(i + 1)%n];
+    double dp = det(a, b, p), dq = det(a, b, q);
+    if (dp >= 0) Q[m++] = p;
+    if ((dp > 0 && dq < 0) || (dp < 0 && dq > 0)) Q[m++] = p + (dp/(dp - dq))*(q - p);
+  }
+  return m;
+}
+
+// the area and the centroid C of the intersection of two triangles (vertices counterclockwise)
+static double RemapTriInter(const R2 *A, const R2 *B, R2 &C) {
+  R2 P[12], Q[12];
+  int n = 3;
+  for (int i = 0; i < 3; ++i) P[i] = A[i];
+  for (int j = 0; j < 3 && n > 2; ++j) {
+    n = RemapClipHalfPlane(P, n, B[j], B[(j + 1)%3], Q);
+    for (int i = 0; i < n; ++i) P[i] = Q[i];
+  }
+  double s = 0;
+  R2 c(0., 0.);
+  for (int i = 1; i + 1 < n; ++i) {
+    double d = det(P[0], P[i], P[i + 1]);
+    s += d;
+    c += (P[0] + P[i] + P[i + 1])*(d/3.);
+  }
+  C = s > 0 ? c/s : A[0];
+  return n > 2 ? max(0., s/2) : 0.;
+}
+
+// the slopes g of the affine reconstruction of u (P0 on Th) in each triangle k: u[k] + (g[k], x - G_k), by least
+// squares on the barycentres of the triangles which share a vertex with k (exact for an affine function), limited:
+// Barth-Jespersen, the values at the vertices of k between the min and the max of u on these triangles (no new
+// extremum: the remapped means stay between the min and the max of u)
+// m components (a vector FE function [P0,...,P0]: u[m*k+c]): the slopes g[m*k+c] of each component, the same limiter
+// for all the components of a triangle (the min of their coefficients): a linear relation between the components
+// which is constant stays constant (the lake at rest H + zb of [H,Hu,Hv,zb])
+static void RemapP0Slopes(const Mesh &Th, const KN_< double > &u, int m, KN< R2 > &g) {
+  const int nt = Th.nt, nv = Th.nv;
+  KN< int > vbeg(nv + 1), vtri(3*nt);// the triangles around each vertex (CSR)
+  vbeg = 0;
+  for (int k = 0; k < nt; ++k) for (int l = 0; l < 3; ++l) vbeg[Th(k, l) + 1]++;
+  for (int i = 0; i < nv; ++i) vbeg[i + 1] += vbeg[i];
+  {
+    KN< int > fill(nv);
+    fill = 0;
+    for (int k = 0; k < nt; ++k) for (int l = 0; l < 3; ++l) { int i = Th(k, l); vtri[vbeg[i] + fill[i]++] = k; }
+  }
+  KN< R2 > G(nt);
+  for (int k = 0; k < nt; ++k) G[k] = (R2(Th[k][0]) + R2(Th[k][1]) + R2(Th[k][2]))/3.;
+  g.resize(m*nt);
+  KN< int > mark(nt);
+  mark = -1;
+  vector< int > nb;
+  vector< double > r1(m), r2(m), umin(m), umax(m);
+  for (int k = 0; k < nt; ++k) {
+    nb.clear( );
+    mark[k] = k;
+    for (int l = 0; l < 3; ++l) {
+      int i = Th(k, l);
+      for (int p = vbeg[i]; p < vbeg[i + 1]; ++p) if (mark[vtri[p]] != k) { mark[vtri[p]] = k; nb.push_back(vtri[p]); }
+    }
+    double m11 = 0, m12 = 0, m22 = 0;
+    for (int c = 0; c < m; ++c) { r1[c] = r2[c] = 0; umin[c] = umax[c] = u[m*k + c]; }
+    for (size_t q = 0; q < nb.size( ); ++q) {
+      int j = nb[q];
+      R2 d = G[j] - G[k];
+      double w = 1./(d, d);
+      m11 += w*d.x*d.x; m12 += w*d.x*d.y; m22 += w*d.y*d.y;
+      for (int c = 0; c < m; ++c) {
+        double du = u[m*j + c] - u[m*k + c];
+        r1[c] += w*d.x*du; r2[c] += w*d.y*du;
+        umin[c] = min(umin[c], u[m*j + c]); umax[c] = max(umax[c], u[m*j + c]);
+      }
+    }
+    double dt = m11*m22 - m12*m12;
+    if (nb.size( ) < 2 || !(dt > 1e-12*(m11 + m22)*(m11 + m22))) { for (int c = 0; c < m; ++c) g[m*k + c] = R2(0., 0.); continue; }
+    double a = 1.;// the limiter, the same for all the components
+    for (int c = 0; c < m; ++c) {
+      R2 gc((m22*r1[c] - m12*r2[c])/dt, (m11*r2[c] - m12*r1[c])/dt);
+      g[m*k + c] = gc;
+      for (int l = 0; l < 3; ++l) {
+        double dv = (gc, R2(Th[k][l]) - G[k]), uk = u[m*k + c];
+        if (dv > 1e-300) a = min(a, (umax[c] - uk)/dv);
+        else if (dv < -1e-300) a = min(a, (umin[c] - uk)/dv);
+      }
+    }
+    for (int c = 0; c < m; ++c) g[m*k + c] *= max(0., a);
+  }
+}
+
+// remapP0(Tho, uo[], Th, u[]) for 2d meshes: u (P0 on Th) from uo (P0 on Tho): uo is reconstructed affine in each
+// triangle of Tho (RemapP0Slopes: least squares on the triangles which share a vertex, exact for an affine function,
+// limited: no new extremum), u = the exact mean of this affine function on each triangle of Th, with the exact areas
+// and centroids of the intersections of the triangles of Th and Tho (the mass is conserved when the 2 meshes cover
+// the same domain: the mean of each triangle of Tho is kept); the triangles of Tho met by a triangle K of Th are found
+// from the one containing the barycentre of K, through the adjacencies (the triangles of Tho met by the convex K are
+// connected by their edges); a part of K outside Tho is not counted (the mean on the covered part), K entirely
+// outside: the nearest triangle
+// a vector FE function [P0,...,P0] of m components (uo[m*k+c], ex. [H,Hu,Hv,zb]: H[]): the m components remapped
+// together (u gets m*Th.nt values), with the same limiter for the components of a triangle (RemapP0Slopes)
+static double RemapP02dK(const Mesh &Tho, const KN_< double > &uo, const Mesh &Th, KN< double > &u) {
+  const int m = Tho.nt ? uo.N( )/Tho.nt : 0;
+  if (m < 1 || uo.N( ) != m*Tho.nt) ExecError("remapP0(Tho, uo[], Th, u[]): uo must be P0 on Tho (one value by triangle, or by component and triangle: [P0,...,P0])");
+  KN< R2 > go;
+  RemapP0Slopes(Tho, uo, m, go);
+  u.resize(m*Th.nt);
+  vector< double > su(m);
+  const int nto = Tho.nt;
+  KN< int > mark(nto);
+  mark = -1;
+  vector< int > queue;
+  const Triangle *tstart = 0;
+  for (int kn = 0; kn < Th.nt; ++kn) {
+    const Triangle &K = Th[kn];
+    R2 A[3] = {K[0], K[1], K[2]};
+    if (det(A[0], A[1], A[2]) < 0) swap(A[1], A[2]);
+    R2 G = (A[0] + A[1] + A[2])/3., Phat;
+    bool outside;
+    const Triangle *T0 = Tho.Find(G, Phat, outside, tstart);
+    if (!T0) T0 = Tho.Find(G, Phat, outside);
+    if (!T0) ExecError("remapP0: a triangle of Th is not found in Tho");
+    tstart = T0;
+    int k0 = Tho(T0);
+    double sa = 0;
+    for (int c = 0; c < m; ++c) su[c] = 0;
+    queue.clear( );
+    queue.push_back(k0);
+    mark[k0] = kn;
+    for (size_t q = 0; q < queue.size( ); ++q) {
+      int k = queue[q];
+      const Triangle &T = Tho[k];
+      R2 B[3] = {T[0], T[1], T[2]};
+      if (det(B[0], B[1], B[2]) < 0) swap(B[1], B[2]);
+      R2 C;
+      double a = RemapTriInter(A, B, C);
+      if (a <= 0 && k != k0) continue;// no overlap: not a way to the other triangles met by K
+      sa += a;
+      R2 GC = C - (B[0] + B[1] + B[2])/3.;
+      for (int c = 0; c < m; ++c) su[c] += a*(uo[m*k + c] + (go[m*k + c], GC));// the mean of the affine function on K n T
+      for (int e = 0; e < 3; ++e) {
+        int j = e, k2 = Tho.ElementAdj(k, j);
+        if (k2 < 0 || k2 == k || mark[k2] == kn) continue;
+        mark[k2] = kn;
+        queue.push_back(k2);
+      }
+    }
+    for (int c = 0; c < m; ++c) u[m*kn + c] = sa > 0 ? su[c]/sa : uo[m*k0 + c];
+  }
+  return 0.;
+}
+static double RemapP02d(const Mesh *const &pTho, KN_< double > const &uo, const Mesh *const &pTh, KN< double > *const &pu) {
+  if (!pTho || !pTh) ExecError("remapP0: a mesh is not defined");
+  return RemapP02dK(*pTho, uo, *pTh, *pu);
+}
+
+// ============================================================================================================
+// remapP1(Tho, uo[], Th, u[]): the transfer of the P1 unknowns of the finite volumes on the dual mesh (FreeVol, eq =
+// "advectiondm", "swtopodm", ...) after adaptmesh: uo[i] is the mean of the unknown on the control volume C_i of the
+// vertex i of Tho; uo is reconstructed affine in each control volume, uo[i] + (g_i, x - G_i) (G_i the center of
+// gravity of C_i), the slope g_i exact for an affine function, limited (Barth-Jespersen: the values at the vertices
+// of the pieces of C_i between the min and the max of uo on i and its neighbours, the same limiter for all the
+// components); u[i'] = the exact mean of this reconstruction on each new control volume C_i': the mass of the finite
+// volumes sum |C_i| u_i is conserved (when the 2 meshes cover the same domain), no new extremum, a lake at rest
+// H + zb stays at rest; a vector FE function [P1,...,P1] of m components (uo[m*i+c]): the m components together
+// the control volumes are the ones of builddualmesh(Th): 1D (meshL) the median dual (from the middle of a segment
+// to the middle of the next one), 2D (mesh) the dual of F. Bouchut: in a triangle K, the part of C_v is made of the
+// 2 triangles (P_v, c_e, I_K), e the 2 edges of K at v, I_K the center of the inscribed circle of K, c_e the
+// intersection of the edge e with the segment between the centers of the 2 triangles of e (the middle of e on the
+// boundary): the geometry is computed again here from the 2 meshes (no dual mesh needed)
+// ============================================================================================================
+
+// 1D (meshL): the coordinate along the curve in the control volume of a vertex v of 1 or 2 segments: xi = dir *
+// (distance from v) - cv[v], dir = +1 in its segment sA[v], -1 in its segment sB[v], cv[v] the center of C_v
+static double RemapP1LK(const MeshL &Tho, const KN_< double > &uo, const MeshL &Th, KN< double > &u) {
+  const int nvo = Tho.nv, nto = Tho.nt;
+  const int m = nvo ? uo.N( )/nvo : 0;
+  if (m < 1 || uo.N( ) != m*nvo) ExecError("remapP1(Tho, uo[], Th, u[]): uo must be P1 on Tho (one value by vertex, or by component and vertex: [P1,...,P1])");
+  // the segments around each vertex (old and new meshes)
+  auto around = [](const MeshL &T, KN< int > &head, KN< int > &adj) {
+    head.resize(T.nv + 1); adj.resize(2*T.nt);
+    head = 0;
+    for (int k = 0; k < T.nt; ++k) { head[T(k, 0) + 1]++; head[T(k, 1) + 1]++; }
+    for (int i = 0; i < T.nv; ++i) head[i + 1] += head[i];
+    KN< int > c(T.nv);
+    c = 0;
+    for (int k = 0; k < T.nt; ++k) for (int l = 0; l < 2; ++l) { int i = T(k, l); adj[head[i] + c[i]++] = k; }
+  };
+  KN< int > head, adj, headn, adjn;
+  around(Tho, head, adj);
+  around(Th, headn, adjn);
+  KN< int > sA(nvo), sB(nvo);
+  KN< double > cv(nvo);
+  for (int v = 0; v < nvo; ++v) {
+    int deg = head[v + 1] - head[v];
+    sA[v] = deg >= 1 && deg <= 2 ? adj[head[v]] : -1;
+    sB[v] = deg == 2 ? adj[head[v] + 1] : -1;
+    double hA = sA[v] >= 0 ? 0.5*Tho[sA[v]].mesure( ) : 0., hB = sB[v] >= 0 ? 0.5*Tho[sB[v]].mesure( ) : 0.;
+    cv[v] = 0.5*(hA - hB);
+  }
+  auto dirv = [&](int v, int k) { return k == sA[v] ? 1 : (k == sB[v] ? -1 : 0); };
+  // the limited slopes g[m*v+c] (d/dxi)
+  KN< double > g(m*nvo);
+  g = 0.;
+  vector< double > umin(m), umax(m), sg(m);
+  for (int v = 0; v < nvo; ++v) {
+    if (sA[v] < 0) continue;
+    int nb = 0;
+    for (int c = 0; c < m; ++c) { sg[c] = 0; umin[c] = umax[c] = uo[m*v + c]; }
+    for (int q = 0; q < 2; ++q) {
+      int s = q == 0 ? sA[v] : sB[v];
+      if (s < 0) continue;
+      int w = Tho(s, 0) == v ? Tho(s, 1) : Tho(s, 0), d = dirv(w, s);
+      double len = Tho[s].mesure( ), pos = q == 0 ? len - d*cv[w] : -len + d*cv[w], D = pos - cv[v];
+      if (fabs(D) < 1e-300) continue;
+      nb++;
+      for (int c = 0; c < m; ++c) {
+        sg[c] += (uo[m*w + c] - uo[m*v + c])/D;
+        umin[c] = min(umin[c], uo[m*w + c]); umax[c] = max(umax[c], uo[m*w + c]);
+      }
+    }
+    if (!nb) continue;
+    double xlo = (sB[v] >= 0 ? -0.5*Tho[sB[v]].mesure( ) : 0.) - cv[v], xhi = 0.5*Tho[sA[v]].mesure( ) - cv[v], a = 1.;
+    for (int c = 0; c < m; ++c) {
+      double gc = sg[c]/nb, uv = uo[m*v + c];
+      g[m*v + c] = gc;
+      for (int e = 0; e < 2; ++e) {
+        double dv = gc*(e ? xhi : xlo);
+        if (dv > 1e-300) a = min(a, (umax[c] - uv)/dv);
+        else if (dv < -1e-300) a = min(a, (umin[c] - uv)/dv);
+      }
+    }
+    for (int c = 0; c < m; ++c) g[m*v + c] *= max(0., a);
+  }
+  // the integral of the reconstruction on the part [l0, l1] of the old segment k (cut at its middle: the half 0
+  // belongs to C of its vertex 0, the half 1 to C of its vertex 1)
+  vector< double > su(m);
+  double sl = 0;
+  auto addpart = [&](int k, double l0, double l1) {
+    if (l0 > l1) swap(l0, l1);
+    double len = Tho[k].mesure( );
+    for (int h = 0; h < 2; ++h) {
+      double a0 = h ? max(l0, 0.5) : l0, a1 = h ? l1 : min(l1, 0.5);
+      if (a1 <= a0) continue;
+      int v = Tho(k, h), d = dirv(v, k);
+      double lm = 0.5*(a0 + a1), xi = d*(h == 0 ? lm : 1. - lm)*len - cv[v], w = (a1 - a0)*len;
+      sl += w;
+      for (int c = 0; c < m; ++c) su[c] += w*(uo[m*v + c] + g[m*v + c]*xi);
+    }
+  };
+  KN< int > prev(nto), mark(nto);
+  mark = -1;
+  int stamp = 0;
+  vector< int > queue, path;
+  // the integral on the piece of curve from A to B (2 points of Th, located on Tho)
+  auto addpiece = [&](const R3 &A, const R3 &B) {
+    R1 PA, PB;
+    bool oa, ob;
+    const EdgeL *Ka = Tho.Find(A, PA, oa), *Kb = Tho.Find(B, PB, ob);
+    if (!Ka || !Kb) return;
+    int ka = Tho(*Ka), kb = Tho(*Kb);
+    double la = min(1., max(0., PA.x)), lb = min(1., max(0., PB.x));
+    if (ka == kb) { addpart(ka, la, lb); return; }
+    ++stamp;
+    queue.clear( );
+    queue.push_back(ka);
+    mark[ka] = stamp; prev[ka] = -1;
+    for (size_t q = 0; q < queue.size( ) && mark[kb] != stamp; ++q) {
+      int k = queue[q];
+      for (int l = 0; l < 2; ++l) {
+        int iv = Tho(k, l);
+        for (int p = head[iv]; p < head[iv + 1]; ++p) {
+          int k2 = adj[p];
+          if (mark[k2] == stamp) continue;
+          mark[k2] = stamp; prev[k2] = k;
+          queue.push_back(k2);
+        }
+      }
+    }
+    if (mark[kb] != stamp) return;// not connected
+    path.clear( );
+    for (int k = kb; k >= 0; k = prev[k]) path.push_back(k);
+    std::reverse(path.begin( ), path.end( ));
+    int np = path.size( );
+    for (int q = 0; q < np; ++q) {
+      int k = path[q];
+      if (q == 0 || q == np - 1) {
+        int other = q == 0 ? path[1] : path[np - 2];
+        double ls = (Tho(k, 0) == Tho(other, 0) || Tho(k, 0) == Tho(other, 1)) ? 0. : 1.;
+        addpart(k, q == 0 ? la : lb, ls);
+      }
+      else addpart(k, 0., 1.);
+    }
+  };
+  u.resize(m*Th.nv);
+  for (int vn = 0; vn < Th.nv; ++vn) {
+    for (int c = 0; c < m; ++c) su[c] = 0;
+    sl = 0;
+    R3 P(Th(vn));
+    for (int p = headn[vn]; p < headn[vn + 1]; ++p) {// the half segments of the new control volume
+      int kn = adjn[p];
+      addpiece(P, (R3(Th[kn][0]) + R3(Th[kn][1]))*0.5);
+    }
+    if (sl > 0) for (int c = 0; c < m; ++c) u[m*vn + c] = su[c]/sl;
+    else {// outside Tho: the nearest vertex of Tho
+      R1 PP;
+      bool o;
+      const EdgeL *K = Tho.Find(P, PP, o);
+      int v = K ? Tho(Tho(*K), PP.x > 0.5 ? 1 : 0) : 0;
+      for (int c = 0; c < m; ++c) u[m*vn + c] = uo[m*v + c];
+    }
+  }
+  return 0.;
+}
+static double RemapP1L(const MeshL *const &pTho, KN_< double > const &uo, const MeshL *const &pTh, KN< double > *const &pu) {
+  if (!pTho || !pTh) ExecError("remapP1: a meshL is not defined");
+  return RemapP1LK(*pTho, uo, *pTh, *pu);
+}
+
+// 2D: the dual of F. Bouchut: the centers I[k] of the inscribed circles, the points cut[3k+e] of the edges (e the
+// edge opposite to the vertex e of k)
+static void RemapP1Bouchut(const Mesh &Th, KN< R2 > &I, KN< R2 > &cut) {
+  I.resize(Th.nt); cut.resize(3*Th.nt);
+  for (int k = 0; k < Th.nt; ++k) {
+    R2 P[3] = {Th[k][0], Th[k][1], Th[k][2]};
+    double l[3];
+    for (int e = 0; e < 3; ++e) l[e] = R2(P[(e + 1)%3], P[(e + 2)%3]).norme( );
+    I[k] = (P[0]*l[0] + P[1]*l[1] + P[2]*l[2])/(l[0] + l[1] + l[2]);
+  }
+  for (int k = 0; k < Th.nt; ++k)
+    for (int e = 0; e < 3; ++e) {
+      int ee = e, k2 = Th.ElementAdj(k, ee);
+      R2 P1 = Th[k][(e + 1)%3], P2 = Th[k][(e + 2)%3];
+      if (k2 < 0 || k2 == k) { cut[3*k + e] = (P1 + P2)*0.5; continue; }// boundary: the middle
+      R2 E(P1, P2), D(I[k], I[k2]);
+      double den = D.x*E.y - D.y*E.x;
+      cut[3*k + e] = fabs(den) > 1e-300 ? I[k] + D*(((P1.x - I[k].x)*E.y - (P1.y - I[k].y)*E.x)/den) : (P1 + P2)*0.5;
+    }
+}
+// the median dual (remapP1FE, the finite elements P1: |C_i| is the lumped mass of the vertex i, sum |C_i| u_i = the
+// integral of the P1 function u): the centroids I[k] of the triangles, the middles cut[3k+e] of the edges
+static void RemapP1Median(const Mesh &Th, KN< R2 > &I, KN< R2 > &cut) {
+  I.resize(Th.nt); cut.resize(3*Th.nt);
+  for (int k = 0; k < Th.nt; ++k) {
+    R2 P[3] = {Th[k][0], Th[k][1], Th[k][2]};
+    I[k] = (P[0] + P[1] + P[2])/3.;
+    for (int e = 0; e < 3; ++e) cut[3*k + e] = (P[(e + 1)%3] + P[(e + 2)%3])*0.5;
+  }
+}
+// the 6 pieces of the control volumes in the triangle k: the piece 2*l+q (q = 0, 1) belongs to the vertex l of k,
+// the triangle (P_l, cut of the edge (l+1+q)%3, I_k), counterclockwise
+static void RemapP1Piece(const Mesh &Th, const KN< R2 > &I, const KN< R2 > &cut, int k, int p, R2 *S) {
+  int l = p/2, e = (l + 1 + p%2)%3;
+  S[0] = Th[k][l]; S[1] = cut[3*k + e]; S[2] = I[k];
+  if (det(S[0], S[1], S[2]) < 0) swap(S[1], S[2]);
+}
+static double RemapP12dK(const Mesh &Tho, const KN_< double > &uo, const Mesh &Th, KN< double > &u, bool median) {
+  const int nvo = Tho.nv, nto = Tho.nt;
+  const int m = nvo ? uo.N( )/nvo : 0;
+  if (m < 1 || uo.N( ) != m*nvo) ExecError("remapP1(Tho, uo[], Th, u[]): uo must be P1 on Tho (one value by vertex, or by component and vertex: [P1,...,P1])");
+  KN< R2 > Io, cuto, In, cutn;
+  if (median) { RemapP1Median(Tho, Io, cuto); RemapP1Median(Th, In, cutn); }
+  else { RemapP1Bouchut(Tho, Io, cuto); RemapP1Bouchut(Th, In, cutn); }
+  // the centers of gravity of the old control volumes
+  KN< R2 > G(nvo);
+  KN< double > A(nvo);
+  G = R2(0., 0.); A = 0.;
+  R2 S[3], Sn[3];
+  for (int k = 0; k < nto; ++k)
+    for (int p = 0; p < 6; ++p) {
+      RemapP1Piece(Tho, Io, cuto, k, p, S);
+      double a = det(S[0], S[1], S[2])/2.;
+      int v = Tho(k, p/2);
+      A[v] += a; G[v] += (S[0] + S[1] + S[2])*(a/3.);
+    }
+  for (int v = 0; v < nvo; ++v) if (A[v] > 0) G[v] /= A[v];
+  // the neighbours of each vertex (the vertices of the triangles around it)
+  KN< int > vbeg(nvo + 1), vtri(3*nto);
+  vbeg = 0;
+  for (int k = 0; k < nto; ++k) for (int l = 0; l < 3; ++l) vbeg[Tho(k, l) + 1]++;
+  for (int i = 0; i < nvo; ++i) vbeg[i + 1] += vbeg[i];
+  {
+    KN< int > fill(nvo);
+    fill = 0;
+    for (int k = 0; k < nto; ++k) for (int l = 0; l < 3; ++l) { int i = Tho(k, l); vtri[vbeg[i] + fill[i]++] = k; }
+  }
+  // the limited slopes g[m*v+c]: least squares on the centers of gravity of the neighbours
+  KN< R2 > g(m*nvo);
+  g = R2(0., 0.);
+  KN< int > markv(nvo);
+  markv = -1;
+  vector< int > nb;
+  vector< double > r1(m), r2(m), umin(m), umax(m);
+  for (int v = 0; v < nvo; ++v) {
+    nb.clear( );
+    markv[v] = v;
+    for (int p = vbeg[v]; p < vbeg[v + 1]; ++p)
+      for (int l = 0; l < 3; ++l) { int w = Tho(vtri[p], l); if (markv[w] != v) { markv[w] = v; nb.push_back(w); } }
+    double m11 = 0, m12 = 0, m22 = 0;
+    for (int c = 0; c < m; ++c) { r1[c] = r2[c] = 0; umin[c] = umax[c] = uo[m*v + c]; }
+    for (size_t q = 0; q < nb.size( ); ++q) {
+      int w = nb[q];
+      R2 d = G[w] - G[v];
+      double wt = 1./(d, d);
+      m11 += wt*d.x*d.x; m12 += wt*d.x*d.y; m22 += wt*d.y*d.y;
+      for (int c = 0; c < m; ++c) {
+        double du = uo[m*w + c] - uo[m*v + c];
+        r1[c] += wt*d.x*du; r2[c] += wt*d.y*du;
+        umin[c] = min(umin[c], uo[m*w + c]); umax[c] = max(umax[c], uo[m*w + c]);
+      }
+    }
+    double dt = m11*m22 - m12*m12;
+    if (nb.size( ) < 2 || !(dt > 1e-12*(m11 + m22)*(m11 + m22))) continue;
+    double a = 1.;// the limiter, the same for all the components: the vertices of the pieces of C_v
+    for (int c = 0; c < m; ++c) {
+      R2 gc((m22*r1[c] - m12*r2[c])/dt, (m11*r2[c] - m12*r1[c])/dt);
+      g[m*v + c] = gc;
+      double uv = uo[m*v + c];
+      for (int p = vbeg[v]; p < vbeg[v + 1]; ++p) {
+        int k = vtri[p], l = Tho(k, 0) == v ? 0 : (Tho(k, 1) == v ? 1 : 2);
+        for (int q = 0; q < 2; ++q) {
+          RemapP1Piece(Tho, Io, cuto, k, 2*l + q, S);
+          for (int s = 0; s < 3; ++s) {
+            double dv = (gc, S[s] - G[v]);
+            if (dv > 1e-300) a = min(a, (umax[c] - uv)/dv);
+            else if (dv < -1e-300) a = min(a, (umin[c] - uv)/dv);
+          }
+        }
+      }
+    }
+    for (int c = 0; c < m; ++c) g[m*v + c] *= max(0., a);
+  }
+  // the integrals on the pieces of the new control volumes: the old triangles met by each new triangle (as remapP0),
+  // the intersections of their pieces
+  const int nvn = Th.nv;
+  KN< double > su(m*nvn), sa(nvn);
+  su = 0.; sa = 0.;
+  KN< int > mark(nto);
+  mark = -1;
+  vector< int > queue;
+  const Triangle *tstart = 0;
+  for (int kn = 0; kn < Th.nt; ++kn) {
+    R2 Kn[3] = {Th[kn][0], Th[kn][1], Th[kn][2]};
+    if (det(Kn[0], Kn[1], Kn[2]) < 0) swap(Kn[1], Kn[2]);
+    R2 Gk = (Kn[0] + Kn[1] + Kn[2])/3., Phat;
+    bool outside;
+    const Triangle *T0 = Tho.Find(Gk, Phat, outside, tstart);
+    if (!T0) T0 = Tho.Find(Gk, Phat, outside);
+    if (!T0) ExecError("remapP1: a triangle of Th is not found in Tho");
+    tstart = T0;
+    int k0 = Tho(T0);
+    queue.clear( );
+    queue.push_back(k0);
+    mark[k0] = kn;
+    for (size_t q = 0; q < queue.size( ); ++q) {
+      int k = queue[q];
+      R2 B[3] = {Tho[k][0], Tho[k][1], Tho[k][2]}, C;
+      if (det(B[0], B[1], B[2]) < 0) swap(B[1], B[2]);
+      if (RemapTriInter(Kn, B, C) <= 0 && k != k0) continue;// no overlap: not a way to the other triangles
+      for (int pn = 0; pn < 6; ++pn) {
+        RemapP1Piece(Th, In, cutn, kn, pn, Sn);
+        if (det(Sn[0], Sn[1], Sn[2]) <= 0) continue;
+        int vn = Th(kn, pn/2);
+        for (int p = 0; p < 6; ++p) {
+          RemapP1Piece(Tho, Io, cuto, k, p, S);
+          if (det(S[0], S[1], S[2]) <= 0) continue;
+          double a = RemapTriInter(Sn, S, C);
+          if (a <= 0) continue;
+          int v = Tho(k, p/2);
+          sa[vn] += a;
+          for (int c = 0; c < m; ++c) su[m*vn + c] += a*(uo[m*v + c] + (g[m*v + c], C - G[v]));
+        }
+      }
+      for (int e = 0; e < 3; ++e) {
+        int j = e, k2 = Tho.ElementAdj(k, j);
+        if (k2 < 0 || k2 == k || mark[k2] == kn) continue;
+        mark[k2] = kn;
+        queue.push_back(k2);
+      }
+    }
+  }
+  u.resize(m*nvn);
+  for (int vn = 0; vn < nvn; ++vn) {
+    if (sa[vn] > 0) { for (int c = 0; c < m; ++c) u[m*vn + c] = su[m*vn + c]/sa[vn]; continue; }
+    R2 Phat;// outside Tho: the nearest vertex of the triangle of Tho
+    bool outside;
+    const Triangle *T = Tho.Find(Th(vn), Phat, outside);
+    int v = T ? Tho(Tho(*T), 0) : 0;
+    for (int c = 0; c < m; ++c) u[m*vn + c] = uo[m*v + c];
+  }
+  return 0.;
+}
+static double RemapP12d(const Mesh *const &pTho, KN_< double > const &uo, const Mesh *const &pTh, KN< double > *const &pu) {
+  if (!pTho || !pTh) ExecError("remapP1: a mesh is not defined");
+  return RemapP12dK(*pTho, uo, *pTh, *pu, false);
+}
+// remapP1FE(Tho, uo[], Th, u[]): the same transfer with the median dual (the control volume of a vertex: |K|/3 in
+// each triangle K around it, from the vertex to the middles of the edges and the centroid): sum |C_i| u_i is the
+// integral of the P1 function, conserved exactly (the finite elements P1); 1D: the dual of remapP1 is the median one
+static double RemapP1FE2d(const Mesh *const &pTho, KN_< double > const &uo, const Mesh *const &pTh, KN< double > *const &pu) {
+  if (!pTho || !pTh) ExecError("remapP1FE: a mesh is not defined");
+  return RemapP12dK(*pTho, uo, *pTh, *pu, true);
+}
+
 #ifndef WITH_NO_INIT
 
 // <<dynamic_loading>>
@@ -9921,6 +10782,13 @@ static void Load_Init_msh3( ) {
 
   Global.Add("segment", "(", new Line);
   Global.Add("segment", "(", new Line(1));
+  Global.Add("adaptmesh", "(", new OneOperatorCode< AdaptationL >);// adaptmesh of a meshL (1D)
+  Global.Add("remapP0", "(", new OneOperator4_< double, const MeshL *const, KN_< double >, const MeshL *const, KN< double > * >(RemapP0L));// remapP0(Tho, uo[], Th, u[])
+  Global.Add("remapP0", "(", new OneOperator4_< double, const Mesh *const, KN_< double >, const Mesh *const, KN< double > * >(RemapP02d));// 2d meshes
+  Global.Add("remapP1", "(", new OneOperator4_< double, const MeshL *const, KN_< double >, const MeshL *const, KN< double > * >(RemapP1L));// the P1 unknowns of the dual mesh: meshL
+  Global.Add("remapP1", "(", new OneOperator4_< double, const Mesh *const, KN_< double >, const Mesh *const, KN< double > * >(RemapP12d));// 2d meshes (dual of F. Bouchut)
+  Global.Add("remapP1FE", "(", new OneOperator4_< double, const Mesh *const, KN_< double >, const Mesh *const, KN< double > * >(RemapP1FE2d));// 2d, median dual: int u conserved
+  Global.Add("remapP1FE", "(", new OneOperator4_< double, const MeshL *const, KN_< double >, const MeshL *const, KN< double > * >(RemapP1L));// meshL: the median dual of remapP1
 
   Global.Add("Sline", "(", new Line);
   Global.Add("Sline", "(", new Line(1));
@@ -9941,9 +10809,12 @@ static void Load_Init_msh3( ) {
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
 // [[file:~/ff/src/fflib/load.cpp::static_load_msh3]]
-
+extern void Load_Init_fvdualmesh(); 
+extern void Load_Init_FreeVol();// the finite volumes (FreeVol.cpp), after the dual meshes
 void msh3_Load_Init( ) {
     Load_Init_msh3( );
+    Load_Init_fvdualmesh();
+    Load_Init_FreeVol();
 }
 
 // dynamic loading: calling [[file:../src/fflib/InitFunct.hpp::LOADFUNC]] on [[Load_Init]]

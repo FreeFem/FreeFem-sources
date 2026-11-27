@@ -1,0 +1,204 @@
+// the BBM-BBM (Boussinesq) system in 2D, parallel version (domain decomposition, PETSc) of freevol_bbm2d.edp,
+// with the parallel method of FreeVol_BBM_FB_ddm.edp (G. Sadaka):
+//   A_BBM dE/dt + div([F(E),G(E)]) = 0, A_BBM = diag(I - b Delta, I - d Delta, I - d Delta), E = [eta,u,v]
+//   two meshes: the finite volumes on Th (P0), the finite elements on Th1 (P1, the vertices are the barycenters
+//   of Th), built on the whole domain, then Th is partitioned on the process 0 (partitionerSeq), the partition
+//   of Th1 is the one of Th interpolated (the cell of its barycenter), the local meshes with overlap and the
+//   distributed matrices by createMat (dAK0 on Th, [P0,P0,P0], for the exchanges; dAK1 on Th1, [P1,P1,P1], the
+//   matrix of the finite elements)
+//   at each stage of the Heun scheme:
+//     1) finite volumes (FreeVol, eq="bbm", walls; the interfaces, label -111111: Neumann, their cells are
+//        overlap cells, set again by the exchange): R = div([F(E),G(E)]) on the local Th, the time step the min
+//        on all the processes, exchange(dAK0,R)
+//     2) R on Th1 (interpolation at the barycenters, exchange(dAK1,R1)), A_BBM W = -R1 (the whole system,
+//        Mm + B K, Mm = diag of the areas of the cells of Th, as freevol_bbm2d.edp), PETSc (MUMPS)
+//     3) W back on Th (interpolation at the barycenters, exchange(dAK0,W)), E += dt*W
+//   run: ff-mpirun -np 4 freevol_bbm2d_ddm.edp -wg   (options: -ordre, -nf, -lim, -b, -d, -nw: no plot)
+load "PETSc"// PETSc plugin
+include "macro_ddm.idp"// additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,cmm = // for plotMPI
+macro PARAMSW fill=true,value=true,wait=1,cmm = // for plotMPI (the last plot)
+include "getARGV.idp"
+real s0=clock();
+load "isoline"// extractborder
+load "Curvature"// Curve
+
+macro case() Channel//
+// labels: 1 the walls y = constant, 2 the walls x = constant
+IFMACRO(case,Gauss)
+   // a hump of water at rest in a square basin: circular dispersive waves
+   real Tf=15.;
+   int Npx=60;
+   int[int] lab=[1,2,1,2];
+   mesh Th=square(Npx,Npx,[40*x-20,40*y-20],label=lab,flags=3);// flags=3: no triangle with 2 edges on the border
+   func eta0 = 0.3*exp(-(x^2+y^2)/4.);
+   func u0 = 0.; func v0 = 0.;
+   macro bbsw() [[-20.,0.],[20.,20.]]// the window of the plots: half of the basin, cut at y = 0
+ENDIFMACRO
+IFMACRO(case,Channel)
+   // the case Gauss of freevol_bbm1d.edp in a channel (invariant in y): compare with the 1D result
+   real Tf=30.;
+   int[int] lab=[1,2,1,2];
+   mesh Th=square(600,4,[120*x-60,4*y-2],label=lab,flags=3);
+   func eta0 = 0.2*exp(-(x/2.)^2);
+   func u0 = 0.; func v0 = 0.;
+   macro bbsw() [[-60.,-2.],[60.,2.]]//
+ENDIFMACRO
+IFMACRO(case,Harbor)
+   // a wave going to the right (u = eta) through the entrance of a harbor (two breakwaters)
+   real Tf=60.;
+   real xa=-60., xb=60., ya=-15., yb=15., x0=5., x1=10., y0=2.;// breakwaters x0 < x < x1, |y| > y0
+   border b1(t=xa,x0){x=t; y=ya; label=1;}
+   border b2(t=ya,-y0){x=x0; y=t; label=2;}
+   border b3(t=x0,x1){x=t; y=-y0; label=1;}
+   border b4(t=-y0,ya){x=x1; y=t; label=2;}
+   border b5(t=x1,xb){x=t; y=ya; label=1;}
+   border b6(t=ya,yb){x=xb; y=t; label=2;}
+   border b7(t=xb,x1){x=t; y=yb; label=1;}
+   border b8(t=yb,y0){x=x1; y=t; label=2;}
+   border b9(t=x1,x0){x=t; y=y0; label=1;}
+   border b10(t=y0,yb){x=x0; y=t; label=2;}
+   border b11(t=x0,xa){x=t; y=yb; label=1;}
+   border b12(t=yb,ya){x=xa; y=t; label=2;}
+   real h=0.75;// the size of the cells
+   int n1=int((x0-xa)/h), n2=int((-ya-y0)/h), n3=int((x1-x0)/h), n5=int((xb-x1)/h), n6=int((yb-ya)/h);
+   mesh Th=buildmesh(b1(n1)+b2(n2)+b3(n3)+b4(n2)+b5(n5)+b6(n6)+b7(n5)+b8(n2)+b9(n3)+b10(n2)+b11(n1)+b12(n6),
+                     splitpbedge=1);// splitpbedge: no triangle with 2 edges on the border
+   func eta0 = 0.2/cosh(0.5*(x+35.))^2;
+   func u0 = 0.2/cosh(0.5*(x+35.))^2; func v0 = 0.;
+   macro bbsw() [[-60.,-15.],[60.,15.]]//
+ENDIFMACRO
+
+int ordre=getARGV("-ordre",2), nfl=getARGV("-nf",0), lim=getARGV("-lim",1);
+real b=getARGV("-b",1./6.), d=getARGV("-d",1./6.);
+func PK0=[P0,P0,P0];
+func PK1=[P1,P1,P1];
+fespace Ph(Th,P0);
+
+// the mesh of the finite elements Th1 (on the whole domain): the vertices are the barycenters of Th (buildmesh
+// with the border of Th and the barycenters, then the triangles touching the border are removed)
+mesh Th1;
+{
+   real[int,int] b12(1,3);
+   int[int] lab = labels(Th);
+   real l12=extractborder(Th,lab,b12);
+   b12(2,:)=0:b12.m-1;// the parameter of the curve: the number of the point
+   border BB(t=0,1){P=Curve(b12,t);label=1;};
+   Ph Px=x,Py=y;// the barycenters
+   real[int,int] PF(Px[].n,2);
+   for(int i=0;i<Px[].n;i++){ PF(i,0)=Px[](i); PF(i,1)=Py[](i); }
+   Th1=buildmesh(BB(b12.m-1),points=PF,nbvx=PF.n+Th.nbe,fixedborder=1);
+   Th1=change(Th1,fregion=0);
+   fespace Ph1(Th1,P0);
+   Ph1 order;
+   OrderVF(Th1,order[],3);// order = 1 for the triangles with a vertex on the border
+   Th1=trunc(Th1,order==2,label=1);
+}
+fespace Ph1(Th1,P0);
+real mesh0=Th.measure;// the area of the whole domain (before the partition)
+
+// the partition: Th by createMat (partitionerSeq, overlap of 2 cells: the stencil of the order 2, the gradients
+// at the vertices and the limiter; 1 cell for the order 1; the installed
+// macro_ddm.idp ignores ThOverlap with ThUserPartitioning), the
+// global partition of Th from the cells of each process (ThN2O: local -> global numbering, the partition of unity
+// D: the cells of the process), the one of Th1 by interpolation (the cell of its barycenter), as
+// FreeVol_BBM_FB_ddm.edp, then createMat on Th1 with Th1UserPartitioning
+mesh ThG=Th;// the whole mesh
+Mat dAK0, dAK1;
+int[int] n2o;
+{
+   macro ThOverlap()2//
+   macro ThN2O()n2o//
+   macro def(u)[u, u#B, u#C]// EOM
+   macro init(u)[u, u, u]// EOM
+   createMat(Th, dAK0, PK0)
+}
+{
+   fespace PhG(ThG,P0);
+   real[int] partl(ThG.nt), part(ThG.nt), part1(Ph1.ndof);
+   partl=0;
+   fespace Ph3l(Th,PK0);
+   Ph3l [Dl,DlB,DlC]; Dl[]=dAK0.D;
+   for(int k=0;k<Th.nt;k++) if(Dl[][3*k]>0.5) partl[n2o[k]]=mpirank;
+   mpiAllReduce(partl,part,mpiCommWorld,mpiMAX);
+   PhG interpPart; interpPart[]=part;
+   Ph1 interpPart1=interpPart;
+   part1=interpPart1[];
+   macro Th1UserPartitioning()part1//
+   macro def(u)[u, u#B, u#C]// EOM
+   macro init(u)[u, u, u]// EOM
+   createMat(Th1, dAK1, PK1)
+}
+mpiBarrier(mpiCommWorld);
+
+// the local meshes: the finite volumes on Th
+fespace Ph3(Th,PK0);
+Ph3 [eta,u,v]=[eta0,u0,v0], [etaBC,uBC,vBC]=[0,0,0], [Re,Ru,Rv]=[0,0,0];
+Ph3 [etap,up,vp];// for the Heun scheme
+int[int] labBC=[1,2,2,2];// walls (the interfaces, label -111111: Neumann, the default)
+fvscheme FV([eta,u,v],order=ordre,eq="bbm",labelBC=labBC,limiter=lim,numflux=nfl);
+Ph3 [D0,D0B,D0C]; D0[]=dAK0.D;// the partition of unity on Th (for the global integrals)
+
+// the finite element part on Th1: (Mm + b K) W = -Mm R1, K the P1 stiffness matrix on Th1, Mm the mass matrix
+//   Mm = diag(|K_k|), the areas of the cells of Th at the barycenters (interpolation), as freevol_bbm2d.edp
+real tfe=0., tfe0=clock();// the cputime of the finite element part
+fespace Wh(Th1,PK1);
+macro grad(u)[dx(u),dy(u)]//
+varf vBBM([etah,uh,vh],[veta,vu,vv])=int2d(Th1)(b*grad(etah)'*grad(veta)+d*grad(uh)'*grad(vu)+d*grad(vh)'*grad(vv));// without the mass term
+Wh [r1e,r1u,r1v], [W1e,W1u,W1v];
+matrix Mm3;
+{
+   Ph ar=area;
+   Wh [a1,a1B,a1C]=[ar,ar,ar];// the area of the cell at each barycenter
+   exchange(dAK1,a1[],scaled=true);
+   Mm3=[a1[]];
+   matrix K3m=vBBM(Wh,Wh);
+   matrix A3=Mm3+K3m;
+   dAK1=A3;
+}
+set(dAK1, sparams = "-pc_type lu -pc_factor_mat_solver_type mumps");
+tfe+=clock()-tfe0;
+// one stage: E -> W = -A^-1 div(F(E)), dtfv the time step of the finite volumes (CFL = 1, min on all the processes)
+macro bbmstage(dtfv){
+  real dtl=fluxupdate(FV,[eta,u,v],[Re,Ru,Rv],[etaBC,uBC,vBC]);
+  mpiAllReduce(dtl,dtfv,mpiCommWorld,mpiMIN);
+  exchange(dAK0,Re[],scaled=true);
+  real tfe1=clock();
+  [r1e,r1u,r1v]=[Re,Ru,Rv];/* [Re,Ru,Rv] on Th -> [r1e,r1u,r1v] on Th1 */
+  exchange(dAK1,r1e[],scaled=true);
+  real[int] bb3=Mm3*r1e[]; bb3=-bb3;
+  W1e[]=dAK1^-1*bb3;
+  [Re,Ru,Rv]=[W1e,W1u,W1v];/* W on Th, in [Re,Ru,Rv] */
+  exchange(dAK0,Re[],scaled=true);
+  tfe+=clock()-tfe1;
+}//
+macro advance(dt){ eta[]+=dt*Re[]; }// E += dt*W ([Re,Ru,Rv] = W)
+
+// the global integrals and extrema (the partition of unity D0: each cell counted once)
+macro globalsum(loc,glob){ real ll=loc; mpiAllReduce(ll,glob,mpiCommWorld,mpiSUM); }//
+real m0; globalsum(int2d(Th)(D0*eta),m0)
+real t=0., dt, dtfv, CFL=.5, tdraw=Tf/20.;
+int ntdraw=0, iter=0;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) { plotMPI(Th, eta, P0, def1, real, PARAMS "eta at t="+t) ntdraw++; }
+    etap[]=eta[];
+    bbmstage(dtfv)
+    dt=CFL*dtfv; if(t+dt > Tf) dt=Tf-t;
+    advance(dt)
+    bbmstage(dtfv)
+    advance(dt)
+    eta[]+=etap[]; eta[]*=.5;// Heun
+    t+=dt;
+}//end of time loop
+plotMPI(Th, eta, P0, def1, real, PARAMSW "eta at t="+t)
+real m1, emin, emax, emin0=eta[].min, emax0=eta[].max;
+{ Ph etaf=eta; emin0=etaf[].min; emax0=etaf[].max; }
+globalsum(int2d(Th)(D0*eta),m1)
+mpiAllReduce(emin0,emin,mpiCommWorld,mpiMIN);
+mpiAllReduce(emax0,emax,mpiCommWorld,mpiMAX);
+real ntg; globalsum(int2d(Th)(D0/area),ntg)
+if(!mpirank) {
+  cout << mpisize << " processes, " << int(ntg+0.5) << " triangles, " << iter << " time steps, cputime = " << clock()-s0 << " (finite elements: " << tfe << ")" << endl;
+  cout << "mass error of eta = " << m1-m0 << " , min eta = " << emin << " , max eta = " << emax << endl;
+}

@@ -27,7 +27,7 @@ SUBDIRS=3rdparty src \
 	plugin  \
 	examples 
 
-EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
+EXTRA_DIST=README.md CHANGELOG.md AUTHORS ffhelp ffhelp.bat\
 	bin/keys.awk \
 	bin/mpic++.in \
 	bin/Install-MacOS.command \
@@ -108,6 +108,7 @@ EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
 	readme/BUGS readme/HISTORY_BEFORE_2005 readme/README_MAC.md readme/TODO \
 	readme/COPYRIGHT readme/INNOVATION readme/README_COMPILATION.md	readme/README_WINDOWS.md \
 	readme/HISTORY readme/README readme/README_GIT.md readme/README_XCODE.md \
+idp/help \
 idp/CC.idp \
 idp/DDM-Schwarz-macro.idp \
 idp/DDM-funcs-v2.idp \
@@ -290,10 +291,14 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
 	cd idp; for i in *.idp; do \
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp/help"
+	cd idp/help; for i in *.txt; do \
+		if [ -f $$i ]; then $(INSTALL) -m 444 $$i "$(DESTDIR)$(ff_prefix_dir)/idp/help"; fi; done
 	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf "$(DESTDIR)$(pkgdatadir)" 	
 #  not error if PB insall FreeFem++-CoCoa in /usr/local/bin/
 	-test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) ffhelp "$(DESTDIR)${bindir}"
 #    need sudo ...	
 #winDssSSs	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
 #	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz; test -d "$(DESTDIR)/Applications" || mkdir -p "$(DESTDIR)/Applications"; tar zxf FreeFem++.app.tgz -C "$(DESTDIR)/Applications" )
@@ -448,7 +453,9 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/bug/Makefile.in \
     examples/3d/Makefile.in \
     examples/3dSurf/Makefile.in \
-    examples/3dCurve/Makefile.in
+    examples/3dCurve/Makefile.in \
+    examples/freevol/Makefile.in \
+    examples/freevol_dualmesh/Makefile.in
 
 LIST_GENERATE_FILE_AM= \
   Makefile.am \
@@ -489,7 +496,9 @@ LIST_GENERATE_FILE_AM= \
     examples/bug/Makefile.am \
     examples/3d/Makefile.am \
     examples/3dSurf/Makefile.am \
-    examples/3dCurve/Makefile.am
+    examples/3dCurve/Makefile.am \
+    examples/freevol/Makefile.am \
+    examples/freevol_dualmesh/Makefile.am
 
 
 #$(LIST_GENERATE_FILE):$(LIST_GENERATE_FILE_AM)

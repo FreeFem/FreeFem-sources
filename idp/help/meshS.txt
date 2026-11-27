@@ -1,0 +1,4 @@
+meshS Th; : a surface mesh of triangles in 3D space (int2d(Th), fespace
+  Vh(Th, P1), finite volumes on a surface).
+  Built by square3, buildmeshS, extract, movemesh, trunc, readmeshS, ...
+  Example: meshS Th = square3(10, 10, [x, y, x*y]);

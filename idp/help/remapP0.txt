@@ -1,0 +1,8 @@
+remapP0(Tho, uo[], Th, u[]) : conservative transfer of a P0 function from
+  the old mesh Tho to Th (after adaptmesh; meshL and mesh): a limited affine
+  reconstruction in each old element, integrated exactly on the
+  intersections with the new elements. The mass is conserved, no new
+  extremum. [P0,...,P0]: the m components together (same limiter).
+  u[] is resized.
+  Example: mesh Tho = Th; fespace Pho(Tho, P0); Pho uo = u;
+           Th = adaptmesh(Th, u, err=0.01); u = 0; remapP0(Tho, uo[], Th, u[]);

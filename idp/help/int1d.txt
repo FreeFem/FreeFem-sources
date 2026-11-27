@@ -1,0 +1,2 @@
+int1d(Th, labels)(f) : integral of f on the borders with the given labels.
+  Example: real l = int1d(Th, 1, 3)(1.);

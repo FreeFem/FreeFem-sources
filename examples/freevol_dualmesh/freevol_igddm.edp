@@ -1,0 +1,196 @@
+// solves the system of isentropic gas dynamics by the finite volume method
+// using control volumes of dualmesh (P1 functions)
+// plots on the dual mesh (plugin fvdualmesh, as test_meshD.edp): one value by control volume, with the modified
+// ffglut:  FreeFem++ -glut ../../../../FreeFem_test/ffglut_1D freevol_igddm.edp
+//   plot(Thstar, rho[]) the control volumes colored by rho (rho, ux, uy: one value by vertex, P1 functions)
+//   keys: m) edges of the polygons  3) relief in steps  v) palette  P) value under the mouse  c) cut
+//   (macro plotdual()0: the usual plots of the P1 functions)
+real s0=clock();
+
+macro plotdual()1// 1: plots on the dual mesh, 0: plots of the P1 functions
+//include "macro_fvdualmesh.idp"
+
+real gamma=2.;
+real gr=9.81;
+real kappa=gr/2.;
+
+macro case() 4//
+
+IFMACRO(case,2)
+   real tdraw=.1,Tf=20.;
+   int Npx=100,Npy=Npx;
+   real xp=30.,yp=0.,R=100.;
+   real aa=-R,bb=R,cc=-R,dd=R;
+   border AB(t=aa,bb){x=t; y=cc;label=1;};
+   border BC(t=cc,dd){x=bb; y=t;label=2;};
+   border CD(t=bb,aa){x=t; y=dd;label=3;};
+   border DA(t=dd,cc){x=aa; y=t;label=4;};
+   mesh Th = buildmesh(AB(Npx)+BC(Npy)+CD(Npx)+DA(Npy),splitpbedge=1);
+   func h0 = (dist(x-xp,y-yp)<=(R/4.)) + 1.;
+   //func h0 = exp(-(x-xp)^2/100.-(y-yp)^2/100.) + 1.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igddm.txt";
+ENDIFMACRO
+IFMACRO(case,4)
+   gamma=1.4;// MODIFICATION OF GAMMA
+   kappa=1.;//  MODIFICATION OF KAPPA
+   real tdraw=.1,Tf=3.;
+   int Npx=30;
+   real L=5.,Haut=5.;
+   border aa(t=0.,1.){x=L*(2.*t-1.);y=-Haut;label=1;};
+   border bb(t=0.,1.){x=L;y=Haut*(2.*t-1.);label=2;};
+   border cc(t=0.,1.){x=L*(1.-2.*t);y=Haut;label=3;};
+   border dd(t=0.,1.){x=-L;y=Haut*(1.-2.*t);label=4;};
+   mesh Th=buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func hu0 = 0.;
+func real rhoexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+}
+func real uxexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+}
+func real uyexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+}
+   func h0=rhoexact(0.);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igddm.txt";
+ENDIFMACRO
+
+int ntdraw=0;
+real t,dt,CFL=.5;//1.;//
+fespace Vh3(Th,[P1,P1,P1]);
+fespace Vh(Th,P1);
+Vh3 [H,Hu,Hv]=[0,0,0],[HBC,HuBC,HvBC]=[0,0,0],[Hr,Hur,Hvr]=[0,0,0];
+Vh3 [Hp,Hup,Hvp];//for second order in time
+[H,Hu,Hv]=[max(h0,0.),hu0,0];
+int[int] labBC=[2,2];
+Vh scal1,scal2;
+meshdual Thstar=builddualmesh(Th);// the dual mesh: the control volumes of the scheme (fvscheme finds it from the mesh Th of the unknowns), and the plots
+
+IFMACRO(case,4)
+     [H,Hu,Hv]=[max(h0,0.),max(h0,0.)*uxexact(0.),max(h0,0.)*uyexact(0.)];
+     labBC=[1,1,2,0,3,1,4,0];
+ENDIFMACRO
+
+IFMACRO(plotdual,1)
+scal1=H;// the density (one value by vertex = by control volume)
+plot(Thstar,scal1[],value=true,wait=0,cmm="initial density");
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(H,dim=3,fill=true,value=true,wait=0);
+ENDIFMACRO
+
+real[int] params=[gamma,kappa];//sets the exponent gamma and the coefficient kappa of the polytropic gas law
+//int[int] intparams=[-3,2];
+int mtordre=2;// order of accuracy in time (1 or 2)
+fvscheme FV([H,Hu,Hv],order=2,eq="igddm",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+macro test()0//EOM
+IFMACRO(test,0)
+
+//bounding box for the plot
+int NTsave = Tsave.n;
+real[int,int] Savedata(Npx+1,NTsave+2);
+Savedata = 0;
+int ncsave=0;
+int[int] donesave(NTsave);   // false by default
+donesave = 0;
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        IFMACRO(plotdual,1)
+        scal1=H;
+        plot(Thstar,scal1[],cmm="Solution at t="+t+", dt="+dt,value=true,wait=0);
+        ENDIFMACRO
+        IFMACRO(plotdual,0)
+        plot(H,cmm="Solution at t="+t+", dt="+dt,dim=3,fill=true,value=true,wait=0);
+        ENDIFMACRO
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     //time dependent BC:
+     IFMACRO(case,4)
+      //[HBC,HuBC,HvBC]=[rhoexact(t),rhoexact(t)*uxexact(t),rhoexact(t)*uyexact(t)];//lent
+      for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+          int kib=Th.be(ib).Element;//neighbouring triangle
+          int iib=Th.be(ib).whoinElement;//edge in triangle
+          int ee;
+          int kee=Th[kib].adj((ee=iib));
+          if(kee==kib){
+           int jv=Th.be(ib)[0];
+           x=Th(jv).x;
+           y=Th(jv).y;
+           HBC[][3*jv]=rhoexact(t);
+           HBC[][3*jv+1]=rhoexact(t)*uxexact(t);
+           HBC[][3*jv+2]=rhoexact(t)*uyexact(t);
+          }
+      }
+     ENDIFMACRO
+     dtsub = fluxupdate(FV,[H,Hu,Hv],[Hr,Hur,Hvr],[HBC,HuBC,HvBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    scal1=H;
+    real Hmin=scal1[].min;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmax=scal2[].linfty;
+    cout << iter+1 << " t=" << t;
+    if (Hmin<0.) cout << " Hmin=" << Hmin;
+    cout << " velmax=" << velmax << endl;
+    if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+}//end of time loop
+cout<<"cputime = "<<clock()-s0<<endl;
+IFMACRO(plotdual,1)
+scal1=H;
+plot(Thstar,scal1[],value=true,wait=1,cmm="rho at t = "+t+" (m, 3, c, P)");
+scal2=Hu/(H+1.e-13);
+plot(Thstar,scal2[],value=true,wait=1,cmm="ux at t = "+t);
+scal2=Hv/(H+1.e-13);
+plot(Thstar,scal2[],value=true,wait=1,cmm="uy at t = "+t);
+ENDIFMACRO
+
+IFMACRO(case,4)
+  Vh rhoex,uxex,uyex;
+  rhoex=rhoexact(t);
+  uxex=uxexact(t);
+  uyex=uyexact(t);
+  scal2=Hu/(H+1.e-13);
+  real errorrho=sqrt(int2d(Th)((H-rhoex)^2));
+  real errorux=sqrt(int2d(Th)((scal2-uxex)^2));
+  scal2=Hv/(H+1.e-13);
+  real erroruy=sqrt(int2d(Th)((scal2-uyex)^2));
+  cout << "errorrho,errorux,erroruy " << errorrho << " " << errorux << " " << erroruy << endl;
+ENDIFMACRO
+
+ENDIFMACRO

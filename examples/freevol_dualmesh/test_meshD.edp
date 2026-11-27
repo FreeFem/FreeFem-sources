@@ -1,0 +1,141 @@
+// Test of the meshdual type (dual mesh, plugin fvdualmesh): plots with ffglut and with ffmedit
+// Run from this folder:
+//   FreeFem++ -glut ../../FreeFem_test/ffglut_1D test_meshD.edp
+// or with MPI (the FreeFEM options after the file, -wg otherwise ff-mpirun disables graphics):
+//   ff-mpirun -n 1 test_meshD.edp -wg -glut ../../FreeFem_test/ffglut_1D -v 0
+//
+// ffglut :  plot(Thstar)          the control volumes (polygons), the boundary coloured (label)
+//           plot(Thstar, u[])     one value per control volume (u[i] = volume around vertex i)
+//           plot(Th, Thstar), plot(Thstar, Th), plot(Th, Thstar, u[]), plot(Thstar, u[], Th): with the primal
+//           keys: m) polygon edges   3) stepped relief   v) palette
+//                 P) value under the mouse  c) cut u(x) / u(y) (piecewise constant)
+//                 j) axes                   enter) next plot
+// ffmedit : meditD("u", Thstar, u[]) and meditDmesh("Thstar", Thstar) (see fvdualmesh.idp),
+//           meditDP("u", Th, Thstar, u[]) and meditDPmesh("Th Thstar", Th, Thstar) with the primal,
+//           same keys (m, 3, c, P, v ...)
+include "fvdualmesh.idp"
+bool withmedit = false;   // false: ffglut only (no ffmedit window)
+
+border gama11(t= 0.,  1.){ x= t   ; y = 0.;label=1;};
+border gama22(t= 0.,  1.){ x= 1.  ; y = t  ;label=2;};
+border gama33(t= 1. , 0.){ x= t   ; y = 1. ;label=3;};
+border gama44(t= 1. , 0.){ x= 0.; y = t ;label=4;};
+int n=7;
+mesh Th=buildmesh(gama11(n)+gama22(n)+gama33(n)+gama44(n));
+
+meshdual Thstar = builddualmesh(Th);
+cout << "Thstar.ncv=" << Thstar.ncv << " Thstar.ndv=" << Thstar.ndv << " Thstar.ndbe=" << Thstar.ndbe << endl;
+
+// one value per control volume (here the function at the vertices of the primal mesh)
+fespace Vh(Th,P1);
+Vh u = sin(3*x)*cos(2*y);
+
+// --- ffglut
+plot(Th);
+plot(Thstar, cmm="meshdual: the control volumes", wait=1);
+plot(Thstar, u[], cmm="u per control volume (m, 3, c, P)", wait=1);
+plot(Thstar, u[], cmm="with the palette values", value=1, wait=1);
+// with the primal mesh (the dual in red); the order of the arguments is free
+plot(Th, Thstar, cmm="plot(Th, Thstar): primal and dual", wait=1);
+plot(Th, Thstar, u[], cmm="plot(Th, Thstar, u[]): the primal over the colours", wait=1);
+
+// --- ffmedit
+wait = 1;
+if (withmedit) {
+  meditDmesh("Thstar", Thstar);
+  meditD("u", Thstar, u[]);
+  // with the primal mesh, like plot(Th, Thstar): the primal in white, the dual in red
+  meditDPmesh("Th Thstar", Th, Thstar);
+  meditDP("u with Th", Th, Thstar, u[]);
+}
+
+// ============================================================================================
+// --- Pathological meshes: the dual, the medit fan and the plot must stay correct
+//   1) very obtuse triangles (angles up to 170 degrees): shaken interior vertices
+//   2) very stretched and sheared triangles (ratio 15:1, angles up to 160 degrees) in a parallelogram
+//   3) L-shaped domain with a hole and a re-entrant corner
+//   4) very different cell sizes (adaptmesh around a point)
+//   5) internal boundary (label 9) between two subdomains: it is not a boundary of the dual
+//   6) the mesh of testfvdualmesh.edp: internal boundaries (label 5) touching a hole,
+//      a disk in the hole, changed regions (n = 12: with n = 3, bamg fails on this mesh)
+//   7) the square of testfvdualmesh.edp with n = 3 (very coarse)
+//   8) mesh-sing.msh: a boundary vertex (0.5, 0.3) where three boundary pieces meet
+//      (the control volume passes three times through this vertex)
+// For each case: the maximum angle, the sum of the control volume areas (= area of the
+// domain), then plot(Th, Thstar), plot(Thstar, u[], Th) and meditDP.
+// With FreeFem++ -v 2, dualmeshfan reports primal edges drawn bent (none expected).
+// ============================================================================================
+int np = 10;
+mesh Tp1 = square(np, np);
+fespace WP1(Tp1, P1);
+WP1 dxp = (x>1e-9 && x<1-1e-9 && y>1e-9 && y<1-1e-9)*0.38/np*sin(97*x*y+13*x);
+WP1 dyp = (x>1e-9 && x<1-1e-9 && y>1e-9 && y<1-1e-9)*0.38/np*cos(71*x*y+7*y);
+Tp1 = movemesh(Tp1, [x+dxp, y+dyp]);
+
+mesh Tp2 = square(4, 60, [x + 3*y, y]);
+
+border l1(t=0,2){x=t; y=0; label=1;}
+border l2(t=0,1){x=2; y=t; label=2;}
+border l3(t=0,1){x=2-t; y=1; label=3;}
+border l4(t=0,1){x=1; y=1+t; label=4;}
+border l5(t=0,1){x=1-t; y=2; label=5;}
+border l6(t=0,2){x=0; y=2-t; label=6;}
+border lh(t=0,2*pi){x=0.5+0.2*cos(-t); y=0.5+0.2*sin(-t); label=7;}
+mesh Tp3 = buildmesh(l1(16)+l2(8)+l3(8)+l4(8)+l5(8)+l6(16)+lh(20));
+
+mesh Tp4 = square(6, 6);
+Tp4 = adaptmesh(Tp4, 1./(1e-3+(x-0.5)^2+(y-0.5)^2), err=0.02, nbvx=10000);
+
+border i1(t=0,2){x=t; y=0; label=1;}
+border i2(t=0,1){x=2; y=t; label=2;}
+border i3(t=0,2){x=2-t; y=1; label=3;}
+border i4(t=0,1){x=0; y=1-t; label=4;}
+border ii(t=0,1){x=1; y=t; label=9;}
+mesh Tp5 = buildmesh(i1(12)+i2(6)+i3(12)+i4(6)+ii(6));
+
+// the mesh of testfvdualmesh.edp (the borders gama11 ... gama44 are those defined above)
+border gamma51(t=0.7,1.){x=0.5;y=t;label=5;};// to test internal boundaries
+border gamma52(t=0.,.3){x=0.5;y=t;label=5;};// to test internal boundaries
+border gamma6(t=0.,2.*pi){x=.5+.2*cos(t);y=.5+.2*sin(t);label=6;};
+border gamma7(t=0.,2.*pi){x=.5+.1*cos(t);y=.5+.1*sin(t);label=6;};
+int nf = 12;
+mesh Tp6 = buildmesh(gama11(nf)+gama22(nf)+gama33(nf)+gama44(nf)+gamma51(nf/4)+gamma52(nf/4)+gamma6(-nf)+gamma7(nf/2));
+{
+  int regL = Tp6(.25,.5).region;
+  int regR = Tp6(.75,.5).region;
+  int[int] chregion = [regL,0,regR,0];
+  Tp6 = change(Tp6, region=chregion);
+}
+int nc3 = 3;
+mesh Tp7 = buildmesh(gama11(nc3)+gama22(nc3)+gama33(nc3)+gama44(nc3));
+mesh Tp8 = readmesh("mesh-sing.msh");
+
+mesh[int] Pth(8);
+Pth[0] = Tp1; Pth[1] = Tp2; Pth[2] = Tp3; Pth[3] = Tp4; Pth[4] = Tp5; Pth[5] = Tp6; Pth[6] = Tp7;
+Pth[7] = Tp8;
+string[int] Pname = ["very obtuse triangles", "stretched and sheared triangles", "L with a hole",
+                     "very different sizes", "internal boundary", "testfvdualmesh.edp (n=12)",
+                     "testfvdualmesh.edp (n=3)", "mesh-sing.msh"];
+for (int k = 0; k < 8; ++k) {
+  mesh Thp = Pth[k];
+  // the maximum angle of the triangles
+  real angmax = 0;
+  for (int t = 0; t < Thp.nt; ++t)
+    for (int i = 0; i < 3; ++i) {
+      int a = Thp[t][i], b = Thp[t][(i+1)%3], c = Thp[t][(i+2)%3];
+      real ux = Thp(b).x-Thp(a).x, uy = Thp(b).y-Thp(a).y, vx = Thp(c).x-Thp(a).x, vy = Thp(c).y-Thp(a).y;
+      angmax = max(angmax, acos((ux*vx+uy*vy)/sqrt((ux^2+uy^2)*(vx^2+vy^2)))*180/pi);
+    }
+  meshdual Thstarp = builddualmesh(Thp);
+  real[int] cva;
+  dualmeshcvarea(cva, Thstarp);
+  cout << "case " << k+1 << " (" << Pname[k] << "): nt=" << Thp.nt << " max angle=" << angmax
+       << " ncv=" << Thstarp.ncv << " min area of a volume=" << cva.min
+       << " sum of areas=" << cva.sum << " area of the domain=" << int2d(Thp)(1.) << endl;
+  fespace Vp(Thp, P1);
+  Vp up = sin(3*x)*cos(2*y);
+  string tit = "case " + (k+1) + ": " + Pname[k] + ", max angle " + int(angmax+0.5);
+  plot(Thp, Thstarp, cmm=tit, wait=1);
+  plot(Thstarp, up[], Thp, cmm=tit + " (m, 3, c, P)", wait=1);
+  if (withmedit) meditDP(tit, Thp, Thstarp, up[]);
+}

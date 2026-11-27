@@ -949,7 +949,7 @@ GLuint alt2dMesh(pScene sc, pMesh mesh, float shrink, float altcoef) {
   pSolution ps[4];
   GLuint dlist;
   float cx, cy, cz, c[4][3];
-  int k, m, i, typ, nv;
+  int k, m, i, typ, nv, dual = dualMesh(mesh);
 
   if (!mesh->nt && !mesh->nq) return (0);
 
@@ -1003,6 +1003,8 @@ GLuint alt2dMesh(pScene sc, pMesh mesh, float shrink, float altcoef) {
         }
 
         for (i = 0; i < nv; i++) {
+          if (dual && !typ && i != 1) continue; /* dual mesh: the edges of the control volumes */
+
           glVertex3fv(c[i]);
           glVertex3fv(c[(i + 1) % nv]);
         }

@@ -1,0 +1,48 @@
+#!/bin/bash
+# ffhelp: the online help of FreeFEM from the shell (the help() of the kernel, without writing a script)
+#   ffhelp                     the list of the topics with a written help
+#   ffhelp name [name ...]     the help of a function, a type or a keyword: its written help, its signatures,
+#                              its named parameters (function) or its members (type)
+#   ffhelp -l plugin name      load a plugin first (ex. ffhelp -l medit medit, ffhelp -l iovtk savevtk);
+#                              -l can be repeated
+#   ffhelp -mpi name           with FreeFem++-mpi (the plugins of the parallel version, ex. ffhelp -mpi -l
+#                              adaptmesh_ddm adaptmeshddm)
+# the FreeFem++ of the directory of this script is used (else the one of the PATH)
+
+usage() { sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; }
+
+dir=$(cd "$(dirname "$0")" && pwd)
+ff=FreeFem++
+loads=()
+names=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -mpi) ff=FreeFem++-mpi ;;
+    -l) shift; [ -z "$1" ] && { echo "ffhelp: -l needs a plugin name" >&2; exit 1; }; loads+=("$1") ;;
+    -*) echo "ffhelp: unknown option $1" >&2; usage >&2; exit 1 ;;
+    *) names+=("$1") ;;
+  esac
+  shift
+done
+
+if [ -x "$dir/$ff" ]; then ff="$dir/$ff"
+elif [ -x "$dir/$ff.exe" ]; then ff="$dir/$ff.exe"   # Windows (MSYS2, Git Bash)
+elif ! command -v "$ff" > /dev/null; then echo "ffhelp: $ff not found" >&2; exit 1; fi
+
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/ffhelp.XXXXXX") || exit 1
+trap 'rm -rf "$tmp"' EXIT
+{
+  for p in "${loads[@]}"; do printf 'load "%s"\n' "$p"; done
+  if [ ${#names[@]} -eq 0 ]; then
+    echo 'help();'
+  else
+    for n in "${names[@]}"; do
+      n=${n//\\/\\\\}; n=${n//\"/\\\"}  # a name given as a FreeFEM string
+      printf 'help("%s");\n' "$n"
+    done
+  fi
+} > "$tmp/ffhelp.edp"
+
+cd "$tmp" && "$ff" -nw -v 0 ffhelp.edp 2>&1 | cat -s
+exit "${PIPESTATUS[0]}"

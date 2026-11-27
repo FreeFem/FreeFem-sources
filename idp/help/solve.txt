@@ -1,0 +1,7 @@
+solve name(u, v) = bilinear form + linear form + conditions ;
+  defines and solves the problem immediately. The terms of the linear form
+  are written with a minus sign.
+  Example:
+    fespace Vh(Th, P1); Vh u, v;
+    solve Poisson(u, v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v))
+                        - int2d(Th)(1*v) + on(1, 2, 3, 4, u=0);

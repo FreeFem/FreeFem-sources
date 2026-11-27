@@ -1,0 +1,42 @@
+// advection in 1D (meshL) by finite volumes on the dual mesh: u_t + (V u)_x = 0 on [0,4], V = 1
+//   a gaussian exp(-((x-1)/0.3)^2), P1 unknown (one value per vertex = the mean on its control volume, meshdualL:
+//   one segment per control volume, between the middles of the segments around the vertex), u = 0 at the inflow
+//   (Dirichlet), Neumann at the outflow, MUSCL scheme (order 2) and Heun in time
+//   w in Phstar(Thstar, P0), w[] = u[]: u on the control volumes (plots, mass int1d(Thstar)(w) = sum |C_i| u_i)
+//   at the end: the mass and the L2 error with respect to the exact solution
+// options: -n (segments, 200), -ordre (2 or 1), -nw: no plot
+include "getARGV.idp"
+int n = getARGV("-n", 200), ordre = getARGV("-ordre", 2);
+real Tf = 2.;
+meshL Th = segment(n, [4*x, 0, 0]);         // labels: 1 at x = 0, 2 at x = 4
+meshdualL Thstar = builddualmesh(Th);      // the dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+fespace Phstar(Thstar, P0);                 // one value per control volume
+Vh u = exp(-((x-1)/.3)^2), up, ur = 0, uBC = 0;
+Vh V1 = 1;                                  // velocity
+Phstar w;
+int[int] labBC = [1,0, 2,1];               // inflow: Dirichlet (uBC = 0), outflow: Neumann
+fvscheme FV([V1], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre);
+w[] = u[];
+real mass0 = int1d(Thstar)(w);
+real t = 0, dt, dtsub, CFL = 0.9;
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(w, cmm="1D dual: initial data (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {w[] = u[]; plot(w, cmm="1D dual: solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+func uex = exp(-((x-t-1)/.3)^2);
+real err = sqrt(int1d(Th, qforder=5)((u-uex)^2));
+w[] = u[];
+cout << "1D dual (order " << ordre << "): t = " << t << " , " << it << " steps , " << Thstar.ncv << " control volumes , mass = "
+     << int1d(Thstar)(w) << " (initial " << mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(w, cmm="1D dual: solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);

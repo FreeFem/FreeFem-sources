@@ -1,0 +1,83 @@
+// solves the system of isentropic gas dynamics by the finite volume method (2D, mesh)
+// with periodic boundary conditions, parallel version (domain decomposition, PETSc) of freevol_igd2d_periodic.edp:
+//   the isentropic vortex transported at the velocity (1, 0) in [-L,L]^2, periodic in x and y
+//   the partition: createMat with macro ThPeriodicity()labPeriodic// (the labels of the periodic borders, macro_ddm.idp):
+//   all the elements near the periodic borders are on one process (with the overlap: 2 cells, the order 2),
+//   so the 2 sides of a periodic border are in the same local mesh, where fvscheme(..., periodic=...) glues them; the
+//   other processes have no periodic border
+//   at each stage: the time step is the min on all the processes, then exchange(A, Hr, scaled=true)
+//   at the end, the solution is gathered on the global mesh (A.D): the same outputs as freevol_igd2d_periodic.edp
+//   (the same values)
+// run: ff-mpirun -np 4 freevol_igd2d_periodic_ddm.edp -wg   (options: -n (40), -L (5), -ordre (2 or 1), -nw: without plot)
+// NBPROC 4
+load "PETSc"                               // PETSc plugin
+include "macro_ddm.idp"                    // additional DDM functions
+include "getARGV.idp"
+real s0 = clock();
+real gamma = 1.4, kappa = 1.;
+int n = getARGV("-n", 40), ordre = getARGV("-ordre", 2);
+real L = getARGV("-L", 5.);
+border aa(t=0., 1.){x=L*(2.*t-1.); y=-L; label=1;};
+border bb(t=0., 1.){x=L; y=L*(2.*t-1.); label=2;};
+border cc(t=0., 1.){x=L*(1.-2.*t); y=L; label=3;};
+border dd(t=0., 1.){x=-L; y=L*(1.-2.*t); label=4;};
+mesh ThG = buildmesh(aa(n)+bb(n)+cc(n)+dd(n), splitpbedge=1);   // the same vertices on the opposite borders
+real Tf = 2.*L, CFL = .5;
+func real posxv(real targ) { real px = x + 3. - targ + 4.*L; int nx = int(px/(2.*L)); px = px - nx*2.*L; if (px > L) px = px - 2.*L; return px; }
+func real rhoexact(real targ) { real px = posxv(targ); return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-px^2-y^2))^(1./(gamma-1.)); }
+func real uxexact(real targ) { real px = posxv(targ); return 1.+5./(2.*pi)*exp(.5*(1.-px^2-y^2))*(-y); }
+func real uyexact(real targ) { real px = posxv(targ); return 5./(2.*pi)*exp(.5*(1.-px^2-y^2))*px; }
+func PKN = [P0,P0,P0];
+mesh Th = ThG;                             // the local mesh
+int[int] n2o;                              // local cell -> global cell
+Mat A;
+{
+  macro ThOverlap()2//
+  macro ThN2O()n2o//
+  int[int] labPeriodic = [1, 3, 2, 4];
+  macro ThPeriodicity()labPeriodic//       // the elements near the periodic borders on one process
+  macro def(u)[u, u#B, u#C]// EOM
+  macro init(u)[u, u, u]// EOM
+  createMat(Th, A, PKN)
+}
+fespace PhN(Th, PKN);
+fespace PhNG(ThG, PKN);
+fespace PhG(ThG, P0);
+PhN [H,Hu,Hv] = [rhoexact(0.), rhoexact(0.)*uxexact(0.), rhoexact(0.)*uyexact(0.)], [HBC,HuBC,HvBC] = [0,0,0], [Hr,Hur,Hvr] = [0,0,0];
+PhN [Hp,Hup,Hvp];
+real[int] params = [gamma, kappa];
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];   // no effect on the periodic borders; the interfaces (-111111): Neumann
+fvscheme FV([H,Hu,Hv], order=ordre, eq="igd", labelBC=labBC, limiter=1, numflux=2, parameters=params,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+// the local solution gathered on the global mesh (each cell counted once: the partition of unity A.D)
+PhN [HD,HuD,HvD]; HD[] = A.D;
+macro gather(Uloc, Uglob) { real[int] gl(Uglob[].n); gl = 0;
+  for (int k = 0; k < Th.nt; k++) for (int c = 0; c < 3; c++) gl[3*n2o[k]+c] += HD[][3*k+c]*Uloc[][3*k+c];
+  mpiAllReduce(gl, Uglob[], mpiCommWorld, mpiSUM); }//
+PhNG [HG0,HuG0,HvG0];
+gather(H, HG0)
+real t, dt, dtsub, dtl;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtl = fluxupdate(FV, [H,Hu,Hv], [Hr,Hur,Hvr], [HBC,HuBC,HvBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+    exchange(A, Hr[], scaled=true);        // the overlap: the values of their process
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+PhNG [HG,HuG,HvG];
+gather(H, HG)
+if (!mpirank) {
+  cout << "igd 2D periodic ddm (" << mpisize << " processes, order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+  PhG rho = HG, rhoex = rhoexact(t), uxex = uxexact(t), uyex = uyexact(t), u1 = HuG/HG, u2 = HvG/HG;
+  real e1 = sqrt(int2d(ThG)((HG-rhoex)^2)), e2 = sqrt(int2d(ThG)((u1-uxex)^2)), e3 = sqrt(int2d(ThG)((u2-uyex)^2));
+  cout << "  conservation: mass " << int2d(ThG)(HG)-int2d(ThG)(HG0) << " , momentum x " << int2d(ThG)(HuG)-int2d(ThG)(HuG0)
+       << " , momentum y " << int2d(ThG)(HvG)-int2d(ThG)(HvG0) << endl;
+  cout << "  errors L2: rho " << e1 << " , ux " << e2 << " , uy " << e3 << " , min rho " << rho[].min << endl;
+  cout << "cputime = " << clock()-s0 << endl;
+}

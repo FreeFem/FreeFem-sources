@@ -1,0 +1,89 @@
+// solves the system of isentropic gas dynamics by the finite volume method on the dual mesh in
+// 2D (mesh, the dual mesh of F. Bouchut) with periodic boundary conditions
+//   fvscheme FV([H,Hu,Hv], eq="igddm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]] (the syntax of a fespace)):
+//   the control volumes of the linked vertices are one control volume: no flux on the boundary pieces of the periodic
+//   borders (inside the control volume), U and the flux balance are the means on the class weighted by the volumes,
+//   at the order 2 the slope is the mean of the slopes and the reconstruction starts from the center of gravity of
+//   the union; the conserved quantities of the scheme are the sums |C_i| U_i (dualmeshcvarea)
+//   -cas 1: a periodic wave rho = 1+0.2 sin(...), u = constant on [0,1]^2: the mass and the momentum are conserved
+//           exactly
+//   -cas 0: a constant state: it stays constant
+//   -cas 2: the case of freevol_igd2d_periodic.edp: the isentropic vortex of freevol_igd2d.edp (case 4) transported at
+//           the velocity (1, 0) in the box [-L,L]^2, periodic in x and in y; at t = Tf = 2L (one period) the vortex is
+//           back at its initial position: the errors are computed with the exact solution at the vertices (the vortex
+//           translated, periodic in x; exp(-L^2) ~ 1e-11 on the borders y = -L, L), in the norm of the dual mesh
+//           (sqrt(sum |C_i| e_i^2))
+// options: -cas (1), -n (16; segments by side), -L (5, cas 2), -Tf (0.5; 2L for cas 2), -ordre (2 or 1),
+//   -nw: without plot
+include "getARGV.idp"
+real s0 = clock();
+real gamma = 1.4, kappa = 1.;
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real L = 1.;
+if (cas == 2) L = getARGV("-L", 5.);
+real Tf0 = 0.5;
+if (cas == 2) Tf0 = 2.*L;               // one period
+real Tf = getARGV("-Tf", Tf0), CFL = .5;
+mesh Th;
+if (cas == 2) {                          // the box [-L,L]^2 of freevol_igd2d_periodic.edp
+  border aa(t=0., 1.){x=L*(2.*t-1.); y=-L; label=1;};
+  border bb(t=0., 1.){x=L; y=L*(2.*t-1.); label=2;};
+  border cc(t=0., 1.){x=L*(1.-2.*t); y=L; label=3;};
+  border dd(t=0., 1.){x=-L; y=L*(1.-2.*t); label=4;};
+  Th = buildmesh(aa(n)+bb(n)+cc(n)+dd(n), splitpbedge=1);   // the same vertices on the opposite borders
+}
+else Th = square(n, n, [L*x, L*y]);     // labels 1 bottom, 2 right, 3 top, 4 left
+meshdual Thstar = builddualmesh(Th);   // the dual mesh
+fespace VhN(Th, [P1,P1,P1]);
+fespace Vh(Th, P1);
+// cas 2: the exact solution at the time targ: the vortex centered at (-3+targ, 0) (periodic in x, of period 2L)
+func real posxv(real targ) { real px = x + 3. - targ + 4.*L; int nx = int(px/(2.*L)); px = px - nx*2.*L; if (px > L) px = px - 2.*L; return px; }
+func real rhoexact(real targ) { real px = posxv(targ); return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-px^2-y^2))^(1./(gamma-1.)); }
+func real uxexact(real targ) { real px = posxv(targ); return 1.+5./(2.*pi)*exp(.5*(1.-px^2-y^2))*(-y); }
+func real uyexact(real targ) { real px = posxv(targ); return 5./(2.*pi)*exp(.5*(1.-px^2-y^2))*px; }
+func rho0 = 1. + 0.2*cas*sin(2.*pi*(x+y)/L);
+VhN [H,Hu,Hv] = [0,0,0], [HBC,HuBC,HvBC] = [0,0,0], [Hr,Hur,Hvr] = [0,0,0];
+VhN [Hp,Hup,Hvp];
+if (cas == 2) [H,Hu,Hv] = [rhoexact(0.), rhoexact(0.)*uxexact(0.), rhoexact(0.)*uyexact(0.)];
+else [H,Hu,Hv] = [rho0, 1.*rho0, 0.5*rho0];
+real[int] params = [gamma, kappa];
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];   // no effect on the periodic borders
+fvscheme FV([H,Hu,Hv], order=ordre, eq="igddm", labelBC=labBC, limiter=1, numflux=2, parameters=params,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);
+Vh rho = H;
+real m0 = cva'*rho[];
+Vh q0 = Hu; real q00 = cva'*q0[];
+Vh q1 = Hv; real q10 = cva'*q1[];
+if (cas == 2) plot(rho, fill=1, value=1, cmm="rho at t=0 (periodic)", wait=1);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv], [Hr,Hur,Hvr], [HBC,HuBC,HvBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+  plot(H, fill=1, value=1, dim=3, cmm="rho at t=" + t + " (periodic)", wait=0);
+}
+rho = H; q0 = Hu; q1 = Hv;
+real[int] drho = rho[];
+drho -= 1.;
+cout << "igddm 2D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps , "
+     << Thstar.ncv << " control volumes" << endl;
+cout << "  conservation: mass " << cva'*rho[]-m0 << " , momentum " << cva'*q0[]-q00 << " " << cva'*q1[]-q10 << " , min rho " << rho[].min << " , max rho " << rho[].max << endl;
+if (cas == 0) cout << "  constant state: max |rho-1| " << drho.linfty << endl;
+if (cas == 2) {// the errors with the exact solution at the vertices, in the norm of the dual mesh
+  Vh rhoex = rhoexact(t), uxex = uxexact(t), uyex = uyexact(t);
+  real[int] er = rho[] - rhoex[], eux = q0[] ./ rho[], euy = q1[] ./ rho[];
+  eux -= uxex[]; euy -= uyex[];
+  real[int] er2 = er .* er, eux2 = eux .* eux, euy2 = euy .* euy;
+  cout << "  errors L2: rho " << sqrt(cva'*er2) << " , ux " << sqrt(cva'*eux2) << " , uy " << sqrt(cva'*euy2)
+       << " , min rho " << rho[].min << " (exact " << rhoex[].min << ")" << endl;
+  cout << "cputime = " << clock()-s0 << endl;
+  plot(rho, fill=1, value=1, cmm="rho at t=" + t + " (periodic)", wait=1);
+}

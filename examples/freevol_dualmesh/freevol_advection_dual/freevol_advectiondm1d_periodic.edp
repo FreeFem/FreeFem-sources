@@ -1,0 +1,45 @@
+// advection in 1D (meshL) by finite volumes on the dual mesh with a periodic boundary condition:
+//   u_t + (V u)_x = 0 on [0,4], V = 1, a gaussian exp(-((x-1)/0.3)^2), P1 unknown (one value per control volume),
+//   the vertices x = 0 and x = 4 linked by periodic=[[1],[2]] (the fespace syntax on a meshL): their 2 half
+//   control volumes form one control volume; MUSCL scheme (order 2) and Heun in time
+//   w in Phstar(Thstar, P0), w[] = u[]: u on the control volumes (plots, mass int1d(Thstar)(w) = sum |C_i| u_i)
+//   at t = 4 (one turn) the gaussian is back at its initial position
+//   at the end: the mass (conserved) and the L2 error with respect to the exact solution
+// options: -n (segments, 200), -ordre (2 or 1), -Tf (4), -nw: no plot
+include "getARGV.idp"
+int n = getARGV("-n", 200), ordre = getARGV("-ordre", 2);
+real L = 4., Tf = getARGV("-Tf", 4.);
+meshL Th = segment(n, [L*x, 0, 0]);         // labels: 1 at x = 0, 2 at x = 4
+meshdualL Thstar = builddualmesh(Th);      // the dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+fespace Phstar(Thstar, P0);                 // one value per control volume
+// the periodic initial data: the gaussian and its neighboring images
+func real gp(real xx) { real s = 0; for (int i = -1; i <= 1; i++) s += exp(-((xx-1-i*L)/.3)^2); return s; }
+Vh u = gp(x), up, ur = 0, uBC = 0;
+Vh V1 = 1;                                  // velocity
+Phstar w;
+int[int] labBC = [1,0, 2,1];               // no effect on the periodic boundaries
+fvscheme FV([V1], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre, periodic=[[1],[2]]);
+w[] = u[];
+real mass0 = int1d(Thstar)(w);
+real t = 0, dt, dtsub, CFL = 0.9;
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(w, cmm="1D dual periodic: initial data (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {w[] = u[]; plot(w, cmm="1D dual periodic: solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+func uex = gp(x - t - floor((x - t)/L)*L);  // the initial data translated by t (periodic)
+real err = sqrt(int1d(Th, qforder=5)((u-uex)^2));
+w[] = u[];
+cout << "1D dual periodic (order " << ordre << "): t = " << t << " , " << it << " steps , " << Thstar.ncv << " control volumes , mass = "
+     << int1d(Thstar)(w) << " (initial " << mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(w, cmm="1D dual periodic: solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);

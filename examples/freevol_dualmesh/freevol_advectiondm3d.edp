@@ -1,0 +1,58 @@
+// 3D advection (mesh3) with finite volumes on the median dual mesh (P1 unknown, one control volume
+// per vertex), the same case as freevol_advection3d.edp: rotation of a Gaussian around the z axis
+// the same fvscheme command as in 2D (eq="advectiondm"), with the dual mesh built in the script (meshdual3),
+// the dimension is given by the mesh of the velocity
+// options: -n (16: cube n x n x n), -ordre (2 or 1), -nw: no plot
+// plots on the dual mesh (plugin fvdualmesh, meshdual3): one value per control volume, with the modified ffglut:
+//   FreeFem++ -glut ../../../../FreeFem_test/ffglut_1D freevol_advectiondm3d.edp
+//   plot(Thstar, u[]): the control volumes coloured on the boundary; F1: cutting plane (the cut volumes),
+//   m: edges of the control volumes, plot(Th, Thstar, u[]): with the primal mesh
+//   (macro plotdual()0: the usual P1 plots of u)
+load "msh3"
+macro plotdual()1// 1: plots on the dual mesh, 0: P1 plots of u
+include "getARGV.idp"
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2);
+mesh3 Th = cube(n, n, n);                  // labels 1 to 6 on the faces of the cube
+meshdual3 Thstar = builddualmesh(Th);            // the median dual mesh: the control volumes of the scheme (fvscheme finds it from Th), and the plots
+fespace Vh(Th, P1);
+func u0 = exp(-((x-0.3)^2+(y-0.5)^2+(z-0.5)^2)/0.01);
+Vh u = u0, up, ur = 0, uBC = 0;
+Vh V1 = -(y-0.5), V2 = x-0.5, V3 = 0;      // P1 velocity: rotation around the z axis (3 components in 3D)
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];
+fvscheme FV([V1,V2,V3], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre);
+real mass0 = int3d(Th)(u);
+real t = 0, dt, dtsub, CFL = 0.9, Tf = 1.;
+IFMACRO(plotdual,1)
+plot(Thstar, cmm="3D: the dual mesh (F1: cut)", wait=1);
+plot(Thstar, u[], value=1, cmm="3D, dual mesh: initial data (F1: cut, m: edges)", wait=1);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(u, cmm="3D, dual mesh: initial data", wait=1);
+ENDIFMACRO
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+func uex = exp(-((0.5+cos(t)*(x-0.5)+sin(t)*(y-0.5)-0.3)^2+(-sin(t)*(x-0.5)+cos(t)*(y-0.5))^2+(z-0.5)^2)/0.01);
+real err = sqrt(int3d(Th)((u-uex)^2)), nex = sqrt(int3d(Th)(uex^2));
+cout << "3D, dual mesh (order " << ordre << "): t = " << t << " , " << it << " steps , mass = " << int3d(Th)(u)
+     << " (initial " << mass0 << ") , min u = " << u[].min << " , max u = " << u[].max << " , L2 error = " << err
+     << " (relative " << err/nex << ")" << endl;
+IFMACRO(plotdual,1)
+plot(Thstar, u[], value=1, cmm="3D, dual mesh: solution at t = " + t + " (F1: cut, m: edges)", wait=1);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(u, cmm="3D, dual mesh: solution at t = " + t, wait=1);
+ENDIFMACRO
+
+// a constant state stays constant (the velocity is divergence-free and tangent to the boundary)
+u = 1;
+for (int l = 0; l < 10; l++) { dtsub = fluxupdate(FV, [u], [ur], [uBC]); u[] -= CFL*dtsub*ur[]; }
+cout << "3D, dual mesh: constant state, max |u-1| = " << max(u[].max-1, 1-u[].min) << endl;

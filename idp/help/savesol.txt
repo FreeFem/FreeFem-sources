@@ -1,0 +1,3 @@
+savesol("file.sol", Th, sol1, sol2, ..., order=1) : writes solutions in the
+  medit format (load "medit"). order=0 for a solution by element.
+  Example: savesol("u.sol", Th, u);

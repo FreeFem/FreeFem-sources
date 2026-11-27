@@ -130,6 +130,11 @@ long npichon2d=0, npichon3d=0;
 long npichon2d1=0, npichon3d1=0;
 
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
+// parallel plot (plot(..., global=true)): set by FreeFem++-mpi (parallelempi.cpp), null in FreeFem++ (sequential)
+#include <string>
+#include <vector>
+void (*ff_plot_allgather_long)(const long *mine, long n, long *all) = 0;
+void (*ff_plot_gather_bytes)(const std::string &mine, std::vector< std::string > &all) = 0;
 
   KN<String> *pkarg;//  for the list of argument  mars 2010
  Map_type_of_map map_type_of_map ; //  to store te type

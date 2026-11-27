@@ -1,0 +1,528 @@
+// solves the Euler system of gas dynamics by the finite volume method (2D, mesh)
+// PARAM -Tf 0.01
+//   (PARAM: the options of make check, bin/test-driver-ff: a short computation)
+//   U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v,E], E = rho*(u^2+v^2)/2+rho*e, p = (gamma-1)*rho*e, parameters=[gamma]
+//   the model is loaded by fvscheme from eq="euler" (plugin FreeVol_euler, 1D/2D/3D)
+//   options: -data dir (case 4: the directory of the exact solution rho.d, u.d, e.d)
+include "getARGV.idp"
+real cputime=clock();
+
+load "iovtk"
+int iscos=0;// with or without viscosity
+
+macro TESTCASE()5// 1: 2d Riemann problem
+                 // 2: doublemach reflexion
+                 // 3: traveling vortex
+                 // 4: 1d rarefaction wave with vanishing temperature and density
+                 // 5: viscous shock tube (Daru and Tenaud 2000)
+                 // 6: supersonic forward-facing step (Mach 3 in a wind tunnel, Woodward and Colella 1984)
+
+IFMACRO(TESTCASE,1)
+ int nx = 300; //number of intervals on the boundaries
+ // rectangle
+ real L=1.,Ht=1.;
+ border gamma1(t=0.,1.){x=L*t;y=0.;label=1;};
+ border gamma2(t=0.,1.){x=L;y=Ht*t;label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=0.;y=Ht*(1.-t);label=4;};
+ func bndy = gamma1(nx)+gamma2(nx)+gamma3(nx)+gamma4(nx);
+ mesh Th=buildmesh(bndy,splitpbedge=1);
+ //func dist=1./((x-.5)^2+(y-.5)^2+0.1)^0.05;
+ //Th=adaptmesh(Th,dist,err=0.00001,nbvx=400000);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,2)
+ int nx = 120; //number of intervals on the boundaries
+ int my = 30;
+ // rectangle
+ real L=4.,Ht=1.;
+ border gamma11(t=0.,1.){x=t/6.;y=0.;label=11;};
+ border gamma12(t=0.,1.){x=(1.-t)/6.+L*t;y=0.;label=12;};
+ border gamma2(t=0.,1.){x=L;y=Ht*t;label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=0.;y=Ht*(1.-t);label=4;};
+ func bndy = gamma11(nx/24)+gamma12(nx-nx/24)+gamma2(my)+gamma3(nx)+gamma4(my);
+ mesh Th=buildmesh(bndy,splitpbedge=1);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,3)
+ int nx = 30; //number of intervals on the boundaries
+ // rectangle
+ real L=5.,Ht=5.;
+ border gamma1(t=0.,1.){x=L*(2.*t-1.);y=-Ht;label=1;};
+ border gamma2(t=0.,1.){x=L;y=Ht*(2.*t-1.);label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-2.*t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=-L;y=Ht*(1.-2.*t);label=4;};
+ //border gamma5(t=0.,1.){x=0.5*L;y=Ht*t;label=5;};// to test internal boundaries
+ func bndy = gamma1(nx)+gamma2(nx)+gamma3(nx)+gamma4(nx);
+ mesh Th=buildmesh(bndy,splitpbedge=1);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,4)
+ int nx = 30; //number of intervals on the boundaries
+ int my = 30;
+ // rectangle
+ real L=1.,Ht=1.;
+ border gamma1(t=0.,1.){x=t*L;y=0.;label=1;};
+ border gamma2(t=0.,1.){x=L;y=t*Ht;label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=0.;y=Ht*(1.-t);label=4;};
+ func bndy = gamma1(nx)+gamma2(my)+gamma3(nx)+gamma4(my);
+ mesh Th=buildmesh(bndy,splitpbedge=1);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,5)
+ int nx = 90/2; //number of intervals on the boundaries
+ int my = 45/2;
+ // rectangle
+ real L=1.,Ht=0.5;
+ border gamma1(t=0.,1.){x=L*t;y=0.;label=1;};
+ border gamma2(t=0.,1.){x=L;y=Ht*t;label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=0.;y=Ht*(1.-t);label=4;};
+ border gamma11(t=0.,.5){x=L*t;y=0.;label=1;};
+ border gamma12(t=.5,1.){x=L*t;y=0.;label=1;};
+ border gamma31(t=0.,.5){x=L*(1.-t);y=Ht;label=3;};
+ border gamma32(t=0.5,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma5(t=0.,1.){x=0.5*L;y=Ht*(1.-t);label=5;};
+ //func bndy = gamma1(nx)+gamma2(my)+gamma3(nx)+gamma4(my);
+ func bndy = gamma11(nx/2.)+gamma12(nx/2.)+gamma2(my)+gamma31(nx/2.)+gamma32(nx/2.)+gamma4(my);
+ mesh Th=buildmesh(bndy+gamma5(my),splitpbedge=1);
+ //Th=change(Th,rmInternalEdges=1,fregion=0);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,6)
+ int nx = 200, my = 80; //number of intervals on the boundaries
+ real L=3.,Ht=1.;
+ real percL=0.2;//part of bottom step
+ border gamma11(t=0.,1.){x=percL*L*t;y=0.;label=11;};
+ border gamma12(t=0.,1.){x=percL*L;y=0.2*Ht*t;label=12;};
+ border gamma13(t=0.,1.){x=L-(1.-percL)*L*(1.-t);y=0.2*Ht;label=13;};
+ border gamma2(t=0.,1.){x=L;y=Ht-.8*Ht*(1.-t);label=2;};
+ border gamma3(t=0.,1.){x=L*(1.-t);y=Ht;label=3;};
+ border gamma4(t=0.,1.){x=0.;y=Ht*(1.-t);label=4;};
+ func bndy = gamma11(nx*percL)+gamma12(my/5)+gamma13(nx*(1.-percL))+gamma2(my*4/5)+gamma3(nx)+gamma4(my);
+ mesh Th=buildmesh(bndy,splitpbedge=1);
+ENDIFMACRO
+
+real t,dt,CFL=0.5,Tf;
+real gamma=1.4;
+fespace Ph4(Th,[P0,P0,P0,P0]);
+fespace Ph(Th,P0);
+Ph uplot;
+Ph4 [H,Hu,Hv,E],[HBC,HuBC,HvBC,EBC]=[0,0,0,0],[Hr,Hur,Hvr,Er]=[0,0,0,0];
+int[int] labBC;
+int nfl=2;// numflux: 2 Suliciu/HLLC (the default), 0 HLL, 1 Rusanov; changed by a case
+Ph4 [Hp,Hup,Hvp,Ep];//for second order in time
+// the viscous terms (iscos=1, finite elements on Th1): the viscosity cmu, clambda, the heat conductivity kcondT, the
+// boundary conditions: no slip on labwall, uy=0 on labslip, ux=uxin, uy=0 and ei=eiin on labin (-1: none);
+// the values of the case 5, changed by the case 6
+real cmu=5.e-3, clambda=-2./3.*cmu, Prandtl=0.73, kcondT=gamma/(gamma-1.)*cmu/Prandtl;
+int[int] labwall=[1,2,4], labslip=[3], labin=[-1];
+real uxin=0., eiin=0.;
+
+IFMACRO(TESTCASE,1)
+ //initial data, depending on x and y
+ func rho=((((x<0.5)&&(y<.5) )? .138 : 0.)+(((x<0.5)&&(y>=.5) )? .5323 : 0.)
+     +(((x>=0.5)&&(y<.5) )? .5323 : 0.)+(((x>=0.5)&&(y>=.5) )? 1.5 : 0.));
+ func ux=((x<0.5)? 1.206 : 0.);
+ func uy=((y<0.5)? 1.206 : 0.);
+ func ei=(1./(gamma-1.)*((((x<0.5)&&(y<.5) )? .029/.138 : 0.)+(((x<0.5)&&(y>=.5) )? .3/.5323 : 0.)
+     +(((x>=0.5)&&(y<.5) )? .3/.5323 : 0.)+(((x>=0.5)&&(y>=.5) )? 1.5/1.5 : 0.)));
+ [H,Hu,Hv,E]=[rho,rho*ux,rho*uy,.5*rho*(ux*ux+uy*uy)+rho*ei];
+ labBC=[1,1,2,1,3,1,4,1];//we take here default Neumann BC
+ Tf=.3;//final time
+ENDIFMACRO
+
+IFMACRO(TESTCASE,2)
+ //initial data, depending on x and y
+ func rho=(((y)>=sqrt(3.)*(x-1./6.)) ? 8. : 1.4);
+ func ux=(((y)>=sqrt(3.)*(x-1./6.)) ? 57.16/8. : 0./1.4);
+ func uy=(((y)>=sqrt(3.)*(x-1./6.)) ? -33./8. : 0./1.4);
+ func ei=(((y)>=sqrt(3.)*(x-1./6.)) ? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : 2.5/1.4-0.);
+ [H,Hu,Hv,E]=[rho,rho*ux,rho*uy,.5*rho*(ux*ux+uy*uy)+rho*ei];
+ //boundary conditions need be written properly!!!!
+ labBC=[11,0,12,2,2,0,3,0,4,0];
+ NewMacro rhoDir()
+  ((y/Ht-.5<-abs(x/L-.5))? 8. : ((x/L-.5<-abs(y/Ht-.5))? 8. : ((x/L-.5>abs(y/Ht-.5))? 1.4 : (((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 8. : 1.4))))
+ EndMacro
+ NewMacro uxDir()
+  ((y/Ht-.5<-abs(x/L-.5))? 57.16/8. : ((x/L-.5<-abs(y/Ht-.5))? 57.16/8. : ((x/L-.5>abs(y/Ht-.5))? 0. : (((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 57.16/8. : 0./1.4))))
+ EndMacro
+ NewMacro uyDir()
+  ((y/Ht-.5<-abs(x/L-.5))? -33./8. : ((x/L-.5<-abs(y/Ht-.5))? -33./8. : ((x/L-.5>abs(y/Ht-.5))? 0. : (((1.+20.*t)/sqrt(3.)>=x-1./6.) ? -33./8. : 0./1.4))))
+ EndMacro
+ NewMacro eiDir()
+  ((y/Ht-.5<-abs(x/L-.5))? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : ((x/L-.5<-abs(y/Ht-.5))? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : ((x/L-.5>abs(y/Ht-.5))? 2.5/1.4 : (((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : 2.5/1.4))))
+ EndMacro
+ NewMacro SetHypBC(rhoin,uxin,uyin,eiin,t,x,y,label,rhoout,uxout,uyout,eiout)//needs to be defined
+  if (label==1) {
+   rhoout=(x<=1./6.) ? 8. : rhoin;
+   uxout=(x<=1./6.) ? 57.16/8. : uxin;
+   uyout=(x<=1./6.) ? -33./8. : -uyin;
+   eiout=(x<=1./6.) ? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : eiin;
+  }
+  else if (label==2) {
+   rhoout=1.4;
+   uxout=0.;
+   uyout=0.;
+   eiout=2.5/1.4;
+  }
+  else if (label==3) {
+   rhoout=((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 8. : 1.4;
+   uxout=((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 57.16/8. : 0./1.4;
+   uyout=((1.+20.*t)/sqrt(3.)>=x-1./6.) ? -33./8. : 0./1.4;
+   eiout=((1.+20.*t)/sqrt(3.)>=x-1./6.) ? 563.52/8.-.5*((57.16/8.)^2+(33./8.)^2) : 2.5/1.4;
+  }
+  else if (label==4) {
+   rhoout=8.;
+   uxout=57.16/8.;
+   uyout=-33./8.;
+   eiout=563.52/8.-.5*((57.16/8.)^2+(33./8.)^2);
+  }
+ EndMacro
+ Tf=.2;//final time
+ENDIFMACRO
+
+IFMACRO(TESTCASE,3)
+ //initial data, depending on x and y
+ func real rhoexact(real targ){
+      real posx=x+3.-targ+4.*L;
+      real posy=y;
+      int nx=int(posx/(2.*L));
+      posx=posx-nx*2.*L;
+      if (posx>L) posx=posx-2.*L;
+      return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+ }
+ func real uxexact(real targ){
+      real posx=x+3.-targ+4.*L;
+      real posy=y;
+      int nx=int(posx/(2.*L));
+      posx=posx-nx*2.*L;
+      if (posx>L) posx=posx-2.*L;
+      return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+ }
+ func real uyexact(real targ){
+      real posx=x+3.-targ+4.*L;
+      real posy=y;
+      int nx=int(posx/(2.*L));
+      posx=posx-nx*2.*L;
+      if (posx>L) posx=posx-2.*L;
+      return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+ }
+ [H,Hu,Hv,E]=[rhoexact(0.),rhoexact(0.)*uxexact(0.),rhoexact(0.)*uyexact(0.),.5*rhoexact(0.)*(uxexact(0.)^2+uyexact(0.)^2)+1./(gamma-1.)*rhoexact(0.)^gamma];
+ labBC=[1,0,2,0,3,0,4,0];//time dependent Dirichlet
+ //boundary conditions need be written properly!!!![HBC,HuBC,HvBC,EBC]=[,,,]
+ NewMacro rhoDir()
+  (((y>abs(x))||(y<-abs(x)))? 1. : rhoexact(t))
+ EndMacro
+ NewMacro qxDir()
+  (((y>abs(x))||(y<-abs(x)))? 1. : rhoexact(t)*uxexact(t))
+ EndMacro
+ NewMacro qyDir()
+  (((y>abs(x))||(y<-abs(x)))? 0. : rhoexact(t)*uyexact(t))
+ EndMacro
+ NewMacro EDir()
+  (((y>abs(x))||(y<-abs(x)))? .5+1./(gamma-1.) : .5*rhoexact(t)*(uxexact(t)^2+uyexact(t)^2)+1./(gamma-1.)*rhoexact(t)^gamma)
+ EndMacro
+ NewMacro SetHypBC(rhoin,uxin,uyin,eiin,t,x,y,label,rhoout,uxout,uyout,eiout)//needs to be defined
+  if ((label==1)||(label==3)) {
+   rhoout=1.;
+   uxout=1.;
+   uyout=0.;
+   eiout=1./(gamma-1.);
+  }
+  else if ((label==2)||(label==4)) {
+   rhoout=rhoexact(t);
+   uxout=uxexact(t);
+   uyout=uyexact(t);
+   eiout=1./(gamma-1.)*rhoexact(t)^(gamma-1.);
+  }
+ EndMacro
+ Tf=3.;//final time
+ENDIFMACRO
+
+IFMACRO(TESTCASE,4)
+ //initial data, depending on x and y
+ func h0 = (x<0.5)? 0. : 1.;
+ func e0 = (x<0.5)? 1.e-12 : 2.;
+ [H,Hu,Hv,E]=[h0,0,0,h0*e0];
+ labBC=[1,1,2,1,3,1,4,1];
+ Tf=0.12;//final time
+ENDIFMACRO
+
+IFMACRO(TESTCASE,5)
+ //initial data, depending on x and y
+ func rho=((x<0.5)? 120. : 1.2);
+ func ei=(1./(gamma-1.)/gamma);
+ [H,Hu,Hv,E]=[rho,0,0,rho*ei];
+ labBC=[1,2,2,2,3,2,4,2];//wall BC
+ Tf=1.;//final time
+ nfl=0;// HLL: at the order 2, HLLC gives defects along the bottom wall and at the interfaces of the partition
+ //need of viscosity!!!!!!!
+ iscos = 1;
+ENDIFMACRO
+
+IFMACRO(TESTCASE,6)
+ //initial data, depending on x and y
+ real Rg=0.714286;//perfect gas constant
+ real Cv=1.78571;
+ gamma=1.+Rg/Cv;
+ func rho=1./(gamma-1.)/Cv;
+ func ux=3.;
+ func uy=0.;
+ func ei=Cv;
+ [H,Hu,Hv,E]=[rho,rho*ux,rho*uy,.5*rho*(ux*ux+uy*uy)+rho*ei];
+ labBC=[11,2,12,2,13,2,2,1,3,2,4,0];
+ [HBC,HuBC,HvBC,EBC]=[rho,rho*3.,0.,.5*rho*9.+rho*ei];
+ Tf=4.;//final time
+ nfl=0;// HLL: at the order 2, HLLC gives the carbuncle (odd-even decoupling) behind the Mach stem
+ // the viscous terms (iscos=1): air, no slip on the step, the inflow on 4
+ cmu=18.1e-6;
+ clambda=0.;
+ kcondT=32.3e-6/Cv/(gamma-1.);
+ labwall=[11,12,13];
+ labin=[4];
+ uxin=3.;
+ eiin=Cv;
+ // without viscosity https://www.gasflow-mpi.com/validation-fd4.html
+ // https://lsdyna.ansys.com/forwardfacingstep/
+ //iscos = 1;
+ENDIFMACRO
+
+mesh Th1;
+fespace Ph1(Th1,P0);
+fespace V1(Th1,P1);
+fespace V2(Th1,[P1,P1]);
+//load "Curvature"
+//load "isoline"
+{
+    Ph Px=x,Py=y; // barycenter
+    real[int,int] PF(Px[].n,2);
+    for(int i=0;i<Px[].n;i++){
+        PF(i,0)=Px[](i);
+        PF(i,1)=Py[](i);
+    }
+    Th1=buildmesh(bndy,points=PF,nbvx=PF.n+Th.nbe,fixedborder=1);
+    Th1=change(Th1,fregion=0);
+    Ph1 order;
+    Ph labelP0;
+    for (int i = 0; i < Th.nbe; i++) {
+        int k = int(Th.be(i).Element);
+        int e,ke;
+        e=0;ke = Th[k].adj(e);labelP0[][ke]=Th.be(i).label;
+        e=1;ke = Th[k].adj(e);labelP0[][ke]=Th.be(i).label;
+        e=2;ke = Th[k].adj(e);labelP0[][ke]=Th.be(i).label;
+    }
+    for (int i = 0; i < Th.nbe; i++) {
+        int k = int(Th.be(i).Element);
+        labelP0[][k]=Th.be(i).label;
+    }
+    //plot(labelP0);
+    OrderVF(Th1,order[],3);
+    Th1=trunc(Th1,order==2,flabel=1.*labelP0);
+}
+/*int[int] labex=[3];
+meshL ThL=extract(Th1,label=labex);
+plot(Th,Th1,dim=2);
+plot(ThL,dim=2);
+exit(0);*/
+
+real[int] params=[gamma];//sets the exponent of the gas law
+//int[int] intparams=[-3,2];
+int mtordre=2;// order of accuracy in time (1 or 2)
+fvscheme FV([H,Hu,Hv,E],order=2,eq="euler",labelBC=labBC,numflux=nfl,limiter=1,parameters=params);
+
+int iter=0;
+real dtsub;
+real timeSinceLastPlot = 0.;
+real plotInterval = 0.005;
+//plot(H,dim=3,fill=true,wait=0,cmm="initial density");
+
+Tf=getARGV("-Tf",Tf);// option -Tf: another final time (a short computation for make check: // PARAM -Tf ...)
+for(t=0.; t<=Tf-1.e-10; iter++){// TIME LOOP
+   if (mtordre==2) Hp[]=H[];
+   for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+    //time dependent BC:
+    IFMACRO(TESTCASE,2)
+     //[HBC,HuBC,HvBC,EBC]=[rhoDir,rhoDir*uxDir,rhoDir*uyDir,.5*rhoDir*(uxDir^2+uyDir^2)+rhoDir*eiDir];//lent!!
+     for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+         int kib=Th.be(ib).Element;//neighbouring triangle
+         int iib=Th.be(ib).whoinElement;//edge in triangle
+         int ee;
+         int kee=Th[kib].adj((ee=iib));
+         if(kee==kib){
+          //betable(kib)=ib;
+          x=.5*(Th.be(ib)[0].x+Th.be(ib)[1].x);
+          y=.5*(Th.be(ib)[0].y+Th.be(ib)[1].y);
+          HBC[][4*kib]=rhoDir;
+          HBC[][4*kib+1]=rhoDir*uxDir;
+          HBC[][4*kib+2]=rhoDir*uyDir;
+          HBC[][4*kib+3]=.5*rhoDir*(uxDir^2+uyDir^2)+rhoDir*eiDir;
+         }
+     }
+    ENDIFMACRO
+    IFMACRO(TESTCASE,3)
+     //[HBC,HuBC,HvBC,EBC]=[rhoDir,qxDir,qyDir,EDir];//lent!!
+     for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+         int kib=Th.be(ib).Element;//neighbouring triangle
+         int iib=Th.be(ib).whoinElement;//edge in triangle
+         int ee;
+         int kee=Th[kib].adj((ee=iib));
+         if(kee==kib){
+          //betable(kib)=ib;
+          x=.5*(Th.be(ib)[0].x+Th.be(ib)[1].x);
+          y=.5*(Th.be(ib)[0].y+Th.be(ib)[1].y);
+          HBC[][4*kib]=rhoDir;
+          HBC[][4*kib+1]=qxDir;
+          HBC[][4*kib+2]=qyDir;
+          HBC[][4*kib+3]=EDir;
+         }
+     }
+    ENDIFMACRO
+    dtsub = fluxupdate(FV,[H,Hu,Hv,E],[Hr,Hur,Hvr,Er],[HBC,HuBC,HvBC,EBC]);
+    if (lmt==1) {
+     dt=dtsub*CFL;
+     if (t+dt>Tf) dt=Tf-t;
+    }
+    H[] -= dt*Hr[];
+
+    if (lmt==1) t+=dt;
+    if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+    }
+   }//end of internal loop on lmt
+
+   if (iscos==1) {
+       V1 uxn,uyn,ux,uy,einew,ei;
+       uxn=Hu/max(H,1.e-13);
+       uyn=Hv/max(H,1.e-13);
+       ei = (E-.5*H*(uxn^2+uyn^2))/max(H,1.e-13);
+       // H (P0, discontinuous) at the vertices of Th1, the barycenters: the value of each cell; the integrals with
+       // H1, not H: a quadrature point of Th1 on an edge of Th takes one or the other cell (not reproducible)
+       V1 H1=H;
+       varf viscosity(ux,uy,vx,vy)=
+           int2d(Th1)(H1*(ux*vx+uy*vy)/dt)
+           +int2d(Th1)(-H1*(uxn*vx+uyn*vy)/dt)
+           +int2d(Th1)(2.*cmu*(dx(ux)*dx(vx)+dy(uy)*dy(vy)+.5*(dy(ux)+dx(uy))*(dy(vx)+dx(vy))))
+           +int2d(Th1)(clambda*(dx(ux)+dy(uy))*(dx(vx)+dy(vy)))
+           +on(labslip,uy=0.)
+           +on(labwall,ux=0.,uy=0.)
+           +on(labin,ux=-uxin,uy=0.)// sign flip because "on" in "varf"
+           ;
+       matrix Adiffusion=viscosity(V2,V2,tgv=-1);
+       real[int] rhs=viscosity(0,V2,tgv=-1);
+       set(Adiffusion,solver=UMFPACK);
+       rhs=-rhs;
+       V2 [solx,soly];
+       solx[]=Adiffusion^-1*rhs;
+       ux=solx;
+       uy=soly;
+       varf viscE(einew,Et)=
+           int2d(Th1)(H1*einew*Et/dt)
+           +int2d(Th1)(-H1*ei*Et/dt)
+           -int2d(Th1)(2.*cmu*(dx(ux)^2+.5*(dy(ux)+dx(uy))^2+dy(uy)^2)*Et)
+           -int2d(Th1)(clambda*(dx(ux)+dy(uy))^2*Et)
+           +int2d(Th1)(kcondT*(gamma-1.)*(dx(einew)*dx(Et)+dy(einew)*dy(Et)))
+           //+on(1,2,4,einew=-1./gamma/(gamma-1.))// sign flip because "on" in "varf"
+           +on(labin,einew=-eiin)// sign flip because "on" in "varf"
+       ;
+       matrix Aconduct=viscE(V1,V1,tgv=-1);
+       real[int] rhsT=viscE(0,V1,tgv=-1);
+       rhsT=-rhsT;
+       set(Aconduct,solver=UMFPACK);
+       einew[]=Aconduct^-1*rhsT;
+       einew = max(einew,1.e-12);
+       [H,Hu,Hv,E]=[H,H*ux,H*uy,.5*H*(ux^2+uy^2)+H*einew];
+   }//end of viscosity
+
+   cout << iter+1 << " t= " << t << endl;
+   timeSinceLastPlot += dt;
+   if(timeSinceLastPlot >= plotInterval){
+      plot(H,dim=3,fill=true,wait=0,cmm="solution at t = "+t);
+      timeSinceLastPlot = 0.;
+   }
+}//end of time loop
+cout<< "CPU "<<clock()-cputime<<endl;
+
+IFMACRO(TESTCASE,3)
+ Ph rhoex,uxex,uyex,eiex,qxex,qyex,Eex;
+ rhoex=rhoexact(t);
+ uxex=uxexact(t);
+ uyex=uyexact(t);
+ eiex=1./(gamma-1.)*rhoex^(gamma-1.);
+ qxex=rhoex*uxex;
+ qyex=rhoex*uyex;
+ Eex=.5*rhoex*(uxex^2+uyex^2)+rhoex*eiex;
+ real errorrho=sqrt(int2d(Th)((H-rhoex)^2));
+ real errorux=sqrt(int2d(Th)((Hu/max(H,1.e-13)-uxex)^2));
+ real errorqx=sqrt(int2d(Th)((Hu-qxex)^2));
+ real erroruy=sqrt(int2d(Th)((Hv/max(H,1.e-13)-uyex)^2));
+ real errorqy=sqrt(int2d(Th)((Hv-qyex)^2));
+ real errorei=sqrt(int2d(Th)(((E-.5*(Hu^2+Hv^2)/max(H,1.e-13))/max(H,1.e-13)-eiex)^2));
+ real errorE=sqrt(int2d(Th)((E-Eex)^2));
+ cout << "errorrho,errorux,erroruy,errorei " << errorrho << " " << errorux << " " << erroruy << " " << errorei << endl;
+ENDIFMACRO
+
+int[int] myorder=[0];
+savevtk("H.vtu",Th,H,order=myorder);
+
+plot(H,dim=3,fill=true,wait=1,value=1,cmm="rho");
+uplot=Hu/max(H,1.e-13);
+plot(uplot,dim=3,fill=true,wait=1,value=1,cmm="ux");
+uplot=Hv/max(H,1.e-13);
+plot(uplot,dim=3,fill=true,wait=1,value=1,cmm="uy");
+uplot=E/max(H,1.e-13)-.5*(Hu^2+Hv^2)/max(H,1.e-13)^2;
+plot(uplot,dim=3,fill=true,wait=1,value=1,cmm="e");
+
+IFMACRO(TESTCASE,5)
+ V1 HP1;
+ HP1=H;
+ Ph1 dxyrho,dyyrho,normgradrho;
+ dxyrho=dx(HP1);dyyrho=dy(HP1);
+ normgradrho=sqrt(dxyrho*dxyrho+dyyrho*dyyrho);
+ myorder=[0];
+ savevtk("normgradrho.vtu",Th1,normgradrho,order=myorder,bin=1);
+ plot(normgradrho,dim=3,fill=true,wait=1,value=1,cmm="normgradrho at t = "+t);
+ENDIFMACRO
+
+IFMACRO(TESTCASE,4)
+ // the cuts on the line y = Ht/2 at the end, compared with the exact solution: vacuum on the left (x < 0.5), the
+ // gas at rest on the right (rho = 1, e = 2): a rarefaction wave into vacuum (E. F. Toro, Riemann solvers and
+ // numerical methods for fluid dynamics, section 4.6), its head at 0.5+cR*t, the front of vacuum at
+ // 0.5-2*cR/(gamma-1)*t (out of the domain at Tf = 0.12); with the option -data dir/: the solution of F. Bouchut
+ // read in the files dir/rho.d, dir/u.d, dir/e.d (200 points)
+ {
+ int ncut=200;
+ real x0c=0.5, rhoRc=1., eRc=2., pRc=(gamma-1.)*rhoRc*eRc, cRc=sqrt(gamma*pRc/rhoRc);
+ real[int] xx(ncut),rhoex(ncut),uxex(ncut),eiex(ncut);
+ for (int i=0;i<ncut;i++) {
+   xx[i]=(i+0.5)*L/ncut;
+   real xi=(xx[i]-x0c)/t;
+   if (xi >= cRc) { rhoex[i]=rhoRc; uxex[i]=0.; eiex[i]=eRc; }// the gas at rest
+   else if (xi <= -2.*cRc/(gamma-1.)) { rhoex[i]=0.; uxex[i]=0.; eiex[i]=0.; }// vacuum
+   else {// the rarefaction wave (p/rho^gamma constant: e = eR*b^2)
+     real b=2./(gamma+1.)+(gamma-1.)/((gamma+1.)*cRc)*xi;
+     rhoex[i]=rhoRc*b^(2./(gamma-1.)); uxex[i]=2./(gamma+1.)*(xi-cRc); eiex[i]=eRc*b^2;
+   }
+ }
+ string datadir=getARGV("-data","");// the solution of F. Bouchut (ex. /home/fbouchut/fortran/data/)
+ if (datadir!="") {
+   ifstream frho(datadir+"rho.d"), fu(datadir+"u.d"), fe(datadir+"e.d");
+   for (int i=0;i<ncut;i++) { frho >> xx[i] >> rhoex[i]; fu >> xx[i] >> uxex[i]; fe >> xx[i] >> eiex[i]; }
+ }
+ // the computed solution on the line y = Ht/2
+ real[int] rhoc(ncut),uc(ncut),ec(ncut);
+ real yc=Ht/2., e1=0., e2=0., e3=0.;
+ for (int i=0;i<ncut;i++) {
+   real r=H(xx[i],yc), q=Hu(xx[i],yc), qv=Hv(xx[i],yc), en=E(xx[i],yc);
+   rhoc[i]=r; uc[i]=q/max(r,1.e-13); ec[i]=en/max(r,1.e-13)-.5*(q^2+qv^2)/max(r,1.e-13)^2;
+   e1+=abs(rhoc[i]-rhoex[i]); e2+=abs(uc[i]-uxex[i]); e3+=abs(ec[i]-eiex[i]);
+ }
+ cout << "cut y = " << yc << " : L1 errors on rho, ux, ei " << e1*L/ncut << " " << e2*L/ncut << " " << e3*L/ncut << endl;
+ plot([xx,rhoc],[xx,rhoex],cmm="rho at t = "+t+" on the line y = "+yc+" | xlabel=x | ylabel=rho | legend=computed,exact",wait=1,value=1);
+ plot([xx,uc],[xx,uxex],cmm="ux at t = "+t+" on the line y = "+yc+" | xlabel=x | ylabel=ux | legend=computed,exact",wait=1,value=1);
+ plot([xx,ec],[xx,eiex],cmm="ei at t = "+t+" on the line y = "+yc+" | xlabel=x | ylabel=ei | legend=computed,exact",wait=1,value=1);
+ }
+ENDIFMACRO

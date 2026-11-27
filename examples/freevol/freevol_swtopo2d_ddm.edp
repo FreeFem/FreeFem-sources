@@ -1,0 +1,452 @@
+/* ---------------------------------------------------------
+
+   parallel version (domain decomposition, PETSc) of freevol_swtopo2d.edp: the Shallow Water system with
+   topography, the same cases, the same scheme (MUSCL, Heun)
+   U_t+div([F(U),G(U)])+(0,gr*H*zb_x,gr*H*zb_y) = 0, U=[H,Hu,Hv], H>0
+   the mesh is partitioned by createMat (overlap of 2 cells: the stencil of the order 2, the gradients at the
+   vertices and the limiter; 1 cell for the order 1), fvscheme on the local mesh; the interfaces (label -111111):
+   Neumann (the default), their cells are overlap cells, set again by the exchange
+   at each stage: the time step the min on all the processes, then exchange(A,[Hr,Hur,Hvr,zbr],scaled=true)
+   the outputs are global (the partition of unity A.D: each cell counted once): Hmin, velmax at each step,
+   the errors of the case 4, the profiles on y=0 (each point given by the process of its cell)
+   plots: plotMPI of H+zb (plotFreeVol2d is not parallel)
+   mesh adaptation (-adapt 1): every nadapt steps, parallel adaptation of the distributed mesh by adaptmeshddm
+   (plugin adaptmesh_ddm, distributed mode owned=: each process remeshes its part, the interfaces are adapted
+   again, the new local meshes are balanced; the owned cells: the partition of unity A.D), the metric given by
+   H+zb and H (P1); the transfer by remapP0ddm (the parallel conservative transfer: an affine limited
+   reconstruction in each old cell, the same limiter for all the components, integrated exactly on the new cells,
+   the old cells sent to the processes whose new local mesh meets them) of [H,Hu,Hv,zb,H+zb,wet], wet = 1 where
+   H > 0; the option -remapeta:
+     0: [H,Hu,Hv,zb] transferred: the mass is conserved exactly, the lake at rest stays at rest where it is wet,
+        but zb is smoothed by the successive transfers
+     1: zb recomputed on the new mesh, H = max((H+zb)-zb,0): zb is not smoothed, the lake at rest stays at rest,
+        but water is created in the dry areas with a steep topography (the mass grows)
+     2 (default): zb recomputed; H = (H+zb)-zb in the new cells entirely in wet old cells (wet = 1) where it is
+        not negative, H transferred elsewhere (near the shoreline, in the dry areas, on the steep slopes): zb not smoothed, the lake at rest stays at
+        rest where it is wet, no water created in the dry areas (a small change of the mass in the wet cells)
+   run: ff-mpirun -np 4 freevol_swtopo2d_ddm.edp -wg   (-nw: no plot; -adapt (0 or 1), -nadapt (10), -erra (0.01),
+   -hmin, -hmax (the size of the initial mesh /8 and *2), -nbvx (1e5), -Tf (the final time of the case))
+
+   --------------------------------------------------------*/
+
+load "PETSc"// PETSc plugin
+load "adaptmesh_ddm"// adaptmeshddm, remapP0ddm
+macro dimension()2// EOM
+include "macro_ddm.idp"// additional DDM functions
+include "getARGV.idp"
+macro ThOverlap()2// EOM 2 cells for the order 2 (1 for the order 1): the overlap of the partition
+macro ThNewOverlap()2// EOM the overlap of the adapted mesh (as ThOverlap)
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,cmm = // for plotMPI
+macro PARAMSW fill=true,value=true,wait=1,cmm = // for plotMPI (the last plot)
+real s0=clock();
+load "msh3"
+macro case() Dambreakdrybed//
+IFMACRO(case,1)
+   real tdraw=.25,Tf=10.;
+   macro bbsw() [[0.,0.],[100.,100.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   real gr=9.81;
+   int Npx=30;
+   real xp=0, xp1=100;
+   real yp=0, yp1=100;
+   border aa(t=0,1) { x=xp+(xp1-xp)*t ; y=yp ; label=2; }
+   border bb(t=0,1) { x=xp1 ; y=yp+(yp1-yp)*t ; label=2; }
+   border cc(t=0,1) { x=xp+(xp1-xp)*(1.-t) ; y=yp1 ; label=2; }
+   border dd(t=0,1) { x=xp ; y=yp+(yp1-yp)*(1.-t) ; label=2; }
+   mesh Th = buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func z0 = 5.*(10.+(x/20.-10.*cos((y/5.-10.-4.*cos(x/10.))/4.))*(x/20.-10.*cos((y/5.-10.-4.*cos(x/10.))/4.)<0.));
+   func h0 = (x>70)*max(40.-z0,0.);
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "swtopo.txt";
+   // boundary conditions: walls on the 4 sides (label 2)
+   int[int] labBC=[2,2];
+ENDIFMACRO
+IFMACRO(case,2)
+   real tdraw=.1,Tf=20.;
+   macro bbsw() [[-100.,0.],[100.,100.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   real gr=9.81;
+   int Npx=100,Npy=Npx;
+   real xp=0.,yp=0.,R=100.;
+   real aa=-R,bb=R,cc=-R,dd=R;
+   border AB(t=aa,bb){x=t; y=cc;label=1;};
+   border BC(t=cc,dd){x=bb; y=t;label=2;};
+   border CD(t=bb,aa){x=t; y=dd;label=3;};
+   border DA(t=dd,cc){x=aa; y=t;label=4;};
+   mesh Th = buildmesh(AB(Npx)+BC(Npy)+CD(Npx)+DA(Npy),splitpbedge=1);
+   func z0 = -1.;func h0 = (dist(x-xp,y-yp)<=(R/4.)) - z0;
+   //func z0 = -1.;func h0 = exp(-(x-xp)^2/100.-(y-yp)^2/100.) - z0;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "swtopo.txt";
+   // boundary conditions: wall on x = R (label 2), Neumann on y = -R, y = R, x = -R (labels 1, 3, 4)
+   int[int] labBC=[1,1,2,2,3,1,4,1];
+ENDIFMACRO
+IFMACRO(case,3)
+   real tdraw=.1,Tf=10.;
+   macro bbsw() [[0.,0.],[1.,1.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   real gr=9.81;
+   int Npx=50;
+   real xp=0, xp1=1;
+   real yp=0, yp1=1;
+   border aa(t=0,1) { x=xp+(xp1-xp)*t ; y=yp ; label=2; }
+   border bb(t=0,1) { x=xp1 ; y=yp+(yp1-yp)*t ; label=2; }
+   border cc(t=0,1) { x=xp+(xp1-xp)*(1.-t) ; y=yp1 ; label=2; }
+   border dd(t=0,1) { x=xp ; y=yp+(yp1-yp)*(1.-t) ; label=2; }
+   mesh Th = buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func z0 = -1.;func h0 = x+2.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "swtopo.txt";
+   // boundary conditions: walls on the 4 sides (label 2)
+   int[int] labBC=[2,2];
+ENDIFMACRO
+IFMACRO(case,4)
+   real tdraw=.1,Tf=3.;
+   macro bbsw() [[-5.,0.],[5.,5.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   real gr=2.;
+   int Npx=30;
+   real L=5.,Haut=5.;
+   border aa(t=0.,1.){x=L*(2.*t-1.);y=-Haut;label=1;};
+   border bb(t=0.,1.){x=L;y=Haut*(2.*t-1.);label=2;};
+   border cc(t=0.,1.){x=L*(1.-2.*t);y=Haut;label=3;};
+   border dd(t=0.,1.){x=-L;y=Haut*(1.-2.*t);label=4;};
+   mesh Th=buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func z0=0.;
+   func hu0 = 0.;
+   real gamma=2.;
+func real rhoexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+}
+func real uxexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+}
+func real uyexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+}
+   func h0=rhoexact(0.);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "swtopo.txt";
+   // boundary conditions: Neumann on y = -Haut, y = Haut (labels 1, 3), Dirichlet (the exact solution) on x = L, x = -L (labels 2, 4)
+   int[int] labBC=[1,1,2,0,3,1,4,0];
+ENDIFMACRO
+IFMACRO(case,Circle)
+   // a hump of water at rest in a circular basin (the same case as case 1 of freevol_igd2d.edp)
+   // options: -R (radius), -h (size of the cells), -x0 (center of the hump), -bc (2: wall, 1: Neumann)
+   include "getARGV.idp"
+   real R=getARGV("-R",10.), hm=getARGV("-h",0.5), xg=getARGV("-x0",0.);
+   border C(t=0,2*pi){x=R*cos(t); y=R*sin(t); label=1;}
+   mesh Th=buildmesh(C(int(2*pi*R/hm)));
+   real tdraw=.1,Tf=5.;
+   macro bbsw() [[-20.,-20.],[20.,20.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   real gr=9.81;
+   func z0 = 0.;
+   func h0 = 1.+0.2*exp(-((x-xg)^2+y^2)/4.) - z0;// a hump of water at rest, off the center
+   //func h0 = (dist(x-xg,y-0.)<=(R/4.)) - z0;
+   func hu0 = 0.;
+   real[int] Tsave = [1., 2., 3., 4., 5.];
+   string filenamesave = "swtopo.txt";
+   // boundary conditions: the circle (label 1), wall by default; -bc 1: Neumann
+   int bc=getARGV("-bc",2);
+   int[int] labBC=[1,bc];
+ENDIFMACRO
+IFMACRO(case,DambreakdrybedObstacle)
+   int Npx=1001,Npy=4;
+   real xp=0., xp1=5000.;
+   real yp=-200., yp1=200.;
+   border aa(t=0,1) { x=xp+(xp1-xp)*t ; y=yp ; label=2; }
+   border bb(t=0,1) { x=xp1 ; y=yp+(yp1-yp)*t ; label=2; }
+   border cc(t=0,1) { x=xp+(xp1-xp)*(1.-t) ; y=yp1 ; label=2; }
+   border dd(t=0,1) { x=xp ; y=yp+(yp1-yp)*(1.-t) ; label=2; }
+   //mesh Th1 = buildmesh(aa(Npx)+bb(Npy)+cc(Npx)+dd(Npy),splitpbedge=1);
+   int[int] lab=[2,2,2,2];
+   mesh Th = square(Npx,Npy,[x*(xp1-xp)+xp,y*(yp1-yp)+yp],label=lab,flags=3);
+   func z0 = -((x < 618.)*0.
+             + (x >= 618. && x < 653.)*(-0.2143*x + 0.2143*618.)
+             + (x >= 653. && x <= 683.)*(-7.5)
+             + (x > 683.  && x <= 718.)*(0.2143*x - 0.2143*683. - 7.5));
+   func h0 = 25.*(x<=465.465) - z0(x,y);
+   real gr=9.81;
+   func hu0 = 0.;
+   real[int] Tsave = [11.9,17.54,20.67,41.87];
+   real tdraw=1.,Tf=42.;
+   macro bbsw() [[0.,-200.],[2000.,200.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   string filenamesave = "DambreakdrybedObstacle.txt";
+   // boundary conditions: walls on the 4 sides (label 2)
+   int[int] labBC=[2,2];
+ENDIFMACRO
+IFMACRO(case,Dambreakdrybed)
+   int Npx=201,Npy=4;
+   real xp=0., xp1=200.;
+   real yp=-2., yp1=2.;
+   border aa(t=0,1) { x=xp+(xp1-xp)*t ; y=yp ; label=2; }
+   border bb(t=0,1) { x=xp1 ; y=yp+(yp1-yp)*t ; label=2; }
+   border cc(t=0,1) { x=xp+(xp1-xp)*(1.-t) ; y=yp1 ; label=2; }
+   border dd(t=0,1) { x=xp ; y=yp+(yp1-yp)*(1.-t) ; label=2; }
+   //mesh Th1 = buildmesh(aa(Npx)+bb(Npy)+cc(Npx)+dd(Npy),splitpbedge=1);
+   int[int] lab=[2,2,2,2];
+   mesh Th = square(Npx,Npy,[x*(xp1-xp)+xp,y*(yp1-yp)+yp],label=lab,flags=3);
+   func z0 = 0.;
+   func h0 = 1.*(x<=100.) - z0(x,y);
+   real gr=9.81;
+   func hu0 = 0.;
+   real[int] Tsave = [10.,15.];
+   real tdraw=1.,Tf=15.1;
+   macro bbsw() [[0.,-2.],[200.,2.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   string filenamesave = "Dambreakdrybed.txt";
+   // boundary conditions: walls on the 4 sides (label 2)
+   int[int] labBC=[2,2];
+ENDIFMACRO
+IFMACRO(case,RunupSynolakis)
+   int Npx=192,Npy=4;
+   real xp=-75., xp1=20.;
+   real yp=-2., yp1=2.;
+   border aa(t=0,1) { x=xp+(xp1-xp)*t ; y=yp ; label=2; }
+   border bb(t=0,1) { x=xp1 ; y=yp+(yp1-yp)*t ; label=2; }
+   border cc(t=0,1) { x=xp+(xp1-xp)*(1.-t) ; y=yp1 ; label=2; }
+   border dd(t=0,1) { x=xp ; y=yp+(yp1-yp)*(1.-t) ; label=2; }
+   //mesh Th = buildmesh(aa(Npx)+bb(Npy)+cc(Npx)+dd(Npy),splitpbedge=1);
+   int[int] lab=[2,2,2,2];
+   mesh Th = square(Npx,Npy,[x*(xp1-xp)+xp,y*(yp1-yp)+yp],label=lab,flags=3);
+   real x0c = 19.85, height=1.;
+   func z0 = (x < -x0c) ? -height : (x/x0c);
+   real Am = 0.0185;
+   real Lg = 2.0 / sqrt(3.0*Am/4.0) * acosh( sqrt(20.0) );
+   real xs = x0c + Lg/2.0;
+   func h0 = Am * sqr( 1./cosh( sqrt(0.75*Am)*( x + xs ) ) ) - z0(x,y);
+   real gr=1.;
+   func hu0 = sqrt(gr/height) * (h0+z0(x,y));
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   real tdraw=10.,Tf=100.;
+   macro bbsw() [[-60.,-2.],[10.,2.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   string filenamesave = "Runup_Synolakis.txt";
+   // boundary conditions: walls on the 4 sides (label 2)
+   int[int] labBC=[2,2];
+ENDIFMACRO
+
+Tf=getARGV("-Tf",Tf);// the final time of the case, or the option -Tf
+int ntdraw=0;
+real t,dt,CFL=.5;
+func PK4=[P0,P0,P0,P0];
+// mesh adaptation
+int adaptm=getARGV("-adapt",0), nadapt=getARGV("-nadapt",10);
+real hmesh0=Th.hmax, erra=getARGV("-erra",0.01), hmina=getARGV("-hmin",hmesh0/8.), hmaxa=getARGV("-hmax",2.*hmesh0);
+real nbvx=getARGV("-nbvx",1.e5);
+int remapeta=getARGV("-remapeta",2);// 0: transfer of [H,Hu,Hv,zb]; 1: of [H,Hu,Hv,H+zb], zb recomputed; 2: both (see below)
+Mat A;
+{
+   macro def(u)[u, u#B, u#C, u#D]// EOM
+   macro init(u)[u, u, u, u]// EOM
+   createMat(Th, A, PK4)// Th: the local mesh (with overlap)
+}
+fespace Ph4(Th,PK4);
+fespace Ph(Th,P0);
+Ph4 [H,Hu,Hv,zb]=[0,0,0,z0],[HBC,HuBC,HvBC,zbBC]=[0,0,0,0],[Hr,Hur,Hvr,zbr]=[0,0,0,0];
+Ph4 [Hp,Hup,Hvp,zbp];//for second order in time
+[H,Hu,Hv,zb]=[max(h0,0.),(h0>0.)*hu0,0,z0];// no momentum in the dry cells
+// labBC (in each case): [label,type,...], type 0 Dirichlet, 1 Neumann (default), 2 wall, 3 Dirichlet and wall;
+// the interfaces (label -111111): Neumann
+Ph ZB=zb;
+Ph scal1,scal2;
+Ph4 [D0,D0B,D0C,D0D]; D0[]=A.D;// the partition of unity (1 on the cells of the process)
+Ph Dc=D0;// for the global integrals
+
+IFMACRO(case,4)
+     [H,Hu,Hv,zb]=[max(h0,0.),max(h0,0.)*uxexact(0.),max(h0,0.)*uyexact(0.),z0];
+ENDIFMACRO
+
+{ Ph PH=H+zb; plotMPI(Th, PH, P0, def1, real, PARAMS "H+zb at t=0") }
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gr];//sets the value of gravity
+fvscheme FV([H,Hu,Hv,zb],order=2,eq="swtopo",labelBC=labBC,limiter=1,numflux=0,parameters=params);
+
+// profiles of zb and of the free surface H+zb on y=0: column 0 zb, column i+1 at t=Tsave[i] (if Tsave[i]<Tf),
+// last column at t=Tf; written in filenamesave (cases Dambreakdrybed, DambreakdrybedObstacle, RunupSynolakis);
+// a point: the value of the process of its cell (D=1, the point in the local mesh), sum on the processes
+// divided by the number of processes which give it (a point on an edge between 2 processes)
+IFMACRO(case,RunupSynolakis)
+macro writeprofiles()1//
+ENDIFMACRO
+IFMACRO(case,Dambreakdrybed)
+macro writeprofiles()1//
+ENDIFMACRO
+IFMACRO(case,DambreakdrybedObstacle)
+macro writeprofiles()1//
+ENDIFMACRO
+int NTsave = Tsave.n;
+int ncsave=0;// the next time of Tsave
+IFMACRO(writeprofiles,1)
+real[int,int] Savedata(Npx+1,NTsave+2);
+Savedata = 0;
+real[int] xx(Npx);
+for (int i=0;i<Npx;i++) xx[i]=xp+i/real(Npx-1)*(xp1-xp);
+macro globalprofile(F,col){
+  real[int] vl(Npx), cl(Npx), vg(Npx), cg(Npx);
+  vl=0; cl=0;
+  for (int i=0;i<Npx;i++) if (chi(Th)(xx[i],0.)>0.5) if (Dc(xx[i],0.)>0.5) { vl[i]=F(xx[i],0.); cl[i]=1; }
+  mpiAllReduce(vl,vg,mpiCommWorld,mpiSUM);
+  mpiAllReduce(cl,cg,mpiCommWorld,mpiSUM);
+  for (int i=0;i<Npx;i++) Savedata(i,col)=vg[i]/max(cg[i],1.);
+}//
+macro saveprofile(col){
+  Ph PHs=H+zb;
+  globalprofile(PHs,col)
+}//
+globalprofile(ZB,0)
+ENDIFMACRO
+IFMACRO(!writeprofiles)
+macro saveprofile(col)//
+ENDIFMACRO
+
+int iter=0;
+real dtsub, dtl;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        { Ph PH=H+zb; plotMPI(Th, PH, P0, def1, real, PARAMS "Solution at t="+t+", dt="+dt) }
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     //time dependent BC (the local boundary: the interfaces too, Neumann, HBC not used there):
+     IFMACRO(case,4)
+      for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+          int kib=Th.be(ib).Element;//neighbouring triangle
+          int iib=Th.be(ib).whoinElement;//edge in triangle
+          int ee;
+          int kee=Th[kib].adj((ee=iib));
+          if(kee==kib){
+           x=.5*(Th.be(ib)[0].x+Th.be(ib)[1].x);
+           y=.5*(Th.be(ib)[0].y+Th.be(ib)[1].y);
+           HBC[][4*kib]=rhoexact(t);
+           HBC[][4*kib+1]=rhoexact(t)*uxexact(t);
+           HBC[][4*kib+2]=rhoexact(t)*uyexact(t);
+           HBC[][4*kib+3]=0.;
+          }
+      }
+     ENDIFMACRO
+     dtl = fluxupdate(FV,[H,Hu,Hv,zb],[Hr,Hur,Hvr,zbr],[HBC,HuBC,HvBC,zbBC]);
+     mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+     exchange(A,Hr[],scaled=true);// the overlap cells: the values of their process
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+      if(ncsave<NTsave) if(t+dt > Tsave[ncsave]) dt=Tsave[ncsave]-t;// to stop at the times Tsave (&& evaluates both sides)
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    if(ncsave<NTsave) if(t >= Tsave[ncsave]-1.e-10) {saveprofile(ncsave+1) ncsave++;}
+
+    scal1=H;
+    real Hminl=scal1[].min, Hmin;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmaxl=scal2[].linfty, velmax;
+    mpiAllReduce(Hminl,Hmin,mpiCommWorld,mpiMIN);
+    mpiAllReduce(velmaxl,velmax,mpiCommWorld,mpiMAX);
+    if (!mpirank) {
+      cout << iter+1 << " t=" << t;
+      if (Hmin<0.) cout << " Hmin=" << Hmin;
+      cout << " velmax=" << velmax << endl;
+      if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+    }
+    if (adaptm && (iter+1)%nadapt == 0 && t < Tf-1.e-10) {// parallel mesh adaptation, conservative transfer
+      Ph part = Dc;// the cells owned by this process: the partition of unity of P0 (1 or 0)
+      fespace Vh1(Th, P1);
+      Vh1 m1 = H+zb, m2 = H;
+      mesh ThNew = adaptmeshddm(Th, m1, m2, err=erra, hmin=hmina, hmax=hmaxa, iso=0, nbvx=nbvx, owned=part[], comm=mpiCommWorld);
+      DmeshReconstruct(ThNew);
+      // the old values: [H,Hu,Hv,zb,H+zb,wet] by cell (wet = 1 where H > 0)
+      int mc = 6;
+      real[int] Uo(mc*Th.nt), Un(1);
+      for (int k=0; k<Th.nt; k++) {
+        for (int c=0; c<4; c++) Uo[mc*k+c] = H[][4*k+c];
+        Uo[mc*k+4] = H[][4*k] + H[][4*k+3];
+        Uo[mc*k+5] = H[][4*k] > 0. ? 1. : 0.;
+      }
+      remapP0ddm(Th, Uo, Dc[], ThNew, Un);// the parallel conservative transfer
+      DmeshCopy(ThNew, Th);
+      {
+        macro def(u)[u, u#B, u#C, u#D]// EOM
+        macro init(u)[u, u, u, u]// EOM
+        Mat An;
+        MatCreate(Th, An, PK4)
+        A = An;
+      }
+      [H,Hu,Hv,zb] = [0,0,0,0];
+      { Ph zn = z0;
+        for (int k=0; k<Th.nt; k++) {
+          for (int c=0; c<4; c++) H[][4*k+c] = Un[mc*k+c];// remapeta 0: [H,Hu,Hv,zb] transferred
+          if (remapeta == 1 || (remapeta == 2 && Un[mc*k+5] > 1.-1.e-12 && Un[mc*k+4] >= zn[][k])) {
+            // the free surface, zb recomputed (remapeta 2: only in the new cells entirely in the wet old cells)
+            H[][4*k+3] = zn[][k];
+            H[][4*k] = max(Un[mc*k+4] - zn[][k], 0.);
+          }
+          else if (remapeta == 2) H[][4*k+3] = zn[][k];// near the shoreline and in the dry area: H transferred
+          if (H[][4*k] <= 0.) { H[][4*k+1] = 0.; H[][4*k+2] = 0.; }
+        }
+      }
+      [Hp,Hup,Hvp,zbp] = [0,0,0,0]; [Hr,Hur,Hvr,zbr] = [0,0,0,0]; [HBC,HuBC,HvBC,zbBC] = [0,0,0,0];
+      [D0,D0B,D0C,D0D] = [0,0,0,0]; D0[] = A.D; Dc = D0; ZB = zb;
+      int ntl = 0, ntg; for (int k=0; k<Th.nt; k++) if (Dc[][k] > 0.5) ntl++;
+      mpiAllReduce(ntl, ntg, mpiCommWorld, mpiSUM);
+      if (!mpirank) cout << "  adaptation at t=" << t << " : " << ntg << " triangles" << endl;
+    }
+}//end of time loop
+if (!mpirank) cout<<"cputime = "<<clock()-s0<<endl;
+{ Ph PH=H+zb; plotMPI(Th, PH, P0, def1, real, PARAMSW "Solution at t="+t) }
+
+// global mass and extrema of H+zb (to compare with freevol_swtopo2d.edp)
+{
+  real ml=int2d(Th)(Dc*H), mg; mpiAllReduce(ml,mg,mpiCommWorld,mpiSUM);
+  Ph PH=H+zb; real a=PH[].min, b=PH[].max, ag, bg;
+  mpiAllReduce(a,ag,mpiCommWorld,mpiMIN); mpiAllReduce(b,bg,mpiCommWorld,mpiMAX);
+  if (!mpirank) cout << mpisize << " processes: mass = " << mg << " , min H+zb = " << ag << " , max H+zb = " << bg << endl;
+}
+IFMACRO(case,4)
+  Ph rhoex,uxex,uyex;
+  rhoex=rhoexact(t);
+  uxex=uxexact(t);
+  uyex=uyexact(t);
+  scal2=Hu/(H+1.e-13);
+  real e1l=int2d(Th)(Dc*(H-rhoex)^2), e2l=int2d(Th)(Dc*(scal2-uxex)^2), e1, e2, e3;
+  scal2=Hv/(H+1.e-13);
+  real e3l=int2d(Th)(Dc*(scal2-uyex)^2);
+  mpiAllReduce(e1l,e1,mpiCommWorld,mpiSUM); mpiAllReduce(e2l,e2,mpiCommWorld,mpiSUM); mpiAllReduce(e3l,e3,mpiCommWorld,mpiSUM);
+  if (!mpirank) cout << "errorrho,errorux,erroruy " << sqrt(e1) << " " << sqrt(e2) << " " << sqrt(e3) << endl;
+ENDIFMACRO
+saveprofile(NTsave+1)
+IFMACRO(writeprofiles,1)
+  if (!mpirank) {
+  ofstream fout(filenamesave);
+  cout << "profiles (x, zb, H+zb at t = Tsave < Tf and at Tf) written in " << filenamesave << endl;
+  for (int i=0;i<Npx;i++)
+  {
+     fout << xx[i];
+     for(int nsave=0; nsave < NTsave+2; nsave++) fout << " " << Savedata(i,nsave);
+     fout << endl;
+  }
+  }
+ENDIFMACRO

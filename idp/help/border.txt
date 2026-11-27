@@ -1,0 +1,2 @@
+border name(t=a, b) { x=...; y=...; label=n; } : parametrized border used by
+  buildmesh. See help(buildmesh).

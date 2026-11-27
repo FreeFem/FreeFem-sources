@@ -1,0 +1,115 @@
+/* ---------------------------------------------------------
+
+   the system of freevol_swtopodm.edp in 3D (mesh3) over the dual mesh (P1 unknowns, the median dual mesh: one
+   control volume by vertex), the same cases as freevol_swtopo3d.edp (P0 unknowns): a minimal example, to check
+   that the 3D version works, not a physical computation (shallow water is a 2D model):
+   U_t+div(F(U))+(0,gr*H*grad zb) = 0, U=[H,Hu,Hv,Hw], H>=0, F(U) = (H u, H u x u + gr/2*H^2 Id)
+   = the barotropic gas dynamics with p = gr/2*H^2 and the potential force -gr*grad zb
+   finite volume method, hydrostatic reconstruction for topography, HLL / Rusanov / HLLC
+   cases:
+     LakeAtRest : H+zb=1 on a bump, with a dry region: must stay at rest (well-balanced scheme)
+     Dambreak   : a ball of fluid in a box with walls (mass, positivity, symmetry x,y,z -> y,z,x)
+     Dambreak1D : the dam break of freevol_swtopo1d.edp in a bar (compare with the 1D result)
+   the same command fvscheme as in 1D and 2D, with the dual mesh built in the script (meshdual3): the dimension
+   is given by the mesh of [H,Hu,Hv,Hw,zb]
+   plots on the dual mesh (as freevol_advectiondm3d.edp): plot(Thstar, PH[]) the control volumes colored on the
+   boundary; F1: cutting plane (the cut control volumes), m: edges of the control volumes
+   (macro plotdual()0: the usual plots of the P1 functions)
+
+   --------------------------------------------------------*/
+
+real s0=clock();
+load "msh3"
+macro plotdual()1// 1: plots on the dual mesh, 0: plots of the P1 functions
+macro case() Dambreak//
+IFMACRO(case,LakeAtRest)
+   real Tf=1., gr=9.81;
+   int Npx=8;
+   mesh3 Th = cube(Npx,Npx,Npx);
+   func z0 = 1.2*exp(-((x-.5)^2+(y-.5)^2+(z-.5)^2)/.05);// dry where z0 > 1
+   func h0 = 1.-z0;
+ENDIFMACRO
+IFMACRO(case,Dambreak)
+   real Tf=.15, gr=9.81;
+   int Npx=10;
+   mesh3 Th = cube(Npx,Npx,Npx,[2*x-1,2*y-1,2*z-1]);
+   func z0 = 0.;
+   func h0 = 1.+((x^2+y^2+z^2)<.25);
+ENDIFMACRO
+IFMACRO(case,Dambreak1D)
+   real Tf=15.1, gr=9.81;
+   int Npx=200;
+   mesh3 Th = cube(Npx,1,1,[200*x,4*y,4*z]);
+   func z0 = 0.;
+   func h0 = 1.*(x<99.99) + 0.5*(abs(x-100.)<0.01);// the vertices of the dam: 1/2 (P1: the mass of P0)
+ENDIFMACRO
+
+real t,dt,CFL=.5;
+meshdual3 Thstar = builddualmesh(Th);// the dual mesh: the control volumes of the scheme (fvscheme finds it from the mesh Th of the unknowns)
+fespace Vh5(Th,[P1,P1,P1,P1,P1]);
+fespace Vh(Th,P1);
+Vh5 [H,Hu,Hv,Hw,zb]=[max(h0,0.),0,0,0,z0],[HBC,HuBC,HvBC,HwBC,zbBC]=[0,0,0,0,0],[Hr,Hur,Hvr,Hwr,zbr]=[0,0,0,0,0];
+Vh5 [Hp,Hup,Hvp,Hwp,zbp];//for second order in time
+int[int] labBC=[1,2,2,2,3,2,4,2,5,2,6,2];// walls on the 6 faces of the cube
+Vh PH=H+zb;
+real mass0=int3d(Th)(H);
+IFMACRO(plotdual,1)
+plot(Thstar,PH[],cmm="H+zb at t=0 (F1: cut, m: edges)",value=true,wait=0);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(PH,cmm="H+zb at t=0",fill=true,value=true,wait=0);
+ENDIFMACRO
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gr];//sets the value of gravity
+fvscheme FV([H,Hu,Hv,Hw,zb],order=2,eq="swtopodm",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu,Hv,Hw,zb],[Hr,Hur,Hvr,Hwr,zbr],[HBC,HuBC,HvBC,HwBC,zbBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+}//end of time loop
+PH=H+zb;
+Vh h1=H, u1=Hu/(H+1.e-13), v1=Hv/(H+1.e-13), w1=Hw/(H+1.e-13);
+IFMACRO(plotdual,1)
+plot(Thstar,PH[],cmm="H+zb at t="+t+" (F1: cut, m: edges)",value=true,wait=1);
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plot(PH,cmm="H+zb at t="+t,fill=true,value=true,wait=1);
+ENDIFMACRO
+cout << "3D: " << Th.nt << " tetrahedra, " << iter << " time steps, cputime = " << clock()-s0 << endl;
+cout << "mass error = " << int3d(Th)(H)-mass0 << " , Hmin = " << h1[].min << " , max |u| = " << max(u1[].linfty,max(v1[].linfty,w1[].linfty)) << endl;
+IFMACRO(case,LakeAtRest)
+  Vh erreta=(H>0.)*abs(PH-1.);// at the wet vertices
+  cout << "lake at rest: max |H+zb-1| (wet vertices) = " << erreta[].max << endl;
+ENDIFMACRO
+IFMACRO(case,Dambreak)
+  // symmetry of the ball and of the mesh of cube (invariant by the circular permutation of x,y,z): H(x,y,z) = H(y,z,x)
+  Vh hsym=h1(y,z,x);
+  hsym[]-=h1[];
+  cout << "symmetry: max |H(x,y,z)-H(y,z,x)| = " << hsym[].linfty << endl;
+ENDIFMACRO
+IFMACRO(case,Dambreak1D)
+  // the exact solution (Ritter), as in freevol_swtopo1d.edp
+  func real hexact(real tt){
+    real c0=sqrt(gr), xi=(x-100.)/max(tt,1.e-30);
+    if (xi <= -c0) return 1.;
+    if (xi >= 2.*c0) return 0.;
+    return (2.*c0-xi)^2/(9.*gr);
+  }
+  Vh hex=hexact(t);
+  cout << "dam break (Ritter): L1 error on H (per unit section) = " << int3d(Th)(abs(H-hex))/16. << endl;
+ENDIFMACRO

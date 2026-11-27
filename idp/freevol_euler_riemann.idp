@@ -1,0 +1,51 @@
+// freevol_euler_riemann.idp: the exact solution of the Riemann problem of the Euler system (E. F. Toro, Riemann
+// Solvers and Numerical Methods for Fluid Dynamics, chapter 4), for freevol_euler1d.edp and freevol_euler3d.edp
+//   given before the include: gamma, the states rhoL, uL, pL | rhoR, uR, pR (no vacuum generated)
+//   p*, u* (the intermediate state) by bisection on the pressure function, then riemann(xi) sets rexa, uexa,
+//   pexa, the exact solution at xi = (x-x0)/t, and returns rexa
+real gm1=gamma-1., gp1=gamma+1.;
+real cL=sqrt(gamma*pL/rhoL), cR=sqrt(gamma*pR/rhoR);
+if (2./gm1*(cL+cR) <= uR-uL) { cout << "freevol_euler_riemann.idp: vacuum is generated, not treated" << endl; exit(1); }
+// the velocity change across the wave from the state (rk,pk) to the pressure p (shock if p > pk, else rarefaction)
+func real fK(real p, real rk, real pk) {
+   real ck=sqrt(gamma*pk/rk);
+   if (p > pk) { real A=2./(gp1*rk), B=gm1/gp1*pk; return (p-pk)*sqrt(A/(p+B)); }
+   return 2.*ck/gm1*((p/pk)^(gm1/(2.*gamma))-1.);
+}
+real ps, us;// the intermediate state
+{
+   real a=1.e-14, b=max(pL,pR);
+   while (fK(b,rhoL,pL)+fK(b,rhoR,pR)+uR-uL < 0.) b*=2.;
+   for (int i=0; i<200; i++) { real m=(a+b)/2; if (fK(m,rhoL,pL)+fK(m,rhoR,pR)+uR-uL > 0.) b=m; else a=m; }
+   ps=(a+b)/2;
+   us=.5*(uL+uR)+.5*(fK(ps,rhoR,pR)-fK(ps,rhoL,pL));
+}
+real rexa, uexa, pexa;// the exact solution at xi = (x-x0)/t, set by riemann(xi)
+func real riemann(real xi) {
+   if (xi <= us) {// left of the contact: the 1-wave
+      if (ps > pL) {// shock
+         real SL=uL-cL*sqrt(gp1/(2.*gamma)*ps/pL+gm1/(2.*gamma));
+         if (xi <= SL) { rexa=rhoL; uexa=uL; pexa=pL; }
+         else { rexa=rhoL*(ps/pL+gm1/gp1)/(gm1/gp1*ps/pL+1.); uexa=us; pexa=ps; }
+      } else {// rarefaction
+         real csL=cL*(ps/pL)^(gm1/(2.*gamma));
+         if (xi <= uL-cL) { rexa=rhoL; uexa=uL; pexa=pL; }
+         else if (xi >= us-csL) { rexa=rhoL*(ps/pL)^(1./gamma); uexa=us; pexa=ps; }
+         else { uexa=2./gp1*(cL+gm1/2.*uL+xi); real c=2./gp1*(cL+gm1/2.*(uL-xi));
+                rexa=rhoL*(c/cL)^(2./gm1); pexa=pL*(c/cL)^(2.*gamma/gm1); }
+      }
+   } else {// the 3-wave
+      if (ps > pR) {// shock
+         real SR=uR+cR*sqrt(gp1/(2.*gamma)*ps/pR+gm1/(2.*gamma));
+         if (xi >= SR) { rexa=rhoR; uexa=uR; pexa=pR; }
+         else { rexa=rhoR*(ps/pR+gm1/gp1)/(gm1/gp1*ps/pR+1.); uexa=us; pexa=ps; }
+      } else {// rarefaction
+         real csR=cR*(ps/pR)^(gm1/(2.*gamma));
+         if (xi >= uR+cR) { rexa=rhoR; uexa=uR; pexa=pR; }
+         else if (xi <= us+csR) { rexa=rhoR*(ps/pR)^(1./gamma); uexa=us; pexa=ps; }
+         else { uexa=2./gp1*(-cR+gm1/2.*uR+xi); real c=2./gp1*(cR-gm1/2.*(uR-xi));
+                rexa=rhoR*(c/cR)^(2./gm1); pexa=pR*(c/cR)^(2.*gamma/gm1); }
+      }
+   }
+   return rexa;
+}

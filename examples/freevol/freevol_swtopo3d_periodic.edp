@@ -1,0 +1,45 @@
+// the system of freevol_swtopo3d.edp (the barotropic gas dynamics with p = gr/2*H^2 and the potential force
+// -gr*grad zb) in 3D (mesh3) with periodic boundary conditions: a minimal example (a few seconds)
+//   fvscheme FV([H,Hu,Hv,Hw,zb], eq="swtopo", ..., periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]) (the
+//   syntax of a 3D fespace): the faces of the opposite sides of the cube are glued (hydrostatic reconstruction with
+//   the zb of the 2 sides), a periodic zb
+//   -cas 0: the lake at rest (H+zb constant, no velocity): it stays at rest, also across the periodic sides
+//   -cas 1: a bump of H in a flow (H u = 0.5 H): the mass is conserved
+// options: -cas (1), -n (segments by side, 8), -Tf (0.2), -ordre (2 or 1), -nw: without plot
+load "msh3"
+include "getARGV.idp"
+real gr = 9.81;
+int n = getARGV("-n", 8), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 0.2), CFL = .5;
+mesh3 Th = cube(n, n, n);                  // labels 1 y=0, 2 x=1, 3 y=1, 4 x=0, 5 z=0, 6 z=1
+fespace Ph5(Th, [P0,P0,P0,P0,P0]);
+fespace Ph(Th, P0);
+func z0 = 0.3*sin(2.*pi*x)*cos(2.*pi*y) + 0.2*cos(2.*pi*z);   // periodic
+func h0 = 2. - z0 + 0.5*cas*exp(-((x-0.3)^2+(y-0.5)^2+(z-0.5)^2)/0.02);
+Ph5 [H,Hu,Hv,Hw,zb] = [h0, 0.5*cas*h0, 0, 0, z0], [HBC,HuBC,HvBC,HwBC,zbBC] = [0,0,0,0,0], [Hr,Hur,Hvr,Hwr,zbr] = [0,0,0,0,0];
+Ph5 [Hp,Hup,Hvp,Hwp,zbp];
+real[int] params = [gr];
+int[int] labBC = [1,2, 2,2, 3,2, 4,2, 5,2, 6,2];   // walls: no effect on the periodic sides
+fvscheme FV([H,Hu,Hv,Hw,zb], order=ordre, eq="swtopo", labelBC=labBC, limiter=1, numflux=2, parameters=params,
+            periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+Ph eta0 = H + zb;
+real m0 = int3d(Th)(H);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,Hw,zb], [Hr,Hur,Hvr,Hwr,zbr], [HBC,HuBC,HvBC,HwBC,zbBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+Ph eta = H + zb, h = H, q1 = Hu, q2 = Hv, q3 = Hw;
+real[int] deta = eta[] - eta0[];
+cout << "swtopo 3D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter
+     << " steps , " << Th.nt << " tetrahedra" << endl;
+cout << "  mass " << int3d(Th)(H) << " (difference " << int3d(Th)(H)-m0 << ") , min H " << h[].min << " , max |H+zb - (H+zb)(0)| "
+     << deta.linfty << " , max |Hu| " << q1[].linfty << " " << q2[].linfty << " " << q3[].linfty << endl;
+plot(eta, cmm="H+zb at t=" + t + " (periodic)", wait=1);

@@ -1611,10 +1611,14 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
         {
             mcount++;
             k= lp[j]-P0;
-            // double dij = Rd(P[i],*lp[j]).norme();
             // warning must be Proof FH.
-            delta[k]=max(delta[k],d0[i]+d0[k]);
-            delta[i]=max(delta[i],d0[i]+d0[k]);
+            // a point of the element i whose nearest barycentre is the one of k: |G_i - G_k| <= 2 d0[i] (found
+            // above), so the search radius of k must be >= |G_i - G_k| (equal to d0[i]+d0[k] for two aligned
+            // segments of a meshL: the margin of the integer grid in ListNearestVertex)
+            double dij = Rd(P[i],*lp[j]).norme();
+            double dd = max(d0[i]+d0[k],dij);
+            delta[k]=max(delta[k],dd);
+            delta[i]=max(delta[i],dd);
             
             if(debug>9) cout << k << " "<< delta[k] << ", ";
         }

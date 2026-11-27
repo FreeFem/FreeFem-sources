@@ -1,0 +1,105 @@
+// Shallow water (Saint-Venant) with topography in 1D (meshL) with finite volumes on the dual mesh with mesh adaptation
+//   U_t+F(U)_x+(0,gr*H*zb_x) = 0, U=[H,Hu], unknowns [H,Hu,zb] P1 (one value per vertex = the average over its
+//   control volume, meshdualL), eq="swtopodm" (hydrostatic reconstruction, MUSCL, Heun)
+//   every nadapt iterations: the mesh adapted to H and zb (adaptmesh of a meshL), its dual mesh
+//   (Thstar = builddualmesh(Th): fvscheme finds it and rebuilds itself); the transfer: [H,Hu,H+zb] (the free
+//   surface, not zb) transferred at once by remapP1(Tho, Ho[], Th, H[]) (a limited affine reconstruction in
+//   each old control volume, the same limiter for the 3 components, integrated exactly over each
+//   new control volume), then zb = z0 recomputed on the new mesh (the topography is not averaged
+//   at each adaptation: an island keeps its height) and H = max((H+zb) - zb, 0), Hu = 0 where H = 0: the lake at
+//   rest (H+zb constant, Hu = 0) stays at rest where it is wet, the shore of an island stays almost dry (a small
+//   error on the control volumes straddling the shore); the mass sum |C_i| H_i is not conserved
+//   exactly: the average of H+zb is, but zb is recomputed (a small error everywhere), and H = max(eta - zb, 0)
+//   does not keep the average of H on the shore
+//   -cas 0: a lake at rest over a submerged bump (H+zb = 1): it must stay at rest
+//   -cas 1: dam break over a dry bed (Ritter: H = 1 for x < 100, 0 beyond): the L1 error on H against the
+//            exact solution, to compare with the fixed mesh (-adapt 0) with the same number of control volumes
+//   -cas 2: a lake at rest with a dry island (H+zb = 1, zb up to 1.5): it must stay (almost) at rest
+// options: -cas (1), -adapt (1 or 0), -n (segments of the initial mesh), -nadapt (5), -err (0.01), -hmin, -hmax,
+//          -nw: no plot
+load "msh3"
+include "getARGV.idp"
+int cas = getARGV("-cas", 1);
+bool adapt = getARGV("-adapt", 1);
+int nadapt = getARGV("-nadapt", 5);
+real gr = 9.81, CFL = 0.5, xp, xp1, Tf;
+int n;
+real erru = getARGV("-err", 0.01), hmin, hmax;
+if (cas != 1) { xp = 0; xp1 = 10; Tf = 2.; n = getARGV("-n", 50); hmin = getARGV("-hmin", 0.02); hmax = getARGV("-hmax", 0.5); }
+else { xp = 0; xp1 = 200; Tf = 10.; n = getARGV("-n", 100); hmin = getARGV("-hmin", 0.25); hmax = getARGV("-hmax", 2.); }
+func z0 = (cas == 0)*(0.8*exp(-(x-5.)^2) + 0.4*exp(-(x-1.)^2)) + (cas == 2)*(1.5*exp(-(x-5.)^2) + 0.4*exp(-(x-1.)^2));
+func h0 = (cas != 1) ? max(1. - z0, 0.) : 1.*(x < 99.99) + 0.5*(abs(x-100.) < 0.01);// the vertex of the dam: 1/2
+// exact solution (Ritter): dam at x=100, H=1 at left, dry bed at right
+func real hexact(real tt) {
+  real c0 = sqrt(gr), xi = (x-100.)/max(tt, 1.e-30);
+  if (xi <= -c0) return 1.;
+  if (xi >= 2.*c0) return 0.;
+  return (2.*c0-xi)^2/(9.*gr);
+}
+meshL Th = segment(n, [xp+(xp1-xp)*x, 0, 0]);// labels 1 at x = xp, 2 at x = xp1
+fespace Vh3(Th, [P1,P1,P1]);
+fespace Vh(Th, P1);
+if (adapt) for (int i = 0; i < 3; i++) { Vh hh = h0, zz = z0; Th = adaptmesh(Th, hh, zz, err=erru, hmin=hmin, hmax=hmax, verbosity=0); }
+meshdualL Thstar = builddualmesh(Th);      // the dual mesh: the control volumes of the scheme
+Vh3 [H,Hu,zb] = [h0, 0, z0], [HBC,HuBC,zbBC] = [0,0,0], [Hr,Hur,zbr] = [0,0,0], [Hp,Hup,zbp];
+int[int] labBC = [1,2, 2,2];               // walls
+real[int] params = [gr];
+fvscheme FV([H,Hu,zb], order=2, eq="swtopodm", labelBC=labBC, limiter=1, numflux=0, parameters=params);
+real[int] cva(1);
+NewMacro massdual(m)                        // the mass of the finite volumes: sum |C_i| H_i
+{
+  cva.resize(Thstar.ncv);
+  dualmeshcvarea(cva, Thstar);
+  Vh hh = H;
+  m = cva'*hh[];
+} EndMacro
+real mass0; massdual(mass0)
+NewMacro plotsw(titre, w)                  // H+zb and zb
+{ Vh eta = H + zb, zz = zb; plot(eta, zz, cmm=titre, wait=w); } EndMacro
+plotsw("H+zb and zb at t=0 (" + Thstar.ncv + " control volumes)", 0)
+real t = 0, dt, dtsub;
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) {// adaptation to H and zb
+    meshL Tho = Th;
+    fespace Vho3(Tho, [P1,P1,P1]);
+    Vho3 [Ho,Huo,zbo];
+    Ho[] = H[];                             // the old values (the same mesh: copy of the array)
+    for (int i = 0; i < Tho.nv; i++) Ho[][3*i+2] += Ho[][3*i];// [H,Hu,H+zb]: the free surface
+    Vh hh = H, zz = zb;
+    Th = adaptmesh(Th, hh, zz, err=erru, hmin=hmin, hmax=hmax, verbosity=0);
+    Thstar = builddualmesh(Th);             // the dual of the new mesh: fvscheme finds it
+    [H,Hu,zb] = [0,0,0]; remapP1(Tho, Ho[], Th, H[]);// the 3 components together
+    {                                       // zb = z0 on the new mesh, H = max((H+zb) - zb, 0)
+      Vh zn = z0;
+      for (int i = 0; i < Th.nv; i++) {
+        real eta = H[][3*i+2];
+        H[][3*i+2] = zn[][i];
+        H[][3*i] = max(eta - zn[][i], 0.);
+        if (H[][3*i] <= 0.) H[][3*i+1] = 0.;// no momentum at a dry vertex
+      }
+    }
+    [HBC,HuBC,zbBC] = [0,0,0]; [Hr,Hur,zbr] = [0,0,0]; [Hp,Hup,zbp] = [0,0,0];// on the new mesh
+    nbad++;
+  }
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,zb], [Hr,Hur,zbr], [HBC,HuBC,zbBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+real mass1; massdual(mass1)
+Vh hh = H;
+cout << (adapt ? "1D dual adapted" : "1D dual fixed") << " (case " << cas << "): t = " << t << " , " << it << " steps , " << nbad
+     << " adaptations , " << Thstar.ncv << " control volumes , mass = " << mass1 << " (initial " << mass0 << ", change "
+     << mass1-mass0 << ") , min H = " << hh[].min << endl;
+if (cas != 1) {
+  Vh e2 = (H > 1e-2)*abs(H + zb - 1.), u2 = (H > 1e-2)*abs(Hu)/max(H, 1e-2), film = (zb > 1.)*H, zz = zb;
+  cout << "  lake at rest (wet vertices, H > 0.01): max |H+zb-1| " << e2[].max << " , max |u| " << u2[].max
+       << " ; the island: max zb " << zz[].max << " , the water on it max H " << film[].max << endl;
+}
+else { Vh hex = hexact(t); cout << "  dam break (Ritter): L1 error on H " << int1d(Th)(abs(hh-hex)) << endl; }
+plotsw("H+zb and zb at t=" + t + " (" + Thstar.ncv + " control volumes)", 1)

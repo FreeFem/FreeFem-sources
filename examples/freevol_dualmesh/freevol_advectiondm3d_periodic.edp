@@ -1,0 +1,44 @@
+// 3D advection (mesh3) with finite volumes on the median dual mesh with periodic boundary conditions
+//   fvscheme FV([V1,V2,V3], eq="advectiondm", ..., periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]) (the
+//   3D fespace syntax): the control volumes of linked vertices (2, 4 or 8 at the corners) form a single
+//   control volume (no flux on the periodic boundary parts, averages weighted by the volumes)
+//   a Gaussian transported at velocity (1, 0.5, 0.25) in the periodic cube: at t = 4 it returns to its
+//   initial position; the scheme mass, sum |C_i| u_i (dualmeshcvarea), is conserved
+// options: -n (segments per side, 8), -ordre (2 or 1), -Tf (4), -cx (centre in x, 0.5), -nw: no plot
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 8), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", 4.), cx = getARGV("-cx", 0.5);
+mesh3 Th = cube(n, n, n);                  // labels 1 y=0, 2 x=1, 3 y=1, 4 x=0, 5 z=0, 6 z=1
+meshdual3 Thstar = builddualmesh(Th);      // the median dual mesh
+fespace Vh(Th, P1);
+func real gp(real xx, real yy, real zz) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++)
+    s += exp(-((xx-cx-i)^2+(yy-0.5-j)^2+(zz-0.5-k)^2)/0.03);
+  return s;
+}
+Vh u = gp(x, y, z), up, ur = 0, uBC = 0;
+Vh V1 = 1, V2 = 0.5, V3 = 0.25;            // constant P1 velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];   // no effect on the periodic boundaries
+fvscheme FV([V1,V2,V3], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre,
+            periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the volumes of the control volumes
+real mass0 = cva'*u[], t = 0, dt, dtsub, CFL = 0.9;
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t), z - 0.25*t - floor(z - 0.25*t));
+real err = sqrt(int3d(Th)((u-uex)^2)), mass = cva'*u[];
+cout << "3D dual periodic (order " << ordre << ", n = " << n << "): t = " << t << " , " << it << " steps , mass = " << mass
+     << " (change " << mass-mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(u, cmm="3D dual periodic: solution at t = " + t, wait=1);

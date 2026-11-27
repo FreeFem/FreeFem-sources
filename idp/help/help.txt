@@ -1,0 +1,7 @@
+help(function) or help("keyword") : help of a function or a keyword (in the
+  kernel, no load; from a shell: ffhelp name). help() gives the list of the
+  topics. For a function, help also prints its signatures (argument types) and
+  its named parameters (name= type), even without a written help; for a type
+  (mesh, meshL, matrix, ...), its members (Th.nv, Th[k].measure, ...).
+  The written texts are the files help/<name>.txt of the include path
+  (idp/help in the sources); a first line @other gives the help of other.

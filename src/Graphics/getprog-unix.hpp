@@ -15,6 +15,9 @@
 #include "ffapi.hpp"
 #include "strversionnumber.hpp"
 #include <string>
+#include <climits>    // PATH_MAX
+#include <cstdlib>    // realpath, setenv
+#include <cstring>    // strchr
 
 extern long mpirank;
 extern long verbosity;
@@ -114,6 +117,20 @@ check_plugin=0; // no pluging to check ..
   bool ch2edpdir = false;
   if(argc)
     prognamearg = argv[0];
+#ifndef _WIN32
+  // the directory of this FreeFem++ first in the PATH: its ffglut (popen) and its ffmedit (plugin medit) are
+  // used, also when another FreeFEM is in the PATH (no -glut, no meditff= needed)
+  if (argc && argv[0] && strchr(argv[0], '/')) {
+    char absprog[PATH_MAX];
+    if (realpath(argv[0], absprog)) {
+      string dir(absprog);
+      dir = dir.substr(0, dir.rfind('/'));
+      const char *oldpath = getenv("PATH");
+      string newpath = oldpath ? dir + ":" + oldpath : dir;
+      setenv("PATH", newpath.c_str(), 1);
+    }
+  }
+#endif
 
   if (prognamearg) { // FH add to remove ffglut in case of -nw or -nw.exe , mpi ,mpi.exp program FH juin 2014 - april 2017
     int l = strlen(prognamearg);

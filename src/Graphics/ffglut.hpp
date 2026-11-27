@@ -153,6 +153,58 @@ struct OnePlotMesh : public OnePlot
     
 };
 
+//  dual mesh (meshdual of the plugin fvdualmesh): polygonal control volumes, one around each vertex
+//  of the primal mesh, and the finite volume solution (one value by control volume)
+//  what = 60: the mesh, 61: the mesh and the values
+struct OnePlotMeshD : public OnePlot
+{
+    KN<double> xy;      // the dual vertices (x,y)
+    KN<double> cxy;     // the center of the control volumes (vertex of the primal mesh)
+    KN<double> nv;      // the number of vertices of each control volume
+    KN<double> cv;      // the vertices of the control volumes (anticlockwise)
+    KN<double> be;      // the boundary edges (2 dual vertices)
+    KN<double> belab;   // the label of the boundary edges
+    KN<double> val;     // the value on each control volume (empty: the mesh only)
+    vector<int> first;  // the first vertex of the control volume i in cv
+    vector<R2> cmn,cmx; // the box of each control volume (probe)
+    OnePlotMeshD(long w,PlotStream & f);
+    void Draw(OneWindow *win);
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);
+    R2 V(int k) const { return R2(xy[2*k],xy[2*k+1]);}
+};
+
+//  3d dual mesh (meshdual3 of the plugin fvdualmesh): the median dual of a mesh3, the control volume of a vertex
+//  is made in each tetrahedron K of the 6 tetrahedra (centroid of K, vertex, middle of an edge, centroid of a
+//  face); built here from the mesh3; the boundary: 3 quadrilaterals by boundary triangle (one by vertex)
+//  what = 62: the mesh, 63: the mesh and the values (one value by vertex of the mesh3 = by control volume)
+struct OnePlotMeshD3 : public OnePlot
+{
+    const Mesh3 *Th;
+    KN<double> val;     // the value on each control volume (empty: the mesh only)
+    FFGrid grid;        // the search of the tetrahedron of a point (Probe)
+    OnePlotMeshD3(const Mesh3 *T,long w,PlotStream & f);
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);// the value of the control volume of P
+    void Draw(OneWindow *win);
+    void DrawSection(OneWindow *win,R3 N,R c,R fmn,R fmx,bool edges,bool withmesh);
+    void DrawSection(OneWindow *win,R3 N,R c);// the section with the options of the plot (key c)
+    void Color(OneWindow *win,R f,R fmn,R fmx) const;
+};
+
+//  surface dual mesh (meshdualS of the plugin fvdualmesh): the median dual of a meshS, the control volume of a
+//  vertex is made in each triangle K of the quadrilateral (vertex, middles of its 2 edges, centroid of K); built
+//  here from the meshS; what = 64: the mesh, 65: the mesh and the values (one value by vertex of the meshS)
+struct OnePlotMeshDS : public OnePlot
+{
+    const MeshS *Th;
+    KN<double> val;     // the value on each control volume (empty: the mesh only)
+    KN<long> bedges;    // [2b], [2b+1]: the vertices of the edges of the border of the surface (in one triangle)
+    FFGrid grid;        // the search of the triangle under the mouse
+    OnePlotMeshDS(const MeshS *T,long w,PlotStream & f);
+    void Draw(OneWindow *win);
+    bool Probe(const R3 & P,R & val,R3 & vec,int & ncomp);
+    void Color(OneWindow *win,R f,R fmn,R fmx) const;
+};
+
 struct OnePlotMesh3 : public OnePlot
 {
     const Mesh3 *Th;
@@ -517,10 +569,12 @@ public:
     int nbcurves;
     bool GraphBound(R2 & Pmn,R2 & Pmx,bool lx=false,bool ly=false) const;
     //  options of the 1d graph given in the comment (cmm=) of the plot:
-    //    cmm="title | xlabel=... | ylabel=... | legend=name1,name2,... | logx | logy"
+    //    cmm="title | xlabel=... | ylabel=... | legend=name1,name2,... | logx | logy | xrange=a:b | yrange=a:b"
     string gtitle,gxlabel,gylabel;
     vector<string> glegend;
     int glogx,glogy;// -1 not given, 1 log scale
+    bool gfixx,gfixy;// xrange=, yrange= given: the fixed bounds gxr, gyr of the axis (as in ffmedit)
+    double gxr[2],gyr[2];
     void GraphOptions();
     // 2D
     long winnum;
@@ -620,7 +674,8 @@ public:
     //  pretty rendering of the 3d plots (key R): continuous colors (texture of the colormap),
     //  smooth normals, specular light, gradient background, color bar (key v), colormap (key C)
     bool pretty,prettybar;
-    int cmapkind;// 0 turbo, 1 viridis, 2 cool to warm, 3 rainbow of FreeFEM, 4 grey
+    int cmapkind;// 0 turbo, 1 viridis, 2 cool to warm, 3 rainbow of FreeFEM, 4 grey, 5 the colors hsv= of the plot
+    bool cmapchosen;// the colormap is chosen with the key C (then hsv= does not change it)
     GLuint cmaptex;
     int cmaptexkind;
     bool Pretty3d() const { return pretty && plotdim==3 && !Graph1d();}
@@ -652,6 +707,25 @@ public:
     bool Cut2dLine(R2 & A,R2 & B) const;
     R2 ScreenToWorld2(int x,int y) const;
     void DrawCut2d();
+    //  3d: plane cut of the 3d function (key c): 0 no, 1 x = const, 2 y = const, 3 z = const (the plane of the
+    //  cut F1, moved by < >), the 2d section of the function in a panel at the bottom of the window
+    int cut3d;
+    bool Cut3d() const { return cut3d && plotdim==3 && theplot && theplot->datadim==3;}
+    int Cut3dPanel() const;// height (pixel) of the panel of the section, 0 without cut plane
+    void DrawCut3d();
+    //  the 1d cut of the section, beside it in the panel: the horizontal line v = cut3A.y (cut3line 0, the middle
+    //  of the section until shift + click) or the segment [cut3A, cut3B] (cut3line 1, shift + drag), in the
+    //  coordinates (u,v) of the plane
+    R2 cut3A,cut3B;
+    int cut3line;
+    bool cut3set,cut3drag;
+    R cut3box[6];      // the section in the panel: rx0, ry0, rw, rh (pixel), scale, and umin, vmin in cut3uv
+    R2 cut3uv;
+    bool InCut3Box(int x,int y,R2 & uv) const;// the mouse (x,y) on the section: its coordinates (u,v)
+    R3 Cut3Point(const R2 & uv) const;// the point of the cut plane of coordinates (u,v)
+    //  the curves ts[k], vs[k] of the cut in the box [x0,x1]x[y0,y1] (2d cut line and 1d cut of the 3d section)
+    void DrawCutGraph(R x0,R y0,R x1,R y1,const vector< vector<R> > & ts,const vector< vector<R> > & vs,
+                      const char *xlabel,R dtmax);
     R cutpos;
     R3 cutN;
     void RotateCut(R ah,R av);

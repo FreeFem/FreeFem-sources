@@ -107,7 +107,8 @@ static void graphParse( ) {
       }
     } else if (!strncmp(f, "complex=", 8)) {
       ; /* the complex solutions (see cplxMesh) */
-
+    } else if (!strcmp(f, "dual") || !strncmp(f, "primal=", 7)) {
+      ; /* dual mesh (see dualMesh, primalLabel) */
     } else if (!strncmp(f, "bb=", 3)) {
       double b[4];
 
@@ -836,7 +837,7 @@ static void axisTics(double *A, double *B, double vmin, double vmax, double *C, 
   double SA[2], SB[2], d[2], o[2], M[2], P[2], Q[2], l, ext = 0.0, half, step;
   double tics[64], minors[256], ends[2];
   char lab[64][24], buf[32];
-  int n, nminor, i, e, align, near;
+  int n, nminor, i, e, align, nearTic;/* (not near: a macro of windef.h on Windows) */
 
   if (!(vmax > vmin)) return;
 
@@ -884,11 +885,11 @@ static void axisTics(double *A, double *B, double vmin, double vmax, double *C, 
       t = lab[i];
     } else {
       e = i - n;
-      near = 0;
+      nearTic = 0;
       for (int j = 0; j < n; j++)
-        if (fabs(tics[j] - ends[e]) < 0.25 * step) near = 1;
+        if (fabs(tics[j] - ends[e]) < 0.25 * step) nearTic = 1;
 
-      if (near) continue;
+      if (nearTic) continue;
 
       a = e;
       snprintf(buf, sizeof(buf), "%.3g", ends[e]);
@@ -2140,4 +2141,77 @@ done:
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix( );
   glEnable(GL_DEPTH_TEST);
+}
+
+/* ---------------------------------------------------------------------------------------
+   dual mesh (meshdual of the plugin fvdualmesh, option dual of -graph): each control volume
+   is sent as a fan of triangles (vertex 0 = the center of the control volume, label = the
+   number of the control volume), the edges of the control volumes are the edges v[1] v[2]
+   --------------------------------------------------------------------------------------- */
+/* the field "name" or "name=value" of the options (-graph): its value (or ""), 0 if absent */
+static const char *dualOption(const char *name) {
+  static char f[64];
+  const char *p = graphopt;
+  int l = strlen(name);
+
+  while (*p) {
+    const char *e = strchr(p, '|');
+    int n = e ? (int)(e - p) : (int)strlen(p);
+
+    if (n < (int)sizeof(f)) {
+      graphTrim(f, p, n, sizeof(f));
+      if (!strncmp(f, name, l) && (f[l] == '\0' || f[l] == '=')) return (f[l] ? f + l + 1 : f + l);
+    }
+
+    p += n + (e ? 1 : 0);
+  }
+
+  return (0);
+}
+
+int dualMesh(pMesh mesh) { return (mesh->dim == 2 && mesh->nt && dualOption("dual")); }
+
+/* dual mesh with the primal mesh (option primal=label): the label of the edges of the primal
+   mesh, -1 if none */
+int primalLabel(pMesh mesh) {
+  const char *v = dualMesh(mesh) ? dualOption("primal") : 0;
+
+  return (v && *v ? atoi(v) : -1);
+}
+
+/* the edges of the control volumes (instead of the edges of the triangles) */
+void drawDualEdges(pScene sc, pMesh mesh) {
+  extern GLfloat altcoef;
+  int k, elev = (sc->mode & S_ALTITUDE) && mesh->nbb && mesh->typage == 1;
+  int lp = primalLabel(mesh);
+  GLfloat col[4], red[4] = {0.9, 0.15, 0.15, 1.0};
+
+  /* with the primal mesh (as plot(Th, Thstar) of ffglut): the dual mesh in red */
+  glGetFloatv(GL_CURRENT_COLOR, col);
+  if (lp >= 0) glColor4fv(red);
+
+  glBegin(GL_LINES);
+  for (k = 1; k <= mesh->nt; k++) {
+    pTriangle pt = &mesh->tria[k];
+    pPoint p1 = &mesh->point[pt->v[1]], p2 = &mesh->point[pt->v[2]];
+    double z = elev ? altcoef * mesh->sol[k].bb - 0.25 * mesh->ztra : 0.0;
+
+    if (pt->v[0] <= 0) continue;
+
+    glVertex3d(p1->c[0], p1->c[1], z);
+    glVertex3d(p2->c[0], p2->c[1], z);
+  }
+
+  /* the border (the edges of the boundary control volumes at the center are not v[1] v[2]),
+     and the edges of the primal mesh */
+  for (k = 1; k <= mesh->na && !elev; k++) {
+    pPoint p1 = &mesh->point[mesh->edge[k].v[0]], p2 = &mesh->point[mesh->edge[k].v[1]];
+
+    glColor4fv(lp >= 0 && mesh->edge[k].ref != lp ? red : col);
+
+    glVertex3d(p1->c[0], p1->c[1], 0.0);
+    glVertex3d(p2->c[0], p2->c[1], 0.0);
+  }
+
+  glEnd( );
 }

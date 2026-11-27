@@ -2608,6 +2608,8 @@ AC_CONFIG_FILES([Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
     examples/3dCurve/Makefile
+    examples/freevol/Makefile
+    examples/freevol_dualmesh/Makefile
 ])
 AC_OUTPUT
 

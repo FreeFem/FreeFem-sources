@@ -1,0 +1,253 @@
+// parallel version (domain decomposition, PETSc) of freevol_igd2d.edp: the isentropic gas dynamics,
+// the same cases, the same scheme (order 2, Heun)
+//   U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v], p = kappa*rho^gamma, parameters=[gamma,kappa]
+//   the mesh is partitioned by createMat (overlap of 2 cells: the stencil of the order 2; 1 cell for the order 1),
+//   fvscheme on the local mesh; the interfaces (label -111111): Neumann (the default), their cells are overlap
+//   cells, set again by the exchange
+//   at each stage: the time step the min on all the processes, then exchange(A,[Hr,Hur,Hvr],scaled=true)
+//   the outputs are global (the partition of unity A.D: each cell counted once): Hmin, velmax at each step,
+//   the mass and the extrema of rho, the errors of the case 4
+//   plots: plotMPI of rho (plotFreeVol2d is not parallel)
+//   mesh adaptation (-adapt 1): every nadapt steps, parallel adaptation of the distributed mesh by adaptmeshddm
+//   (plugin adaptmesh_ddm, distributed mode owned=: each process remeshes its part, the interfaces are adapted
+//   again, the new local meshes are balanced; the owned cells: the partition of unity A.D), the metric given by
+//   rho (P1); [rho,rho u,rho v] transferred by remapP0ddm (the parallel conservative transfer: an affine limited
+//   reconstruction in each old cell, the same limiter for the 3 components, integrated exactly on the new cells,
+//   the old cells sent to the processes whose new local mesh meets them): the mass and the momentum are conserved
+//   run: ff-mpirun -np 4 freevol_igd2d_ddm.edp -wg   (-nw: no plot; -adapt (0 or 1), -nadapt (10), -erra (0.01),
+//   -hmin, -hmax (the size of the initial mesh /8 and *2), -nbvx (1e5), -Tf (the final time of the case))
+load "PETSc"// PETSc plugin
+load "adaptmesh_ddm"// adaptmeshddm, remapP0ddm
+macro dimension()2// EOM
+include "macro_ddm.idp"// additional DDM functions
+include "getARGV.idp"
+macro ThOverlap()2// EOM 2 cells for the order 2 (1 for the order 1): the overlap of the partition
+macro ThNewOverlap()2// EOM the overlap of the adapted mesh (as ThOverlap)
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,cmm = // for plotMPI
+macro PARAMSW fill=true,value=true,wait=1,cmm = // for plotMPI (the last plot)
+real s0=clock();
+
+real gamma=2.;
+real gr=9.81;
+real kappa=gr/2.;
+
+macro case() 1//
+IFMACRO(case,1)
+     include "getARGV.idp"
+     real R=getARGV("-R",10.), hm=getARGV("-h",0.5), xg=getARGV("-x0",0.);
+     border C(t=0,2*pi){x=R*cos(t); y=R*sin(t); label=1;}
+     mesh Th=buildmesh(C(int(2*pi*R/hm)));
+     int Npx=30;
+     real tdraw=.1,Tf=5.;
+     macro bbsw() [[-20.,-20.],[20.,20.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   
+     func z0 = 0.;
+     func h0 = 1.+0.2*exp(-((x-xg)^2+y^2)/4.) - z0;// a hump of water at rest, off the center
+     //func h0 = (dist(x-xg,y-0.)<=(R/4.)) - z0;
+     func hu0 = 0.;
+     real[int] Tsave = [1., 2., 3., 4., 5.];
+     string filenamesave = "igd.txt";
+     // boundary conditions: the circle (label 1), wall by default; -bc 1: Neumann
+     int bc=getARGV("-bc",2);
+     int[int] labBC=[1,bc];
+ENDIFMACRO
+IFMACRO(case,2)
+   real tdraw=.1,Tf=20.;
+   macro bbsw() [[-100.,0.],[100.,100.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   int Npx=100,Npy=Npx;
+   real xp=30.,yp=0.,R=100.;
+   real aa=-R,bb=R,cc=-R,dd=R;
+   border AB(t=aa,bb){x=t; y=cc;label=1;};
+   border BC(t=cc,dd){x=bb; y=t;label=2;};
+   border CD(t=bb,aa){x=t; y=dd;label=3;};
+   border DA(t=dd,cc){x=aa; y=t;label=4;};
+   mesh Th = buildmesh(AB(Npx)+BC(Npy)+CD(Npx)+DA(Npy),splitpbedge=1);
+   //func h0 = (dist(x-xp,y-yp)<=(R/4.)) + 1.;
+   func h0 = exp(-(x-xp)^2/100.-(y-yp)^2/100.) + 1.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igd.txt";
+   // boundary conditions: wall on x = R (label 2), Neumann on y = -R, y = R, x = -R (labels 1, 3, 4)
+   int[int] labBC=[1,1,2,2,3,1,4,1];
+ENDIFMACRO
+IFMACRO(case,4)
+   gamma=1.4;// MODIFICATION OF GAMMA
+   kappa=1.;//  MODIFICATION OF KAPPA
+   real tdraw=.1,Tf=3.;
+   macro bbsw() [[-5.,0.],[5.,5.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   int Npx=30;
+   real L=5.,Haut=5.;
+   border aa(t=0.,1.){x=L*(2.*t-1.);y=-Haut;label=1;};
+   border bb(t=0.,1.){x=L;y=Haut*(2.*t-1.);label=2;};
+   border cc(t=0.,1.){x=L*(1.-2.*t);y=Haut;label=3;};
+   border dd(t=0.,1.){x=-L;y=Haut*(1.-2.*t);label=4;};
+   mesh Th=buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func hu0 = 0.;
+func real rhoexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+}
+func real uxexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+}
+func real uyexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+}
+   func h0=rhoexact(0.);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igd.txt";
+   // boundary conditions: Neumann on y = -Haut, y = Haut (labels 1, 3), Dirichlet (the exact solution) on x = L, x = -L (labels 2, 4)
+   int[int] labBC=[1,1,2,0,3,1,4,0];
+ENDIFMACRO
+
+Tf=getARGV("-Tf",Tf);// the final time of the case, or the option -Tf
+int ntdraw=0;
+real t,dt,CFL=.5;//1.;//
+func PK3=[P0,P0,P0];
+// mesh adaptation
+int adaptm=getARGV("-adapt",0), nadapt=getARGV("-nadapt",10);
+real hmesh0=Th.hmax, erra=getARGV("-erra",0.01), hmina=getARGV("-hmin",hmesh0/8.), hmaxa=getARGV("-hmax",2.*hmesh0);
+real nbvx=getARGV("-nbvx",1.e5);
+Mat A;
+{
+   macro def(u)[u, u#B, u#C]// EOM
+   macro init(u)[u, u, u]// EOM
+   createMat(Th, A, PK3)// Th: the local mesh (with overlap)
+}
+fespace Ph3(Th,PK3);
+fespace Ph(Th,P0);
+Ph3 [H,Hu,Hv]=[0,0,0],[HBC,HuBC,HvBC]=[0,0,0],[Hr,Hur,Hvr]=[0,0,0];
+Ph3 [Hp,Hup,Hvp];//for second order in time
+[H,Hu,Hv]=[max(h0,0.),hu0,0];
+// labBC (in each case): [label,type,...], type 0 Dirichlet, 1 Neumann (default), 2 wall; the interfaces
+// (label -111111): Neumann
+Ph scal1,scal2;
+Ph3 [D0,D0B,D0C]; D0[]=A.D;// the partition of unity (1 on the cells of the process)
+Ph Dc=D0;// for the global integrals
+
+IFMACRO(case,4)
+     [H,Hu,Hv]=[max(h0,0.),max(h0,0.)*uxexact(0.),max(h0,0.)*uyexact(0.)];
+ENDIFMACRO
+
+{ Ph rho=H; plotMPI(Th, rho, P0, def1, real, PARAMS "rho at t=0") }
+
+real[int] params=[gamma,kappa];//sets the exponent gamma and the coefficient kappa of the polytropic gas law
+int mtordre=2;// order of accuracy in time (1 or 2)
+fvscheme FV([H,Hu,Hv],order=2,eq="igd",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+int iter=0;
+real dtsub, dtl;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        { Ph rho=H; plotMPI(Th, rho, P0, def1, real, PARAMS "rho at t="+t+", dt="+dt) }
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     //time dependent BC (the local boundary: the interfaces too, Neumann, HBC not used there):
+     IFMACRO(case,4)
+      for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+          int kib=Th.be(ib).Element;//neighbouring triangle
+          int iib=Th.be(ib).whoinElement;//edge in triangle
+          int ee;
+          int kee=Th[kib].adj((ee=iib));
+          if(kee==kib){
+           x=.5*(Th.be(ib)[0].x+Th.be(ib)[1].x);
+           y=.5*(Th.be(ib)[0].y+Th.be(ib)[1].y);
+           HBC[][3*kib]=rhoexact(t);
+           HBC[][3*kib+1]=rhoexact(t)*uxexact(t);
+           HBC[][3*kib+2]=rhoexact(t)*uyexact(t);
+          }
+      }
+     ENDIFMACRO
+     dtl = fluxupdate(FV,[H,Hu,Hv],[Hr,Hur,Hvr],[HBC,HuBC,HvBC]);
+     mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+     exchange(A,Hr[],scaled=true);// the overlap cells: the values of their process
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    scal1=H;
+    real Hminl=scal1[].min, Hmin;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmaxl=scal2[].linfty, velmax;
+    mpiAllReduce(Hminl,Hmin,mpiCommWorld,mpiMIN);
+    mpiAllReduce(velmaxl,velmax,mpiCommWorld,mpiMAX);
+    if (!mpirank) {
+      cout << iter+1 << " t=" << t;
+      if (Hmin<0.) cout << " Hmin=" << Hmin;
+      cout << " velmax=" << velmax << endl;
+      if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+    }
+    if (adaptm && (iter+1)%nadapt == 0 && t < Tf-1.e-10) {// parallel mesh adaptation, conservative transfer
+      Ph part = Dc;// the cells owned by this process: the partition of unity of P0 (1 or 0)
+      fespace Vh1(Th, P1);
+      Vh1 m1 = H;
+      mesh ThNew = adaptmeshddm(Th, m1, err=erra, hmin=hmina, hmax=hmaxa, iso=0, nbvx=nbvx, owned=part[], comm=mpiCommWorld);
+      DmeshReconstruct(ThNew);
+      real[int] Un(1);
+      remapP0ddm(Th, H[], Dc[], ThNew, Un);// the parallel conservative transfer of [rho,rho u,rho v]
+      DmeshCopy(ThNew, Th);
+      {
+        macro def(u)[u, u#B, u#C]// EOM
+        macro init(u)[u, u, u]// EOM
+        Mat An;
+        MatCreate(Th, An, PK3)
+        A = An;
+      }
+      [H,Hu,Hv] = [0,0,0];
+      H[] = Un;
+      [Hp,Hup,Hvp] = [0,0,0]; [Hr,Hur,Hvr] = [0,0,0]; [HBC,HuBC,HvBC] = [0,0,0];
+      [D0,D0B,D0C] = [0,0,0]; D0[] = A.D; Dc = D0;
+      int ntl = 0, ntg; for (int k=0; k<Th.nt; k++) if (Dc[][k] > 0.5) ntl++;
+      mpiAllReduce(ntl, ntg, mpiCommWorld, mpiSUM);
+      if (!mpirank) cout << "  adaptation at t=" << t << " : " << ntg << " triangles" << endl;
+    }
+}//end of time loop
+if (!mpirank) cout<<"cputime = "<<clock()-s0<<endl;
+{ Ph rho=H; plotMPI(Th, rho, P0, def1, real, PARAMSW "rho at t="+t) }
+
+// global mass and extrema of rho (to compare with freevol_igd2d.edp)
+{
+  real ml=int2d(Th)(Dc*H), mg; mpiAllReduce(ml,mg,mpiCommWorld,mpiSUM);
+  Ph rho=H; real a=rho[].min, b=rho[].max, ag, bg;
+  mpiAllReduce(a,ag,mpiCommWorld,mpiMIN); mpiAllReduce(b,bg,mpiCommWorld,mpiMAX);
+  if (!mpirank) cout << mpisize << " processes: mass = " << mg << " , min rho = " << ag << " , max rho = " << bg << endl;
+}
+IFMACRO(case,4)
+  Ph rhoex,uxex,uyex;
+  rhoex=rhoexact(t);
+  uxex=uxexact(t);
+  uyex=uyexact(t);
+  scal2=Hu/(H+1.e-13);
+  real e1l=int2d(Th)(Dc*(H-rhoex)^2), e2l=int2d(Th)(Dc*(scal2-uxex)^2), e1, e2, e3;
+  scal2=Hv/(H+1.e-13);
+  real e3l=int2d(Th)(Dc*(scal2-uyex)^2);
+  mpiAllReduce(e1l,e1,mpiCommWorld,mpiSUM); mpiAllReduce(e2l,e2,mpiCommWorld,mpiSUM); mpiAllReduce(e3l,e3,mpiCommWorld,mpiSUM);
+  if (!mpirank) cout << "errorrho,errorux,erroruy " << sqrt(e1) << " " << sqrt(e2) << " " << sqrt(e3) << endl;
+ENDIFMACRO

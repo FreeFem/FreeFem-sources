@@ -1,0 +1,4 @@
+meshL Th; : a 1D mesh of segments, a curve in 3D space (int1d(Th), fespace
+  Vh(Th, P1), finite volumes in 1D).
+  Built by segment, buildmeshL, extract, adaptmesh, movemesh, trunc, ...
+  Example: meshL Th = segment(20, [4*x, 0, 0]);

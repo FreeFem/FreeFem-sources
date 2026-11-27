@@ -1695,6 +1695,7 @@ void Init_map_type()
     Global.Add("storagetotal","(",new OneOperator0<long>(storagetotal));
 
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
+     { extern void Load_Init_help(); Load_Init_help(); }// help(f), help("name"), help() (ffhelp.cpp)
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006
      Global.Add("system","(",new OneOperator1<long,string* >(exec));  //FH string fevr 2011
 

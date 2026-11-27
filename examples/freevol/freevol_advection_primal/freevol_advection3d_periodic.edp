@@ -1,0 +1,47 @@
+// advection in 3D (mesh3) by finite volumes with periodic boundary conditions
+//   fvscheme FV([V1,V2,V3], eq="advection", ..., periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]): the
+//   3D fespace syntax (2 functions per label); the faces of boundaries 1 (y = 0) and 3 (y = 1) whose vertices have
+//   the same (x, z) are glued (2 and 4: the same (y, z); 5 and 6: the same (x, y)): interior faces
+//   (the flux computed once: conservative; the order 2 slopes, by least squares, see the translated neighbors
+//   on the other side)
+//   a gaussian transported at velocity (1, 0.5, 0.25) in the periodic cube: at t = 4 (4 turns in x, 2 in y,
+//   1 in z) it is back at its initial position, the L2 error is compared with the initial data
+// options: -n (segments per side, 8), -ordre (2 or 1), -Tf (4), -cx (center in x, 0.5), -nw: no plot
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 8), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", 4.), cx = getARGV("-cx", 0.5);
+mesh3 Th = cube(n, n, n);                  // labels 1 y=0, 2 x=1, 3 y=1, 4 x=0, 5 z=0, 6 z=1
+fespace Ph(Th, P0);
+// the periodic initial data (the gaussian and its neighboring images)
+func real gp(real xx, real yy, real zz) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++)
+    s += exp(-((xx-cx-i)^2+(yy-0.5-j)^2+(zz-0.5-k)^2)/0.03);
+  return s;
+}
+Ph u = gp(x, y, z), up, ur = 0, uBC = 0;
+Ph V1 = 1, V2 = 0.5, V3 = 0.25;            // constant velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];   // no effect on the periodic boundaries
+fvscheme FV([V1,V2,V3], eq="advection", labelBC=labBC, numflux=2, order=ordre,
+            periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+real mass0 = int3d(Th)(u), t = 0, dt, dtsub, CFL = 0.9;
+plot(u, cmm="3D periodic: initial data", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+// the exact solution: the initial data translated by t*(1, 0.5, 0.25) (periodic)
+func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t), z - 0.25*t - floor(z - 0.25*t));
+real err = sqrt(int3d(Th, qforder=3)((u-uex)^2));
+cout << "3D periodic (order " << ordre << ", n = " << n << "): t = " << t << " , " << it << " steps , " << Th.nt
+     << " tetrahedra , mass = " << int3d(Th)(u) << " (deviation " << int3d(Th)(u)-mass0 << ") , max u = " << u[].max
+     << " , L2 error = " << err << endl;
+plot(u, cmm="3D periodic: solution at t = " + t, wait=1);

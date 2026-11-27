@@ -671,7 +671,7 @@ macro ffddmpartf(prmesh,Th,sizeoverlaps,res)
     
     if (ffddmbplot && (mpiRank(prmesh#commddm) == 0 && ffddmverbosity >= 5)) {
       if (ffddmbffplot)
-      plot(upart,wait=0,cmm="partition",value=1,fill=1);
+      plot(upart,wait=0,cmm="partition",value=1,fill=1,global=false);
       if (ffddmbmedit)
       medit("partition",Th,upart);
     }
@@ -851,7 +851,7 @@ NewMacro prfe#mplot(u,s)
         if (ffddmbmedit)
         medit(s,prmsh#Thglob,solplot);
         if (ffddmbffplot)
-        plot(solplot,dim=3,wait=0,cmm=s,value=1,fill=1,nbiso=ffddmnbiso);
+        plot(solplot,dim=3,wait=0,cmm=s,value=1,fill=1,nbiso=ffddmnbiso,global=false);
       }
     }
   }

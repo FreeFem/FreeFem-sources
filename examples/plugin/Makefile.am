@@ -271,6 +271,7 @@ EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.
 
 freefem++.pref: Makefile
 	echo loadpath = "../../plugin/seq/" > freefem++.pref
+	echo loadpath += "../../plugin/mpi/" >> freefem++.pref
 	echo includepath = "../../idp/" >> freefem++.pref
 
 clean-local:

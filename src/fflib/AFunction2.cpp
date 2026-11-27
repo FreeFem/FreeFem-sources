@@ -884,6 +884,7 @@ E_F0 * Routine::code(const basicAC_F0 & args) const
 
 void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
 {
+ if (ffhelp_probe && n > 0) throw ffHelpNamedParams{n, l};// help(f): the list of the named parameters
  int k=0;
  if ( !n && !named_parameter)  return;
 

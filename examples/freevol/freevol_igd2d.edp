@@ -1,0 +1,200 @@
+// solves the system of isentropic gas dynamics by the finite volume method (2D, mesh)
+//   U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v], p = kappa*rho^gamma, parameters=[gamma,kappa]
+//   1D: freevol_igd1d.edp (meshL), 3D: freevol_igd3d.edp (mesh3)
+//   the model is loaded by fvscheme from eq="igd" (plugin FreeVol_igd)
+real s0=clock();
+
+real gamma=2.;
+real gr=9.81;
+real kappa=gr/2.;
+
+macro case() 1//
+IFMACRO(case,1)
+     include "getARGV.idp"
+     real R=getARGV("-R",10.), hm=getARGV("-h",0.5), xg=getARGV("-x0",0.);
+     border C(t=0,2*pi){x=R*cos(t); y=R*sin(t); label=1;}
+     mesh Th=buildmesh(C(int(2*pi*R/hm)));
+     int Npx=30;
+     real tdraw=.1,Tf=5.;
+     macro bbsw() [[-20.,-20.],[20.,20.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   
+     func z0 = 0.;
+     func h0 = 1.+0.2*exp(-((x-xg)^2+y^2)/4.) - z0;// a hump of water at rest, off the center
+     //func h0 = (dist(x-xg,y-0.)<=(R/4.)) - z0;
+     func hu0 = 0.;
+     real[int] Tsave = [1., 2., 3., 4., 5.];
+     string filenamesave = "igd.txt";
+     // boundary conditions: the circle (label 1), wall by default; -bc 1: Neumann
+     int bc=getARGV("-bc",2);
+     int[int] labBC=[1,bc];
+ENDIFMACRO
+IFMACRO(case,2)
+   real tdraw=.1,Tf=20.;
+   macro bbsw() [[-100.,0.],[100.,100.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   int Npx=100,Npy=Npx;
+   real xp=30.,yp=0.,R=100.;
+   real aa=-R,bb=R,cc=-R,dd=R;
+   border AB(t=aa,bb){x=t; y=cc;label=1;};
+   border BC(t=cc,dd){x=bb; y=t;label=2;};
+   border CD(t=bb,aa){x=t; y=dd;label=3;};
+   border DA(t=dd,cc){x=aa; y=t;label=4;};
+   mesh Th = buildmesh(AB(Npx)+BC(Npy)+CD(Npx)+DA(Npy),splitpbedge=1);
+   //func h0 = (dist(x-xp,y-yp)<=(R/4.)) + 1.;
+   func h0 = exp(-(x-xp)^2/100.-(y-yp)^2/100.) + 1.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igd.txt";
+   // boundary conditions: wall on x = R (label 2), Neumann on y = -R, y = R, x = -R (labels 1, 3, 4)
+   int[int] labBC=[1,1,2,2,3,1,4,1];
+ENDIFMACRO
+IFMACRO(case,4)
+   gamma=1.4;// MODIFICATION OF GAMMA
+   kappa=1.;//  MODIFICATION OF KAPPA
+   real tdraw=.1,Tf=3.;
+   macro bbsw() [[-5.,0.],[5.,5.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (plotFreeVolbb)
+   int Npx=30;
+   real L=5.,Haut=5.;
+   border aa(t=0.,1.){x=L*(2.*t-1.);y=-Haut;label=1;};
+   border bb(t=0.,1.){x=L;y=Haut*(2.*t-1.);label=2;};
+   border cc(t=0.,1.){x=L*(1.-2.*t);y=Haut;label=3;};
+   border dd(t=0.,1.){x=-L;y=Haut*(1.-2.*t);label=4;};
+   mesh Th=buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func hu0 = 0.;
+func real rhoexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+}
+func real uxexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+}
+func real uyexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+}
+   func h0=rhoexact(0.);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igd.txt";
+   // boundary conditions: Neumann on y = -Haut, y = Haut (labels 1, 3), Dirichlet (the exact solution) on x = L, x = -L (labels 2, 4)
+   int[int] labBC=[1,1,2,0,3,1,4,0];
+ENDIFMACRO
+
+int ntdraw=0;
+real t,dt,CFL=.5;//1.;//
+fespace Ph3(Th,[P0,P0,P0]);
+fespace Ph(Th,P0);
+Ph3 [H,Hu,Hv]=[0,0,0],[HBC,HuBC,HvBC]=[0,0,0],[Hr,Hur,Hvr]=[0,0,0];
+Ph3 [Hp,Hup,Hvp];//for second order in time
+[H,Hu,Hv]=[max(h0,0.),hu0,0];
+// labBC (in each case): [label,type,...], type 0 Dirichlet, 1 Neumann (default), 2 wall
+Ph scal1,scal2;
+
+IFMACRO(case,4)
+     [H,Hu,Hv]=[max(h0,0.),max(h0,0.)*uxexact(0.),max(h0,0.)*uyexact(0.)];
+ENDIFMACRO
+
+// plotFreeVol2d(Th, rho, 0, {options of plot}): rho as a volume above a flat ground, see plotFreeVol.idp
+// (the window bbsw cuts the domain at y = 0: through the center of the dam break and of the vortex)
+include "plotFreeVol.idp"
+plotFreeVolbb(bbsw)
+plotFreeVol2d(Th,H,0,{cmm="rho at t=0",wait=0})
+
+real[int] params=[gamma,kappa];//sets the exponent gamma and the coefficient kappa of the polytropic gas law
+//int[int] intparams=[-3,2];
+int mtordre=2;// order of accuracy in time (1 or 2)
+fvscheme FV([H,Hu,Hv],order=2,eq="igd",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+real[int] params2=[3.,5.];
+fvscheme FV2([H,Hu,Hv],order=2,eq="igd",labelBC=labBC,limiter=0,numflux=1,parameters=params2);
+
+macro test()0//EOM
+IFMACRO(test,0)
+
+//bounding box for the plot
+int NTsave = Tsave.n;
+real[int,int] Savedata(Npx+1,NTsave+2);
+Savedata = 0;
+int ncsave=0;
+int[int] donesave(NTsave);   // false by default
+donesave = 0;
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        plotFreeVol2d(Th,H,0,{cmm="rho at t="+t+", dt="+dt,wait=0})
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     //time dependent BC:
+     IFMACRO(case,4)
+      //[HBC,HuBC,HvBC]=[rhoexact(t),rhoexact(t)*uxexact(t),rhoexact(t)*uyexact(t)];//lent
+      for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+          int kib=Th.be(ib).Element;//neighbouring triangle
+          int iib=Th.be(ib).whoinElement;//edge in triangle
+          int ee;
+          int kee=Th[kib].adj((ee=iib));
+          if(kee==kib){
+           //betable(kib)=ib;
+           x=.5*(Th.be(ib)[0].x+Th.be(ib)[1].x);
+           y=.5*(Th.be(ib)[0].y+Th.be(ib)[1].y);
+           HBC[][3*kib]=rhoexact(t);
+           HBC[][3*kib+1]=rhoexact(t)*uxexact(t);
+           HBC[][3*kib+2]=rhoexact(t)*uyexact(t);
+          }
+      }
+     ENDIFMACRO
+     dtsub = fluxupdate(FV,[H,Hu,Hv],[Hr,Hur,Hvr],[HBC,HuBC,HvBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    scal1=H;
+    real Hmin=scal1[].min;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmax=scal2[].linfty;
+    cout << iter+1 << " t=" << t;
+    if (Hmin<0.) cout << " Hmin=" << Hmin;
+    cout << " velmax=" << velmax << endl;
+    if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+}//end of time loop
+cout<<"cputime = "<<clock()-s0<<endl;
+plotFreeVol2d(Th,H,0,{cmm="rho at t="+t,wait=1})
+
+IFMACRO(case,4)
+  Ph rhoex,uxex,uyex;
+  rhoex=rhoexact(t);
+  uxex=uxexact(t);
+  uyex=uyexact(t);
+  scal2=Hu/(H+1.e-13);
+  real errorrho=sqrt(int2d(Th)((H-rhoex)^2));
+  real errorux=sqrt(int2d(Th)((scal2-uxex)^2));
+  scal2=Hv/(H+1.e-13);
+  real erroruy=sqrt(int2d(Th)((scal2-uyex)^2));
+  cout << "errorrho,errorux,erroruy " << errorrho << " " << errorux << " " << erroruy << endl;
+ENDIFMACRO
+
+ENDIFMACRO

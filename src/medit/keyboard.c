@@ -48,8 +48,9 @@ static void usage( ) {
   fprintf(stdout, "3 - 2d elevation   h/H - lower/higher elevation   k - complex part\n");
   fprintf(stdout, "c - 2d cut line u(x) / u(y) / none   < > (or , .) move it   shift+drag: segment\n");
   fprintf(stdout, "s - iso-surfaces (3d)   V - arrows   a/A - shorter/longer arrows\n");
-  fprintf(stdout, "e/E - exploded view (shrink)   T - normals   U - overlay of the windows\n");
+  fprintf(stdout, "e - toggle matcolors   E - edit matcolors   T - normals   U - overlay of the windows\n");
   fprintf(stdout, "F1 clip plane  F2 edit it (mouse)  F3 freeze it on the object  F4 vclip\n");
+  fprintf(stdout, "F5 shrink (exploded view) on/off   F6 increase shrink   F7 decrease shrink\n");
   fprintf(stdout, "= - reset view   z/Z - zoom   +/- scale object   arrows - translate\n");
   fprintf(stdout, "w - hardcopy PPM   b - back color   G - grid   r - refresh\n");
   fprintf(stdout, "1d graph: k lines/points  G grid  F bold  x y log  z Z zoom  A axes  i auto\n");
@@ -381,7 +382,10 @@ void ffDefaults(pScene sc, pMesh mesh) {
   if (!mesh->nbb || graph1dMesh(mesh)) return;
 
   sc->isotyp &= ~(S_ISOLINE | S_VECTOR | S_ISOSURF);
-  if (mesh->dim == 2) {
+  if (mesh->dim == 2 && dualMesh(mesh) && mesh->nfield == 1) {
+    sc->mode = S_FILL + S_MAP; /* dual mesh: the control volumes in colors (one value) */
+    sc->item |= S_GEOM;
+  } else if (mesh->dim == 2) {
     sc->mode = S_FILL; /* the interior in the color of the background: no edge of the mesh */
     sc->item |= S_GEOM; /* the border of the domain */
     if (mesh->nfield == 1 && mesh->typage == 2)
@@ -477,17 +481,6 @@ static int ffKey(pScene sc, pMesh mesh, unsigned char key) {
       break;
     case 'l': /* lighting */
       sc->mode ^= S_COLOR;
-      break;
-    case 'e': /* exploded view: the elements smaller */
-    case 'E':
-      if (key == 'e')
-        sc->shrink = sc->shrink > 0.99 ? 0.95 : max(0.1, sc->shrink - 0.05);
-      else if (sc->shrink < 0.99)
-        sc->shrink = sc->shrink + 0.05 > 0.96 ? 1.0 : sc->shrink + 0.05;
-
-      doLists(sc, mesh);
-      if (sc->mode & S_MAP) doMapLists(sc, mesh, 1);
-
       break;
     case '=': /* reset the view */
       keyView('R', 0, 0);

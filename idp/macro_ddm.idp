@@ -86,6 +86,57 @@ NewMacro defPlt#Th(vPrivate)vPrivate EndMacro
     plotMPI(Th, plt, P1, defPlt#Th, real, params)
 }//
 
+// plotDP0(Th, u, params) or plotDP0(Th, [u1, u2, ...], params): plot of one or several solutions in P0 (one value per
+// cell, the value at its barycentre: no P1 interpolation, the discontinuities of a finite volume solution are kept),
+// the local pieces of all the processes gathered on process 0 and plotted together, as plot(u1, u2, ..., params)
+macro plotDP0(Th, uPrivate, params)
+if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro
+ENDIFMACRO
+    meshN ThCurrent = Th;
+    fespace PhPlotPrivate(ThCurrent, P0);
+    real[int] valPlotPrivate(1); /* the values of the solutions at a point: u or [u1, u2, ...] evaluated */
+    int nLocalPlotPrivate = 1, nPlotPrivate;
+    if(ThCurrent.nt) {
+        PhPlotPrivate cPlotPrivate = (valPlotPrivate = uPrivate)[0];
+        nLocalPlotPrivate = valPlotPrivate.n;
+    }
+    mpiAllReduce(nLocalPlotPrivate, nPlotPrivate, mpiCommWorld, mpiMAX); /* the number of solutions (an empty piece: 1) */
+    PhPlotPrivate[int] uSend(nPlotPrivate);
+    if(ThCurrent.nt)
+        for(int j = 0; j < nPlotPrivate; ++j)
+            uSend[j] = (valPlotPrivate = uPrivate)[j];
+    if(mpirank == 0) {
+        meshN[int] meshTab(mpisize);
+        PhPlotPrivate[int] uTab(nPlotPrivate * mpisize); /* solution j of process i: uTab[j * mpisize + i] (the solutions drawn one after the other, as plot(u1, u2, ...)) */
+        if(ThCurrent.nt)
+            for(int j = 0; j < nPlotPrivate; ++j)
+                uTab[j * mpisize][] = uSend[j][];
+        meshTab[0] = ThCurrent;
+        mpiRequest[int] rq((mpisize - 1) * nPlotPrivate);
+        for(int i = 1; i < mpisize; ++i)
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
+        mpiWaitAll(rq);
+        for(int i = 1; i < mpisize; ++i) {
+            ThCurrent = meshTab[i];
+            if(ThCurrent.nt)
+                for(int j = 0; j < nPlotPrivate; ++j)
+                    Irecv(processor(i, mpiCommWorld, rq[(i - 1) * nPlotPrivate + j]), uTab[j * mpisize + i][]);
+        }
+        mpiWaitAll(rq);
+        plot(uTab, global = false, params); /* process 0 only: the pieces already gathered */
+    }
+    else {
+        mpiRequest[int] rq(1 + nPlotPrivate);
+        Isend(processor(0, rq[0]), ThCurrent);
+        if(ThCurrent.nt)
+            for(int j = 0; j < nPlotPrivate; ++j)
+                Isend(processor(0, rq[1 + j]), uSend[j][]);
+        mpiWaitAll(rq);
+    }
+}// EOM
+
 macro plotMPI(Th, uPrivate, Pk, def, K, params)
 if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
 IFMACRO(!meshN)
@@ -115,7 +166,7 @@ ENDIFMACRO
                 Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
         }
         mpiWaitAll(rq);
-        plot(def(uTab), params);
+        plot(def(uTab), global = false, params); /* process 0 only: the pieces already gathered */
     }
     else {
         mpiRequest[int] rq(2);

@@ -1,0 +1,144 @@
+// solves the system of isentropic gas dynamics by the finite volume method in 1D (meshL)
+//   U_t+F(U)_x = 0, U=[rho,rho*u], F(U) = (rho*u, rho*u^2 + kappa*rho^gamma), parameters=[gamma,kappa]
+//   the same command fvscheme as in 2D (freevol_igd2d.edp): the dimension is given by the mesh of [rho,rhou]
+//   Riemann problems, compared with the exact solution (computed below): rho*, u* by bisection on the
+//   wave curves (rarefaction or shock), then the solution sampled at (x-x0)/t
+// options: -n (number of cells), -ordre (1 or 2), -nf (numflux), -lim (limiter)
+include "getARGV.idp"
+real s0=clock();
+load "msh3"
+
+macro case() Dambreak//
+// rhoL,uL | rhoR,uR at x=x0, domain [xp,xp1], Neumann boundary conditions (the waves stay inside)
+IFMACRO(case,Dambreak)
+   // gamma=2, kappa=g/2: the shallow water system (rho = H), the 1D version of the case 2 of freevol_igd2d.edp
+   real gamma=2., kappa=9.81/2.;
+   real xp=0., xp1=200., x0=100., rhoL=2., uL=0., rhoR=1., uR=0., Tf=10.;
+ENDIFMACRO
+IFMACRO(case,ShockTube)
+   // a rarefaction to the left, a shock to the right
+   real gamma=1.4, kappa=1.;
+   real xp=0., xp1=1., x0=0.5, rhoL=1., uL=0., rhoR=0.125, uR=0., Tf=0.15;
+ENDIFMACRO
+IFMACRO(case,Vacuum)
+   // two rarefactions which separate fast: vacuum in the middle (positivity of rho)
+   real gamma=1.4, kappa=1.;
+   real xp=0., xp1=2., x0=1., rhoL=1., uL=-7., rhoR=1., uR=7., Tf=0.08;
+ENDIFMACRO
+IFMACRO(case,Collision)
+   // two flows which collide: two shocks
+   real gamma=1.4, kappa=1.;
+   real xp=0., xp1=1., x0=0.5, rhoL=1., uL=1., rhoR=1., uR=-1., Tf=0.15;
+ENDIFMACRO
+
+int Npx=getARGV("-n",400), mtordre=getARGV("-ordre",2), nfl=getARGV("-nf",2), lim=getARGV("-lim",1);
+// ---- the exact solution of the Riemann problem
+func real pres(real r) { return kappa*r^gamma; }
+func real cson(real r) { return sqrt(gamma*kappa*r^(gamma-1.)); }
+func real rhoofc(real c) { return (c^2/(gamma*kappa))^(1./(gamma-1.)); }
+// velocity change across the wave from the state rk to r (rarefaction if r<rk, shock otherwise)
+func real gwave(real r, real rk) {
+   if (r <= rk) return 2./(gamma-1.)*(cson(r)-cson(rk));
+   return sqrt((pres(r)-pres(rk))*(r-rk)/(r*rk));
+}
+real rhos=0., us=0.;// the intermediate state
+{
+   real a=0., b=10.*max(rhoL,rhoR)+10.;
+   if (gwave(0.,rhoL)+gwave(0.,rhoR)+uR-uL >= 0.) { rhos=0.; us=0.; }// vacuum
+   else {
+      for (int i=0; i<200; i++) { real m=(a+b)/2; if (gwave(m,rhoL)+gwave(m,rhoR)+uR-uL > 0.) b=m; else a=m; }
+      rhos=(a+b)/2; us=uL-gwave(rhos,rhoL);
+   }
+}
+real rexa, uexa;// the exact solution at xi = (x-x0)/t, set by riemann(xi)
+func real riemann(real xi) {
+   real cL=cson(rhoL), cR=cson(rhoR);
+   if (rhos<=0.) {// vacuum: two rarefactions down to rho=0
+      if (xi <= uL-cL) { rexa=rhoL; uexa=uL; }
+      else if (xi <= uL+2./(gamma-1.)*cL) { uexa=2./(gamma+1.)*(cL+(gamma-1.)/2.*uL+xi); rexa=rhoofc(uexa-xi); }
+      else if (xi < uR-2./(gamma-1.)*cR) { rexa=0.; uexa=0.; }
+      else if (xi < uR+cR) { uexa=2./(gamma+1.)*(-cR+(gamma-1.)/2.*uR+xi); rexa=rhoofc(xi-uexa); }
+      else { rexa=rhoR; uexa=uR; }
+      return rexa;
+   }
+   real cs=cson(rhos);
+   if (xi <= us) {// left of the contact: the 1-wave
+      if (rhos > rhoL) {// shock
+         real s=(rhos*us-rhoL*uL)/(rhos-rhoL);
+         if (xi < s) { rexa=rhoL; uexa=uL; } else { rexa=rhos; uexa=us; }
+      } else {// rarefaction
+         if (xi <= uL-cL) { rexa=rhoL; uexa=uL; }
+         else if (xi >= us-cs) { rexa=rhos; uexa=us; }
+         else { uexa=2./(gamma+1.)*(cL+(gamma-1.)/2.*uL+xi); rexa=rhoofc(uexa-xi); }
+      }
+   } else {// the 2-wave
+      if (rhos > rhoR) {
+         real s=(rhos*us-rhoR*uR)/(rhos-rhoR);
+         if (xi > s) { rexa=rhoR; uexa=uR; } else { rexa=rhos; uexa=us; }
+      } else {
+         if (xi >= uR+cR) { rexa=rhoR; uexa=uR; }
+         else if (xi <= us+cs) { rexa=rhos; uexa=us; }
+         else { uexa=2./(gamma+1.)*(-cR+(gamma-1.)/2.*uR+xi); rexa=rhoofc(xi-uexa); }
+      }
+   }
+   return rexa;
+}
+cout << "exact intermediate state: rho* = " << rhos << " , u* = " << us << endl;
+
+meshL Th = segment(Npx, [xp+(xp1-xp)*x, 0, 0]);// labels: 1 at x=xp, 2 at x=xp1
+fespace Ph2(Th,[P0,P0]);
+fespace Ph(Th,P0);
+Ph2 [H,Hu]=[0,0],[HBC,HuBC]=[0,0],[Hr,Hur]=[0,0];
+Ph2 [Hp,Hup];//for second order in time
+[H,Hu]=[(x<x0)*rhoL+(x>=x0)*rhoR,(x<x0)*rhoL*uL+(x>=x0)*rhoR*uR];
+int[int] labBC=[1,1,2,1];// Neumann
+real m0=int1d(Th)(H);
+
+// the exact solution rex, P1 on a fine meshL, plotted with the numerical one: plot(rho,rex)
+meshL ThE = segment(2000, [xp+(xp1-xp)*x, 0, 0]);
+fespace VhE(ThE,P1);
+VhE rex;
+
+real[int] params=[gamma,kappa];//sets the exponent gamma and the coefficient kappa of the polytropic gas law
+fvscheme FV([H,Hu],order=mtordre,eq="igd",labelBC=labBC,limiter=lim,numflux=nfl,parameters=params);
+
+real t=0.,dt,CFL=.5,tdraw=Tf/10.;
+int ntdraw=0, iter=0;
+real dtsub, rmin=min(rhoL,rhoR);
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        for (int i=0;i<ThE.nv;i++) {
+            if (t>0) rex[][i]=riemann((ThE(i).x-x0)/t);
+            else if (ThE(i).x<x0) rex[][i]=rhoL;
+            else rex[][i]=rhoR;
+        }
+        Ph rho=H;
+        plot(rho,rex,cmm="rho at t="+t+" | xlabel=x | ylabel=rho | legend=numerical (P0),exact",wait=0);
+        ntdraw++;
+    }
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu],[Hr,Hur],[HBC,HuBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+    Ph rho=H; rmin=min(rmin,rho[].min);
+}//end of time loop
+for (int i=0;i<ThE.nv;i++) rex[][i]=riemann((ThE(i).x-x0)/t);
+{ Ph rho=H; plot(rho,rex,cmm="rho at t="+t+" | xlabel=x | ylabel=rho | legend=numerical (P0),exact",wait=1); }
+
+// errors with the exact solution (at the centroids of the cells)
+Ph rho=H, u=Hu/(H+1.e-13), xc=x, rhoe, ue;
+for (int k=0;k<Th.nt;k++) { riemann((xc[][k]-x0)/t); rhoe[][k]=rexa; ue[][k]=uexa; }
+cout << iter << " time steps, cputime = " << clock()-s0 << endl;
+// the mass changes by the fluxes at the boundary: rhoL*uL in, rhoR*uR out (the waves stay inside)
+cout << "mass balance error = " << (int1d(Th)(H)-m0-(rhoL*uL-rhoR*uR)*t)/m0 << " , min rho (all the steps) = " << rmin << endl;
+cout << "L1 error on rho = " << int1d(Th)(abs(rho-rhoe)) << " , on u (where rho > 1e-3) = " << int1d(Th)((rhoe>1.e-3)*abs(u-ue)) << endl;

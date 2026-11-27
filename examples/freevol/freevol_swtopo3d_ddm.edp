@@ -1,0 +1,142 @@
+/* ---------------------------------------------------------
+
+   the system of freevol_swtopo2d.edp in 3D (mesh3): a minimal example (a few seconds), to check that the
+   3D version works, not a physical computation (shallow water is a 2D model):
+   U_t+div(F(U))+(0,gr*H*grad zb) = 0, U=[H,Hu,Hv,Hw], H>=0, F(U) = (H u, H u x u + gr/2*H^2 Id)
+   = the barotropic gas dynamics with p = gr/2*H^2 and the potential force -gr*grad zb
+   finite volume method, hydrostatic reconstruction for topography, HLL / Rusanov / HLLC
+   parallel version (domain decomposition, PETSc) of freevol_swtopo3d.edp: the same cases, the same scheme;
+   the mesh is partitioned by createMat (overlap: macro ordre, 2 cells for the order 2, 1 cell for the order 1), fvscheme on the local
+   mesh, the interfaces (label -111111): Neumann (the default), their cells are overlap cells set again by the
+   exchange; at each stage: the time step the min on all the processes, then exchange(A,Hr,scaled=true); at
+   the end the solution is gathered on the whole mesh ThG (ThN2O, A.D): the outputs of freevol_swtopo3d.edp
+   run: ff-mpirun -np 2 freevol_swtopo3d_ddm.edp -wg   (-nw: no plot)
+   cases:
+     LakeAtRest : H+zb=1 on a bump, with a dry region: must stay at rest (well-balanced scheme)
+     Dambreak   : a ball of fluid in a box with walls (mass, positivity, symmetry x,y,z -> y,z,x)
+     Dambreak1D : the dam break of freevol_swtopo1d.edp in a bar (compare with the 1D result)
+   the same command fvscheme as in 1D and 2D: the dimension is given by the mesh of [H,Hu,Hv,Hw,zb]
+
+   --------------------------------------------------------*/
+
+load "PETSc"// PETSc plugin
+macro dimension()3// EOM
+include "macro_ddm.idp"// additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,cmm = // for plotMPI
+macro PARAMSW fill=true,value=true,wait=1,cmm = // for plotMPI (the last plot)
+real s0=clock();
+load "msh3"
+macro case() Dambreak//
+IFMACRO(case,LakeAtRest)
+   real Tf=1., gr=9.81;
+   int Npx=8;
+   mesh3 Th = cube(Npx,Npx,Npx);
+   func z0 = 1.2*exp(-((x-.5)^2+(y-.5)^2+(z-.5)^2)/.05);// dry where z0 > 1
+   func h0 = 1.-z0;
+ENDIFMACRO
+IFMACRO(case,Dambreak)
+   real Tf=.15, gr=9.81;
+   int Npx=10;
+   mesh3 Th = cube(Npx,Npx,Npx,[2*x-1,2*y-1,2*z-1]);
+   func z0 = 0.;
+   func h0 = 1.+((x^2+y^2+z^2)<.25);
+ENDIFMACRO
+IFMACRO(case,Dambreak1D)
+   real Tf=15.1, gr=9.81;
+   int Npx=200;
+   mesh3 Th = cube(Npx,1,1,[200*x,4*y,4*z]);
+   func z0 = 0.;
+   func h0 = 1.*(x<=100.);
+ENDIFMACRO
+
+real t,dt,CFL=.5;
+func PK=[P0,P0,P0,P0,P0];
+mesh3 ThG=Th;// the whole mesh (for the outputs)
+fespace PhG(ThG,P0);
+macro ordre()2// the order of the scheme (2 or 1): also the overlap of the partition
+Mat A;
+int[int] n2o;// local cell -> global cell
+{
+   IFMACRO(ordre,2)
+   macro ThOverlap()2// 2 cells for the order 2
+   ENDIFMACRO
+   IFMACRO(ordre,1)
+   macro ThOverlap()1// 1 cell for the order 1
+   ENDIFMACRO
+   macro ThN2O()n2o//
+   macro def(u)[u, u#B, u#C, u#D, u#E]// EOM
+   macro init(u)[u, u, u, u, u]// EOM
+   createMat(Th, A, PK)// Th: the local mesh (with overlap)
+}
+fespace Ph5(Th,PK);
+fespace Ph(Th,P0);
+Ph5 [H,Hu,Hv,Hw,zb]=[max(h0,0.),0,0,0,z0],[HBC,HuBC,HvBC,HwBC,zbBC]=[0,0,0,0,0],[Hr,Hur,Hvr,Hwr,zbr]=[0,0,0,0,0];
+Ph5 [Hp,Hup,Hvp,Hwp,zbp];//for second order in time
+int[int] labBC=[1,2,2,2,3,2,4,2,5,2,6,2];// walls on the 6 faces of the cube
+Ph PH=H+zb;
+Ph5 [D0,D0B,D0C,D0D,D0E]; D0[]=A.D;// the partition of unity (1 on the cells of the process)
+Ph Dc=D0;
+// the local solution gathered on the whole mesh ThG (the partition of unity: each cell counted once)
+macro gather(uloc,uglob){ real[int] gl(ThG.nt); gl=0; for(int k=0;k<Th.nt;k++) gl[n2o[k]]+=Dc[][k]*uloc[][k];
+  mpiAllReduce(gl,uglob[],mpiCommWorld,mpiSUM); }//
+real mass0;
+{ PhG HG; Ph h0l=H; gather(h0l,HG) mass0=int3d(ThG)(HG); }
+plotMPI(Th, PH, P0, def1, real, PARAMS "H+zb at t=0")
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gr];//sets the value of gravity
+fvscheme FV([H,Hu,Hv,Hw,zb],order=ordre,eq="swtopo",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     real dtl = fluxupdate(FV,[H,Hu,Hv,Hw,zb],[Hr,Hur,Hvr,Hwr,zbr],[HBC,HuBC,HvBC,HwBC,zbBC]);
+     mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+     exchange(A,Hr[],scaled=true);// the overlap cells: the values of their process
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+}//end of time loop
+PH=H+zb;
+plotMPI(Th, PH, P0, def1, real, PARAMSW "H+zb at t="+t)
+// the outputs of freevol_swtopo3d.edp, on the whole mesh ThG (the local solution gathered)
+PhG HG, HuG, HvG, HwG, zbG;
+{ Ph c=H; gather(c,HG) c=Hu; gather(c,HuG) c=Hv; gather(c,HvG) c=Hw; gather(c,HwG) c=zb; gather(c,zbG) }
+if (!mpirank) {
+PhG PHG=HG+zbG;
+PhG h1=HG, u1=HuG/(HG+1.e-13), v1=HvG/(HG+1.e-13), w1=HwG/(HG+1.e-13);
+cout << "3D (" << mpisize << " processes): " << ThG.nt << " tetrahedra, " << iter << " time steps, cputime = " << clock()-s0 << endl;
+cout << "mass error = " << int3d(ThG)(HG)-mass0 << " , Hmin = " << h1[].min << " , max |u| = " << max(u1[].linfty,max(v1[].linfty,w1[].linfty)) << endl;
+IFMACRO(case,LakeAtRest)
+  PhG erreta=(HG>0.)*abs(PHG-1.);// on the wet cells
+  cout << "lake at rest: max |H+zb-1| (wet cells) = " << erreta[].max << endl;
+ENDIFMACRO
+IFMACRO(case,Dambreak)
+  // symmetry of the ball and of the mesh of cube (invariant by the circular permutation of x,y,z): H(x,y,z) = H(y,z,x)
+  PhG hsym=h1(y,z,x);
+  hsym[]-=h1[];
+  cout << "symmetry: max |H(x,y,z)-H(y,z,x)| = " << hsym[].linfty << endl;
+ENDIFMACRO
+IFMACRO(case,Dambreak1D)
+  // the exact solution (Ritter), as in freevol_swtopo1d.edp
+  func real hexact(real tt){
+    real c0=sqrt(gr), xi=(x-100.)/max(tt,1.e-30);
+    if (xi <= -c0) return 1.;
+    if (xi >= 2.*c0) return 0.;
+    return (2.*c0-xi)^2/(9.*gr);
+  }
+  PhG hex=hexact(t);
+  cout << "dam break (Ritter): L1 error on H (per unit section) = " << int3d(ThG)(abs(HG-hex))/16. << endl;
+ENDIFMACRO
+}

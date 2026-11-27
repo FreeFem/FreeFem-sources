@@ -1,0 +1,46 @@
+// advection on a surface (meshS) by finite volumes: the unit sphere (Sphere20 of MeshSurface.idp,
+// refined icosahedron, no pole), rotation of a gaussian around the z axis (velocity tangent to the sphere)
+// the same fvscheme command as in 2D and 3D, the dimension is given by the mesh of the velocity: on a meshS,
+// the velocity has 3 components [V1,V2,V3]; on an edge, the normal velocity with the mean of the conormals of the
+// 2 triangles (the same flux for both: the mass is conserved)
+// options: -n (10: Sphere20(1, n), 20 n^2 triangles), -ordre (2 or 1), -nw: no plot
+load "msh3"
+include "MeshSurface.idp"
+include "getARGV.idp"
+int nn = getARGV("-n", 10), ordre = getARGV("-ordre", 2);
+meshS Th = Sphere20(1., nn, 1, 0);         // the sphere of radius 1
+fespace Ph(Th, P0);
+fespace Vh(Th, P1);
+real xc = 1/sqrt(2.), yc = 0, zc = 1/sqrt(2.), w2 = 0.1;
+func u0 = exp(-((x-xc)^2+(y-yc)^2+(z-zc)^2)/w2);
+Ph u = u0, up, ur = 0, uBC = 0;
+Vh V1 = -y, V2 = x, V3 = 0;               // rotation around the z axis (3 components, tangent to the sphere)
+fvscheme FV([V1,V2,V3], eq="advection", numflux=2, order=ordre);
+real mass0 = int2d(Th)(u);
+real t = 0, dt, dtsub, CFL = 0.9, Tf = pi/2;  // a quarter turn
+plot(u, cmm="sphere: initial data", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+// the exact solution: the initial data rotated by the angle t around z
+func uex = exp(-((cos(t)*x+sin(t)*y-xc)^2+(-sin(t)*x+cos(t)*y-yc)^2+(z-zc)^2)/w2);
+Ph ue = uex;
+real err = sqrt(int2d(Th)((u-ue)^2)), nex = sqrt(int2d(Th)(ue^2));
+cout << "sphere (order " << ordre << ", " << Th.nt << " triangles): t = " << t << " , " << it << " steps , mass = " << int2d(Th)(u)
+     << " (deviation " << int2d(Th)(u)-mass0 << ") , min u = " << u[].min << " , max u = " << u[].max
+     << " , relative L2 error = " << err/nex << endl;
+plot(u, cmm="sphere: solution at t = " + t, wait=1);
+
+// a constant state: the velocity is divergence free on the sphere; on the flat triangles, the deviation is
+// of order h^2 (the P1 velocity at the edge midpoints is not exactly tangent to the triangles)
+u = 1;
+for (int l = 0; l < 5; l++) { dtsub = fluxupdate(FV, [u], [ur], [uBC]); u[] -= CFL*dtsub*ur[]; }
+cout << "sphere: constant state after 5 steps, max |u-1| = " << max(u[].max-1, 1-u[].min) << endl;

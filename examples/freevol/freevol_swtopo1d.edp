@@ -1,0 +1,191 @@
+/* ---------------------------------------------------------
+
+   solves the Shallow Water system with topography in 1D (meshL)
+   U_t+F(U)_x+(0,gr*H*zb_x) = 0, U=[H,Hu], H>=0, F(U) = (Hu, Hu^2 + gr/2*H^2)
+   finite volume method, hydrostatic reconstruction for topography
+   numflux = 0 : HLL, numflux = 1 : Rusanov, numflux = 2 : HLLC
+   MUSCL scheme for second order in space
+   first or second order in time (mtordre=1 or 2)
+   the 1D version of the cases of freevol_swtopo2d.edp which depend only on x
+   (Dambreakdrybed, DambreakdrybedObstacle, RunupSynolakis, 3), and a lake at rest (LakeAtRest)
+   the same command fvscheme as in 2D: the dimension is given by the mesh of the unknowns [H,Hu,zb]
+
+   --------------------------------------------------------*/
+
+real s0=clock();
+load "msh3"
+macro case() 3//
+// labels of segment: 1 at x=xp, 2 at x=xp1; labelBC=2: wall
+IFMACRO(case,3)
+   real tdraw=.1,Tf=10.;
+   macro bbsw() [[0.,-2],[1.,3.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (option bb of plot)
+   real gr=9.81;
+   int Npx=30;
+   real xp=0, xp1=1;
+   func z0 = -1.;func h0 = x+2.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "swtopo1d.txt";
+ENDIFMACRO
+IFMACRO(case,LakeAtRest)
+   // well-balanced test: a lake at rest on a bump with a dry island, H+zb=1 must stay (velocity 0)
+   real tdraw=.5,Tf=5.;
+   macro bbsw() [[0.,-0.1],[10.,1.6]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (option bb of plot)
+   real gr=9.81;
+   int Npx=100;
+   real xp=0, xp1=10;
+   func z0 = 1.5*exp(-(x-5.)^2) + 0.4*exp(-(x-1.)^2);
+   func h0 = 1.-z0;
+   func hu0 = 0.;
+   real[int] Tsave = [1.];
+   string filenamesave = "LakeAtRest1d.txt";
+ENDIFMACRO
+IFMACRO(case,DambreakdrybedObstacle)
+   int Npx=1001;
+   real xp=0., xp1=5000.;
+   func z0 = -((x < 618.)*0.
+             + (x >= 618. && x < 653.)*(-0.2143*x + 0.2143*618.)
+             + (x >= 653. && x <= 683.)*(-7.5)
+             + (x > 683.  && x <= 718.)*(0.2143*x - 0.2143*683. - 7.5));
+   func h0 = 25.*(x<=465.465) - z0;
+   real gr=9.81;
+   func hu0 = 0.;
+   real[int] Tsave = [11.9,17.54,20.67,41.87];
+   real tdraw=1.,Tf=42.;
+   macro bbsw() [[0.,-1.],[2000.,26.]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (option bb of plot)
+   string filenamesave = "DambreakdrybedObstacle1d.txt";
+ENDIFMACRO
+IFMACRO(case,Dambreakdrybed)
+   int Npx=200;// the dam x=100 on an interface (201 in 2D: the triangles of the dam cut it)
+   real xp=0., xp1=200.;
+   func z0 = 0.;
+   func h0 = 1.*(x<=100.) - z0;
+   real gr=9.81;
+   func hu0 = 0.;
+   real[int] Tsave = [10.,15.];
+   real tdraw=1.,Tf=15.1;
+   macro bbsw() [[0.,-0.05],[200.,1.1]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (option bb of plot)
+   string filenamesave = "Dambreakdrybed1d.txt";
+   // exact solution (Ritter): dam at x=100, H=1 at left, dry bed at right
+   func real hexact(real tt){
+     real c0=sqrt(gr), xi=(x-100.)/max(tt,1.e-30);
+     if (xi <= -c0) return 1.;
+     if (xi >= 2.*c0) return 0.;
+     return (2.*c0-xi)^2/(9.*gr);
+   }
+ENDIFMACRO
+IFMACRO(case,RunupSynolakis)
+   int Npx=192;
+   real xp=-75., xp1=20.;
+   real x0c = 19.85, height=1.;
+   func z0 = (x < -x0c) ? -height : (x/x0c);
+   real Am = 0.0185;
+   real Lg = 2.0 / sqrt(3.0*Am/4.0) * acosh( sqrt(20.0) );
+   real xs = x0c + Lg/2.0;
+   func h0 = Am * sqr( 1./cosh( sqrt(0.75*Am)*( x + xs ) ) ) - z0;
+   real gr=1.;
+   func hu0 = sqrt(gr/height) * (h0+z0);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   real tdraw=10.,Tf=100.;
+   macro bbsw() [[-60.,-0.05],[10.,0.1]]// the window of the plots [[xmin,ymin],[xmax,ymax]] (option bb of plot)
+   string filenamesave = "Runup_Synolakis1d.txt";
+ENDIFMACRO
+
+meshL Th = segment(Npx, [xp+(xp1-xp)*x, 0, 0]);
+int ntdraw=0;
+real t,dt,CFL=.5;
+fespace Ph3(Th,[P0,P0,P0]);
+fespace Ph(Th,P0);
+Ph3 [H,Hu,zb]=[0,0,z0],[HBC,HuBC,zbBC]=[0,0,0],[Hr,Hur,zbr]=[0,0,0];
+Ph3 [Hp,Hup,zbp];//for second order in time
+[H,Hu,zb]=[max(h0,0.),(h0>0.)*hu0,z0];// no momentum in the dry cells
+int[int] labBC=[1,2,2,2];// walls
+Ph PH=H+zb;
+Ph ZB=zb;
+Ph scal1,scal2;
+
+// plotFreeVol1d(Th, H, zb, {options of plot}): the ground (grey) and the water (blue), see plotFreeVol.idp
+include "plotFreeVol.idp"
+plotFreeVol1d(Th,H,zb,{cmm="H+zb and zb at t=0",bb=bbsw,wait=0})
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gr];//sets the value of gravity
+fvscheme FV([H,Hu,zb],order=2,eq="swtopo",labelBC=labBC,limiter=1,numflux=0,parameters=params);
+
+// profiles of zb and of the free surface H+zb: column 0 zb, column i+1 at t=Tsave[i] (if Tsave[i]<Tf),
+// last column at t=Tf; written in filenamesave
+int NTsave = Tsave.n;
+real[int,int] Savedata(Npx+1,NTsave+2);
+Savedata = 0;
+int ncsave=0;// the next time of Tsave
+real[int] xx(Npx);
+for (int i=0;i<Npx;i++) xx[i]=xp+i/real(Npx-1)*(xp1-xp);
+macro saveprofile(col){
+  Ph PHs=H+zb;
+  for (int i=0;i<Npx;i++) Savedata(i,col)=PHs(xx[i],0.);
+}//
+for (int i=0;i<Npx;i++) Savedata(i,0)=ZB(xx[i],0.);
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        plotFreeVol1d(Th,H,zb,{cmm="Solution at t="+t+", dt="+dt,bb=bbsw,wait=0})
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu,zb],[Hr,Hur,zbr],[HBC,HuBC,zbBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+      if(ncsave<NTsave) if(t+dt > Tsave[ncsave]) dt=Tsave[ncsave]-t;// to stop at the times Tsave (&& evaluates both sides)
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    if(ncsave<NTsave) if(t >= Tsave[ncsave]-1.e-10) {saveprofile(ncsave+1) ncsave++;}
+
+    scal1=H;
+    real Hmin=scal1[].min;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmax=scal2[].linfty;
+    if (verbosity>1) {
+     cout << iter+1 << " t=" << t;
+     if (Hmin<0.) cout << " Hmin=" << Hmin;
+     cout << " velmax=" << velmax << endl;
+    }
+    if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+}//end of time loop
+plotFreeVol1d(Th,H,zb,{cmm="Solution at t="+t,bb=bbsw,wait=1})
+PH=H+zb;
+cout<<iter<<" time steps, cputime = "<<clock()-s0<<endl;
+cout<<"mass = "<<int1d(Th)(H)<<" , Hmin = "<<scal1[].min<<" , max |u| = "<<scal2[].linfty<<endl;
+
+IFMACRO(case,LakeAtRest)
+  Ph erreta=(H>0.)*abs(PH-1.), hu1=Hu;// on the wet cells
+  cout << "lake at rest: max |H+zb-1| (wet cells) = " << erreta[].max << " , max |Hu| = " << hu1[].linfty << endl;
+ENDIFMACRO
+IFMACRO(case,Dambreakdrybed)
+  Ph hex=hexact(t);
+  cout << "dam break (Ritter): L1 error on H = " << int1d(Th)(abs(H-hex)) << endl;
+ENDIFMACRO
+
+saveprofile(NTsave+1)
+{
+  ofstream fout(filenamesave);
+  cout << "profiles (x, zb, H+zb at t = Tsave < Tf and at Tf) written in " << filenamesave << endl;
+  for (int i=0;i<Npx;i++)
+  {
+     fout << xx[i];
+     for(int nsave=0; nsave < NTsave+2; nsave++) fout << " " << Savedata(i,nsave);
+     fout << endl;
+  }
+}

@@ -1,0 +1,6 @@
+meshdual, meshdualL, meshdual3, meshdualS : the dual meshes of a mesh, meshL,
+  mesh3 or meshS: one control volume around each vertex, the unknowns P1 of
+  the finite volume schemes eq="...dm" of fvscheme. meshdual (2D) is the
+  dual mesh of F. Bouchut, the others are median dual meshes.
+  Example: meshdual Thstar = builddualmesh(Th); plot(Thstar, u[]);
+  See help(builddualmesh), help(dualmeshcvarea).

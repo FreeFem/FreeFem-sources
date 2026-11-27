@@ -41,6 +41,7 @@ Name: "{app}\examples\3dCurve"; Permissions: everyone-full
 Name: "{app}\examples\examples"; Permissions: everyone-full
 Name: "{app}\examples\eigen"; Permissions: everyone-full
 Name: "{app}\idp"; Permissions: everyone-full
+Name: "{app}\idp\help"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\mpi"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\ffddm"; Permissions: everyone-full
@@ -67,6 +68,8 @@ Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 Source: "freefem++.pref"; DestDir: "{app}"
 ifelse(len(MPIPROG),0,; ,)Source: "src\bin-win32\FreeFem++-mpi.exe"; DestDir: "{app}"
 ifelse(len(MPIPROG),0,; ,)Source: "src\mpi\ff-mpirun"; DestDir: "{app}"
+Source: "ffhelp"; DestDir: "{app}"
+Source: "ffhelp.bat"; DestDir: "{app}"
 Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 Source: "src\bin-win32\md2edp.exe"; DestDir: "{app}"
 ;
@@ -93,6 +96,7 @@ Source: "plugin\seq\ff-get-dep"; DestDir: "{app}"
 
 ; Examples
 Source: "idp\*.idp"; DestDir: "{app}\idp"
+Source: "idp\help\*.txt"; DestDir: "{app}\idp\help"
 Source: "examples\misc\*.edp"; DestDir: "{app}\examples\misc"
 Source: "examples\eigen\*.edp"; DestDir: "{app}\examples\eigen"
 Source: "examples\tutorial\*.edp"; DestDir: "{app}\examples\tutorial"

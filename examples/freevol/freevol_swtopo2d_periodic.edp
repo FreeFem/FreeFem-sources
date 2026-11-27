@@ -1,0 +1,50 @@
+// solves the shallow water system with topography by the finite volume method (2D, mesh) with periodic boundary
+// conditions
+//   U_t+div([F(U),G(U)])+(0,gr*H*zb_x,gr*H*zb_y) = 0, U=[H,Hu,Hv], zb the topography (P0, with the unknowns)
+//   the square [0,L]^2, periodic in x and in y: fvscheme FV([H,Hu,Hv,zb], eq="swtopo", ...,
+//   periodic=[[1,x],[3,x],[2,y],[4,y]]) (the syntax of a fespace): the faces of the borders 1 and 3 with the same x
+//   (2 and 4: the same y) are glued and become interior faces (hydrostatic reconstruction with the zb of the 2
+//   sides, the non conservative fluxes left/right of an interior face), a periodic topography
+//   -cas 0: the lake at rest (H+zb constant, no velocity): it stays at rest (well balanced, also across the
+//           periodic borders)
+//   -cas 1: a hump of water in a uniform flow (Hu = 0.5 H): it crosses the periodic borders, the mass is conserved
+// options: -cas (1), -n (segments by side, 20), -Tf (5), -ordre (2 or 1), -nw: without plot
+include "getARGV.idp"
+real s0 = clock();
+real gr = 9.81, L = 10.;
+int n = getARGV("-n", 20), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 5.), CFL = .5;
+mesh Th = square(n, n, [L*x, L*y]);        // labels 1 bottom, 2 right, 3 top, 4 left
+func z0 = 0.3*sin(2.*pi*x/L)*cos(2.*pi*y/L) + 0.2*cos(4.*pi*x/L);   // periodic topography
+func h0 = (cas == 0) ? 2. - z0 : 2. - z0 + 0.5*exp(-((x-0.3*L)^2+(y-0.5*L)^2)/2.);
+func hu0 = (cas == 0) ? 0. : 0.5*h0;
+fespace Ph4(Th, [P0,P0,P0,P0]);
+fespace Ph(Th, P0);
+Ph4 [H,Hu,Hv,zb] = [h0,hu0,0,z0], [HBC,HuBC,HvBC,zbBC] = [0,0,0,0], [Hr,Hur,Hvr,zbr] = [0,0,0,0], [Hp,Hup,Hvp,zbp];
+real[int] params = [gr];
+int[int] labBC = [1,2, 2,2, 3,2, 4,2];   // wall: no effect on the periodic borders
+fvscheme FV([H,Hu,Hv,zb], order=ordre, eq="swtopo", labelBC=labBC, limiter=1, numflux=0, parameters=params,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+Ph eta0 = H + zb;
+real m0 = int2d(Th)(H);
+plot(eta0, fill=1, value=1, cmm="H+zb at t=0 (periodic)", wait=1);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,zb], [Hr,Hur,Hvr,zbr], [HBC,HuBC,HvBC,zbBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+Ph eta = H + zb, h = H, qx = Hu, qy = Hv;
+real[int] deta = eta[] - eta0[];
+cout << "swtopo 2D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter
+     << " steps , " << Th.nt << " triangles" << endl;
+cout << "  mass " << int2d(Th)(H) << " (difference " << int2d(Th)(H)-m0 << ") , min H " << h[].min
+     << " , max |H+zb - (H+zb)(0)| " << deta.linfty << " , max |Hu| " << qx[].linfty << " , max |Hv| " << qy[].linfty << endl;
+cout << "cputime = " << clock()-s0 << endl;
+plot(eta, fill=1, value=1, cmm="H+zb at t=" + t + " (periodic)", wait=1);

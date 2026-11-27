@@ -1,0 +1,55 @@
+// solves the system of isentropic gas dynamics by the finite volume method (2D, mesh) with periodic boundary conditions
+//   U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v], p = kappa*rho^gamma, parameters=[gamma,kappa]
+//   the isentropic vortex of freevol_igd2d.edp (case 4) transported at the velocity (1, 0) in the box [-L,L]^2,
+//   periodic in x and in y: fvscheme FV([H,Hu,Hv], eq="igd", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]) (the syntax
+//   of a fespace): the faces of the borders 1 and 3 with the same x (2 and 4: the same y) are glued, the flux of a
+//   glued face is computed once (the mass and the momentum are conserved), the slopes of the order 2 see the
+//   neighbours on the other side
+//   at t = Tf = 2L (one period) the vortex is back at its initial position: the errors are computed with the exact
+//   solution (the vortex translated, periodic in x; exp(-L^2) ~ 1e-11 on the borders y = -L, L)
+// options: -n (segments by side, 40), -L (5), -Tf (10), -ordre (2 or 1), -nw: without plot
+include "getARGV.idp"
+real s0 = clock();
+real gamma = 1.4, kappa = 1.;
+int n = getARGV("-n", 40), ordre = getARGV("-ordre", 2);
+real L = getARGV("-L", 5.), Tf = getARGV("-Tf", 2.*L), CFL = .5;
+border aa(t=0., 1.){x=L*(2.*t-1.); y=-L; label=1;};
+border bb(t=0., 1.){x=L; y=L*(2.*t-1.); label=2;};
+border cc(t=0., 1.){x=L*(1.-2.*t); y=L; label=3;};
+border dd(t=0., 1.){x=-L; y=L*(1.-2.*t); label=4;};
+mesh Th = buildmesh(aa(n)+bb(n)+cc(n)+dd(n), splitpbedge=1);   // the same vertices on the opposite borders
+// the exact solution at the time targ: the vortex centered at (-3+targ, 0) (periodic in x, of period 2L)
+func real posxv(real targ) { real px = x + 3. - targ + 4.*L; int nx = int(px/(2.*L)); px = px - nx*2.*L; if (px > L) px = px - 2.*L; return px; }
+func real rhoexact(real targ) { real px = posxv(targ); return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-px^2-y^2))^(1./(gamma-1.)); }
+func real uxexact(real targ) { real px = posxv(targ); return 1.+5./(2.*pi)*exp(.5*(1.-px^2-y^2))*(-y); }
+func real uyexact(real targ) { real px = posxv(targ); return 5./(2.*pi)*exp(.5*(1.-px^2-y^2))*px; }
+fespace Ph3(Th, [P0,P0,P0]);
+fespace Ph(Th, P0);
+Ph3 [H,Hu,Hv] = [0,0,0], [HBC,HuBC,HvBC] = [0,0,0], [Hr,Hur,Hvr] = [0,0,0], [Hp,Hup,Hvp];
+[H,Hu,Hv] = [rhoexact(0.), rhoexact(0.)*uxexact(0.), rhoexact(0.)*uyexact(0.)];
+real[int] params = [gamma, kappa];
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];   // no effect on the periodic borders
+fvscheme FV([H,Hu,Hv], order=ordre, eq="igd", labelBC=labBC, limiter=1, numflux=2, parameters=params,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real m0 = int2d(Th)(H), qx0 = int2d(Th)(Hu), qy0 = int2d(Th)(Hv);
+plot(H, fill=1, value=1, cmm="rho at t=0 (periodic)", wait=1);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv], [Hr,Hur,Hvr], [HBC,HuBC,HvBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+  plot(H, fill=1, value=1, dim=3, cmm="rho at t=" + t + " (periodic)", wait=0);
+}
+Ph rhoex = rhoexact(t), uxex = uxexact(t), uyex = uyexact(t), u1 = Hu/H, u2 = Hv/H, rho = H;
+real errorrho = sqrt(int2d(Th)((H-rhoex)^2)), errorux = sqrt(int2d(Th)((u1-uxex)^2)), erroruy = sqrt(int2d(Th)((u2-uyex)^2));
+cout << "igd 2D periodic (order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps , " << Th.nt << " triangles" << endl;
+cout << "  conservation: mass " << int2d(Th)(H)-m0 << " , momentum x " << int2d(Th)(Hu)-qx0 << " , momentum y " << int2d(Th)(Hv)-qy0 << endl;
+cout << "  errors L2: rho " << errorrho << " , ux " << errorux << " , uy " << erroruy << " , min rho " << rho[].min << " (exact " << rhoex[].min << ")" << endl;
+cout << "cputime = " << clock()-s0 << endl;
+plot(H, fill=1, value=1, cmm="rho at t=" + t + " (periodic)", wait=1);

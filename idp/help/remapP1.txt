@@ -1,0 +1,7 @@
+remapP1(Tho, uo[], Th, u[]) : conservative transfer of the P1 unknowns of
+  the dual finite volumes (one value per vertex = the mean on its control
+  volume) from Tho to Th (meshL, mesh): limited affine reconstruction
+  (Barth-Jespersen) per control volume, integrated exactly on the new
+  volumes (dual of F. Bouchut in 2D, median dual in 1D); sum |C_i| u_i
+  conserved; several components together. For a P1 finite element
+  (int u conserved): remapP1FE.

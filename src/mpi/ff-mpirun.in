@@ -25,15 +25,33 @@ if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
 a[0]="'$mpirun'"
 j=1;
 test -n "$mpi_run_option" && a[((j++))]="$mpi_run_option"
+# the options of FreeFem++ given before the script (ex. ff-mpirun -n 4 -glut ffglut a.edp) are
+# moved after FreeFem++-mpi, not given to mpirun (-v and -f are left to mpirun: options of mpirun too)
+# graphics or not, before or after the script (the last one wins): -nw, -ng without graphics;
+# -win, -wg or a graphics program (-glut, -fglut, -gff) with graphics
+for o in "$@"; do
+case "$o" in
+"-nw"|"-ng") nw=1;;
+"-win"|"-wg"|"-glut"|"-fglut"|"-gff") nw=0;;
+esac
+done
+ffopt=()
+script=0   # 1 after the script: the arguments go to FreeFem++-mpi unchanged
 #echo $1 ---
 while test -n "$1" ; do
 ((j++))
 
+if [ "$script" -eq 1 -a "$1" != "-dry" ]; then a[$j]="$1"; shift; continue; fi
 case "$1" in
-"-nw") nw=1;;
-"-win") nw=0;;
+"-nw"|"-ng"|"-win"|"-wg") ;;   # see above
+"-glut"|"-fglut"|"-gff") ffopt+=("$1" "'$2'"); shift;;
+"-check_plugin") ffopt+=("$1" "'$2'"); shift;;
+"-ne"|"-cd"|"-cdtmp"|"-jc"|"-ns"|"-nowait"|"-wait"|"-nc"|"-log"|"-md") ffopt+=("$1");;
 *.edp|*.md) a[$j]="${ffmpi}";
 if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
+for o in "${ffopt[@]}"; do ((j++)); a[$j]="$o"; done
+ffopt=()
+script=1
 ((j++));a[$j]="'$1'";;
 #if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;
 -dry) dry=1;; 

@@ -1,0 +1,58 @@
+// advection in 1D (meshL) by finite volumes with a periodic boundary condition: u_t + (V u)_x = 0 on [0,4], V = 1
+//   a gaussian exp(-((x-1)/0.3)^2), P0 unknown, the endpoints x = 0 and x = 4 glued by periodic=[[1],[2]]
+//   (the fespace syntax on a meshL: the labels of the 2 endpoints), MUSCL scheme (order 2) and Heun in time
+//   at t = 4 (one turn) the gaussian is back at its initial position
+//   at the end: the mass (conserved) and the L2 error with respect to the exact solution
+//   every nadapt iterations: Th = adaptmesh(Th, u, up, V1, ...) on the P0 functions, then u, V1 and uBC
+//   transferred to the new mesh by remapP0 (mass conserved, no new extremum); fvscheme rebuilds itself
+//   at the end: the L2 error with respect to the exact solution
+// options: -adapt (1, or 0: fixed mesh), -n (200), -nadapt (20), -err (0.002), -hmin (0.002), -hmax (0.2),
+//          -ratio (1.5), -ordre (2 or 1), -nw: no plot
+include "getARGV.idp"
+bool adapt = getARGV("-adapt", 1);
+string nom = adapt ? "1D adapted" : "1D fixed";
+int n = getARGV("-n", 200), nadapt = getARGV("-nadapt", 20), ordre = getARGV("-ordre", 2);
+real erru = getARGV("-err", 0.002), hmin = getARGV("-hmin", 0.002), hmax = getARGV("-hmax", 0.2);
+real ratio = getARGV("-ratio", 1.5), Tf = 4.;
+real L = 4.;
+meshL Th = segment(n, [L*x, 0, 0]);         // labels: 1 at x = 0, 2 at x = 4
+fespace Ph(Th, P0);
+// the periodic initial data: the gaussian and its neighboring images
+func real gp(real xx) { real s = 0; for (int i = -1; i <= 1; i++) s += exp(-((xx-1-i*L)/.3)^2); return s; }
+Ph u = gp(x), up, ur = 0, uBC = 0;
+Ph V1 = 1;                                  // velocity
+int[int] labBC = [1,0, 2,1];               // no effect on the periodic boundaries
+fvscheme FV([V1], eq="advection", labelBC=labBC, numflux=2, order=ordre, periodic=[[1],[2]]);
+real mass0 = int1d(Th)(u);
+real t = 0, dt, dtsub, CFL = 0.9;
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(u, cmm=nom + " periodic: initial data (" + Th.nt + " segments) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) { // adaptation to u and to the solution of the previous step
+    meshL Tho = Th;                         // the old mesh and the old values
+    fespace Pho(Tho, P0);
+    Pho uo = u, V1o = V1, uBCo = uBC;
+    Th = adaptmesh(Th, u, up, V1, err=erru, hmin=hmin, hmax=hmax, ratio=ratio, verbosity=0);
+    u = 0; V1 = 0; uBC = 0;                 // on the new mesh
+    remapP0(Tho, uo[], Th, u[]);            // limited affine reconstruction, mass conserved
+    remapP0(Tho, V1o[], Th, V1[]);
+    remapP0(Tho, uBCo[], Th, uBC[]);
+    ur = 0; up = 0;
+    nbad++;
+  }
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {plot(u, cmm=nom + " periodic: solution at t = " + t + " (" + Th.nt + " segments) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+func uex = gp(x - t - floor((x - t)/L)*L);  // the initial data translated by t (periodic)
+real err = sqrt(int1d(Th, qforder=5)((u-uex)^2));
+cout << nom << " periodic (order " << ordre << "): t = " << t << " , " << it << " steps , " << Th.nt << " segments , mass = "
+     << int1d(Th)(u) << " (initial " << mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(u, cmm=nom + " periodic: solution at t = " + t + " (" + Th.nt + " segments) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);

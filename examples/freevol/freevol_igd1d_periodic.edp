@@ -1,0 +1,43 @@
+// solves the system of isentropic gas dynamics by the finite volume method in 1D (meshL) with a periodic boundary
+// condition
+//   U_t+F(U)_x = 0, U=[rho,rho*u], F(U) = (rho*u, rho*u^2 + kappa*rho^gamma), parameters=[gamma,kappa]
+//   fvscheme FV([H,Hu], eq="igd", ..., periodic=[[1],[2]]) (the syntax of a fespace on a meshL: the labels of the 2
+//   ends): the 2 boundary faces (x = 0 and x = L) are glued, an interior face between the first and the last cell
+//   -cas 1: a periodic wave rho = 1+0.3 sin(2 pi x/L), u = 1 (it steepens into shocks which cross the periodic
+//           boundary): the mass and the momentum are conserved exactly
+//   -cas 0: a constant state (rho = 1, u = 1): it stays constant
+// options: -cas (1), -n (cells, 50), -Tf (2), -ordre (2 or 1), -nw: without plot
+include "getARGV.idp"
+real gamma = 1.4, kappa = 1., L = 2.;
+int n = getARGV("-n", 50), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 2.), CFL = .5;
+meshL Th = segment(n, [L*x, 0, 0]);        // labels: 1 at x = 0, 2 at x = L
+fespace Ph2(Th, [P0,P0]);
+fespace Ph(Th, P0);
+func rho0 = 1. + 0.3*cas*sin(2.*pi*x/L);
+Ph2 [H,Hu] = [rho0, rho0], [HBC,HuBC] = [0,0], [Hr,Hur] = [0,0], [Hp,Hup];
+real[int] params = [gamma, kappa];
+int[int] labBC = [1,1, 2,1];               // no effect on the periodic ends
+fvscheme FV([H,Hu], order=ordre, eq="igd", labelBC=labBC, limiter=1, numflux=2, parameters=params, periodic=[[1],[2]]);
+real m0 = int1d(Th)(H), q0 = int1d(Th)(Hu);
+plot(H, cmm="rho at t=0 (periodic)", wait=1);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu], [Hr,Hur], [HBC,HuBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+Ph rho = H, q = Hu;
+real[int] drho = rho[], dq = q[];
+drho -= 1.; dq -= 1.;
+cout << "igd 1D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+cout << "  conservation: mass " << int1d(Th)(H)-m0 << " , momentum " << int1d(Th)(Hu)-q0 << " , min rho " << rho[].min
+     << " , max rho " << rho[].max << endl;
+if (cas == 0) cout << "  constant state: max |rho-1| " << drho.linfty << " , max |rho u-1| " << dq.linfty << endl;
+plot(H, cmm="rho at t=" + t + " (periodic)", wait=1);

@@ -1,0 +1,51 @@
+// 2D advection (mesh) with finite volumes on the dual mesh of F. Bouchut with periodic boundary
+// conditions
+//   fvscheme FV([V1,V2], eq="advectiondm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]) (the fespace syntax): the
+//   vertices of boundaries 1 and 3 with the same x (2 and 4: the same y) are linked, the control volumes of linked
+//   vertices (2, or 4 at the corners) form a single control volume: no flux on the periodic boundary parts,
+//   u and the flux balance are the area-weighted averages, at order 2 the slope is the average of the slopes
+//   and the reconstruction starts from the centroid of the merged volume
+//   a Gaussian transported at velocity (1, 0.5) in the periodic square: at t = 2 (2 periods in x, 1 in y) it
+//   returns to its initial position; the scheme mass, sum |C_i| u_i (dualmeshcvarea), is conserved
+// options: -n (segments per side, 20), -ordre (2 or 1), -Tf (2), -cx, -cy (centre, 0.5), -nw: no plot
+include "getARGV.idp"
+int n = getARGV("-n", 20), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", 2.), cx = getARGV("-cx", 0.5), cy = getARGV("-cy", 0.5);
+mesh Th = square(n, n);                    // labels 1 bottom, 2 right, 3 top, 4 left
+meshdual Thstar = builddualmesh(Th);       // the dual mesh of F. Bouchut
+fespace Vh(Th, P1);
+fespace Phstar(Thstar, P0);
+Phstar w;
+// the periodic initial data (the Gaussian and its neighbouring images)
+func real gp(real xx, real yy) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) s += exp(-((xx-cx-i)^2+(yy-cy-j)^2)/0.02);
+  return s;
+}
+Vh u = gp(x, y), up, ur = 0, uBC = 0;
+Vh V1 = 1, V2 = 0.5;                       // constant P1 velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];     // no effect on the periodic boundaries
+fvscheme FV([V1,V2], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre, periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the areas of the control volumes
+real mass0 = cva'*u[], t = 0, dt, dtsub, CFL = 0.9;
+dualtoP0(w[], Thstar, u[]);
+plot(w, fill=1, value=1, cmm="2D dual periodic: initial data", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+// the exact solution: the initial data translated by t*(1, 0.5) (periodic)
+func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t));
+real err = sqrt(int2d(Th)((u-uex)^2)), mass = cva'*u[];
+cout << "2D dual periodic (order " << ordre << ", n = " << n << "): t = " << t << " , " << it << " steps , mass = " << mass
+     << " (change " << mass-mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+dualtoP0(w[], Thstar, u[]);
+plot(w, fill=1, value=1, cmm="2D dual periodic: solution at t = " + t, wait=1);

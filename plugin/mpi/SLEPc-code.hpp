@@ -1,3 +1,13 @@
+// compatibilite PETSc < 3.23 : les operations "shell" attendent PetscVoidFn*
+#include <petscversion.h>
+#include <petscsys.h>
+#ifndef FF_PETSC_OPFN
+#if PETSC_VERSION_LT(3, 23, 0)
+#define FF_PETSC_OPFN PetscVoidFn
+#else
+#define FF_PETSC_OPFN PetscErrorCodeFn
+#endif
+#endif
 #include "PETSc.hpp"
 
 #ifdef WITH_slepc
@@ -251,7 +261,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PetscNew(&user);
                     user->mat = new typename eigensolver<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>::MatF_O(m, stack, codeA);
                     MatCreateShell(PetscObjectComm((PetscObject)ptA->_petsc), m, m, M, M, user, &S);
-                    MatShellSetOperation(S, MATOP_MULT, (PetscErrorCodeFn *)MatMult_User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>);
+                    MatShellSetOperation(S, MATOP_MULT, (FF_PETSC_OPFN *)MatMult_User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>);
                     if(std::is_same<SType, EPS>::value)
                         EPSSetOperators(eps, S, NULL);
                     else if(std::is_same<SType, SVD>::value)

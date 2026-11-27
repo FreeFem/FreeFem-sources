@@ -1,0 +1,65 @@
+// advection in 2D (mesh) by finite volumes with periodic boundary conditions
+//   fvscheme FV([V1,V2], eq="advection", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]): the fespace syntax; the
+//   faces of boundaries 1 and 3 that have the same x (2 and 4: the same y) are glued, they become interior
+//   faces between the cells of the two sides (the flux computed once: conservative; the order 2 slopes
+//   and the limiter see the neighbors on the other side, the linked vertices are one vertex for the gradients)
+//   a gaussian transported at velocity (1, 0.5) in the periodic square: at t = 2 (2 turns in x, 1 in y)
+//   it is back at its initial position, the L2 error is compared with the initial data, the mass is conserved
+//   with -adapt 1: the mesh is adapted to u and to the solution of the previous step every nadapt iterations
+//   (adaptmesh with periodic=: the boundary vertices match), u and the velocity transferred by remapP0
+//   (exact mean, mass conserved)
+// options: -n (segments per side, 100), -ordre (2 or 1), -adapt (1), -nadapt (50), -err (0.01), -hmin (0.005),
+//          -hmax (0.1), -nw: no plot
+include "getARGV.idp"
+bool adapt = getARGV("-adapt", 1);
+string nom = adapt ? "2D adapted" : "2D fixed";
+int n = getARGV("-n", 100), ordre = getARGV("-ordre", 2), nadapt = getARGV("-nadapt", 5);
+real erru = getARGV("-err", 0.01), hmin = getARGV("-hmin", 0.01), hmax = getARGV("-hmax", 0.1);
+mesh Th = square(n, n);                    // labels 1 bottom, 2 right, 3 top, 4 left
+fespace Ph(Th, P0);
+// the periodic initial data (the gaussian and its neighboring images)
+func real gp(real xx, real yy) {
+  real s = 0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) s += exp(-((xx-0.5-i)^2+(yy-0.5-j)^2)/0.01);
+  return s;
+}
+Ph u = gp(x, y), up, ur = 0, uBC = 0;
+Ph V1 = 1, V2 = 0.5;                       // constant velocity
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];     // no effect on the periodic boundaries
+fvscheme FV([V1,V2], eq="advection", labelBC=labBC, numflux=2, order=ordre, periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real mass0 = int2d(Th)(u);
+real t = 0, dt, dtsub, CFL = 0.9, Tf = 1.;
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(u, cmm=nom + " periodic: initial data (" + Th.nt + " triangles)", fill=1, value=1, wait=1);
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) { // adaptation to u and to the solution of the previous step
+    mesh Tho = Th;                          // the old mesh and the old values
+    fespace Pho(Tho, P0);
+    Pho uo = u, V1o = V1, V2o = V2, uBCo = uBC;
+    Th = adaptmesh(Th, u, up, err=erru, hmin=hmin, hmax=hmax, nbvx=100000, periodic=[[1,x],[3,x],[2,y],[4,y]]);
+    u = 0; V1 = 0; V2 = 0; uBC = 0;         // on the new mesh
+    remapP0(Tho, uo[], Th, u[]);           // limited affine reconstruction, mass conserved
+    remapP0(Tho, V1o[], Th, V1[]);
+    remapP0(Tho, V2o[], Th, V2[]);
+    remapP0(Tho, uBCo[], Th, uBC[]);
+    ur = 0; up = 0;
+    nbad++;
+  }
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {plot(u, cmm=nom + " periodic: solution at t = " + t + " (" + Th.nt + " triangles)", fill=1, value=1, wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+// the exact solution: the initial data translated by t*(1, 0.5) (periodic)
+func uex = gp(x - t - floor(x - t), y - 0.5*t - floor(y - 0.5*t));
+real err = sqrt(int2d(Th, qforder=5)((u-uex)^2));
+cout << nom + " periodic (order " << ordre << "): t = " << t << " , " << it << " steps , " << nbad << " adaptations , " << Th.nt
+     << " triangles , mass = " << int2d(Th)(u) << " (deviation " << int2d(Th)(u)-mass0 << ") , max u = " << u[].max
+     << " , L2 error = " << err << endl;
+plot(u, cmm=nom + " periodic: solution at t = " + t + " (" + Th.nt + " triangles)", fill=1, value=1, wait=1);

@@ -1,0 +1,50 @@
+// advection on a surface (meshS) with finite volumes on the dual mesh: the unit sphere (Sphere20 of
+// MeshSurface.idp, refined icosahedron, no pole), rotation of a Gaussian around the z axis (velocity tangent to
+// the sphere), like freevol_advectionS.edp on the primal mesh
+// the median dual of the meshS (meshdualS Thstar = builddualmesh(Th)): the control volume of a vertex is made of the
+// parts (vertex, edge midpoints, centroid) of the surrounding triangles; one interface per edge (the two
+// half-segments, each in the plane of its triangle); the unknown is P1 (one value per vertex = per control
+// volume), the P1 velocity has 3 components [V1,V2,V3]; fvscheme finds the dual from Th
+// options: -n (10: Sphere20(1, n), 20 n^2 triangles), -ordre (2 or 1), -Tf (pi/2: a quarter turn), -nw
+load "msh3"
+include "MeshSurface.idp"
+include "getARGV.idp"
+int nn = getARGV("-n", 10), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", pi/2);
+meshS Th = Sphere20(1., nn, 1, 0);         // the sphere of radius 1
+meshdualS Thstar = builddualmesh(Th);      // the median dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+real xc = 1/sqrt(2.), yc = 0, zc = 1/sqrt(2.), w2 = 0.1;
+func u0 = exp(-((x-xc)^2+(y-yc)^2+(z-zc)^2)/w2);
+Vh u = u0, up, ur = 0, uBC = 0;
+Vh V1 = -y, V2 = x, V3 = 0;                // rotation around the z axis (3 components, tangent to the sphere)
+fvscheme FV([V1,V2,V3], eq="advectiondm", numflux=2, order=ordre);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the areas of the control volumes
+real mass0 = cva'*u[];                     // the scheme mass: sum |C_i| u_i
+real t = 0, dt, dtsub, CFL = 0.9;
+plot(Thstar, u[], value=1, cmm="sphere (dual mesh): initial data", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+// the exact solution: the initial data rotated by the angle t around z
+func uex = exp(-((cos(t)*x+sin(t)*y-xc)^2+(-sin(t)*x+cos(t)*y-yc)^2+(z-zc)^2)/w2);
+Vh ue = uex;
+real err = sqrt(int2d(Th)((u-ue)^2)), nex = sqrt(int2d(Th)(ue^2));
+cout << "sphere, dual mesh (order " << ordre << ", " << Thstar.ncv << " control volumes): t = " << t << " , " << it << " steps , mass = " << cva'*u[]
+     << " (change " << cva'*u[]-mass0 << ") , min u = " << u[].min << " , max u = " << u[].max
+     << " , relative L2 error = " << err/nex << endl;
+plot(Thstar, u[], value=1, cmm="sphere (dual mesh): solution at t = " + t, wait=1);
+
+// a constant state: the velocity is divergence-free on the sphere; on the dual, the deviation is of order h^2
+u = 1;
+for (int l = 0; l < 5; l++) { dtsub = fluxupdate(FV, [u], [ur], [uBC]); u[] -= CFL*dtsub*ur[]; }
+cout << "sphere, dual mesh: constant state after 5 steps, max |u-1| = " << max(u[].max-1, 1-u[].min) << endl;

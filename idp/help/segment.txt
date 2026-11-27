@@ -1,0 +1,3 @@
+segment(n, [fx,fy,fz]) : 1D mesh (meshL) of the segment [0,1] with n
+  intervals, mapped by x -> (fx,fy,fz) (load "msh3" if needed).
+  Example: meshL ThL = segment(20, [4*x, 0, 0]);

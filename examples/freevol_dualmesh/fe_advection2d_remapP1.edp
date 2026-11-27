@@ -1,0 +1,69 @@
+// 2D advection with P1 finite elements (Galerkin, Crank-Nicolson) with mesh adaptation: transfer of the
+// P1 solution from one mesh to the next, by interpolation (u = u, the values at the new vertices) or by remapP1
+// or remapP1FE (the limited affine reconstruction on the control volumes, integrated exactly over the new
+// control volumes, no new extremum):
+//   remapP1   : the dual of F. Bouchut (the one of the FreeVol finite volumes): it conserves sum |C_i| u_i on this dual,
+//               which is not the integral of u: the finite element scheme conserves int u, the gap accumulates
+//   remapP1FE : the median dual (|C_i| = the lumped mass of vertex i, |K|/3 in each triangle K): sum
+//               |C_i| u_i = int u, conserved exactly: the conservative transfer for P1 finite elements
+//   the case: the unit disk, the rotation V = (-y, x) (V.n = 0 on the boundary: int u is conserved by the scheme on a
+//   fixed mesh), a Gaussian centred at (0.5, 0); at t = 2 pi (one revolution) the exact solution is the initial
+//   data
+//   the scheme: (u^{n+1} - u^n)/dt + V.grad((u^{n+1} + u^n)/2) = 0, Galerkin P1 (non-dissipative)
+//   4 runs: 0 fixed mesh, 1 adaptation + interpolation u = u, 2 adaptation + remapP1, 3 adaptation +
+//   remapP1FE; every nadapt
+//   iterations: Th = adaptmesh(Th, u, ...)
+//   at the end: int u (the finite element mass), sum |C_i| u_i (on the Bouchut dual), min and max of u,
+//   the L2 error
+// options: -n (points on the circle, 60), -nadapt (5), -err (0.005), -hmin (0.01), -hmax (0.1), -nt (time steps
+//          per revolution, 300), -nw: no plot
+include "getARGV.idp"
+int nb = getARGV("-n", 60), nadapt = getARGV("-nadapt", 5), ntour = getARGV("-nt", 300);
+real erru = getARGV("-err", 0.005), hmin = getARGV("-hmin", 0.01), hmax = getARGV("-hmax", 0.1);
+real Tf = 2*pi, dt = Tf/ntour;
+border C(t=0, 2*pi) { x = cos(t); y = sin(t); label = 1; }
+func u0 = exp(-((x-0.5)^2 + y^2)/0.01);
+string[int] nom = ["fixed mesh", "adaptation + interpolation u = u", "adaptation + remapP1", "adaptation + remapP1FE"];
+real[int,int] res(4, 7);
+for (int meth = 0; meth < 4; meth++) {
+  mesh Th = buildmesh(C(nb));
+  fespace Vh(Th, P1);
+  if (meth > 0) for (int i = 0; i < 3; i++) { Vh v = u0; Th = adaptmesh(Th, v, err=erru, hmin=hmin, hmax=hmax, nbvx=100000); }
+  meshdual Thstar = builddualmesh(Th);     // the dual mesh of F. Bouchut: the condensed mass sum |C_i| u_i
+  Vh u = u0, uold, v, V1 = -y, V2 = x;
+  real[int] cva(Thstar.ncv);
+  dualmeshcvarea(cva, Thstar);
+  real m0 = int2d(Th)(u), mc0 = cva'*u[];
+  problem Adv(u, v) = int2d(Th)(u*v/dt + 0.5*(V1*dx(u) + V2*dy(u))*v)
+                    - int2d(Th)(uold*v/dt - 0.5*(V1*dx(uold) + V2*dy(uold))*v);
+  int nbad = 0;
+  for (int it = 0; it < ntour; it++) {
+    if (meth > 0 && it > 0 && it % nadapt == 0) {
+      mesh Tho = Th;
+      fespace Vho(Tho, P1);
+      Vho uo = u;
+      Th = adaptmesh(Th, u, err=erru, hmin=hmin, hmax=hmax, nbvx=100000);
+      if (meth == 1) u = u;                 // interpolation: the values at the new vertices
+      else if (meth == 2) { u = 0; remapP1(Tho, uo[], Th, u[]); }// dual of F. Bouchut
+      else { u = 0; remapP1FE(Tho, uo[], Th, u[]); }// median dual: int u conserved
+      V1 = -y; V2 = x; uold = 0; v = 0;
+      nbad++;
+    }
+    uold = u;
+    Adv;
+  }
+  Thstar = builddualmesh(Th);
+  cva.resize(Thstar.ncv);
+  dualmeshcvarea(cva, Thstar);
+  real m1 = int2d(Th)(u), mc1 = cva'*u[], err = sqrt(int2d(Th, qforder=5)((u - u0)^2));
+  res(meth, 0) = Th.nv; res(meth, 1) = nbad; res(meth, 2) = (m1 - m0)/m0; res(meth, 3) = (mc1 - mc0)/mc0;
+  res(meth, 4) = u[].min; res(meth, 5) = u[].max; res(meth, 6) = err;
+  cout << nom[meth] << " : " << Th.nv << " vertices , " << nbad << " adaptations , relative change of int u " << res(meth, 2)
+       << " , relative change of sum |C_i| u_i " << res(meth, 3) << " , u in [" << u[].min << ", " << u[].max
+       << "] , L2 error " << err << endl;
+  plot(u, fill=1, value=1, cmm=nom[meth] + " : u at t = 2 pi (" + Th.nv + " vertices)", wait=1);
+}
+cout << endl << "comparison (exact: int u and sum |C_i| u_i conserved, u in [0, 1], error 0)" << endl;
+for (int meth = 0; meth < 4; meth++)
+  cout << "  " << nom[meth] << " : change of int u " << res(meth, 2) << " , change of sum |C_i| u_i " << res(meth, 3) << " , min "
+       << res(meth, 4) << " , max " << res(meth, 5) << " , L2 error " << res(meth, 6) << endl;

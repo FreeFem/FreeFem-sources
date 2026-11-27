@@ -1,0 +1,24 @@
+// advection in 3D (mesh3) by finite volumes: the same fvscheme command as in 2D,
+// the dimension is given by the mesh of the velocity
+load "msh3"
+mesh3 Th = cube(16, 16, 16);               // labels 1 to 6 on the faces of the cube
+fespace Ph(Th, P0);
+fespace Vh(Th, P1);
+Ph u = exp(-((x-0.3)^2+(y-0.5)^2+(z-0.5)^2)/0.01), up, ur = 0, uBC = 0;
+Vh V1 = -(y-0.5), V2 = x-0.5, V3 = 0;      // rotation around the z axis (3 components in 3D)
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];
+fvscheme FV([V1,V2,V3], eq="advection", labelBC=labBC, numflux=2);
+real t = 0, dt, dtsub, CFL = 0.9, Tf = 1.;
+plot(u, cmm="3D: initial data", wait=1);
+for (int it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+cout << "3D: t = " << t << " , mass = " << int3d(Th)(u) << " , max u = " << u[].max << endl;
+plot(u, cmm="3D: solution at t = " + t, wait=1);

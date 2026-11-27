@@ -1,0 +1,3 @@
+movemesh(Th, [fx, fy]) : moves the mesh vertices by (x,y) -> (fx,fy).
+  In 3D: movemesh(Th3, [fx, fy, fz]).
+  Example: Th = movemesh(Th, [x + 0.1*y, y]);

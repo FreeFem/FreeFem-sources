@@ -1,0 +1,2 @@
+int3d(Th)(f) : integral of f on the 3D mesh.
+  Example: real m = int3d(Th3)(u);

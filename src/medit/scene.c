@@ -158,7 +158,12 @@ static void drawList(pScene sc, int clip, int map) {
       if (sc->mlist[LHexa]) glCallList(sc->mlist[LHexa]);
     }
   } else {
-    if (mesh->nt + mesh->nq) {
+    GLint pmode[2];
+
+    glGetIntegerv(GL_POLYGON_MODE, pmode);
+    if (pmode[0] == GL_LINE && dualMesh(mesh)) {
+      drawDualEdges(sc, mesh); /* dual mesh: the edges of the control volumes only */
+    } else if (mesh->nt + mesh->nq) {
       if (sc->dlist[LTria]) glCallList(sc->dlist[LTria]);
 
       if (sc->dlist[LQuad]) glCallList(sc->dlist[LQuad]);

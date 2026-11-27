@@ -66,6 +66,7 @@ all.edp:
 freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
+	echo loadpath += \"../../plugin/mpi/\" >> freefem++.pref
 
 clean-local:
 	rm -rf modes.txt eigen*.eps

@@ -1,0 +1,53 @@
+// solves the Euler system on a surface (meshS) by the finite volume method on the median dual mesh with periodic
+// boundary conditions
+//   U = [rho, rho u, rho v, rho w, E] P1 (the momentum tangent to the surface), p = (gamma-1)(E - rho|u|^2/2),
+//   parameters=[gamma]
+//   the surface: the graph z = h(x,y) over [0,1]^2, h periodic in x and y (square3, labels 1 bottom, 2 right, 3 top,
+//   4 left, as square), a wavy surface (-a 0: the plane z = 0)
+//   fvscheme FV([rho,ru,rv,rw,E], eq="eulerdm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]) (the syntax of a 2D
+//   fespace): the control volumes of the linked vertices are one control volume (no flux on the boundary pieces of
+//   the periodic borders, U and the flux balance are the means on the class weighted by the volumes); on the surface
+//   the control volumes of a class have the normal of their union (the plane of the momentum), and the correction
+//   of a state at rest (SurfDefect) is the one of the union
+//   -cas 0: the state at rest rho = 1, p = 1: it stays at rest, also on the wavy surface
+//   -cas 1: a bump of density and pressure at rest: the mass and the energy are conserved (the sums |C_i| U_i)
+// options: -cas (1), -n (16), -a (0.1), -Tf (0.2), -ordre (2 or 1), -nw: without plot
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real a = getARGV("-a", 0.1), Tf = getARGV("-Tf", 0.2), gamma = 1.4, CFL = 0.5;
+func h = a*(sin(2*pi*x) + cos(2*pi*y)) + 0.5*a*sin(2*pi*x)*sin(2*pi*y);   // periodic
+meshS Th = square3(n, n, [x, y, h]);
+meshdualS Thstar = builddualmesh(Th);     // the median dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+func rho0 = 1 + cas*0.2*exp(-((x-0.5)^2+(y-0.5)^2)/0.02);
+Vh rho = rho0, ru = 0, rv = 0, rw = 0, E = rho0^gamma/(gamma-1);   // p = rho^gamma at t = 0
+Vh rhop, rup, rvp, rwp, Ep, rhor = 0, rur = 0, rvr = 0, rwr = 0, Er = 0, rhoB = 0, ruB = 0, rvB = 0, rwB = 0, EB = 0;
+real[int] params = [gamma];
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];   // no effect on the periodic borders
+fvscheme FV([rho,ru,rv,rw,E], eq="eulerdm", labelBC=labBC, parameters=params, order=ordre, numflux=2,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);             // the areas of the control volumes
+real mass0 = cva'*rho[], energy0 = cva'*E[], t = 0, dt, dtsub;
+plot(Thstar, rho[], value=1, cmm="surface (dual mesh, periodic): rho at t = 0", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  rhop[] = rho[]; rup[] = ru[]; rvp[] = rv[]; rwp[] = rw[]; Ep[] = E[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [rho,ru,rv,rw,E], [rhor,rur,rvr,rwr,Er], [rhoB,ruB,rvB,rwB,EB]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    rho[] -= dt*rhor[]; ru[] -= dt*rur[]; rv[] -= dt*rvr[]; rw[] -= dt*rwr[]; E[] -= dt*Er[];
+    if (l == 1) t += dt;
+    if (l == 2) {
+      rho[] += rhop[]; rho[] *= .5; ru[] += rup[]; ru[] *= .5; rv[] += rvp[]; rv[] *= .5; rw[] += rwp[]; rw[] *= .5;
+      E[] += Ep[]; E[] *= .5;
+    }
+  }
+}
+Vh q = sqrt(ru^2+rv^2+rw^2);
+cout << "eulerdm surface periodic (cas " << cas << ", order " << ordre << ", n = " << n << ", a = " << a << ") : t = " << t << " , "
+     << it << " steps , " << Thstar.ncv << " control volumes" << endl;
+cout << "  mass difference " << cva'*rho[]-mass0 << " , energy difference " << cva'*E[]-energy0 << " , rho in [" << rho[].min
+     << ", " << rho[].max << "] , max |rho u| " << q[].max << endl;
+plot(Thstar, rho[], value=1, cmm="surface (dual mesh, periodic): rho at t = " + t, wait=1);

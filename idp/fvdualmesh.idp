@@ -1,0 +1,34 @@
+// Plot of a dual mesh (meshdual, plugin fvdualmesh) with ffmedit
+//   meditD("u", Thstar, u[]);   the control volumes in colors (one value per volume)
+//   meditDmesh("Thstar", Thstar);  the polygons only
+//   meditDP("u", Th, Thstar, u[]);  meditDPmesh("Th Thstar", Th, Thstar);  with the primal mesh Th
+//                            (as plot(Th, Thstar): the dual in red; Th = the primal of Thstar)
+// Each control volume is sent to ffmedit as a fan of triangles
+// (dualmeshfan), the |dual option draws only the edges of the polygons.
+load "medit"
+macro meditD(nm, Thstar, u)
+{
+  mesh ThDfan = dualmeshfan(Thstar);
+  fespace PhDfan(ThDfan, P0);
+  PhDfan uDfan;
+  dualmeshfanvalues(uDfan[], Thstar, u);
+  medit(nm + "|dual", ThDfan, uDfan, order = 0, wait = wait);
+} // EOM
+macro meditDmesh(nm, Thstar)
+{
+  mesh ThDfan = dualmeshfan(Thstar);
+  medit(nm + "|dual", ThDfan, wait = wait);
+} // EOM
+macro meditDP(nm, Th, Thstar, u)
+{
+  mesh ThDfan = dualmeshfan(Thstar, 1);
+  fespace PhDfan(ThDfan, P0);
+  PhDfan uDfan;
+  dualmeshfanvalues(uDfan[], Thstar, u, 1);
+  medit(nm + "|dual|primal=" + dualmeshprimallabel(Thstar), ThDfan, uDfan, order = 0, wait = wait);
+} // EOM
+macro meditDPmesh(nm, Th, Thstar)
+{
+  mesh ThDfan = dualmeshfan(Thstar, 1);
+  medit(nm + "|dual|primal=" + dualmeshprimallabel(Thstar), ThDfan, wait = wait);
+} // EOM

@@ -1,0 +1,68 @@
+// gas dynamics on a surface (meshS) with finite volumes on the dual mesh: the unit sphere
+// (Sphere20 of MeshSurface.idp, refined icosahedron, no pole), the isentropic gas (eq="igddm",
+// [rho,rhou,rhov,rhow], p = kappa rho^gamma) or the Euler equations (eq="eulerdm", [rho,rhou,rhov,rhow,E],
+// p = (gamma-1)(E - rho |u|^2/2))
+// the median dual of the meshS (meshdualS Thstar = builddualmesh(Th)), fvscheme finds it from Th; the
+// unknowns in P1 (one value per vertex = per control volume), the tangential momentum (in the
+// plane of the control volume), the neighbour state rotated into this plane on each interface (like swtopodm)
+// cases (option -cas):
+//   0 Rest: a gas at rest (rho = 1, p = 1): must stay at rest (the deviation measures the closure defect
+//            of the projected normals of the control volumes, which are not planar)
+//   1 Wave: a small density (and pressure) bump at the north pole, at rest: a circular wave that crosses
+//            the equator around t = pi/2/c (c = sqrt(gamma p/rho) the speed of sound) and refocuses at the south pole;
+//            the maximum of rho in the southern hemisphere is printed
+// options: -eq (0 igddm, 1 eulerdm), -cas, -n (10: Sphere20(1, n), 20 n^2 triangles), -ordre (2 or 1), -Tf,
+//          -nf (numflux: 0 HLL, 1 Rusanov, 2 Suliciu/HLLC), -nw: no plot
+load "msh3"
+include "MeshSurface.idp"
+include "getARGV.idp"
+int eqn = getARGV("-eq", 0), cas = getARGV("-cas", 1), nn = getARGV("-n", 10), ordre = getARGV("-ordre", 2);
+int nfl = getARGV("-nf", 2);
+real gamma = 1.4, kappa = 1.;
+real cs = sqrt(gamma);                     // the speed of sound of the state rho = 1, p = 1
+real Tf = getARGV("-Tf", pi/cs);           // the wave refocuses at the south pole
+meshS Th = Sphere20(1., nn, 1, 0);         // the sphere of radius 1, without boundary
+meshdualS Thstar = builddualmesh(Th);      // the median dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the areas of the control volumes: the mass is sum |C_i| rho_i
+func rho0 = 1 + (cas == 1)*0.1*exp(-(x^2+y^2+(z-1)^2)/0.02);
+Vh rho = rho0, ru = 0, rv = 0, rw = 0, E = kappa*rho0^gamma/(gamma-1);// p = kappa rho^gamma initially
+Vh rhop, rup, rvp, rwp, Ep, rhor = 0, rur = 0, rvr = 0, rwr = 0, Er = 0;
+Vh rhoB = 0, ruB = 0, rvB = 0, rwB = 0, EB = 0;
+Vh rho00 = rho;
+string eqname = eqn ? "eulerdm" : "igddm";
+real[int] params = [gamma, kappa];          // igddm: [gamma, kappa]; eulerdm: [gamma] (kappa ignored)
+fvscheme FV;
+if (eqn) resetfvscheme(FV, [rho,ru,rv,rw,E], eq="eulerdm", parameters=params, order=ordre, numflux=nfl);
+else resetfvscheme(FV, [rho,ru,rv,rw], eq="igddm", parameters=params, order=ordre, numflux=nfl);
+real mass0 = cva'*rho[], energy0 = cva'*E[], t = 0, dt, dtsub, CFL = 0.5;
+plot(Thstar, rho[], value=1, cmm="sphere (dual mesh, " + eqname + "): rho at t = 0", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  rhop[] = rho[]; rup[] = ru[]; rvp[] = rv[]; rwp[] = rw[]; Ep[] = E[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    if (eqn) dtsub = fluxupdate(FV, [rho,ru,rv,rw,E], [rhor,rur,rvr,rwr,Er], [rhoB,ruB,rvB,rwB,EB]);
+    else dtsub = fluxupdate(FV, [rho,ru,rv,rw], [rhor,rur,rvr,rwr], [rhoB,ruB,rvB,rwB]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    rho[] -= dt*rhor[]; ru[] -= dt*rur[]; rv[] -= dt*rvr[]; rw[] -= dt*rwr[];
+    if (eqn) E[] -= dt*Er[];
+    if (l == 1) t += dt;
+    if (l == 2) {
+      rho[] += rhop[]; rho[] *= .5; ru[] += rup[]; ru[] *= .5; rv[] += rvp[]; rv[] *= .5; rw[] += rwp[]; rw[] *= .5;
+      if (eqn) { E[] += Ep[]; E[] *= .5; }
+    }
+  }
+}
+Vh q = sqrt(ru^2+rv^2+rw^2), qn = abs(ru*x+rv*y+rw*z);// |rho u|, its normal component (zero: tangent)
+cout << "sphere, dual mesh, " << eqname << (cas ? ", case Wave" : ", case Rest") << " (order " << ordre << ", " << Thstar.ncv << " control volumes): t = " << t << " , " << it << " steps"
+     << " , mass change " << cva'*rho[]-mass0 << " , max |rho u| " << q[].max << " , max |rho u.n| " << qn[].max
+     << " , rho in [" << rho[].min << ", " << rho[].max << "]";
+if (eqn) cout << " , energy change " << cva'*E[]-energy0;
+cout << endl;
+if (cas == 1) {
+  Vh rsud = (z < 0)*rho, rnord = (z > 0)*rho;
+  cout << "wave: max of rho in the southern hemisphere " << rsud[].max << " , in the northern hemisphere " << rnord[].max
+       << " (initial bump: max " << rho00[].max << ")" << endl;
+}
+plot(Thstar, rho[], value=1, cmm="sphere (dual mesh, " + eqname + "): rho at t = " + t, wait=1);

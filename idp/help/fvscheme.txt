@@ -1,0 +1,70 @@
+fvscheme : a finite volume scheme (FreeVol module of the kernel, no load).
+
+  Definition:
+    fvscheme FV([V1, ...], eq="model", order=2, labelBC=[...], numflux=n,
+                limiter=1, parameters=[...], periodic=[...], rebuild=true);
+    fvscheme FV(Thstar, [U1, ...], eq="...dm", ...); // the dual mesh given
+  then at each step: dt = fluxupdate(FV, [u...], [ur...], [uBC...]);
+  (see help(fluxupdate)). To redefine: resetfvscheme(FV, [...], eq=...).
+
+  [V1, ...] : finite element functions which set the mesh, the dimension
+  (meshL 1D, mesh 2D, mesh3 3D, meshS surface) and the type of the unknowns;
+  for advection/advectiondm it is the velocity, for the other models they are
+  the unknowns themselves.
+
+  The models (eq=, plugin FreeVol_<eq> loaded automatically):
+    "advection"  u_t + div(V u) = 0 ; unknown [u] ; [V1,V2(,V3)] in fvscheme
+                 = the velocity (P0, P1 or P1nc, read again at each fluxupdate);
+                 numflux 0 HLL, 1 Rusanov, 2 upwind (default)
+    "euler"      gas dynamics ; [rho, rho*u, (rho*v, rho*w,) E],
+                 E = rho|u|^2/2 + rho*e, p = (gamma-1)*rho*e ; parameters=[gamma]
+    "igd"        isentropic gas ; [rho, rho*u, ...], p = kappa*rho^gamma ;
+                 parameters=[gamma, kappa]
+    "swtopo"     shallow water with topography ; [H, H*u, (H*v,) zb] (zb given,
+                 not modified; hydrostatic reconstruction) ; parameters=[g]
+                 euler, igd, swtopo : numflux 0 HLL, 1 Rusanov, 2 Suliciu/HLLC
+                 (default)
+    "bbm"        hyperbolic part of BBM-BBM ; [eta, u, (v)] ; ur = R, the
+                 script solves A W = -R ; numflux 0 HLL (default), 1 Rusanov
+    "advectiondm", "eulerdm", "igddm", "swtopodm" : the same on the dual
+                 mesh (P1 unknowns: one value by vertex = the mean on its
+                 control volume; meshdual Thstar = builddualmesh(Th) to be
+                 built before fvscheme; 2D: dual mesh of F. Bouchut; 1D, 3D,
+                 surface: median dual mesh)
+    On meshS the momenta have 3 tangent components.
+    numflux not given: the default of the model. Unknowns: P0 (one value by
+    cell) except for the ...dm models.
+
+  Options:
+    order=2        1: first order; 2 (default): MUSCL (gradient by cell,
+                   limited, reconstruction at the faces)
+    limiter=1      (order 2) 0 none, 1 maximum principle (default), 2 minmod,
+                   3 Sweby, 4 Van Albada, 12/13/14: 1 + (2, 3 or 4)
+    labelBC=[l1,t1, l2,t2, ...]  the type of condition by boundary label:
+                   0 Dirichlet (the outer state is uBC of fluxupdate)
+                   1 Neumann / transparent (default of the labels not given)
+                   2 wall (normal velocity reflected; euler, igd, swtopo, bbm
+                     and the ...dm)
+                   3 Dirichlet + wall: the momentum components equal to
+                     zero in uBC are reflected (euler, swtopo,
+                     eulerdm, swtopodm)
+                   the label -111111 (interfaces of a ddm splitting): Neumann,
+                   its cells excluded from the time step (updated by
+                   the exchange)
+    parameters=[...]   the constants of the model (list above)
+    intparameters=[...] can be used for options of the model
+    periodic=[[l1,f1],[l2,f2]]  periodic conditions, the syntax of a
+                   fespace ([[l1],[l2]] in 1D, [[l1,f1,g1],[l2,f2,g2]] in 3D)
+    rebuild=true   after adaptmesh, fluxupdate builds the scheme again on the
+                   new mesh (V1 = ... to be computed on it before);
+                   false: error, call resetfvscheme
+
+  Example (2D advection, Heun):
+    fespace Ph(Th, P0); Ph u = u0, ur = 0, uBC = 0, up, V1 = -y, V2 = x;
+    fvscheme FV([V1, V2], eq="advection", labelBC=[1,1, 2,1, 3,1, 4,1]);
+    for (real t = 0; t < Tf; t += dt) {
+      up[] = u[];
+      dt = 0.9*fluxupdate(FV, [u], [ur], [uBC]); u[] -= dt*ur[];
+      fluxupdate(FV, [u], [ur], [uBC]); u[] -= dt*ur[]; u[] += up[]; u[] *= .5;
+    }
+  Examples: examples/freevol, examples/freevol_dualmesh.

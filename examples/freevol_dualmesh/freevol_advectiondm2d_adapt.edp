@@ -1,0 +1,69 @@
+// 2D advection (mesh) with finite volumes on the dual mesh of F. Bouchut with mesh adaptation
+//   the same test case as freevol/freevol_advection2d_adapt.edp (n x n square, Gaussian rotated around the centre)
+//   with the P1 unknown (one value per vertex = the average over its control volume, meshdual Thstar =
+//   builddualmesh(Th)) and the scheme eq="advectiondm";
+//   every nadapt iterations: the mesh adapted to u and to the previous-step solution (P1), its dual mesh
+//   (Thstar = builddualmesh(Th): fvscheme finds it from Th and rebuilds itself, rebuild=true);
+//   u and the boundary data transferred by remapP1(Tho, uo[], Th, u[]): a limited affine reconstruction in
+//   each old control volume, integrated exactly over each new control volume (the finite volume
+//   mass sum |C_i| u_i is conserved exactly, no new extremum; the interpolation u = u does not
+//   conserve mass); the P1 velocity (a vertex value, not an average) interpolated: V1 = V1
+//   at the end: the L2 error with respect to the exact solution, compared with the computation on the fixed mesh (-adapt 0)
+// options: -adapt (1: with adaptation, 0: on the fixed mesh), -n (segments per side of the initial mesh, 20),
+//          -nadapt (5), -err (0.01), -hmin (0.01), -hmax (0.1), -ordre (2 or 1), -nw: no plot
+include "getARGV.idp"
+bool adapt = getARGV("-adapt", 1);
+string nom = adapt ? "2D dual adapted" : "2D dual fixed";
+int n = getARGV("-n", 20), nadapt = getARGV("-nadapt", 5), ordre = getARGV("-ordre", 2);
+real erru = getARGV("-err", 0.01), hmin = getARGV("-hmin", 0.01), hmax = getARGV("-hmax", 0.1);
+mesh Th = square(n, n);                    // labels 1 to 4 on the sides of the square
+fespace Vh(Th, P1);
+func u0 = exp(-((x-0.3)^2+(y-0.5)^2)/0.01);
+// the initial mesh adapted to the initial data
+if (adapt) for (int i = 0; i < 3; i++) { Vh v = u0; Th = adaptmesh(Th, v, err=erru, hmin=hmin, hmax=hmax, nbvx=100000); }
+meshdual Thstar = builddualmesh(Th);       // the dual mesh (the control volumes of the scheme)
+Vh u = u0, up, ur = 0, uBC = 0;
+Vh V1 = -(y-0.5), V2 = x-0.5;              // rotation around the centre (P1 velocity)
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];
+fvscheme FV([V1,V2], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre);
+real[int] cva(1);
+NewMacro massdual(uu, m)                    // the finite volume mass: sum |C_i| u_i
+{
+  cva.resize(Thstar.ncv);
+  dualmeshcvarea(cva, Thstar);
+  m = cva'*uu[];
+} EndMacro
+real mass0; massdual(u, mass0)
+real t = 0, dt, dtsub, CFL = 0.9, Tf = 1.;
+plot(Thstar, u[], value=1, cmm=nom + " : initial data (" + Thstar.ncv + " control volumes)", wait=1);
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) { // adaptation to u and to the previous-step solution
+    mesh Tho = Th;                          // the old mesh and the old values
+    fespace Vho(Tho, P1);
+    Vho uo = u, uBCo = uBC;
+    Th = adaptmesh(Th, u, up, err=erru, hmin=hmin, hmax=hmax, nbvx=100000);
+    Thstar = builddualmesh(Th);             // the dual of the new mesh: fvscheme finds it
+    u = 0; remapP1(Tho, uo[], Th, u[]);    // the exact average of the limited affine reconstruction
+    uBC = 0; remapP1(Tho, uBCo[], Th, uBC[]);
+    V1 = V1; V2 = V2;                       // the P1 velocity interpolated at the new vertices
+    ur = 0; up = 0;                         // fvscheme rebuilds itself on the new mesh
+    nbad++;
+  }
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+// the exact solution: u0 rotated by the angle t
+func uex = exp(-(((x-0.5)*cos(t)+(y-0.5)*sin(t)+0.2)^2+(-(x-0.5)*sin(t)+(y-0.5)*cos(t))^2)/0.01);
+real err = sqrt(int2d(Th, qforder=5)((u-uex)^2)), mass1;
+massdual(u, mass1)
+cout << nom << " (order " << ordre << "): t = " << t << " , " << it << " steps , " << nbad << " adaptations , " << Thstar.ncv
+     << " control volumes , mass = " << mass1 << " (initial " << mass0 << ", change " << mass1-mass0 << ") , min u = "
+     << u[].min << " , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(Thstar, u[], value=1, cmm=nom + " : solution at t = " + t + " (" + Thstar.ncv + " control volumes)", wait=1);

@@ -1,0 +1,110 @@
+// advection in 2D (mesh) by finite volumes, parallel version (domain decomposition, PETSc) of
+// freevol_advection2d.edp: the same rotation of a gaussian, the same scheme (Heun)
+//   the mesh is partitioned by createMat (overlap of 2 cells: the order 2 stencil, the gradients
+//   at the vertices and the limiter; 1 cell is enough at order 1; on an unstructured mesh, more are needed:
+//   5 for the Harbor of freevol_bbm2d_ddm.edp),
+//   the velocity and fvscheme on the local mesh; the interfaces (label -111111): Neumann (the default), their
+//   cells are overlap cells, updated by the exchange
+//   at each stage: the time step is the min over all the processes, then exchange(A,ur,scaled=true)
+//   mesh adaptation, as in freevol_advection2d.edp, on the global mesh ThG (the same on all the processes):
+//   the computation advances by cycles of nadapt iterations; at each cycle, ThG is partitioned by createMat (a
+//   new matrix A: createMat on the same matrix does not update its partition of unity A.D), the
+//   global solution uG is restricted to the local mesh (ThN2O: n2o), nadapt iterations, then the solution is
+//   gathered on ThG (A.D: each cell counted once), ThG is adapted (adaptmesh on the P1 solution) and
+//   the solution transferred to the new ThG (L2 projection or interpolation)
+//   mass, min, max, L2 norm: on the global solution uG
+// run: ff-mpirun -np 4 freevol_advection2d_ddm.edp -wg   (options: -n, -ordre (2 by default, or 1), -nw: no plot,
+//   -adapt (1 or 0), -nadapt, -err, -hmin, -hmax, -proj (1 projection, 0 interpolation))
+load "PETSc"// PETSc plugin
+include "macro_ddm.idp"// additional DDM functions
+include "getARGV.idp"
+int n=getARGV("-n",100), ordre=getARGV("-ordre",2);
+int adapt=getARGV("-adapt",1), nadapt=getARGV("-nadapt",10), proj=getARGV("-proj",1);
+real err=getARGV("-err",0.01), hmin=getARGV("-hmin",0.005), hmax=getARGV("-hmax",0.1);
+func u0 = exp(-((x-0.3)^2+(y-0.5)^2)/0.01);
+mesh ThG = square(n, n);                   // the global mesh, labels 1 to 4 on the sides of the square
+fespace PhG(ThG, P0);
+fespace VhG(ThG, P1);
+// the initial mesh adapted to the initial data (on ThG, the same on all the processes)
+if (adapt) for (int i = 0; i < 3; i++) {
+  VhG uh = u0;
+  ThG = adaptmesh(ThG, uh, err=err, hmin=hmin, hmax=hmax, nbvx=100000);
+}
+PhG uG = u0;                               // the global solution
+mesh Th = ThG;                             // the local mesh (partitioned at each cycle)
+fespace Ph(Th, P0);
+fespace Vh(Th, P1);
+Ph u, up, ur, uBC;
+Vh V1 = -(y-0.5), V2 = x-0.5;              // rotation around the center (2 components in 2D)
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];     // the interfaces (-111111): Neumann, the default
+fvscheme FV([V1,V2], eq="advection", labelBC=labBC, numflux=2, order=ordre);// rebuilt on each local mesh
+int[int] n2o;                              // local cell -> global cell
+real mass0 = int2d(ThG)(uG);
+real t = 0, dt, dtsub, dtl, CFL = 0.9, Tf = 1.;
+real t0 = mpiWtime(), tadapt = 0;          // the total computing time and the adaptation time
+if (!mpirank) plot(uG, cmm="2D: initial data", fill=1, value=1, wait=1);
+int it = 0;
+while (t < Tf - 1e-10) {// one cycle: partition of ThG, nadapt iterations, adaptation of ThG
+  real tp0 = mpiWtime();
+  Th = ThG;
+  Mat A;
+  {
+     macro ThOverlap()2//                  // overlap of 2 cells (order 2)
+     macro ThN2O()n2o//
+     createMat(Th, A, P0)                  // Th: the local mesh (with overlap)
+  }
+  u = 0;
+  for (int k = 0; k < Th.nt; k++) u[][k] = uG[][n2o[k]];// the restriction to the local mesh
+  up = 0; ur = 0; uBC = 0;
+  V1 = -(y-0.5); V2 = x-0.5;               // the velocity on the local mesh (fvscheme is rebuilt)
+  Ph D; D[] = A.D;                         // the partition of unity (1 on the cells of the process)
+  if (it > 0) tadapt += mpiWtime()-tp0;    // the new partition after an adaptation
+  int nc = adapt ? nadapt : 1000000;       // without adaptation: a single cycle
+  for (int ic = 0; ic < nc && t < Tf - 1e-10; ic++) {
+    it++;
+    up[] = u[];
+    for (int l = 1; l <= 2; l++) {
+      dtl = fluxupdate(FV, [u], [ur], [uBC]);
+      mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+      exchange(A, ur[], scaled=true);      // ur of the overlap cells: the one of their process
+      if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+      u[] -= dt*ur[];
+      if (l == 1) t += dt;
+      if (l == 2) { u[] += up[]; u[] *= .5; }
+    }
+  }
+  real ta0 = mpiWtime();
+  // the local solution gathered on ThG (each cell counted once)
+  { real[int] gl(ThG.nt); gl = 0; for (int k = 0; k < Th.nt; k++) gl[n2o[k]] += D[][k]*u[][k];
+    mpiAllReduce(gl, uG[], mpiCommWorld, mpiSUM); }
+  if (adapt && t < Tf - 1e-10) {// adaptation of ThG, transfer of the solution
+    // on process 0 only, then ThG and uG sent to the others: the value of a P0 function at a point
+    // of an edge (interpolation at the vertices, quadrature points of the projection) depends on the search for the
+    // triangle, which depends on the history of the process: each process would have a slightly different ThG or uG
+    if (mpirank == 0) {
+      mesh ThGo = ThG;                     // a copy of the old ThG, as in freevol_advection2d.edp
+      fespace PhGo(ThGo, P0);
+      PhGo uo; uo[] = uG[];                // the solution on the old ThG
+      VhG uh = uo;                         // the P1 solution for the metric
+      ThG = adaptmesh(ThG, uh, err=err, hmin=hmin, hmax=hmax, nbvx=100000);
+      if (proj) {// L2 projection: the mean of uo on each new cell (conservative ur to the quadrature)
+        varf vproj(w, v) = int2d(ThG, qforder=7)(uo*v);
+        PhG ar = area;
+        uG = 0;                            // uG on the new ThG
+        uG[] = vproj(0, PhG); uG[] ./= ar[];
+      }
+      else uG = uo;                        // interpolation at the barycenter
+    }
+    broadcast(processor(0, mpiCommWorld), ThG);
+    if (mpirank) uG = 0;                   // uG on the new ThG
+    broadcast(processor(0, mpiCommWorld), uG[]);
+  }
+  if (t < Tf - 1e-10) tadapt += mpiWtime()-ta0;// the gathering, the adaptation, the broadcast
+}
+if (!mpirank) {
+  real mass = int2d(ThG)(uG), l2 = int2d(ThG)(uG^2);
+  cout << "2D (" << mpisize << " processes): t = " << t << " , " << it << " steps , " << ThG.nt << " triangles , mass = " << mass
+       << " (error " << mass-mass0 << ") , min u = " << uG[].min << " , max u = " << uG[].max << " , L2 norm = " << sqrt(l2) << endl;
+  cout << "computing time: total " << mpiWtime()-t0 << " s , adaptation " << tadapt << " s" << endl;
+  plot(uG, cmm="2D: solution at t = " + t, fill=1, value=1, wait=1);
+}

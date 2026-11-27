@@ -73,5 +73,6 @@ all.edp: Makefile
 freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
+	echo loadpath += \"../../plugin/mpi/\" >> freefem++.pref
 
 FORCE:

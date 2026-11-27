@@ -149,6 +149,7 @@ makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
+	echo loadpath += \"../../plugin/mpi/\" >> freefem++.pref
 
 3d-leman.md: freefem++.pref
 

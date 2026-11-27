@@ -1,0 +1,6 @@
+buildmesh(b1(n1) + b2(n2) + ...) : 2D mesh of the domain bounded by borders
+  (border), oriented counterclockwise; n = number of points on the border
+  (negative to reverse the orientation).
+  Example:
+    border C(t=0, 2*pi) { x=cos(t); y=sin(t); label=1; }
+    mesh Th = buildmesh(C(50));

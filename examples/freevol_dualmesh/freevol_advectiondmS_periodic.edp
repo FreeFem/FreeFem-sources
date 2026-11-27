@@ -1,0 +1,52 @@
+// advection on a surface (meshS) by the finite volume method on the median dual mesh with periodic boundary
+// conditions
+//   the surface: the graph z = h(x,y) over [0,1]^2, h periodic in x and y (square3, labels 1 bottom, 2 right, 3 top,
+//   4 left, as square), a wavy surface (-a 0: the plane z = 0)
+//   fvscheme FV([V1,V2,V3], eq="advectiondm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]) (the syntax of a 2D fespace):
+//   the control volumes of the linked vertices are one control volume: no flux on the boundary pieces of the periodic
+//   borders (inside the control volume), u and the flux balance are the means on the class weighted by the volumes,
+//   at the order 2 the slope is the mean of the slopes and the reconstruction starts from the center of gravity of
+//   the union; the conserved quantity of the scheme is the sum |C_i| u_i (dualmeshcvarea)
+//   the velocity V = (r_x + 0.5 r_y)/sqrt(g) (r = (x, y, h), sqrt(g) = sqrt(1+h_x^2+h_y^2)): tangent to the surface,
+//   of zero surface divergence, periodic; the data: a periodic gaussian
+//   the mass is conserved exactly; a constant state stays constant on the plane (-a 0), ur to O(h^2) on the wavy
+//   surface (the P1 velocity is not exactly of zero divergence on the control volumes)
+// options: -n (16), -a (0.1), -Tf (0.5), -ordre (2 or 1), -nw: without plot
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2);
+real a = getARGV("-a", 0.1), Tf = getARGV("-Tf", 0.5), CFL = 0.9;
+func h = a*(sin(2*pi*x) + cos(2*pi*y)) + 0.5*a*sin(2*pi*x)*sin(2*pi*y);   // periodic
+func hx = a*(2*pi*cos(2*pi*x) + pi*cos(2*pi*x)*sin(2*pi*y));
+func hy = a*(-2*pi*sin(2*pi*y) + pi*sin(2*pi*x)*cos(2*pi*y));
+func sg = sqrt(1 + hx^2 + hy^2);
+meshS Th = square3(n, n, [x, y, h]);
+meshdualS Thstar = builddualmesh(Th);     // the median dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+Vh V1 = 1/sg, V2 = 0.5/sg, V3 = (hx + 0.5*hy)/sg;   // tangent, zero surface divergence
+func real gp(real xx, real yy) { real s = 0; for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) s += exp(-((xx-0.5-i)^2+(yy-0.5-j)^2)/0.02); return s; }
+Vh u = gp(x, y), up, ur = 0, uBC = 0;
+int[int] labBC = [1,1, 2,1, 3,1, 4,1];   // no effect on the periodic borders
+fvscheme FV([V1,V2,V3], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre, periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);             // the areas of the control volumes
+real mass0 = cva'*u[], t = 0, dt, dtsub;
+plot(Thstar, u[], value=1, cmm="surface (dual mesh, periodic): u at t = 0", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+cout << "advectiondm surface periodic (order " << ordre << ", n = " << n << ", a = " << a << ") : t = " << t << " , " << it << " steps , "
+     << Thstar.ncv << " control volumes" << endl;
+cout << "  mass " << cva'*u[] << " (difference " << cva'*u[]-mass0 << ") , min u " << u[].min << " , max u " << u[].max << endl;
+plot(Thstar, u[], value=1, cmm="surface (dual mesh, periodic): u at t = " + t, wait=1);
+u = 1;                                    // a constant state: 5 steps
+for (int l = 0; l < 5; l++) { dtsub = fluxupdate(FV, [u], [ur], [uBC]); u[] -= CFL*dtsub*ur[]; }
+cout << "  constant state after 5 steps: max |u-1| " << max(u[].max-1, 1-u[].min) << endl;

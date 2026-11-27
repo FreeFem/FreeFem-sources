@@ -1,0 +1,3 @@
+mesh Th; : a 2D mesh of triangles (the mesh of fespace Vh(Th, P1), int2d(Th), ...).
+  Built by square, buildmesh, readmesh, adaptmesh, movemesh, trunc, ...
+  Example: mesh Th = square(10, 10); cout << Th.nt << " triangles" << endl;

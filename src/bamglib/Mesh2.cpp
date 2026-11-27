@@ -1680,8 +1680,55 @@ namespace bamg {
            << endl;
     return NbSplitEdge;
   }
+  // a new point v too close to the boundary: its distance (in its metric) to a boundary edge (locked, or between an
+  // inside and an outside triangle) of the triangle containing it, or of the triangles around the vertices of this
+  // triangle, is < seuil. Without this test (ToClose tests only the vertices), a point can be inserted very close to
+  // a boundary edge (an anisotropic metric along the boundary: thin triangles); kept as a background vertex in the next
+  // adaptation (KeepBackVertex), the new points are closer and closer to the boundary, until a point is on a boundary
+  // edge (integer coordinates): the swap of a locked edge fails (Problem swap), wrong mesh (ex. periodic adaptmesh,
+  // repeated, a solution crossing the periodic boundary)
+  static bool ToCloseToBoundary(const Triangles &Th, const Vertex &v, Real8 seuil) {
+    Icoor2 dete[3];
+    Triangle *tv = Th.FindTriangleContening(v.i, dete);
+    if (!tv || tv->det < 0) return false;    // outside: not a new point (not tested here)
+    const R2 P = v.r;
+    // the triangles to test: tv and the triangles around its vertices
+    Triangle *lt[64];
+    int nlt = 0;
+    lt[nlt++] = tv;
+    for (int iv = 0; iv < 3; iv++) {
+      const Vertex *s = (*tv)(iv);
+      if (!s || !s->t) continue;
+      TriangleAdjacent ta(s->t, EdgesVertexTriangle[s->vint][1]);
+      Triangle *tbegin = (Triangle *)ta;
+      int k = 0;
+      do {
+        Triangle *tt = (Triangle *)ta;
+        if (tt->det > 0 && nlt < 64) lt[nlt++] = tt;
+        ta = Next(Adj(ta));
+      } while (tbegin != (Triangle *)ta && ++k < 64);
+    }
+    for (int l = 0; l < nlt; l++) {
+      Triangle *tt = lt[l];
+      for (int j = 0; j < 3; j++) {
+        Triangle *ta = tt->TriangleAdj(j);
+        if (!tt->Locked(j) && ta && ta->det >= 0) continue;    // not a boundary edge
+        const Vertex *a = (*tt)(VerticesOfTriangularEdge[j][0]), *b = (*tt)(VerticesOfTriangularEdge[j][1]);
+        if (!a || !b) continue;
+        // the distance from P to the segment [a,b], in the metric of v
+        R2 A = a->r, AB = b->r - A, AP = P - A;
+        Real8 ab2 = (AB, AB);
+        Real8 lambda = ab2 > 0 ? Max(0., Min(1., (AP, AB) / ab2)) : 0.;
+        if (v.m(AP - AB * lambda) < seuil) return true;
+      }
+    }
+    return false;
+  }
+
   Int4 Triangles::InsertNewPoints(Int4 nbvold, Int4 &NbTSwap) {
     Real8 seuil = 1.414 / 2;    // for two close point
+    const Real8 seuilb = 0.2;    // the minimal distance (in the metric) of a new point to the boundary
+    Int4 nbtoclosebdy = 0;       // the number of new points too close to the boundary (not inserted)
     Int4 i;
     // insertion part ---
 
@@ -1712,7 +1759,8 @@ namespace bamg {
         Real8 hx, hy;
         vi.m.Box(hx, hy);
         Icoor1 hi = (Icoor1)(hx * coefIcoor), hj = (Icoor1)(hy * coefIcoor);
-        if (!quadtree->ToClose(vi, seuil, hi, hj)) {
+        bool tocloseb = false;
+        if (!quadtree->ToClose(vi, seuil, hi, hj) && !(tocloseb = ToCloseToBoundary(*this, vi, seuilb))) {
           // a good new point
           Vertex &vj = vertices[iv];
           Int4 j = vj.ReferenceNumber;
@@ -1753,11 +1801,12 @@ namespace bamg {
           Add(vj, tcvj, dete);
           NbSwap += vj.Optim(1);
           iv++;
-        }
+        } else if (tocloseb)
+          nbtoclosebdy++;
       }
       if (verbosity > 3) {
         cout << "    Number of new points " << iv << " Number of points which are too close "
-             << nbv - iv;
+             << nbv - iv << " (to the boundary " << nbtoclosebdy << ")";
         cout << " Nb swap = " << NbSwap << " after ";
       }
 

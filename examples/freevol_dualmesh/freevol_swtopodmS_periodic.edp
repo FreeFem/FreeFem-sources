@@ -1,0 +1,50 @@
+// shallow water with topography on a surface (meshS) by the finite volume method on the median dual mesh with
+// periodic boundary conditions (the system of freevol_swtopodmS.edp: unknowns [H,Hu,Hv,Hw,zb] P1, the momentum
+// tangent, the gravity normal to the surface)
+//   the surface: the graph z = h(x,y) over [0,1]^2, h periodic in x and y (square3, labels 1 bottom, 2 right, 3 top,
+//   4 left, as square), a wavy surface (-a 0: the plane z = 0); zb periodic
+//   fvscheme FV([H,Hu,Hv,Hw,zb], eq="swtopodm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]]) (the syntax of a 2D
+//   fespace): the control volumes of the linked vertices are one control volume (no flux on the boundary pieces of
+//   the periodic borders, U and the flux balance are the means on the class weighted by the volumes); on the surface
+//   the control volumes of a class have the normal of their union (the plane of the momentum), and the correction
+//   of a state at rest (SurfDefect) is the one of the union
+//   -cas 0: the lake at rest (H + zb = 1, no velocity): it stays at rest, also on the wavy surface
+//   -cas 1: a bump of H on the lake: the mass is conserved (the sum |C_i| H_i, dualmeshcvarea)
+// options: -cas (1), -n (16), -a (0.1), -Tf (0.2), -ordre (2 or 1), -nw: without plot
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real a = getARGV("-a", 0.1), Tf = getARGV("-Tf", 0.2), gr = 1., CFL = 0.5;
+func h = a*(sin(2*pi*x) + cos(2*pi*y)) + 0.5*a*sin(2*pi*x)*sin(2*pi*y);   // periodic
+meshS Th = square3(n, n, [x, y, h]);
+meshdualS Thstar = builddualmesh(Th);     // the median dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+func z0 = 0.1*cos(2*pi*x)*sin(2*pi*y);   // periodic topography
+Vh zb = z0, H = 1 - z0 + cas*0.2*exp(-((x-0.3)^2+(y-0.5)^2)/0.01), Hu = 0, Hv = 0, Hw = 0;
+Vh Hp, Hup, Hvp, Hwp, Hr = 0, Hur = 0, Hvr = 0, Hwr = 0, zbr = 0, HBC = 0, HuBC = 0, HvBC = 0, HwBC = 0, zbBC = 0;
+real[int] params = [gr];
+int[int] labBC = [1,2, 2,2, 3,2, 4,2];   // walls: no effect on the periodic borders
+fvscheme FV([H,Hu,Hv,Hw,zb], eq="swtopodm", labelBC=labBC, parameters=params, order=ordre,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);             // the areas of the control volumes
+real m0 = cva'*H[], t = 0, dt, dtsub;
+Vh eta = H + zb;
+plot(Thstar, eta[], value=1, cmm="surface (dual mesh, periodic): H + zb at t = 0", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  Hp[] = H[]; Hup[] = Hu[]; Hvp[] = Hv[]; Hwp[] = Hw[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,Hw,zb], [Hr,Hur,Hvr,Hwr,zbr], [HBC,HuBC,HvBC,HwBC,zbBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    H[] -= dt*Hr[]; Hu[] -= dt*Hur[]; Hv[] -= dt*Hvr[]; Hw[] -= dt*Hwr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; Hu[] += Hup[]; Hu[] *= .5; Hv[] += Hvp[]; Hv[] *= .5; Hw[] += Hwp[]; Hw[] *= .5; }
+  }
+}
+eta = H + zb;
+Vh q = sqrt(Hu^2+Hv^2+Hw^2);
+cout << "swtopodm surface periodic (cas " << cas << ", order " << ordre << ", n = " << n << ", a = " << a << ") : t = " << t << " , "
+     << it << " steps , " << Thstar.ncv << " control volumes" << endl;
+cout << "  mass difference " << cva'*H[]-m0 << " , H + zb in [" << eta[].min << ", " << eta[].max << "] , max |H u| " << q[].max << endl;
+plot(Thstar, eta[], value=1, cmm="surface (dual mesh, periodic): H + zb at t = " + t, wait=1);

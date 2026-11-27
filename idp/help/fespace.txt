@@ -1,0 +1,3 @@
+fespace Vh(Th, P1); : finite element space on the mesh Th.
+  Common elements: P0, P1, P2, P1dc, P1b, RT0, P1nc; product space:
+  fespace Wh(Th, [P2, P2, P1]);

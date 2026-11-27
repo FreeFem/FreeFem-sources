@@ -1,0 +1,124 @@
+// Saint-Venant with topography on a surface (meshS) by finite volumes: the unit sphere (Sphere20 of
+// MeshSurface.idp, refined icosahedron, no pole), gravity normal to the surface, zb measured along the normal
+// unknowns [H,Hu,Hv,Hw,zb] in P0 (as in 3D): the momentum is tangent (in the plane of each
+// triangle); on an edge, the neighbor state is rotated around the edge into the plane of the cell
+// forces (source terms of the momentum q = H u, added in the script at each stage):
+//   Coriolis (rotation of the Earth Om around z): -f N x q, f = 2 Om sin(latitude), N the normal to the sphere
+//   attraction of the Moon (tide): H F, F = -grad_S Phi, Phi = -3/2 eps (X.m)^2 the tidal potential, m the
+//     direction of the Moon, which rotates at -Om around z in the Earth frame (Moon in the equatorial plane);
+//     equilibrium tide: H + zb = cst + 3/2 eps/g (X.m)^2 (two bulges, towards the Moon and opposite)
+// cases (macro case):
+//   LakeAtRest: lake at rest, H + zb = 1 with a topography bump: must stay exact (zero velocity)
+//   Rotation  : steady zonal flow in geostrophic balance (Williamson test case 2, with
+//               Coriolis Om = 1 by default): u = om e_z x X, H + zb = 2 - (om^2/2 + Om om) z^2/g, with an
+//               axisymmetric topography zb(z) (H constant along the parallels): the deviation from H(0) measures
+//               the error of the scheme (-Om 0: without Coriolis, centrifugal balance only)
+//   Hump      : a hump of water spreading over the topography (mass conserved)
+//   Wave      : a wave propagating on the sphere: a small hump of water at the north pole (no topography, at
+//               rest) gives a circular wave that crosses the equator near t = pi/2 (speed sqrt(g H) = 1) and
+//               refocuses at the south pole near t = pi; the maximum of H in the southern hemisphere is printed
+//   Tide      : the tide: an ocean at rest (H = 1), Coriolis (Om = 2) and the attraction of the Moon (eps = 0.01),
+//               over one day (Tf = 2 pi/Om): the two tidal bulges follow the Moon
+// options: -n (10: Sphere20(1, n), 20 n^2 triangles), -ordre (2 or 1), -Tf, -Om (rotation, Coriolis),
+//          -eps (tide), -nw: no plot; Coriolis and the tide can be added to all the cases
+load "msh3"
+include "MeshSurface.idp"
+include "getARGV.idp"
+macro case() Tide//
+int nn = getARGV("-n", 10), ordre = getARGV("-ordre", 2);
+real Tf = getARGV("-Tf", 1.);
+meshS Th = Sphere20(1., nn, 1, 0);         // the sphere of radius 1, no boundary
+fespace Ph(Th, P0);
+real gr = 1., om = 1.;                     // gravity, rotation speed of the flow (Rotation case)
+real Om = getARGV("-Om", 0.), epst = getARGV("-eps", 0.);// rotation of the Earth (Coriolis), tide of the Moon
+func r = sqrt(x^2+y^2+z^2);                // the radius (the triangle centers are slightly below the sphere)
+func bump = 0.2*exp(-((x-1/sqrt(2.))^2+y^2+(z-1/sqrt(2.))^2)/0.1);
+Ph zb, H, Hu, Hv, Hw;
+string casename;
+IFMACRO(case,LakeAtRest)
+ casename = "LakeAtRest";
+ zb = bump; H = 1 - zb; Hu = 0; Hv = 0; Hw = 0;
+ENDIFMACRO
+IFMACRO(case,Rotation)
+ casename = "Rotation";
+ zb = 0.2*exp(-(z-0.5)^2/0.05);            // a band (zb depends only on z)
+ if (usedARGV("-Om") < 0) Om = 1.;         // Coriolis by default
+ H = 2 - (om^2/2 + Om*om)*z^2/gr - zb; Hu = H*(-om*y); Hv = H*(om*x); Hw = 0;
+ENDIFMACRO
+IFMACRO(case,Hump)
+ casename = "Hump";
+ zb = bump; H = 1 - zb + 0.3*exp(-((x+1/sqrt(2.))^2+y^2+(z-1/sqrt(2.))^2)/0.05); Hu = 0; Hv = 0; Hw = 0;
+ Tf = getARGV("-Tf", 3.);
+ENDIFMACRO
+IFMACRO(case,Wave)
+ casename = "Wave";
+ zb = 0; H = 1 + 0.1*exp(-(x^2+y^2+(z-1)^2)/0.02); Hu = 0; Hv = 0; Hw = 0;
+ Tf = getARGV("-Tf", pi);
+ENDIFMACRO
+IFMACRO(case,Tide)
+ casename = "Tide";
+ if (usedARGV("-Om") < 0) Om = 2.;
+ if (usedARGV("-eps") < 0) epst = 0.01;
+ zb = 0; H = 1; Hu = 0; Hv = 0; Hw = 0;
+ real Tday = 2*pi;                         // one day: 2 pi/Om (Om = 0: the Moon is fixed)
+ if (Om != 0) Tday = 2*pi/abs(Om);
+ Tf = getARGV("-Tf", Tday);
+ENDIFMACRO
+// the source terms at time tt, added to [Hur,Hvr,Hwr] (the scheme does q -= dt*qp):
+//   Coriolis: qp += f N x q, f = 2 Om z/r; tide: qp -= H F, F = 3 eps (X.m) (m - (m.N) N), N = X/r
+NewMacro addsources(tt)
+if (Om != 0 || epst != 0) {
+  real mx = cos(-Om*(tt)), my = sin(-Om*(tt)), mz = 0;// the direction of the Moon
+  Ph fN = 2*Om*z/r^2;                      // f/r : N x q = X x q / r
+  Ph XM = (x*mx + y*my + z*mz)/r;           // X.m = m.N
+  Ph Fu = 3*epst*XM*(mx - XM*x/r), Fv = 3*epst*XM*(my - XM*y/r), Fw = 3*epst*XM*(mz - XM*z/r);
+  Ph Cu = fN*(y*Hw - z*Hv), Cv = fN*(z*Hu - x*Hw), Cw = fN*(x*Hv - y*Hu);
+  Hur[] += Cu[]; Hvr[] += Cv[]; Hwr[] += Cw[];
+  Fu = H*Fu; Fv = H*Fv; Fw = H*Fw;
+  Hur[] -= Fu[]; Hvr[] -= Fv[]; Hwr[] -= Fw[];
+}
+EndMacro
+Ph H0 = H, Hp, Hup, Hvp, Hwp, Hr=0, Hur=0, Hvr=0, Hwr=0, zbr=0, HBC=0, HuBC=0, HvBC=0, HwBC=0, zbBC=0;
+real[int] params = [gr];
+fvscheme FV([H,Hu,Hv,Hw,zb], eq="swtopo", parameters=params, order=ordre);
+real mass0 = int2d(Th)(H), t = 0, dt, dtsub, CFL = 0.5;
+real tdraw = Tf/12, tnext = tdraw;       // the plots during the computation
+Ph eta = H + zb;
+plot(eta, cmm="sphere: H + zb at t = 0", wait=1);
+int it;
+for (it = 0; t < Tf - 1e-10; it++) {
+  Hp[] = H[]; Hup[] = Hu[]; Hvp[] = Hv[]; Hwp[] = Hw[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,Hw,zb], [Hr,Hur,Hvr,Hwr,zbr], [HBC,HuBC,HvBC,HwBC,zbBC]);
+    addsources(t)                          // Coriolis and tide (t: the time of the stage)
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    H[] -= dt*Hr[]; Hu[] -= dt*Hur[]; Hv[] -= dt*Hvr[]; Hw[] -= dt*Hwr[];
+    if (l == 1) t += dt;
+    if (l == 2) {
+      H[] += Hp[]; H[] *= .5; Hu[] += Hup[]; Hu[] *= .5; Hv[] += Hvp[]; Hv[] *= .5; Hw[] += Hwp[]; Hw[] *= .5;
+    }
+  }
+  if (t >= tnext - 1e-10 && t < Tf - 1e-10) {
+    eta = H + zb;
+    plot(eta, cmm="sphere: H + zb at t = " + t, wait=0);
+    tnext += tdraw;
+  }
+}
+Ph q = sqrt(Hu^2+Hv^2+Hw^2);
+eta = H + zb;
+real errH = sqrt(int2d(Th)((H-H0)^2))/sqrt(int2d(Th)(H0^2));
+cout << "sphere, case " << casename << " (order " << ordre << ", " << Th.nt << " triangles, Om " << Om << ", eps " << epst << "): t = " << t << " , " << it << " steps"
+     << " , mass deviation " << int2d(Th)(H)-mass0 << " , max |H u| " << q[].max
+     << " , H + zb in [" << eta[].min << ", " << eta[].max << "] , relative L2 deviation from H(0) " << errH << endl;
+IFMACRO(case,Wave)
+ Ph Hsud = (z < 0)*H, Hnord = (z > 0)*H;
+ cout << "wave: max of H in the southern hemisphere " << Hsud[].max << " , in the northern hemisphere " << Hnord[].max
+      << " (initial hump: max " << H0[].max << ")" << endl;
+ENDIFMACRO
+IFMACRO(case,Tide)
+ real mx = cos(-Om*t), my = sin(-Om*t);
+ Ph HL = (x*mx + y*my > 0.9*r)*eta, HP = ((x*mx + y*my)^2 < 0.01*r^2)*eta + ((x*mx + y*my)^2 >= 0.01*r^2)*10;
+ cout << "tide: H + zb under the Moon (max) " << HL[].max << " , at 90 degrees (min) " << HP[].min
+      << " , equilibrium tide: amplitude 3/2 eps/g = " << 1.5*epst/gr << endl;
+ENDIFMACRO
+plot(eta, cmm="sphere: H + zb at t = " + t, wait=1);

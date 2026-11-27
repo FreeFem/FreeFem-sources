@@ -1,0 +1,96 @@
+// The P0 finite element on the dual mesh, in 1D, 2D and 3D: fespace Phstar(Thstar, P0)
+//   the dual mesh (meshdualL, meshdual, meshdual3) is seen as the FreeFEM mesh of its control volumes:
+//   2D (dual of F. Bouchut) each control volume is a fan of triangles, 1D one segment per control volume (between
+//   the middles of the segments, Phstar.ndof = Th.nv), 3D 24 tetrahedra per tetrahedron; the label of an element =
+//   the number of its control volume + 1
+//   - dualtoP0(w[], Thstar, u[]): u (one value per control volume = the FV unknowns, P1 of Th) -> w in Phstar,
+//     constant per control volume
+//   - dualfromP0(u[], Thstar, w[]): the average of w over each control volume
+//   - int2d(Thstar)(w) (int1d, int3d): exact, = sum |C_i| u_i (the mass of the FV scheme); int2d(Thstar, i+1)(...)
+//     over control volume i; plot(w), savevtk(..., Thstar, w) as on a mesh
+// options: -n (2D: the disk with 4 n points on the boundary; 1D: n segments), -m (3D: cube(m, m, m)), -nw
+load "msh3"
+include "getARGV.idp"
+int n = getARGV("-n", 10), mm = getARGV("-m", 6);
+
+// ============================ 2D: the dual of F. Bouchut ============================
+border C(t=0, 2*pi) { x = .5 + .5*cos(t); y = .5 + .5*sin(t); label = 1; }
+mesh Th = buildmesh(C(4*n));               // an unstructured mesh
+meshdual Thstar = builddualmesh(Th);       // the control volumes (incircle centres)
+fespace Vh(Th, P1);                        // the FV unknowns: one value per vertex = per control volume
+fespace Phstar(Thstar, P0);                 // the P0 of the dual mesh
+func f = exp(-10*((x-.5)^2 + (y-.5)^2));
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);               // the areas of the control volumes
+
+// (a) the FV unknowns (one value per control volume) as a function of Phstar
+Vh u = f;                                  // the value of f at the vertex
+Phstar w=x+y;
+plot(w);
+dualtoP0(w[], Thstar, u[]);
+real massVF = 0.;
+for (int i = 0; i < Thstar.ncv; ++i) massVF += cva[i]*u[][i];
+cout << "2D: " << Thstar.ncv << " control volumes, Phstar.ndof = " << Phstar.ndof << endl;
+cout << "(a) mass of the FV scheme sum |C_i| u_i = " << massVF << " , int2d(Thstar)(w) = " << int2d(Thstar)(w)
+     << " , int2d(Th)(u) (P1 of Th) = " << int2d(Th)(u) << endl;
+
+// (b) the integral over a control volume: region i+1
+int i0 = Thstar.ncv/2;
+cout << "(b) control volume " << i0 << " : int2d(Thstar, " << i0+1 << ")(1) = " << int2d(Thstar, i0+1)(1.)
+     << " = its area " << cva[i0] << endl;
+
+// (c) the exact average of f over each control volume (L2 projection onto the P0 of the dual): the "average"
+//     FV initial data instead of the value at the vertex
+varf vf(a, b) = int2d(Thstar, qforder=5)(f*b);
+varf vm(a, b) = int2d(Thstar)(b);
+real[int] bf = vf(0, Phstar), bm = vm(0, Phstar);// the integral of f and the area of each element
+Phstar wf;
+wf[] = bf ./ bm;                           // the average of f over each element
+Vh um;
+dualfromP0(um[], Thstar, wf[]);            // the average of f over each control volume
+Phstar wm;
+dualtoP0(wm[], Thstar, um[]);
+Vh du = um - u;
+cout << "(c) averages: int2d(Thstar)(wm) = " << int2d(Thstar)(wm) << " = int2d(Thstar)(f) = "
+     << int2d(Thstar, qforder=5)(f) << " , max |average - value at the vertex| = " << du[].linfty << endl;
+plot(w, fill=1, value=1, wait=1, cmm="2D: fespace Phstar(Thstar, P0), f at the vertex of each control volume");
+plot(wm, fill=1, value=1, wait=1, cmm="2D: the average of f over each control volume");
+
+// ============================ 1D: the median dual ============================
+meshL ThL = segment(n, [x, 0, 0]);
+meshdualL ThstarL = builddualmesh(ThL);
+fespace VhL(ThL, P1);
+fespace PhstarL(ThstarL, P0);
+VhL uL = sin(pi*x);
+PhstarL wL;
+dualtoP0(wL[], ThstarL, uL[]);
+real[int] cvL(ThstarL.ncv);
+dualmeshcvarea(cvL, ThstarL);
+real massL = 0.;
+for (int i = 0; i < ThstarL.ncv; ++i) massL += cvL[i]*uL[][i];
+cout << "1D: " << ThstarL.ncv << " control volumes, PhstarL.ndof = " << PhstarL.ndof << " : sum |C_i| u_i = " << massL
+     << " , int1d(ThstarL)(wL) = " << int1d(ThstarL)(wL) << endl;
+plot(wL, wait=1, cmm="1D: fespace PhstarL(ThstarL, P0)");
+
+// ============================ 3D: the median dual ============================
+mesh3 Th3 = cube(mm, mm, mm);
+meshdual3 Thstar3 = builddualmesh(Th3);
+fespace Vh3(Th3, P1);
+fespace Phstar3(Thstar3, P0);
+Vh3 u3 = exp(-10*((x-.5)^2 + (y-.5)^2 + (z-.5)^2));
+Phstar3 w3;
+dualtoP0(w3[], Thstar3, u3[]);
+real[int] cv3(Thstar3.ncv);
+dualmeshcvarea(cv3, Thstar3);
+real mass3 = 0.;
+for (int i = 0; i < Thstar3.ncv; ++i) mass3 += cv3[i]*u3[][i];
+cout << "3D: " << Thstar3.ncv << " control volumes, Phstar3.ndof = " << Phstar3.ndof << " : sum |C_i| u_i = " << mass3
+     << " , int3d(Thstar3)(w3) = " << int3d(Thstar3)(w3) << endl;
+// the same space with the FreeFEM element P0VF on the primal mesh (one degree of freedom per vertex: indicator
+// of the median control volume): in 3D (and 1D) it is the P0 of the median dual; in 2D it does not match the dual of
+// F. Bouchut
+fespace V0(Th3, P0VF);
+V0 v3;
+v3[] = u3[];
+cout << "    with P0VF: int3d(Th3, qforder=3)(v3) = " << int3d(Th3, qforder=3)(v3) << endl;
+plot(w3, wait=1, cmm="3D: fespace Phstar3(Thstar3, P0)");

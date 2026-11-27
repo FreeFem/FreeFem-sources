@@ -1,0 +1,3 @@
+on(labels, u=g) : Dirichlet condition u = g on the borders with the given
+  labels, in solve, problem or varf.
+  Example: + on(1, 2, 3, 4, u=0)

@@ -1,0 +1,126 @@
+// solves the Euler system of gas dynamics in 3D (mesh3): a minimal example (a few seconds), to check that the
+// 3D version works:  U_t+div(F(U)) = 0, U=[rho,rho*u,rho*v,rho*w,E], E = rho*|u|^2/2+rho*e, p = (gamma-1)*rho*e
+// cases:
+//   Blast      : a ball of gas at high pressure in a box with walls (mass and energy conserved, positivity,
+//                symmetry x,y,z -> y,z,x)
+//   ShockTube1D: the Sod shock tube of freevol_euler1d.edp in a bar, compared with the exact solution
+// the same command fvscheme as in 1D and 2D: the dimension is given by the mesh of [rho,rhou,rhov,rhow,E];
+// numflux = 2 (Suliciu/HLLC, the default) in 3D: in the frame (N,T1,T2), the velocity T2 passive
+// options: -nf (numflux), -n (cells along the bar: ShockTube1D)
+// parallel version (domain decomposition, PETSc) of freevol_euler3d.edp: the same cases, the same scheme
+//   the order of the scheme: macro ordre (2 or 1), it gives the overlap of the partition by createMat: 2 cells
+//   for the order 2, 1 cell for the order 1 (the stencil); fvscheme on the local mesh; the interfaces (label
+//   -111111): Neumann (the default), their cells are overlap cells, set again by the exchange
+//   at each stage: the time step the min on all the processes, then exchange(A,Hr,scaled=true)
+//   at the end, the solution is gathered on the whole mesh ThG (ThN2O, the partition of unity A.D): the outputs
+//   of freevol_euler3d.edp (process 0)
+//   run: ff-mpirun -np 2 freevol_euler3d_ddm.edp -wg   (-nw: no plot)
+load "PETSc"// PETSc plugin
+macro dimension()3// EOM
+include "macro_ddm.idp"// additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,cmm = // for plotMPI
+macro PARAMSW fill=true,value=true,wait=1,cmm = // for plotMPI (the last plot)
+include "getARGV.idp"
+real s0=clock();
+load "msh3"
+macro case() Blast//
+real gamma=1.4;
+int nfl=getARGV("-nf",2);
+IFMACRO(case,Blast)
+   real Tf=.2;
+   int Npx=10;
+   mesh3 Th = cube(Npx,Npx,Npx,[2*x-1,2*y-1,2*z-1]);
+   func rho0 = 1.;
+   func p0 = 1.+9.*((x^2+y^2+z^2)<.25);
+ENDIFMACRO
+IFMACRO(case,ShockTube1D)
+   real Tf=.2;
+   int Npx=getARGV("-n",100);
+   real x0=0.5, rhoL=1., uL=0., pL=1., rhoR=0.125, uR=0., pR=0.1;
+   mesh3 Th = cube(Npx,1,1,[x,0.02*y,0.02*z]);
+   func rho0 = (x<x0)*rhoL+(x>=x0)*rhoR;
+   func p0 = (x<x0)*pL+(x>=x0)*pR;
+ENDIFMACRO
+real t,dt,CFL=.5;
+macro ordre()2// the order of the scheme (2 or 1): also the overlap of the partition
+func PK5=[P0,P0,P0,P0,P0];
+mesh3 ThG=Th;// the whole mesh (for the outputs)
+fespace PhG(ThG,P0);
+Mat A;
+int[int] n2o;// local cell -> global cell
+{
+   IFMACRO(ordre,2)
+   macro ThOverlap()2// 2 cells for the order 2
+   ENDIFMACRO
+   IFMACRO(ordre,1)
+   macro ThOverlap()1// 1 cell for the order 1
+   ENDIFMACRO
+   macro ThN2O()n2o//
+   macro def(u)[u, u#B, u#C, u#D, u#E]// EOM
+   macro init(u)[u, u, u, u, u]// EOM
+   createMat(Th, A, PK5)// Th: the local mesh (with overlap)
+}
+fespace Ph5(Th,PK5);
+fespace Ph(Th,P0);
+Ph5 [H,Hu,Hv,Hw,E]=[rho0,0,0,0,p0/(gamma-1.)],[HBC,HuBC,HvBC,HwBC,EBC]=[0,0,0,0,0],[Hr,Hur,Hvr,Hwr,Er]=[0,0,0,0,0];
+Ph5 [Hp,Hup,Hvp,Hwp,Ep];//for second order in time
+int[int] labBC=[1,2,2,2,3,2,4,2,5,2,6,2];// walls on the 6 faces of the cube
+Ph5 [D0,D0B,D0C,D0D,D0E]; D0[]=A.D;// the partition of unity (1 on the cells of the process)
+Ph Dc=D0;
+// the local solution gathered on the whole mesh ThG (the partition of unity: each cell counted once)
+macro gather(uloc,uglob){ real[int] gl(ThG.nt); gl=0; for(int k=0;k<Th.nt;k++) gl[n2o[k]]+=Dc[][k]*uloc[][k];
+  mpiAllReduce(gl,uglob[],mpiCommWorld,mpiSUM); }//
+real mass0, energy0;
+{ PhG HG, EG; Ph c=H; gather(c,HG) c=E; gather(c,EG) mass0=int3d(ThG)(HG); energy0=int3d(ThG)(EG); }
+{ Ph rho=H; plotMPI(Th, rho, P0, def1, real, PARAMS "rho at t=0") }
+
+int mtordre=2;// order of accuracy in time (1 or 2)
+real[int] params=[gamma];
+fvscheme FV([H,Hu,Hv,Hw,E],order=ordre,eq="euler",labelBC=labBC,limiter=1,numflux=nfl,parameters=params);
+
+int iter=0;
+real dtsub, rmin=1e30, pmin=1e30;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     real dtl = fluxupdate(FV,[H,Hu,Hv,Hw,E],[Hr,Hur,Hvr,Hwr,Er],[HBC,HuBC,HvBC,HwBC,EBC]);
+     mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+     exchange(A,Hr[],scaled=true);// the overlap cells: the values of their process
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+    Ph rho=H, pr=(gamma-1.)*(E-.5*(Hu^2+Hv^2+Hw^2)/(H+1.e-13));
+    real rl=rho[].min, pl=pr[].min, rg, pg;
+    mpiAllReduce(rl,rg,mpiCommWorld,mpiMIN); mpiAllReduce(pl,pg,mpiCommWorld,mpiMIN);
+    rmin=min(rmin,rg); pmin=min(pmin,pg);
+}//end of time loop
+{ Ph rhol=H; plotMPI(Th, rhol, P0, def1, real, PARAMSW "rho at t="+t) }
+// the outputs of freevol_euler3d.edp, on the whole mesh ThG (the local solution gathered)
+PhG rho, EG; { Ph c=H; gather(c,rho) c=E; gather(c,EG) }
+if (!mpirank) {
+cout << "3D (" << mpisize << " processes): " << ThG.nt << " tetrahedra, " << iter << " time steps, cputime = " << clock()-s0 << endl;
+cout << "mass error = " << (int3d(ThG)(rho)-mass0)/mass0 << " , energy error = " << (int3d(ThG)(EG)-energy0)/energy0
+     << " , min rho = " << rmin << " , min p (all the steps) = " << pmin << endl;
+IFMACRO(case,Blast)
+  // symmetry of the ball and of the mesh of cube (invariant by the circular permutation of x,y,z)
+  PhG hsym=rho(y,z,x);
+  hsym[]-=rho[];
+  cout << "symmetry: max |rho(x,y,z)-rho(y,z,x)| = " << hsym[].linfty << endl;
+ENDIFMACRO
+IFMACRO(case,ShockTube1D)
+  include "freevol_euler_riemann.idp"
+  PhG xc=x, rhoe;
+  for (int k=0;k<ThG.nt;k++) rhoe[][k]=riemann((xc[][k]-x0)/t);
+  cout << "shock tube: L1 error on rho (per unit section) = " << int3d(ThG)(abs(rho-rhoe))/0.02^2
+       << " (freevol_euler1d.edp, case Sod, with 100 cells: 0.0054)" << endl;
+ENDIFMACRO
+}

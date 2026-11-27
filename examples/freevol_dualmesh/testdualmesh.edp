@@ -1,0 +1,16 @@
+
+border gama11(t= 0.,  1.){ x= t   ; y = 0.;label=1;};
+border gama22(t= 0.,  1.){ x= 1.  ; y = t  ;label=2;};
+border gama33(t= 1. , 0.){ x= t   ; y = 1. ;label=3;};
+border gama44(t= 1. , 0.){ x= 0.; y = t ;label=4;};
+int n=7;
+mesh Th=buildmesh(gama11(n)+gama22(n)+gama33(n)+gama44(n));
+
+dualmesh Thstar;
+builddualmesh(Thstar,Th);
+
+savedualmesh(Thstar,"dualmesh.vtk");//saves mesh to a file for paraview
+
+cout << "Thstar.npe=" << Thstar.npe << " Thstar.nde=" << Thstar.nde
+     << " Thstar.ncv=" << Thstar.ncv << " Thstar.ndv=" << Thstar.ndv
+     << " Thstar.ndbe=" << Thstar.ndbe << endl;

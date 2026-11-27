@@ -1,0 +1,2 @@
+interpolate(Wh, Vh) : interpolation matrix from Vh to Wh.
+  To interpolate a function, just write: Wh w = u;

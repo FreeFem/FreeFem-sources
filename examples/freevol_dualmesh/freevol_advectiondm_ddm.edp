@@ -1,0 +1,144 @@
+// advection of a scalar by a given vector field, by the finite volume method
+// using control volumes of dualmesh (P1 functions)
+// parallel version (domain decomposition, PETSc) of freevol_advectiondm.edp: the same case, the same scheme
+//   the order of the scheme: macro ordre (2 or 1), it gives the overlap of the partition by DmeshCreate:
+//   3 layers of triangles for the order 2 (one more than on the primal mesh: the control volumes of the
+//   vertices on the border of the local mesh are cut, so their centers of gravity, used by the slopes in the
+//   triangles, change), 1 for the order 1 (verified: the same solution as freevol_advectiondm.edp with a fixed
+//   time step, np = 2 and 4; with 2 layers at the order 2: differences of 1e-2)
+//   the mesh is partitioned by DmeshCreate, the velocity, the dual mesh Thstar and fvscheme on the
+//   local mesh (meshdual Thstar = builddualmesh(Th), found by fvscheme from Th); the interfaces (label -111111): Neumann
+//   (the default), their vertices are overlap vertices, set again by the exchange
+//   at each stage: the time step the min on all the processes, then exchange(dA0,ur,scaled=true)
+//   at the end, the solution is gathered on the whole mesh ThG (onedomainsol: the partition of unity dA0.D
+//   and the interpolation matrix local <- global): the L2 error on ThG, as freevol_advectiondm.edp
+//   plots on the dual mesh (plugin fvdualmesh, as test_meshD.edp): the solution gathered on ThG (onedomainsol),
+//   plotted by the process 0 on the dual mesh ThstarG of ThG, one value by control volume, with the modified ffglut:
+//     ff-mpirun -np 2 freevol_advectiondm_ddm.edp -v 0 -wg -glut ../../../../FreeFem_test/ffglut_1D
+//     keys: m) edges of the polygons  3) relief in steps  v) palette  P) value under the mouse  c) cut
+//   (macro plotdual()0: the usual plots by plotMPI)
+// ff-mpirun -np 2 freevol_advectiondm_ddm.edp -v 0 -wg
+
+load "PETSc"                  // PETSc plugin
+include "macro_ddm.idp"       // additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,dim=3,cmm =  // for plotMPI
+
+real cputime=clock();
+
+macro plotdual()1// 1: plots on the dual mesh (process 0, gathered solution), 0: plots by plotMPI
+
+int Np=100;
+real xp=-1.5,yp=-1.5,R=5.;
+border C(t=0,2.*pi) { x=R*cos(t); y=R*sin(t); label = 1;}
+border IB(t=0.,2.) {x=0.;y=(t-1.)*R;label = 33;}
+mesh Th=buildmesh(C(Np)+IB(Np/4),fixedborder=1,splitpbedge=1);
+mesh ThG=Th;// the whole mesh (for the outputs)
+
+if (mpirank==0) {cout << Th.nv << " degrees of freedom" << endl;}
+
+macro ordre()2// the order of the scheme (2 or 1): also the overlap of the partition
+IFMACRO(ordre,2)
+macro ThOverlap()3// 3 layers of triangles for the order 2
+ENDIFMACRO
+IFMACRO(ordre,1)
+macro ThOverlap()1// 1 layer for the order 1
+ENDIFMACRO
+DmeshCreate(Th)
+mpiBarrier(mpiCommWorld);
+Mat dA0;
+{
+ macro def(u)[u]// EOM
+ macro init(u)[u]// EOM
+ MatCreate(Th, dA0, [P1]);
+}
+meshdual Thstar=builddualmesh(Th);// the dual mesh of the local mesh: the control volumes of the scheme
+
+//savemesh(Th,"mydistmesh"+mpirank+".mesh");
+plotDmesh(Th,cmm="my distributed mesh");//no wait here !
+
+
+real t,dt,dtsub,dtl,dtmax=0.2,CFL=.9,Tf=4.;
+fespace Vh(Th,P1);
+Vh u,up,ur=0;
+Vh V1=-y,V2=x;
+//fespace Vh2(Th,[P1,P1]);
+//Vh2 [V1,V2]=[-y,x];
+//u = dist(x-xp,y-yp)<=(R/4.);
+real width=3.;
+u=exp(-dist(x-xp,y-yp)^2/width^2);
+Vh uBC=0;
+int[int] labBC=[1,1];// the interfaces (-111111): Neumann, the default
+int mtordre=2;// order of accuracy in time (1 or 2)
+fvscheme FV([V1,V2],eq="advectiondm",labelBC=labBC,numflux=2,order=ordre);
+
+// the local solution gathered on the whole mesh (onedomainsol: each vertex counted once)
+fespace VhG(ThG,P1);
+Vh Dunity; Dunity[]=dA0.D;// the partition of unity
+matrix interplocglobal=interpolate(Vh,VhG);// local <- global
+macro onedomainsol(uloc,uglob){ real[int] tl=uloc[].*Dunity[]; real[int] tg=interplocglobal'*tl;
+  mpiAllReduce(tg,uglob[],mpiCommWorld,mpiSUM); }//
+IFMACRO(plotdual,1)
+VhG uGp;// the solution gathered for the plots during the computation
+meshdual ThstarG;// the dual mesh of the whole mesh, built by the process 0 (the plots)
+if (mpirank==0) ThstarG=builddualmesh(ThG);
+ENDIFMACRO
+
+macro test()0//EOM
+IFMACRO(test,0)
+int iter=0;
+real timeSinceLastPlot = 0.;
+real plotInterval = 0.5;
+for(t=0.; t<=Tf-1.e-10; iter++){// TIME LOOP
+   if (mtordre==2) up[]=u[];
+   for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+    dtl = fluxupdate(FV,[u],[ur],[uBC]);
+    mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+    exchange(dA0,ur[],scaled=true);// ur of the overlap vertices: the one of their process
+    if (lmt==1) {
+     dt=min(dtsub*CFL,dtmax);
+     if (t+dt>Tf) dt=Tf-t;
+    }
+    u[] -= dt*ur[];
+    if (lmt==1) t+=dt;
+    if (lmt==2) {//second-order Heun scheme in time
+      u[]+=up[];
+      u[]*=.5;
+    }
+   }//end of internal loop on lmt
+
+   if (mpirank==0) cout << iter+1 << " t= " << t << endl;
+   timeSinceLastPlot += dt;
+   if(timeSinceLastPlot >= plotInterval){
+      IFMACRO(plotdual,1)
+      onedomainsol(u,uGp)// all the processes
+      if (mpirank==0) plot(ThstarG,uGp[],value=true,wait=0,cmm="u at t = "+t+", dt="+dt);
+      ENDIFMACRO
+      IFMACRO(plotdual,0)
+      plotMPI(Th, u, P1, def1, real, PARAMS "u at t = "+t+", dt="+dt)
+      ENDIFMACRO
+      timeSinceLastPlot = 0.;
+   }
+}//end of time loop
+
+VhG uG;
+onedomainsol(u,uG)
+//func uex=(dist(cos(t)*x+sin(t)*y-xp,-sin(t)*x+cos(t)*y-yp)<=(R/4.));
+func uex=exp(-dist(cos(t)*x+sin(t)*y-xp,-sin(t)*x+cos(t)*y-yp)^2/width^2);
+real err=sqrt(int2d(ThG)((uG-uex)^2));
+if (mpirank==0) cout << "L2 error " << err << endl;
+
+if (mpirank==0) cout<< "CPU "<<clock()-cputime<<endl;
+
+macro PARAMSf fill=true,value=true,wait=1,dim=3,cmm =  // for plotMPI
+IFMACRO(plotdual,1)
+if (mpirank==0) {
+ plot(ThstarG,uG[],value=true,wait=1,cmm="u at t = "+t+" (m, 3, c, P)");
+ plot(ThG,ThstarG,uG[],value=true,wait=1,cmm="u at t = "+t+", with the primal mesh");
+}
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plotMPI(Th, u, P1, def1, real, PARAMSf "u at t = "+t)
+ENDIFMACRO
+
+ENDIFMACRO

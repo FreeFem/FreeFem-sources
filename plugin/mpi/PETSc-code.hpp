@@ -1,3 +1,13 @@
+// compatibilite PETSc < 3.23 : les operations "shell" attendent PetscVoidFn*
+#include <petscversion.h>
+#include <petscsys.h>
+#ifndef FF_PETSC_OPFN
+#if PETSC_VERSION_LT(3, 23, 0)
+#define FF_PETSC_OPFN PetscVoidFn
+#else
+#define FF_PETSC_OPFN PetscErrorCodeFn
+#endif
+#endif
 #include <petsc.h>
 
 #if defined(__clang__)
@@ -2637,9 +2647,9 @@ namespace PETSc {
                 MatGetLocalSize(tabA->operator[](i + 1)._petsc, &mCoarse, nullptr);
                 MatGetSize(tabA->operator[](i + 1)._petsc, &MCoarse, nullptr);
                 MatCreateShell(PetscObjectComm((PetscObject)tabA->operator[](i + 1)._petsc), mFine, mCoarse, MFine, MCoarse, user, &P);
-                MatShellSetOperation(P, MATOP_MULT, (PetscErrorCodeFn *)ShellInjectionOp< false >);
-                MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (PetscErrorCodeFn *)ShellInjectionOp< true >);
-                MatShellSetOperation(P, MATOP_DESTROY, (PetscErrorCodeFn *)ShellDestroy< ShellInjection >);
+                MatShellSetOperation(P, MATOP_MULT, (FF_PETSC_OPFN *)ShellInjectionOp< false >);
+                MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (FF_PETSC_OPFN *)ShellInjectionOp< true >);
+                MatShellSetOperation(P, MATOP_DESTROY, (FF_PETSC_OPFN *)ShellDestroy< ShellInjection >);
                 PCMGSetInterpolation(pc, level - i - 1, P);
                 MatDestroy(&P);
             } else {
@@ -2930,7 +2940,7 @@ namespace PETSc {
                 int nnz = dO.HPDDM_nnz;
                 MPI_Allreduce(MPI_IN_PLACE, &nnz, 1, MPI_INT, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
                 if (nnz) {
-                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (PetscErrorCodeFn *)CustomCreateSubMatrices);
+                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (FF_PETSC_OPFN *)CustomCreateSubMatrices);
                   Mat aux = ff_to_PETSc(&dO);
                   IS perm;
                   ISSortPermutation(is, PETSC_TRUE, &perm);
@@ -2942,7 +2952,7 @@ namespace PETSc {
                 PCSetUp(pc);
                 ISDestroy(&loc);
                 if (nnz) {
-                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (PetscErrorCodeFn *)MatCreateSubMatrices);
+                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (FF_PETSC_OPFN *)MatCreateSubMatrices);
                   delete O;
                 }
                 O = nullptr;
@@ -3851,7 +3861,7 @@ namespace PETSc {
         Mat S;
         MatCreateShell(PETSC_COMM_WORLD, in->n, in->n, PETSC_DECIDE, PETSC_DECIDE, user, &S);
         MatShellSetOperation(S, MATOP_MULT,
-                             (PetscErrorCodeFn *)Op_User< LinearSolver< Type >, Mat >);
+                             (FF_PETSC_OPFN *)Op_User< LinearSolver< Type >, Mat >);
         Vec x, y;
         MatCreateVecs(S, &x, &y);
         if (out->n != in->n) {
@@ -4055,14 +4065,14 @@ namespace PETSc {
           if (codeAt) {
             user->op = new LinearSolver< Dmat >::MatF_O(ptB->_last - ptB->_first, stack, codeA, -1, codeAt);
             MatShellSetOperation(ptA->_petsc, MATOP_MULT_TRANSPOSE,
-                    (PetscErrorCodeFn *)Op_User< LinearSolver< Mat >, Mat, 'T' >);
+                    (FF_PETSC_OPFN *)Op_User< LinearSolver< Mat >, Mat, 'T' >);
           }
       }
       if(!user->op) user->op = new LinearSolver< Dmat >::MatF_O(ptB->_last - ptB->_first, stack, codeA);
       MatShellSetContext(ptA->_petsc, user);
       MatShellSetOperation(ptA->_petsc, MATOP_MULT,
-                           (PetscErrorCodeFn *)Op_User< LinearSolver< Mat >, Mat >);
-      MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (PetscErrorCodeFn *)ShellDestroy< LinearSolver< Dmat >  >);
+                           (FF_PETSC_OPFN *)Op_User< LinearSolver< Mat >, Mat >);
+      MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (FF_PETSC_OPFN *)ShellDestroy< LinearSolver< Dmat >  >);
       MatSetUp(ptA->_petsc);
     }
     if (c == 0 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
@@ -4135,14 +4145,14 @@ namespace PETSc {
               if (codeAt) {
                   user->op = new LinearSolver< Dmat >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first, codeAt);
                   MatShellSetOperation(ptA->_petsc, MATOP_MULT_TRANSPOSE,
-                          (PetscErrorCodeFn *)Op_User< LinearSolver< Mat >, Mat, 'T' >);
+                          (FF_PETSC_OPFN *)Op_User< LinearSolver< Mat >, Mat, 'T' >);
               }
           }
           if(!user->op) user->op = new LinearSolver< Dmat >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first);
           MatShellSetContext(ptA->_petsc, user);
           MatShellSetOperation(ptA->_petsc, MATOP_MULT,
-                               (PetscErrorCodeFn *)Op_User< LinearSolver< Mat >, Mat >);
-          MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (PetscErrorCodeFn *)ShellDestroy< LinearSolver< Dmat >  >);
+                               (FF_PETSC_OPFN *)Op_User< LinearSolver< Mat >, Mat >);
+          MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (FF_PETSC_OPFN *)ShellDestroy< LinearSolver< Dmat >  >);
         }
         MatSetUp(ptA->_petsc);
         if(ptB->_A && ptC->_A) {

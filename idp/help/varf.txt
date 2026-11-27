@@ -1,0 +1,3 @@
+varf a(u, v) = form ; defines a variational form to build
+  matrices and right-hand sides:
+    matrix A = a(Vh, Vh);  real[int] b = l(0, Vh);

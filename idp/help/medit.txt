@@ -1,0 +1,33 @@
+medit("names", Th, sol1, sol2, ..., parameters) : draws in the ffmedit window
+  (load "medit").
+
+  "names": one name per solution, separated by spaces. The 1D graph
+  options go after a vertical bar:
+    "u w | title | xlabel=... | ylabel=... | legend=a,b | logx | logy | loglog
+     | xrange=a:b | yrange=a:b"
+  A vector solution is written in brackets: [vx,vy] or [vx,vy,vz].
+
+  Parameters:
+    wait=true          the script waits for enter in the window;
+                       wait=false: the script continues (animation)
+    order=0            solution given by element (P0); 1 by default (vertices)
+    bb=[[xmin,ymin],[xmax,ymax]]   fixed axes of the 1D graph
+    meditff="prog"     ffmedit program to launch
+    save="f.sol"       saves the solution to a file
+    bin=1              binary transfer (default)
+
+  Keys (the same as ffglut): enter next plot, p previous, Esc quit,
+  ? help, f fill, o isolines, n N fewer/more isolines, m mesh,
+  B boundary, l lighting, v palette, P value under the mouse, j axes, 3 2D relief,
+  h H relief height, k complex part, s isosurfaces, V arrows,
+  a A arrow length, e E exploded view, T normals, U overlay,
+  F1 cutting plane, F2 move it, F3 fix it on the object, = initial view,
+  c 2D cut u(x) / u(y), < > move it, shift + drag a segment,
+  z Z zoom, w PPM capture, b black/white background. The rest: right button.
+  1D graph: k lines/points, G grid, x y log, A fix the axes, i auto axes.
+
+  Examples:
+    medit("u", Th, u, wait=1);
+    medit("u grad", Th3, u, [gx,gy,gz]);
+    medit("p", Th, p, order=0);
+    medit("u | Title | xlabel=x", ThL, u, bb=[[0,-1],[1,1]]);

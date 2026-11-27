@@ -1,0 +1,257 @@
+// solves the system of isentropic gas dynamics by the finite volume method
+// using control volumes of dualmesh (P1 functions)
+// parallel version (domain decomposition, PETSc) of freevol_igddm.edp: the same cases, the same scheme, as
+// freevol_eulerdm_ddm.edp
+//   the order of the scheme: macro ordre (2 or 1), it gives the overlap of the partition by DmeshCreate:
+//   3 layers of triangles for the order 2 (one more than on the primal mesh: the control volumes of the
+//   vertices on the border of the local mesh are cut, so their centers of gravity, used by the slopes, change),
+//   1 for the order 1
+//   the dual mesh Thstar and fvscheme on the local mesh (meshdual Thstar = builddualmesh(Th), found by
+//   fvscheme from Th); the interfaces (label -111111): Neumann (the default), their vertices are overlap vertices, set
+//   again by the exchange at each stage: the time step the min on all the processes, then
+//   exchange(dA0,Hr,scaled=true)
+//   at the end, the solution is gathered on the whole mesh ThG (onedomainsol: the partition of unity dA0.D
+//   and the interpolation matrix local <- global): the errors of the case 4 on ThG
+//   plots on the dual mesh: the solution gathered on ThG, plotted by the process 0 on the dual mesh ThstarG of
+//   ThG, one value by control volume (keys: m) edges of the polygons  3) relief in steps  v) palette
+//   P) value under the mouse  c) cut)  (macro plotdual()0: the usual plots by plotMPI)
+// ff-mpirun -np 2 freevol_igddm_ddm.edp -v 0 -wg
+load "PETSc"                  // PETSc plugin
+include "macro_ddm.idp"       // additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS fill=true,value=true,wait=0,dim=2,cmm =  // for plotMPI
+real s0=clock();
+
+macro plotdual()1// 1: plots on the dual mesh, 0: plots of the P1 functions
+//include "macro_fvdualmesh.idp"
+
+real gamma=2.;
+real gr=9.81;
+real kappa=gr/2.;
+
+macro case() 4//
+
+IFMACRO(case,2)
+   real tdraw=.1,Tf=20.;
+   int Npx=100,Npy=Npx;
+   real xp=30.,yp=0.,R=100.;
+   real aa=-R,bb=R,cc=-R,dd=R;
+   border AB(t=aa,bb){x=t; y=cc;label=1;};
+   border BC(t=cc,dd){x=bb; y=t;label=2;};
+   border CD(t=bb,aa){x=t; y=dd;label=3;};
+   border DA(t=dd,cc){x=aa; y=t;label=4;};
+   mesh Th = buildmesh(AB(Npx)+BC(Npy)+CD(Npx)+DA(Npy),splitpbedge=1);
+   func h0 = (dist(x-xp,y-yp)<=(R/4.)) + 1.;
+   //func h0 = exp(-(x-xp)^2/100.-(y-yp)^2/100.) + 1.;
+   func hu0 = 0.;
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igddm.txt";
+ENDIFMACRO
+IFMACRO(case,4)
+   gamma=1.4;// MODIFICATION OF GAMMA
+   kappa=1.;//  MODIFICATION OF KAPPA
+   real tdraw=.1,Tf=3.;
+   int Npx=30;
+   real L=5.,Haut=5.;
+   border aa(t=0.,1.){x=L*(2.*t-1.);y=-Haut;label=1;};
+   border bb(t=0.,1.){x=L;y=Haut*(2.*t-1.);label=2;};
+   border cc(t=0.,1.){x=L*(1.-2.*t);y=Haut;label=3;};
+   border dd(t=0.,1.){x=-L;y=Haut*(1.-2.*t);label=4;};
+   mesh Th=buildmesh(aa(Npx)+bb(Npx)+cc(Npx)+dd(Npx),splitpbedge=1);
+   func hu0 = 0.;
+func real rhoexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return (1.-(gamma-1.)*5.^2/(8.*gamma*pi^2)*exp(1.-posx^2-posy^2))^(1./(gamma-1.));
+}
+func real uxexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 1.+5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*(-posy);
+}
+func real uyexact(real targ){
+     real posx=x+3.-targ+4.*L;
+     real posy=y;
+     int nx=int(posx/(2.*L));
+     posx=posx-nx*2.*L;
+     if (posx>L) posx=posx-2.*L;
+     return 5./(2.*pi)*exp(.5*(1.-posx^2-posy^2))*posx;
+}
+   func h0=rhoexact(0.);
+   real[int] Tsave = [30., 40., 50., 60., 70.];
+   string filenamesave = "igddm.txt";
+ENDIFMACRO
+
+mesh ThG=Th;// the whole mesh (for the outputs)
+if (mpirank==0) {cout << Th.nv << " degrees of freedom" << endl;}
+
+macro ordre()2// the order of the scheme (2 or 1): also the overlap of the partition
+IFMACRO(ordre,2)
+macro ThOverlap()3// 3 layers of triangles for the order 2
+ENDIFMACRO
+IFMACRO(ordre,1)
+macro ThOverlap()1// 1 layer for the order 1
+ENDIFMACRO
+DmeshCreate(Th)
+mpiBarrier(mpiCommWorld);
+Mat dA0;
+{
+ macro def(u)[u, u#B, u#C]// EOM
+ macro init(u)[u, u, u]// EOM
+ MatCreate(Th, dA0, [P1,P1,P1]);
+}
+
+int ntdraw=0;
+real t,dt,dtl,CFL=.5;//1.;//
+fespace Vh3(Th,[P1,P1,P1]);
+fespace Vh(Th,P1);
+Vh3 [H,Hu,Hv]=[0,0,0],[HBC,HuBC,HvBC]=[0,0,0],[Hr,Hur,Hvr]=[0,0,0];
+Vh3 [Hp,Hup,Hvp];//for second order in time
+[H,Hu,Hv]=[max(h0,0.),hu0,0];
+int[int] labBC=[2,2];
+Vh scal1,scal2;
+meshdual Thstar=builddualmesh(Th);// the dual mesh of the local mesh: the control volumes of the scheme
+
+IFMACRO(case,4)
+     [H,Hu,Hv]=[max(h0,0.),max(h0,0.)*uxexact(0.),max(h0,0.)*uyexact(0.)];
+     labBC=[1,1,2,0,3,1,4,0];
+ENDIFMACRO
+
+real[int] params=[gamma,kappa];//sets the exponent gamma and the coefficient kappa of the polytropic gas law
+//int[int] intparams=[-3,2];
+int mtordre=2;// order of accuracy in time (1 or 2)
+// before ThstarG (with 1 process ThG is Th: 2 dual meshes of Th, fvscheme would not know which one)
+fvscheme FV([H,Hu,Hv],order=ordre,eq="igddm",labelBC=labBC,limiter=1,numflux=2,parameters=params);
+
+// the local solution gathered on the whole mesh (onedomainsol: each vertex counted once)
+fespace Vh3G(ThG,[P1,P1,P1]);
+fespace VhG(ThG,P1);
+Vh3 [Dunity,DunityB,DunityC]; Dunity[]=dA0.D;// the partition of unity
+matrix interplocglobal=interpolate(Vh3,Vh3G);// local <- global
+macro onedomainsol(uloc,uglob){ real[int] tl=uloc[].*Dunity[]; real[int] tg=interplocglobal'*tl;
+  mpiAllReduce(tg,uglob[],mpiCommWorld,mpiSUM); }//
+Vh3G [HG,HuG,HvG];
+VhG uplotG;
+IFMACRO(plotdual,1)
+meshdual ThstarG;// the dual mesh of the whole mesh, built by the process 0 (the plots)
+if (mpirank==0) ThstarG=builddualmesh(ThG);
+onedomainsol(H,HG)
+if (mpirank==0) {uplotG=HG; plot(ThstarG,uplotG[],value=true,wait=0,cmm="initial density");}
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plotMPI(Th, H, P1, def1, real, PARAMS "initial density")
+ENDIFMACRO
+
+macro test()0//EOM
+IFMACRO(test,0)
+
+//bounding box for the plot
+int NTsave = Tsave.n;
+real[int,int] Savedata(Npx+1,NTsave+2);
+Savedata = 0;
+int ncsave=0;
+int[int] donesave(NTsave);   // false by default
+donesave = 0;
+
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        IFMACRO(plotdual,1)
+        onedomainsol(H,HG)// all the processes
+        if (mpirank==0) {uplotG=HG; plot(ThstarG,uplotG[],cmm="Solution at t="+t+", dt="+dt,value=true,wait=0);}
+        ENDIFMACRO
+        IFMACRO(plotdual,0)
+        plotMPI(Th, H, P1, def1, real, PARAMS "Solution at t="+t+", dt="+dt)
+        ENDIFMACRO
+        ntdraw++;
+    }
+
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     //time dependent BC:
+     IFMACRO(case,4)
+      //[HBC,HuBC,HvBC]=[rhoexact(t),rhoexact(t)*uxexact(t),rhoexact(t)*uyexact(t)];//lent
+      for(int ib=0; ib<Th.nbe; ++ib){//rapide!!
+          int kib=Th.be(ib).Element;//neighbouring triangle
+          int iib=Th.be(ib).whoinElement;//edge in triangle
+          int ee;
+          int kee=Th[kib].adj((ee=iib));
+          if(kee==kib){
+           int jv=Th.be(ib)[0];
+           x=Th(jv).x;
+           y=Th(jv).y;
+           HBC[][3*jv]=rhoexact(t);
+           HBC[][3*jv+1]=rhoexact(t)*uxexact(t);
+           HBC[][3*jv+2]=rhoexact(t)*uyexact(t);
+          }
+      }
+     ENDIFMACRO
+     dtl = fluxupdate(FV,[H,Hu,Hv],[Hr,Hur,Hvr],[HBC,HuBC,HvBC]);
+     mpiAllReduce(dtl,dtsub,mpiCommWorld,mpiMIN);
+     exchange(dA0,Hr[],scaled=true);// Hr of the overlap vertices: the one of their process
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+
+    scal1=H;
+    real Hminl=scal1[].min, Hmin;
+    scal2=Hu;
+    scal2=scal2/(scal1+1.e-13);
+    real velmaxl=scal2[].linfty, velmax;
+    mpiAllReduce(Hminl,Hmin,mpiCommWorld,mpiMIN);
+    mpiAllReduce(velmaxl,velmax,mpiCommWorld,mpiMAX);
+    if (mpirank==0) {
+     cout << iter+1 << " t=" << t;
+     if (Hmin<0.) cout << " Hmin=" << Hmin;
+     cout << " velmax=" << velmax << endl;
+     if (velmax>1.e5) {cout << "velmax >>> 1 " << endl;}
+    }
+}//end of time loop
+if (mpirank==0) cout<<"cputime = "<<clock()-s0<<endl;
+// the solution gathered on the whole mesh ThG
+onedomainsol(H,HG)
+if (mpirank==0) cout << "mass = " << int2d(ThG)(HG) << endl;
+macro PARAMSf fill=true,value=true,wait=1,dim=2,cmm =  // for plotMPI
+IFMACRO(plotdual,1)
+if (mpirank==0) {
+ uplotG=HG;
+ plot(ThstarG,uplotG[],value=true,wait=1,cmm="rho at t = "+t+" (m, 3, c, P)");
+ uplotG=HuG/(HG+1.e-13);
+ plot(ThstarG,uplotG[],value=true,wait=1,cmm="ux at t = "+t);
+ uplotG=HvG/(HG+1.e-13);
+ plot(ThstarG,uplotG[],value=true,wait=1,cmm="uy at t = "+t);
+}
+ENDIFMACRO
+IFMACRO(plotdual,0)
+plotMPI(Th, H, P1, def1, real, PARAMSf "rho at t = "+t)
+ENDIFMACRO
+
+IFMACRO(case,4)
+  VhG rhoex,uxex,uyex,scal2G;
+  rhoex=rhoexact(t);
+  uxex=uxexact(t);
+  uyex=uyexact(t);
+  scal2G=HuG/(HG+1.e-13);
+  real errorrho=sqrt(int2d(ThG)((HG-rhoex)^2));
+  real errorux=sqrt(int2d(ThG)((scal2G-uxex)^2));
+  scal2G=HvG/(HG+1.e-13);
+  real erroruy=sqrt(int2d(ThG)((scal2G-uyex)^2));
+  if (mpirank==0) cout << "errorrho,errorux,erroruy " << errorrho << " " << errorux << " " << erroruy << endl;
+ENDIFMACRO
+
+ENDIFMACRO

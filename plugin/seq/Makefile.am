@@ -54,7 +54,11 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	vortextools.$(DYLIB_SUFFIX)  MatrixMarket.$(DYLIB_SUFFIX) Element_P3nc.$(DYLIB_SUFFIX) \
 	plotPDF.$(DYLIB_SUFFIX) Element_P2pnc_3d.$(DYLIB_SUFFIX) Element_P3pnc_3d.$(DYLIB_SUFFIX) \
 	Element_P1nc_3d.$(DYLIB_SUFFIX) Element_PkLagrange.$(DYLIB_SUFFIX) \
-	GrundmannMoller.$(DYLIB_SUFFIX)
+	GrundmannMoller.$(DYLIB_SUFFIX) \
+	FreeVol.$(DYLIB_SUFFIX) FreeVol_advection.$(DYLIB_SUFFIX) FreeVol_igd.$(DYLIB_SUFFIX) \
+	FreeVol_euler.$(DYLIB_SUFFIX) FreeVol_swtopo.$(DYLIB_SUFFIX) FreeVol_bbm.$(DYLIB_SUFFIX) \
+	FreeVol_advectiondm.$(DYLIB_SUFFIX) FreeVol_igddm.$(DYLIB_SUFFIX) \
+	FreeVol_eulerdm.$(DYLIB_SUFFIX) FreeVol_swtopodm.$(DYLIB_SUFFIX)
 
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
@@ -127,7 +131,9 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/femlib/VirtualSolverSparseSuite.hpp \
 	../../src/femlib/HashMatrix.hpp \
 	../../src/femlib/MatriceElementaire.hpp \
-	../../src/femlib/DataFindBoundary.hpp
+	../../src/femlib/DataFindBoundary.hpp \
+	../../src/fflib/fvdualmesh.hpp \
+	../../src/fflib/FreeVol.hpp ../../src/fflib/FreeVolDualMesh.hpp
 
 if ENABLE_FFCS
 include.done: $(allheaders)

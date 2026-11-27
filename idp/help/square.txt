@@ -1,0 +1,6 @@
+square(nx, ny, [fx,fy], flags=, label=, region=) : 2D mesh of the unit square
+  ]0,1[^2 with nx x ny intervals, mapped by (x,y) -> (fx,fy).
+  Boundary labels: 1 bottom, 2 right, 3 top, 4 left.
+  Examples:
+    mesh Th = square(10, 10);
+    mesh Th = square(20, 10, [2*x, y]);

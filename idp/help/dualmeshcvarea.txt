@@ -1,0 +1,2 @@
+dualmeshcvarea(a, Thstar) : a[i] = the measure of the control volume of the
+  vertex i (a resized to Th.nv). The finite volume mass: a'*u[].

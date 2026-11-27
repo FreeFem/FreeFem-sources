@@ -1,0 +1,61 @@
+// advection in 1D (meshL) by finite volumes on the dual mesh with mesh adaptation: u_t + (V u)_x = 0 on [0,4], V = 1
+//   a gaussian exp(-((x-1)/0.3)^2), P1 unknown (one value per vertex = the mean on its control volume), u = 0 at the
+//   inflow (Dirichlet), Neumann at the outflow, MUSCL scheme (order 2) and Heun in time
+//   every nadapt iterations: Th = adaptmesh(Th, u, up, V1, ...) on the P1 functions, its dual mesh
+//   Thstar = builddualmesh(Th) (fvscheme and the fespace Phstar follow it), then u, V1 and uBC transferred to the
+//   new control volumes by remapP1 (mass int1d(Thstar)(w) = sum |C_i| u_i conserved, no new extremum)
+//   at the end: the L2 error with respect to the exact solution
+// options: -adapt (1, or 0: fixed mesh), -n (200), -nadapt (20), -err (0.002), -hmin (0.002), -hmax (0.2),
+//          -ratio (1.5), -ordre (2 or 1), -nw: no plot
+
+include "getARGV.idp"
+bool adapt = getARGV("-adapt", 1);
+string nom = adapt ? "1D dual adapted" : "1D dual fixed";
+int n = getARGV("-n", 200), nadapt = getARGV("-nadapt", 20), ordre = getARGV("-ordre", 2);
+real erru = getARGV("-err", 0.002), hmin = getARGV("-hmin", 0.002), hmax = getARGV("-hmax", 0.2);
+real ratio = getARGV("-ratio", 1.5), Tf = 2.;
+meshL Th = segment(n, [4*x, 0, 0]);         // labels: 1 at x = 0, 2 at x = 4
+meshdualL Thstar = builddualmesh(Th);      // the dual mesh: the control volumes of the scheme
+fespace Vh(Th, P1);
+fespace Phstar(Thstar, P0);                 // one value per control volume
+Vh u = exp(-((x-1)/.3)^2), up, ur = 0, uBC = 0;
+Vh V1 = 1;                                  // velocity
+Phstar w;
+int[int] labBC = [1,0, 2,1];               // inflow: Dirichlet (uBC = 0), outflow: Neumann
+fvscheme FV([V1], eq="advectiondm", labelBC=labBC, numflux=2, order=ordre);
+w[] = u[];
+real mass0 = int1d(Thstar)(w);
+real t = 0, dt, dtsub, CFL = 0.9;
+real dtplot = .1, tplot = min(dtplot, Tf);// the solution is plotted every dtplot (dt is cut to reach these times)
+plot(w, cmm=nom + ": initial data (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);
+int it, nbad = 0;
+for (it = 0; t < Tf - 1e-10; it++) {
+  if (adapt && it > 0 && it % nadapt == 0) { // adaptation to u and to the solution of the previous step
+    meshL Tho = Th;                         // the old mesh and the old values
+    fespace Vho(Tho, P1);
+    Vho uo = u, V1o = V1, uBCo = uBC;
+    Th = adaptmesh(Th, u, up, V1, err=erru, hmin=hmin, hmax=hmax, ratio=ratio, verbosity=0);
+    Thstar = builddualmesh(Th);             // the dual of the new mesh: fvscheme and Phstar follow it
+    u = 0; V1 = 0; uBC = 0; w = 0;          // on the new mesh
+    remapP1(Tho, uo[], Th, u[]);            // limited affine reconstruction, mass conserved
+    remapP1(Tho, V1o[], Th, V1[]);
+    remapP1(Tho, uBCo[], Th, uBC[]);
+    ur = 0; up = 0;
+    nbad++;
+  }
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {           // Heun, second order in time
+    dtsub = fluxupdate(FV, [u], [ur], [uBC]);
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > tplot) dt = tplot - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+  if (t > tplot - 1e-10) {w[] = u[]; plot(w, cmm=nom + ": solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=0); tplot = min(tplot + dtplot, Tf);}
+}
+func uex = exp(-((x-t-1)/.3)^2);
+real err = sqrt(int1d(Th, qforder=5)((u-uex)^2));
+w[] = u[];
+cout << nom << " (order " << ordre << "): t = " << t << " , " << it << " steps , " << nbad << " adaptations , " << Thstar.ncv
+     << " control volumes , mass = " << int1d(Thstar)(w) << " (initial " << mass0 << ") , max u = " << u[].max << " , L2 error = " << err << endl;
+plot(w, cmm=nom + ": solution at t = " + t + " (" + Thstar.ncv + " control volumes) | xlabel=x | ylabel=u | yrange=-0.1:1.1", wait=1);

@@ -1,0 +1,5 @@
+meshdual Thstar = builddualmesh(Th); : the dual mesh (the control volumes of
+  the eq="...dm" schemes of fvscheme); meshdual (2D, dual mesh of F. Bouchut),
+  meshdualL (1D), meshdual3 (3D), meshdualS (surface): median dual meshes.
+  Thstar = builddualmesh(Th2); builds it again (after adaptmesh).
+  See also dualmeshcvarea, dualtoP0, dualfromP0, plot(Thstar, u[]).

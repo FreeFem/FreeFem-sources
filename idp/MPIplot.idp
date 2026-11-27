@@ -26,7 +26,7 @@ macro PLOTMPIALL(mesh,Pk, Th, u, plotparm)
 	     Irecv(processor(i,rq1[i-1]),uh[i][]);}
       for (int i=1;i<mpisize;++i)
        	int k= mpiWaitAny(rq1); 
-      plot(uh,plotparm);
+      plot(uh,global=false,plotparm); // process 0 only: the pieces already gathered
     }
   else
     {

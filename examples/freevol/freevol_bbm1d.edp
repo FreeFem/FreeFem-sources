@@ -1,0 +1,175 @@
+// the BBM-BBM (Boussinesq) system in 1D (meshL) by a finite volume / finite element method:
+//   (I - b d_xx) eta_t + ((1+eta) u)_x = 0 ,  (I - d d_xx) u_t + (eta + u^2/2)_x = 0
+//   finite volume / finite element method with two meshes (G. Sadaka, as freevol_bbm2d_circle.edp): the finite
+//   volumes on Th (P0, the values at the middles of the cells), the finite elements on Th1, the meshL whose
+//   vertices are the middles of the cells of Th and the 2 walls (P1, the values at the vertices): the transfer
+//   P0 (Th) <-> P1 (Th1) is exact (the same values, no interpolation). At each stage of the Heun scheme:
+//     1) finite volumes (FreeVol, eq="bbm", walls): R = div(F(E)), E = [eta,u] P0 on Th (fluxupdate)
+//     2) R on Th1 (P1, R1 = R at the middles), finite elements P1 on Th1, the whole system together
+//        (as FreeVol_BBM_FB.edp, varf vBBM): A_BBM W = -R1, u = 0 at the walls (as in the finite volumes; with
+//        Neumann for u, the error of the case Standing stays at 1.3% for all n); the matrix dAK1 is factorized once
+//     3) W back on Th (the values at the vertices of Th1 = the values at the middles of the cells), E += dt*W
+//   b = d = 0: W = -R exactly, the finite volume scheme alone
+// options: -n (number of cells), -ordre (1 or 2), -nf (numflux), -lim (limiter), -b, -d, -save (file)
+include "getARGV.idp"
+real s0=clock();
+load "msh3"
+
+macro case() Wavemaker//
+IFMACRO(case,Gauss)
+   // a hump of water at rest: two dispersive wave trains
+   real xp=-60., xp1=60., Tf=30.;
+   func eta0 = 0.2*exp(-(x/2.)^2);
+   func u0 = 0.;
+   macro bbsw() [[-60.,-0.15],[60.,0.25]]// the window of the plots (bb of plot)
+ENDIFMACRO
+IFMACRO(case,Standing)
+   // a small standing wave between two walls: the linear solution eta = eps cos(k x) cos(omega t),
+   // omega^2 = k^2/((1+b k^2)(1+d k^2)) (the dispersion of BBM-BBM), one period
+   real xp=0., xp1=10., eps=1.e-3, kw=2*pi/10.;
+   real bb0=getARGV("-b",1./6.), dd0=getARGV("-d",1./6.);
+   real omega=kw/sqrt((1+bb0*kw^2)*(1+dd0*kw^2)), Tf=2*pi/omega;
+   func eta0 = eps*cos(kw*x);
+   func u0 = 0.;
+   macro bbsw() [[0.,-2.e-3],[10.,2.e-3]]//
+ENDIFMACRO
+IFMACRO(case,Solitary)
+   // a hump going to the right (u = eta: the long wave going to the right), reflected by the wall
+   real xp=-20., xp1=100., Tf=80.;
+   func eta0 = 0.3/cosh(0.5*x)^2;
+   func u0 = 0.3/cosh(0.5*x)^2;
+   macro bbsw() [[-20.,-0.15],[100.,0.5]]//
+ENDIFMACRO
+IFMACRO(case,Wavemaker)
+   // a wavemaker at x = xp: a periodic wave eta = aw sin(omw t) (ramped during the first period), u = cu eta,
+   // enters the basin (Dirichlet at x = xp), wall at x = xp1 (not reached before Tf)
+   real xp=0., xp1=150., Tf=100.;
+   real aw=0.05, omw=0.6;// amplitude, angular frequency
+   real bb0=getARGV("-b",1./6.), dd0=getARGV("-d",1./6.);
+   // the wave number of the linear BBM-BBM: omw^2 (1+b k^2)(1+d k^2) = k^2 (Newton), cu = omw (1+b k^2)/k
+   real kw=omw;
+   for(int it=0;it<50;it++) { real f=omw^2*(1+bb0*kw^2)*(1+dd0*kw^2)-kw^2;
+      real df=omw^2*(2*bb0*kw*(1+dd0*kw^2)+2*dd0*kw*(1+bb0*kw^2))-2*kw; kw-=f/df; }
+   real cu=omw*(1+bb0*kw^2)/kw;
+   func eta0 = 0.;
+   func u0 = 0.;
+   macro bbsw() [[0.,-0.1],[150.,0.1]]//
+   macro wavemaker()1//
+ENDIFMACRO
+
+int Npx=getARGV("-n",600), ordre=getARGV("-ordre",2), nfl=getARGV("-nf",0), lim=getARGV("-lim",1);
+real b=getARGV("-b",1./6.), d=getARGV("-d",1./6.);
+string fsave=getARGV("-save","");
+meshL Th = segment(Npx, [xp+(xp1-xp)*x, 0, 0]);// labels: 1 at x=xp, 2 at x=xp1
+fespace Ph2(Th,[P0,P0]);
+fespace Ph(Th,P0);
+Ph2 [eta,u]=[eta0,u0], [etaBC,uBC]=[0,0], [Re,Ru]=[0,0];
+Ph2 [etap,up];// for the Heun scheme
+int[int] labBC=[1,2,2,2];// walls
+// the boundary values at the time tt (wavemaker): eta, u at x = xp (finite volumes, Dirichlet) and du/dt
+// (finite elements, W_u at x = xp); 0 for the other cases (W_u = 0 at the walls)
+real ebc=0., ubc=0., wbc=0.;
+IFMACRO(!wavemaker)
+   macro setbc(tt)//
+ENDIFMACRO
+IFMACRO(wavemaker,1)
+   labBC=[1,0,2,2];// Dirichlet at x = xp (label 1)
+   macro setbc(tt){ real Tr=2*pi/omw, r=min(1.,(tt)/Tr), dr=((tt)<Tr)?1./Tr:0.;
+     ebc=aw*r*sin(omw*(tt)); ubc=cu*ebc; wbc=cu*aw*(dr*sin(omw*(tt))+r*omw*cos(omw*(tt)));
+     [etaBC,uBC]=[ebc,ubc]; }//
+ENDIFMACRO
+fvscheme FV([eta,u],order=ordre,eq="bbm",labelBC=labBC,limiter=lim,numflux=nfl);
+
+// the mesh of the finite elements Th1: the vertices are the 2 ends of Th (the walls) and the barycenters (the
+// middles) of the cells of Th, in the order of x (vertex j+1 = the j-th cell from the left)
+int[int] kc(Th.nt);// the cells of Th in the order of x
+real[int] X1(Th.nt+2), lc(Th.nt);// the vertices of Th1, the lengths of the cells of Th
+{
+   Ph Px=x;// the barycenters
+   real[int] xs=Px[];
+   for(int k=0;k<Th.nt;k++) { kc[k]=k; lc[k]=abs(Th(Th[k][1]).x-Th(Th[k][0]).x); }
+   sort(xs,kc);
+   real xmin=Th(0).x, xmax=Th(0).x;
+   for(int i=0;i<Th.nv;i++) { xmin=min(xmin,Th(i).x); xmax=max(xmax,Th(i).x); }
+   X1[0]=xmin; X1[Th.nt+1]=xmax;
+   for(int j=0;j<Th.nt;j++) X1[j+1]=xs[j];
+}
+meshL Th1 = segment(Th.nt+1, [X1[min(int(x*(Th.nt+1)+0.5),Th.nt+1)], 0, 0]);// vertex j at X1[j]
+// K2[2*i+c]: the dof of [P0,P0] on Th for the dof 2*i+c of Th1 (-1 at the walls); Iw: the dofs of u at the walls
+int[int] K2(2*Th1.nv), Iw(2);
+{
+   int mw=0;
+   for(int i=0;i<Th1.nv;i++) {
+      if(abs(Th1(i).x-X1[i])>1.e-12*(X1[Th.nt+1]-X1[0])) { cout << "Th1: a vertex is not at its place" << endl; exit(1); }
+      bool wall=(i==0 || i==Th.nt+1);
+      for(int c=0;c<2;c++) K2[2*i+c]= wall ? -1 : 2*kc[i-1]+c;
+      if(wall) Iw[mw++]=2*i+1;
+   }
+}
+int[int] I2in(2*Npx), J2in(2*Npx);
+{ int m=0; for(int q=0;q<2*Th1.nv;q++) if(K2[q]>=0) { I2in[m]=q; J2in[m]=K2[q]; m++; } }
+
+// the finite element part on Th1: (Mm + b K) W = -Mm R1, K the P1 stiffness matrix on Th1, Mm the mass matrix
+//   Mm = diag(|K_k|), the lengths of the cells of Th at the middles, 0 at the walls: the mass of eta on Th is
+//   conserved exactly (K 1 = 0); at the walls: u = 0 (W_u = 0), eta: the line of K (W_eta at the wall = W_eta
+//   at the middle of the cell next to it)
+//   the 2 lines together (G. Sadaka, varf vBBM): one matrix dAK1 of size 2*Th1.nv on [P1,P1]
+real tfe=0., tfe0=clock();// the cputime of the finite element part
+fespace Wh(Th1,[P1,P1]);
+varf vBBM([etah,uh],[veta,vu])=int1d(Th1)(b*dx(etah)*dx(veta)+d*dx(uh)*dx(vu));// without the mass term
+matrix Mm2, dAK1;
+Wh [r1e,r1u], [W1e,W1u];
+{ real[int] da2(2*Th1.nv); da2=0.; for(int q=0;q<2*Th1.nv;q++) if(K2[q]>=0) da2[q]=lc[K2[q]/2];
+  Mm2=[da2]; matrix K2m=vBBM(Wh,Wh); dAK1=Mm2+K2m;
+  for(int m=0;m<2;m++) dAK1(Iw[m],Iw[m])=1.e30; }// u = 0 at the walls
+set(dAK1,solver=sparsesolver);
+tfe+=clock()-tfe0;
+real[int] Rin(2*Npx);
+// one stage: E -> W = -A^-1 div(F(E)), dtfv the time step of the finite volumes (CFL = 1)
+macro bbmstage(dtfv){
+  dtfv=fluxupdate(FV,[eta,u],[Re,Ru],[etaBC,uBC]);
+  real tfe1=clock();
+  r1e[]=0.; Rin=Re[](J2in); r1e[](I2in)=Rin;/* [Re,Ru] on Th -> [r1e,r1u] on Th1 (0 at the walls) */
+  real[int] bb2=Mm2*r1e[]; bb2=-bb2;
+  bb2[Iw[0]]=1.e30*wbc;/* W_u at x = xp: 0 (wall) or du/dt (wavemaker) */
+  W1e[]=dAK1^-1*bb2;
+  Rin=W1e[](I2in); Re[](J2in)=Rin;/* W on Th, in [Re,Ru] */
+  tfe+=clock()-tfe1;
+}//
+macro advance(dt){ eta[]+=dt*Re[]; }// E += dt*W ([Re,Ru] = W)
+
+real m0=int1d(Th)(eta);
+real t=0., dt, dtfv, CFL=.5, tdraw=Tf/20.;
+int ntdraw=0, iter=0;
+include "plotFreeVol.idp"
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) { Ph h=1+eta; plotFreeVol1d(Th,h,-1,{cmm="eta at t="+t,bb=bbsw,wait=0}) ntdraw++; }
+    etap[]=eta[];
+    setbc(t)
+    bbmstage(dtfv)
+    dt=CFL*dtfv; if(t+dt > Tf) dt=Tf-t;
+    advance(dt)
+    setbc(t+dt)
+    bbmstage(dtfv)
+    advance(dt)
+    eta[]+=etap[]; eta[]*=.5;// Heun
+    t+=dt;
+}//end of time loop
+{ Ph h=1+eta; plotFreeVol1d(Th,h,-1,{cmm="eta at t="+t,bb=bbsw,wait=1}) }
+Ph etaf=eta;
+cout << iter << " time steps, cputime = " << clock()-s0 << " (finite elements: " << tfe << ")" << endl;
+cout << "mass error of eta = " << int1d(Th)(eta)-m0 << " , min eta = " << etaf[].min << " , max eta = " << etaf[].max << endl;
+IFMACRO(case,Standing)
+  // after one period: eta = eta0 (and with omega = k, the period without dispersion, an error of 6%)
+  Ph etaex=eta0;
+  cout << "standing wave, one period T = " << Tf << " : relative L2 error on eta = " << sqrt(int1d(Th)((etaf-etaex)^2)/int1d(Th)(etaex^2)) << endl;
+ENDIFMACRO
+IFMACRO(case,Wavemaker)
+  // the amplitude and the wave length far from the wavemaker (10 < x < 40), the linear theory: aw, 2 pi/kw
+  { Ph xc=x; real emax=0., emin=0., x0=-1., x1=-1.; int nz=0;
+    for(int k=0;k<Th.nt-1;k++) if(xc[][k]>10 && xc[][k]<40) {
+      emax=max(emax,etaf[][k]); emin=min(emin,etaf[][k]);
+      if(etaf[][k]<0 && etaf[][k+1]>=0) { real xz=xc[][k]-etaf[][k]*(xc[][k+1]-xc[][k])/(etaf[][k+1]-etaf[][k]); if(nz==0) x0=xz; x1=xz; nz++; } }
+    cout << "wavemaker: amplitude (max-min)/2 = " << (emax-emin)/2 << " (aw = " << aw << ") , wave length = " << (nz>1 ? (x1-x0)/(nz-1) : 0.) << " (2 pi/k = " << 2*pi/kw << ")" << endl; }
+ENDIFMACRO
+if(fsave!="") { ofstream f(fsave); Ph xc=x, uf=u; for(int k=0;k<Th.nt;k++) f << xc[][k] << " " << etaf[][k] << " " << uf[][k] << endl; }

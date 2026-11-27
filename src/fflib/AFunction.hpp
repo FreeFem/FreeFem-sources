@@ -327,6 +327,7 @@ public:
  	void AddCast(CastFunc f1,CastFunc f2=nullptr,CastFunc f3=nullptr,CastFunc f4=nullptr,
  	             CastFunc f5=nullptr,CastFunc f6=nullptr,CastFunc f7=nullptr,CastFunc f8=nullptr);
     ostream & ShowTable(ostream & f) const { f << ti; return f;}
+    const TableOfIdentifier & Members() const { return ti;}   // the members of the type (help("type"), ffhelp.cpp)
     
   //  basicForEachType * funct_type;
   virtual ~basicForEachType();
@@ -518,6 +519,8 @@ class  ArrayOfaType : public CodeAlloc{
      return true;}
    
    friend ostream & operator<<(ostream & f,const ArrayOfaType & a);
+   int NbTypes() const {return n;}            // the number of argument types (help(f), ffhelp.cpp)
+   aType TypeAt(int i) const {return t[i];}   // the type of the argument i
 };
 
 
@@ -531,6 +534,7 @@ class  OneOperator : public ArrayOfaType {
     const basicForEachType * r; //  return type 
     OneOperator *next; // to make a list of OneOperator
     public: 
+    const OneOperator *Next() const {return next;}   // the next operator of the list (help(f), ffhelp.cpp)
     int pref; //  to try to solve ambiguity for binary operator
     //  10 for bool, 20 for int , 30 for long , 40, for float, 50 double, 60 for complex, 70 string
     //  string+ 1 => string 
@@ -617,6 +621,8 @@ public:
  virtual bool Empty() const {return true;} //  by default Empty 
  void clear() { m.clear();}
  const  OneOperator * Find(const char *op, const ArrayOfaType &at) const;
+ // the list of the operators op (ex. "(" for a function), 0 if none (help(f), ffhelp.cpp)
+ const  OneOperator * FindOp(const char *op) const { const_iterator i=m.find(op); return i==m.end() ? nullptr : i->second;}
  const  OneOperator * FindWithOutCast(const char *op,const  ArrayOfaType &at) const;
  void Show(const char *op,const ArrayOfaType & at,ostream &f=cerr)const ; 
  void  Add(const char * op,OneOperator * p0  ,OneOperator * p1=nullptr,OneOperator * p2=nullptr,
@@ -1569,6 +1575,11 @@ class basicAC_F0 {
  
   void SetNameParam(int n=0,name_and_type *l=nullptr , Expression * e=nullptr) const ;
 };
+
+// help(f) (ffhelp.cpp): when ffhelp_probe is true, SetNameParam throws the list of the named parameters of the
+// operator (the code of each operator of f is called with dummy arguments, nothing is executed)
+extern bool ffhelp_probe;
+struct ffHelpNamedParams { int n; const basicAC_F0::name_and_type *l; };
 
 /// <<AC_F0>> array of parameters for FF language operators. uses [[basicAC_F0]]
 
@@ -2682,7 +2693,7 @@ class  Operator_Aritm_If : public OneOperator{
              return  SetAny<R>(r);// static_cast<R>( ? GetAny<B>((*b)(s))  : GetAny<C>((*c)(s))  ));
           }
     Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc){} 
-    bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent() &&b->MeshIndependent() ;}
+    bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent() ;}// c: was b twice (a ? cst : f(x) mesh independent)
     int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
       int rr = find(m);

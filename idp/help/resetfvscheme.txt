@@ -1,0 +1,4 @@
+resetfvscheme(FV, [V1, ...], eq=..., ...) or resetfvscheme(FV, Thstar, [...], ...)
+  : redefines the scheme FV (same arguments as fvscheme, see
+  help("fvscheme")); useful after a change of mesh with rebuild=false,
+  or to change the model or the options.

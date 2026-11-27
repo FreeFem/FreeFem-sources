@@ -1,0 +1,3 @@
+remapP1FE(Tho, uo[], Th, u[]) : as remapP1 with the median dual in 2D
+  (|C_i| = the lumped mass of the vertex i): int u of a P1 function is
+  conserved exactly. In 1D identical to remapP1.

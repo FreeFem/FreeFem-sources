@@ -1,0 +1,3 @@
+int2d(Th)(f) : integral of f on the 2D mesh (or on a region:
+  int2d(Th, region)(f)).
+  Example: real m = int2d(Th)(u);

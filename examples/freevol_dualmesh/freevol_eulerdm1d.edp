@@ -1,0 +1,103 @@
+// solves the Euler system of gas dynamics by the finite volume method in 1D (meshL), over the dual mesh (P1
+//   unknowns, one control volume by vertex: from the middle of the segment on the left to the middle of the
+//   segment on the right), the same cases as freevol_euler1d.edp (P0 unknowns)
+//   U_t+F(U)_x = 0, U=[rho,rho*u,E], E = rho*u^2/2+rho*e, F(U) = (rho*u, rho*u^2+p, (E+p)*u), p = (gamma-1)*rho*e,
+//   parameters=[gamma]
+//   the same command fvscheme as in 2D (freevol_eulerdm.edp), with the dual mesh built in the script (meshdualL):
+//   the dimension is given by the mesh of [rho,rhou,E]
+//   Riemann problems (E. F. Toro), compared with the exact solution (freevol_euler_riemann.idp)
+// options: -n (number of cells), -ordre (1 or 2), -nf (numflux), -lim (limiter)
+include "getARGV.idp"
+real s0=clock();
+load "msh3"
+
+macro case() Sod//
+// rhoL,uL,pL | rhoR,uR,pR at x=x0, domain [0,1], Neumann boundary conditions (the waves stay inside)
+real gamma=1.4, x0=0.5;
+IFMACRO(case,Sod)
+   // a rarefaction to the left, a contact, a shock to the right
+   real rhoL=1., uL=0., pL=1., rhoR=0.125, uR=0., pR=0.1, Tf=0.2;
+ENDIFMACRO
+IFMACRO(case,Lax)
+   // the Lax shock tube: a stronger shock and contact
+   real rhoL=0.445, uL=0.698, pL=3.528, rhoR=0.5, uR=0., pR=0.571, Tf=0.14;
+ENDIFMACRO
+IFMACRO(case,Toro123)
+   // two rarefactions which separate (test 2 of Toro): a low density and pressure in the middle
+   real rhoL=1., uL=-2., pL=0.4, rhoR=1., uR=2., pR=0.4, Tf=0.15;
+ENDIFMACRO
+IFMACRO(case,Collision)
+   // two flows which collide: two shocks
+   real rhoL=1., uL=1., pL=1., rhoR=1., uR=-1., pR=1., Tf=0.15;
+ENDIFMACRO
+
+int Npx=getARGV("-n",400), mtordre=getARGV("-ordre",2), nfl=getARGV("-nf",2), lim=getARGV("-lim",1);
+include "freevol_euler_riemann.idp"
+cout << "exact intermediate state: p* = " << ps << " , u* = " << us << endl;
+
+meshL Th = segment(Npx, [x, 0, 0]);// labels: 1 at x=0, 2 at x=1
+meshdualL Thstar = builddualmesh(Th);// the dual mesh: the control volumes of the scheme (fvscheme finds it from the mesh Th of the unknowns)
+fespace Phstar(Thstar,P0);// the plots on the dual mesh: one value by control volume (dualtoP0)
+fespace Vh3(Th,[P1,P1,P1]);
+fespace Vh(Th,P1);
+Vh3 [H,Hu,E]=[0,0,0],[HBC,HuBC,EBC]=[0,0,0],[Hr,Hur,Er]=[0,0,0];
+Vh3 [Hp,Hup,Ep];//for second order in time
+// the conserved variables: left state for x < x0, right state for x > x0, their mean at the vertex x0 (if x0
+// is a vertex: the control volume of x0 is half left, half right, the mass and the energy of P0)
+real EL0=.5*rhoL*uL^2+pL/(gamma-1.), ER0=.5*rhoR*uR^2+pR/(gamma-1.);
+func wL=(x<x0-1.e-8)+0.5*(abs(x-x0)<=1.e-8);
+[H,Hu,E]=[wL*rhoL+(1-wL)*rhoR,wL*rhoL*uL+(1-wL)*rhoR*uR,wL*EL0+(1-wL)*ER0];
+int[int] labBC=[1,1,2,1];// Neumann
+real m0=int1d(Th)(H), e0=int1d(Th)(E);
+
+// the exact solution rex, P1 on a fine meshL, plotted with the numerical one: plot(rho,rex)
+meshL ThE = segment(2000, [x, 0, 0]);
+fespace VhE(ThE,P1);
+VhE rex;
+
+real[int] params=[gamma];//sets the exponent gamma of the gas law
+fvscheme FV([H,Hu,E],order=mtordre,eq="eulerdm",labelBC=labBC,limiter=lim,numflux=nfl,parameters=params);
+
+real t=0.,dt,CFL=.5,tdraw=Tf/10.;
+int ntdraw=0, iter=0;
+real dtsub, rmin=min(rhoL,rhoR);
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        for (int i=0;i<ThE.nv;i++) {
+            if (t>0) rex[][i]=riemann((ThE(i).x-x0)/t);
+            else if (ThE(i).x<x0) rex[][i]=rhoL;
+            else rex[][i]=rhoR;
+        }
+        Vh rho=H; Phstar rhow; dualtoP0(rhow[],Thstar,rho[]);
+        plot(rhow,rex,cmm="rho at t="+t+" | xlabel=x | ylabel=rho | legend=numerical (dual mesh),exact",wait=0);
+        ntdraw++;
+    }
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu,E],[Hr,Hur,Er],[HBC,HuBC,EBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+    Vh rho=H; rmin=min(rmin,rho[].min);
+}//end of time loop
+for (int i=0;i<ThE.nv;i++) rex[][i]=riemann((ThE(i).x-x0)/t);
+{ Vh rho=H; Phstar rhow; dualtoP0(rhow[],Thstar,rho[]);
+  plot(rhow,rex,cmm="rho at t="+t+" | xlabel=x | ylabel=rho | legend=numerical (dual mesh),exact",wait=1); }
+
+// errors with the exact solution (at the vertices: the values of the control volumes)
+Vh rho=H, u=Hu/(H+1.e-13), p=(gamma-1.)*(E-.5*Hu^2/(H+1.e-13)), xc=x, rhoe, ue, pe;
+for (int i=0;i<Th.nv;i++) { riemann((xc[][i]-x0)/t); rhoe[][i]=rexa; ue[][i]=uexa; pe[][i]=pexa; }
+cout << iter << " time steps, cputime = " << clock()-s0 << endl;
+// the mass and the energy change by the fluxes at the boundary (the waves stay inside): in at x=0, out at x=1
+real EL=.5*rhoL*uL^2+pL/(gamma-1.), ER=.5*rhoR*uR^2+pR/(gamma-1.);
+cout << "mass balance error = " << (int1d(Th)(H)-m0-(rhoL*uL-rhoR*uR)*t)/m0
+     << " , energy balance error = " << (int1d(Th)(E)-e0-((EL+pL)*uL-(ER+pR)*uR)*t)/e0 << " , min rho (all the steps) = " << rmin << endl;
+cout << "L1 error on rho = " << int1d(Th)(abs(rho-rhoe)) << " , on u = " << int1d(Th)(abs(u-ue)) << " , on p = " << int1d(Th)(abs(p-pe)) << endl;

@@ -1,0 +1,52 @@
+// advection in 3D (mesh3) by finite volumes, parallel version (domain decomposition, PETSc) of
+// freevol_advection3d.edp: the same rotation of a gaussian around the z axis, the same scheme (Heun)
+//   the mesh is partitioned by createMat (overlap of 2 cells: the order 2 stencil; 1 cell at
+//   order 1), the velocity and fvscheme on the local mesh; the interfaces (label -111111): Neumann (the
+//   default), their cells are overlap cells, updated by the exchange
+//   at each stage: the time step is the min over all the processes, then exchange(A,ur,scaled=true)
+//   at the end, the solution is gathered on the global mesh ThG (the local -> global numbering ThN2O,
+//   the partition of unity A.D): the outputs are those of freevol_advection3d.edp
+// run: ff-mpirun -np 2 freevol_advection3d_ddm.edp -wg   (-nw: no plot)
+load "PETSc"// PETSc plugin
+macro dimension()3// EOM
+include "macro_ddm.idp"// additional DDM functions
+macro def1(u) u// for plotMPI
+macro PARAMS wait=1,cmm = // for plotMPI
+load "msh3"
+mesh3 Th = cube(16, 16, 16);               // labels 1 to 6 on the faces of the cube
+mesh3 ThG = Th;                            // the global mesh (for the outputs)
+Mat A;
+int[int] n2o;                              // local cell -> global cell
+{
+   macro ThOverlap()2//                    // overlap of 2 cells (order 2; 1 at order 1)
+   macro ThN2O()n2o//
+   createMat(Th, A, P0)                    // Th: the local mesh (with overlap)
+}
+fespace Ph(Th, P0);
+fespace Vh(Th, P1);
+fespace PhG(ThG, P0);
+Ph u = exp(-((x-0.3)^2+(y-0.5)^2+(z-0.5)^2)/0.01), up, ur = 0, uBC = 0;
+Vh V1 = -(y-0.5), V2 = x-0.5, V3 = 0;      // rotation around the z axis (3 components in 3D)
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];// the interfaces (-111111): Neumann, the default
+fvscheme FV([V1,V2,V3], eq="advection", labelBC=labBC, numflux=2);
+Ph D; D[] = A.D;                           // the partition of unity
+// the local solution gathered on the global mesh (each cell counted once)
+macro gather(uloc,uglob){ real[int] gl(ThG.nt); gl=0; for(int k=0;k<Th.nt;k++) gl[n2o[k]]+=D[][k]*uloc[][k];
+  mpiAllReduce(gl,uglob[],mpiCommWorld,mpiSUM); }//
+real t = 0, dt, dtsub, dtl, CFL = 0.9, Tf = 1.;
+plotMPI(Th, u, P0, def1, real, PARAMS "3D: initial data")
+for (int it = 0; t < Tf - 1e-10; it++) {
+  up[] = u[];
+  for (int l = 1; l <= 2; l++) {
+    dtl = fluxupdate(FV, [u], [ur], [uBC]);
+    mpiAllReduce(dtl, dtsub, mpiCommWorld, mpiMIN);
+    exchange(A, ur[], scaled=true);        // ur of the overlap cells: the one of their process
+    if (l == 1) { dt = CFL*dtsub; if (t + dt > Tf) dt = Tf - t; }
+    u[] -= dt*ur[];
+    if (l == 1) t += dt;
+    if (l == 2) { u[] += up[]; u[] *= .5; }
+  }
+}
+PhG uG; gather(u,uG)
+if (!mpirank) cout << "3D (" << mpisize << " processes): t = " << t << " , mass = " << int3d(ThG)(uG) << " , max u = " << uG[].max << endl;
+plotMPI(Th, u, P0, def1, real, PARAMS "3D: solution at t = " + t)

@@ -9,6 +9,19 @@
 #include <GL/glut.h>
 #endif
 #endif
+// OpenGL 1.2 constants, missing in the OpenGL 1.1 headers of Windows (gl.h of MinGW / MSVC)
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+#ifndef GL_LIGHT_MODEL_COLOR_CONTROL
+#define GL_LIGHT_MODEL_COLOR_CONTROL 0x81F8
+#endif
+#ifndef GL_SINGLE_COLOR
+#define GL_SINGLE_COLOR 0x81F9
+#endif
+#ifndef GL_SEPARATE_SPECULAR_COLOR
+#define GL_SEPARATE_SPECULAR_COLOR 0x81FA
+#endif
 /*
 #if !defined(GLUT_WINDOW_SCALE)
 #    define NOTGLUT_WINDOW_SCALE
@@ -447,10 +460,15 @@ void drawisoTetN(const R3 K[4],R f[4],const R3 G[4],R v)
     ffPolygonN(P,N,nP);
 }
 
+//  the colors given by hsv= in the current plot: the colormap 5 of the pretty rendering
+static KN<R> cmapUserColors;
+static bool cmapUserHsv=true;
+
 //  the colormaps of the pretty rendering: t in [0,1] -> rgb
 static void ColormapRGB(int kind,double t,float c[3])
 {
     t = max(0.,min(1.,t));
+    if(kind==5 && cmapUserColors.N()<6) kind=0;
     if(kind==0)
     { // turbo (polynomial approximation, A. Mikhailov 2019)
         c[0]=0.13572138+t*(4.61539260+t*(-42.66032258+t*(132.13108234+t*(-152.94239396+t*59.28637943))));
@@ -480,6 +498,18 @@ static void ColormapRGB(int kind,double t,float c[3])
         int i=min(3,(int) x);
         double a=x-i;
         for(int j=0;j<3;++j) c[j]=((1-a)*cw[i][j]+a*cw[i+1][j])/255.;
+    }
+    else if(kind==5)
+    { // the colors of hsv=, equally spaced on [0,1] (linear interpolation in rgb: no other hue between 2 colors)
+        int nc=cmapUserColors.N()/3;
+        double x=t*(nc-1);
+        int i=min(nc-2,(int) x);
+        double a=x-i;
+        float c0[3],c1[3];
+        const R *u=&cmapUserColors[3*i];
+        if(cmapUserHsv) { hsvToRgb(u[0],u[1],u[2],c0[0],c0[1],c0[2]); hsvToRgb(u[3],u[4],u[5],c1[0],c1[1],c1[2]); }
+        else for(int j=0;j<3;++j) c0[j]=u[j],c1[j]=u[3+j];
+        for(int j=0;j<3;++j) c[j]=(1-a)*c0[j]+a*c1[j];
     }
     else if(kind==3)
     { // the rainbow of ffglut
@@ -1092,6 +1122,592 @@ void OnePlotMesh<Mesh>::Draw(OneWindow *win)
     }
     Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
     ShowGlerror("OnePlotMesh::Draw");
+}
+
+OnePlotMeshD::OnePlotMeshD(long w,PlotStream & f)
+: OnePlot(w,2,0)
+{
+    f >> xy >> cxy >> nv >> cv >> be >> belab >> val;
+    ffassert(f.good());
+    int ncv=nv.N();
+    first.resize(ncv+1);
+    cmn.resize(ncv);
+    cmx.resize(ncv);
+    first[0]=0;
+    for(int i=0;i<ncv;++i)
+    {
+        first[i+1]=first[i]+(int) nv[i];
+        cmn[i]=R2(dinfty,dinfty);
+        cmx[i]=R2(-dinfty,-dinfty);
+        for(int j=first[i];j<first[i+1];++j)
+        {
+            R2 P=V((int) cv[j]);
+            cmn[i]=R2(min(cmn[i].x,P.x),min(cmn[i].y,P.y));
+            cmx[i]=R2(max(cmx[i].x,P.x),max(cmx[i].y,P.y));
+        }
+    }
+    ffassert(first[ncv]<=cv.N());
+    for(int k=0;k<xy.N()/2;++k)
+    {
+        Pmin=Minc(Pmin,R3(xy[2*k],xy[2*k+1],0.));
+        Pmax=Maxc(Pmax,R3(xy[2*k],xy[2*k+1],0.));
+    }
+    if(val.N())
+    {
+        ffassert(val.N()==ncv);
+        fmin=val.min();
+        fmax=val.max();
+    }
+}
+
+void OnePlotMeshD::Draw(OneWindow *win)
+{ //  the control volumes in colors (value), the edges of the control volumes, the border (label)
+    ThePlot & plot=*win->theplot;
+    int ncv=nv.N();
+    bool elev = win->plotdim==3 && val.N();
+    bool pretty = win->PrettyOn();
+    R fmn=0,fmx=1;
+    if(val.N()) DataRange(plot,fmn,fmx);
+    //  the height of the control volume i (elevation: the value, otherwise 0)
+    #define ZD(i) (elev ? val[i] : 0.)
+    if(elev) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_1D);
+    if(val.N())
+    {
+        win->setLighting();
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.,1.);
+        for(int i=0;i<ncv;++i)
+        {
+            R f=val[i];
+            R2 C(cxy[2*i],cxy[2*i+1]);
+            if(pretty)
+            { // the color of the value in the colormap of the pretty rendering
+                float rgb[3];
+                ColormapRGB(win->cmapkind,(f-fmn)/(fmx-fmn),rgb);
+                glColor3fv(rgb);
+                glNormal3d(0.,0.,1.);
+                glBegin(GL_TRIANGLE_FAN);
+                glVertex3d(C.x,C.y,ZD(i));
+                for(int j=first[i];j<=first[i+1];++j)
+                {
+                    R2 P=V((int) cv[j<first[i+1] ? j : first[i]]);
+                    glVertex3d(P.x,P.y,ZD(i));
+                }
+                glEnd();
+            }
+            else
+            { // the band of the iso values which contains the value (z = f, see DrawIsoTfill)
+                R ff[3]={f,f,f};
+                for(int j=first[i];j<first[i+1];++j)
+                {
+                    int jn = j+1<first[i+1] ? j+1 : first[i];
+                    R2 Pt[3]={C,V((int) cv[j]),V((int) cv[jn])};
+                    if(!elev) glPushMatrix(),glScaled(1.,1.,0.);
+                    plot.DrawIsoTfill(Pt,ff,plot.Viso,plot.Viso.N());
+                    if(!elev) glPopMatrix();
+                }
+            }
+        }
+        if(elev)
+        { // the walls between two control volumes with different values
+            map<pair<int,int>,int> edge;// the edge (a,b) of the control volume
+            for(int i=0;i<ncv;++i)
+                for(int j=first[i];j<first[i+1];++j)
+                {
+                    int a=(int) cv[j], b=(int) cv[j+1<first[i+1] ? j+1 : first[i]];
+                    edge[make_pair(a,b)]=i;
+                }
+            for(map<pair<int,int>,int>::const_iterator e=edge.begin();e!=edge.end();++e)
+            {
+                int a=e->first.first, b=e->first.second, i=e->second;
+                map<pair<int,int>,int>::const_iterator o=edge.find(make_pair(b,a));
+                if(o==edge.end() || o->second<i) continue;// a border, or already done
+                int j=o->second, k= val[i]>val[j] ? i : j;
+                R2 A=V(a), B=V(b);
+                float rgb[3];
+                ColormapRGB(pretty ? win->cmapkind : 3,(val[k]-fmn)/(fmx-fmn),rgb);
+                glColor3f(0.8*rgb[0],0.8*rgb[1],0.8*rgb[2]);
+                R3 N(B.y-A.y,A.x-B.x,0.);
+                N/=max(N.norme(),1e-30);
+                glNormal3d(N.x,N.y,N.z);
+                glBegin(GL_QUADS);
+                glVertex3d(A.x,A.y,val[i]); glVertex3d(B.x,B.y,val[i]);
+                glVertex3d(B.x,B.y,val[j]); glVertex3d(A.x,A.y,val[j]);
+                glEnd();
+            }
+        }
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        win->unsetLighting();
+    }
+    //  the edges of the control volumes (always without values, key m with values)
+    if(!val.N() || plot.drawmeshes)
+    {
+        //  with a mesh of FreeFEM in the plot (plot(Th,Thstar)): the dual mesh in red
+        bool withmesh=false;
+        for (list<OnePlot *>::iterator p= plot.plots.begin();p != plot.plots.end(); ++p)
+            withmesh = withmesh || (*p)->what==0;
+        glLineWidth((withmesh ? 1.5 : 1)*kscreenscale);
+        if(withmesh) glColor3d(0.85,0.1,0.1);
+        else if(val.N()) glColor3d(0.,0.,0.);
+        else plot.color(1);
+        for(int i=0;i<ncv;++i)
+        {
+            glBegin(GL_LINE_LOOP);
+            for(int j=first[i];j<first[i+1];++j)
+            {
+                R2 P=V((int) cv[j]);
+                glVertex3d(P.x,P.y,ZD(i));
+            }
+            glEnd();
+        }
+    }
+    //  the border, the color of the label
+    if(plot.drawborder && !elev)
+    {
+        glLineWidth(2*kscreenscale);
+        glBegin(GL_LINES);
+        for(int k=0;k<belab.N();++k)
+        {
+            plot.color(1+abs((int) belab[k]));
+            R2 A=V((int) be[2*k]), B=V((int) be[2*k+1]);
+            glVertex3d(A.x,A.y,0.);
+            glVertex3d(B.x,B.y,0.);
+        }
+        glEnd();
+        glLineWidth(kscreenscale);
+    }
+    #undef ZD
+    ShowGlerror("OnePlotMeshD::Draw");
+}
+
+bool OnePlotMeshD::Probe(const R3 & P,R & v,R3 & vec,int & ncomp)
+{ //  the control volume which contains P (even-odd rule), its value
+    if(!val.N()) return false;
+    for(int i=0;i<nv.N();++i)
+    {
+        if(P.x<cmn[i].x || P.x>cmx[i].x || P.y<cmn[i].y || P.y>cmx[i].y) continue;
+        bool in=false;
+        for(int j=first[i];j<first[i+1];++j)
+        {
+            R2 A=V((int) cv[j]), B=V((int) cv[j+1<first[i+1] ? j+1 : first[i]]);
+            if((A.y>P.y) != (B.y>P.y) && P.x < A.x+(P.y-A.y)*(B.x-A.x)/(B.y-A.y)) in=!in;
+        }
+        if(!in) continue;
+        v=val[i];
+        ncomp=1;
+        return true;
+    }
+    return false;
+}
+
+OnePlotMeshD3::OnePlotMeshD3(const Mesh3 *T,long w,PlotStream & f)
+: OnePlot(w,3,0),Th(T)
+{
+    if(w==63)
+    {
+        f >> val;
+        ffassert(val.N()==Th->nv);
+        fmin=val.min();
+        fmax=val.max();
+    }
+    Pmin=Th->Pmin;
+    Pmax=Th->Pmax;
+}
+
+bool OnePlotMeshD3::Probe(const R3 & P,R & v,R3 & vec,int & ncomp)
+{ //  the value of the control volume of P: the tetrahedron of P, its vertex of largest barycentric coordinate (the
+  //  part of a vertex in a tetrahedron of the median dual mesh: the barycentric coordinate of the vertex is the
+  //  largest one)
+    if(!val.N()) return false;
+    const Mesh3 & T=*Th;
+    if(!grid.built)
+    {
+        vector<R3> mn(T.nt),mx(T.nt);
+        for(int k=0;k<T.nt;++k)
+        {
+            const Mesh3::Element & K=T[k];
+            mn[k]=mx[k]=K[0];
+            for(int l=1;l<4;++l) { mn[k]=Minc(mn[k],(R3) K[l]); mx[k]=Maxc(mx[k],(R3) K[l]);}
+        }
+        grid.build(mn,mx);
+    }
+    if(grid.head.empty()) return false;
+    int c[3];
+    grid.ijk(P,c);
+    int best=-1;
+    R bmin=-0.05, lb[4]={0,0,0,0};// tolerance in the barycentric coordinates
+    for(int dk=-1;dk<=1;++dk) for(int dj=-1;dj<=1;++dj) for(int di=-1;di<=1;++di)
+    {
+        int i=c[0]+di, j=c[1]+dj, kk=c[2]+dk;
+        if(i<0 || j<0 || kk<0 || i>=grid.n[0] || j>=grid.n[1] || kk>=grid.n[2]) continue;
+        for(int q=grid.head[grid.cell(i,j,kk)];q>=0;q=grid.nxt[q])
+        {
+            int k=grid.elem[q];
+            const Mesh3::Element & K=T[k];
+            R3 GL[4];
+            K.Gradlambda(GL);
+            R3 AP((R3) K[0],P);
+            R l1=(GL[1],AP), l2=(GL[2],AP), l3=(GL[3],AP), l0=1-l1-l2-l3;
+            R mn=min(min(l0,l1),min(l2,l3));
+            if(mn>bmin) { bmin=mn; best=k; lb[0]=l0; lb[1]=l1; lb[2]=l2; lb[3]=l3;}
+        }
+    }
+    if(best<0) return false;
+    int l=0;
+    for(int j=1;j<4;++j) if(lb[j]>lb[l]) l=j;
+    v=val[T(best,l)];
+    ncomp=1;
+    return true;
+}
+
+void OnePlotMeshD3::Color(OneWindow *win,R f,R fmn,R fmx) const
+{ //  pretty rendering: the colormap, otherwise the color of the band of the iso values which contains f
+    ThePlot & plot=*win->theplot;
+    if(win->PrettyOn())
+    {
+        float rgb[3];
+        ColormapRGB(win->cmapkind,(f-fmn)/(fmx-fmn),rgb);
+        glColor3fv(rgb);
+    }
+    else
+    {
+        int n=plot.Viso.N(), l=1;
+        while(l<n-1 && f>plot.Viso[l]) ++l;
+        plot.color(l+4);
+    }
+}
+
+void OnePlotMeshD3::Draw(OneWindow *win)
+{ //  the boundary of the control volumes in colors (value), the edges of the control volumes on the boundary,
+  //  with the cut plane: the section of the control volumes
+    ThePlot & plot=*win->theplot;
+    const Mesh3 & T=*Th;
+    R fmn=0,fmx=1;
+    if(val.N()) DataRange(plot,fmn,fmx);
+    //  with a mesh3 in the plot (plot(Th3,Thstar)): the dual mesh in red
+    bool withmesh=false;
+    for (list<OnePlot *>::iterator p= plot.plots.begin();p != plot.plots.end(); ++p)
+        withmesh = withmesh || (*p)->what==0;
+    bool edges = !val.N() || plot.drawmeshes;// the edges: always without values, key m with values
+    R3 N;
+    R c=0;
+    bool cut=win->SetCutPlane(Th->Pmin,Th->Pmax,N,c);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_1D);
+    if(cut) glEnable(GL_CLIP_PLANE0);
+    if(val.N())
+    { //  the boundary triangle (a0,a1,a2), centroid F: the piece of a0 is (a0, middle of a0a1, F, middle of a0a2)
+        win->setLighting();
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.,1.);
+        for(int b=0;b<T.nbe;++b)
+        {
+            const Mesh3::BorderElement & K=T.be(b);
+            R3 Q[3]={K[0],K[1],K[2]};
+            R3 Nt=R3(Q[0],Q[1])^R3(Q[0],Q[2]);
+            Nt/=max(Nt.norme(),1e-30);
+            glNormal3d(Nt.x,Nt.y,Nt.z);
+            R3 F=(Q[0]+Q[1]+Q[2])/3.;
+            for(int l=0;l<3;++l)
+            {
+                R3 A=Q[l], B=(Q[l]+Q[(l+1)%3])*0.5, C=(Q[l]+Q[(l+2)%3])*0.5;
+                Color(win,val[T(K[l])],fmn,fmx);
+                glBegin(GL_POLYGON);
+                glVertex3d(A.x,A.y,A.z); glVertex3d(B.x,B.y,B.z);
+                glVertex3d(F.x,F.y,F.z); glVertex3d(C.x,C.y,C.z);
+                glEnd();
+            }
+        }
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        win->unsetLighting();
+    }
+    if(edges)
+    { //  the edges of the control volumes on the boundary: from the middle of each edge to the centroid of the face
+        glLineWidth((withmesh ? 1.5 : 1)*kscreenscale);
+        if(withmesh) glColor3d(0.85,0.1,0.1);
+        else if(val.N()) glColor3d(0.,0.,0.);
+        else plot.color(1);
+        glBegin(GL_LINES);
+        for(int b=0;b<T.nbe;++b)
+        {
+            const Mesh3::BorderElement & K=T.be(b);
+            R3 Q[3]={K[0],K[1],K[2]};
+            R3 F=(Q[0]+Q[1]+Q[2])/3.;
+            for(int l=0;l<3;++l)
+            {
+                R3 M=(Q[l]+Q[(l+1)%3])*0.5;
+                glVertex3d(M.x,M.y,M.z); glVertex3d(F.x,F.y,F.z);
+            }
+        }
+        glEnd();
+        glLineWidth(kscreenscale);
+    }
+    glDisable(GL_CLIP_PLANE0);
+    if(cut) DrawSection(win,N,c,fmn,fmx,edges,withmesh);
+    ShowGlerror("OnePlotMeshD3::Draw");
+}
+
+OnePlotMeshDS::OnePlotMeshDS(const MeshS *T,long w,PlotStream & f)
+: OnePlot(w,3,0),Th(T)
+{
+    if(w==65)
+    {
+        f >> val;
+        ffassert(val.N()==Th->nv);
+        fmin=val.min();
+        fmax=val.max();
+    }
+    Pmin=Th->Pmin;
+    Pmax=Th->Pmax;
+    //  the edges of the border of the surface: the edges of one triangle only (not the seams of a meshS made of
+    //  pieces, which are boundary elements)
+    map< pair<long,long>, int > ne;
+    for(int k=0;k<Th->nt;++k)
+        for(int l=0;l<3;++l)
+        {
+            long a=(*Th)(k,(l+1)%3), b=(*Th)(k,(l+2)%3);
+            ne[make_pair(min(a,b),max(a,b))]++;
+        }
+    long nb=0;
+    for(map< pair<long,long>, int >::const_iterator i=ne.begin();i!=ne.end();++i) if(i->second==1) ++nb;
+    bedges.resize(2*nb);
+    nb=0;
+    for(map< pair<long,long>, int >::const_iterator i=ne.begin();i!=ne.end();++i)
+        if(i->second==1) { bedges[2*nb]=i->first.first; bedges[2*nb+1]=i->first.second; ++nb; }
+}
+
+void OnePlotMeshDS::Color(OneWindow *win,R f,R fmn,R fmx) const
+{ //  pretty rendering: the colormap, otherwise the color of the band of the iso values which contains f
+    ThePlot & plot=*win->theplot;
+    if(win->PrettyOn())
+    {
+        float rgb[3];
+        ColormapRGB(win->cmapkind,(f-fmn)/(fmx-fmn),rgb);
+        glColor3fv(rgb);
+    }
+    else
+    {
+        int n=plot.Viso.N(), l=1;
+        while(l<n-1 && f>plot.Viso[l]) ++l;
+        plot.color(l+4);
+    }
+}
+
+void OnePlotMeshDS::Draw(OneWindow *win)
+{ //  the control volumes in colors (value), their edges (from the middle of each edge of a triangle to its
+  //  centroid) and the border of the surface
+    ThePlot & plot=*win->theplot;
+    const MeshS & T=*Th;
+    R fmn=0,fmx=1;
+    if(val.N()) DataRange(plot,fmn,fmx);
+    //  with a meshS in the plot (plot(ThS,Thstar)): the dual mesh in red
+    bool withmesh=false;
+    for (list<OnePlot *>::iterator p= plot.plots.begin();p != plot.plots.end(); ++p)
+        withmesh = withmesh || dynamic_cast<OnePlotMeshS *>(*p);
+    bool edges = !val.N() || plot.drawmeshes;// the edges: always without values, key m with values
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_1D);
+    if(val.N() || !withmesh)
+    { //  the triangle (a0,a1,a2), centroid F: the piece of a0 is (a0, middle of a0a1, F, middle of a0a2), in the
+      //  color of the value of a0; without values in light grey (the edges of the back of the surface hidden), but
+      //  not with a meshS in the plot (its edges would be hidden)
+        win->setLighting();
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.,1.);
+        if(!val.N()) glColor3d(0.92,0.92,0.92);
+        for(int k=0;k<T.nt;++k)
+        {
+            R3 Q[3]={T[k][0],T[k][1],T[k][2]};
+            R3 Nt=R3(Q[0],Q[1])^R3(Q[0],Q[2]);
+            Nt/=max(Nt.norme(),1e-30);
+            glNormal3d(Nt.x,Nt.y,Nt.z);
+            R3 F=(Q[0]+Q[1]+Q[2])/3.;
+            for(int l=0;l<3;++l)
+            {
+                R3 A=Q[l], B=(Q[l]+Q[(l+1)%3])*0.5, C=(Q[l]+Q[(l+2)%3])*0.5;
+                if(val.N()) Color(win,val[T(k,l)],fmn,fmx);
+                glBegin(GL_POLYGON);
+                glVertex3d(A.x,A.y,A.z); glVertex3d(B.x,B.y,B.z);
+                glVertex3d(F.x,F.y,F.z); glVertex3d(C.x,C.y,C.z);
+                glEnd();
+            }
+        }
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        win->unsetLighting();
+    }
+    if(edges)
+    {
+        glLineWidth((withmesh ? 1.5 : 1)*kscreenscale);
+        if(withmesh) glColor3d(0.85,0.1,0.1);
+        else if(val.N()) glColor3d(0.,0.,0.);
+        else plot.color(1);
+        glBegin(GL_LINES);
+        for(int k=0;k<T.nt;++k)
+        {
+            R3 Q[3]={T[k][0],T[k][1],T[k][2]};
+            R3 F=(Q[0]+Q[1]+Q[2])/3.;
+            for(int l=0;l<3;++l)
+            {
+                R3 M=(Q[l]+Q[(l+1)%3])*0.5;
+                glVertex3d(M.x,M.y,M.z); glVertex3d(F.x,F.y,F.z);
+            }
+        }
+        for(int b=0;b<bedges.N()/2;++b)
+        {
+            R3 A=T(bedges[2*b]), B=T(bedges[2*b+1]);
+            glVertex3d(A.x,A.y,A.z); glVertex3d(B.x,B.y,B.z);
+        }
+        glEnd();
+        glLineWidth(kscreenscale);
+    }
+    ShowGlerror("OnePlotMeshDS::Draw");
+}
+
+bool OnePlotMeshDS::Probe(const R3 & P,R & v,R3 & vec,int & ncomp)
+{ //  the value of the control volume under the mouse: the triangle nearest to P, the vertex of the triangle with
+  //  the largest barycentric coordinate at P (the piece of a vertex in a triangle of the median dual)
+    if(!val.N()) return false;
+    const MeshS & T=*Th;
+    if(!grid.built)
+    {
+        vector<R3> mn(T.nt),mx(T.nt);
+        for(int k=0;k<T.nt;++k)
+        {
+            const MeshS::Element & K=T[k];
+            mn[k]=mx[k]=K[0];
+            for(int l=1;l<3;++l) { mn[k]=Minc(mn[k],(R3) K[l]); mx[k]=Maxc(mx[k],(R3) K[l]);}
+            R3 d=(mx[k]-mn[k])*0.1;// the point under the mouse is near the surface
+            mn[k]-=d;
+            mx[k]+=d;
+        }
+        grid.build(mn,mx);
+    }
+    if(grid.head.empty()) return false;
+    int c[3];
+    grid.ijk(P,c);
+    int best=-1;
+    R dbest=1e100, lbest[3]={0,0,0};
+    for(int q=grid.head[grid.cell(c[0],c[1],c[2])];q>=0;q=grid.nxt[q])
+    {
+        int k=grid.elem[q];
+        const MeshS::Element & K=T[k];
+        R3 A=K[0],B=K[1],C=K[2];
+        R3 AB(A,B),AC(A,C),AP(A,P);
+        R a11=(AB,AB), a12=(AB,AC), a22=(AC,AC), b1=(AB,AP), b2=(AC,AP);
+        R det=a11*a22-a12*a12;
+        if(det<=0) continue;
+        R l1=(b1*a22-b2*a12)/det, l2=(a11*b2-a12*b1)/det;
+        if(l1<-0.05 || l2<-0.05 || l1+l2>1.05) continue;
+        R d=(AP-AB*l1-AC*l2).norme()/sqrt(max(a11,a22));
+        if(d<dbest) { dbest=d; best=k; lbest[0]=1-l1-l2; lbest[1]=l1; lbest[2]=l2;}
+    }
+    if(best<0 || dbest>0.1) return false;
+    int l=0;
+    if(lbest[1]>lbest[l]) l=1;
+    if(lbest[2]>lbest[l]) l=2;
+    v=val[T(best,l)];
+    ncomp=1;
+    return true;
+}
+
+void OnePlotMeshD3::DrawSection(OneWindow *win,R3 N,R c)
+{ //  the section with the options of the plot (as in Draw): the panel of the cut plane (key c)
+    ThePlot & plot=*win->theplot;
+    R fmn=0,fmx=1;
+    if(val.N()) DataRange(plot,fmn,fmx);
+    bool withmesh=false;
+    for (list<OnePlot *>::iterator p= plot.plots.begin();p != plot.plots.end(); ++p)
+        withmesh = withmesh || (*p)->what==0;
+    DrawSection(win,N,c,fmn,fmx,!val.N() || plot.drawmeshes,withmesh);
+}
+
+void OnePlotMeshD3::DrawSection(OneWindow *win,R3 N,R c,R fmn,R fmx,bool edges,bool withmesh)
+{ //  the section of the control volumes by the plane (N,P) = c: in each tetrahedron K crossed by the plane,
+  //  the sections of the 6 tetrahedra (G, vertex i, middle of an edge [i,j], centroid of a face (i,j,l)) of each
+  //  vertex i (pass 0, color of the value of i), and of the interfaces (G, middle of [i,j], centroid of a face):
+  //  the edges of the control volumes in the section (pass 1)
+    static const int ed[6][4]={{0,1,2,3},{0,2,1,3},{0,3,1,2},{1,2,0,3},{1,3,0,2},{2,3,0,1}};// edge (i,j), others
+    const Mesh3 & T=*Th;
+    ThePlot & plot=*win->theplot;
+    glEnable(GL_DEPTH_TEST);
+    for(int pass=0;pass<2;++pass)
+    {
+        if(pass==0 && !val.N()) continue;
+        if(pass==1 && !edges) continue;
+        if(pass==0)
+        {
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(1.,1.);
+            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+            glNormal3d(N.x,N.y,N.z);
+        }
+        else
+        {
+            glLineWidth((withmesh ? 1.5 : 1)*kscreenscale);
+            if(withmesh) glColor3d(0.85,0.1,0.1);
+            else if(val.N()) glColor3d(0.,0.,0.);
+            else plot.color(1);
+            glBegin(GL_LINES);
+        }
+        for(int k=0;k<T.nt;++k)
+        {
+            const Mesh3::Element & K=T[k];
+            R3 P[4];
+            R d[4], dmin=dinfty, dmax=-dinfty;
+            for(int i=0;i<4;++i)
+            {
+                P[i]=K[i];
+                d[i]=(N,P[i])-c;
+                dmin=min(dmin,d[i]); dmax=max(dmax,d[i]);
+            }
+            if(dmin>0 || dmax<0) continue;
+            R3 G=(P[0]+P[1]+P[2]+P[3])*0.25, F[4];// F[o]: the centroid of the face opposite to the vertex o
+            for(int o=0;o<4;++o) F[o]=(P[0]+P[1]+P[2]+P[3]-P[o])/3.;
+            if(pass==0)
+                for(int i=0;i<4;++i)
+                {
+                    Color(win,val[T(K[i])],fmn,fmx);
+                    for(int o=0;o<4;++o)
+                        for(int m=0;m<4;++m)
+                        {
+                            if(o==i || m==i || m==o) continue;// the face opposite to o, the edge [i,m] in it
+                            R3 S[4]={G,P[i],(P[i]+P[m])*0.5,F[o]}, Pc[4];
+                            R ds[4], ff[4]={0.,0.,0.,0.}, g[4];
+                            for(int l=0;l<4;++l) ds[l]=(N,S[l])-c;
+                            int n=CutTet(S,ds,ff,Pc,g);
+                            if(n<3) continue;
+                            glBegin(GL_POLYGON);
+                            for(int l=0;l<n;++l) glVertex3d(Pc[l].x,Pc[l].y,Pc[l].z);
+                            glEnd();
+                        }
+                }
+            else
+                for(int e=0;e<6;++e)
+                {
+                    R3 M=(P[ed[e][0]]+P[ed[e][1]])*0.5;
+                    for(int f=2;f<4;++f)
+                    { //  the interface triangle (G, M, centroid of the face opposite to the vertex ed[e][f])
+                        R3 S[3]={G,M,F[ed[e][f]]}, Ps[3];
+                        R ds[3];
+                        int np=0;
+                        for(int l=0;l<3;++l) ds[l]=(N,S[l])-c;
+                        for(int l=0;l<3;++l)
+                        {
+                            int l1=(l+1)%3;
+                            if((ds[l]<0) != (ds[l1]<0))
+                                Ps[np++]=S[l]+(S[l1]-S[l])*(ds[l]/(ds[l]-ds[l1]));
+                        }
+                        if(np==2) { glVertex3d(Ps[0].x,Ps[0].y,Ps[0].z); glVertex3d(Ps[1].x,Ps[1].y,Ps[1].z);}
+                    }
+                }
+        }
+        if(pass==0) glDisable(GL_POLYGON_OFFSET_FILL);
+        else { glEnd(); glLineWidth(kscreenscale);}
+    }
 }
 
 void OnePlotMesh3::Draw(OneWindow *win)
@@ -3963,7 +4579,7 @@ height(h),width(w),theplot(0),hpixel(1),
 Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
 windowdump(false),windowdumppng(false),help(false),helpall(false),showhx(0), rapz0(-1.),rapz(1),withlight(false),
 changearrow(true),changeiso(true), keepPV(false),init(false),
-graphgrid(false),graphkey(true),graphstyle(0),graphlogx(false),graphlogy(false),pretty(true),probe(true),isolines(true),axes(true),prettybar(true),cmapkind(0),cmaptex(0),cmaptexkind(-1),userlogx(-1),userlogy(-1),explode(0),cutaxis(0),cut2d(0),cutA(0.,0.),cutB(1.,0.),cutdrag(false),cutpos(0.5),cutN(1.,0.,0.),cutedit(false),cutfreeze(false),threshold(0.5),isosurf(false),xmouse(-1),ymouse(-1)
+graphgrid(false),graphkey(true),graphstyle(0),graphlogx(false),graphlogy(false),pretty(true),probe(true),isolines(true),axes(true),prettybar(true),cmapkind(0),cmapchosen(false),cmaptex(0),cmaptexkind(-1),userlogx(-1),userlogy(-1),explode(0),cutaxis(0),cut2d(0),cut3d(0),cutA(0.,0.),cutB(1.,0.),cutdrag(false),cutpos(0.5),cutN(1.,0.,0.),cut3A(0.,0.),cut3B(0.,0.),cut3line(0),cut3set(false),cut3drag(false),cut3uv(0.,0.),cutedit(false),cutfreeze(false),threshold(0.5),isosurf(false),xmouse(-1),ymouse(-1)
 {
 
     add(p);
@@ -3975,6 +4591,21 @@ void OneWindow::set(ThePlot *p)
     theplot=p;
     if(p)
     {
+        //  the colors hsv= of the plot: the colormap of the pretty rendering (if not chosen with the key C)
+        if(p->colors.N()>=6)
+        {
+            bool same = cmapUserColors.N()==p->colors.N() && cmapUserHsv==p->hsv;
+            for(int i=0;same && i<p->colors.N();++i) same = cmapUserColors[i]==p->colors[i];
+            if(!same)
+            {
+                cmapUserColors.resize(p->colors.N());
+                cmapUserColors=p->colors;
+                cmapUserHsv=p->hsv;
+                cmaptexkind=-1;// rebuild the texture
+            }
+            if(!cmapchosen) cmapkind=5;
+        }
+        else if(cmapkind==5) cmapkind=0;
         if( debug) cout << "OneWindow:: set "<< p->keepPV << " -> "<< keepPV << endl;
         plotdim=p->plotdim;
         if(!keepPV)keepPV=p->keepPV;
@@ -4070,6 +4701,12 @@ void OneWindow::DefaultView(int state)
         {
             Bmin3=A;
             Bmax3=B;
+            if(theplot->boundingbox.size() ==4)
+            { // 3d with bb=: the box of the view is bb in x and y (the plots are clipped by bb)
+                const KN<R> &bb=theplot->boundingbox;
+                Bmin3.x=min(bb[0],bb[2]); Bmax3.x=max(bb[0],bb[2]);
+                Bmin3.y=min(bb[1],bb[3]); Bmax3.y=max(bb[1],bb[3]);
+            }
         }
         else
         { // data plot 2d ou 1 d...
@@ -4125,6 +4762,17 @@ void OneWindow::DefaultView(int state)
                 if(graphlogx && A.x>0) A.x=log10(A.x),B.x=log10(B.x);
                 if(graphlogy && A.y>0) A.y=log10(A.y),B.y=log10(B.y);
             }
+            // the bounds given by xrange=, yrange= in the comment, without margin
+            if(theplot->gfixx && (!graphlogx || theplot->gxr[0]>0))
+            {
+                A.x = graphlogx ? log10(theplot->gxr[0]) : theplot->gxr[0];
+                B.x = graphlogx ? log10(theplot->gxr[1]) : theplot->gxr[1];
+            }
+            if(theplot->gfixy && (!graphlogy || theplot->gyr[0]>0))
+            {
+                A.y = graphlogy ? log10(theplot->gyr[0]) : theplot->gyr[0];
+                B.y = graphlogy ? log10(theplot->gyr[1]) : theplot->gyr[1];
+            }
             // no empty axis range
             if( !(B.x>A.x) ) { R d = A.x ? fabs(A.x)*0.05 : 0.5; A.x -= d; B.x += d;}
             if( !(B.y>A.y) ) { R d = A.y ? fabs(A.y)*0.05 : 0.5; A.y -= d; B.y += d;}
@@ -4156,11 +4804,12 @@ void  OneWindow::SetView()
 {
     if(plotdim==3 && theplot)
     {
-        glViewport(0, 0,width, height);
+        int hp=Cut3dPanel();// the panel of the section of the cut plane at the bottom (key c)
+        glViewport(0, hp,width, height-hp);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        R ratio= (double) width / (double)  height;
+        R ratio= (double) width / (double)  (height-hp);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
@@ -4222,6 +4871,9 @@ void  OneWindow::SetView()
             //  to be sur  the the z size is no zero .
             dz = max(dz,(Bmax.x-Bmin.x)*0.1);
             dz = max(dz,(Bmax.y-Bmin.y)*0.1);
+            //  the plots drawn at z = 0 (the meshes, the border, the dual mesh plot(Thstar,u[])) are in the
+            //  view (glTranslated(0,0,-zm)), also when the values are far from 0 (|zm| > dz)
+            dz = max(dz,1.01*fabs(zm));
             dz0=-dz;
             dz1 = dz;
             viewdim=2;
@@ -4244,16 +4896,22 @@ void  OneWindow::SetView()
         //  on the left and at the bottom for the axes (key j)
         int s=GraphScale();
         R mr = (pi || pa) ? min(120.*s,0.4*width) : 0.;
-        R ml = 0., mb = 0.;
+        //  value=1 without the color bar: the key of the values (PlotValue) on the right, from 0.85*width
+        if(theplot && theplot->value && !Graph1d() && plotdim==2
+           && ((theplot->withiso && !pi) || (theplot->witharrow && !pa)))
+            mr = max(mr,0.15*width+10.*s);
+        R ml = 0., mb = 0., mt = 0.;
         if(axes && !Graph1d())
         {
             ml = min(70.*s + (pi && pa ? 120.*s : 0.),0.3*width);// the bar of the arrows is on the left
             mb = min(50.*s,0.3*height);
+            mt = min(35.*s,0.2*height);// the title and the value at the top of the y axis
+            mr = max(mr,min(30.*s,0.1*width));// the value at the end of the x axis
         }
         mb += Cut2dPanel();// the graph of the cut line
-        if(mr+ml+mb>0)
+        if(mr+ml+mb+mt>0)
         { //  the box Bmin, Bmax in the window without the margins (same scale in x and y if aspectratio)
-            R wi=width-ml-mr, hi=height-mb;
+            R wi=width-ml-mr, hi=height-mb-mt;
             R sx=(B1.x-B0.x)/wi, sy=(B1.y-B0.y)/hi;
             if(theplot && theplot->aspectratio) sx=sy=max(sx,sy);
             R2 M=(B0+B1)/2.;
@@ -4473,7 +5131,12 @@ void OneWindow::DrawProbe()
     R3 vec;
     int nc=0;
     bool oniso=false;
-    if(plotdim==3)
+    R2 uv;
+    bool onsection = InCut3Box(xmouse,ymouse,uv);// 3d: the mouse on the section of the panel (key c)
+    if(onsection) P=Cut3Point(uv);
+    //  the mouse in the panel of a cut (key c), not on the section: no point of the plot (the graph shows the values)
+    if(!onsection && ((Cut2d() && height-1-ymouse < Cut2dPanel()) || (Cut3d() && height-1-ymouse < Cut3dPanel()))) return;
+    if(plotdim==3 && !onsection)
     { // the point on the visible surface: the depth of the pixel
         GLfloat d=1;
         glReadPixels(xp,yp,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&d);
@@ -4501,7 +5164,7 @@ void OneWindow::DrawProbe()
     int l = d3 ? snprintf(buf,sizeof(buf),"x = %.4g  y = %.4g  z = %.4g",P.x,P.y,P.z)
                : snprintf(buf,sizeof(buf),"x = %.4g  y = %.4g",P.x,P.y);
     if(nc==1)
-        snprintf(buf+l,sizeof(buf)-l,oniso ? "   :  %.6g   (isosurface)" : "   :  %.6g",val);
+        snprintf(buf+l,sizeof(buf)-l,oniso ? "   :  %.6g   (isosurface)" : (onsection ? "   :  %.6g   (section)" : "   :  %.6g"),val);
     else if(nc==2)
         snprintf(buf+l,sizeof(buf)-l,"   :  (%.4g, %.4g)   |.| = %.4g",vec.x,vec.y,val);
     else if(nc==3)
@@ -4680,10 +5343,10 @@ void OneWindow::DrawAxis(const R3 & A,const R3 & B,R vmin,R vmax,const R2 & C,R 
     R ends[2]={vmin,vmax};
     for(int e=0;e<2;++e)
     {
-        bool near=false;
+        bool nearTic=false;// (not near: a macro of windef.h on Windows)
         for(size_t i=0;i<tics.size();++i)
-            if(fabs(tics[i]-ends[e])<0.25*step) near=true;
-        if(near) continue;
+            if(fabs(tics[i]-ends[e])<0.25*step) nearTic=true;
+        if(nearTic) continue;
         R2 P = e ? SB : SA;
         if(P.x<0 || P.y<0 || P.x>width || P.y>height) continue;
         R2 Q = P + o*(5*s);
@@ -4737,24 +5400,33 @@ void OneWindow::DrawCut2d()
     R2 A,B;
     if(!theplot || !Cut2dLine(A,B)) return;
     int s=GraphScale(), fh=GraphFontHeight();
-    //  the values along the line (the first function of the plot)
+    //  the functions of the plot (FE functions, scalar or |vector|, and dual meshes with values):
+    //  one curve by function, in the order of the plot
+    vector<OnePlot *> fs;
+    for (list<OnePlot *>::iterator it= theplot->plots.begin();it != theplot->plots.end(); ++it)
+    {
+        OnePlotFE<Mesh2> *f2=dynamic_cast<OnePlotFE<Mesh2> *>(*it);
+        OnePlotFE<Mesh> *f1=dynamic_cast<OnePlotFE<Mesh> *>(*it);
+        OnePlotMeshD *fd=dynamic_cast<OnePlotMeshD *>(*it);
+        if((f2 && (f2->what%10==1 || f2->what%10==2)) || (f1 && (f1->what%10==1 || f1->what%10==2)) || (fd && fd->val.N()))
+            fs.push_back(*it);
+    }
+    //  the values along the line
     const int n=400;
-    vector<R> ts,vs;
+    int nf=fs.size();
+    vector< vector<R> > ts(nf),vs(nf);
     for(int i=0;i<=n;++i)
     {
         R2 P=A+(B-A)*((R)i/n);
-        R val=0; R3 vec; int nc=0;
-        for (list<OnePlot *>::iterator it= theplot->plots.begin();it != theplot->plots.end() && !nc; ++it)
+        for(int k=0;k<nf;++k)
         {
-            OnePlotFE<Mesh2> *f2=dynamic_cast<OnePlotFE<Mesh2> *>(*it);
-            OnePlotFE<Mesh> *f1=dynamic_cast<OnePlotFE<Mesh> *>(*it);
-            if(f2 && !f2->Probe(R3(P.x,P.y,0.),val,vec,nc)) nc=0;
-            if(f1 && !f1->Probe(R3(P.x,P.y,0.),val,vec,nc)) nc=0;
+            R val=0; R3 vec; int nc=0;
+            if(!fs[k]->Probe(R3(P.x,P.y,0.),val,vec,nc)) nc=0;
+            if(!nc) continue;// outside the domain of this function
+            //  abscissa: x (horizontal line), y (vertical line), the length along the segment
+            ts[k].push_back(cut2d==1 ? P.x : (cut2d==2 ? P.y : R2(A,P).norme()));
+            vs[k].push_back(val);
         }
-        if(!nc) continue;// outside the domain
-        //  abscissa: x (horizontal line), y (vertical line), the length along the segment
-        ts.push_back(cut2d==1 ? P.x : (cut2d==2 ? P.y : R2(A,P).norme()));
-        vs.push_back(val);
     }
     //  the line on the plot (in pixel: no depth clipping)
     GLdouble x,y,z;
@@ -4797,10 +5469,29 @@ void OneWindow::DrawCut2d()
     else if(cut2d==2) snprintf(buf,sizeof(buf),"cut x = %.4g  (c: next, <) >): move, shift + left button: segment)",A.x);
     else snprintf(buf,sizeof(buf),"cut from (%.4g, %.4g) to (%.4g, %.4g)",A.x,A.y,B.x,B.y);
     GraphText(x0,y1+8*s,buf);
-    if(ts.size()<2) { GraphText(x0+10*s,(y0+y1)/2,"the line is outside the domain"); return;}
-    R tmn=ts.front(), tmx=ts.back();
-    if(tmn>tmx) swap(tmn,tmx);
-    R vmn=*min_element(vs.begin(),vs.end()), vmx=*max_element(vs.begin(),vs.end());
+    DrawCutGraph(x0,y0,x1,y1,ts,vs,cut2d==1 ? "x" : (cut2d==2 ? "y" : "s (length along the segment)"),3.5*R2(A,B).norme()/n);
+}
+
+void OneWindow::DrawCutGraph(R x0,R y0,R x1,R y1,const vector< vector<R> > & ts,const vector< vector<R> > & vs,
+                             const char *xlabel,R dtmax)
+{ //  the curves (t, v) of a cut in the box [x0,x1]x[y0,y1] of the screen, with the tics and the key; a jump of the
+  //  abscissa larger than dtmax = outside the domain (the curve is cut)
+    int s=GraphScale(), fh=GraphFontHeight();
+    int nf=ts.size();
+    char buf[128];
+    //  the bounds of all the curves
+    R tmn=dinfty, tmx=-dinfty, vmn=dinfty, vmx=-dinfty;
+    int ncurves=0;
+    for(int k=0;k<nf;++k)
+    {
+        if(ts[k].size()<2) continue;
+        ++ncurves;
+        tmn=min(tmn,min(ts[k].front(),ts[k].back()));
+        tmx=max(tmx,max(ts[k].front(),ts[k].back()));
+        vmn=min(vmn,*min_element(vs[k].begin(),vs[k].end()));
+        vmx=max(vmx,*max_element(vs[k].begin(),vs[k].end()));
+    }
+    if(!ncurves) { GraphText(x0+10*s,(y0+y1)/2,"the line is outside the domain"); return;}
     //  a constant along the line (ex. the round-off of a zero): the scale of the whole function
     R scale=max(max(fabs(theplot->fmin),fabs(theplot->fmax)),max(fabs(vmn),fabs(vmx)));
     if(!(vmx-vmn > 1e-8*scale))
@@ -4823,7 +5514,7 @@ void OneWindow::DrawCut2d()
         snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
         GraphText(x0+(tics[i]-tmn)*ax,y0-8*s-fh,buf,1);
     }
-    GraphText((x0+x1)/2,y0-20*s-fh*2,cut2d==1 ? "x" : (cut2d==2 ? "y" : "s (length along the segment)"),1);
+    GraphText((x0+x1)/2,y0-20*s-fh*2,xlabel,1);
     GraphTics(vmn,vmx,max(2,(int)((y1-y0)/(45*s))),tics,prec);
     glBegin(GL_LINES);
     for(size_t i=0;i<tics.size();++i) { R Y=y0+(tics[i]-vmn)*ay; glVertex2d(x0,Y); glVertex2d(x0+5*s,Y);}
@@ -4833,19 +5524,283 @@ void OneWindow::DrawCut2d()
         snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
         GraphText(x0-6*s,y0+(tics[i]-vmn)*ay-fh/2.,buf,2);
     }
-    //  the curve (a jump of the abscissa = outside the domain: the curve is cut)
-    glColor3d(0.1,0.3,0.8);
+    //  the curves (a jump of the abscissa = outside the domain: the curve is cut), one curve: in blue,
+    //  several curves: the colors of the 1d graph and the key (cmm="... | legend=name1,name2,...")
     glLineWidth(2*s);
-    R dtmax=3.5*fabs(ts.back()-ts.front())/n;
-    glBegin(GL_LINE_STRIP);
-    for(size_t i=0;i<ts.size();++i)
+    for(int k=0;k<nf;++k)
     {
-        if(i && fabs(ts[i]-ts[i-1])>dtmax) { glEnd(); glBegin(GL_LINE_STRIP);}
-        glVertex2d(x0+(ts[i]-tmn)*ax,y0+(vs[i]-vmn)*ay);
+        if(ts[k].size()<2) continue;
+        if(ncurves==1) glColor3d(0.1,0.3,0.8);
+        else GraphColor(k,theplot->grey);
+        glBegin(GL_LINE_STRIP);
+        for(size_t i=0;i<ts[k].size();++i)
+        {
+            if(i && fabs(ts[k][i]-ts[k][i-1])>dtmax) { glEnd(); glBegin(GL_LINE_STRIP);}
+            glVertex2d(x0+(ts[k][i]-tmn)*ax,y0+(vs[k][i]-vmn)*ay);
+        }
+        glEnd();
+    }
+    if(ncurves>1)
+    { //  the key: name and sample of each curve, on the top right corner of the panel
+        R xs1=x1-10*s, xs0=xs1-40*s, yk=y1-10*s-fh;
+        for(int k=0;k<nf;++k)
+        {
+            if(ts[k].size()<2) continue;
+            glColor3d(0.,0.,0.);
+            if(k < (int) theplot->glegend.size()) GraphText(xs0-8*s,yk,theplot->glegend[k].c_str(),2);
+            else { snprintf(buf,sizeof(buf),"curve %d",k+1); GraphText(xs0-8*s,yk,buf,2);}
+            GraphColor(k,theplot->grey);
+            glBegin(GL_LINES);
+            glVertex2d(xs0,yk+fh/2.); glVertex2d(xs1,yk+fh/2.);
+            glEnd();
+            yk -= fh+8*s;
+        }
+    }
+    //  the mouse on the graph (key P): a vertical line at its abscissa, the value of each curve (linear between
+    //  the points of the curve, nothing in a jump: outside the domain), written at the top of the graph
+    R XM=xmouse, YM=height-1-ymouse;
+    if(probe && XM>=x0 && XM<=x1 && YM>=y0 && YM<=y1)
+    {
+        R t=tmn+(XM-x0)/ax;
+        glColor3d(0.4,0.4,0.4);
+        glLineWidth(s);
+        glBegin(GL_LINES);
+        glVertex2d(XM,y0); glVertex2d(XM,y1);
+        glEnd();
+        int l=snprintf(buf,sizeof(buf),"%s = %.5g  :",xlabel,t);
+        int nv=0;
+        glPointSize(7*s);
+        for(int k=0;k<nf && l<(int) sizeof(buf)-40;++k)
+        {
+            if(ts[k].size()<2) continue;
+            bool found=false;
+            R vk=0;
+            for(size_t i=1;i<ts[k].size() && !found;++i)
+            {
+                R ta=ts[k][i-1], tb=ts[k][i];
+                if(fabs(tb-ta)>dtmax) continue;// a jump: outside the domain
+                if((t-ta)*(t-tb)<=0)
+                {
+                    R w= tb!=ta ? (t-ta)/(tb-ta) : 0;
+                    vk=vs[k][i-1]+w*(vs[k][i]-vs[k][i-1]);
+                    found=true;
+                }
+            }
+            if(!found) continue;
+            if(ncurves==1) glColor3d(0.1,0.3,0.8);
+            else GraphColor(k,theplot->grey);
+            glBegin(GL_POINTS);
+            glVertex2d(XM,y0+(vk-vmn)*ay);
+            glEnd();
+            if(ncurves>1)
+            {
+                if(k < (int) theplot->glegend.size()) l+=snprintf(buf+l,sizeof(buf)-l,"  %s = %.6g",theplot->glegend[k].c_str(),vk);
+                else l+=snprintf(buf+l,sizeof(buf)-l,"  curve %d = %.6g",k+1,vk);
+            }
+            else l+=snprintf(buf+l,sizeof(buf)-l,"  %.6g",vk);
+            ++nv;
+        }
+        if(!nv) snprintf(buf+l,sizeof(buf)-l,"  outside the domain");
+        glColor3d(0.,0.,0.);
+        GraphText(x0+8*s,y1-8*s-fh,buf);
+    }
+    glLineWidth(kscreenscale);
+    glColor3d(0.,0.,0.);
+}
+
+int OneWindow::Cut3dPanel() const
+{ //  height of the panel of the section of the cut plane (bottom of the window)
+    if(!Cut3d()) return 0;
+    return (int) min(0.45*height,380.*GraphScale());
+}
+
+void OneWindow::DrawCut3d()
+{ //  3d: the cut plane x, y or z = const in the 3d view, and the section of the functions of the plot (and of
+  //  the meshes if there is no function) in a panel below: the 3d drawing of the section is projected on the plane
+    ThePlot & plot=*theplot;
+    int s=GraphScale(), fh=GraphFontHeight();
+    int a=cut3d-1, iu= a==0 ? 1 : 0, iv= a==2 ? 1 : 2;// the normal axis, the axes of the plane
+    R3 Pn=plot.Pmin, Px=plot.Pmax;
+    R c=Pn[a]+cutpos*(Px[a]-Pn[a]);
+    R3 N(a==0,a==1,a==2);
+    static const char *xyz[3]={"x","y","z"};
+    //  the plane in the 3d view
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_DEPTH_TEST);
+    glColor3d(0.,0.,0.);
+    glLineWidth(2*s);
+    glBegin(GL_LINE_LOOP);
+    for(int k=0;k<4;++k)
+    {
+        R3 P;
+        P[a]=c;
+        P[iu]= (k==1 || k==2) ? Px[iu] : Pn[iu];
+        P[iv]= k>=2 ? Px[iv] : Pn[iv];
+        glVertex3d(P.x,P.y,P.z);
     }
     glEnd();
     glLineWidth(kscreenscale);
+    //  the panel
+    SetScreenView();
+    int H=Cut3dPanel();
+    R x0=75*s, x1=width-30*s, y0=40*s, y1=H-30*s;
+    bool pi=false,pa=false;
+    if(PrettyOn() && prettybar) plot.PrettyPlots(this,pi,pa);
+    if(pi || pa) x1=width-135*s;// the color bar
+    if(x1-x0<40 || y1-y0<30) return;
+    glColor3d(1.,1.,1.);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    glBegin(GL_QUADS);
+    glVertex2d(x0,y0); glVertex2d(x1,y0); glVertex2d(x1,y1); glVertex2d(x0,y1);
+    glEnd();
+    char buf[128];
+    snprintf(buf,sizeof(buf),"cut %s = %.4g  (c: next, < >: move, F1: the plane in the 3d view)",xyz[a],c);
     glColor3d(0.,0.,0.);
+    GraphText(x0,y1+8*s,buf);
+    //  the panel: the section on the left, the 1d cut of the section on the right (if the panel is wide enough)
+    bool withgraph = x1-x0 > 520*s;
+    R xs1 = withgraph ? x0+0.5*(x1-x0) : x1;
+    //  the box of the plane in the panel, same scale in the 2 directions
+    R umn=Pn[iu], umx=Px[iu], vmn=Pn[iv], vmx=Px[iv];
+    if(!(umx>umn) || !(vmx>vmn)) return;
+    R sc=min((xs1-x0)/(umx-umn),(y1-y0)/(vmx-vmn));
+    R rw=(umx-umn)*sc, rh=(vmx-vmn)*sc;
+    R rx0=x0+((xs1-x0)-rw)/2, ry0=y0+((y1-y0)-rh)/2;
+    cut3box[0]=rx0; cut3box[1]=ry0; cut3box[2]=rw; cut3box[3]=rh; cut3box[4]=sc; cut3uv=R2(umn,vmn);
+    //  tics and values on the box
+    vector<R> tics; int prec;
+    GraphTics(umn,umx,max(2,(int)(rw/(80*s))),tics,prec);
+    glLineWidth(s);
+    glBegin(GL_LINES);
+    for(size_t i=0;i<tics.size();++i) { R X=rx0+(tics[i]-umn)*sc; glVertex2d(X,ry0); glVertex2d(X,ry0-5*s);}
+    glEnd();
+    for(size_t i=0;i<tics.size();++i)
+    {
+        snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
+        GraphText(rx0+(tics[i]-umn)*sc,ry0-8*s-fh,buf,1);
+    }
+    GraphText(rx0+rw+12*s,ry0-8*s-fh,xyz[iu],0);
+    GraphTics(vmn,vmx,max(2,(int)(rh/(45*s))),tics,prec);
+    glBegin(GL_LINES);
+    for(size_t i=0;i<tics.size();++i) { R Y=ry0+(tics[i]-vmn)*sc; glVertex2d(rx0,Y); glVertex2d(rx0-5*s,Y);}
+    glEnd();
+    for(size_t i=0;i<tics.size();++i)
+    {
+        snprintf(buf,sizeof(buf),"%.*g",prec,tics[i]);
+        GraphText(rx0-8*s,ry0+(tics[i]-vmn)*sc-fh/2.,buf,2);
+    }
+    GraphText(rx0-8*s,ry0+rh+6*s,xyz[iv],2);
+    //  the section: (x,y,z) -> (u, v, (N,P)-c) in the box of the plane
+    int vx=(int) rx0, vy=(int) ry0, vw=max((int) rw,1), vh=max((int) rh,1);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(vx,vy,vw,vh);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_SCISSOR_TEST);
+    glViewport(vx,vy,vw,vh);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(umn,umx,vmn,vmx,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    GLdouble m[16]={0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1};// column-major
+    m[4*iu+0]=1; m[4*iv+1]=1; m[4*a+2]=1; m[14]=-c;
+    glLoadMatrixd(m);
+    bool withfunction=false;
+    for (list<OnePlot *>::iterator i= plot.plots.begin();i != plot.plots.end(); ++i)
+    {
+        OnePlotFE3 *f3=dynamic_cast<OnePlotFE3 *>(*i);
+        OnePlotMeshD3 *fd=dynamic_cast<OnePlotMeshD3 *>(*i);
+        if(f3 && f3->what%10==6) { f3->DrawSection(this,N,c,plot.drawmeshes,f3->lastthreshold); withfunction=true;}
+        if(fd) { fd->DrawSection(this,N,c); withfunction=true;}
+    }
+    if(!withfunction)// the meshes alone: the section of the elements (color of the label)
+        for (list<OnePlot *>::iterator i= plot.plots.begin();i != plot.plots.end(); ++i)
+        {
+            OnePlotMesh3 *m3=dynamic_cast<OnePlotMesh3 *>(*i);
+            if(m3) m3->DrawSection(plot,N,c);
+        }
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_1D);
+    SetScreenView();
+    glColor3d(0.,0.,0.);
+    glLineWidth(s);
+    glBegin(GL_LINE_LOOP);
+    glVertex2d(rx0,ry0); glVertex2d(rx0+rw,ry0); glVertex2d(rx0+rw,ry0+rh); glVertex2d(rx0,ry0+rh);
+    glEnd();
+    glLineWidth(kscreenscale);
+    if(!withgraph) return;
+    //  the 1d cut of the section: the line in (u,v) (default: horizontal, through the middle of the section)
+    if(!cut3set) { cut3A=R2(umn,(vmn+vmx)/2); cut3line=0; cut3set=true;}
+    R2 A=cut3A, B=cut3B;
+    if(cut3line==0) { A=R2(umn,cut3A.y); B=R2(umx,cut3A.y);}
+    if(!(R2(A,B).norme()>0)) return;
+    //  the line on the section (pixel)
+    glColor3d(0.,0.,0.);
+    glLineWidth(2*s);
+    glBegin(GL_LINES);
+    glVertex2d(rx0+(A.x-umn)*sc,ry0+(A.y-vmn)*sc); glVertex2d(rx0+(B.x-umn)*sc,ry0+(B.y-vmn)*sc);
+    glEnd();
+    glPointSize(6*s);
+    glBegin(GL_POINTS);
+    glVertex2d(rx0+(A.x-umn)*sc,ry0+(A.y-vmn)*sc); glVertex2d(rx0+(B.x-umn)*sc,ry0+(B.y-vmn)*sc);
+    glEnd();
+    glLineWidth(kscreenscale);
+    //  the functions of the plot (FE functions: scalar or |vector|, dual meshes with values) along the line
+    vector<OnePlot *> fs;
+    for (list<OnePlot *>::iterator i= plot.plots.begin();i != plot.plots.end(); ++i)
+    {
+        OnePlotFE3 *f3=dynamic_cast<OnePlotFE3 *>(*i);
+        OnePlotMeshD3 *fd=dynamic_cast<OnePlotMeshD3 *>(*i);
+        if((f3 && (f3->what%10==6 || f3->what%10==7)) || (fd && fd->val.N())) fs.push_back(*i);
+    }
+    const int n=400;
+    int nf=fs.size();
+    vector< vector<R> > ts(nf),vs(nf);
+    for(int k=0;k<=n;++k)
+    {
+        R2 Q=A+(B-A)*((R)k/n);
+        R3 P;
+        P[a]=c; P[iu]=Q.x; P[iv]=Q.y;
+        for(int f=0;f<nf;++f)
+        {
+            R val=0; R3 vec; int nc=0;
+            if(!fs[f]->Probe(P,val,vec,nc)) nc=0;
+            if(!nc) continue;// outside the domain of this function
+            ts[f].push_back(cut3line==0 ? Q.x : R2(A,Q).norme());
+            vs[f].push_back(val);
+        }
+    }
+    //  the graph on the right of the panel
+    R gx0=xs1+70*s, gx1=x1, gy0=y0, gy1=y1-fh-14*s;
+    if(gx1-gx0<60*s || gy1-gy0<40*s) return;
+    glColor3d(0.,0.,0.);
+    glLineWidth(s);
+    glBegin(GL_LINE_LOOP);
+    glVertex2d(gx0,gy0); glVertex2d(gx1,gy0); glVertex2d(gx1,gy1); glVertex2d(gx0,gy1);
+    glEnd();
+    if(cut3line==0) snprintf(buf,sizeof(buf),"1d cut: %s = %.4g, %s = %.4g  (shift + click/drag on the section)",xyz[a],c,xyz[iv],A.y);
+    else snprintf(buf,sizeof(buf),"1d cut from (%.4g, %.4g) to (%.4g, %.4g)",A.x,A.y,B.x,B.y);
+    GraphText(gx0,gy1+6*s,buf);
+    DrawCutGraph(gx0,gy0,gx1,gy1,ts,vs,cut3line==0 ? xyz[iu] : "s (length along the segment)",3.5*R2(A,B).norme()/n);
+}
+
+bool OneWindow::InCut3Box(int x,int y,R2 & uv) const
+{ //  the mouse (x,y) (pixel, from the top left corner) on the section of the panel: its coordinates (u,v)
+    if(!Cut3d() || !(cut3box[4]>0)) return false;
+    R X=x, Y=height-1-y;
+    if(X<cut3box[0] || X>cut3box[0]+cut3box[2] || Y<cut3box[1] || Y>cut3box[1]+cut3box[3]) return false;
+    uv=R2(cut3uv.x+(X-cut3box[0])/cut3box[4],cut3uv.y+(Y-cut3box[1])/cut3box[4]);
+    return true;
+}
+
+R3 OneWindow::Cut3Point(const R2 & uv) const
+{ //  the point of the cut plane x, y or z = const (key c) of coordinates (u,v) in the plane
+    int a=cut3d-1, iu= a==0 ? 1 : 0, iv= a==2 ? 1 : 2;
+    R3 P;
+    P[a]=theplot->Pmin[a]+cutpos*(theplot->Pmax[a]-theplot->Pmin[a]);
+    P[iu]=uv.x; P[iv]=uv.y;
+    return P;
 }
 
 void OneWindow::DrawAxes()
@@ -4854,6 +5809,12 @@ void OneWindow::DrawAxes()
     int s=GraphScale();
     R3 A,B;
     if(plotdim==3) A=Bmin3, B=Bmax3;// in 3d view of a 2d function, z = the values of the function
+    else if(theplot->boundingbox.N()==4)
+    { // 2d with bb=: the axes on the box bb
+        const KN<R> &bb=theplot->boundingbox;
+        A=R3(min(bb[0],bb[2]),min(bb[1],bb[3]),0.);
+        B=R3(max(bb[0],bb[2]),max(bb[1],bb[3]),0.);
+    }
     else A=theplot->Pmin, B=theplot->Pmax;
     if(!(A.x<=B.x && A.y<=B.y)) return;
     SetScreenView();
@@ -5355,8 +6316,9 @@ static string GraphTrim(const string & s)
 
 void ThePlot::GraphOptions()
 { //  the options of the 1d graph in the comment of the plot, the fields are separated by |
-  //    cmm="title | xlabel=... | ylabel=... | legend=name1,name2,... | logx | logy"
+  //    cmm="title | xlabel=... | ylabel=... | legend=name1,name2,... | logx | logy | xrange=a:b | yrange=a:b"
     glogx=glogy=-1;
+    gfixx=gfixy=false;
     if(!cm) return;
     string c=*cm+"|";
     for(size_t a=0,b;(b=c.find('|',a))!=string::npos;a=b+1)
@@ -5369,6 +6331,17 @@ void ThePlot::GraphOptions()
             string l=f.substr(7)+",";
             for(size_t la=0,lb;(lb=l.find(',',la))!=string::npos;la=lb+1)
                 glegend.push_back(GraphTrim(l.substr(la,lb-la)));
+        }
+        else if(f.compare(0,7,"xrange=")==0 || f.compare(0,7,"yrange=")==0)
+        { // the bounds of an axis, xrange=a:b (as in ffmedit)
+            double b0,b1;
+            if(sscanf(f.c_str()+7,"%lf :%lf",&b0,&b1)==2 && b1!=b0)
+            {
+                double *r = f[0]=='x' ? gxr : gyr;
+                r[0]=min(b0,b1);
+                r[1]=max(b0,b1);
+                (f[0]=='x' ? gfixx : gfixy) = true;
+            }
         }
         else if(f=="logx") glogx=1;
         else if(f=="logy") glogy=1;
@@ -5405,6 +6378,7 @@ void ThePlot::PrettyPlots(OneWindow *win,bool & prettyiso,bool & prettyarrow) co
         }
         if(w2==1) prettyiso=true;
         if(w2==2) prettyarrow=true;
+        if((*i)->what==61 || (*i)->what==63 || (*i)->what==65) prettyiso=true;// dual mesh with values (2d, 3d, surface)
     }
 }
 
@@ -5437,8 +6411,20 @@ void ThePlot::Draw(OneWindow *win)
     cmap = win->PrettyOn() ? (grey ? 4 : win->cmapkind) : -1;
     DataRange(*this,cmapfmn,cmapfmx);
     win->SetView();
+    //  with bb=: the plots are clipped by the box bb in x and y (2d: they do not go over the margins of the
+    //  axes; 3d: only the part of the domain in bb)
+    bool clipbb = boundingbox.N()==4;
+    if(clipbb)
+    {
+        R x1=min(boundingbox[0],boundingbox[2]), x2=max(boundingbox[0],boundingbox[2]);
+        R y1=min(boundingbox[1],boundingbox[3]), y2=max(boundingbox[1],boundingbox[3]);
+        GLdouble eq[4][4]={{1,0,0,-x1},{-1,0,0,x2},{0,1,0,-y1},{0,-1,0,y2}};
+        for(int k=0;k<4;++k) { glClipPlane(GL_CLIP_PLANE1+k,eq[k]); glEnable(GL_CLIP_PLANE1+k); }
+    }
     for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
         (*i)->Draw(win);
+    if(clipbb)
+        for(int k=0;k<4;++k) glDisable(GL_CLIP_PLANE1+k);
     //  the display lists are up to date: they are only called at the next display (fast with a
     //  fine mesh), until a key or the zoom asks to rebuild them (see OnePlot::GLDraw, never called)
     win->changeiso=false;
@@ -5455,6 +6441,12 @@ void ThePlot::Draw(OneWindow *win)
     if(win->Cut2d())
     {
         win->DrawCut2d();
+        win->SetView();
+    }
+    //  3d: the cut plane and the 2d section of the function (key c)
+    if(win->Cut3d())
+    {
+        win->DrawCut3d();
         win->SetView();
     }
 
@@ -5991,7 +6983,25 @@ case 20+index: {type dummy; fin >= dummy;} break;
         {
             p=new OnePlotHMatrix(what,fin);
         }
-
+        else if (what == 60 || what == 61)
+        { // dual mesh (plugin fvdualmesh), 61: with the finite volume values
+            if(what==61) withiso=true;
+            p=new OnePlotMeshD(what,fin);
+        }
+        else if (what == 62 || what == 63)
+        { // 3d dual mesh (plugin fvdualmesh, meshdual3): the number of its primal mesh3, 63: with the values
+            fin >> imsh;
+            ffassert(imsh>0 && imsh <=nbmeshes3);
+            if(what==63) withiso=true;
+            p=new OnePlotMeshD3(Ths3[imsh-1],what,fin);
+        }
+        else if (what == 64 || what == 65)
+        { // surface dual mesh (plugin fvdualmesh, meshdualS): the number of its primal meshS, 65: with the values
+            fin >> imsh;
+            ffassert(imsh>0 && imsh <=nbmeshesS);
+            if(what==65) withiso=true;
+            p=new OnePlotMeshDS(ThsS[imsh-1],what,fin);
+        }
         else
         {
             cout << "Bizarre unknown what :  " << what<< endl;
@@ -6016,11 +7026,29 @@ case 20+index: {type dummy; fin >= dummy;} break;
     for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
         (**i).num=nbcurves++;
     glogx=glogy=-1;
+    gfixx=gfixy=false;
     if(graph1d)
     {
         GraphOptions();
         if(!dimpp) plotdim=2;
         if(plotdim==2 && !uaspectratio) aspectratio=false;
+    }
+    else if(cm && cm->find("legend=")!=string::npos)
+    { //  2d: the names of the curves of the cut line (key c), cmm="title | legend=name1,name2,..."
+      //  (the field legend= is removed from the comment of the plot)
+        string c=*cm+"|", t;
+        for(size_t a=0,b;(b=c.find('|',a))!=string::npos;a=b+1)
+        {
+            string f=GraphTrim(c.substr(a,b-a));
+            if(f.compare(0,7,"legend=")==0)
+            {
+                string l=f.substr(7)+",";
+                for(size_t la=0,lb;(lb=l.find(',',la))!=string::npos;la=lb+1)
+                    glegend.push_back(GraphTrim(l.substr(la,lb-la)));
+            }
+            else if(!f.empty()) t += (t.empty() ? "" : " | ") + f;
+        }
+        *cm=t;
     }
    
     if(Niso==0)
@@ -6820,6 +7848,26 @@ static void Mouse( int button,int state,int x,int y )
     {
         case GLUT_LEFT_BUTTON:
             casemouse=GLUT_LEFT_BUTTON;
+            //  3d: shift + left button on the section of the panel (key c): the line of the 1d cut (a click: the
+            //  horizontal line through the point, a drag: the segment)
+            {
+                R2 uv;
+                if(win && win->theplot && (keyact & GLUT_ACTIVE_SHIFT) && state == GLUT_DOWN && win->InCut3Box(x,y,uv))
+                {
+                    win->cut3A = win->cut3B = uv;
+                    win->cut3line = 0;
+                    win->cut3set = true;
+                    win->cut3drag = true;
+                    glutPostRedisplay();
+                    return;
+                }
+                if(win && win->cut3drag && state == GLUT_UP)
+                {
+                    win->cut3drag = false;
+                    glutPostRedisplay();
+                    return;
+                }
+            }
             //  2d: shift + left button draws the segment of the cut line (key c)
             if(win && win->theplot && win->plotdim==2 && !win->Graph1d() && (keyact & GLUT_ACTIVE_SHIFT)
                && state == GLUT_DOWN)
@@ -6875,6 +7923,12 @@ static void MotionMouse(int x,int y )
                 win->Bmax += D2;
                 win->xold=x;
                 win->yold=y;
+                glutPostRedisplay();
+            }
+            else if(win && win->cut3drag)
+            { // 3d: the segment of the 1d cut of the section
+                R2 uv;
+                if(win->InCut3Box(x,y,uv)) { win->cut3B = uv; if(R2(win->cut3A,win->cut3B).norme() > 0) win->cut3line = 1;}
                 glutPostRedisplay();
             }
             else if(win && win->cutdrag)
@@ -7072,10 +8126,11 @@ static void Key( unsigned char key, int x, int y )
             win->changearrow=true;
             break;
         case 'C': // colormap of the pretty rendering
-            win->cmapkind = (win->cmapkind+1)%5;
+            win->cmapkind = (win->cmapkind+1)%(cmapUserColors.N()>=6 && win->theplot && win->theplot->colors.N()>=6 ? 6 : 5);
+            win->cmapchosen=true;
             win->changeiso=win->changearrow=true;// the iso lines and the arrows have the colors in the lists
             {
-                static const char *names[5]={"turbo","viridis","cool to warm","rainbow","grey"};
+                static const char *names[6]={"turbo","viridis","cool to warm","rainbow","grey","hsv= of the plot"};
                 cout << " ffglut: colormap " << names[win->cmapkind] << endl;
             }
             break;
@@ -7099,10 +8154,18 @@ static void Key( unsigned char key, int x, int y )
             win->threshold = min(win->threshold+0.05,1.);
             break;
         case 'c': // 2d: cut line of the function: horizontal, vertical, no
+                  // 3d: cut plane x, y, z = const (the plane of F1), no: the section in a panel
             if(win->plotdim==2 && !win->Graph1d())
             {
                 win->cut2d = win->cut2d==0 ? 1 : (win->cut2d==1 ? 2 : 0);
                 win->changearrow=true;// the size of the pixel changes with the panel
+            }
+            else if(win->plotdim==3 && win->theplot->datadim==3)
+            {
+                win->cut3d = (win->cut3d+1)%4;
+                if(win->cut3d) win->cutN = R3(win->cut3d==1,win->cut3d==2,win->cut3d==3);
+                win->cut3set = false;// the 1d cut: the middle of the new section
+                win->changeiso=true;// the section of F1 is computed again
             }
             break;
         case 'x': // 1d graph: log scale in x, otherwise rotation of the cut plane of 5 degree
@@ -7260,7 +8323,8 @@ void SpecialKey(int key, int x, int y)
             if(key==GLUT_KEY_F1)
             {
                 win->cutaxis = win->cutaxis ? 0 : 1;
-                win->cutN = R3(1.,0.,0.);
+                //  the plane x = const, or the plane of the section of the key c (3d)
+                win->cutN = win->Cut3d() ? R3(win->cut3d==1,win->cut3d==2,win->cut3d==3) : R3(1.,0.,0.);
                 win->cutedit = win->cutfreeze = false;
             }
             else if(win->cutaxis && key==GLUT_KEY_F2)

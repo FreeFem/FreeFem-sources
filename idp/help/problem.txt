@@ -1,0 +1,2 @@
+problem name(u, v) = ... ; same syntax as solve, but the problem is solved
+  only when name; is written (useful in a loop). See help("solve").

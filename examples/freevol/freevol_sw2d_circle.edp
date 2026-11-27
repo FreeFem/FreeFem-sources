@@ -1,0 +1,83 @@
+/* ---------------------------------------------------------
+
+   solves the Shallow Water system (eq="swtopo", flat bottom) in a circular basin: the reflection of a
+   gaussian hump on the circle (the same case as freevol_bbm2d_circle.edp, without the dispersion)
+   U_t+div([F(U),G(U)]) = 0, U=[H,Hu,Hv], H>0, F(U) = (Hu, Hu^2 + gr/2*H^2, Huv), G(U) = (Hv, Huv, Hv^2 + gr/2*H^2)
+   finite volume method, MUSCL scheme for second order in space, Heun scheme for second order in time
+   depth 1, gr = 1: the speed of the waves is sqrt(H) = sqrt(1+eta), as in freevol_bbm2d_circle.edp
+   wall on the circle; plot of eta = H+zb-1 with the plot of FreeFem
+   options: -R (radius), -h (size of the cells), -x0 (center of the hump), -Tf, -ordre (1 or 2),
+            -nf (numflux), -lim (limiter), -sym (1: mesh symmetric in y as in freevol_bbm2d_circle.edp,
+            0: buildmesh of the circle)
+
+   --------------------------------------------------------*/
+include "getARGV.idp"
+real s0=clock();
+
+real R=getARGV("-R",20.), hm=getARGV("-h",0.5), xg=getARGV("-x0",0.), Tf=getARGV("-Tf",40.);
+int mtordre=getARGV("-ordre",2), nfl=getARGV("-nf",0), lim=getARGV("-lim",1), sym=getARGV("-sym",1);
+real gr=1.;
+mesh Th;
+if (sym) {// a mesh symmetric in y: the half disk y > 0, its mirror image, glued along the diameter
+   border C(t=0,pi){x=R*cos(t); y=R*sin(t); label=1;}
+   border D(t=-R,R){x=t; y=0; label=99;}
+   mesh Thu=buildmesh(C(int(pi*R/hm))+D(int(2*R/hm)));
+   mesh Thd=movemesh(Thu,[x,-y]);
+   Th=Thu+Thd;
+   Th=change(Th,rmInternalEdges=1);
+} else {
+   border C(t=0,2*pi){x=R*cos(t); y=R*sin(t); label=1;}
+   Th=buildmesh(C(int(2*pi*R/hm)));
+}
+func z0 = 0.;
+//func h0 = 1.+0.2*exp(-((x-xg)^2+y^2)/4.) - z0;// a hump of water at rest, off the center
+func h0 = (dist(x-xg,y-0.)<=(R/4.)) - z0;
+func hu0 = 0.;
+
+int ntdraw=0;
+real t,dt,CFL=.5,tdraw=Tf/40.;
+fespace Ph4(Th,[P0,P0,P0,P0]);
+fespace Ph(Th,P0);
+Ph4 [H,Hu,Hv,zb]=[0,0,0,z0],[HBC,HuBC,HvBC,zbBC]=[0,0,0,0],[Hr,Hur,Hvr,zbr]=[0,0,0,0];
+Ph4 [Hp,Hup,Hvp,zbp];//for second order in time
+[H,Hu,Hv,zb]=[max(h0,0.),hu0,0,z0];
+int[int] labBC=[1,2];// wall on the circle
+real[int] viso(31); for(int i=0;i<31;i++) viso[i]=-0.05+0.15*i/30.;// the same colors for all the plots
+
+real[int] params=[gr];//sets the value of gravity
+fvscheme FV([H,Hu,Hv,zb],order=mtordre,eq="swtopo",labelBC=labBC,limiter=lim,numflux=nfl,parameters=params);
+
+real m0=int2d(Th)(H);
+int iter=0;
+real dtsub;
+for(t=0.; t<Tf-1.e-10; iter++){// TIME LOOP
+    if(t >= ntdraw*tdraw) {
+        Ph eta=H+zb-1.;
+        plot(eta,fill=1,value=1,viso=viso,dim=3,cmm="eta at t="+t+", dt="+dt,wait=1);
+        ntdraw++;
+    }
+    if (mtordre==2) Hp[]=H[];
+    for (int lmt=1;lmt<=mtordre;lmt++) {// internal time loop for second order in time
+     dtsub = fluxupdate(FV,[H,Hu,Hv,zb],[Hr,Hur,Hvr,zbr],[HBC,HuBC,HvBC,zbBC]);
+     if (lmt==1) {
+      dt=dtsub*CFL;
+      if(t+dt > Tf) dt=Tf-t;
+     }
+     H[] -= dt*Hr[];
+     if (lmt==1) t+=dt;
+     if (lmt==2) {//second-order Heun scheme in time
+      H[]+=Hp[];
+      H[]*=.5;
+     }
+    }//end of internal loop on lmt
+}//end of time loop
+Ph etaf=H+zb-1.;
+plot(etaf,fill=1,value=1,dim=3,viso=viso,cmm="eta at t="+t,wait=1);
+cout << Th.nt << " triangles, " << iter << " time steps, cputime = " << clock()-s0 << endl;
+cout << "mass error = " << int2d(Th)(H)-m0 << " , min eta = " << etaf[].min << " , max eta = " << etaf[].max << endl;
+// the symmetry in y: eta(x,y) = eta(x,-y) (exact only on the symmetric mesh -sym 1)
+Ph esym=etaf(x,-y); esym[]-=etaf[];
+cout << "symmetry: max |eta(x,y)-eta(x,-y)| = " << esym[].linfty << " (max |eta| = " << etaf[].linfty << ")" << endl;
+// the normal velocity on the circle (the wall)
+Ph uf=Hu/H, vf=Hv/H;
+cout << "normal velocity on the circle: |u.n| = " << sqrt(int1d(Th,1)((uf*N.x+vf*N.y)^2)/int1d(Th,1)(1.)) << " (rms) , max |u| = " << max(uf[].linfty,vf[].linfty) << endl;

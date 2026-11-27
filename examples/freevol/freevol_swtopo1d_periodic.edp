@@ -1,0 +1,44 @@
+// solves the shallow water system with topography by the finite volume method in 1D (meshL) with a periodic boundary
+// condition
+//   U_t+F(U)_x+(0,gr*H*zb_x) = 0, U=[H,Hu], zb the topography (P0, with the unknowns)
+//   fvscheme FV([H,Hu,zb], eq="swtopo", ..., periodic=[[1],[2]]) (the syntax of a fespace on a meshL: the labels of
+//   the 2 ends): the 2 boundary faces (x = 0 and x = L) are glued, an interior face between the first and the last
+//   cell (hydrostatic reconstruction with the zb of the 2 sides), a periodic topography
+//   -cas 0: the lake at rest (H+zb constant, no velocity): it stays at rest (well balanced, also across the
+//           periodic boundary)
+//   -cas 1: a hump of water in a flow (Hu = 0.5 H): it crosses the periodic boundary, the mass is conserved
+// options: -cas (1), -n (cells, 50), -Tf (5), -ordre (2 or 1), -nw: without plot
+include "getARGV.idp"
+real gr = 9.81, L = 10.;
+int n = getARGV("-n", 50), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 5.), CFL = .5;
+meshL Th = segment(n, [L*x, 0, 0]);        // labels: 1 at x = 0, 2 at x = L
+fespace Ph3(Th, [P0,P0,P0]);
+fespace Ph(Th, P0);
+func z0 = 0.3*sin(2.*pi*x/L) + 0.2*cos(4.*pi*x/L);       // periodic topography
+func h0 = 2. - z0 + 0.5*cas*exp(-((x-0.3*L)^2)/2.);
+Ph3 [H,Hu,zb] = [h0, 0.5*cas*h0, z0], [HBC,HuBC,zbBC] = [0,0,0], [Hr,Hur,zbr] = [0,0,0], [Hp,Hup,zbp];
+real[int] params = [gr];
+int[int] labBC = [1,2, 2,2];               // wall: no effect on the periodic ends
+fvscheme FV([H,Hu,zb], order=ordre, eq="swtopo", labelBC=labBC, limiter=1, numflux=0, parameters=params, periodic=[[1],[2]]);
+Ph eta0 = H + zb;
+real m0 = int1d(Th)(H);
+plot(eta0, cmm="H+zb at t=0 (periodic)", wait=1);
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,zb], [Hr,Hur,zbr], [HBC,HuBC,zbBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+Ph eta = H + zb, h = H, q = Hu;
+real[int] deta = eta[] - eta0[];
+cout << "swtopo 1D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+cout << "  mass " << int1d(Th)(H) << " (difference " << int1d(Th)(H)-m0 << ") , min H " << h[].min
+     << " , max |H+zb - (H+zb)(0)| " << deta.linfty << " , max |Hu| " << q[].linfty << endl;
+plot(eta, cmm="H+zb at t=" + t + " (periodic)", wait=1);

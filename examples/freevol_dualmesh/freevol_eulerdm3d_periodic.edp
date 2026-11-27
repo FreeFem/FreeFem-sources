@@ -1,0 +1,54 @@
+// solves the Euler system of gas dynamics by the finite volume method on the dual mesh in
+// 3D (mesh3, the median dual mesh) with periodic boundary conditions
+//   fvscheme FV([H,Hu,Hv,Hw,E], eq="eulerdm", ..., periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]] (the syntax of a 3D fespace)):
+//   the control volumes of the linked vertices are one control volume: no flux on the boundary pieces of the periodic
+//   borders, U and the flux balance are the means on the class weighted by the volumes, at the order 2 the slope is
+//   the mean of the slopes and the reconstruction starts from the center of gravity of the union; the conserved
+//   quantities of the scheme are the sums |C_i| U_i (dualmeshcvarea)
+//   -cas 1: a periodic wave rho = 1+0.2 sin(...), u = constant, p = 1: the mass, the momentum and the energy are
+//           conserved exactly
+//   -cas 0: a constant state: it stays constant
+// options: -cas (1), -n (6), -Tf (0.3), -ordre (2 or 1), -nw: without plot
+load "msh3"
+include "getARGV.idp"
+real gamma = 1.4, p0 = 1., L = 1.;
+int n = getARGV("-n", 6), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 0.3), CFL = .5;
+mesh3 Th = cube(n, n, n, [L*x, L*y, L*z]); // labels 1 y=0, 2 x=L, 3 y=L, 4 x=0, 5 z=0, 6 z=L
+meshdual3 Thstar = builddualmesh(Th);   // the dual mesh
+fespace VhN(Th, [P1,P1,P1,P1,P1]);
+fespace Vh(Th, P1);
+func rho0 = 1. + 0.2*cas*sin(2.*pi*(x+y+z)/L);
+VhN [H,Hu,Hv,Hw,E] = [rho0, 1.*rho0, 0.5*rho0, 0.25*rho0, p0/(gamma-1.) + 0.5*rho0*(1.^2+0.5^2+0.25^2)], [HBC,HuBC,HvBC,HwBC,EBC] = [0,0,0,0,0], [Hr,Hur,Hvr,Hwr,Er] = [0,0,0,0,0];
+VhN [Hp,Hup,Hvp,Hwp,Ep];
+real[int] params = [gamma];
+int[int] labBC = [1,1, 2,1, 3,1, 4,1, 5,1, 6,1];   // no effect on the periodic borders
+fvscheme FV([H,Hu,Hv,Hw,E], order=ordre, eq="eulerdm", labelBC=labBC, limiter=1, numflux=2, parameters=params,
+            periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);
+Vh s0 = H;
+Vh s1 = Hu;
+Vh s2 = Hv;
+Vh s3 = Hw;
+Vh s4 = E;
+real[int] c0 = [cva'*s0[], cva'*s1[], cva'*s2[], cva'*s3[], cva'*s4[]];
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,Hw,E], [Hr,Hur,Hvr,Hwr,Er], [HBC,HuBC,HvBC,HwBC,EBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+s0 = H; s1 = Hu; s2 = Hv; s3 = Hw; s4 = E; 
+real[int] drho = s0[];
+drho -= 1.;
+cout << "eulerdm 3D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+cout << "  conservation (mass, momentum, energy): " << cva'*s0[] - c0[0] << " " << cva'*s1[] - c0[1] << " " << cva'*s2[] - c0[2] << " " << cva'*s3[] - c0[3] << " " << cva'*s4[] - c0[4] << endl;
+cout << "  min rho " << s0[].min << " , max rho " << s0[].max << endl;
+if (cas == 0) cout << "  constant state: max |rho-1| " << drho.linfty << endl;

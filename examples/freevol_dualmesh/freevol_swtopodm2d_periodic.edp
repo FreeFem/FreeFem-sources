@@ -1,0 +1,49 @@
+// solves the shallow water system with topography by the finite volume method on the dual
+// mesh in 2D (mesh, the dual mesh of F. Bouchut) with periodic boundary conditions (in 3D: the barotropic gas dynamics with a potential force, a minimal example)
+//   fvscheme FV([H,Hu,Hv,zb], eq="swtopodm", ..., periodic=[[1,x],[3,x],[2,y],[4,y]] (the syntax of a fespace)):
+//   the control volumes of the linked vertices are one control volume: no flux on the boundary pieces of the periodic
+//   borders (inside the control volume), U and the flux balance are the means on the class weighted by the volumes,
+//   at the order 2 the slope is the mean of the slopes and the reconstruction starts from the center of gravity of
+//   the union; the conserved quantities of the scheme are the sums |C_i| U_i (dualmeshcvarea)
+//   (no flux on the periodic pieces: also right for the non conservative fluxes of the hydrostatic reconstruction)
+//   -cas 0: the lake at rest (H+zb constant, no velocity) on a periodic topography: it stays at rest
+//   -cas 1: a hump of water in a flow (Hu = 0.5 H): the mass is conserved
+// options: -cas (1), -n (16), -Tf (0.2), -ordre (2 or 1), -nw: without plot
+include "getARGV.idp"
+real gr = 9.81, L = 1.;
+int n = getARGV("-n", 16), ordre = getARGV("-ordre", 2), cas = getARGV("-cas", 1);
+real Tf = getARGV("-Tf", 0.2), CFL = .5;
+mesh Th = square(n, n, [L*x, L*y]);       // labels 1 bottom, 2 right, 3 top, 4 left
+meshdual Thstar = builddualmesh(Th);   // the dual mesh
+fespace VhN(Th, [P1,P1,P1,P1]);
+fespace Vh(Th, P1);
+func z0 = 0.3*sin(2.*pi*x/L)*cos(2.*pi*y/L) + 0.2*cos(4.*pi*x/L);   // periodic
+func h0 = 2. - z0 + 0.5*cas*exp(-((x-0.3*L)^2+(y-0.5*L)^2)/0.02);
+VhN [H,Hu,Hv,zb] = [h0, 0.5*cas*h0, 0, z0], [HBC,HuBC,HvBC,zbBC] = [0,0,0,0], [Hr,Hur,Hvr,zbr] = [0,0,0,0];
+VhN [Hp,Hup,Hvp,zbp];
+real[int] params = [gr];
+int[int] labBC = [1,2, 2,2, 3,2, 4,2];   // walls: no effect on the periodic borders
+fvscheme FV([H,Hu,Hv,zb], order=ordre, eq="swtopodm", labelBC=labBC, limiter=1, numflux=0, parameters=params,
+            periodic=[[1,x],[3,x],[2,y],[4,y]]);
+real[int] cva(Thstar.ncv);
+dualmeshcvarea(cva, Thstar);
+Vh h = H, eta0 = H + zb;
+real m0 = cva'*h[];
+real t, dt, dtsub;
+int iter = 0;
+for (t = 0.; t < Tf-1.e-10; iter++) {
+  Hp[] = H[];
+  for (int l = 1; l <= 2; l++) {          // Heun, second order in time
+    dtsub = fluxupdate(FV, [H,Hu,Hv,zb], [Hr,Hur,Hvr,zbr], [HBC,HuBC,HvBC,zbBC]);
+    if (l == 1) { dt = dtsub*CFL; if (t+dt > Tf) dt = Tf-t; }
+    H[] -= dt*Hr[];
+    if (l == 1) t += dt;
+    if (l == 2) { H[] += Hp[]; H[] *= .5; }
+  }
+}
+h = H;
+Vh eta = H + zb, q0 = Hu, q1 = Hv;
+real[int] deta = eta[] - eta0[];
+cout << "swtopodm 2D periodic (cas " << cas << ", order " << ordre << ", n = " << n << ") : t = " << t << " , " << iter << " steps" << endl;
+cout << "  mass " << cva'*h[] << " (difference " << cva'*h[]-m0 << ") , min H " << h[].min << " , max |H+zb - (H+zb)(0)| " << deta.linfty
+     << " , max |Hu| " << q0[].linfty << " " << q1[].linfty << endl;

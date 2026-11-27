@@ -1,0 +1,5 @@
+adaptmesh(Th, u, ...) : adapts the mesh to the function u (or to several).
+  Common parameters: err= (target error), hmin=, hmax= (edge sizes),
+  nbvx= (maximum number of vertices), iso=true (isotropic mesh),
+  ratio= (size ratio between neighbouring edges).
+  Example: Th = adaptmesh(Th, u, err=0.01, hmin=1e-3);
