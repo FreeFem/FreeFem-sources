@@ -17,41 +17,99 @@
 <!--- along with FreeFEM.  If not, see <http://www.gnu.org/licenses/>.            --->
 <!----------------------------------------------------------------------------------->
 
-# How to compile FreeFem++ on Microsoft Windows
-_april 2017_
+# Install FreeFem++ binaries
 
-Visit this [web page](http://www.freefem.org/ff++/windows.php)
+You can download FreeFem++ binaries for your platform on the [download page](https://doc.freefem.org/introduction/download.html#download). 
+Once downloaded, double-click on the `.exe` installer and follow the instructions.
 
-Bug warning (Windows 64): if you launch FreeFem++ without script by double clicking
-on the icon, you get an error (it is due to a bug in GetOpenFileName).
+By default, FreeFem++ binaries are installed in `C:\Program Files (x86)\FreeFem++`.
 
-From version 3.52 onwards, the Windows 64 version is built with MPI support and
-with the following options
-```bash
-./configure '--enable-download'
+You can either launch FreeFem++ from the launcher icon on your desktop
+(sequential version), or from a Powershell if you want to use the parallel
+version:
+
+```shell
+          cd "C:\Program Files (x86)\FreeFem++"
+          & "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -n 4 .\FreeFem++-mpi.exe .\examples\mpi\MUMPS.edp
 ```
 
-Then, execute and follow the instructions.
+# Compile FreeFem++
 
-## To test the MPI usage: in windows terminal (cmd, shell, PowerShell)
+FreeFem++ can be built on Windows using [MSYS2](https://www.msys2.org/). Use one
+MSYS2 environment consistently, do not mix packages from UCRT64, MINGW64, or 
+CLANG64.
 
-Go to the directory `C:\Program Files (86)\FreeFem++\examples\mpi`
+## Select an MSYS2 environment
 
-To lauch an example:
+Open the MSYS2 shell for the environment you intend to use. UCRT64 is the
+reference environment for the package examples below.
+
+Other environments, like CLANG64, have not been tested but could work with
+package names that may differ.
+
+## Install build dependencies
+
 ```bash
-mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp -wg
+# Update MSYS2
+pacman -Syu
+# Install dependencies
+pacman -S \
+  mingw-w64-ucrt-x86_64-toolchain \
+  mingw-w64-ucrt-x86_64-freeglut \
+  mingw-w64-ucrt-x86_64-gcc-fortran \
+  mingw-w64-ucrt-x86_64-autotools \
+  mingw-w64-ucrt-x86_64-openblas \
+  mingw-w64-ucrt-x86_64-cmake \
+  make m4 patch git flex bison unzip pkg-config pkgfile tar
 ```
-or without graphics:
+
+### MPI support
+
+MS-MPI is a prerequisite for building or running FreeFem++ with MPI. It can be 
+downloaded from [here](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi).
+
+For UCRT64 builds, also install the MS-MPI package from the UCRT64 repository:
+
 ```bash
-mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp
+pacman -S mingw-w64-ucrt-x86_64-msmpi
 ```
 
-## To use MPI, you must first install `MSMPI`
+## Configure
 
-Download [MS MPI V7](https://www.microsoft.com/en-us/download/details.aspx?id=49926 ),
-and install both `msmpisdk.msi` and `MSMpiSetup.exe`.
+From the FreeFem++ source directory, in the selected MSYS2 shell:
 
-Remark:
+```bash
+autoreconf -i
+./configure --enable-download --enable-optim --enable-generic [--prefix=<install_prefix>]
+```
 
-Under msys2 do not forger to do open `c:\msys64\mingw64.ini` in an editor
-and remove `rem` before `set MSYS2_PATH_TYPE=inherit`
+This will automatically download missing FreeFem++ dependencies.
+If you want PETSc/SLEPc's support, run:
+
+```bash
+./3rdparty/getall -a -o PETSc
+cd 3rdparty/ff-petsc
+make petsc-slepc
+cd -
+./reconfigure
+```
+
+## Build, check and install
+
+```bash
+make -j 4
+make check
+make install
+```
+
+## Run FreeFem++
+
+FreeFem++ executables and their dlls will be located in the `/ucrt64/bin` (or in
+`<install_prefix>/bin` if you specified an installation prefix).
+
+From a Powershell (note the '\' instead of '/' in paths):
+
+```shell
+cd C:\msys64\ucrt64\bin
+& "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -n 4 .\FreeFem++-mpi.exe ..\share\FreeFEM\4.17\examples\mpi\MUMPS.edp
+```
