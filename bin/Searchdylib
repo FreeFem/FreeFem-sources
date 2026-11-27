@@ -1,5 +1,5 @@
 
-otool -L  ./src/mpi/FreeFem++-mpi src/nw/FreeFem++ ./src/nw/ffglut ./src/medit/ffmedit  `find plugin -name '*.dylib'`  | awk '/compatibility version/ { print $1}' | sort -u  |egrep -v "^/usr/lib/|^/System/Library/" >/tmp/l-ff++0
+otool -L  ./src/mpi/FreeFem++-mpi src/nw/FreeFem++ ./src/nw/ffglut ./src/medit/ffmedit  `find plugin -name '*.dylib'`  | awk '/compatibility version/ { print $1}' | sort -u  | grep -E -v "^/usr/lib/|^/System/Library/" >/tmp/l-ff++0
 
 for i in  0 1 2 3 4 5 ; do
     ((i1=i+1))
@@ -18,7 +18,7 @@ for i in  0 1 2 3 4 5 ; do
       done 
    ) >/tmp/l-ff++tt
 # cat /tmp/l-ff++tt
-cat /tmp/l-ff++tt| xargs otool -L   | awk '/compatibility version/ { print $1}' | sort -u |egrep -v "^/usr/lib/|^/System/Library/" >/tmp/l-ff++$i1
+cat /tmp/l-ff++tt| xargs otool -L   | awk '/compatibility version/ { print $1}' | sort -u | grep -E -v "^/usr/lib/|^/System/Library/" >/tmp/l-ff++$i1
 done
 #echo '------'
 cat /tmp/l-ff++tt

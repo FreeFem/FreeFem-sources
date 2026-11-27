@@ -18,13 +18,13 @@ mkdir $fftmp
 cd $ffsrc 
 printf  "      program sizeofint\n       integer  i\n       end\n" >$fftmp/ffff.f
 gfortran $fftmp/ffff.f -o $fftmp/ffff
-(export DYLD_PRINT_LIBRARIES=1;$fftmp/ffff ) 2>&1 | awk '{print $NF}'| egrep -v '/usr/lib|$fftmp/ffff' >$fftmp/list-dylib-gfortran 
+(export DYLD_PRINT_LIBRARIES=1;$fftmp/ffff ) 2>&1 | awk '{print $NF}'| grep -E -v '/usr/lib|$fftmp/ffff' >$fftmp/list-dylib-gfortran 
 # in plugin/mpi
 #listplugin=`for i in *dylib; do if otool -L $i| grep 'fortran' >/dev/null ;then echo -n $i, ; fi ; done`
 listplugin=gsl,ff-Ipopt,MUMPS_mpi,PETSc,SuperLu,ff-Ipopt,ffnewuoa,function-PETSc,hpddm,hpddm_substructuring
 (export DYLD_PRINT_LIBRARIES=1;cd plugin/mpi; ../../src/mpi/FreeFem++-mpi  -check_plugin $listplugin -v 0 ;../../src/mpi/FreeFem++-mpi  -check_plugin PETSc-complex.dylib -v 0 ) 2>&1 |\
  awk '/dylib/ {print $NF}'|\
-  egrep -v '/usr/lib'| sort -u > $fftmp/ff-list-dylib
+  grep -E -v '/usr/lib'| sort -u > $fftmp/ff-list-dylib
 if grep homebrew $fftmp/ff-list-dylib >/dev/null; then
 #
 #
@@ -53,7 +53,7 @@ fi
 cd $fftmp
 (export DYLD_PRINT_LIBRARIES=1;FreeFem++-mpi  -check_plugin $listplugin -v 0 ;FreeFem++-mpi  -check_plugin PETSc-complex.dylib -v 0 ) 2>&1 |\
  awk '/dylib/ {print $NF}'|\
-  egrep -v '/usr/lib'| sort -u > $fftmp/ff-list-dylib-
+  grep -E -v '/usr/lib'| sort -u > $fftmp/ff-list-dylib-
 
 set -x
 FreeFem++-mpi  -check_plugin $listplugin -v 0
