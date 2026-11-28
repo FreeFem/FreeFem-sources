@@ -1,6 +1,7 @@
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"
 #include "compositeFESpace.hpp"
+#include <cstdint>
 #ifdef PARALLELE
 #include <mpi.h>
 static inline MPI_Comm ffComm(pcommworld c) { return c ? *(MPI_Comm*)c : MPI_COMM_WORLD; }
@@ -9,11 +10,14 @@ static inline MPI_Comm ffComm(pcommworld c) { return c ? *(MPI_Comm*)c : MPI_COM
 static const int TAG_XFER_HDR = 3000;
 static const int TAG_XFER_BODY = 3001;
 static const int TAG_XFER_DOF = 3002;
+static const int TAG_XFER_OCC = 3003;
 
 static const double COVER_EMPTY_TOL = 1e-12;
 static const double COVER_ONE_TOL = 1e-9;
 static double transferTolN = 0.0;
 static double transferTolT = 0.0;
+static const int OCC_G = 32; // cellules par axe de la carte d'occupation
+static long transferOccupancy = 1; // 0 ; filtre historique (barycentre), pour comparer
 
 template<class Mesh>
 double localMaxEdgeLength(const Mesh& Th) {
@@ -77,6 +81,62 @@ static bool boxContains(const BBox& outer, const BBox& inner) {
     }
     return true;
 }
+
+template<class E>
+static void elementBox(const E& K, double lo[3], double hi[3]) {
+    for (int d = 0; d < 3; ++d) { lo[d] = 1e300; hi[d] = -1e300; }
+    for (int i = 0; i < E::nv; ++i)
+        for (int d = 0; d < 3; ++d) {
+            const double c = (d < E::Rd::d) ? K[i][d] : 0.0;
+            lo[d] = std::min(lo[d], c); hi[d] = std::max(hi[d], c);
+        }
+}
+
+// Carte d'occupation d'un rang destination : OCC_G^3 bits dans SA boite (allDst[r]).
+// Construite a l'identique par l'emetteur et le destinataire (meme boite, meme formule).
+struct OccGrid {
+    double org[3] = {0,0,0}, top[3] = {0,0,0}, inv[3] = {0,0,0};
+    int    n[3]   = {1,1,1};
+    std::vector<uint64_t> bits;
+
+    void init(const BBox& frame, int G) {
+        for (int d = 0; d < 3; ++d) {
+            org[d] = frame.pmin[d]; top[d] = frame.pmax[d];
+            const double ext = top[d] - org[d];
+            if (!frame.empty && ext > 0) { n[d] = G; inv[d] = G / ext; }
+            else                         { n[d] = 1; inv[d] = 0.0; }
+        }
+        bits.assign(((size_t)n[0]*n[1]*n[2] + 63) / 64, 0);
+    }
+    // plage de cellules couverte par [lo,hi] ; false si la boite ne rencontre pas le repere
+    bool range(const double lo[3], const double hi[3], int a[3], int b[3]) const {
+        for (int d = 0; d < 3; ++d) {
+            if (hi[d] < org[d] || lo[d] > top[d]) return false;
+            // marge d'arrondi de 1e-9 cellule des deux cotes : marquage et test l'appliquent tous deux
+            a[d] = (int)std::floor((lo[d] - org[d]) * inv[d] - 1e-9);
+            b[d] = (int)std::floor((hi[d] - org[d]) * inv[d] + 1e-9);
+            a[d] = std::max(a[d], 0); b[d] = std::min(b[d], n[d] - 1);
+            if (b[d] < a[d]) b[d] = a[d];
+        }
+        return true;
+    }
+    size_t cell(int x, int y, int z) const { return (size_t)x + n[0]*((size_t)y + n[1]*(size_t)z); }
+    void mark(const double lo[3], const double hi[3]) {
+        int a[3], b[3];
+        if (!range(lo, hi, a, b)) return;
+        for (int z = a[2]; z <= b[2]; ++z) for (int y = a[1]; y <= b[1]; ++y) for (int x = a[0]; x <= b[0]; ++x) {
+            const size_t c = cell(x, y, z); bits[c >> 6] |= (uint64_t)1 << (c & 63);
+        }
+    }
+    bool touches(const double lo[3], const double hi[3]) const {
+        int a[3], b[3];
+        if (!range(lo, hi, a, b)) return false;
+        for (int z = a[2]; z <= b[2]; ++z) for (int y = a[1]; y <= b[1]; ++y) for (int x = a[0]; x <= b[0]; ++x) {
+            const size_t c = cell(x, y, z); if (bits[c >> 6] >> (c & 63) & 1) return true;
+        }
+        return false;
+    }
+};
 
 struct CoverStats {
     long nRows = 0;
@@ -386,17 +446,65 @@ void computeOverlapRankPairs(pcommworld comm, const DistributedMesh<Mesh1>& Dsrc
     for (int i=0; i<(int)rcv.size(); ++i) recvFromRanks[i] = rcv[i];
 }
 
+// Je suis destination : je construis MA carte et l'envoie a chaque rang qui m'enverra
+// un fragment (recvFromRanks). Je suis source : je recois la carte de chaque rang a qui
+// j'enverrai un fragment (sendToRanks). Les listes sont symetriques (test A).
+template<class Mesh2>
+static void exchangeOccupancy(pcommworld comm, const DistributedMesh<Mesh2>& Ddst,
+                              const KN<int>& sendToRanks, const KN<int>& recvFromRanks,
+                              const std::vector<BBox>& allDst, std::vector<OccGrid>& occOut)
+{
+    const int me = commRank(comm);
+    OccGrid mine; mine.init(allDst[me], OCC_G);
+    const Mesh2& Th = *Ddst.LocalMesh;
+    for (int k = 0; k < Th.nt; ++k) { double lo[3], hi[3]; elementBox(Th[k], lo, hi); mine.mark(lo, hi); }
+
+    occOut.assign(sendToRanks.n, OccGrid());
+    for (int i = 0; i < sendToRanks.n; ++i) occOut[i].init(allDst[sendToRanks[i]], OCC_G);
+#ifdef PARALLELE
+    MPI_Comm cw = ffComm(comm);
+    const int nS = sendToRanks.n, nR = recvFromRanks.n;
+    std::vector<MPI_Request> rq(nS + nR);
+    for (int i = 0; i < nS; ++i)                     // Irecv AVANT Isend
+        MPI_Irecv(occOut[i].bits.data(), (int)occOut[i].bits.size(), MPI_UINT64_T,
+                  sendToRanks[i], TAG_XFER_OCC, cw, &rq[i]);
+    for (int j = 0; j < nR; ++j)
+        MPI_Isend(mine.bits.data(), (int)mine.bits.size(), MPI_UINT64_T,
+                  recvFromRanks[j], TAG_XFER_OCC, cw, &rq[nS + j]);
+    if (!rq.empty()) MPI_Waitall((int)rq.size(), rq.data(), MPI_STATUSES_IGNORE);
+#else
+    for (int i = 0; i < sendToRanks.n; ++i) occOut[i] = mine;
+#endif
+}
+
 template<class Mesh>
-static Mesh* buildFragmentFor(const Mesh& Loc, const BBox& target, KN<int>& n2o, const KN<int>* usable = nullptr) {
+static Mesh* buildFragmentFor(const Mesh& Loc, const BBox& target, KN<int>& n2o, const KN<int>* usable = nullptr,
+                              const OccGrid* occ = nullptr, double epsT = 0.0, double epsN = 0.0) {
   const int nv = Mesh::Element::nv;
+  const int dHat = Mesh::Element::RdHat::d;
   KN<int> mask(Loc.nt, 0);
   int nkept = 0;
 
   for (int k = 0; k < Loc.nt; ++k) {
-    typename Mesh::Rd g;
-    for (int i = 0; i < nv; ++i) g += Loc[k][i];
-    g /= nv;
-    if (pointInBox(target, g) && (!usable || (*usable)[k] >= 0)) { mask[k] = 1; ++nkept; }
+    if (usable && (*usable)[k] < 0) continue;
+    bool keep;
+    if (occ) {
+      // boite de K gonflee de (dHat+1)*epsT*etendue + epsN : couvre toute la zone
+      // ou locate() accepte un point dans K (lambda_i >= -epsT)
+      double lo[3], hi[3];
+      elementBox(Loc[k], lo, hi);
+      for (int d = 0; d < 3; ++d) {
+        const double m = (dHat + 1) * epsT * (hi[d] - lo[d]) + epsN;
+        lo[d] -= m; hi[d] += m;
+      }
+      keep = occ->touches(lo, hi);
+    } else {
+      typename Mesh::Rd g;
+      for (int i = 0; i < nv; ++i) g += Loc[k][i];
+      g /= nv;
+      keep = pointInBox(target, g);
+    }
+    if (keep) { mask[k] = 1; ++nkept; }
   }
   if (nkept == 0) { n2o = KN<int>(0); return nullptr; }
 
@@ -619,16 +727,30 @@ static void exchangeDofOnly(pcommworld, const KN<int>&, const KN<int>& recvFromR
 }
 #endif
 
+struct OccOptions { double epsT = 0.0, epsN = 0.0; };   // tolerances FINALES du plan
 
 template<class Mesh1, class Mesh2, class OnFragment>
 static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
                              const GFESpace<Mesh1>& srcVh,
                              const DistributedMesh<Mesh2>& Ddst,
                              KN<int>& sendToRanks, KN<int>& recvFromRanks,
-                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr, std::vector<FragInj>* injOut = nullptr, std::vector<Mesh1*>* keepFrags = nullptr, std::vector<KN<double>>* keepDof = nullptr)
+                             OnFragment&& onArrive, KN<long>* sentCounts = nullptr, KN<long>* recvCounts = nullptr, std::vector<FragInj>* injOut = nullptr, std::vector<Mesh1*>* keepFrags = nullptr, std::vector<KN<double>>* keepDof = nullptr, const OccOptions* occOpt = nullptr)
 {
     std::vector<BBox> allSrc, allDst;
     computeOverlapRankPairs(Dsrc.comm, Dsrc, Ddst, sendToRanks, recvFromRanks, allSrc, allDst);
+    std::vector<OccGrid> occ;
+    double occEpsT = 0.0, occEpsN = 0.0;
+    if (occOpt) {
+        exchangeOccupancy(Dsrc.comm, Ddst, sendToRanks, recvFromRanks, allDst, occ);
+        // diagonale du domaine source global : majore celle des fragments recus,
+        // donc 1e-12*L majore le plancher epsN de FragLocator::build
+        double lo[3] = {1e300,1e300,1e300}, hi[3] = {-1e300,-1e300,-1e300};
+        for (size_t r = 0; r < allSrc.size(); ++r) if (!allSrc[r].empty)
+            for (int d = 0; d < 3; ++d) { lo[d] = std::min(lo[d], allSrc[r].pmin[d]); hi[d] = std::max(hi[d], allSrc[r].pmax[d]); }
+        double L2 = 0.0; for (int d = 0; d < 3; ++d) if (hi[d] > lo[d]) L2 += (hi[d]-lo[d])*(hi[d]-lo[d]);
+        occEpsT = std::max(occOpt->epsT, 1e-10);                 // = FragLocator::build:238
+        occEpsN = std::max(occOpt->epsN, 1e-12*std::sqrt(L2));   // >= FragLocator::build:237
+    }
     if (injOut) injOut->resize(sendToRanks.n);
     if (recvCounts) { recvCounts->resize(recvFromRanks.n); *recvCounts = 0L; }
     const Mesh1* srcGeom = Dsrc.CoverMesh ? Dsrc.CoverMesh : Dsrc.LocalMesh;
@@ -658,7 +780,8 @@ static void collectFragments(const DistributedMesh<Mesh1>& Dsrc,
     std::vector<KN<double> > subOut(sendToRanks.n);
     for (int i = 0; i < sendToRanks.n; ++i) {
         KN<int> n2oCover;
-        fragOut[i] = buildFragmentFor(*srcGeom, allDst[sendToRanks[i]], n2oCover, &usable);
+        fragOut[i] = buildFragmentFor(*srcGeom, allDst[sendToRanks[i]], n2oCover, &usable,
+                                      occOpt ? &occ[i] : nullptr, occEpsT, occEpsN);
         if (sentCounts) (*sentCounts)[i] = fragOut[i] ? fragOut[i]->nt : 0;
         if (fragOut[i]) {
             KN<int> n2oLocal(n2oCover.n);
@@ -1069,12 +1192,16 @@ static TransferPlan<Mesh>* buildTransferPlan(const DistributedMesh<Mesh>& Dsrc, 
     std::vector<Mesh*>        keepFrags;
     std::vector<KN<double> >  keepDof;
 
+    const bool useOcc = ((int)Mesh::Element::RdHat::d == (int)Mesh::Rd::d) && transferOccupancy;
+    OccOptions oo; oo.epsT = tolT; oo.epsN = tolN;     // tolerances deja finales en volume
     collectFragments(Dsrc, srcVh, Ddst, P->sendToRanks, P->recvFromRanks,
-                     [](int, const Mesh&, const KN<double>&) {}, 
-                     nullptr, nullptr, &P->inj, &keepFrags, &keepDof);
-
+                     [](int, const Mesh&, const KN<double>&) {},
+                     nullptr, nullptr, &P->inj, &keepFrags, &keepDof, useOcc ? &oo : nullptr);
 
     if (autoTol) detectTolerances(dstVh, keepFrags, Dsrc.comm, tolN, tolT);
+    // La marge du filtre d'occupation suppose des tolerances fixees AVANT la selection.
+    // Vrai en volume (LocateByDim<3> rend dist2 = 0, detectTolerances ne change rien).
+    ffassert(!useOcc || (tolT == oo.epsT && tolN == oo.epsN));
     try {
         buildFragmentOperators(dstVh, srcVh, keepFrags, keepDof, data,
                                P->op, P->ndFrag, P->colOffset, P->cover,
@@ -1259,7 +1386,11 @@ long transferFragmentCounts(const DistributedMesh<Mesh>** const & Dsrc,
     GFESpace<Mesh> srcVh(*A.LocalMesh, DataFE<Mesh>::P1);
 
     KN<int> snd, rcv;
-    collectFragments(A, srcVh, B, snd, rcv, [&](int j, const Mesh& frag, const KN<double>&) { (*nRecus)[j] = frag.nt; }, nEnvoyes, nRecus);
+    const bool volume = ((int)Mesh::Element::RdHat::d == (int)Mesh::Rd::d);
+    OccOptions oo; oo.epsT = std::max(0.0, transferTolT); oo.epsN = std::max(0.0, transferTolN);
+    collectFragments(A, srcVh, B, snd, rcv, [&](int j, const Mesh& frag, const KN<double>&) { (*nRecus)[j] = frag.nt; },
+                     nEnvoyes, nRecus, nullptr, static_cast<std::vector<Mesh*>*>(nullptr), nullptr,
+                     (volume && transferOccupancy) ? &oo : nullptr);
     return 0L;
 }
 
@@ -1505,6 +1636,7 @@ static void registerTransferGlobals() {
         done = true;
         Global.New("transferTolN", CPValue<double>(transferTolN));
         Global.New("transferTolT", CPValue<double>(transferTolT));
+        Global.New("transferOccupancy", CPValue<long>(transferOccupancy));
     }
 
 template<class Mesh>
@@ -1545,7 +1677,6 @@ void registerTransferInterpolateOps() {
 
     Global.Add("transferCoverage", "(",
         new OneOperator2_<long, TPP, KN<double>*>(transferCoverage<Mesh>));
-
 
     Global.Add("interpolateMat", "(",
         new OneOperator4_<long, TPP, KN<long>*, Matrice_Creuse<double>*, KN<double>*>(
