@@ -127,7 +127,17 @@ then
 	dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
 	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
-	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
+	    *)
+		case "$ff_uname" in
+		    CYGWIN*|MINGW*|MSYS_NT*)
+			# With MS-MPI, the runtime (mpiexec) and the compilers
+			# wrappers (mpicxx/mpif90/... from the MSYS2 msmpi package)
+			# are located in different directories, so search PATH instead
+			# of MPIRUN's directory.
+			ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
+		    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
+		esac
+		;;
 	    dnl if also  add $PATH they  could be missing some different mpi version...
 	esac
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
@@ -135,6 +145,7 @@ then
 	    AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
 	    AC_MSG_CHECKING(for MPICXX)
 	fi
+	test -f "$MPICXX.exe" && MPICXX="$MPICXX.exe"
 	ff_mpicxx="eval $MPICXX"
 	CXX=$ff_mpicxx
 	LIBS="$LIBS $ff_MPI_LIB"
@@ -200,15 +211,17 @@ fi
 	      if test -z "$MPIFC" ; then
 		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
 	      fi
+	      test -f "$MPIFC.exe" && MPIFC="$MPIFC.exe"
 	      AC_SUBST(MPIFC)
 	  fi
 
 #	echo " ********************ffmpi= '$ff_mpi' *************   "
-	ff_MPI_INCLUDE="$with_mpiinc"
-	if test -z "$ff_mpitype" ; then
-           test -n "$MPICXX" && ff_mpishow=`$MPICXX -show` 2>/dev/null
-           test -n "$MPICC" && ff_mpicshow=`$MPICC -show` 2>/dev/null
-           test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+	 ff_MPI_INCLUDE="$with_mpiinc"
+	 if test -z "$ff_mpitype" ; then
+           test -n "$MPICXX" && ff_mpishow=`$MPICXX -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+           test -n "$MPICC" && ff_mpicshow=`$MPICC -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+           test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show 2>/dev/null | sed -e "s/'//g" -e 's/"//g'`
+
 	   if test "$with_mpiinc" = no -o -z "$with_mpiinc" ; then
 	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n' | sed '1 d'| grep -E '^[-/][^WLlOgpf]|^-Wp,'|tr '\n' ' '`]
 	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
@@ -248,6 +261,7 @@ fi
 	if test -z "$MPICC" ; then
 	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	fi
+	test -f "$MPICC.exe" && MPICC="$MPICC.exe"
 	AC_SUBST(MPICC,$MPICC)
 
 	if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
